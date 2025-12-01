@@ -8,7 +8,7 @@ import androidx.room.TypeConverters
 import com.nguyendevs.ecolens.model.HistoryEntry
 
 @Database(entities = [HistoryEntry::class], version = 1, exportSchema = false)
-@TypeConverters(HistoryTypeConverters::class) // Áp dụng Type Converters
+@TypeConverters(HistoryTypeConverters::class)
 abstract class HistoryDatabase : RoomDatabase() {
 
     abstract fun historyDao(): HistoryDao

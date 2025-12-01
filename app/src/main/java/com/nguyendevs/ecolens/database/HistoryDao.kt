@@ -13,7 +13,6 @@ interface HistoryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entry: HistoryEntry)
 
-    // Lấy tất cả lịch sử, sắp xếp theo thời gian mới nhất lên đầu (DESC)
     @Query("SELECT * FROM history_table ORDER BY timestamp DESC")
     fun getAllHistory(): Flow<List<HistoryEntry>>
 

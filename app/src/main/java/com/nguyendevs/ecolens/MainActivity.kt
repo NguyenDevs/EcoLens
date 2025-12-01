@@ -25,7 +25,7 @@ import com.nguyendevs.ecolens.model.HistoryEntry
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.nguyendevs.ecolens.model.SpeciesInfo
-import com.nguyendevs.ecolens.viewmodel.EcoLensViewModel
+import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.launch
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.LinearLayoutManager

@@ -73,7 +73,7 @@ class HistoryAdapter(
                 .into(ivImage)
 
             itemView.setOnClickListener {
-                clickListener(entry) // Xử lý sự kiện click
+                clickListener(entry)
             }
         }
 
