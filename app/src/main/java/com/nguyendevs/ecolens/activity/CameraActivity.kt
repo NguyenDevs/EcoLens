@@ -27,12 +27,14 @@ class CameraActivity : AppCompatActivity() {
     private var camera: Camera? = null
     private lateinit var outputDirectory: File
     private lateinit var viewFinder: PreviewView
+    private lateinit var closeButton: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera)
 
         viewFinder = findViewById(R.id.viewFinder)
+        closeButton = findViewById(R.id.closeButton)
         cameraExecutor = Executors.newSingleThreadExecutor()
         outputDirectory = getOutputDirectory()
 
@@ -42,8 +44,11 @@ class CameraActivity : AppCompatActivity() {
             takePhoto()
         }
 
-        // Xử lý nút Back
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        closeButton.setOnClickListener {
+            finish()
+            overridePendingTransition(R.anim.hold, R.anim.slide_out_bottom)
+        }
+
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -127,12 +132,12 @@ class CameraActivity : AppCompatActivity() {
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     val savedUri = output.savedUri ?: Uri.fromFile(photoFile)
 
-                    // Trả về URI của ảnh cho MainActivity
                     val resultIntent = Intent().apply {
                         putExtra(KEY_IMAGE_URI, savedUri.toString())
                     }
                     setResult(RESULT_OK, resultIntent)
                     finish()
+                    overridePendingTransition(R.anim.hold, R.anim.slide_out_bottom)
                 }
             })
     }
