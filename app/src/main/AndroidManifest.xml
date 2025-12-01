@@ -37,7 +37,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
+        <activity
+                android:name=".activity.CameraActivity"
+                android:screenOrientation="portrait"
+                android:theme="@style/Theme.AppCompat.NoActionBar"
+                android:exported="false" />
         <!-- File Provider for Camera -->
         <provider
                 android:name="androidx.core.content.FileProvider"

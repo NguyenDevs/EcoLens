@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Html
 import android.view.View
+import android.content.Intent
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
@@ -28,6 +29,7 @@ import com.nguyendevs.ecolens.viewmodel.EcoLensViewModel
 import kotlinx.coroutines.launch
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.nguyendevs.ecolens.activity.CameraActivity
 import com.nguyendevs.ecolens.adapter.HistoryAdapter
 
 import java.io.File
@@ -56,15 +58,22 @@ class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: EcoLensViewModel
     private var imageUri: Uri? = null
 
-    private val cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-        if (success && imageUri != null) {
-            // Hiển thị ảnh ngay lập tức
-            Glide.with(this)
-                .load(imageUri)
-                .centerCrop()
-                .into(imagePreview)
+    private val cameraActivityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val uriString = result.data?.getStringExtra(CameraActivity.KEY_IMAGE_URI)
+            if (uriString != null) {
+                val capturedUri = Uri.parse(uriString)
+                imageUri = capturedUri
 
-            viewModel.identifySpecies(imageUri!!)
+                // Hiển thị ảnh ngay lập tức
+                Glide.with(this)
+                    .load(capturedUri)
+                    .centerCrop()
+                    .into(imagePreview)
+
+                // Bắt đầu nhận diện
+                viewModel.identifySpecies(capturedUri)
+            }
         }
     }
 
@@ -176,45 +185,23 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupFAB() {
         findViewById<FloatingActionButton>(R.id.fabCamera).setOnClickListener {
-            showImageSourceDialog()
+            checkPermissionsAndOpenCameraActivity()
         }
     }
 
-    private fun showImageSourceDialog() {
-        MaterialAlertDialogBuilder(this)
-            .setTitle("Chọn nguồn ảnh")
-            .setMessage("Bạn muốn chụp ảnh mới hay chọn từ thư viện?")
-            .setPositiveButton("📷 Chụp ảnh") { _, _ ->
-                checkPermissionsAndOpenCamera()
-            }
-            .setNegativeButton("🖼️ Thư viện") { _, _ ->
-                checkPermissionsAndOpenGallery()
-            }
-            .show()
-    }
-
-    private fun checkPermissionsAndOpenCamera() {
+    private fun checkPermissionsAndOpenCameraActivity() {
         if (hasPermissions()) {
-            openCamera()
+            openCameraActivity()
         } else {
             requestPermissions()
         }
     }
 
-    private fun checkPermissionsAndOpenGallery() {
-        if (hasPermissions()) {
-            galleryLauncher.launch("image/*")
-        } else {
-            requestPermissions()
-        }
-    }
 
-    private fun openCamera() {
-        val photoFile = File(cacheDir, "photo_${System.currentTimeMillis()}.jpg")
-        imageUri = FileProvider.getUriForFile(this, "$packageName.provider", photoFile)
-        cameraLauncher.launch(imageUri!!)
+    private fun openCameraActivity() {
+        // Khởi chạy Activity Camera tùy chỉnh
+        cameraActivityLauncher.launch(CameraActivity.newIntent(this))
     }
-
     private fun hasPermissions(): Boolean {
         val camera = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) ==
                 PackageManager.PERMISSION_GRANTED

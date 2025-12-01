@@ -43,6 +43,11 @@ android {
 }
 
 dependencies {
+    val camerax_version = "1.3.3" // Phiên bản CameraX
+    implementation("androidx.camera:camera-core:$camerax_version")
+    implementation("androidx.camera:camera-camera2:$camerax_version")
+    implementation("androidx.camera:camera-lifecycle:$camerax_version")
+    implementation("androidx.camera:camera-view:$camerax_version")
 
     val room_version = "2.6.1"
     implementation("androidx.room:room-runtime:$room_version")
