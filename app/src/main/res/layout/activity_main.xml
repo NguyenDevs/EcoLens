@@ -53,6 +53,25 @@
             app:layout_anchorGravity="top|end"
             android:layout_gravity="top|end"/>
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabCameraNav"
+            android:layout_width="90dp"
+            android:layout_height="90dp"
+            app:elevation="0dp"
+            android:layout_marginBottom="22dp"
+            android:scaleType="center"
+            app:fabCustomSize="90dp"
+            app:backgroundTint="#FFFFFF"
+            app:labelVisibilityMode="labeled"
+            app:borderWidth="0dp"
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.FAB.Round"
+            app:layout_anchor="@id/bottomNavigation"
+            app:layout_anchorGravity="top|center_horizontal"
+            android:translationY="18dp"
+            android:clickable="false"
+            android:focusable="false"
+    />
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottomNavigation"
             android:layout_width="match_parent"
@@ -65,7 +84,10 @@
             app:labelVisibilityMode="labeled"
             app:itemIconSize="24dp"
             style="@style/BottomNavigationViewCustom"
-            app:menu="@menu/bottom_nav_menu" android:paddingBottom="10dp"/>
+            app:menu="@menu/bottom_nav_menu"
+            android:paddingBottom="10dp"/>
+
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fabCamera"
@@ -87,5 +109,7 @@
             app:layout_anchorGravity="top|center_horizontal"
             android:translationY="18dp"
             android:translationZ="12dp" />
+
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

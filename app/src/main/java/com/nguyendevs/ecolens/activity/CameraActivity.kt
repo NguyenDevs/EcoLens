@@ -98,11 +98,10 @@ class CameraActivity : AppCompatActivity() {
             }
             imageCapture?.flashMode = newFlashMode
 
-            // Cập nhật icon/giao diện
             val iconRes = when (newFlashMode) {
-                ImageCapture.FLASH_MODE_ON -> R.drawable.ic_lightning // Cần thêm icon này
-                ImageCapture.FLASH_MODE_AUTO -> R.drawable.ic_lightning_auto // Cần thêm icon này
-                else -> R.drawable.ic_lightning_off // Icon mặc định (Flash Off)
+                ImageCapture.FLASH_MODE_ON -> R.drawable.ic_lightning
+                ImageCapture.FLASH_MODE_AUTO -> R.drawable.ic_lightning_auto
+                else -> R.drawable.ic_lightning_off
             }
             flashToggle.setImageResource(iconRes)
         }
@@ -111,7 +110,6 @@ class CameraActivity : AppCompatActivity() {
     private fun takePhoto() {
         val imageCapture = imageCapture ?: return
 
-        // Tạo tệp đầu ra
         val photoFile = File(
             outputDirectory,
             SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis()) + ".jpg"

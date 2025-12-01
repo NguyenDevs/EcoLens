@@ -29,6 +29,7 @@ import com.nguyendevs.ecolens.viewmodel.EcoLensViewModel
 import kotlinx.coroutines.launch
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.button.MaterialButton
 import com.nguyendevs.ecolens.activity.CameraActivity
 import com.nguyendevs.ecolens.adapter.HistoryAdapter
 
@@ -42,6 +43,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var settingsContainer: View
 
     // Home screen views
+    private lateinit var fabSearch: FloatingActionButton
     private lateinit var imagePreview: ImageView
     private lateinit var progressBar: ProgressBar
     private lateinit var loadingOverlay: View
@@ -124,6 +126,7 @@ class MainActivity : AppCompatActivity() {
         settingsContainer = findViewById(R.id.settingsContainer)
 
         // Home screen views
+        fabSearch = findViewById(R.id.fabSearch)
         imagePreview = findViewById(R.id.imagePreview)
         progressBar = findViewById(R.id.progressBar)
         loadingOverlay = findViewById(R.id.loadingOverlay)
@@ -201,6 +204,10 @@ class MainActivity : AppCompatActivity() {
     private fun openCameraActivity() {
         // Khởi chạy Activity Camera tùy chỉnh
         cameraActivityLauncher.launch(CameraActivity.newIntent(this))
+        overridePendingTransition(
+            R.anim.slide_in_bottom,
+            R.anim.hold
+        )
     }
     private fun hasPermissions(): Boolean {
         val camera = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) ==
@@ -341,6 +348,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showHomeScreen() {
+        fabSearch.visibility = View.VISIBLE
         homeContainer.visibility = View.VISIBLE
         historyContainer.visibility = View.GONE
         myGardenContainer.visibility = View.GONE
@@ -348,6 +356,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showHistoryScreen() {
+        fabSearch.visibility = View.GONE
         homeContainer.visibility = View.GONE
         historyContainer.visibility = View.VISIBLE
         myGardenContainer.visibility = View.GONE
@@ -355,6 +364,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showMyGardenScreen() {
+        fabSearch.visibility = View.GONE
         homeContainer.visibility = View.GONE
         historyContainer.visibility = View.GONE
         myGardenContainer.visibility = View.VISIBLE
@@ -362,6 +372,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showSettingsScreen() {
+        fabSearch.visibility = View.GONE
         homeContainer.visibility = View.GONE
         historyContainer.visibility = View.GONE
         myGardenContainer.visibility = View.GONE
