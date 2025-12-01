@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
                 .centerCrop()
                 .into(imagePreview)
 
-            viewModel.identifySpecies(this, imageUri!!)
+            viewModel.identifySpecies(imageUri!!)
         }
     }
 
@@ -77,7 +77,7 @@ class MainActivity : AppCompatActivity() {
                 .centerCrop()
                 .into(imagePreview)
 
-            viewModel.identifySpecies(this, it)
+            viewModel.identifySpecies(it)
         }
     }
 
@@ -129,7 +129,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupViewModel() {
-        viewModel = ViewModelProvider(this)[EcoLensViewModel::class.java]
+        viewModel = ViewModelProvider(this,
+            ViewModelProvider.AndroidViewModelFactory.getInstance(application)
+        )[EcoLensViewModel::class.java]
     }
 
     private fun setupHistoryScreen() {

@@ -1,20 +1,25 @@
 package com.nguyendevs.ecolens.viewmodel
 
+import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nguyendevs.ecolens.model.EcoLensUiState
 import com.nguyendevs.ecolens.model.SpeciesInfo
 import com.nguyendevs.ecolens.model.HistoryEntry
+import com.nguyendevs.ecolens.database.HistoryDatabase
 import com.nguyendevs.ecolens.network.RetrofitClient
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -22,31 +27,33 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import java.io.FileOutputStream
 
-class EcoLensViewModel : ViewModel() {
+class EcoLensViewModel(application: Application) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(EcoLensUiState())
     val uiState: StateFlow<EcoLensUiState> = _uiState.asStateFlow()
-
-    private val _history = MutableStateFlow<List<HistoryEntry>>(emptyList())
-    val history: StateFlow<List<HistoryEntry>> = _history.asStateFlow()
 
     private val apiService = RetrofitClient.iNaturalistApi
     private val translationService = RetrofitClient.translationApi
 
-<<<<<<< Updated upstream
-=======
+    private val historyDao = HistoryDatabase.getDatabase(application).historyDao()
+
+    val history: StateFlow<List<HistoryEntry>> = historyDao.getAllHistory()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     private fun saveToHistory(imageUri: Uri, speciesInfo: SpeciesInfo) {
-        val newEntry = HistoryEntry(
-            id = System.currentTimeMillis(),
-            imageUri = imageUri,
-            speciesInfo = speciesInfo
-        )
-        // Thêm mục mới vào đầu danh sách (mới nhất ở trên)
-        _history.value = listOf(newEntry) + _history.value
+        viewModelScope.launch {
+            val newEntry = HistoryEntry(
+                imageUri = imageUri,
+                speciesInfo = speciesInfo
+            )
+            historyDao.insert(newEntry)
+        }
     }
 
->>>>>>> Stashed changes
-    fun identifySpecies(context: Context, imageUri: Uri) {
+    fun identifySpecies(imageUri: Uri) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
                 isLoading = true,
@@ -55,7 +62,7 @@ class EcoLensViewModel : ViewModel() {
             )
 
             try {
-                val imageFile = uriToFile(context, imageUri)
+                val imageFile = uriToFile(getApplication(), imageUri)
                 val requestFile = imageFile.asRequestBody("image/jpeg".toMediaTypeOrNull())
                 val imagePart = MultipartBody.Part.createFormData("image", imageFile.name, requestFile)
 
