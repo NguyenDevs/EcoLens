@@ -48,7 +48,12 @@ class CameraActivity : AppCompatActivity() {
             finish()
             overridePendingTransition(R.anim.hold, R.anim.slide_out_bottom)
         }
+      
+    }
 
+    override fun onBackPressed() {
+        finish()
+        overridePendingTransition(R.anim.hold, R.anim.slide_out_bottom)
     }
 
     override fun onSupportNavigateUp(): Boolean {
