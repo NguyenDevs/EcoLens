@@ -48,10 +48,11 @@ class CameraActivity : AppCompatActivity() {
             finish()
             overridePendingTransition(R.anim.hold, R.anim.slide_out_bottom)
         }
-      
+
     }
 
     override fun onBackPressed() {
+        super.onBackPressed()
         finish()
         overridePendingTransition(R.anim.hold, R.anim.slide_out_bottom)
     }
