@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.viewmodel
+package com.nguyendevs.ecolens.view
 
 import android.app.Application
 import android.content.Context
@@ -8,12 +8,11 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.nguyendevs.ecolens.model.EcoLensUiState
-import com.nguyendevs.ecolens.model.SpeciesInfo
-import com.nguyendevs.ecolens.model.HistoryEntry
 import com.nguyendevs.ecolens.database.HistoryDatabase
+import com.nguyendevs.ecolens.model.EcoLensUiState
+import com.nguyendevs.ecolens.model.HistoryEntry
+import com.nguyendevs.ecolens.model.SpeciesInfo
 import com.nguyendevs.ecolens.network.RetrofitClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -34,12 +33,12 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     private val apiService = RetrofitClient.iNaturalistApi
     private val translationService = RetrofitClient.translationApi
 
-    private val historyDao = HistoryDatabase.getDatabase(application).historyDao()
+    private val historyDao = HistoryDatabase.Companion.getDatabase(application).historyDao()
 
     val history: StateFlow<List<HistoryEntry>> = historyDao.getAllHistory()
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.Companion.WhileSubscribed(5000),
             initialValue = emptyList()
         )
 
