@@ -6,20 +6,27 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nguyendevs.ecolens.model.EcoLensUiState
 import com.nguyendevs.ecolens.model.SpeciesInfo
 import com.nguyendevs.ecolens.network.RetrofitClient
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
+import java.net.HttpURLConnection
+import java.net.URL
+import java.net.URLEncoder
 
 class EcoLensViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(EcoLensUiState())
@@ -27,6 +34,9 @@ class EcoLensViewModel : ViewModel() {
 
     private val apiService = RetrofitClient.iNaturalistApi
     private val translationService = RetrofitClient.translationApi
+
+    // Simple in-memory cache to avoid repeated Wikipedia calls
+    private val wikiCache = mutableMapOf<String, String?>()
 
     fun identifySpecies(context: Context, imageUri: Uri) {
         viewModelScope.launch {
@@ -47,11 +57,39 @@ class EcoLensViewModel : ViewModel() {
                     val topResult = response.results.first()
                     val taxon = topResult.taxon
 
-                    val englishName = taxon.preferred_common_name?.takeIf { it.isNotEmpty() }
-                        ?: taxon.name
+                    // Lấy scientific name
+                    val scientificName = taxon.name
 
-                    val commonNameVi = translateToVietnamese(englishName)
+                    // 1) Nếu preferred_common_name có giá trị và là tiếng Việt -> dùng luôn
+                    var commonName = taxon.preferred_common_name?.takeIf { it.isNotEmpty() } ?: ""
 
+                    // 2) Nếu không phải tiếng Việt hoặc rỗng -> thử lấy từ Wikipedia tiếng Việt theo tên khoa học
+                    if (commonName.isBlank() || !isVietnamese(commonName)) {
+                        val cached = wikiCache[scientificName]
+                        val wikiName = if (cached != null) {
+                            cached
+                        } else {
+                            val fetched = fetchVietnameseName(scientificName)
+                            // store (có thể null)
+                            wikiCache[scientificName] = fetched
+                            fetched
+                        }
+
+                        if (!wikiName.isNullOrEmpty()) {
+                            commonName = wikiName
+                        } else {
+                            // 3) Fallback: dịch preferred_common_name (hoặc tên khoa học) sang tiếng Việt
+                            val englishName = taxon.preferred_common_name?.takeIf { it.isNotEmpty() } ?: scientificName
+                            commonName = translateToVietnamese(englishName)
+                        }
+                    } else {
+                        // Nếu preferred_common_name có nhưng không phải tiếng Việt, vẫn dịch sang tiếng Việt để cải thiện
+                        if (!isVietnamese(commonName)) {
+                            commonName = translateToVietnamese(commonName)
+                        }
+                    }
+
+                    // Taxonomy
                     val kingdom = taxon.ancestors?.find { it.rank == "kingdom" }?.name ?: ""
                     val phylum = taxon.ancestors?.find { it.rank == "phylum" }?.name ?: ""
                     val className = taxon.ancestors?.find { it.rank == "class" }?.name ?: ""
@@ -138,7 +176,7 @@ class EcoLensViewModel : ViewModel() {
                     val conservationStatus = "Chưa có thông tin"
 
                     val speciesInfo = SpeciesInfo(
-                        commonName = commonNameVi,
+                        commonName = commonName,
                         scientificName = taxon.name,
                         kingdom = kingdom,
                         phylum = phylum,
@@ -176,6 +214,56 @@ class EcoLensViewModel : ViewModel() {
                 )
             }
         }
+    }
+
+    // --- helper functions ---
+
+    // Attempt to fetch a Vietnamese page title for a given scientific name from vi.wikipedia.org
+    private suspend fun fetchVietnameseName(scientificName: String): String? {
+        if (scientificName.isBlank()) return null
+
+        // return cached if present (could be null)
+        if (wikiCache.containsKey(scientificName)) return wikiCache[scientificName]
+
+        return withContext(Dispatchers.IO) {
+            try {
+                val encoded = URLEncoder.encode(scientificName, "UTF-8")
+                val urlStr = "https://vi.wikipedia.org/w/api.php?action=query&format=json&prop=info&titles=$encoded"
+                val url = URL(urlStr)
+                val conn = url.openConnection() as HttpURLConnection
+                conn.requestMethod = "GET"
+                conn.connectTimeout = 8_000
+                conn.readTimeout = 8_000
+                conn.doInput = true
+
+                val resp = conn.inputStream.bufferedReader().use { it.readText() }
+                val json = JSONObject(resp)
+                val query = json.optJSONObject("query") ?: return@withContext null
+                val pages = query.optJSONObject("pages") ?: return@withContext null
+
+                val keys = pages.keys()
+                if (!keys.hasNext()) return@withContext null
+                val pageId = keys.next()
+                if (pageId == "-1") return@withContext null
+
+                val page = pages.getJSONObject(pageId)
+                val title = page.optString("title", null)
+                // put into cache
+                wikiCache[scientificName] = title
+                return@withContext title
+            } catch (e: Exception) {
+                Log.e("EcoLensViewModel", "fetchVietnameseName error: ${e.message}")
+                wikiCache[scientificName] = null
+                null
+            }
+        }
+    }
+
+    // basic heuristic: detect Vietnamese diacritics
+    private fun isVietnamese(text: String?): Boolean {
+        if (text.isNullOrBlank()) return false
+        val regex = Regex("[ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểẾỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰửữự]+")
+        return regex.containsMatchIn(text)
     }
 
     private suspend fun translateToVietnamese(text: String): String {
