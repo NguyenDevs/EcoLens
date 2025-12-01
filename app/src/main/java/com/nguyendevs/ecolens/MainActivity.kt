@@ -20,15 +20,19 @@ import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.card.MaterialCardView
+import com.nguyendevs.ecolens.model.HistoryEntry
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.nguyendevs.ecolens.model.SpeciesInfo
 import com.nguyendevs.ecolens.viewmodel.EcoLensViewModel
 import kotlinx.coroutines.launch
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.nguyendevs.ecolens.adapter.HistoryAdapter
+
 import java.io.File
 
 class MainActivity : AppCompatActivity() {
-
     // Containers
     private lateinit var homeContainer: View
     private lateinit var historyContainer: View
@@ -43,6 +47,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var errorCard: MaterialCardView
     private lateinit var errorText: TextView
     private lateinit var speciesInfoCard: MaterialCardView
+
+    //History screen views
+    private lateinit var rvHistory: RecyclerView
+    private lateinit var emptyStateContainer: LinearLayout
+    private lateinit var historyAdapter: HistoryAdapter
 
     private lateinit var viewModel: EcoLensViewModel
     private var imageUri: Uri? = null
@@ -92,6 +101,7 @@ class MainActivity : AppCompatActivity() {
         initViews()
         setupViewModel()
         setupBottomNavigation()
+        setupHistoryScreen()
         setupFAB()
         setupObservers()
         showHomeScreen()
@@ -112,10 +122,41 @@ class MainActivity : AppCompatActivity() {
         errorCard = findViewById(R.id.errorCard)
         errorText = findViewById(R.id.errorText)
         speciesInfoCard = findViewById(R.id.speciesInfoCard)
+
+        //History screen views
+        rvHistory = historyContainer.findViewById(R.id.rvHistory)
+        emptyStateContainer = historyContainer.findViewById(R.id.emptyStateContainer)
     }
 
     private fun setupViewModel() {
         viewModel = ViewModelProvider(this)[EcoLensViewModel::class.java]
+    }
+
+    private fun setupHistoryScreen() {
+        historyAdapter = HistoryAdapter(emptyList()) { entry ->
+            displayHistoryEntry(entry)
+        }
+        rvHistory.apply {
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            adapter = historyAdapter
+        }
+    }
+
+    private fun displayHistoryEntry(entry: HistoryEntry) {
+        showHomeScreen()
+
+        imageUri = entry.imageUri
+        Glide.with(this)
+            .load(entry.imageUri)
+            .centerCrop()
+            .into(imagePreview)
+
+        loadingOverlay.visibility = View.GONE
+        loadingCard.visibility = View.GONE
+        errorCard.visibility = View.GONE
+
+        displaySpeciesInfo(entry.speciesInfo)
+        speciesInfoCard.visibility = View.VISIBLE
     }
 
     private fun setupBottomNavigation() {
@@ -215,6 +256,19 @@ class MainActivity : AppCompatActivity() {
                     displaySpeciesInfo(info)
                     errorCard.visibility = View.GONE
                     speciesInfoCard.visibility = View.VISIBLE
+                }
+            }
+        }
+        lifecycleScope.launch {
+            viewModel.history.collect { historyList ->
+                historyAdapter.updateList(historyList)
+                // Hiển thị RecyclerView hoặc Empty State
+                if (historyList.isNotEmpty()) {
+                    rvHistory.visibility = View.VISIBLE
+                    emptyStateContainer.visibility = View.GONE
+                } else {
+                    rvHistory.visibility = View.GONE
+                    emptyStateContainer.visibility = View.VISIBLE
                 }
             }
         }

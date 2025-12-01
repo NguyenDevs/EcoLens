@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nguyendevs.ecolens.model.EcoLensUiState
 import com.nguyendevs.ecolens.model.SpeciesInfo
+import com.nguyendevs.ecolens.model.HistoryEntry
 import com.nguyendevs.ecolens.network.RetrofitClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,9 +26,26 @@ class EcoLensViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(EcoLensUiState())
     val uiState: StateFlow<EcoLensUiState> = _uiState.asStateFlow()
 
+    private val _history = MutableStateFlow<List<HistoryEntry>>(emptyList())
+    val history: StateFlow<List<HistoryEntry>> = _history.asStateFlow()
+
     private val apiService = RetrofitClient.iNaturalistApi
     private val translationService = RetrofitClient.translationApi
 
+<<<<<<< Updated upstream
+=======
+
+    private fun saveToHistory(imageUri: Uri, speciesInfo: SpeciesInfo) {
+        val newEntry = HistoryEntry(
+            id = System.currentTimeMillis(),
+            imageUri = imageUri,
+            speciesInfo = speciesInfo
+        )
+        // Thêm mục mới vào đầu danh sách (mới nhất ở trên)
+        _history.value = listOf(newEntry) + _history.value
+    }
+
+>>>>>>> Stashed changes
     fun identifySpecies(context: Context, imageUri: Uri) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
@@ -155,6 +173,8 @@ class EcoLensViewModel : ViewModel() {
                         conservationStatus = conservationStatus,
                         confidence = topResult.combined_score
                     )
+
+                    saveToHistory(imageUri, speciesInfo)
 
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
