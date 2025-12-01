@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="ShapeAppearanceOverlay.FAB.Round" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">40%</item>
+    </style>
+    <style name="BottomNavigationViewCustom" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="android:textSize">10sp</item>
+        <item name="itemIconSize">24dp</item>
+        <item name="labelVisibilityMode">labeled</item>
+        <item name="android:paddingTop">5dp</item>
+    </style>
+
+
+</resources>

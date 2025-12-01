@@ -1,0 +1,8 @@
+package com.nguyendevs.ecolens.model
+
+
+data class EcoLensUiState(
+    val isLoading: Boolean = false,
+    val speciesInfo: SpeciesInfo? = null,
+    val error: String? = null
+)

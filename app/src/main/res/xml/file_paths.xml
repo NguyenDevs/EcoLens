@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tạo file này tại: res/xml/file_paths.xml -->
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <cache-path name="cache" path="." />
+    <external-cache-path name="external_cache" path="." />
+</paths>

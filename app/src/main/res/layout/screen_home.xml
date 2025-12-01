@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+    android:background="@color/background_color">
+
+        <!-- Header -->
+        <TextView
+                android:id="@+id/tvAppTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="EcoLens"
+                android:textSize="32sp"
+                android:textColor="#00796B"
+                android:textStyle="bold" android:paddingTop="15dp"/>
+
+        <TextView
+                android:id="@+id/tvAppSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nhận diện sinh vật qua ảnh"
+                android:textSize="16sp"
+                android:textColor="#757575"
+                android:layout_marginTop="4dp" />
+
+        <!-- Image Preview Card -->
+        <com.google.android.material.card.MaterialCardView
+                android:id="@+id/imagePreviewCard"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:layout_marginTop="24dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp"
+                android:visibility="visible">
+
+            <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                <!-- Image -->
+                <ImageView
+                        android:id="@+id/imagePreview"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:contentDescription="@string/image_preview" />
+
+                <!-- Placeholder -->
+                <LinearLayout
+                        android:id="@+id/imagePlaceholder"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:background="#E8F5E9"
+                        android:visibility="gone">
+
+                    <ImageView
+                            android:layout_width="64dp"
+                            android:layout_height="64dp"
+                            android:src="@drawable/ic_image"
+                            android:contentDescription="@string/no_image"
+                            app:tint="#BDBDBD" />
+
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Chưa có ảnh"
+                            android:textColor="#757575"
+                            android:layout_marginTop="8dp" />
+
+                </LinearLayout>
+
+                <!-- Loading Overlay -->
+                <FrameLayout
+                        android:id="@+id/loadingOverlay"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="#80000000"
+                        android:visibility="gone">
+
+                    <ProgressBar
+                            android:id="@+id/progressBar"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_gravity="center"
+                            android:indeterminateTint="@android:color/white" />
+
+                </FrameLayout>
+
+            </FrameLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Loading Text -->
+        <com.google.android.material.card.MaterialCardView
+                android:id="@+id/loadingCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                android:visibility="gone">
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Đang phân tích hình ảnh..."
+                    android:textSize="16sp"
+                    android:textColor="#00796B"
+                    android:textStyle="bold"
+                    android:padding="16dp"
+                    android:layout_gravity="center" />
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Error Card -->
+        <com.google.android.material.card.MaterialCardView
+                android:id="@+id/errorCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#FFEBEE"
+                app:cardElevation="2dp"
+                android:visibility="gone">
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:gravity="center_vertical">
+
+                <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_warning"
+                        android:contentDescription="@string/error"
+                        app:tint="#D32F2F" />
+
+                <TextView
+                        android:id="@+id/errorText"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="12dp"
+                        android:textColor="#D32F2F"
+                        android:text="Đã xảy ra lỗi" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Species Info Card -->
+        <include
+                android:id="@+id/speciesInfoCard"
+                layout="@layout/card_species_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:visibility="gone" />
+
+    </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>

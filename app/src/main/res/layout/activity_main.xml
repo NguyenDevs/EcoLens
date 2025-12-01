@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                                     xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                     xmlns:tools="http://schemas.android.com/tools"
+                                                     android:layout_width="match_parent"
+                                                     android:layout_height="match_parent"
+                                                     android:background="#F9F9F9"
+                                                     tools:context=".MainActivity">
+
+    <FrameLayout
+            android:id="@+id/mainContent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="70dp">
+
+        <include
+                android:id="@+id/homeContainer"
+                layout="@layout/screen_home"
+                android:visibility="visible"/>
+
+        <include
+                android:id="@+id/historyContainer"
+                layout="@layout/screen_history"
+                android:visibility="gone"/>
+
+        <include
+                android:id="@+id/myGardenContainer"
+                layout="@layout/screen_my_garden"
+                android:visibility="gone"/>
+
+        <include
+                android:id="@+id/settingsContainer"
+                layout="@layout/screen_settings"
+                android:visibility="gone"/>
+    </FrameLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabSearch"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="40dp"
+            android:layout_marginEnd="16dp"
+            android:contentDescription="@string/search"
+            android:src="@drawable/ic_search"
+            app:fabSize="normal"
+            app:maxImageSize="35dp"
+            app:fabCustomSize="50dp"
+            app:backgroundTint="@color/white"
+            app:tint="@color/green_primary"
+            app:elevation="1dp"
+            app:pressedTranslationZ="5dp"
+            app:borderWidth="0dp"
+            app:layout_anchorGravity="top|end"
+            android:layout_gravity="top|end"/>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottomNavigation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="@drawable/bottom_nav_background"
+            android:elevation="26dp"
+            app:itemIconTint="@color/bottom_nav_color"
+            app:itemTextColor="@color/bottom_nav_color"
+            app:labelVisibilityMode="labeled"
+            app:itemIconSize="24dp"
+            style="@style/BottomNavigationViewCustom"
+            app:menu="@menu/bottom_nav_menu" android:paddingBottom="10dp"/>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabCamera"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginBottom="22dp"
+            android:src="@drawable/ic_camera"
+            android:contentDescription="@string/camera"
+            android:scaleType="center"
+            app:fabCustomSize="70dp"
+            app:maxImageSize="40dp"
+            app:backgroundTint="@color/green_primary"
+            app:tint="@android:color/white"
+            app:elevation="27dp"
+            app:pressedTranslationZ="20dp"
+            app:borderWidth="0dp"
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.FAB.Round"
+            app:layout_anchor="@id/bottomNavigation"
+            app:layout_anchorGravity="top|center_horizontal"
+            android:translationY="18dp"
+            android:translationZ="12dp" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="@android:color/white">
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+        <!-- Common Name -->
+        <TextView
+                android:id="@+id/tvCommonName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tên thường gọi"
+                android:textSize="24sp"
+                android:textColor="#00796B"
+                android:textStyle="bold" />
+
+        <!-- Scientific Name -->
+        <TextView
+                android:id="@+id/tvScientificName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Scientific name"
+                android:textSize="18sp"
+                android:textStyle="italic"
+                android:textColor="#757575"
+                android:layout_marginTop="4dp" />
+
+        <!-- Confidence Badge -->
+        <com.google.android.material.card.MaterialCardView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                app:cardCornerRadius="12dp"
+                app:cardBackgroundColor="#E8F5E9"
+                app:cardElevation="0dp">
+
+            <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="8dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:gravity="center_vertical">
+
+                <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_check_circle"
+                        app:tint="#00A86B"
+                        android:contentDescription="@string/confidence" />
+
+                <TextView
+                        android:id="@+id/tvConfidence"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Độ tin cậy: 95%"
+                        android:textColor="#00796B"
+                        android:textStyle="bold"
+                        android:layout_marginStart="8dp" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Divider -->
+        <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E0E0E0"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp" />
+
+        <!-- Taxonomy Section -->
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🔬 Phân loại khoa học"
+                android:textSize="20sp"
+                android:textColor="#00796B"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+        <!-- Taxonomy Rows -->
+        <LinearLayout
+                android:id="@+id/taxonomyContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+            <!-- Giới -->
+            <LinearLayout
+                    android:id="@+id/rowKingdom"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp">
+                <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.3"
+                        android:text="Giới:"
+                        android:textSize="14sp"
+                        android:textColor="#757575" />
+                <TextView
+                        android:id="@+id/tvKingdom"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.7"
+                        android:textSize="14sp"
+                        android:textColor="#424242" />
+            </LinearLayout>
+
+            <!-- Ngành -->
+            <LinearLayout
+                    android:id="@+id/rowPhylum"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp">
+                <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.3"
+                        android:text="Ngành:"
+                        android:textSize="14sp"
+                        android:textColor="#757575" />
+                <TextView
+                        android:id="@+id/tvPhylum"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.7"
+                        android:textSize="14sp"
+                        android:textColor="#424242" />
+            </LinearLayout>
+
+            <!-- Lớp -->
+            <LinearLayout
+                    android:id="@+id/rowClass"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp">
+                <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.3"
+                        android:text="Lớp:"
+                        android:textSize="14sp"
+                        android:textColor="#757575" />
+                <TextView
+                        android:id="@+id/tvClass"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.7"
+                        android:textSize="14sp"
+                        android:textColor="#424242" />
+            </LinearLayout>
+
+            <!-- Bộ -->
+            <LinearLayout
+                    android:id="@+id/rowOrder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp">
+                <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.3"
+                        android:text="Bộ:"
+                        android:textSize="14sp"
+                        android:textColor="#757575" />
+                <TextView
+                        android:id="@+id/tvOrder"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.7"
+                        android:textSize="14sp"
+                        android:textColor="#424242" />
+            </LinearLayout>
+
+            <!-- Họ -->
+            <LinearLayout
+                    android:id="@+id/rowFamily"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp">
+                <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.3"
+                        android:text="Họ:"
+                        android:textSize="14sp"
+                        android:textColor="#757575" />
+                <TextView
+                        android:id="@+id/tvFamily"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.7"
+                        android:textSize="14sp"
+                        android:textColor="#424242" />
+            </LinearLayout>
+
+            <!-- Chi -->
+            <LinearLayout
+                    android:id="@+id/rowGenus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp">
+                <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.3"
+                        android:text="Chi:"
+                        android:textSize="14sp"
+                        android:textColor="#757575" />
+                <TextView
+                        android:id="@+id/tvGenus"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.7"
+                        android:textSize="14sp"
+                        android:textColor="#424242" />
+            </LinearLayout>
+
+            <!-- Loài -->
+            <LinearLayout
+                    android:id="@+id/rowSpecies"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp">
+                <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.3"
+                        android:text="Loài:"
+                        android:textSize="14sp"
+                        android:textColor="#757575" />
+                <TextView
+                        android:id="@+id/tvSpecies"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.7"
+                        android:textSize="14sp"
+                        android:textColor="#424242" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Description Section -->
+        <LinearLayout
+                android:id="@+id/sectionDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="16dp"
+                android:visibility="gone">
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="📖 Mô tả"
+                    android:textSize="20sp"
+                    android:textColor="#00796B"
+                    android:textStyle="bold" />
+
+            <TextView
+                    android:id="@+id/tvDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#424242"
+                    android:lineSpacingExtra="8dp"
+                    android:layout_marginTop="8dp" />
+
+        </LinearLayout>
+
+        <!-- Characteristics Section -->
+        <LinearLayout
+                android:id="@+id/sectionCharacteristics"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="16dp"
+                android:visibility="gone">
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="✨ Đặc điểm"
+                    android:textSize="20sp"
+                    android:textColor="#00796B"
+                    android:textStyle="bold" />
+
+            <TextView
+                    android:id="@+id/tvCharacteristics"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#424242"
+                    android:lineSpacingExtra="8dp"
+                    android:layout_marginTop="8dp" />
+
+        </LinearLayout>
+
+        <!-- Distribution Section -->
+        <LinearLayout
+                android:id="@+id/sectionDistribution"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="16dp"
+                android:visibility="gone">
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🌍 Phân bố"
+                    android:textSize="20sp"
+                    android:textColor="#00796B"
+                    android:textStyle="bold" />
+
+            <TextView
+                    android:id="@+id/tvDistribution"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#424242"
+                    android:lineSpacingExtra="8dp"
+                    android:layout_marginTop="8dp" />
+
+        </LinearLayout>
+
+        <!-- Habitat Section -->
+        <LinearLayout
+                android:id="@+id/sectionHabitat"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="16dp"
+                android:visibility="gone">
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🏞️ Môi trường sống"
+                    android:textSize="20sp"
+                    android:textColor="#00796B"
+                    android:textStyle="bold" />
+
+            <TextView
+                    android:id="@+id/tvHabitat"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#424242"
+                    android:lineSpacingExtra="8dp"
+                    android:layout_marginTop="8dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>
