@@ -68,7 +68,7 @@ class HistoryAdapter(
             tvTime.text = "Thời gian: ${timeFormatter.format(Date(entry.timestamp))}"
 
             Glide.with(itemView.context)
-                .load(entry.imageUri)
+                .load(entry.imagePath)  // Đổi từ imageUri thành imagePath
                 .centerCrop()
                 .into(ivImage)
 

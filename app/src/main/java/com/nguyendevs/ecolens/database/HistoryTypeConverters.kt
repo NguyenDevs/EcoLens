@@ -1,6 +1,5 @@
 package com.nguyendevs.ecolens.database
 
-import android.net.Uri
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -23,15 +22,4 @@ class HistoryTypeConverters {
         return gson.fromJson(json, type)
     }
 
-    // Chuyển Uri thành String
-    @TypeConverter
-    fun fromUri(uri: Uri): String {
-        return uri.toString()
-    }
-
-    // Chuyển String thành Uri
-    @TypeConverter
-    fun toUri(uriString: String): Uri {
-        return Uri.parse(uriString)
-    }
 }

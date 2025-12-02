@@ -11,6 +11,6 @@ data class HistoryEntry(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val imagePath: String,
     @Embedded val speciesInfo: SpeciesInfo,
-    val date: Long,
+    val timestamp: Long,
     val isFavorite: Boolean = false
 )
