@@ -135,36 +135,23 @@ class SpeciesInfoHandler(
     }
 
     /**
-     * Hiển thị tình trạng bảo tồn với màu sắc
+     * Hiển thị tình trạng bảo tồn (Đã cập nhật để hỗ trợ HTML màu từ AI)
      */
     private fun displayConservationStatus(status: String) {
         val section = speciesInfoCard.findViewById<LinearLayout>(R.id.sectionConservation)
         val textView = speciesInfoCard.findViewById<TextView>(R.id.tvConservationStatus)
 
         if (status.isNotEmpty()) {
-            textView?.text = status
-
-            val color = when {
-                status.contains("Nguy cấp", ignoreCase = true) ||
-                        status.contains("Critically Endangered", ignoreCase = true) ->
-                    ContextCompat.getColor(context, android.R.color.holo_red_dark)
-
-                status.contains("Sách đỏ", ignoreCase = true) ||
-                        status.contains("Endangered", ignoreCase = true) ->
-                    ContextCompat.getColor(context, android.R.color.holo_orange_dark)
-
-                status.contains("Dễ bị tổn thương", ignoreCase = true) ||
-                        status.contains("Vulnerable", ignoreCase = true) ->
-                    ContextCompat.getColor(context, android.R.color.holo_orange_light)
-
-                status.contains("Ít quan tâm", ignoreCase = true) ||
-                        status.contains("Least Concern", ignoreCase = true) ->
-                    ContextCompat.getColor(context, android.R.color.holo_green_dark)
-
-                else -> ContextCompat.getColor(context, android.R.color.black)
+            // CẬP NHẬT: Sử dụng Html.fromHtml để hiển thị thẻ <b> và <font> từ AI
+            textView?.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                Html.fromHtml(status, Html.FROM_HTML_MODE_COMPACT)
+            } else {
+                @Suppress("DEPRECATION")
+                Html.fromHtml(status)
             }
 
-            textView?.setTextColor(color)
+            textView?.setTextColor(ContextCompat.getColor(context, R.color.black))
+
             section?.visibility = View.VISIBLE
         } else {
             section?.visibility = View.GONE

@@ -225,8 +225,19 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
     private suspend fun fetchDetailsFromGemini(scientificName: String, confidence: Double): SpeciesInfo {
         return try {
+            // Lấy màu primary từ colors.xml (tạm fix cứng mã màu để Gemini dễ hiểu)
+            // Màu #00796B là màu xanh đậm bạn đang dùng trong app
+            val highlightColor = "#00796B"
+
             val prompt = """
                 Hãy đóng vai một nhà sinh vật học. Cung cấp thông tin chi tiết về loài sinh vật có tên khoa học là "$scientificName" bằng Tiếng Việt.
+                
+                YÊU CẦU VỀ ĐỊNH DẠNG VĂN BẢN (QUAN TRỌNG):
+                Trong các trường nội dung mô tả ('description', 'characteristics', 'distribution', 'habitat', 'conservationStatus'), hãy làm nổi bật các từ khóa quan trọng như sau:
+                1. Sử dụng thẻ <b>...</b> để in đậm các đặc điểm chính, tính chất nổi bật.
+                2. Sử dụng thẻ <font color='$highlightColor'><b>...</b></font> để tô màu xanh và in đậm cho các địa danh, tên riêng, hoặc các thông số kích thước quan trọng.
+                Lưu ý: Chỉ sử dụng các thẻ HTML cơ bản này, không dùng Markdown (**).
+
                 Trả về kết quả duy nhất dưới dạng JSON (không markdown, không code block) với cấu trúc sau:
                 {
                     "commonName": "Tên thường gọi tiếng Việt chuẩn nhất",
@@ -238,11 +249,11 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                     "genus": "Tên chi (CHỈ TÊN, bỏ từ 'Chi' ở đầu, nếu có tên tiếng anh, ưu tiên dùng tên tiếng Anh)",
                     "species": "Tên loài (CHỈ TÊN, bỏ từ 'Loài' ở đầu, nếu có tên tiếng anh, ưu tiên dùng tên tiếng Anh)",
                     "rank": "Cấp phân loại hiện tại (Ví dụ: Loài)",
-                    "description": "Mô tả tổng quan ngắn gọn và thú vị (khoảng 5 câu).",
-                    "characteristics": "Đặc điểm hình thái, kích thước, màu sắc nổi bật.",
-                    "distribution": "Phân bố địa lý (ưu tiên nơi tìm thấy ở Việt Nam sau đó là thế giới, nếu không có ở Việt Nam thì chỉ cần nói rằng loài này hiện không có ở Việt Nam và đang chỉ có ở đâu trên thế giới).",
-                    "habitat": "Môi trường sống (rừng, biển, đô thị...).",
-                    "conservationStatus": "Tình trạng bảo tồn (ví dụ: Sách đỏ, Ít quan tâm)."
+                    "description": "Mô tả tổng quan ngắn gọn và thú vị (khoảng 5 câu). Có sử dụng thẻ html để highlight.",
+                    "characteristics": "Đặc điểm hình thái, kích thước, màu sắc nổi bật. Có sử dụng thẻ html để highlight.",
+                    "distribution": "Phân bố địa lý (ưu tiên nơi tìm thấy ở Việt Nam sau đó là thế giới). Có sử dụng thẻ html để highlight.",
+                    "habitat": "Môi trường sống (rừng, biển, đô thị...). Có sử dụng thẻ html để highlight.",
+                    "conservationStatus": "Tình trạng bảo tồn (ví dụ: Nguy cấp, Sách đỏ, Dễ bị tổn thương, Ít quan tâm, Không xếp hạng). Có sử dụng thẻ html để highlight. Riêng phần này, nếu sinh vật thuộc loại nguy cấp. Sử dụng màu #8B0000 làm màu cho phần highlight chỉ tính Nguy cấp. Màu #c97608 cho Sách đỏ. Màu #eddb11 cho Dễ bị tổn thương. Màu #55f200 cho Ít quan tâm và màu #05deff cho Không xếp hạng. "
                 }
             """.trimIndent()
 
