@@ -11,9 +11,8 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp"
-    android:background="@color/background_color">
+            android:background="@color/background_color">
 
-        <!-- Header -->
         <TextView
                 android:id="@+id/tvAppTitle"
                 android:layout_width="wrap_content"
@@ -32,7 +31,6 @@
                 android:textColor="#757575"
                 android:layout_marginTop="4dp" />
 
-        <!-- Image Preview Card -->
         <com.google.android.material.card.MaterialCardView
                 android:id="@+id/imagePreviewCard"
                 android:layout_width="match_parent"
@@ -70,6 +68,13 @@
                         android:layout_height="match_parent"
                         android:background="#80000000"
                         android:visibility="gone">
+
+                    <ProgressBar
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:indeterminate="true"
+                            android:indeterminateTint="@android:color/white"/>
                 </FrameLayout>
 
                 <ImageView
@@ -89,7 +94,6 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Loading Text -->
         <com.google.android.material.card.MaterialCardView
                 android:id="@+id/loadingCard"
                 android:layout_width="match_parent"
@@ -112,7 +116,6 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Error Card -->
         <com.google.android.material.card.MaterialCardView
                 android:id="@+id/errorCard"
                 android:layout_width="match_parent"
@@ -150,7 +153,6 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Species Info Card -->
         <include
                 android:id="@+id/speciesInfoCard"
                 layout="@layout/card_species_info"
