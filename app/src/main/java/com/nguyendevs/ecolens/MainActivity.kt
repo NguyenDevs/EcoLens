@@ -213,13 +213,14 @@ class MainActivity : AppCompatActivity() {
                 override fun onAnimationStart(animation: Animator) {
                     textInputLayoutSearch.visibility = View.VISIBLE
                     etSearchQuery.setText(text)
-                    etSearchQuery.post {
-                        if (etSearchQuery.requestFocus()) {
-                            etSearchQuery.setSelection(text.length)
-                            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                            imm.showSoftInput(etSearchQuery, InputMethodManager.SHOW_IMPLICIT)
-                        }
-                    }
+                }
+
+                override fun onAnimationEnd(animation: Animator) {
+                    super.onAnimationEnd(animation)
+                    etSearchQuery.requestFocus()
+                    etSearchQuery.setSelection(etSearchQuery.text.length)
+                    val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.showSoftInput(etSearchQuery, InputMethodManager.SHOW_IMPLICIT)
                 }
             })
             animator.start()
