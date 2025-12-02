@@ -238,6 +238,12 @@ class MainActivity : AppCompatActivity() {
                     loadingOverlay.visibility = if (state.isLoading) View.VISIBLE else View.GONE
                     loadingCard.visibility = if (state.isLoading) View.VISIBLE else View.GONE
 
+                    // ✅ Khi đang loading, ẨN card kết quả cũ
+                    if (state.isLoading) {
+                        speciesInfoCard.visibility = View.GONE
+                        errorCard.visibility = View.GONE
+                    }
+
                     if (state.error != null) {
                         errorText.text = state.error
                         errorCard.visibility = View.VISIBLE
@@ -270,52 +276,102 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun displaySpeciesInfo(info: SpeciesInfo) {
+        // Tên và độ tin cậy
+        val confidencePercent = if (info.confidence > 1) {
+            String.format("%.2f", info.confidence)
+        } else {
+            String.format("%.2f", info.confidence * 100)
+        }
+
         speciesInfoCard.findViewById<TextView>(R.id.tvCommonName)?.text = info.commonName
         speciesInfoCard.findViewById<TextView>(R.id.tvScientificName)?.text = info.scientificName
         speciesInfoCard.findViewById<TextView>(R.id.tvConfidence)?.text =
-            "Độ tin cậy: ${(info.confidence * 100).toInt()}%"
+            "Độ tin cậy: $confidencePercent%"
 
-        setTextIfNotEmpty(R.id.tvKingdom, info.kingdom)
-        setTextIfNotEmpty(R.id.tvPhylum, info.phylum)
-        setTextIfNotEmpty(R.id.tvClass, info.className)
-        setTextIfNotEmpty(R.id.tvOrder, info.order)
-        setTextIfNotEmpty(R.id.tvFamily, info.family)
-        setTextIfNotEmpty(R.id.tvGenus, info.genus)
-        setTextIfNotEmpty(R.id.tvSpecies, info.species)
+        // Phân loại khoa học - Ẩn/hiện cả row
+        setTaxonomyRow(R.id.rowKingdom, R.id.tvKingdom, info.kingdom)
+        setTaxonomyRow(R.id.rowPhylum, R.id.tvPhylum, info.phylum)
+        setTaxonomyRow(R.id.rowClass, R.id.tvClass, info.className)
+        setTaxonomyRow(R.id.rowOrder, R.id.tvOrder, info.order)
+        setTaxonomyRow(R.id.rowFamily, R.id.tvFamily, info.family)
+        setTaxonomyRow(R.id.rowGenus, R.id.tvGenus, info.genus)
+        setTaxonomyRow(R.id.rowSpecies, R.id.tvSpecies, info.species)
 
-        setSectionVisibility(R.id.sectionDescription, R.id.tvDescription, info.description, "Không có thông tin chi tiết")
+        // Các section mô tả
+        setSectionVisibility(R.id.sectionDescription, R.id.tvDescription, info.description)
         setSectionVisibility(R.id.sectionCharacteristics, R.id.tvCharacteristics, info.characteristics)
         setSectionVisibility(R.id.sectionDistribution, R.id.tvDistribution, info.distribution)
         setSectionVisibility(R.id.sectionHabitat, R.id.tvHabitat, info.habitat)
+
+        // Tình trạng bảo tồn với màu sắc
+        setConservationStatus(info.conservationStatus)
     }
 
-    private fun setTextIfNotEmpty(viewId: Int, text: String) {
-        speciesInfoCard.findViewById<TextView>(viewId)?.apply {
-            if (text.isNotEmpty()) {
-                this.text = text
-                visibility = View.VISIBLE
-            } else {
-                visibility = View.GONE
-            }
+    // Helper: Ẩn/hiện cả row taxonomy
+    private fun setTaxonomyRow(rowId: Int, textViewId: Int, text: String) {
+        val row = speciesInfoCard.findViewById<LinearLayout>(rowId)
+        val textView = speciesInfoCard.findViewById<TextView>(textViewId)
+
+        if (text.isNotEmpty()) {
+            textView?.text = text
+            row?.visibility = View.VISIBLE
+        } else {
+            row?.visibility = View.GONE
         }
     }
 
+    // Helper: Ẩn/hiện section với HTML support
     private fun setSectionVisibility(
         sectionId: Int,
         textViewId: Int,
-        text: String,
-        excludeText: String? = null
+        text: String
     ) {
         val section = speciesInfoCard.findViewById<LinearLayout>(sectionId)
         val textView = speciesInfoCard.findViewById<TextView>(textViewId)
 
-        if (text.isNotEmpty() && text != excludeText) {
+        if (text.isNotEmpty()) {
             textView?.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 Html.fromHtml(text, Html.FROM_HTML_MODE_COMPACT)
             } else {
                 @Suppress("DEPRECATION")
                 Html.fromHtml(text)
             }
+            section?.visibility = View.VISIBLE
+        } else {
+            section?.visibility = View.GONE
+        }
+    }
+
+    // Helper: Hiển thị conservation status với màu sắc
+    private fun setConservationStatus(status: String) {
+        val section = speciesInfoCard.findViewById<LinearLayout>(R.id.sectionConservation)
+        val textView = speciesInfoCard.findViewById<TextView>(R.id.tvConservationStatus)
+
+        if (status.isNotEmpty()) {
+            textView?.text = status
+
+            // Đổi màu theo mức độ nguy cấp
+            val color = when {
+                status.contains("Nguy cấp", ignoreCase = true) ||
+                        status.contains("Critically Endangered", ignoreCase = true) ->
+                    ContextCompat.getColor(this, android.R.color.holo_red_dark)
+
+                status.contains("Sách đỏ", ignoreCase = true) ||
+                        status.contains("Endangered", ignoreCase = true) ->
+                    ContextCompat.getColor(this, android.R.color.holo_orange_dark)
+
+                status.contains("Dễ bị tổn thương", ignoreCase = true) ||
+                        status.contains("Vulnerable", ignoreCase = true) ->
+                    ContextCompat.getColor(this, android.R.color.holo_orange_light)
+
+                status.contains("Ít quan tâm", ignoreCase = true) ||
+                        status.contains("Least Concern", ignoreCase = true) ->
+                    ContextCompat.getColor(this, android.R.color.holo_green_dark)
+
+                else -> ContextCompat.getColor(this, android.R.color.black)
+            }
+
+            textView?.setTextColor(color)
             section?.visibility = View.VISIBLE
         } else {
             section?.visibility = View.GONE
@@ -332,7 +388,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showHistoryScreen() {
-        fabSearch.visibility = View.GONE // Ẩn nút search ở màn hình History
+        fabSearch.visibility = View.GONE
         homeContainer.visibility = View.GONE
         historyContainer.visibility = View.VISIBLE
         myGardenContainer.visibility = View.GONE

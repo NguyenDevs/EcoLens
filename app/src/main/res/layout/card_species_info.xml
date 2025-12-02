@@ -6,6 +6,7 @@
         android:layout_height="wrap_content"
         app:cardCornerRadius="20dp"
         app:cardElevation="4dp"
+        app:cardUseCompatPadding="true"
         app:cardBackgroundColor="@android:color/white">
 
     <LinearLayout
@@ -379,7 +380,32 @@
                     android:layout_marginTop="8dp" />
 
         </LinearLayout>
+        <LinearLayout
+                android:id="@+id/sectionConservation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="16dp"
+                android:visibility="gone">
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🛡️ Tình trạng bảo tồn"
+                    android:textSize="20sp"
+                    android:textColor="#00796B"
+                    android:textStyle="bold" />
+
+            <TextView
+                    android:id="@+id/tvConservationStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#424242"
+                    android:lineSpacingExtra="8dp"
+                    android:layout_marginTop="8dp" />
+
+        </LinearLayout>
 
     </LinearLayout>
-
 </com.google.android.material.card.MaterialCardView>

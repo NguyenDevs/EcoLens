@@ -58,46 +58,11 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         )
 
     /**
-     * Lưu ảnh từ URI vào internal storage
-     * FIX: Đọc bitmap từ Main thread trước, sau đó mới chuyển sang IO để lưu file
+     * Lưu bitmap đã có sẵn vào internal storage
      */
-    private suspend fun saveImageToInternalStorage(context: Context, uri: Uri): String? {
-        return try {
-            Log.d(TAG, "Bắt đầu lưu ảnh từ URI: $uri")
-
-            // ĐỌC BITMAP TRÊN MAIN THREAD (hoặc thread hiện tại) trước
-            // để tránh mất quyền truy cập URI khi chuyển dispatcher
-            val bitmap = withContext(Dispatchers.Main) {
-                try {
-                    val contentResolver = context.contentResolver
-
-                    // Sử dụng InputStream để đọc an toàn hơn
-                    contentResolver.openInputStream(uri)?.use { inputStream ->
-                        BitmapFactory.decodeStream(inputStream)
-                    } ?: run {
-                        // Fallback về cách cũ nếu InputStream fail
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                            ImageDecoder.decodeBitmap(ImageDecoder.createSource(contentResolver, uri))
-                        } else {
-                            @Suppress("DEPRECATION")
-                            MediaStore.Images.Media.getBitmap(contentResolver, uri)
-                        }
-                    }
-                } catch (e: Exception) {
-                    Log.e(TAG, "Lỗi khi đọc bitmap: ${e.message}", e)
-                    null
-                }
-            }
-
-            if (bitmap == null) {
-                Log.e(TAG, "❌ Không thể đọc bitmap từ URI")
-                return null
-            }
-
-            Log.d(TAG, "✅ Đã load bitmap, kích thước: ${bitmap.width}x${bitmap.height}")
-
-            // SAU ĐÓ MỚI CHUYỂN SANG IO DISPATCHER để lưu file
-            withContext(Dispatchers.IO) {
+    private suspend fun saveBitmapToInternalStorage(context: Context, bitmap: Bitmap): String? {
+        return withContext(Dispatchers.IO) {
+            try {
                 val filename = "species_${UUID.randomUUID()}.jpg"
                 val file = File(context.filesDir, filename)
 
@@ -108,27 +73,27 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                     outputStream.flush()
                 }
 
-                // Giải phóng bitmap
+                // Giải phóng bitmap sau khi lưu
                 bitmap.recycle()
 
                 Log.d(TAG, "✅ Đã lưu ảnh thành công tại: ${file.absolutePath}")
                 Log.d(TAG, "File tồn tại: ${file.exists()}, Kích thước: ${file.length()} bytes")
 
                 file.absolutePath
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Lỗi khi lưu ảnh: ${e.message}", e)
+                e.printStackTrace()
+                null
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "❌ Lỗi khi lưu ảnh: ${e.message}", e)
-            e.printStackTrace()
-            null
         }
     }
 
-    private fun saveToHistory(imageUri: Uri, speciesInfo: SpeciesInfo) {
+    private fun saveToHistory(bitmap: Bitmap, speciesInfo: SpeciesInfo) {
         viewModelScope.launch {
             try {
                 Log.d(TAG, "Bắt đầu lưu vào lịch sử...")
 
-                val localPath = saveImageToInternalStorage(getApplication(), imageUri)
+                val localPath = saveBitmapToInternalStorage(getApplication(), bitmap)
 
                 if (localPath != null) {
                     withContext(Dispatchers.IO) {
@@ -176,10 +141,27 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 speciesInfo = null
             )
 
+            var bitmapForHistory: Bitmap? = null
+
             try {
                 Log.d(TAG, "Bắt đầu nhận diện loài từ URI: $imageUri")
 
-                val imageFile = uriToFile(getApplication(), imageUri)
+                // ĐỌC BITMAP NGAY LẬP TỨC (khi URI còn quyền truy cập)
+                val context = getApplication<Application>()
+                bitmapForHistory = try {
+                    context.contentResolver.openInputStream(imageUri)?.use { inputStream ->
+                        BitmapFactory.decodeStream(inputStream)
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Lỗi khi đọc bitmap cho history: ${e.message}")
+                    null
+                }
+
+                if (bitmapForHistory != null) {
+                    Log.d(TAG, "✅ Đã đọc bitmap cho history: ${bitmapForHistory.width}x${bitmapForHistory.height}")
+                }
+
+                val imageFile = uriToFile(context, imageUri)
                 val requestFile = imageFile.asRequestBody("image/jpeg".toMediaTypeOrNull())
                 val imagePart = MultipartBody.Part.createFormData("image", imageFile.name, requestFile)
 
@@ -206,8 +188,12 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
                     Log.d(TAG, "Thông tin cuối cùng: ${finalInfo.commonName}")
 
-                    // Lưu vào lịch sử (không chờ kết quả)
-                    saveToHistory(imageUri, finalInfo)
+                    // Lưu vào lịch sử với bitmap đã đọc sẵn
+                    if (bitmapForHistory != null) {
+                        saveToHistory(bitmapForHistory, finalInfo)
+                    } else {
+                        Log.e(TAG, "⚠️ Không thể lưu lịch sử vì bitmap null")
+                    }
 
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
@@ -231,6 +217,8 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                     isLoading = false,
                     error = "Đã xảy ra lỗi: ${e.message}"
                 )
+            } finally {
+                // Bitmap sẽ được recycle trong saveToHistory, không cần recycle ở đây
             }
         }
     }
@@ -313,25 +301,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             bitmap.recycle()
 
             file
-        }
-    }
-
-    // Hàm debug để kiểm tra lịch sử
-    fun debugHistory() {
-        viewModelScope.launch {
-            Log.d(TAG, "=== DEBUG HISTORY ===")
-            Log.d(TAG, "Số lượng entries: ${history.value.size}")
-            history.value.forEachIndexed { index, entry ->
-                Log.d(TAG, "Entry $index: ${entry.speciesInfo.commonName}, path: ${entry.imagePath}")
-            }
-        }
-    }
-
-    // Hàm xóa toàn bộ lịch sử (nếu cần test)
-    fun clearHistory() {
-        viewModelScope.launch(Dispatchers.IO) {
-            historyDao.deleteAll()
-            Log.d(TAG, "✅ Đã xóa toàn bộ lịch sử")
         }
     }
 }

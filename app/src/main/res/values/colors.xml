@@ -19,4 +19,6 @@
     <color name="black">#000000</color>
     <color name="error_red">#D32F2F</color>
     <color name="error_background">#FFEBEE</color>
+
+    <color name="text_primary">#808080</color>
 </resources>
