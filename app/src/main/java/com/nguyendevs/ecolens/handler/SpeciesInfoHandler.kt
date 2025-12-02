@@ -48,9 +48,8 @@ class SpeciesInfoHandler(
             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = ClipData.newPlainText("Scientific Name", textToCopy)
             clipboard.setPrimaryClip(clip)
-            Toast.makeText(context, "Đã copy: $textToCopy", Toast.LENGTH_SHORT).show()
+            //Toast.makeText(context, "Đã copy: $textToCopy", Toast.LENGTH_SHORT).show()
 
-            // Kích hoạt callback để mở thanh search
             onCopySuccess(textToCopy)
         }
     }
@@ -112,7 +111,14 @@ class SpeciesInfoHandler(
         val textView = speciesInfoCard.findViewById<TextView>(textViewId)
 
         if (text.isNotEmpty()) {
-            textView?.text = text
+            val styledText = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                // Dùng LEGACY chỉ cho taxonomy để hỗ trợ <i>
+                Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY)
+            } else {
+                @Suppress("DEPRECATION")
+                Html.fromHtml(text)
+            }
+            textView?.text = styledText
             row?.visibility = View.VISIBLE
         } else {
             row?.visibility = View.GONE
@@ -127,12 +133,20 @@ class SpeciesInfoHandler(
         val textView = speciesInfoCard.findViewById<TextView>(textViewId)
 
         if (text.isNotEmpty()) {
-            textView?.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                Html.fromHtml(text, Html.FROM_HTML_MODE_COMPACT)
+            val htmlText = text.trim()
+                .replace("\n•", "<br>•")        // Giữ dấu đầu dòng
+                .replace("\n", "<br>")          // Xuống dòng bình thường
+                .replace("<br>•", "<br>•")      // Đảm bảo không bị mất bullet
+
+            // BƯỚC 2: Dùng FROM_HTML_MODE_LEGACY để hỗ trợ đầy đủ <br>, <i>, v.v.
+            val spanned = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                Html.fromHtml(htmlText, Html.FROM_HTML_MODE_LEGACY)
             } else {
                 @Suppress("DEPRECATION")
-                Html.fromHtml(text)
+                Html.fromHtml(htmlText)
             }
+
+            textView?.text = spanned
             section?.visibility = View.VISIBLE
         } else {
             section?.visibility = View.GONE

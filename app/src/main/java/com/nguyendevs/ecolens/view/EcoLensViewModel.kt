@@ -237,37 +237,69 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
     private suspend fun fetchDetailsFromGemini(scientificName: String, confidence: Double): SpeciesInfo {
         return try {
-            // Lấy màu primary từ colors.xml (tạm fix cứng mã màu để Gemini dễ hiểu)
-            // Màu #00796B là màu xanh đậm bạn đang dùng trong app
             val highlightColor = "#00796B"
+            val dangerColor = "#8B0000"
+            val redBookColor = "#c97408"
+            val vulnerableColor = "#eddb11"
+            val leastConcernColor = "#55f200"
+            val notRankedColor = "#05deff"
 
             val prompt = """
-                Hãy đóng vai một nhà sinh vật học. Cung cấp thông tin chi tiết về loài sinh vật có tên khoa học là "$scientificName" bằng Tiếng Việt.
-                
-                YÊU CẦU VỀ ĐỊNH DẠNG VĂN BẢN (QUAN TRỌNG):
-                Trong các trường nội dung mô tả ('description', 'characteristics', 'distribution', 'habitat', 'conservationStatus'), hãy làm nổi bật các từ khóa quan trọng như sau:
-                1. Sử dụng thẻ <b>...</b> để in đậm các đặc điểm chính, tính chất nổi bật.
-                2. Sử dụng thẻ <font color='$highlightColor'><b>...</b></font> để tô màu xanh và in đậm cho các địa danh, tên riêng, hoặc các thông số kích thước quan trọng.
-                Lưu ý: Chỉ sử dụng các thẻ HTML cơ bản này, không dùng Markdown (**).
-
-                Trả về kết quả duy nhất dưới dạng JSON (không markdown, không code block) với cấu trúc sau:
-                {
-                    "commonName": "Tên thường gọi tiếng Việt chuẩn nhất",
-                    "kingdom": "Tên giới (CHỈ TÊN, ví dụ: 'Động vật', KHÔNG ghi 'Giới Động vật')",
-                    "phylum": "Tên ngành (CHỈ TÊN, ví dụ: 'Dây sống', KHÔNG ghi 'Ngành Dây sống')",
-                    "className": "Tên lớp (CHỈ TÊN, ví dụ: 'Thú', KHÔNG ghi 'Lớp Thú')",
-                    "order": "Tên bộ (CHỈ TÊN, bỏ từ 'Bộ' ở đầu)",
-                    "family": "Tên họ (CHỈ TÊN, bỏ từ 'Họ' ở đầu, nếu có tên tiếng anh, ưu tiên dùng tên tiếng Anh)",
-                    "genus": "Tên chi (CHỈ TÊN, bỏ từ 'Chi' ở đầu, nếu có tên tiếng anh, ưu tiên dùng tên tiếng Anh)",
-                    "species": "Tên loài (CHỈ TÊN, bỏ từ 'Loài' ở đầu, nếu có tên tiếng anh, ưu tiên dùng tên tiếng Anh)",
-                    "rank": "Cấp phân loại hiện tại (Ví dụ: Loài)",
-                    "description": "Mô tả tổng quan ngắn gọn và thú vị (khoảng 5 câu). Có sử dụng thẻ html để highlight.",
-                    "characteristics": "Đặc điểm hình thái, kích thước, màu sắc nổi bật. Có sử dụng thẻ html để highlight.",
-                    "distribution": "Phân bố địa lý (ưu tiên nơi tìm thấy ở Việt Nam sau đó là thế giới). Có sử dụng thẻ html để highlight.",
-                    "habitat": "Môi trường sống (rừng, biển, đô thị...). Có sử dụng thẻ html để highlight.",
-                    "conservationStatus": "Tình trạng bảo tồn (ví dụ: Nguy cấp, Sách đỏ, Dễ bị tổn thương, Ít quan tâm, Không xếp hạng). Có sử dụng thẻ html để highlight. Riêng phần này, nếu sinh vật thuộc loại nguy cấp. Sử dụng màu #8B0000 làm màu cho phần highlight chỉ tính Nguy cấp. Màu #c97608 cho Sách đỏ. Màu #eddb11 cho Dễ bị tổn thương. Màu #55f200 cho Ít quan tâm và màu #05deff cho Không xếp hạng. "
-                }
-            """.trimIndent()
+            Bạn là một nhà sinh vật học chuyên nghiệp. Hãy cung cấp thông tin chi tiết về loài có tên khoa học "$scientificName" bằng tiếng Việt.
+            
+            === YÊU CẦU ĐỊNH DẠNG ===
+            
+            1. CÁC TRƯỜNG NỘI DUNG MÔ TẢ (description, characteristics, distribution, habitat, conservationStatus):
+               - Sử dụng <b>...</b> để in đậm các đặc điểm chính, tính chất nổi bật
+               - Sử dụng <font color='$highlightColor'><b>...</b></font> để tô màu xanh lục và in đậm cho:
+                 + Địa danh cụ thể
+                 + Tên riêng
+                 + Các thông số kích thước quan trọng (chiều dài, cân nặng, kích thước...)
+               - CHỈ sử dụng các thẻ HTML cơ bản (<b>, <font>), KHÔNG dùng Markdown (**)
+            
+            2. TRƯỜNG PHÂN LOẠI (kingdom, phylum, className, order, family, genus, species):
+               - CHỈ ghi TÊN, KHÔNG thêm tiền tố ("Giới", "Ngành", "Lớp", "Bộ", "Họ", "Chi", "Loài")
+               - Ví dụ ĐÚNG: "Động vật", "Dây sống", "Thú"
+               - Ví dụ SAI: "Giới Động vật", "Ngành Dây sống", "Lớp Thú"
+               - Với family, genus, species: Ưu tiên tên tiếng Anh, nếu có tên tiếng Việt thì ghi trong ngoặc đơn VÀ BỌC TOÀN BỘ PHẦN NGOẶC VÀ NỘI DUNG TRONG <i>...</i>
+                 + Ví dụ: "Felidae (Họ Mèo)", "Panthera (Chi Báo)"
+            
+            3. TRƯỜNG CONSERVATIONSTATUS - MÀU SẮC ĐÁNH DẤU:
+               - Nguy cấp (Critically Endangered/Endangered): <font color='$dangerColor'><b>...</b></font>
+               - Sách đỏ/Vulnerable: <font color='$redBookColor'><b>...</b></font>
+               - Dễ bị tổn thương: <font color='$vulnerableColor'><b>...</b></font>
+               - Ít quan tâm (Least Concern): <font color='$leastConcernColor'><b>...</b></font>
+               - Không xếp hạng: <font color='$notRankedColor'><b>...</b></font>
+            
+            === YÊU CẦU NỘI DUNG ===
+            
+            - description: Mô tả tổng quan (5 câu), có thụt đầu dòng
+            - characteristics: Trình bày dạng gạch đầu dòng (•), xuống dòng giữa các gạch dầu dòng, tập trung vào hình thái, kích thước, màu sắc
+            - distribution: Ưu tiên phân bố tại Việt Nam trước, sau đó mới đến thế giới. Nếu không có ở Việt Nam, phải nói rõ
+            - habitat: Môi trường sống cụ thể, có thụt đầu dòng
+            - conservationStatus: Tình trạng bảo tồn hiện tại, có thụt đầu dòng
+            
+            === ĐỊNH DẠNG ĐẦU RA ===
+            
+            Trả về JSON thuần túy (KHÔNG có markdown fence, KHÔNG có ```json):
+            
+            {
+                "commonName": "Tên thường gọi tiếng Việt chuẩn nhất",
+                "kingdom": "Tên giới (chỉ tên, không có 'Giới')",
+                "phylum": "Tên ngành (chỉ tên)",
+                "className": "Tên lớp (chỉ tên)",
+                "order": "Tên bộ (chỉ tên)",
+                "family": "Tên họ tiếng Anh (Tên Việt)",
+                "genus": "Tên chi tiếng Anh (Tên Việt)",
+                "species": "Tên loài tiếng Anh (Tên Việt)",
+                "rank": "Cấp phân loại (ví dụ: Loài, Phân loài, Chi...)",
+                "description": "...",
+                "characteristics": "...",
+                "distribution": "...",
+                "habitat": "...",
+                "conservationStatus": "..."
+            }
+        """.trimIndent()
 
             val response = geminiModel.generateContent(prompt)
             val jsonString = response.text?.replace("```json", "")?.replace("```", "")?.trim() ?: ""

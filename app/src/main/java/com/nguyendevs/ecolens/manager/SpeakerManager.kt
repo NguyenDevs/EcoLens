@@ -61,9 +61,11 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
 
         isPaused = false
 
+        // Loại bỏ nội dung tiếng Việt trong ngoặc đơn trước khi xử lý
+        val cleanedText = removeVietnameseInParentheses(text)
+
         // Nếu text mới khác text cũ -> Chia lại câu và reset index
-        // Nếu text giống text cũ (người dùng ấn lại nút Speak) -> Đọc tiếp từ index hiện tại
-        val newSentences = splitTextToSentences(text)
+        val newSentences = splitTextToSentences(cleanedText)
         if (sentenceList != newSentences) {
             sentenceList = newSentences
             currentSentenceIndex = 0
@@ -85,6 +87,16 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
             // utteranceId là cần thiết để onDone hoạt động
             textToSpeech?.speak(sentence, TextToSpeech.QUEUE_FLUSH, null, "ID_SENTENCE_$currentSentenceIndex")
         }
+    }
+
+    // Hàm loại bỏ nội dung tiếng Việt trong ngoặc đơn
+    private fun removeVietnameseInParentheses(text: String): String {
+        // Regex để tìm và xóa nội dung trong ngoặc đơn chứa tiếng Việt
+        // Pattern: (bất kỳ ký tự nào trong ngoặc đơn)
+        return text.replace(Regex("\\s*\\([^)]*[ạ-ỹĂăÂâĐđÊêÔôƠơƯư][^)]*\\)"), "")
+            .replace(Regex("\\s*\\([^)]*[Họ|Chi|Loài][^)]*\\)"), "")
+            .replace(Regex("\\s+"), " ") // Làm sạch khoảng trắng thừa
+            .trim()
     }
 
     // Hàm chia văn bản thành các câu nhỏ (dựa trên dấu chấm, xuống dòng...)
