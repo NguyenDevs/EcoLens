@@ -17,7 +17,7 @@ class NavigationManager(
 
     fun showHomeScreen() {
         fabSearch.visibility = View.VISIBLE
-        fabSpeak.visibility = View.VISIBLE
+        fabSpeak.visibility = View.GONE
         homeContainer.visibility = View.VISIBLE
         historyContainer.visibility = View.GONE
         myGardenContainer.visibility = View.GONE
