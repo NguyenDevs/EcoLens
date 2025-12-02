@@ -54,7 +54,7 @@
             app:layout_constraintStart_toStartOf="@+id/viewFinder"
             app:layout_constraintEnd_toEndOf="@+id/viewFinder"
             app:layout_constraintDimensionRatio="3:3" app:layout_constraintBottom_toBottomOf="@+id/viewFinder"
-            android:foreground="@drawable/_6c47a8b9acf15914cde">
+            android:foreground="@drawable/camera_corner">
 
 
     </FrameLayout>
