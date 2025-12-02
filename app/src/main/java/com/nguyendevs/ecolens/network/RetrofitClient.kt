@@ -16,7 +16,6 @@ object RetrofitClient {
         level = HttpLoggingInterceptor.Level.BODY
     }
 
-    // SỬA: Đổi tên từ iNaturalistInterceptor thành authInterceptor
     private val authInterceptor = Interceptor { chain ->
         val original = chain.request()
         val requestBuilder = original.newBuilder()
@@ -38,12 +37,6 @@ object RetrofitClient {
 
     private val iNaturalistRetrofit = Retrofit.Builder()
         .baseUrl("https://api.inaturalist.org/")
-        .client(okHttpClient)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-
-    private val translationRetrofit = Retrofit.Builder()
-        .baseUrl("https://libretranslate.com/")
         .client(okHttpClient)
         .addConverterFactory(GsonConverterFactory.create())
         .build()

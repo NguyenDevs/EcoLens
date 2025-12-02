@@ -1,10 +1,8 @@
 package com.nguyendevs.ecolens.model
 
-import android.net.Uri
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.io.Serializable
 
 @Entity(tableName = "history_table")
 data class HistoryEntry(

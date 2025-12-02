@@ -249,8 +249,8 @@ class SpeciesInfoHandler(
             if (imageUri != null) {
                 // Share với ảnh
                 val shareIntent = Intent().apply {
-                    action = Intent.ACTION_SEND // [FIX] Gán action đúng cú pháp
-                    type = "image/*"            // [FIX] Gán type đúng cú pháp
+                    action = Intent.ACTION_SEND
+                    type = "image/*"
                     putExtra(Intent.EXTRA_STREAM, imageUri)
                     putExtra(Intent.EXTRA_TEXT, shareText)
                     putExtra(Intent.EXTRA_SUBJECT, "Thông tin về ${info.commonName}")
@@ -268,8 +268,8 @@ class SpeciesInfoHandler(
             } else {
                 // Share chỉ text
                 val shareIntent = Intent().apply {
-                    action = Intent.ACTION_SEND // [FIX] Gán action đúng cú pháp
-                    type = "text/plain"         // [FIX] Gán type đúng cú pháp
+                    action = Intent.ACTION_SEND
+                    type = "text/plain"
                     putExtra(Intent.EXTRA_TEXT, shareText)
                     putExtra(Intent.EXTRA_SUBJECT, "Thông tin về ${info.commonName}")
                 }

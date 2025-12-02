@@ -32,16 +32,3 @@ data class TaxonDetail(
     val id: Int,
     val wikipedia_summary: String = ""
 )
-
-// Translation API Models
-data class TranslationResponse(
-    val data: TranslationData
-)
-
-data class TranslationData(
-    val translations: List<Translation>
-)
-
-data class Translation(
-    val translatedText: String
-)
