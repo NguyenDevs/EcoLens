@@ -11,30 +11,24 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
     private var textToSpeech: TextToSpeech? = null
     private var isLoaded = false
 
-    // Biến để quản lý việc "Đọc tiếp"
     private var sentenceList: List<String> = emptyList()
     private var currentSentenceIndex = 0
     private var isPaused = false
 
-    // Callback để thông báo cho Activity biết khi nào đọc xong hết
     var onSpeechFinished: (() -> Unit)? = null
 
     init {
         textToSpeech = TextToSpeech(context, this)
-        // Lắng nghe sự kiện khi đọc xong 1 câu
         textToSpeech?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
             override fun onStart(utteranceId: String?) {}
 
             override fun onDone(utteranceId: String?) {
-                // Khi đọc xong 1 câu, tăng index và đọc câu tiếp theo
                 currentSentenceIndex++
                 if (currentSentenceIndex < sentenceList.size) {
-                    // Nếu chưa dừng (pause) thì đọc tiếp
                     if (!isPaused) {
                         speakCurrentSentence()
                     }
                 } else {
-                    // Đã đọc hết danh sách -> Reset và gọi callback về UI
                     currentSentenceIndex = 0
                     onSpeechFinished?.invoke()
                 }
@@ -55,16 +49,11 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
         }
     }
 
-    // Hàm gọi từ bên ngoài: Bắt đầu đọc văn bản mới hoặc resume
     fun speak(text: String) {
         if (!isLoaded) return
 
         isPaused = false
-
-        // Loại bỏ nội dung tiếng Việt trong ngoặc đơn trước khi xử lý
         val cleanedText = removeVietnameseInParentheses(text)
-
-        // Nếu text mới khác text cũ -> Chia lại câu và reset index
         val newSentences = splitTextToSentences(cleanedText)
         if (sentenceList != newSentences) {
             sentenceList = newSentences
@@ -74,13 +63,11 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
         speakCurrentSentence()
     }
 
-    // Hàm dừng tạm thời
     fun pause() {
         isPaused = true
         textToSpeech?.stop()
     }
 
-    // Hàm đọc câu hiện tại dựa trên index
     private fun speakCurrentSentence() {
         if (currentSentenceIndex < sentenceList.size) {
             val sentence = sentenceList[currentSentenceIndex]
@@ -89,19 +76,14 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
         }
     }
 
-    // Hàm loại bỏ nội dung tiếng Việt trong ngoặc đơn
     private fun removeVietnameseInParentheses(text: String): String {
-        // Regex để tìm và xóa nội dung trong ngoặc đơn chứa tiếng Việt
-        // Pattern: (bất kỳ ký tự nào trong ngoặc đơn)
         return text.replace(Regex("\\s*\\([^)]*[ạ-ỹĂăÂâĐđÊêÔôƠơƯư][^)]*\\)"), "")
             .replace(Regex("\\s*\\([^)]*[Họ|Chi|Loài][^)]*\\)"), "")
-            .replace(Regex("\\s+"), " ") // Làm sạch khoảng trắng thừa
+            .replace(Regex("\\s+"), " ")
             .trim()
     }
 
-    // Hàm chia văn bản thành các câu nhỏ (dựa trên dấu chấm, xuống dòng...)
     private fun splitTextToSentences(text: String): List<String> {
-        // Tách dựa trên dấu chấm, chấm phẩy, xuống dòng, nhưng giữ lại dấu câu để đọc tự nhiên hơn
         return text.split(Regex("(?<=[.!?\\n])\\s+"))
             .filter { it.isNotBlank() }
     }

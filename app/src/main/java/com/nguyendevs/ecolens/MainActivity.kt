@@ -39,6 +39,7 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import android.view.MotionEvent
 import android.graphics.Rect
+import com.google.android.material.textfield.TextInputLayout
 
 class MainActivity : AppCompatActivity() {
     // Containers
@@ -48,6 +49,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var settingsContainer: View
 
     // Home screen views
+    private lateinit var textInputLayoutSearch: TextInputLayout
     private lateinit var etSearchQuery: EditText
     private lateinit var btnSearchAction: ImageView
     private lateinit var searchBarContainer: MaterialCardView
@@ -80,10 +82,8 @@ class MainActivity : AppCompatActivity() {
 
     // Search Bar State
     private var isSearchBarExpanded = false
-    private val expandedWidthPx by lazy { (330 * resources.displayMetrics.density).toInt() } // Chiều rộng khi mở
-    private val collapsedWidthPx by lazy { (50 * resources.displayMetrics.density).toInt() } // Chiều rộng khi đóng
-
-
+    private val expandedWidthPx by lazy { (330 * resources.displayMetrics.density).toInt() }
+    private val collapsedWidthPx by lazy { (50 * resources.displayMetrics.density).toInt() }
 
     // Camera Activity Launcher
     private val cameraActivityLauncher = registerForActivityResult(
@@ -94,7 +94,6 @@ class MainActivity : AppCompatActivity() {
             if (uriString != null) {
                 val capturedUri = Uri.parse(uriString)
                 imageUri = capturedUri
-
                 Glide.with(this)
                     .load(capturedUri)
                     .centerCrop()
@@ -140,6 +139,7 @@ class MainActivity : AppCompatActivity() {
         settingsContainer = findViewById(R.id.settingsContainer)
 
         // Home screen views
+        textInputLayoutSearch = findViewById(R.id.textInputLayoutSearch)
         searchBarContainer = findViewById(R.id.searchBarContainer)
         etSearchQuery = findViewById(R.id.etSearchQuery)
         btnSearchAction = findViewById(R.id.btnSearchAction)
@@ -169,11 +169,9 @@ class MainActivity : AppCompatActivity() {
         )
 
         permissionManager = PermissionManager(this, permissionLauncher)
-
         speciesInfoHandler = SpeciesInfoHandler(this, speciesInfoCard) { copiedText ->
             expandSearchBar(copiedText)
         }
-
         speakerManager = SpeakerManager(this)
 
         speakerManager.onSpeechFinished = {
@@ -186,10 +184,8 @@ class MainActivity : AppCompatActivity() {
     private fun setupSearchBar() {
         btnSearchAction.setOnClickListener {
             if (!isSearchBarExpanded) {
-                // Nếu đang đóng -> Mở ra để nhập
                 expandSearchBar("")
             } else {
-                // Nếu đang mở -> Thực hiện tìm kiếm
                 performGoogleSearch()
             }
         }
@@ -206,23 +202,19 @@ class MainActivity : AppCompatActivity() {
 
     private fun expandSearchBar(text: String = "") {
         if (!isSearchBarExpanded) {
-            // Animation mở rộng
             val animator = ValueAnimator.ofInt(collapsedWidthPx, expandedWidthPx)
-            animator.duration = 300
+            animator.duration = 320
             animator.addUpdateListener { animation ->
                 val params = searchBarContainer.layoutParams
                 params.width = animation.animatedValue as Int
                 searchBarContainer.layoutParams = params
             }
-
             animator.addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator) {
-                    etSearchQuery.visibility = View.VISIBLE
+                    textInputLayoutSearch.visibility = View.VISIBLE
                     etSearchQuery.setText(text)
                     etSearchQuery.requestFocus()
-
-                    // Đặt con trỏ ở cuối và hiển thị bàn phím
-                    etSearchQuery.setSelection(etSearchQuery.text.length)
+                    etSearchQuery.setSelection(text.length)
 
                     val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                     imm.showSoftInput(etSearchQuery, InputMethodManager.SHOW_IMPLICIT)
@@ -232,12 +224,9 @@ class MainActivity : AppCompatActivity() {
             isSearchBarExpanded = true
 
         } else {
-            // Nếu search bar đã mở rồi (ví dụ: copy lần 2)
             etSearchQuery.setText(text)
             etSearchQuery.requestFocus()
-            etSearchQuery.setSelection(text.length) // Đặt cursor ở cuối
-
-            // Vẫn hiện bàn phím và con trỏ
+            etSearchQuery.setSelection(text.length)
             val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.showSoftInput(etSearchQuery, InputMethodManager.SHOW_IMPLICIT)
         }
@@ -253,7 +242,6 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Không tìm thấy trình duyệt web", Toast.LENGTH_SHORT).show()
             }
         } else {
-            // Nếu trống thì thu lại
             collapseSearchBar()
         }
     }
@@ -261,7 +249,7 @@ class MainActivity : AppCompatActivity() {
     private fun collapseSearchBar() {
         if (isSearchBarExpanded) {
             val animator = ValueAnimator.ofInt(expandedWidthPx, collapsedWidthPx)
-            animator.duration = 300
+            animator.duration = 320
             animator.addUpdateListener { animation ->
                 val params = searchBarContainer.layoutParams
                 params.width = animation.animatedValue as Int
@@ -269,11 +257,8 @@ class MainActivity : AppCompatActivity() {
             }
             animator.addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
-                    super.onAnimationEnd(animation)
-                    etSearchQuery.visibility = View.GONE
-                    etSearchQuery.text.clear()
-                    val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                    imm.hideSoftInputFromWindow(etSearchQuery.windowToken, 0)
+                    textInputLayoutSearch.visibility = View.GONE
+                    etSearchQuery.text?.clear()
                 }
             })
             animator.start()
@@ -386,11 +371,9 @@ class MainActivity : AppCompatActivity() {
             if (v is EditText) {
                 val outRect = Rect()
                 v.getGlobalVisibleRect(outRect)
-                // Kiểm tra xem vị trí chạm có nằm ngoài EditText không
                 if (!outRect.contains(event.rawX.toInt(), event.rawY.toInt())) {
                     v.clearFocus() // Bỏ focus
 
-                    // Ẩn bàn phím mềm
                     val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                     imm.hideSoftInputFromWindow(v.windowToken, 0)
                 }
@@ -401,8 +384,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun generateSpeechText(): String {
         val info = viewModel.uiState.value.speciesInfo ?: return ""
-
-        // Hàm local xử lý HTML (giữ nguyên)
         fun stripHtml(html: String): String {
             return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
                 android.text.Html.fromHtml(html, android.text.Html.FROM_HTML_MODE_COMPACT).toString()
@@ -413,12 +394,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         val sb = StringBuilder()
-
-        // 1. Tên thường gọi và Khoa học
         sb.append("${info.commonName}. ")
         sb.append("Tên khoa học ${info.scientificName}. ")
 
-        // 2. Phân loại khoa học (ĐÃ SỬA: Thêm danh xưng trước tên và loại bỏ HTML)
         val taxonomyList = mutableListOf<String>()
         if (info.kingdom.isNotEmpty()) taxonomyList.add("Giới ${stripHtml(info.kingdom)}")
         if (info.phylum.isNotEmpty()) taxonomyList.add("Ngành ${stripHtml(info.phylum)}")
@@ -430,12 +408,10 @@ class MainActivity : AppCompatActivity() {
 
         if (taxonomyList.isNotEmpty()) {
             sb.append("Phân loại khoa học: ")
-            // Dùng dấu phẩy để ngắt nghỉ tự nhiên khi đọc
             sb.append(taxonomyList.joinToString(", "))
             sb.append(". ")
         }
 
-        // 3. Các phần thông tin khác
         if (info.description.isNotEmpty()) {
             sb.append("Mô tả. ${stripHtml(info.description)}. ")
         }
@@ -451,10 +427,8 @@ class MainActivity : AppCompatActivity() {
         if (info.conservationStatus.isNotEmpty()) {
             sb.append("Tình trạng bảo tồn. ${stripHtml(info.conservationStatus)}.")
         }
-
         return sb.toString()
     }
-
 
     private fun checkPermissionsAndOpenCamera() {
         if (permissionManager.hasPermissions()) {
@@ -482,8 +456,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-
-        // Observer cho History List
         lifecycleScope.launch {
             viewModel.history.collect { historyList ->
                 historyAdapter.updateList(historyList)

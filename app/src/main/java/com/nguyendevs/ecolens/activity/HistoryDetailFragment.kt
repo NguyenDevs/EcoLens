@@ -21,10 +21,8 @@ import com.nguyendevs.ecolens.view.EcoLensViewModel
 class HistoryDetailFragment : Fragment() {
 
     private var historyEntry: HistoryEntry? = null
-    // Sử dụng activityViewModels để chia sẻ ViewModel với MainActivity
     private val viewModel: EcoLensViewModel by activityViewModels()
 
-    // Hàm này dùng để truyền dữ liệu từ Activity vào Fragment
     fun setData(entry: HistoryEntry) {
         this.historyEntry = entry
     }
@@ -34,14 +32,13 @@ class HistoryDetailFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate layout cho fragment này
         return inflater.inflate(R.layout.fragment_history_detail, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val entry = historyEntry ?: return // Nếu không có dữ liệu thì thoát
+        val entry = historyEntry ?: return
         val info = entry.speciesInfo
 
         // Ánh xạ View
@@ -68,51 +65,46 @@ class HistoryDetailFragment : Fragment() {
         val tvConservation = view.findViewById<TextView>(R.id.tvConservationStatus)
         val lblConservation = view.findViewById<TextView>(R.id.lblConservation)
 
-
-        // Load ảnh từ đường dẫn file (imagePath)
         Glide.with(this)
             .load(entry.imagePath)
             .centerCrop()
             .into(imageView)
 
-        // Hiển thị tên
         tvCommonName.text = info.commonName
         tvScientificName.text = info.scientificName
 
-        // Xây dựng chuỗi phân loại
-        val taxonomyBuilder = StringBuilder()
-        if (info.kingdom.isNotEmpty()) taxonomyBuilder.append("• Giới: ${info.kingdom}\n")
-        if (info.phylum.isNotEmpty()) taxonomyBuilder.append("• Ngành: ${info.phylum}\n")
-        if (info.className.isNotEmpty()) taxonomyBuilder.append("• Lớp: ${info.className}\n")
-        if (info.order.isNotEmpty()) taxonomyBuilder.append("• Bộ: ${info.order}\n")
-        if (info.family.isNotEmpty()) taxonomyBuilder.append("• Họ: ${info.family}\n")
-        if (info.genus.isNotEmpty()) taxonomyBuilder.append("• Chi: ${info.genus}\n")
-        if (info.species.isNotEmpty()) taxonomyBuilder.append("• Loài: ${info.species}")
-        tvTaxonomy.text = taxonomyBuilder.toString().trim()
+        val taxonomyHtml = buildString {
+            if (info.kingdom.isNotEmpty()) append("• Giới: ${info.kingdom}<br>")
+            if (info.phylum.isNotEmpty()) append("• Ngành: ${info.phylum}<br>")
+            if (info.className.isNotEmpty()) append("• Lớp: ${info.className}<br>")
+            if (info.order.isNotEmpty()) append("• Bộ: ${info.order}<br>")
+            if (info.family.isNotEmpty()) append("• Họ: ${info.family}<br>")
+            if (info.genus.isNotEmpty()) append("• Chi: ${info.genus}<br>")
+            if (info.species.isNotEmpty()) append("• Loài: ${info.species}")
+        }
 
-        // Hiển thị các section mô tả (có hỗ trợ HTML và ẩn nếu không có dữ liệu)
+        val taxonomySpanned =
+            Html.fromHtml(taxonomyHtml, Html.FROM_HTML_MODE_LEGACY)
+
+        tvTaxonomy.text = taxonomySpanned
+
         displaySection(tvDescription, lblDescription, info.description)
         displaySection(tvCharacteristics, lblCharacteristics, info.characteristics)
         displaySection(tvDistribution, lblDistribution, info.distribution)
         displaySection(tvHabitat, lblHabitat, info.habitat)
         displaySection(tvConservation, lblConservation, info.conservationStatus)
 
-        // Xử lý nút Back (Đóng Fragment)
         btnBack.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
 
-        // Xử lý nút Favorite
-        updateFavoriteIcon(btnFavorite, entry.isFavorite) // Set trạng thái ban đầu
+        updateFavoriteIcon(btnFavorite, entry.isFavorite)
 
         btnFavorite.setOnClickListener {
-            // 1. Gọi ViewModel để update vào Database (Lưu vào/Xóa khỏi My Garden)
             viewModel.toggleFavorite(entry)
 
-            // 2. Cập nhật trạng thái UI tạm thời (đảo ngược trạng thái hiện tại)
             val newStatus = !entry.isFavorite
 
-            // Cập nhật object hiện tại để đồng bộ
             historyEntry = entry.copy(isFavorite = newStatus)
 
             updateFavoriteIcon(btnFavorite, newStatus)
@@ -124,7 +116,7 @@ class HistoryDetailFragment : Fragment() {
             labelView.visibility = View.VISIBLE
             textView.visibility = View.VISIBLE
             textView.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                Html.fromHtml(content, Html.FROM_HTML_MODE_COMPACT)
+                Html.fromHtml(content, Html.FROM_HTML_MODE_LEGACY)
             } else {
                 @Suppress("DEPRECATION")
                 Html.fromHtml(content)
@@ -138,10 +130,10 @@ class HistoryDetailFragment : Fragment() {
     private fun updateFavoriteIcon(fab: FloatingActionButton, isFav: Boolean) {
         if (isFav) {
             fab.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_favorite))
-            fab.setColorFilter(Color.RED) // Đổi màu icon thành đỏ
+            fab.setColorFilter(Color.RED)
         } else {
             fab.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_favorite))
-            fab.setColorFilter(Color.GRAY) // Đổi màu icon thành xám
+            fab.setColorFilter(Color.GRAY)
         }
     }
 }

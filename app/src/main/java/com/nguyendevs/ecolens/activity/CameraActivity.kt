@@ -75,7 +75,6 @@ class CameraActivity : AppCompatActivity() {
             startCamera()
         }
 
-        // Sự kiện nút Flash
         flashToggle.setOnClickListener {
             toggleFlash()
         }
@@ -87,7 +86,7 @@ class CameraActivity : AppCompatActivity() {
     private val selectImageFromGalleryResult = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
             val resultIntent = Intent().apply {
-                data = it // Gán URI vào data chuẩn của Intent
+                data = it
                 flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
                 putExtra(KEY_IMAGE_URI, it.toString())
 
@@ -115,24 +114,19 @@ class CameraActivity : AppCompatActivity() {
         cameraProviderFuture.addListener({
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
 
-            // Preview
             val preview = Preview.Builder()
                 .build()
                 .also {
                     it.setSurfaceProvider(viewFinder.surfaceProvider)
                 }
 
-            // ImageCapture
             imageCapture = ImageCapture.Builder()
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                // Reset flash về OFF mỗi khi start lại camera để tránh lỗi logic
                 .setFlashMode(ImageCapture.FLASH_MODE_OFF)
                 .build()
 
-            // Cập nhật icon Flash về trạng thái tắt
             updateFlashIcon(ImageCapture.FLASH_MODE_OFF)
 
-            // Chọn camera dựa trên biến lensFacing
             val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
 
             try {
@@ -141,7 +135,6 @@ class CameraActivity : AppCompatActivity() {
                     this, cameraSelector, preview, imageCapture
                 )
 
-                // Kiểm tra xem camera hiện tại có hỗ trợ flash không để ẩn/hiện nút flash
                 if (camera?.cameraInfo?.hasFlashUnit() == true) {
                     flashToggle.visibility = View.VISIBLE
                 } else {
@@ -149,8 +142,6 @@ class CameraActivity : AppCompatActivity() {
                 }
 
             } catch (exc: Exception) {
-                Log.e("CameraActivity", "Use case binding failed", exc)
-                // Nếu xoay sang camera trước mà lỗi (vd máy không có cam trước), quay lại cam sau
                 if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
                     Toast.makeText(this, "Không thể mở camera trước", Toast.LENGTH_SHORT).show()
                     lensFacing = CameraSelector.LENS_FACING_BACK
@@ -166,8 +157,6 @@ class CameraActivity : AppCompatActivity() {
 
     private fun toggleFlash() {
         val imageCapture = imageCapture ?: return
-
-        // Logic chuyển đổi vòng tròn: OFF -> ON -> OFF
         val currentMode = imageCapture.flashMode
         val newMode = when (currentMode) {
             ImageCapture.FLASH_MODE_OFF -> ImageCapture.FLASH_MODE_ON
@@ -182,7 +171,7 @@ class CameraActivity : AppCompatActivity() {
     private fun updateFlashIcon(mode: Int) {
         val iconRes = when (mode) {
             ImageCapture.FLASH_MODE_ON -> R.drawable.ic_lightning
-            else -> R.drawable.ic_lightning_off // Icon sét gạch chéo
+            else -> R.drawable.ic_lightning_off
         }
         flashToggle.setImageResource(iconRes)
     }
@@ -222,7 +211,6 @@ class CameraActivity : AppCompatActivity() {
         val mediaDir = externalMediaDirs.firstOrNull()?.let {
             File(it, resources.getString(R.string.app_name)).apply { mkdirs() }
         }
-        // Sử dụng cacheDir nếu không truy cập được external media
         return if (mediaDir != null && mediaDir.exists()) mediaDir else cacheDir
     }
 

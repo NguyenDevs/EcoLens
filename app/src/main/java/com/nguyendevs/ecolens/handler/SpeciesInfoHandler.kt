@@ -17,18 +17,12 @@ import com.google.android.material.card.MaterialCardView
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.model.SpeciesInfo
 
-/**
- * Class xử lý hiển thị và tương tác với thông tin loài
- */
 class SpeciesInfoHandler(
     private val context: Context,
     private val speciesInfoCard: MaterialCardView,
     private val onCopySuccess: (String) -> Unit
 ) {
 
-    /**
-     * Hiển thị thông tin loài lên card
-     */
     fun displaySpeciesInfo(info: SpeciesInfo, imageUri: Uri?) {
         setupCopyButton(info)
         setupShareButton(info, imageUri)
@@ -38,9 +32,6 @@ class SpeciesInfoHandler(
         displayConservationStatus(info.conservationStatus)
     }
 
-    /**
-     * Setup nút copy tên khoa học
-     */
     private fun setupCopyButton(info: SpeciesInfo) {
         val btnCopy = speciesInfoCard.findViewById<ImageView>(R.id.btnCopyScientificName)
         btnCopy?.setOnClickListener {
@@ -54,9 +45,6 @@ class SpeciesInfoHandler(
         }
     }
 
-    /**
-     * Setup nút share thông tin
-     */
     private fun setupShareButton(info: SpeciesInfo, imageUri: Uri?) {
         val btnShare = speciesInfoCard.findViewById<ImageView>(R.id.btnShareInfo)
         btnShare?.setOnClickListener {
@@ -64,21 +52,16 @@ class SpeciesInfoHandler(
         }
     }
 
-    /**
-     * Hiển thị thông tin cơ bản (tên, độ tin cậy)
-     */
     private fun displayBasicInfo(info: SpeciesInfo) {
         val confidenceValue = info.confidence.coerceIn(0.0, 100.0) // Đảm bảo nằm trong 0-100
         val confidencePercent = String.format("%.2f", confidenceValue)
 
-        // Cập nhật tên và độ tin cậy
         speciesInfoCard.findViewById<TextView>(R.id.tvCommonName)?.text = info.commonName
         speciesInfoCard.findViewById<TextView>(R.id.tvScientificName)?.text = info.scientificName
         speciesInfoCard.findViewById<TextView>(R.id.tvConfidence)?.text = "Độ tin cậy: $confidencePercent%"
 
-        // Lấy các view cần thay đổi
-        val confidenceCard = speciesInfoCard.findViewById<MaterialCardView>(R.id.confidenceCard) // Đổi ID nếu cần
-        val iconConfidence = speciesInfoCard.findViewById<ImageView>(R.id.iconConfidence) // Sẽ thêm ID này vào XML
+        val confidenceCard = speciesInfoCard.findViewById<MaterialCardView>(R.id.confidenceCard)
+        val iconConfidence = speciesInfoCard.findViewById<ImageView>(R.id.iconConfidence)
         val tvConfidence = speciesInfoCard.findViewById<TextView>(R.id.tvConfidence)
 
         when {
@@ -105,9 +88,7 @@ class SpeciesInfoHandler(
             }
         }
     }
-    /**
-     * Hiển thị phân loại khoa học
-     */
+
     private fun displayTaxonomy(info: SpeciesInfo) {
         setTaxonomyRow(R.id.rowKingdom, R.id.tvKingdom, info.kingdom)
         setTaxonomyRow(R.id.rowPhylum, R.id.tvPhylum, info.phylum)
@@ -118,9 +99,6 @@ class SpeciesInfoHandler(
         setTaxonomyRow(R.id.rowSpecies, R.id.tvSpecies, info.species)
     }
 
-    /**
-     * Hiển thị các section mô tả
-     */
     private fun displaySections(info: SpeciesInfo) {
         setSectionVisibility(R.id.sectionDescription, R.id.tvDescription, info.description)
         setSectionVisibility(R.id.sectionCharacteristics, R.id.tvCharacteristics, info.characteristics)
@@ -128,16 +106,12 @@ class SpeciesInfoHandler(
         setSectionVisibility(R.id.sectionHabitat, R.id.tvHabitat, info.habitat)
     }
 
-    /**
-     * Ẩn/hiện một row trong taxonomy
-     */
     private fun setTaxonomyRow(rowId: Int, textViewId: Int, text: String) {
         val row = speciesInfoCard.findViewById<LinearLayout>(rowId)
         val textView = speciesInfoCard.findViewById<TextView>(textViewId)
 
         if (text.isNotEmpty()) {
             val styledText = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                // Dùng LEGACY chỉ cho taxonomy để hỗ trợ <i>
                 Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY)
             } else {
                 @Suppress("DEPRECATION")
@@ -150,20 +124,16 @@ class SpeciesInfoHandler(
         }
     }
 
-    /**
-     * Ẩn/hiện section với HTML support
-     */
     private fun setSectionVisibility(sectionId: Int, textViewId: Int, text: String) {
         val section = speciesInfoCard.findViewById<LinearLayout>(sectionId)
         val textView = speciesInfoCard.findViewById<TextView>(textViewId)
 
         if (text.isNotEmpty()) {
             val htmlText = text.trim()
-                .replace("\n•", "<br>•")        // Giữ dấu đầu dòng
-                .replace("\n", "<br>")          // Xuống dòng bình thường
-                .replace("<br>•", "<br>•")      // Đảm bảo không bị mất bullet
+                .replace("\n•", "<br>•")
+                .replace("\n", "<br>")
+                .replace("<br>•", "<br>•")
 
-            // BƯỚC 2: Dùng FROM_HTML_MODE_LEGACY để hỗ trợ đầy đủ <br>, <i>, v.v.
             val spanned = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 Html.fromHtml(htmlText, Html.FROM_HTML_MODE_LEGACY)
             } else {
@@ -178,15 +148,11 @@ class SpeciesInfoHandler(
         }
     }
 
-    /**
-     * Hiển thị tình trạng bảo tồn (Đã cập nhật để hỗ trợ HTML màu từ AI)
-     */
     private fun displayConservationStatus(status: String) {
         val section = speciesInfoCard.findViewById<LinearLayout>(R.id.sectionConservation)
         val textView = speciesInfoCard.findViewById<TextView>(R.id.tvConservationStatus)
 
         if (status.isNotEmpty()) {
-            // CẬP NHẬT: Sử dụng Html.fromHtml để hiển thị thẻ <b> và <font> từ AI
             textView?.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 Html.fromHtml(status, Html.FROM_HTML_MODE_COMPACT)
             } else {
@@ -202,9 +168,6 @@ class SpeciesInfoHandler(
         }
     }
 
-    /**
-     * Chia sẻ thông tin loài
-     */
     private fun shareSpeciesInfo(info: SpeciesInfo, imageUri: Uri?) {
         val confidencePercent = if (info.confidence > 1) {
             String.format("%.2f", info.confidence)
@@ -278,26 +241,21 @@ class SpeciesInfoHandler(
 
         try {
             if (imageUri != null) {
-                // Share với ảnh
                 val shareIntent = Intent().apply {
                     action = Intent.ACTION_SEND
                     type = "image/*"
                     putExtra(Intent.EXTRA_STREAM, imageUri)
                     putExtra(Intent.EXTRA_TEXT, shareText)
                     putExtra(Intent.EXTRA_SUBJECT, "Thông tin về ${info.commonName}")
-
-                    // [FIX] Thêm ClipData để cấp quyền đọc ảnh cho ứng dụng ngoài (Zalo, Messenger...)
                     clipData = ClipData.newRawUri(null, imageUri)
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
 
                 val chooserIntent = Intent.createChooser(shareIntent, "Chia sẻ thông tin loài qua")
-                // [FIX] Cấp quyền cho cả Chooser để đảm bảo an toàn
                 chooserIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
                 context.startActivity(chooserIntent)
             } else {
-                // Share chỉ text
                 val shareIntent = Intent().apply {
                     action = Intent.ACTION_SEND
                     type = "text/plain"
@@ -312,9 +270,6 @@ class SpeciesInfoHandler(
         }
     }
 
-    /**
-     * Loại bỏ HTML tags
-     */
     private fun stripHtml(html: String): String {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT).toString()

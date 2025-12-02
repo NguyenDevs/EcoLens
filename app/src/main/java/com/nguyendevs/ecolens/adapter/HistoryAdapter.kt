@@ -16,10 +16,8 @@ import java.util.TimeZone
 
 class HistoryAdapter(
     private var historyList: List<HistoryEntry>,
-    private val clickListener: (HistoryEntry) -> Unit
-) : RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
+    private val clickListener: (HistoryEntry) -> Unit) : RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
 
-    // Sử dụng Locale và TimeZone mặc định
     private val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).apply {
         timeZone = TimeZone.getDefault()
     }
@@ -42,15 +40,12 @@ class HistoryAdapter(
         val entry = historyList[position]
         holder.bind(entry, clickListener)
 
-        // Logic nhóm theo ngày: Hiển thị tiêu đề ngày nếu đây là mục đầu tiên
-        // hoặc nếu ngày của mục hiện tại khác ngày của mục trước đó.
         val showDateHeader = position == 0 || !isSameDay(entry.timestamp, historyList[position - 1].timestamp)
         holder.bindDateHeader(entry.timestamp, showDateHeader)
     }
 
     override fun getItemCount(): Int = historyList.size
 
-    // Hàm kiểm tra xem hai timestamp có cùng ngày hay không
     private fun isSameDay(timestamp1: Long, timestamp2: Long): Boolean {
         return dateFormatter.format(Date(timestamp1)) == dateFormatter.format(Date(timestamp2))
     }
@@ -68,7 +63,7 @@ class HistoryAdapter(
             tvTime.text = "Thời gian: ${timeFormatter.format(Date(entry.timestamp))}"
 
             Glide.with(itemView.context)
-                .load(entry.imagePath)  // Đổi từ imageUri thành imagePath
+                .load(entry.imagePath)
                 .centerCrop()
                 .into(ivImage)
 

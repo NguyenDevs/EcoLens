@@ -69,9 +69,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             initialValue = emptyList()
         )
 
-    /**
-     * Lưu bitmap đã có sẵn vào internal storage
-     */
     private suspend fun saveBitmapToInternalStorage(context: Context, bitmap: Bitmap): String? {
         return withContext(Dispatchers.IO) {
             try {
@@ -84,12 +81,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 85, outputStream)
                     outputStream.flush()
                 }
-
-                // Giải phóng bitmap sau khi lưu
                 bitmap.recycle()
-
-                Log.d(TAG, "✅ Đã lưu ảnh thành công tại: ${file.absolutePath}")
-                Log.d(TAG, "File tồn tại: ${file.exists()}, Kích thước: ${file.length()} bytes")
 
                 file.absolutePath
             } catch (e: Exception) {
@@ -103,8 +95,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     private fun saveToHistory(bitmap: Bitmap, speciesInfo: SpeciesInfo) {
         viewModelScope.launch {
             try {
-                Log.d(TAG, "Bắt đầu lưu vào lịch sử...")
-
                 val localPath = saveBitmapToInternalStorage(getApplication(), bitmap)
 
                 if (localPath != null) {
@@ -115,14 +105,8 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                             timestamp = System.currentTimeMillis(),
                             isFavorite = false
                         )
-
-                        Log.d(TAG, "Chuẩn bị insert vào database: ${newEntry.speciesInfo.commonName}")
                         historyDao.insert(newEntry)
-                        Log.d(TAG, "✅ Đã insert thành công vào database")
                     }
-
-                    // Kiểm tra xem đã lưu chưa
-                    Log.d(TAG, "Số lượng entries trong history hiện tại: ${history.value.size}")
                 } else {
                     Log.e(TAG, "❌ Không thể lưu ảnh vào internal storage")
                 }
@@ -138,7 +122,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             try {
                 val updatedEntry = entry.copy(isFavorite = !entry.isFavorite)
                 historyDao.update(updatedEntry)
-                Log.d(TAG, "✅ Đã cập nhật favorite cho entry ID: ${entry.id}")
             } catch (e: Exception) {
                 Log.e(TAG, "❌ Lỗi khi toggle favorite: ${e.message}", e)
             }
@@ -152,13 +135,8 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 error = null,
                 speciesInfo = null
             )
-
             var bitmapForHistory: Bitmap? = null
-
             try {
-                Log.d(TAG, "Bắt đầu nhận diện loài từ URI: $imageUri")
-
-                // ĐỌC BITMAP NGAY LẬP TỨC (khi URI còn quyền truy cập)
                 val context = getApplication<Application>()
                 bitmapForHistory = try {
                     context.contentResolver.openInputStream(imageUri)?.use { inputStream ->
@@ -177,7 +155,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 val requestFile = imageFile.asRequestBody("image/jpeg".toMediaTypeOrNull())
                 val imagePart = MultipartBody.Part.createFormData("image", imageFile.name, requestFile)
 
-                Log.d(TAG, "Gọi API iNaturalist...")
                 val response = apiService.identifySpecies(imagePart)
 
                 if (response.results.isNotEmpty()) {
@@ -187,7 +164,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
                     Log.d(TAG, "Tìm thấy loài: $scientificName, confidence: ${topResult.combined_score}")
 
-                    // Gọi Gemini để lấy thông tin chi tiết
                     Log.d(TAG, "Gọi Gemini API...")
                     val speciesInfo = fetchDetailsFromGemini(scientificName, topResult.combined_score)
 
@@ -197,10 +173,8 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                         confidence = topResult.combined_score,
                         kingdom = if(speciesInfo.kingdom.isEmpty()) taxon.ancestors?.find { it.rank == "kingdom" }?.name ?: "" else speciesInfo.kingdom
                     )
-
                     Log.d(TAG, "Thông tin cuối cùng: ${finalInfo.commonName}")
 
-                    // Lưu vào lịch sử với bitmap đã đọc sẵn
                     if (bitmapForHistory != null) {
                         saveToHistory(bitmapForHistory, finalInfo)
                     } else {
@@ -211,8 +185,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                         isLoading = false,
                         speciesInfo = finalInfo
                     )
-
-                    Log.d(TAG, "✅ Hoàn tất nhận diện")
                 } else {
                     Log.w(TAG, "Không tìm thấy kết quả từ API")
                     _uiState.value = _uiState.value.copy(
@@ -230,7 +202,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                     error = "Đã xảy ra lỗi: ${e.message}"
                 )
             } finally {
-                // Bitmap sẽ được recycle trong saveToHistory, không cần recycle ở đây
             }
         }
     }
@@ -344,7 +315,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
     private suspend fun uriToFile(context: Context, uri: Uri): File {
         return withContext(Dispatchers.IO) {
-            // Đọc bitmap trên IO dispatcher (vì đây là temp file cho API call)
             val inputStream = context.contentResolver.openInputStream(uri)
             val bitmap = BitmapFactory.decodeStream(inputStream)
             inputStream?.close()
@@ -354,7 +324,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
             }
             bitmap.recycle()
-
             file
         }
     }

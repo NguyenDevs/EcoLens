@@ -8,17 +8,11 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
-/**
- * Class quản lý quyền truy cập camera và thư viện ảnh
- */
 class PermissionManager(
     private val context: Context,
     private val permissionLauncher: ActivityResultLauncher<Array<String>>
 ) {
 
-    /**
-     * Kiểm tra xem đã có đủ quyền chưa
-     */
     fun hasPermissions(): Boolean {
         val camera = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
                 PackageManager.PERMISSION_GRANTED
@@ -32,9 +26,6 @@ class PermissionManager(
         return camera && storage
     }
 
-    /**
-     * Yêu cầu quyền truy cập
-     */
     fun requestPermissions() {
         val perms = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             arrayOf(Manifest.permission.CAMERA, Manifest.permission.READ_MEDIA_IMAGES)
@@ -44,9 +35,6 @@ class PermissionManager(
         permissionLauncher.launch(perms)
     }
 
-    /**
-     * Hiển thị dialog khi không được cấp quyền
-     */
     fun showPermissionDeniedDialog() {
         MaterialAlertDialogBuilder(context)
             .setTitle("Cần quyền truy cập")
