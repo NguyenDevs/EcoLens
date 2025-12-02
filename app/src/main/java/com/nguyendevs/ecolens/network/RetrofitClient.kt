@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
     // API Token từ iNaturalist
-    private const val INATURALIST_API_TOKEN = "eyJhbGciOiJIUzUxMiJ9.eyJ1c2VyX2lkIjo5OTU2ODY1LCJleHAiOjE3NjQ2NjE5ODJ9.dOIN54my7981FsBd0kQk-uo4lF1xD36p6fsmklyfzIP_GV5P2pb6fcxgI7HrBoNwtM-ZDLvewmxzPAVWm3erwg"
+    private const val INATURALIST_API_TOKEN = "eyJhbGciOiJIUzUxMiJ9.eyJ1c2VyX2lkIjo5OTU2ODY1LCJleHAiOjE3NjQ3NDg3MDV9.QEJFqImLeOmrc6cGOym1yVInCgYWBVO1gIPWqBMfp01_HmzERvkXen1IAejd8PTXebTtIC_1Hjgxy7IQDDZuig"
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
