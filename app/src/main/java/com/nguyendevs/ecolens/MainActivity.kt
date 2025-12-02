@@ -37,6 +37,8 @@ import com.nguyendevs.ecolens.manager.SpeakerManager
 import android.text.Html
 import android.widget.ProgressBar
 import android.widget.Toast
+import android.view.MotionEvent
+import android.graphics.Rect
 
 class MainActivity : AppCompatActivity() {
     // Containers
@@ -189,6 +191,12 @@ class MainActivity : AppCompatActivity() {
             } else {
                 // Nếu đang mở -> Thực hiện tìm kiếm
                 performGoogleSearch()
+            }
+        }
+        etSearchQuery.setOnFocusChangeListener { _, hasFocus ->
+            // Nếu mất focus (hasFocus == false) VÀ nội dung trống
+            if (!hasFocus && etSearchQuery.text.toString().trim().isEmpty()) {
+                collapseSearchBar()
             }
         }
 
@@ -368,6 +376,25 @@ class MainActivity : AppCompatActivity() {
             speakerManager.pause()
             toggleSpeakerUI(isSpeaking = false)
         }
+    }
+
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        if (event.action == MotionEvent.ACTION_DOWN) {
+            val v = currentFocus
+            if (v is EditText) {
+                val outRect = Rect()
+                v.getGlobalVisibleRect(outRect)
+                // Kiểm tra xem vị trí chạm có nằm ngoài EditText không
+                if (!outRect.contains(event.rawX.toInt(), event.rawY.toInt())) {
+                    v.clearFocus() // Bỏ focus
+
+                    // Ẩn bàn phím mềm
+                    val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.hideSoftInputFromWindow(v.windowToken, 0)
+                }
+            }
+        }
+        return super.dispatchTouchEvent(event)
     }
 
     private fun generateSpeechText(): String {
