@@ -41,6 +41,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var errorCard: MaterialCardView
     private lateinit var errorText: TextView
     private lateinit var speciesInfoCard: MaterialCardView
+    private lateinit var btnZoomIn: ImageView
+    private lateinit var fullScreenContainer: View
+    private lateinit var fullScreenImage: ImageView
+    private lateinit var btnZoomOut: ImageView
 
     // History screen views
     private lateinit var rvHistory: RecyclerView
@@ -69,7 +73,7 @@ class MainActivity : AppCompatActivity() {
                     .load(capturedUri)
                     .centerCrop()
                     .into(imagePreview)
-
+                btnZoomIn.visibility = View.VISIBLE
                 viewModel.identifySpecies(capturedUri)
             }
         }
@@ -96,6 +100,7 @@ class MainActivity : AppCompatActivity() {
         setupHistoryScreen()
         setupFAB()
         setupObservers()
+        setupZoomLogic()
 
         navigationManager.showHomeScreen()
     }
@@ -115,6 +120,10 @@ class MainActivity : AppCompatActivity() {
         errorCard = findViewById(R.id.errorCard)
         errorText = findViewById(R.id.errorText)
         speciesInfoCard = findViewById(R.id.speciesInfoCard)
+        btnZoomIn = findViewById(R.id.btnZoomIn)
+        fullScreenContainer = findViewById(R.id.fullScreenContainer)
+        fullScreenImage = findViewById(R.id.fullScreenImage)
+        btnZoomOut = findViewById(R.id.btnZoomOut)
 
         // History screen views
         rvHistory = historyContainer.findViewById(R.id.rvHistory)
@@ -130,6 +139,32 @@ class MainActivity : AppCompatActivity() {
         permissionManager = PermissionManager(this, permissionLauncher)
 
         speciesInfoHandler = SpeciesInfoHandler(this, speciesInfoCard)
+    }
+
+    private fun setupZoomLogic() {
+        btnZoomIn.setOnClickListener {
+            imageUri?.let { uri ->
+                fullScreenContainer.visibility = View.VISIBLE
+                Glide.with(this)
+                    .load(uri)
+                    .into(fullScreenImage)
+            }
+        }
+        btnZoomOut.setOnClickListener {
+            fullScreenContainer.visibility = View.GONE
+        }
+
+        fullScreenContainer.setOnClickListener {
+            fullScreenContainer.visibility = View.GONE
+        }
+    }
+
+    override fun onBackPressed() {
+        if (fullScreenContainer.visibility == View.VISIBLE) {
+            fullScreenContainer.visibility = View.GONE
+        } else {
+            super.onBackPressed()
+        }
     }
 
     private fun setupViewModel() {

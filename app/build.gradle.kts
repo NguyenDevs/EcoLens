@@ -6,7 +6,6 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
-// Hàm đọc API Key từ file local.properties để bảo mật
 fun getApiKey(propertyKey: String): String {
     val properties = Properties()
     val localPropertiesFile = rootProject.file("local.properties")
@@ -29,7 +28,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Thêm API Key vào BuildConfig
+        buildConfigField("String", "INATURALIST_API_TOKEN", "\"${getApiKey("INATURALIST_API_TOKEN")}\"")
         buildConfigField("String", "GEMINI_API_KEY", "\"${getApiKey("GEMINI_API_KEY")}\"")
     }
 
@@ -52,7 +51,7 @@ android {
     buildFeatures{
         dataBinding = false
         viewBinding = true
-        buildConfig = true // Bật tính năng này để dùng BuildConfig.GEMINI_API_KEY
+        buildConfig = true
     }
 }
 

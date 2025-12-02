@@ -47,16 +47,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-                <!-- Image -->
                 <ImageView
                         android:id="@+id/imagePreview"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
-
                         android:contentDescription="@string/image_preview" />
 
-                <!-- Placeholder -->
                 <LinearLayout
                         android:id="@+id/imagePlaceholder"
                         android:layout_width="match_parent"
@@ -65,39 +62,28 @@
                         android:gravity="center"
                         android:background="#E8F5E9"
                         android:visibility="gone">
-
-                    <ImageView
-                            android:layout_width="64dp"
-                            android:layout_height="64dp"
-                            android:src="@drawable/ic_image"
-                            android:contentDescription="@string/no_image"
-                            app:tint="#BDBDBD" />
-
-                    <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Chưa có ảnh"
-                            android:textColor="#757575"
-                            android:layout_marginTop="8dp" />
-
                 </LinearLayout>
 
-                <!-- Loading Overlay -->
                 <FrameLayout
                         android:id="@+id/loadingOverlay"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:background="#80000000"
                         android:visibility="gone">
-
-                    <ProgressBar
-                            android:id="@+id/progressBar"
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:layout_gravity="center"
-                            android:indeterminateTint="@android:color/white" />
-
                 </FrameLayout>
+
+                <ImageView
+                        android:id="@+id/btnZoomIn"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_gravity="bottom|end"
+                        android:layout_margin="16dp"
+                        android:src="@drawable/ic_zoomin"
+                        android:background="@drawable/rounded_trans_bg"
+                        android:padding="8dp"
+                        app:tint="@android:color/white"
+                        android:visibility="gone"
+                        android:contentDescription="Phóng to" />
 
             </FrameLayout>
 

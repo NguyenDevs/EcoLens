@@ -6,23 +6,26 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import com.nguyendevs.ecolens.BuildConfig
 import java.util.concurrent.TimeUnit
 
+
 object RetrofitClient {
-    // API Token từ iNaturalist
-    private const val INATURALIST_API_TOKEN = "eyJhbGciOiJIUzUxMiJ9.eyJ1c2VyX2lkIjo5OTU2ODY1LCJleHAiOjE3NjQ3NDg3MDV9.QEJFqImLeOmrc6cGOym1yVInCgYWBVO1gIPWqBMfp01_HmzERvkXen1IAejd8PTXebTtIC_1Hjgxy7IQDDZuig"
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
     }
 
-    // Interceptor để thêm Authorization header
+    // SỬA: Đổi tên từ iNaturalistInterceptor thành authInterceptor
     private val authInterceptor = Interceptor { chain ->
-        val originalRequest = chain.request()
-        val authenticatedRequest = originalRequest.newBuilder()
-            .header("Authorization", INATURALIST_API_TOKEN)
-            .build()
-        chain.proceed(authenticatedRequest)
+        val original = chain.request()
+        val requestBuilder = original.newBuilder()
+            .header("Authorization", "Bearer ${BuildConfig.INATURALIST_API_TOKEN}")
+            .header("Accept", "application/json")
+            .method(original.method, original.body)
+
+        val request = requestBuilder.build()
+        chain.proceed(request)
     }
 
     private val okHttpClient = OkHttpClient.Builder()

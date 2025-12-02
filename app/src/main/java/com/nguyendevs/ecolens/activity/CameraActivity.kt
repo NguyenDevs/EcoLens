@@ -87,7 +87,10 @@ class CameraActivity : AppCompatActivity() {
     private val selectImageFromGalleryResult = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
             val resultIntent = Intent().apply {
+                data = it // Gán URI vào data chuẩn của Intent
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
                 putExtra(KEY_IMAGE_URI, it.toString())
+
             }
             setResult(RESULT_OK, resultIntent)
             finish()
