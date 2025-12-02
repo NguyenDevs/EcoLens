@@ -12,9 +12,9 @@ class NavigationManager(
     private val settingsContainer: View
 ) {
 
-    fun showHomeScreen() {
+    fun showHomeScreen(shouldShowFab: Boolean) {
         searchBarContainer.visibility = View.VISIBLE
-        fabSpeak.visibility = View.GONE
+        fabSpeak.visibility = if (shouldShowFab) View.VISIBLE else View.GONE
         homeContainer.visibility = View.VISIBLE
         historyContainer.visibility = View.GONE
         myGardenContainer.visibility = View.GONE

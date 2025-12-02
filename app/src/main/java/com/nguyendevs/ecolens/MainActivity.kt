@@ -36,8 +36,16 @@ import kotlinx.coroutines.launch
 import com.nguyendevs.ecolens.manager.SpeakerManager
 import android.text.Html
 import android.widget.ProgressBar
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
+import android.graphics.Color
+
 import android.widget.Toast
 import android.view.MotionEvent
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import android.graphics.Rect
 import com.google.android.material.textfield.TextInputLayout
 
@@ -49,6 +57,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var settingsContainer: View
 
     // Home screen views
+    private lateinit var tvLoading: TextView
+    private var loadingTextJob: Job? = null
     private lateinit var textInputLayoutSearch: TextInputLayout
     private lateinit var etSearchQuery: EditText
     private lateinit var btnSearchAction: ImageView
@@ -92,6 +102,10 @@ class MainActivity : AppCompatActivity() {
         if (result.resultCode == RESULT_OK) {
             val uriString = result.data?.getStringExtra(CameraActivity.KEY_IMAGE_URI)
             if (uriString != null) {
+                if (isSearchBarExpanded) {
+                    collapseSearchBar()
+                }
+
                 val capturedUri = Uri.parse(uriString)
                 imageUri = capturedUri
                 Glide.with(this)
@@ -128,7 +142,7 @@ class MainActivity : AppCompatActivity() {
         setupZoomLogic()
         setupSearchBar()
 
-        navigationManager.showHomeScreen()
+        navigationManager.showHomeScreen(false)
     }
 
     private fun initViews() {
@@ -143,7 +157,7 @@ class MainActivity : AppCompatActivity() {
         searchBarContainer = findViewById(R.id.searchBarContainer)
         etSearchQuery = findViewById(R.id.etSearchQuery)
         btnSearchAction = findViewById(R.id.btnSearchAction)
-
+        loadingCard = findViewById(R.id.loadingCard)
         fabSpeak = findViewById(R.id.fabSpeak)
         fabMute = findViewById(R.id.fabMute)
         imagePreview = findViewById(R.id.imagePreview)
@@ -160,6 +174,7 @@ class MainActivity : AppCompatActivity() {
         // History screen views
         rvHistory = historyContainer.findViewById(R.id.rvHistory)
         emptyStateContainer = historyContainer.findViewById(R.id.emptyStateContainer)
+        tvLoading = loadingCard.findViewById(R.id.tvLoading)
     }
 
     private fun initManagers() {
@@ -333,10 +348,31 @@ class MainActivity : AppCompatActivity() {
         findViewById<BottomNavigationView>(R.id.bottomNavigation)
             .setOnItemSelectedListener { item ->
                 when (item.itemId) {
-                    R.id.nav_home -> navigationManager.showHomeScreen()
-                    R.id.nav_history -> navigationManager.showHistoryScreen()
-                    R.id.nav_my_garden -> navigationManager.showMyGardenScreen()
-                    R.id.nav_settings -> navigationManager.showSettingsScreen()
+                    R.id.nav_home -> {
+                        val state = viewModel.uiState.value
+                        val hasInfo = state.speciesInfo != null
+                                && !state.isLoading
+                                && state.error == null
+                        navigationManager.showHomeScreen(hasInfo)
+
+                        if (hasInfo) {
+                            toggleSpeakerUI(speakerManager.isSpeaking())
+                        } else {
+                            fabMute.visibility = View.GONE
+                        }
+                    }
+                    R.id.nav_history -> {
+                        navigationManager.showHistoryScreen()
+                        fabMute.visibility = View.GONE
+                    }
+                    R.id.nav_my_garden -> {
+                        navigationManager.showMyGardenScreen()
+                        fabMute.visibility = View.GONE
+                    }
+                    R.id.nav_settings -> {
+                        navigationManager.showSettingsScreen()
+                        fabMute.visibility = View.GONE
+                    }
                     else -> return@setOnItemSelectedListener false
                 }
                 true
@@ -474,6 +510,12 @@ class MainActivity : AppCompatActivity() {
         loadingCard.visibility = if (isLoading) View.VISIBLE else View.GONE
 
         if (isLoading) {
+            startLoadingTextAnimation()
+        } else {
+            stopLoadingTextAnimation()
+        }
+
+        if (isLoading) {
             speciesInfoCard.visibility = View.GONE
             errorCard.visibility = View.GONE
         }
@@ -506,6 +548,49 @@ class MainActivity : AppCompatActivity() {
             emptyStateContainer.visibility = View.VISIBLE
         }
     }
+
+    private fun startLoadingTextAnimation() {
+        // Nếu đang chạy rồi thì không chạy lại
+        if (loadingTextJob?.isActive == true) return
+
+        loadingTextJob = lifecycleScope.launch {
+            val baseText = "Đang phân tích hình ảnh"
+            val dots = "..."
+            val fullText = "$baseText$dots"
+
+            var loopCount = 0
+            while (isActive) {
+                val spannable = SpannableString(fullText)
+
+                val visibleDots = (loopCount % 3) + 1
+
+                val hideCount = 3 - visibleDots
+
+                if (hideCount > 0) {
+                    val start = fullText.length - hideCount
+                    val end = fullText.length
+
+                    spannable.setSpan(
+                        ForegroundColorSpan(Color.TRANSPARENT),
+                        start,
+                        end,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                }
+
+                tvLoading.text = spannable
+
+                loopCount++
+                delay(500)
+            }
+        }
+    }
+
+    private fun stopLoadingTextAnimation() {
+        loadingTextJob?.cancel()
+        loadingTextJob = null
+    }
+
     override fun onDestroy() {
         speakerManager.shutdown()
         super.onDestroy()

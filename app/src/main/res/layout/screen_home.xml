@@ -26,7 +26,7 @@
                 android:id="@+id/tvAppSubtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Nhận diện sinh vật qua ảnh"
+                android:text="Nhận diện động thực vật bằng hình ảnh."
                 android:textSize="16sp"
                 android:textColor="#757575"
                 android:layout_marginTop="4dp" />
@@ -105,6 +105,7 @@
                 android:visibility="gone">
 
             <TextView
+                    android:id="@+id/tvLoading"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Đang phân tích hình ảnh..."
