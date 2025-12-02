@@ -1,8 +1,16 @@
 package com.nguyendevs.ecolens
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
+import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -25,10 +33,10 @@ import com.nguyendevs.ecolens.manager.PermissionManager
 import com.nguyendevs.ecolens.handler.SpeciesInfoHandler
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.launch
-import android.speech.tts.TextToSpeech
 import com.nguyendevs.ecolens.manager.SpeakerManager
 import android.text.Html
-import java.util.Locale
+import android.widget.ProgressBar
+import android.widget.Toast
 
 class MainActivity : AppCompatActivity() {
     // Containers
@@ -38,7 +46,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var settingsContainer: View
 
     // Home screen views
-    private lateinit var fabSearch: FloatingActionButton
+    private lateinit var etSearchQuery: EditText
+    private lateinit var btnSearchAction: ImageView
+    private lateinit var searchBarContainer: MaterialCardView
     private lateinit var imagePreview: ImageView
     private lateinit var loadingOverlay: View
     private lateinit var loadingCard: MaterialCardView
@@ -65,6 +75,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var speciesInfoHandler: SpeciesInfoHandler
 
     private var imageUri: Uri? = null
+
+    // Search Bar State
+    private var isSearchBarExpanded = false
+    private val expandedWidthPx by lazy { (330 * resources.displayMetrics.density).toInt() } // Chiều rộng khi mở
+    private val collapsedWidthPx by lazy { (50 * resources.displayMetrics.density).toInt() } // Chiều rộng khi đóng
+
+
 
     // Camera Activity Launcher
     private val cameraActivityLauncher = registerForActivityResult(
@@ -108,6 +125,7 @@ class MainActivity : AppCompatActivity() {
         setupFAB()
         setupObservers()
         setupZoomLogic()
+        setupSearchBar()
 
         navigationManager.showHomeScreen()
     }
@@ -120,9 +138,12 @@ class MainActivity : AppCompatActivity() {
         settingsContainer = findViewById(R.id.settingsContainer)
 
         // Home screen views
+        searchBarContainer = findViewById(R.id.searchBarContainer)
+        etSearchQuery = findViewById(R.id.etSearchQuery)
+        btnSearchAction = findViewById(R.id.btnSearchAction)
+
         fabSpeak = findViewById(R.id.fabSpeak)
         fabMute = findViewById(R.id.fabMute)
-        fabSearch = findViewById(R.id.fabSearch)
         imagePreview = findViewById(R.id.imagePreview)
         loadingOverlay = findViewById(R.id.loadingOverlay)
         loadingCard = findViewById(R.id.loadingCard)
@@ -141,13 +162,15 @@ class MainActivity : AppCompatActivity() {
 
     private fun initManagers() {
         navigationManager = NavigationManager(
-            fabSearch, fabSpeak, homeContainer, historyContainer,
+            searchBarContainer, fabSpeak, homeContainer, historyContainer,
             myGardenContainer, settingsContainer
         )
 
         permissionManager = PermissionManager(this, permissionLauncher)
 
-        speciesInfoHandler = SpeciesInfoHandler(this, speciesInfoCard)
+        speciesInfoHandler = SpeciesInfoHandler(this, speciesInfoCard) { copiedText ->
+            expandSearchBar(copiedText)
+        }
 
         speakerManager = SpeakerManager(this)
 
@@ -155,6 +178,96 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread {
                 toggleSpeakerUI(isSpeaking = false)
             }
+        }
+    }
+
+    private fun setupSearchBar() {
+        btnSearchAction.setOnClickListener {
+            if (!isSearchBarExpanded) {
+                // Nếu đang đóng -> Mở ra để nhập
+                expandSearchBar("")
+            } else {
+                // Nếu đang mở -> Thực hiện tìm kiếm
+                performGoogleSearch()
+            }
+        }
+
+        etSearchQuery.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                performGoogleSearch()
+                true
+            } else {
+                false
+            }
+        }
+    }
+
+    private fun expandSearchBar(text: String) {
+        if (!isSearchBarExpanded) {
+            val animator = ValueAnimator.ofInt(collapsedWidthPx, expandedWidthPx)
+            animator.duration = 300
+            animator.addUpdateListener { animation ->
+                val params = searchBarContainer.layoutParams
+                params.width = animation.animatedValue as Int
+                searchBarContainer.layoutParams = params
+            }
+            animator.addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationStart(animation: Animator) {
+                    super.onAnimationStart(animation)
+                    etSearchQuery.visibility = View.VISIBLE
+                    if (text.isNotEmpty()) {
+                        etSearchQuery.setText(text)
+                        etSearchQuery.setSelection(text.length)
+                    }
+                    etSearchQuery.requestFocus()
+                    val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.showSoftInput(etSearchQuery, InputMethodManager.SHOW_IMPLICIT)
+                }
+            })
+            animator.start()
+            isSearchBarExpanded = true
+        } else if (text.isNotEmpty()) {
+            // Nếu đã mở mà nhận được text mới (copy lại)
+            etSearchQuery.setText(text)
+            etSearchQuery.setSelection(text.length)
+        }
+    }
+
+    private fun performGoogleSearch() {
+        val query = etSearchQuery.text.toString().trim()
+        if (query.isNotEmpty()) {
+            try {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/search?q=$query"))
+                startActivity(intent)
+            } catch (e: Exception) {
+                Toast.makeText(this, "Không tìm thấy trình duyệt web", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            // Nếu trống thì thu lại
+            collapseSearchBar()
+        }
+    }
+
+    private fun collapseSearchBar() {
+        if (isSearchBarExpanded) {
+            val animator = ValueAnimator.ofInt(expandedWidthPx, collapsedWidthPx)
+            animator.duration = 300
+            animator.addUpdateListener { animation ->
+                val params = searchBarContainer.layoutParams
+                params.width = animation.animatedValue as Int
+                searchBarContainer.layoutParams = params
+            }
+            animator.addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    super.onAnimationEnd(animation)
+                    etSearchQuery.visibility = View.GONE
+                    etSearchQuery.text.clear()
+                    val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.hideSoftInputFromWindow(etSearchQuery.windowToken, 0)
+                }
+            })
+            animator.start()
+            isSearchBarExpanded = false
         }
     }
 
@@ -241,9 +354,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupFAB() {
-        findViewById<FloatingActionButton>(R.id.fabSearch).setOnClickListener {
-            checkPermissionsAndOpenCamera()
-        }
         findViewById<FloatingActionButton>(R.id.fabCamera).setOnClickListener {
             checkPermissionsAndOpenCamera()
         }
