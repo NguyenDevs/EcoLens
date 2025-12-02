@@ -8,6 +8,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
  */
 class NavigationManager(
     private val fabSearch: FloatingActionButton,
+    private val fabSpeak: FloatingActionButton,
     private val homeContainer: View,
     private val historyContainer: View,
     private val myGardenContainer: View,
@@ -16,6 +17,7 @@ class NavigationManager(
 
     fun showHomeScreen() {
         fabSearch.visibility = View.VISIBLE
+        fabSpeak.visibility = View.VISIBLE
         homeContainer.visibility = View.VISIBLE
         historyContainer.visibility = View.GONE
         myGardenContainer.visibility = View.GONE
@@ -24,6 +26,7 @@ class NavigationManager(
 
     fun showHistoryScreen() {
         fabSearch.visibility = View.GONE
+        fabSpeak.visibility = View.GONE
         homeContainer.visibility = View.GONE
         historyContainer.visibility = View.VISIBLE
         myGardenContainer.visibility = View.GONE
@@ -32,6 +35,7 @@ class NavigationManager(
 
     fun showMyGardenScreen() {
         fabSearch.visibility = View.GONE
+        fabSpeak.visibility = View.GONE
         homeContainer.visibility = View.GONE
         historyContainer.visibility = View.GONE
         myGardenContainer.visibility = View.VISIBLE
@@ -40,6 +44,7 @@ class NavigationManager(
 
     fun showSettingsScreen() {
         fabSearch.visibility = View.GONE
+        fabSpeak.visibility = View.GONE
         homeContainer.visibility = View.GONE
         historyContainer.visibility = View.GONE
         myGardenContainer.visibility = View.GONE
