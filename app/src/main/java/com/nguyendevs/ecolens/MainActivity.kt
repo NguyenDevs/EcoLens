@@ -1,6 +1,9 @@
 package com.nguyendevs.ecolens
 
 import android.Manifest
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
@@ -11,6 +14,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -276,6 +280,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun displaySpeciesInfo(info: SpeciesInfo) {
+
+        val btnCopy = speciesInfoCard.findViewById<ImageView>(R.id.btnCopyScientificName)
+        val tvScientificName = speciesInfoCard.findViewById<TextView>(R.id.tvScientificName)
+        btnCopy?.setOnClickListener {
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("Scientific Name", info.scientificName)
+            clipboard.setPrimaryClip(clip)
+
+            // Hiển thị thông báo đã copy
+            Toast.makeText(this, "Đã copy: ${info.scientificName}", Toast.LENGTH_SHORT).show()
+        }
         // Tên và độ tin cậy
         val confidencePercent = if (info.confidence > 1) {
             String.format("%.2f", info.confidence)

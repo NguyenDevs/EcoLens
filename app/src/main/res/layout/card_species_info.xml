@@ -5,7 +5,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:cardCornerRadius="20dp"
-        app:cardElevation="4dp"
+        app:cardElevation="1dp"
         app:cardUseCompatPadding="true"
         app:cardBackgroundColor="@android:color/white">
 
@@ -25,16 +25,35 @@
                 android:textColor="#00796B"
                 android:textStyle="bold" />
 
-        <!-- Scientific Name -->
-        <TextView
-                android:id="@+id/tvScientificName"
-                android:layout_width="wrap_content"
+        <!-- Scientific Name with Copy Button -->
+        <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Scientific name"
-                android:textSize="18sp"
-                android:textStyle="italic"
-                android:textColor="#757575"
-                android:layout_marginTop="4dp" />
+                android:orientation="horizontal"
+                android:layout_marginTop="4dp"
+                android:gravity="center_vertical">
+
+            <TextView
+                    android:id="@+id/tvScientificName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Scientific name"
+                    android:textSize="18sp"
+                    android:textStyle="italic"
+                    android:textColor="#757575" />
+
+            <ImageView
+                    android:id="@+id/btnCopyScientificName"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_copy"
+                    android:padding="6dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:alpha="0.6"
+                    android:contentDescription="Copy scientific name" />
+
+        </LinearLayout>
 
         <!-- Confidence Badge -->
         <com.google.android.material.card.MaterialCardView
@@ -380,6 +399,7 @@
                     android:layout_marginTop="8dp" />
 
         </LinearLayout>
+
         <LinearLayout
                 android:id="@+id/sectionConservation"
                 android:layout_width="match_parent"
