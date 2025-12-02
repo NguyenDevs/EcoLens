@@ -10,6 +10,8 @@ import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.gson.Gson
@@ -42,11 +44,21 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     private val _uiState = MutableStateFlow(EcoLensUiState())
     val uiState: StateFlow<EcoLensUiState> = _uiState.asStateFlow()
 
+    private val _searchTextAction = MutableLiveData<String?>()
+    val searchTextAction: LiveData<String?> get() = _searchTextAction
+
     private val apiService = RetrofitClient.iNaturalistApi
     private val geminiModel = GenerativeModel(
         modelName = "gemini-2.5-flash",
         apiKey = BuildConfig.GEMINI_API_KEY
     )
+
+    fun triggerSearch(query: String) {
+        _searchTextAction.value = query
+    }
+    fun resetSearchAction() {
+        _searchTextAction.value = null
+    }
 
     private val historyDao = HistoryDatabase.getDatabase(application).historyDao()
 
