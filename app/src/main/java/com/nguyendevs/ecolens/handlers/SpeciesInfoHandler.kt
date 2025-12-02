@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.handler
+package com.nguyendevs.ecolens.handlers
 
 import android.content.ClipData
 import android.content.ClipboardManager

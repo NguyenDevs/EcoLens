@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.manager
+package com.nguyendevs.ecolens.managers
 
 import android.Manifest
 import android.content.Context

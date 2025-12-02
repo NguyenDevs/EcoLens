@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.manager
+package com.nguyendevs.ecolens.managers
 
 import android.content.Context
 import android.speech.tts.TextToSpeech

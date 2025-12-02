@@ -40,7 +40,7 @@
             </intent-filter>
         </activity>
         <activity
-                android:name=".activity.CameraActivity"
+                android:name=".activities.CameraActivity"
                 android:screenOrientation="portrait"
                 android:theme="@style/Theme.AppCompat.NoActionBar"
                 android:exported="false" />

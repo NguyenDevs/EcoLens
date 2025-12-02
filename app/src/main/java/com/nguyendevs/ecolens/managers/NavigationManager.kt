@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.manager
+package com.nguyendevs.ecolens.managers
 
 import android.view.View
 import com.google.android.material.floatingactionbutton.FloatingActionButton

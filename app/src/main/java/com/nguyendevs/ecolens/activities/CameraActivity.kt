@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.activity
+package com.nguyendevs.ecolens.activities
 
 import android.content.Context
 import android.content.Intent
