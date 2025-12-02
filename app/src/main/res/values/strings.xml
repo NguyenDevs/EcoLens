@@ -55,4 +55,5 @@
     <string name="settings_placeholder">Cài đặt</string>
     <string name="settings_subtitle">Các tùy chọn cài đặt</string>
     <string name="search">Tìm kiếm</string>
+    <string name="speak">Đọc nội dung</string>
 </resources>
