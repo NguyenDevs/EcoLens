@@ -213,11 +213,13 @@ class MainActivity : AppCompatActivity() {
                 override fun onAnimationStart(animation: Animator) {
                     textInputLayoutSearch.visibility = View.VISIBLE
                     etSearchQuery.setText(text)
-                    etSearchQuery.requestFocus()
-                    etSearchQuery.setSelection(text.length)
-
-                    val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                    imm.showSoftInput(etSearchQuery, InputMethodManager.SHOW_IMPLICIT)
+                    etSearchQuery.post {
+                        if (etSearchQuery.requestFocus()) {
+                            etSearchQuery.setSelection(text.length)
+                            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                            imm.showSoftInput(etSearchQuery, InputMethodManager.SHOW_IMPLICIT)
+                        }
+                    }
                 }
             })
             animator.start()
@@ -225,10 +227,12 @@ class MainActivity : AppCompatActivity() {
 
         } else {
             etSearchQuery.setText(text)
-            etSearchQuery.requestFocus()
-            etSearchQuery.setSelection(text.length)
-            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.showSoftInput(etSearchQuery, InputMethodManager.SHOW_IMPLICIT)
+            etSearchQuery.post {
+                etSearchQuery.requestFocus()
+                etSearchQuery.setSelection(text.length)
+                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.showSoftInput(etSearchQuery, InputMethodManager.SHOW_IMPLICIT)
+            }
         }
     }
 
