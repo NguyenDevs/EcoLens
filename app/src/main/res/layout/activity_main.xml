@@ -123,9 +123,8 @@
             app:itemIconSize="24dp"
             style="@style/BottomNavigationViewCustom"
             app:menu="@menu/bottom_nav_menu"
+            app:itemRippleColor="@null"
             android:paddingBottom="10dp"/>
-
-
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fabCamera"
