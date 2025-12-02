@@ -193,12 +193,6 @@ class MainActivity : AppCompatActivity() {
                 performGoogleSearch()
             }
         }
-        etSearchQuery.setOnFocusChangeListener { _, hasFocus ->
-            // Nếu mất focus (hasFocus == false) VÀ nội dung trống
-            if (!hasFocus && etSearchQuery.text.toString().trim().isEmpty()) {
-                collapseSearchBar()
-            }
-        }
 
         etSearchQuery.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
