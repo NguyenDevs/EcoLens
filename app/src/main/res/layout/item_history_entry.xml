@@ -49,8 +49,8 @@
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
                     android:contentDescription="Ảnh nhận diện"
-                    android:src="@drawable/ic_image"
-                    app:tint="@color/confidence_high"/>
+                    android:background="@drawable/ic_image"
+                    android:backgroundTint="@color/confidence_high"/>
 
             </com.google.android.material.card.MaterialCardView>
 
