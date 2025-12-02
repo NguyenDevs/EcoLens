@@ -550,9 +550,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startLoadingTextAnimation() {
-        // Nếu đang chạy rồi thì không chạy lại
         if (loadingTextJob?.isActive == true) return
-
         loadingTextJob = lifecycleScope.launch {
             val baseText = "Đang phân tích hình ảnh"
             val dots = "..."
