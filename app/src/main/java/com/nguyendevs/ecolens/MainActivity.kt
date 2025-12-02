@@ -204,8 +204,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun expandSearchBar(text: String) {
+    private fun expandSearchBar(text: String = "") {
         if (!isSearchBarExpanded) {
+            // Animation mở rộng
             val animator = ValueAnimator.ofInt(collapsedWidthPx, expandedWidthPx)
             animator.duration = 300
             animator.addUpdateListener { animation ->
@@ -213,25 +214,32 @@ class MainActivity : AppCompatActivity() {
                 params.width = animation.animatedValue as Int
                 searchBarContainer.layoutParams = params
             }
+
             animator.addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator) {
-                    super.onAnimationStart(animation)
                     etSearchQuery.visibility = View.VISIBLE
-                    if (text.isNotEmpty()) {
-                        etSearchQuery.setText(text)
-                        etSearchQuery.setSelection(text.length)
-                    }
+                    etSearchQuery.setText(text)
                     etSearchQuery.requestFocus()
+
+                    // Đặt con trỏ ở cuối và hiển thị bàn phím
+                    etSearchQuery.setSelection(etSearchQuery.text.length)
+
                     val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                     imm.showSoftInput(etSearchQuery, InputMethodManager.SHOW_IMPLICIT)
                 }
             })
             animator.start()
             isSearchBarExpanded = true
-        } else if (text.isNotEmpty()) {
-            // Nếu đã mở mà nhận được text mới (copy lại)
+
+        } else {
+            // Nếu search bar đã mở rồi (ví dụ: copy lần 2)
             etSearchQuery.setText(text)
-            etSearchQuery.setSelection(text.length)
+            etSearchQuery.requestFocus()
+            etSearchQuery.setSelection(text.length) // Đặt cursor ở cuối
+
+            // Vẫn hiện bàn phím và con trỏ
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(etSearchQuery, InputMethodManager.SHOW_IMPLICIT)
         }
     }
 

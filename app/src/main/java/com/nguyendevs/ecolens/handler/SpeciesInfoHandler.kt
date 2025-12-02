@@ -68,18 +68,43 @@ class SpeciesInfoHandler(
      * Hiển thị thông tin cơ bản (tên, độ tin cậy)
      */
     private fun displayBasicInfo(info: SpeciesInfo) {
-        val confidencePercent = if (info.confidence > 1) {
-            String.format("%.2f", info.confidence)
-        } else {
-            String.format("%.2f", info.confidence * 100)
-        }
+        val confidenceValue = info.confidence.coerceIn(0.0, 100.0) // Đảm bảo nằm trong 0-100
+        val confidencePercent = String.format("%.2f", confidenceValue)
 
+        // Cập nhật tên và độ tin cậy
         speciesInfoCard.findViewById<TextView>(R.id.tvCommonName)?.text = info.commonName
         speciesInfoCard.findViewById<TextView>(R.id.tvScientificName)?.text = info.scientificName
-        speciesInfoCard.findViewById<TextView>(R.id.tvConfidence)?.text =
-            "Độ tin cậy: $confidencePercent%"
-    }
+        speciesInfoCard.findViewById<TextView>(R.id.tvConfidence)?.text = "Độ tin cậy: $confidencePercent%"
 
+        // Lấy các view cần thay đổi
+        val confidenceCard = speciesInfoCard.findViewById<MaterialCardView>(R.id.confidenceCard) // Đổi ID nếu cần
+        val iconConfidence = speciesInfoCard.findViewById<ImageView>(R.id.iconConfidence) // Sẽ thêm ID này vào XML
+        val tvConfidence = speciesInfoCard.findViewById<TextView>(R.id.tvConfidence)
+
+        when {
+            confidenceValue >= 50f -> {
+                // Cao: xanh lá
+                iconConfidence?.setImageResource(R.drawable.ic_check_circle)
+                iconConfidence?.imageTintList = ContextCompat.getColorStateList(context, R.color.confidence_high) // #00A86B
+                confidenceCard?.setCardBackgroundColor(ContextCompat.getColor(context, R.color.confidence_bg_high)) // #E8F5E9
+                tvConfidence?.setTextColor(ContextCompat.getColor(context, R.color.confidence_text_high)) // #00796B
+            }
+            confidenceValue >= 25f -> {
+                // Trung bình: cam
+                iconConfidence?.setImageResource(R.drawable.ic_check_warning_circle)
+                iconConfidence?.imageTintList = ContextCompat.getColorStateList(context, R.color.confidence_medium) // #FF8C00 hoặc #F57C00
+                confidenceCard?.setCardBackgroundColor(ContextCompat.getColor(context, R.color.confidence_bg_medium)) // #FFF3E0
+                tvConfidence?.setTextColor(ContextCompat.getColor(context, R.color.confidence_text_medium)) // #E65100
+            }
+            else -> {
+                // Thấp: đỏ
+                iconConfidence?.setImageResource(R.drawable.ic_check_not_circle)
+                iconConfidence?.imageTintList = ContextCompat.getColorStateList(context, R.color.confidence_low) // #D32F2F
+                confidenceCard?.setCardBackgroundColor(ContextCompat.getColor(context, R.color.confidence_bg_low)) // #FFEBEE
+                tvConfidence?.setTextColor(ContextCompat.getColor(context, R.color.confidence_text_low)) // #C62828
+            }
+        }
+    }
     /**
      * Hiển thị phân loại khoa học
      */

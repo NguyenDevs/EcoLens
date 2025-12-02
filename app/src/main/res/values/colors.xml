@@ -21,4 +21,17 @@
     <color name="error_background">#FFEBEE</color>
 
     <color name="text_primary">#808080</color>
+
+    <!-- Confidence levels -->
+    <color name="confidence_high">#00A86B</color>
+    <color name="confidence_medium">#F57C00</color>
+    <color name="confidence_low">#D32F2F</color>
+
+    <color name="confidence_bg_high">#E8F5E9</color>
+    <color name="confidence_bg_medium">#FFF3E0</color>
+    <color name="confidence_bg_low">#FFEBEE</color>
+
+    <color name="confidence_text_high">#00796B</color>
+    <color name="confidence_text_medium">#E65100</color>
+    <color name="confidence_text_low">#C62828</color>
 </resources>
