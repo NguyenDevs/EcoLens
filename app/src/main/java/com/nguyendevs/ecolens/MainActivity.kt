@@ -25,6 +25,10 @@ import com.nguyendevs.ecolens.manager.PermissionManager
 import com.nguyendevs.ecolens.handler.SpeciesInfoHandler
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.launch
+import android.speech.tts.TextToSpeech
+import com.nguyendevs.ecolens.manager.SpeakerManager
+import android.text.Html
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
     // Containers
@@ -45,6 +49,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fullScreenContainer: View
     private lateinit var fullScreenImage: ImageView
     private lateinit var btnZoomOut: ImageView
+    private lateinit var fabSpeak: FloatingActionButton
+    private lateinit var fabMute: FloatingActionButton
 
     // History screen views
     private lateinit var rvHistory: RecyclerView
@@ -52,6 +58,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var historyAdapter: HistoryAdapter
 
     // Managers
+    private lateinit var speakerManager: SpeakerManager
     private lateinit var viewModel: EcoLensViewModel
     private lateinit var navigationManager: NavigationManager
     private lateinit var permissionManager: PermissionManager
@@ -113,6 +120,8 @@ class MainActivity : AppCompatActivity() {
         settingsContainer = findViewById(R.id.settingsContainer)
 
         // Home screen views
+        fabSpeak = findViewById(R.id.fabSpeak)
+        fabMute = findViewById(R.id.fabMute)
         fabSearch = findViewById(R.id.fabSearch)
         imagePreview = findViewById(R.id.imagePreview)
         loadingOverlay = findViewById(R.id.loadingOverlay)
@@ -132,13 +141,21 @@ class MainActivity : AppCompatActivity() {
 
     private fun initManagers() {
         navigationManager = NavigationManager(
-            fabSearch, homeContainer, historyContainer,
+            fabSearch, fabSpeak, homeContainer, historyContainer,
             myGardenContainer, settingsContainer
         )
 
         permissionManager = PermissionManager(this, permissionLauncher)
 
         speciesInfoHandler = SpeciesInfoHandler(this, speciesInfoCard)
+
+        speakerManager = SpeakerManager(this)
+
+        speakerManager.onSpeechFinished = {
+            runOnUiThread {
+                toggleSpeakerUI(isSpeaking = false)
+            }
+        }
     }
 
     private fun setupZoomLogic() {
@@ -213,6 +230,16 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
+    private fun toggleSpeakerUI(isSpeaking: Boolean) {
+        if (isSpeaking) {
+            fabSpeak.visibility = View.GONE
+            fabMute.visibility = View.VISIBLE
+        } else {
+            fabSpeak.visibility = View.VISIBLE
+            fabMute.visibility = View.GONE
+        }
+    }
+
     private fun setupFAB() {
         findViewById<FloatingActionButton>(R.id.fabSearch).setOnClickListener {
             checkPermissionsAndOpenCamera()
@@ -220,7 +247,75 @@ class MainActivity : AppCompatActivity() {
         findViewById<FloatingActionButton>(R.id.fabCamera).setOnClickListener {
             checkPermissionsAndOpenCamera()
         }
+        fabSpeak.setOnClickListener {
+            val textToRead = generateSpeechText()
+            if (textToRead.isNotEmpty()) {
+                speakerManager.speak(textToRead)
+                toggleSpeakerUI(isSpeaking = true)
+            }
+        }
+        fabMute.setOnClickListener {
+            speakerManager.pause()
+            toggleSpeakerUI(isSpeaking = false)
+        }
     }
+
+    private fun generateSpeechText(): String {
+        val info = viewModel.uiState.value.speciesInfo ?: return ""
+
+        // Hàm local xử lý HTML (giữ nguyên)
+        fun stripHtml(html: String): String {
+            return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                android.text.Html.fromHtml(html, android.text.Html.FROM_HTML_MODE_COMPACT).toString()
+            } else {
+                @Suppress("DEPRECATION")
+                android.text.Html.fromHtml(html).toString()
+            }
+        }
+
+        val sb = StringBuilder()
+
+        // 1. Tên thường gọi và Khoa học
+        sb.append("${info.commonName}. ")
+        sb.append("Tên khoa học ${info.scientificName}. ")
+
+        // 2. Phân loại khoa học (ĐÃ SỬA: Thêm danh xưng trước tên)
+        val taxonomyList = mutableListOf<String>()
+        if (info.kingdom.isNotEmpty()) taxonomyList.add("Giới ${info.kingdom}")
+        if (info.phylum.isNotEmpty()) taxonomyList.add("Ngành ${info.phylum}")
+        if (info.className.isNotEmpty()) taxonomyList.add("Lớp ${info.className}")
+        if (info.order.isNotEmpty()) taxonomyList.add("Bộ ${info.order}")
+        if (info.family.isNotEmpty()) taxonomyList.add("Họ ${info.family}")
+        if (info.genus.isNotEmpty()) taxonomyList.add("Chi ${info.genus}")
+        if (info.species.isNotEmpty()) taxonomyList.add("Loài ${info.species}")
+
+        if (taxonomyList.isNotEmpty()) {
+            sb.append("Phân loại khoa học: ")
+            // Dùng dấu phẩy để ngắt nghỉ tự nhiên khi đọc
+            sb.append(taxonomyList.joinToString(", "))
+            sb.append(". ")
+        }
+
+        // 3. Các phần thông tin khác
+        if (info.description.isNotEmpty()) {
+            sb.append("Mô tả. ${stripHtml(info.description)}. ")
+        }
+        if (info.characteristics.isNotEmpty()) {
+            sb.append("Đặc điểm. ${stripHtml(info.characteristics)}. ")
+        }
+        if (info.distribution.isNotEmpty()) {
+            sb.append("Phân bố. ${stripHtml(info.distribution)}. ")
+        }
+        if (info.habitat.isNotEmpty()) {
+            sb.append("Môi trường sống. ${stripHtml(info.habitat)}. ")
+        }
+        if (info.conservationStatus.isNotEmpty()) {
+            sb.append("Tình trạng bảo tồn. ${stripHtml(info.conservationStatus)}.")
+        }
+
+        return sb.toString()
+    }
+
 
     private fun checkPermissionsAndOpenCamera() {
         if (permissionManager.hasPermissions()) {
@@ -236,7 +331,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupObservers() {
-        // Observer cho UI State
         lifecycleScope.launch {
             viewModel.uiState.collect { state ->
                 if (homeContainer.visibility == View.VISIBLE) {
@@ -268,6 +362,16 @@ class MainActivity : AppCompatActivity() {
             errorCard.visibility = View.GONE
         }
 
+        if (viewModel.uiState.value.speciesInfo != null && !isLoading && error == null) {
+            if (fabMute.visibility != View.VISIBLE) {
+                fabSpeak.visibility = View.VISIBLE
+            }
+        } else {
+            fabSpeak.visibility = View.GONE
+            fabMute.visibility = View.GONE
+            speakerManager.pause()
+        }
+
         if (error != null) {
             errorText.text = error
             errorCard.visibility = View.VISIBLE
@@ -285,5 +389,9 @@ class MainActivity : AppCompatActivity() {
             rvHistory.visibility = View.GONE
             emptyStateContainer.visibility = View.VISIBLE
         }
+    }
+    override fun onDestroy() {
+        speakerManager.shutdown()
+        super.onDestroy()
     }
 }
