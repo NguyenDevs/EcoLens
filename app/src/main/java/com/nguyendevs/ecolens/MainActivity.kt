@@ -7,7 +7,6 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Html
 import android.view.View
-import android.content.Intent
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
@@ -15,26 +14,22 @@ import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.card.MaterialCardView
-import com.nguyendevs.ecolens.model.HistoryEntry
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.nguyendevs.ecolens.model.SpeciesInfo
-import com.nguyendevs.ecolens.view.EcoLensViewModel
-import kotlinx.coroutines.launch
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.button.MaterialButton
 import com.nguyendevs.ecolens.activity.CameraActivity
 import com.nguyendevs.ecolens.activity.HistoryDetailFragment
 import com.nguyendevs.ecolens.adapter.HistoryAdapter
-
-import java.io.File
+import com.nguyendevs.ecolens.model.HistoryEntry
+import com.nguyendevs.ecolens.model.SpeciesInfo
+import com.nguyendevs.ecolens.view.EcoLensViewModel
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     // Containers
@@ -53,7 +48,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var errorText: TextView
     private lateinit var speciesInfoCard: MaterialCardView
 
-    //History screen views
+    // History screen views
     private lateinit var rvHistory: RecyclerView
     private lateinit var emptyStateContainer: LinearLayout
     private lateinit var historyAdapter: HistoryAdapter
@@ -61,6 +56,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: EcoLensViewModel
     private var imageUri: Uri? = null
 
+    // Nhận kết quả từ CameraActivity
     private val cameraActivityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
             val uriString = result.data?.getStringExtra(CameraActivity.KEY_IMAGE_URI)
@@ -68,7 +64,7 @@ class MainActivity : AppCompatActivity() {
                 val capturedUri = Uri.parse(uriString)
                 imageUri = capturedUri
 
-                // Hiển thị ảnh ngay lập tức
+                // Hiển thị ảnh preview ở Home
                 Glide.with(this)
                     .load(capturedUri)
                     .centerCrop()
@@ -80,10 +76,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Nhận kết quả từ thư viện ảnh (nút Upload)
+    // Lưu ý: Logic upload nằm trong CameraActivity, MainActivity chỉ cần xử lý ảnh trả về từ CameraActivity
+    // Tuy nhiên nếu bạn gọi gallery trực tiếp từ MainActivity thì dùng launcher này
     private val galleryLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
             imageUri = it
-            // Hiển thị ảnh ngay lập tức
             Glide.with(this)
                 .load(it)
                 .centerCrop()
@@ -116,6 +114,8 @@ class MainActivity : AppCompatActivity() {
         setupHistoryScreen()
         setupFAB()
         setupObservers()
+
+        // Mặc định hiển thị Home
         showHomeScreen()
     }
 
@@ -136,7 +136,7 @@ class MainActivity : AppCompatActivity() {
         errorText = findViewById(R.id.errorText)
         speciesInfoCard = findViewById(R.id.speciesInfoCard)
 
-        //History screen views
+        // History screen views
         rvHistory = historyContainer.findViewById(R.id.rvHistory)
         emptyStateContainer = historyContainer.findViewById(R.id.emptyStateContainer)
     }
@@ -148,30 +148,27 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupHistoryScreen() {
+        // [QUAN TRỌNG] Sửa callback ở đây: Khi click item -> mở Fragment chi tiết
         historyAdapter = HistoryAdapter(emptyList()) { entry ->
-            displayHistoryEntry(entry)
+            openHistoryDetail(entry)
         }
+
         rvHistory.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = historyAdapter
         }
     }
 
-    private fun displayHistoryEntry(entry: HistoryEntry) {
-        showHomeScreen()
+    // Hàm mở Fragment chi tiết lịch sử
+    fun openHistoryDetail(entry: HistoryEntry) {
+        val detailFragment = HistoryDetailFragment()
+        detailFragment.setData(entry)
 
-        imageUri = entry.imageUri
-        Glide.with(this)
-            .load(entry.imageUri)
-            .centerCrop()
-            .into(imagePreview)
-
-        loadingOverlay.visibility = View.GONE
-        loadingCard.visibility = View.GONE
-        errorCard.visibility = View.GONE
-
-        displaySpeciesInfo(entry.speciesInfo)
-        speciesInfoCard.visibility = View.VISIBLE
+        supportFragmentManager.beginTransaction()
+            .setCustomAnimations(R.anim.slide_in_bottom, R.anim.hold, R.anim.hold, R.anim.slide_out_bottom)
+            .replace(R.id.fragment_container, detailFragment)
+            .addToBackStack("history_detail")
+            .commit()
     }
 
     private fun setupBottomNavigation() {
@@ -188,6 +185,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupFAB() {
+        // Nút search ở màn hình Home (để chụp ảnh)
+        findViewById<FloatingActionButton>(R.id.fabSearch).setOnClickListener {
+            checkPermissionsAndOpenCameraActivity()
+        }
+        // Nút camera chính
         findViewById<FloatingActionButton>(R.id.fabCamera).setOnClickListener {
             checkPermissionsAndOpenCameraActivity()
         }
@@ -201,26 +203,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun openHistoryDetail(entry: HistoryEntry) {
-        val detailFragment = HistoryDetailFragment()
-        detailFragment.setData(entry)
-
-        supportFragmentManager.beginTransaction()
-            .setCustomAnimations(R.anim.slide_in_bottom, R.anim.hold, R.anim.hold, R.anim.slide_out_bottom)
-            .replace(R.id.fragment_container, detailFragment) // R.id.fragment_container là ID của container chứa fragment chính
-            .addToBackStack("history_detail")
-            .commit()
-    }
-
-
     private fun openCameraActivity() {
-        // Khởi chạy Activity Camera tùy chỉnh
         cameraActivityLauncher.launch(CameraActivity.newIntent(this))
-        overridePendingTransition(
-            R.anim.slide_in_bottom,
-            R.anim.hold
-        )
+        overridePendingTransition(R.anim.slide_in_bottom, R.anim.hold)
     }
+
     private fun hasPermissions(): Boolean {
         val camera = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) ==
                 PackageManager.PERMISSION_GRANTED
@@ -246,31 +233,31 @@ class MainActivity : AppCompatActivity() {
     private fun setupObservers() {
         lifecycleScope.launch {
             viewModel.uiState.collect { state ->
-                // Loading state
-                loadingOverlay.visibility = if (state.isLoading) View.VISIBLE else View.GONE
-                loadingCard.visibility = if (state.isLoading) View.VISIBLE else View.GONE
+                // Chỉ update giao diện Home nếu đang ở tab Home
+                if (homeContainer.visibility == View.VISIBLE) {
+                    loadingOverlay.visibility = if (state.isLoading) View.VISIBLE else View.GONE
+                    loadingCard.visibility = if (state.isLoading) View.VISIBLE else View.GONE
 
-                // Error state
-                if (state.error != null) {
-                    errorText.text = state.error
-                    errorCard.visibility = View.VISIBLE
-                    speciesInfoCard.visibility = View.GONE
-                } else {
-                    errorCard.visibility = View.GONE
-                }
+                    if (state.error != null) {
+                        errorText.text = state.error
+                        errorCard.visibility = View.VISIBLE
+                        speciesInfoCard.visibility = View.GONE
+                    } else {
+                        errorCard.visibility = View.GONE
+                    }
 
-                // Success state
-                state.speciesInfo?.let { info ->
-                    displaySpeciesInfo(info)
-                    errorCard.visibility = View.GONE
-                    speciesInfoCard.visibility = View.VISIBLE
+                    state.speciesInfo?.let { info ->
+                        displaySpeciesInfo(info)
+                        speciesInfoCard.visibility = View.VISIBLE
+                    }
                 }
             }
         }
+
+        // Observer cho History List
         lifecycleScope.launch {
             viewModel.history.collect { historyList ->
                 historyAdapter.updateList(historyList)
-                // Hiển thị RecyclerView hoặc Empty State
                 if (historyList.isNotEmpty()) {
                     rvHistory.visibility = View.VISIBLE
                     emptyStateContainer.visibility = View.GONE
@@ -283,13 +270,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun displaySpeciesInfo(info: SpeciesInfo) {
-        // Basic info
         speciesInfoCard.findViewById<TextView>(R.id.tvCommonName)?.text = info.commonName
         speciesInfoCard.findViewById<TextView>(R.id.tvScientificName)?.text = info.scientificName
         speciesInfoCard.findViewById<TextView>(R.id.tvConfidence)?.text =
             "Độ tin cậy: ${(info.confidence * 100).toInt()}%"
 
-        // Taxonomy
         setTextIfNotEmpty(R.id.tvKingdom, info.kingdom)
         setTextIfNotEmpty(R.id.tvPhylum, info.phylum)
         setTextIfNotEmpty(R.id.tvClass, info.className)
@@ -298,31 +283,10 @@ class MainActivity : AppCompatActivity() {
         setTextIfNotEmpty(R.id.tvGenus, info.genus)
         setTextIfNotEmpty(R.id.tvSpecies, info.species)
 
-        // Description sections
-        setSectionVisibility(
-            R.id.sectionDescription,
-            R.id.tvDescription,
-            info.description,
-            "Không có thông tin chi tiết"
-        )
-
-        setSectionVisibility(
-            R.id.sectionCharacteristics,
-            R.id.tvCharacteristics,
-            info.characteristics
-        )
-
-        setSectionVisibility(
-            R.id.sectionDistribution,
-            R.id.tvDistribution,
-            info.distribution
-        )
-
-        setSectionVisibility(
-            R.id.sectionHabitat,
-            R.id.tvHabitat,
-            info.habitat
-        )
+        setSectionVisibility(R.id.sectionDescription, R.id.tvDescription, info.description, "Không có thông tin chi tiết")
+        setSectionVisibility(R.id.sectionCharacteristics, R.id.tvCharacteristics, info.characteristics)
+        setSectionVisibility(R.id.sectionDistribution, R.id.tvDistribution, info.distribution)
+        setSectionVisibility(R.id.sectionHabitat, R.id.tvHabitat, info.habitat)
     }
 
     private fun setTextIfNotEmpty(viewId: Int, text: String) {
@@ -346,7 +310,6 @@ class MainActivity : AppCompatActivity() {
         val textView = speciesInfoCard.findViewById<TextView>(textViewId)
 
         if (text.isNotEmpty() && text != excludeText) {
-            // Render HTML
             textView?.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 Html.fromHtml(text, Html.FROM_HTML_MODE_COMPACT)
             } else {
@@ -359,6 +322,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Các hàm chuyển màn hình
     private fun showHomeScreen() {
         fabSearch.visibility = View.VISIBLE
         homeContainer.visibility = View.VISIBLE
@@ -368,7 +332,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showHistoryScreen() {
-        fabSearch.visibility = View.GONE
+        fabSearch.visibility = View.GONE // Ẩn nút search ở màn hình History
         homeContainer.visibility = View.GONE
         historyContainer.visibility = View.VISIBLE
         myGardenContainer.visibility = View.GONE
