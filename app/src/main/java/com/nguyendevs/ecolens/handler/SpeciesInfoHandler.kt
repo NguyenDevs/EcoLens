@@ -22,7 +22,8 @@ import com.nguyendevs.ecolens.model.SpeciesInfo
  */
 class SpeciesInfoHandler(
     private val context: Context,
-    private val speciesInfoCard: MaterialCardView
+    private val speciesInfoCard: MaterialCardView,
+    private val onCopySuccess: (String) -> Unit
 ) {
 
     /**
@@ -43,10 +44,14 @@ class SpeciesInfoHandler(
     private fun setupCopyButton(info: SpeciesInfo) {
         val btnCopy = speciesInfoCard.findViewById<ImageView>(R.id.btnCopyScientificName)
         btnCopy?.setOnClickListener {
+            val textToCopy = info.scientificName
             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val clip = ClipData.newPlainText("Scientific Name", info.scientificName)
+            val clip = ClipData.newPlainText("Scientific Name", textToCopy)
             clipboard.setPrimaryClip(clip)
-            Toast.makeText(context, "Đã copy: ${info.scientificName}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Đã copy: $textToCopy", Toast.LENGTH_SHORT).show()
+
+            // Kích hoạt callback để mở thanh search
+            onCopySuccess(textToCopy)
         }
     }
 
