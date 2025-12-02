@@ -1,7 +1,6 @@
 package com.nguyendevs.ecolens.network
 
 import com.nguyendevs.ecolens.api.INaturalistApi
-import com.nguyendevs.ecolens.api.TranslationApi
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -47,5 +46,4 @@ object RetrofitClient {
         .build()
 
     val iNaturalistApi: INaturalistApi = iNaturalistRetrofit.create(INaturalistApi::class.java)
-    val translationApi: TranslationApi = translationRetrofit.create(TranslationApi::class.java)
 }

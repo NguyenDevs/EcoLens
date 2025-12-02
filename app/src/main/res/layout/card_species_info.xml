@@ -6,6 +6,7 @@
         android:layout_height="wrap_content"
         app:cardCornerRadius="20dp"
         app:cardElevation="1dp"
+        android:layout_marginTop="20dp"
         app:cardUseCompatPadding="true"
         app:cardBackgroundColor="@android:color/white">
 
@@ -13,7 +14,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:padding="20dp"
+            >
 
         <!-- Common Name -->
         <TextView
@@ -52,7 +54,15 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:alpha="0.6"
                     android:contentDescription="Copy scientific name" />
-
+            <ImageView
+                    android:id="@+id/btnShareInfo"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_share"
+                    android:padding="6dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:alpha="0.6"
+                    android:contentDescription="Copy scientific name" />
         </LinearLayout>
 
         <!-- Confidence Badge -->
