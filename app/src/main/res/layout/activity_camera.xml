@@ -59,9 +59,9 @@
 
     </FrameLayout>
 
-    <!-- Settings Button -->
+    <!-- Upload Button -->
     <ImageView
-            android:id="@+id/settingsButton"
+            android:id="@+id/uploadButton"
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:src="@drawable/ic_upload"

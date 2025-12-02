@@ -31,6 +31,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.button.MaterialButton
 import com.nguyendevs.ecolens.activity.CameraActivity
+import com.nguyendevs.ecolens.activity.HistoryDetailFragment
 import com.nguyendevs.ecolens.adapter.HistoryAdapter
 
 import java.io.File
@@ -198,6 +199,17 @@ class MainActivity : AppCompatActivity() {
         } else {
             requestPermissions()
         }
+    }
+
+    fun openHistoryDetail(entry: HistoryEntry) {
+        val detailFragment = HistoryDetailFragment()
+        detailFragment.setData(entry)
+
+        supportFragmentManager.beginTransaction()
+            .setCustomAnimations(R.anim.slide_in_bottom, R.anim.hold, R.anim.hold, R.anim.slide_out_bottom)
+            .replace(R.id.fragment_container, detailFragment) // R.id.fragment_container là ID của container chứa fragment chính
+            .addToBackStack("history_detail")
+            .commit()
     }
 
 
