@@ -15,6 +15,7 @@ import java.util.Locale
 import java.util.TimeZone
 
 class HistoryAdapter(
+
     private var historyList: List<HistoryEntry>,
     private val clickListener: (HistoryEntry) -> Unit) : RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
 
@@ -58,9 +59,15 @@ class HistoryAdapter(
         private val tvDateHeader: TextView = itemView.findViewById(R.id.tvDateHeader)
 
         fun bind(entry: HistoryEntry, clickListener: (HistoryEntry) -> Unit) {
-            tvCommonName.text = entry.speciesInfo.commonName.ifEmpty { "[Không rõ tên thường gọi]" }
-            tvScientificName.text = entry.speciesInfo.scientificName.ifEmpty { "[Không rõ tên khoa học]" }
-            tvTime.text = "Thời gian: ${timeFormatter.format(Date(entry.timestamp))}"
+            val context = itemView.context
+
+            tvCommonName.text = entry.speciesInfo.commonName.ifEmpty {
+                context.getString(R.string.unknown_common_name)
+            }
+            tvScientificName.text = entry.speciesInfo.scientificName.ifEmpty {
+                context.getString(R.string.unknown_scientific_name)
+            }
+            tvTime.text = "${context.getString(R.string.time_prefix)}${timeFormatter.format(Date(entry.timestamp))}"
 
             Glide.with(itemView.context)
                 .load(entry.imagePath)

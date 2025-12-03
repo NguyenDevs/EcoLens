@@ -58,7 +58,8 @@ class SpeciesInfoHandler(
 
         speciesInfoCard.findViewById<TextView>(R.id.tvCommonName)?.text = info.commonName
         speciesInfoCard.findViewById<TextView>(R.id.tvScientificName)?.text = info.scientificName
-        speciesInfoCard.findViewById<TextView>(R.id.tvConfidence)?.text = "Độ tin cậy: $confidencePercent%"
+        speciesInfoCard.findViewById<TextView>(R.id.tvConfidence)?.text =
+            context.getString(R.string.confidence_format, confidencePercent)
 
         val confidenceCard = speciesInfoCard.findViewById<MaterialCardView>(R.id.confidenceCard)
         val iconConfidence = speciesInfoCard.findViewById<ImageView>(R.id.iconConfidence)

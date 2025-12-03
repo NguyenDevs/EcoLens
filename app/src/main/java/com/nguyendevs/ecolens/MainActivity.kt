@@ -302,9 +302,8 @@ class MainActivity : AppCompatActivity() {
         }
         fabSpeak.setOnClickListener {
             viewModel.uiState.value.speciesInfo?.let { info ->
-                val textToRead = TextToSpeechGenerator.generateSpeechText(info)
+                val textToRead = TextToSpeechGenerator.generateSpeechText(this, info)
                 if (textToRead.isNotEmpty()) {
-                    // Set ngôn ngữ trước khi nói
                     speakerManager.setLanguage(languageManager.getLanguage())
                     speakerManager.speak(textToRead)
                     toggleSpeakerUI(isSpeaking = true)

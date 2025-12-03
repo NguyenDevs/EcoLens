@@ -143,11 +143,11 @@ class CameraActivity : AppCompatActivity() {
 
             } catch (exc: Exception) {
                 if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
-                    Toast.makeText(this, "Không thể mở camera trước", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.error_camera_front), Toast.LENGTH_SHORT).show()
                     lensFacing = CameraSelector.LENS_FACING_BACK
                     startCamera()
                 } else {
-                    Toast.makeText(this, "Không thể mở camera: ${exc.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.error_camera_open, exc.message), Toast.LENGTH_SHORT).show()
                     finish()
                 }
             }
@@ -191,7 +191,7 @@ class CameraActivity : AppCompatActivity() {
             outputOptions, ContextCompat.getMainExecutor(this), object : ImageCapture.OnImageSavedCallback {
                 override fun onError(exc: ImageCaptureException) {
                     Log.e("CameraActivity", "Photo capture failed: ${exc.message}", exc)
-                    Toast.makeText(baseContext, "Lỗi chụp ảnh: ${exc.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(baseContext, getString(R.string.error_capture, exc.message), Toast.LENGTH_SHORT).show()
                 }
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {

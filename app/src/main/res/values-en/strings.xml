@@ -1,4 +1,24 @@
 <resources>
+    <string name="tts_scientific_name">Scientific name</string>
+    <string name="tts_taxonomy">Scientific classification</string>
+
+    <string name="unknown_common_name">[Unknown common name]</string>
+    <string name="unknown_scientific_name">[Unknown scientific name]</string>
+    <string name="time_prefix">Time: </string>
+
+    <string name="permission_title">Permission Required</string>
+    <string name="permission_message">This app needs camera and storage permissions to function.</string>
+    <string name="ok">OK</string>
+
+    <string name="error_camera_front">Cannot open front camera</string>
+    <string name="error_camera_open">Cannot open camera: %s</string>
+    <string name="error_capture">Capture error: %s</string>
+    <string name="error_browser">Web browser not found</string>
+
+    <string name="analyzing_text">Analyzing image</string>
+
+    <string name="confidence_format">Confidence: %s%%</string>
+
     <string name="app_name">EcoLens</string>
     <string name="nav_home">Home</string>
     <string name="nav_history">History</string>

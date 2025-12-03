@@ -37,9 +37,9 @@ class PermissionManager(
 
     fun showPermissionDeniedDialog() {
         MaterialAlertDialogBuilder(context)
-            .setTitle("Cần quyền truy cập")
-            .setMessage("Ứng dụng cần quyền camera và thư viện ảnh để hoạt động.")
-            .setPositiveButton("OK", null)
+            .setTitle(context.getString(com.nguyendevs.ecolens.R.string.permission_title))
+            .setMessage(context.getString(com.nguyendevs.ecolens.R.string.permission_message))
+            .setPositiveButton(context.getString(com.nguyendevs.ecolens.R.string.ok), null)
             .show()
     }
 }

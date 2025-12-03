@@ -110,7 +110,7 @@ class SearchBarHandler(
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/search?q=$query"))
                 context.startActivity(intent)
             } catch (e: Exception) {
-                Toast.makeText(context, "Không tìm thấy trình duyệt web", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.error_browser), Toast.LENGTH_SHORT).show()
             }
         } else {
             collapseSearchBar()

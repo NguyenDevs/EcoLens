@@ -20,7 +20,7 @@ class LoadingAnimationHandler(
     fun start() {
         if (loadingTextJob?.isActive == true) return
         loadingTextJob = coroutineScope.launch {
-            val baseText = "Đang phân tích hình ảnh"
+            val baseText = tvLoading.context.getString(com.nguyendevs.ecolens.R.string.analyzing_text)
             val dots = "..."
             val fullText = "$baseText$dots"
 

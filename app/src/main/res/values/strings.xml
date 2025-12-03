@@ -1,8 +1,28 @@
 <resources>
+    <string name="tts_scientific_name">Tên khoa học</string>
+    <string name="tts_taxonomy">Phân loại khoa học</string>
+
+    <string name="unknown_common_name">[Không rõ tên thường gọi]</string>
+    <string name="unknown_scientific_name">[Không rõ tên khoa học]</string>
+    <string name="time_prefix">Thời gian: </string>
+
+    <string name="permission_title">Cần quyền truy cập</string>
+    <string name="permission_message">Ứng dụng cần quyền camera và thư viện ảnh để hoạt động.</string>
+    <string name="ok">OK</string>
+
+    <string name="error_camera_front">Không thể mở camera trước</string>
+    <string name="error_camera_open">Không thể mở camera: %s</string>
+    <string name="error_capture">Lỗi chụp ảnh: %s</string>
+    <string name="error_browser">Không tìm thấy trình duyệt web</string>
+
+    <string name="analyzing_text">Đang phân tích hình ảnh</string>
+
+    <string name="confidence_format">Độ tin cậy: %s%%</string>
+
     <string name="app_name">EcoLens</string>
     <string name="nav_home">Trang chủ</string>
     <string name="nav_history">Lịch sử</string>
-    <string name="nav_my_garden">Vườn của tôi</string>
+    <string name="nav_my_garden">Yêu thích</string>
     <string name="nav_settings">Cài đặt</string>
 
     <string name="settings_title">Cài đặt</string>

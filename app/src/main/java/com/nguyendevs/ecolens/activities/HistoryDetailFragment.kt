@@ -74,13 +74,14 @@ class HistoryDetailFragment : Fragment() {
         tvScientificName.text = info.scientificName
 
         val taxonomyHtml = buildString {
-            if (info.kingdom.isNotEmpty()) append("• Giới: ${info.kingdom}<br>")
-            if (info.phylum.isNotEmpty()) append("• Ngành: ${info.phylum}<br>")
-            if (info.className.isNotEmpty()) append("• Lớp: ${info.className}<br>")
-            if (info.order.isNotEmpty()) append("• Bộ: ${info.order}<br>")
-            if (info.family.isNotEmpty()) append("• Họ: ${info.family}<br>")
-            if (info.genus.isNotEmpty()) append("• Chi: ${info.genus}<br>")
-            if (info.species.isNotEmpty()) append("• Loài: ${info.species}")
+            // Dùng getString() thay vì cứng chữ
+            if (info.kingdom.isNotEmpty()) append("• ${getString(R.string.label_kingdom)} ${info.kingdom}<br>")
+            if (info.phylum.isNotEmpty()) append("• ${getString(R.string.label_phylum)} ${info.phylum}<br>")
+            if (info.className.isNotEmpty()) append("• ${getString(R.string.label_class)} ${info.className}<br>")
+            if (info.order.isNotEmpty()) append("• ${getString(R.string.label_order)} ${info.order}<br>")
+            if (info.family.isNotEmpty()) append("• ${getString(R.string.label_family)} ${info.family}<br>")
+            if (info.genus.isNotEmpty()) append("• ${getString(R.string.label_genus)} ${info.genus}<br>")
+            if (info.species.isNotEmpty()) append("• ${getString(R.string.label_species)} ${info.species}")
         }
 
         val taxonomySpanned =
