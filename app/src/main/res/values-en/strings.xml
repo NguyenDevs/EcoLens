@@ -1,51 +1,26 @@
 <resources>
-    <string name="tts_scientific_name">Scientific name</string>
-    <string name="tts_taxonomy">Scientific classification</string>
-
-    <string name="unknown_common_name">[Unknown common name]</string>
-    <string name="unknown_scientific_name">[Unknown scientific name]</string>
-    <string name="time_prefix">Time: </string>
-
-    <string name="permission_title">Permission Required</string>
-    <string name="permission_message">This app needs camera and storage permissions to function.</string>
-    <string name="ok">OK</string>
-
-    <string name="error_camera_front">Cannot open front camera</string>
-    <string name="error_camera_open">Cannot open camera: %s</string>
-    <string name="error_capture">Capture error: %s</string>
-    <string name="error_browser">Web browser not found</string>
-
-    <string name="analyzing_text">Analyzing image</string>
-
-    <string name="confidence_format">Confidence: %s%%</string>
-
+    <!-- App Info -->
     <string name="app_name">EcoLens</string>
+    <string name="app_title">EcoLens</string>
+    <string name="app_subtitle">Identify species via images</string>
+    <string name="app_subtitle_home">Identify species via images.</string>
+
+    <!-- Navigation -->
     <string name="nav_home">Home</string>
     <string name="nav_history">History</string>
     <string name="nav_my_garden">Favorites</string>
     <string name="nav_settings">Settings</string>
 
-    <string name="settings_title">Settings</string>
-    <string name="language_label">Language</string>
-    <string name="lang_vietnamese">Tiếng Việt</string>
-    <string name="lang_english">English</string>
-
+    <!-- Common Actions -->
+    <string name="ok">OK</string>
     <string name="camera">Camera</string>
-    <string name="image_preview">Image Preview</string>
-    <string name="no_image">No Image</string>
-    <string name="error">Error</string>
-    <string name="confidence">Confidence</string>
-    <string name="history">History</string>
-    <string name="my_garden">Favorites</string>
-    <string name="settings">Settings</string>
+    <string name="search">Search</string>
+    <string name="speak">Read content</string>
 
-    <string name="app_title">EcoLens</string>
-    <string name="app_subtitle">Identify species via images</string>
-    <string name="analyzing">Analyzing image…</string>
-    <string name="no_image_selected">No image selected</string>
-    <string name="error_occurred">An error occurred</string>
-
-    <string name="taxonomy_title">🔬 Scientific Classification</string>
+    <!-- Labels -->
+    <string name="label_common_name">Common name</string>
+    <string name="label_scientific_name">Scientific name</string>
+    <string name="label_confidence_template">Confidence: %s</string>
     <string name="label_kingdom">Kingdom:</string>
     <string name="label_phylum">Phylum:</string>
     <string name="label_class">Class:</string>
@@ -54,18 +29,90 @@
     <string name="label_genus">Genus:</string>
     <string name="label_species">Species:</string>
 
+    <!-- TTS (Text-to-Speech) -->
+    <string name="tts_scientific_name">Scientific name</string>
+    <string name="tts_taxonomy">Scientific classification</string>
+
+    <!-- Unknown Values -->
+    <string name="unknown_common_name">[Unknown common name]</string>
+    <string name="unknown_scientific_name">[Unknown scientific name]</string>
+
+    <!-- Time & Date -->
+    <string name="time_prefix">Time: </string>
+
+    <!-- Permissions -->
+    <string name="permission_title">Permission Required</string>
+    <string name="permission_message">This app needs camera and storage permissions to function.</string>
+
+    <!-- Image Related -->
+    <string name="image_preview">Image Preview</string>
+    <string name="no_image">No Image</string>
+    <string name="no_image_selected">No image selected</string>
+
+    <!-- Analysis & Loading -->
+    <string name="analyzing">Analyzing image…</string>
+    <string name="analyzing_text">Analyzing image</string>
+    <string name="loading_analyzing">Analyzing image...</string>
+
+    <!-- Confidence -->
+    <string name="confidence">Confidence</string>
+    <string name="confidence_format">Confidence: %s%%</string>
+
+    <!-- Taxonomy Section -->
+    <string name="taxonomy_title">🔬 Scientific Classification</string>
+
+    <!-- Information Sections -->
     <string name="section_description">📖 Description</string>
     <string name="section_characteristics">✨ Characteristics</string>
     <string name="section_distribution">🌍 Distribution</string>
     <string name="section_habitat">🏞️ Habitat</string>
     <string name="section_conservation">🛡️ Conservation Status</string>
 
+    <!-- History Screen -->
+    <string name="history">History</string>
+    <string name="history_title_label">Recognition History</string>
     <string name="history_placeholder">Recognition History</string>
     <string name="history_subtitle">Feature under development</string>
+
+    <!-- My Garden Screen -->
+    <string name="my_garden">Favorites</string>
+    <string name="my_garden_title">Favorites</string>
+    <string name="my_garden_desc">Save your favorite species</string>
     <string name="garden_placeholder">Favorites</string>
     <string name="garden_subtitle">Save your favorite species</string>
+
+    <!-- Settings Screen -->
+    <string name="settings">Settings</string>
+    <string name="settings_title">Settings</string>
     <string name="settings_placeholder">Settings</string>
     <string name="settings_subtitle">Application options</string>
-    <string name="search">Search</string>
-    <string name="speak">Read content</string>
+    <string name="language_label">Language</string>
+    <string name="lang_vietnamese">Tiếng Việt</string>
+    <string name="lang_english">English</string>
+
+    <!-- Share Feature -->
+    <string name="share_title">🌿 SPECIES INFORMATION</string>
+    <string name="share_taxonomy_title">🔬 SCIENTIFIC CLASSIFICATION</string>
+    <string name="share_desc_title">📖 DESCRIPTION</string>
+    <string name="share_char_title">✨ CHARACTERISTICS</string>
+    <string name="share_dist_title">🌍 DISTRIBUTION</string>
+    <string name="share_hab_title">🏞️ HABITAT</string>
+    <string name="share_cons_title">🛡️ CONSERVATION STATUS</string>
+    <string name="share_footer">📱 Shared from EcoLens App</string>
+    <string name="share_subject">Information about %s</string>
+    <string name="share_chooser_title">Share species information via</string>
+
+    <!-- Errors -->
+    <string name="error">Error</string>
+    <string name="error_occurred">An error occurred</string>
+    <string name="error_default">An error occurred</string>
+    <string name="error_prefix">An error occurred: %s</string>
+    <string name="error_no_result">Unable to identify species in the image. Please try another image.</string>
+    <string name="error_camera_front">Cannot open front camera</string>
+    <string name="error_camera_open">Cannot open camera: %s</string>
+    <string name="error_capture">Capture error: %s</string>
+    <string name="error_browser">Web browser not found</string>
+
+    <!-- Feature Status -->
+    <string name="feature_developing">Feature under development</string>
 </resources>

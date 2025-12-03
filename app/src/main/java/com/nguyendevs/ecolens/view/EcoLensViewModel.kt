@@ -4,10 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.ImageDecoder
 import android.net.Uri
-import android.os.Build
-import android.provider.MediaStore
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -16,6 +13,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.gson.Gson
 import com.nguyendevs.ecolens.BuildConfig
+import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.database.HistoryDatabase
 import com.nguyendevs.ecolens.model.EcoLensUiState
 import com.nguyendevs.ecolens.model.HistoryEntry
@@ -34,7 +32,6 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import java.io.FileOutputStream
-import java.io.InputStream
 import java.util.UUID
 import java.util.Locale
 
@@ -56,6 +53,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     fun triggerSearch(query: String) {
         _searchTextAction.value = query
     }
+
     fun resetSearchAction() {
         _searchTextAction.value = null
     }
@@ -192,7 +190,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                     Log.w(TAG, "Không tìm thấy kết quả từ API")
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        error = "Không thể nhận diện sinh vật trong ảnh. Vui lòng thử ảnh khác."
+                        error = context.getString(R.string.error_no_result)
                     )
                 }
 
@@ -202,9 +200,8 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 e.printStackTrace()
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    error = "Đã xảy ra lỗi: ${e.message}"
+                    error = getApplication<Application>().getString(R.string.error_prefix, e.message ?: "Unknown")
                 )
-            } finally {
             }
         }
     }
@@ -215,6 +212,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         languageCode: String
     ): SpeciesInfo {
         return try {
+            val context = getApplication<Application>()
             val highlightColor = "#00796B"
             val dangerColor = "#8B0000"
             val redBookColor = "#c97408"
@@ -222,59 +220,58 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             val leastConcernColor = "#55f200"
             val notRankedColor = "#05deff"
 
-            val langInstruction = if (languageCode == "en") "bằng tiếng Anh (English)" else "bằng tiếng Việt"
-
+            val langInstruction = if (languageCode == "en") "in English" else "bằng tiếng Việt"
             val commonNameDesc = if (languageCode == "en") "Common name in English" else "Tên thường gọi tiếng Việt chuẩn nhất"
 
             val prompt = """
-            Bạn là một nhà sinh vật học chuyên nghiệp. Hãy cung cấp thông tin chi tiết về loài có tên khoa học "$scientificName" $langInstruction.
+            You are a professional biologist. Please provide detailed information about the species with scientific name "$scientificName" $langInstruction.
             
-            === YÊU CẦU ĐỊNH DẠNG ===
+            === FORMAT REQUIREMENTS ===
             
-            1. CÁC TRƯỜNG NỘI DUNG MÔ TẢ (description, characteristics, distribution, habitat, conservationStatus):
-               - Sử dụng <b>...</b> để in đậm các đặc điểm chính, tính chất nổi bật
-               - Sử dụng <font color='$highlightColor'><b>...</b></font> để tô màu xanh lục và in đậm cho:
-                 + Địa danh cụ thể
-                 + Tên riêng
-                 + Các thông số kích thước quan trọng (chiều dài, cân nặng, kích thước...)
-               - CHỈ sử dụng các thẻ HTML cơ bản (<b>, <font>), KHÔNG dùng Markdown (**)
+            1. CONTENT FIELDS (description, characteristics, distribution, habitat, conservationStatus):
+               - Use <b>...</b> for bold text for main features and notable properties
+               - Use <font color='$highlightColor'><b>...</b></font> for green color and bold for:
+                 + Specific place names
+                 + Proper names
+                 + Important size measurements (length, weight, dimensions...)
+               - ONLY use basic HTML tags (<b>, <font>), DO NOT use Markdown (**)
             
-            2. TRƯỜNG PHÂN LOẠI (kingdom, phylum, className, order, family, genus, species):
-               - CHỈ ghi TÊN, KHÔNG thêm tiền tố ("Giới", "Ngành", "Lớp", "Bộ", "Họ", "Chi", "Loài", "Kingdom", "Phylum", etc.)
-               - Ví dụ ĐÚNG: "Động vật", "Dây sống", "Thú" (hoặc "Animalia", "Chordata" nếu là tiếng Anh)
-               - Ví dụ SAI: "Giới Động vật", "Ngành Dây sống", "Lớp Thú"
-               - Với family, genus, species: Ưu tiên tên tiếng Anh/Latin. Nếu có tên địa phương (Việt/Anh) thì ghi trong ngoặc đơn VÀ BỌC TOÀN BỘ PHẦN NGOẶC VÀ NỘI DUNG TRONG <i>...</i>
-                 + Ví dụ: "Felidae (Họ Mèo)", "Panthera (Chi Báo)"
+            2. CLASSIFICATION FIELDS (kingdom, phylum, className, order, family, genus, species):
+               - ONLY write the NAME, DO NOT add prefixes ("Kingdom", "Phylum", "Class", etc.)
+               - Example CORRECT: "Animalia", "Chordata", "Mammalia" (or Vietnamese equivalents)
+               - Example WRONG: "Kingdom Animalia", "Phylum Chordata"
+               - For family, genus, species: Prioritize English/Latin names. If there's a local name, put it in parentheses AND wrap the ENTIRE parenthetical phrase in <i>...</i>
+                 + Example: "Felidae <i>(Cat Family)</i>", "Panthera <i>(Big Cats)</i>"
             
-            3. TRƯỜNG CONSERVATIONSTATUS - MÀU SẮC ĐÁNH DẤU:
-               - Nguy cấp (Critically Endangered/Endangered): <font color='$dangerColor'><b>...</b></font>
-               - Sách đỏ/Vulnerable: <font color='$redBookColor'><b>...</b></font>
-               - Dễ bị tổn thương: <font color='$vulnerableColor'><b>...</b></font>
-               - Ít quan tâm (Least Concern): <font color='$leastConcernColor'><b>...</b></font>
-               - Không xếp hạng: <font color='$notRankedColor'><b>...</b></font>
+            3. CONSERVATIONSTATUS FIELD - COLOR CODING:
+               - Critically Endangered/Endangered: <font color='$dangerColor'><b>...</b></font>
+               - Red Book/Vulnerable: <font color='$redBookColor'><b>...</b></font>
+               - Near Threatened: <font color='$vulnerableColor'><b>...</b></font>
+               - Least Concern: <font color='$leastConcernColor'><b>...</b></font>
+               - Not Ranked: <font color='$notRankedColor'><b>...</b></font>
             
-            === YÊU CẦU NỘI DUNG ===
+            === CONTENT REQUIREMENTS ===
             
-            - description: Mô tả tổng quan (khoảng 5 câu), có thụt đầu dòng.
-            - characteristics: Trình bày dạng gạch đầu dòng (•), xuống dòng giữa các ý, tập trung vào hình thái, kích thước, màu sắc.
-            - distribution: Ưu tiên phân bố tại Việt Nam trước (nếu có), sau đó đến thế giới.
-            - habitat: Môi trường sống cụ thể, có thụt đầu dòng.
-            - conservationStatus: Tình trạng bảo tồn hiện tại.
+            - description: General overview (about 5 sentences), with paragraph indentation.
+            - characteristics: Present in bullet point format (•), new line between points, focus on morphology, size, colors.
+            - distribution: Prioritize distribution in Vietnam first (if applicable), then worldwide.
+            - habitat: Specific living environment, with paragraph indentation.
+            - conservationStatus: Current conservation status.
             
-            === ĐỊNH DẠNG ĐẦU RA ===
+            === OUTPUT FORMAT ===
             
-            Trả về JSON thuần túy (KHÔNG có markdown fence, KHÔNG có ```json):
+            Return pure JSON (NO markdown fence, NO ```json):
             
             {
                 "commonName": "$commonNameDesc",
-                "kingdom": "Tên giới (chỉ tên)",
-                "phylum": "Tên ngành (chỉ tên)",
-                "className": "Tên lớp (chỉ tên)",
-                "order": "Tên bộ (chỉ tên)",
-                "family": "Tên họ (Tên thường gọi nếu có)",
-                "genus": "Tên chi (Tên thường gọi nếu có)",
-                "species": "Tên loài (Tên thường gọi nếu có)",
-                "rank": "Cấp phân loại",
+                "kingdom": "Kingdom name (name only)",
+                "phylum": "Phylum name (name only)",
+                "className": "Class name (name only)",
+                "order": "Order name (name only)",
+                "family": "Family name (common name if available)",
+                "genus": "Genus name (common name if available)",
+                "species": "Species name (common name if available)",
+                "rank": "Classification rank",
                 "description": "...",
                 "characteristics": "...",
                 "distribution": "...",
@@ -306,10 +303,11 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         } catch (e: Exception) {
             Log.e(TAG, "❌ Lỗi khi parse Gemini response: ${e.message}", e)
 
+            val context = getApplication<Application>()
             val errorMsg = if (languageCode == "en")
-                "Could not retrieve details from AI at this time."
+                context.getString(R.string.error_occurred)
             else
-                "Không thể lấy thông tin chi tiết từ AI vào lúc này."
+                context.getString(R.string.error_default)
 
             SpeciesInfo(
                 commonName = scientificName,

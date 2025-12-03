@@ -7,6 +7,7 @@ import android.os.Build
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.nguyendevs.ecolens.R
 
 class PermissionManager(
     private val context: Context,
@@ -37,9 +38,9 @@ class PermissionManager(
 
     fun showPermissionDeniedDialog() {
         MaterialAlertDialogBuilder(context)
-            .setTitle(context.getString(com.nguyendevs.ecolens.R.string.permission_title))
-            .setMessage(context.getString(com.nguyendevs.ecolens.R.string.permission_message))
-            .setPositiveButton(context.getString(com.nguyendevs.ecolens.R.string.ok), null)
+            .setTitle(context.getString(R.string.permission_title))
+            .setMessage(context.getString(R.string.permission_message))
+            .setPositiveButton(context.getString(R.string.ok), null)
             .show()
     }
 }

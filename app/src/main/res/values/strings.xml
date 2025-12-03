@@ -1,50 +1,26 @@
 <resources>
-    <string name="tts_scientific_name">Tên khoa học</string>
-    <string name="tts_taxonomy">Phân loại khoa học</string>
-
-    <string name="unknown_common_name">[Không rõ tên thường gọi]</string>
-    <string name="unknown_scientific_name">[Không rõ tên khoa học]</string>
-    <string name="time_prefix">Thời gian: </string>
-
-    <string name="permission_title">Cần quyền truy cập</string>
-    <string name="permission_message">Ứng dụng cần quyền camera và thư viện ảnh để hoạt động.</string>
-    <string name="ok">OK</string>
-
-    <string name="error_camera_front">Không thể mở camera trước</string>
-    <string name="error_camera_open">Không thể mở camera: %s</string>
-    <string name="error_capture">Lỗi chụp ảnh: %s</string>
-    <string name="error_browser">Không tìm thấy trình duyệt web</string>
-
-    <string name="analyzing_text">Đang phân tích hình ảnh</string>
-
-    <string name="confidence_format">Độ tin cậy: %s%%</string>
-
+    <!-- App Info -->
     <string name="app_name">EcoLens</string>
+    <string name="app_title">EcoLens</string>
+    <string name="app_subtitle">Nhận diện động thực vật bằng hình ảnh</string>
+    <string name="app_subtitle_home">Nhận diện động thực vật bằng hình ảnh.</string>
+
+    <!-- Navigation -->
     <string name="nav_home">Trang chủ</string>
     <string name="nav_history">Lịch sử</string>
     <string name="nav_my_garden">Yêu thích</string>
     <string name="nav_settings">Cài đặt</string>
 
-    <string name="settings_title">Cài đặt</string>
-    <string name="language_label">Ngôn ngữ</string>
-    <string name="lang_vietnamese">Tiếng Việt</string>
-    <string name="lang_english">English</string>
-
+    <!-- Common Actions -->
+    <string name="ok">OK</string>
     <string name="camera">Máy ảnh</string>
-    <string name="image_preview">Xem trước ảnh</string>
-    <string name="no_image">Không có ảnh</string>
-    <string name="error">Lỗi</string>
-    <string name="confidence">Độ tin cậy</string>
-    <string name="history">Lịch sử</string>
-    <string name="my_garden">Yêu thích</string>
-    <string name="settings">Cài đặt</string>
+    <string name="search">Tìm kiếm</string>
+    <string name="speak">Đọc nội dung</string>
 
-    <string name="app_title">EcoLens</string>
-    <string name="app_subtitle">Nhận diện động thực vật bằng hình ảnh</string>
-    <string name="no_image_selected">Chưa chọn ảnh</string>
-    <string name="error_occurred">Đã xảy ra lỗi</string>
-
-    <string name="taxonomy_title">🔬 Phân loại khoa học</string>
+    <!-- Labels -->
+    <string name="label_common_name">Tên thường gọi</string>
+    <string name="label_scientific_name">Tên khoa học</string>
+    <string name="label_confidence_template">Độ tin cậy: %s</string>
     <string name="label_kingdom">Giới:</string>
     <string name="label_phylum">Ngành:</string>
     <string name="label_class">Lớp:</string>
@@ -52,19 +28,91 @@
     <string name="label_family">Họ:</string>
     <string name="label_genus">Chi:</string>
     <string name="label_species">Loài:</string>
+
+    <!-- TTS (Text-to-Speech) -->
+    <string name="tts_scientific_name">Tên khoa học</string>
+    <string name="tts_taxonomy">Phân loại khoa học</string>
+
+    <!-- Unknown Values -->
+    <string name="unknown_common_name">[Không rõ tên thường gọi]</string>
+    <string name="unknown_scientific_name">[Không rõ tên khoa học]</string>
+
+    <!-- Time & Date -->
+    <string name="time_prefix">Thời gian: </string>
+
+    <!-- Permissions -->
+    <string name="permission_title">Cần quyền truy cập</string>
+    <string name="permission_message">Ứng dụng cần quyền camera và thư viện ảnh để hoạt động.</string>
+
+    <!-- Image Related -->
+    <string name="image_preview">Xem trước ảnh</string>
+    <string name="no_image">Không có ảnh</string>
+    <string name="no_image_selected">Chưa chọn ảnh</string>
+
+    <!-- Analysis & Loading -->
     <string name="analyzing">Đang phân tích hình ảnh…</string>
+    <string name="analyzing_text">Đang phân tích hình ảnh</string>
+    <string name="loading_analyzing">Đang phân tích hình ảnh...</string>
+
+    <!-- Confidence -->
+    <string name="confidence">Độ tin cậy</string>
+    <string name="confidence_format">Độ tin cậy: %s%%</string>
+
+    <!-- Taxonomy Section -->
+    <string name="taxonomy_title">🔬 Phân loại khoa học</string>
+
+    <!-- Information Sections -->
     <string name="section_description">📖 Mô tả</string>
     <string name="section_characteristics">✨ Đặc điểm</string>
     <string name="section_distribution">🌍 Phân bố</string>
     <string name="section_habitat">🏞️ Môi trường sống</string>
     <string name="section_conservation">🛡️ Tình trạng bảo tồn</string>
 
+    <!-- History Screen -->
+    <string name="history">Lịch sử</string>
+    <string name="history_title_label">Lịch sử nhận diện</string>
     <string name="history_placeholder">Lịch sử nhận diện</string>
     <string name="history_subtitle">Chức năng đang được phát triển</string>
+
+    <!-- My Garden Screen -->
+    <string name="my_garden">Yêu thích</string>
+    <string name="my_garden_title">Mục yêu thích</string>
+    <string name="my_garden_desc">Lưu trữ các loài yêu thích</string>
     <string name="garden_placeholder">Lưu trữ các loài yêu thích</string>
     <string name="garden_subtitle">Lưu trữ các loài yêu thích</string>
+
+    <!-- Settings Screen -->
+    <string name="settings">Cài đặt</string>
+    <string name="settings_title">Cài đặt</string>
     <string name="settings_placeholder">Cài đặt</string>
     <string name="settings_subtitle">Các tùy chọn cài đặt</string>
-    <string name="search">Tìm kiếm</string>
-    <string name="speak">Đọc nội dung</string>
+    <string name="language_label">Ngôn ngữ</string>
+    <string name="lang_vietnamese">Tiếng Việt</string>
+    <string name="lang_english">English</string>
+
+    <!-- Share Feature -->
+    <string name="share_title">🌿 THÔNG TIN LOÀI</string>
+    <string name="share_taxonomy_title">🔬 PHÂN LOẠI KHOA HỌC</string>
+    <string name="share_desc_title">📖 MÔ TẢ</string>
+    <string name="share_char_title">✨ ĐẶC ĐIỂM</string>
+    <string name="share_dist_title">🌍 PHÂN BỐ</string>
+    <string name="share_hab_title">🏞️ MÔI TRƯỜNG SỐNG</string>
+    <string name="share_cons_title">🛡️ TÌNH TRẠNG BẢO TỒN</string>
+    <string name="share_footer">📱 Chia sẻ từ EcoLens App</string>
+    <string name="share_subject">Thông tin về %s</string>
+    <string name="share_chooser_title">Chia sẻ thông tin loài qua</string>
+
+    <!-- Errors -->
+    <string name="error">Lỗi</string>
+    <string name="error_occurred">Đã xảy ra lỗi</string>
+    <string name="error_default">Đã xảy ra lỗi</string>
+    <string name="error_prefix">Đã xảy ra lỗi: %s</string>
+    <string name="error_no_result">Không thể nhận diện sinh vật trong ảnh. Vui lòng thử ảnh khác.</string>
+    <string name="error_camera_front">Không thể mở camera trước</string>
+    <string name="error_camera_open">Không thể mở camera: %s</string>
+    <string name="error_capture">Lỗi chụp ảnh: %s</string>
+    <string name="error_browser">Không tìm thấy trình duyệt web</string>
+
+    <!-- Feature Status -->
+    <string name="feature_developing">Chức năng đang được phát triển</string>
 </resources>

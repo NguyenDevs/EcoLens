@@ -39,7 +39,6 @@ class SpeciesInfoHandler(
             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = ClipData.newPlainText("Scientific Name", textToCopy)
             clipboard.setPrimaryClip(clip)
-            //Toast.makeText(context, "Đã copy: $textToCopy", Toast.LENGTH_SHORT).show()
 
             onCopySuccess(textToCopy)
         }
@@ -53,7 +52,7 @@ class SpeciesInfoHandler(
     }
 
     private fun displayBasicInfo(info: SpeciesInfo) {
-        val confidenceValue = info.confidence.coerceIn(0.0, 100.0) // Đảm bảo nằm trong 0-100
+        val confidenceValue = info.confidence.coerceIn(0.0, 100.0)
         val confidencePercent = String.format("%.2f", confidenceValue)
 
         speciesInfoCard.findViewById<TextView>(R.id.tvCommonName)?.text = info.commonName
@@ -67,25 +66,22 @@ class SpeciesInfoHandler(
 
         when {
             confidenceValue >= 50f -> {
-                // Cao: xanh lá
                 iconConfidence?.setImageResource(R.drawable.ic_check_circle)
-                iconConfidence?.imageTintList = ContextCompat.getColorStateList(context, R.color.confidence_high) // #00A86B
-                confidenceCard?.setCardBackgroundColor(ContextCompat.getColor(context, R.color.confidence_bg_high)) // #E8F5E9
-                tvConfidence?.setTextColor(ContextCompat.getColor(context, R.color.confidence_text_high)) // #00796B
+                iconConfidence?.imageTintList = ContextCompat.getColorStateList(context, R.color.confidence_high)
+                confidenceCard?.setCardBackgroundColor(ContextCompat.getColor(context, R.color.confidence_bg_high))
+                tvConfidence?.setTextColor(ContextCompat.getColor(context, R.color.confidence_text_high))
             }
             confidenceValue >= 25f -> {
-                // Trung bình: cam
                 iconConfidence?.setImageResource(R.drawable.ic_check_warning_circle)
-                iconConfidence?.imageTintList = ContextCompat.getColorStateList(context, R.color.confidence_medium) // #FF8C00 hoặc #F57C00
-                confidenceCard?.setCardBackgroundColor(ContextCompat.getColor(context, R.color.confidence_bg_medium)) // #FFF3E0
-                tvConfidence?.setTextColor(ContextCompat.getColor(context, R.color.confidence_text_medium)) // #E65100
+                iconConfidence?.imageTintList = ContextCompat.getColorStateList(context, R.color.confidence_medium)
+                confidenceCard?.setCardBackgroundColor(ContextCompat.getColor(context, R.color.confidence_bg_medium))
+                tvConfidence?.setTextColor(ContextCompat.getColor(context, R.color.confidence_text_medium))
             }
             else -> {
-                // Thấp: đỏ
                 iconConfidence?.setImageResource(R.drawable.ic_check_not_circle)
-                iconConfidence?.imageTintList = ContextCompat.getColorStateList(context, R.color.confidence_low) // #D32F2F
-                confidenceCard?.setCardBackgroundColor(ContextCompat.getColor(context, R.color.confidence_bg_low)) // #FFEBEE
-                tvConfidence?.setTextColor(ContextCompat.getColor(context, R.color.confidence_text_low)) // #C62828
+                iconConfidence?.imageTintList = ContextCompat.getColorStateList(context, R.color.confidence_low)
+                confidenceCard?.setCardBackgroundColor(ContextCompat.getColor(context, R.color.confidence_bg_low))
+                tvConfidence?.setTextColor(ContextCompat.getColor(context, R.color.confidence_text_low))
             }
         }
     }
@@ -177,67 +173,67 @@ class SpeciesInfoHandler(
         }
 
         val shareText = buildString {
-            append("🌿 THÔNG TIN LOÀI\n")
-            append("━━━━━━━━━━━━━━━━━━━━━\n\n")
+            append(context.getString(R.string.share_title))
+            append("\n━━━━━━━━━━━━━━━━━━━━━\n\n")
 
             append("📌 ${info.commonName}\n")
             append("🔬 ${info.scientificName}\n")
-            append("✅ Độ tin cậy: $confidencePercent%\n\n")
+            append("✅ ${context.getString(R.string.label_confidence_template, confidencePercent)}\n\n")
 
             append("━━━━━━━━━━━━━━━━━━━━━\n")
-            append("🔬 PHÂN LOẠI KHOA HỌC\n")
-            append("━━━━━━━━━━━━━━━━━━━━━\n\n")
+            append(context.getString(R.string.share_taxonomy_title))
+            append("\n━━━━━━━━━━━━━━━━━━━━━\n\n")
 
-            if (info.kingdom.isNotEmpty()) append("• Giới: ${info.kingdom}\n")
-            if (info.phylum.isNotEmpty()) append("• Ngành: ${info.phylum}\n")
-            if (info.className.isNotEmpty()) append("• Lớp: ${info.className}\n")
-            if (info.order.isNotEmpty()) append("• Bộ: ${info.order}\n")
-            if (info.family.isNotEmpty()) append("• Họ: ${info.family}\n")
-            if (info.genus.isNotEmpty()) append("• Chi: ${info.genus}\n")
-            if (info.species.isNotEmpty()) append("• Loài: ${info.species}\n")
+            if (info.kingdom.isNotEmpty()) append("• ${context.getString(R.string.label_kingdom)} ${info.kingdom}\n")
+            if (info.phylum.isNotEmpty()) append("• ${context.getString(R.string.label_phylum)} ${info.phylum}\n")
+            if (info.className.isNotEmpty()) append("• ${context.getString(R.string.label_class)} ${info.className}\n")
+            if (info.order.isNotEmpty()) append("• ${context.getString(R.string.label_order)} ${info.order}\n")
+            if (info.family.isNotEmpty()) append("• ${context.getString(R.string.label_family)} ${info.family}\n")
+            if (info.genus.isNotEmpty()) append("• ${context.getString(R.string.label_genus)} ${info.genus}\n")
+            if (info.species.isNotEmpty()) append("• ${context.getString(R.string.label_species)} ${info.species}\n")
 
             if (info.description.isNotEmpty()) {
                 append("\n━━━━━━━━━━━━━━━━━━━━━\n")
-                append("📖 MÔ TẢ\n")
-                append("━━━━━━━━━━━━━━━━━━━━━\n\n")
+                append(context.getString(R.string.share_desc_title))
+                append("\n━━━━━━━━━━━━━━━━━━━━━\n\n")
                 append(stripHtml(info.description))
                 append("\n")
             }
 
             if (info.characteristics.isNotEmpty()) {
                 append("\n━━━━━━━━━━━━━━━━━━━━━\n")
-                append("✨ ĐẶC ĐIỂM\n")
-                append("━━━━━━━━━━━━━━━━━━━━━\n\n")
+                append(context.getString(R.string.share_char_title))
+                append("\n━━━━━━━━━━━━━━━━━━━━━\n\n")
                 append(stripHtml(info.characteristics))
                 append("\n")
             }
 
             if (info.distribution.isNotEmpty()) {
                 append("\n━━━━━━━━━━━━━━━━━━━━━\n")
-                append("🌍 PHÂN BỐ\n")
-                append("━━━━━━━━━━━━━━━━━━━━━\n\n")
+                append(context.getString(R.string.share_dist_title))
+                append("\n━━━━━━━━━━━━━━━━━━━━━\n\n")
                 append(stripHtml(info.distribution))
                 append("\n")
             }
 
             if (info.habitat.isNotEmpty()) {
                 append("\n━━━━━━━━━━━━━━━━━━━━━\n")
-                append("🏞️ MÔI TRƯỜNG SỐNG\n")
-                append("━━━━━━━━━━━━━━━━━━━━━\n\n")
+                append(context.getString(R.string.share_hab_title))
+                append("\n━━━━━━━━━━━━━━━━━━━━━\n\n")
                 append(stripHtml(info.habitat))
                 append("\n")
             }
 
             if (info.conservationStatus.isNotEmpty()) {
                 append("\n━━━━━━━━━━━━━━━━━━━━━\n")
-                append("🛡️ TÌNH TRẠNG BẢO TỒN\n")
-                append("━━━━━━━━━━━━━━━━━━━━━\n\n")
+                append(context.getString(R.string.share_cons_title))
+                append("\n━━━━━━━━━━━━━━━━━━━━━\n\n")
                 append(stripHtml(info.conservationStatus))
                 append("\n")
             }
 
             append("\n━━━━━━━━━━━━━━━━━━━━━\n")
-            append("📱 Chia sẻ từ EcoLens App")
+            append(context.getString(R.string.share_footer))
         }
 
         try {
@@ -247,12 +243,12 @@ class SpeciesInfoHandler(
                     type = "image/*"
                     putExtra(Intent.EXTRA_STREAM, imageUri)
                     putExtra(Intent.EXTRA_TEXT, shareText)
-                    putExtra(Intent.EXTRA_SUBJECT, "Thông tin về ${info.commonName}")
+                    putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.share_subject, info.commonName))
                     clipData = ClipData.newRawUri(null, imageUri)
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
 
-                val chooserIntent = Intent.createChooser(shareIntent, "Chia sẻ thông tin loài qua")
+                val chooserIntent = Intent.createChooser(shareIntent, context.getString(R.string.share_chooser_title))
                 chooserIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
                 context.startActivity(chooserIntent)
@@ -261,13 +257,13 @@ class SpeciesInfoHandler(
                     action = Intent.ACTION_SEND
                     type = "text/plain"
                     putExtra(Intent.EXTRA_TEXT, shareText)
-                    putExtra(Intent.EXTRA_SUBJECT, "Thông tin về ${info.commonName}")
+                    putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.share_subject, info.commonName))
                 }
-                context.startActivity(Intent.createChooser(shareIntent, "Chia sẻ thông tin loài qua"))
+                context.startActivity(Intent.createChooser(shareIntent, context.getString(R.string.share_chooser_title)))
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(context, "Không thể chia sẻ: ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "${context.getString(R.string.error)}: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 

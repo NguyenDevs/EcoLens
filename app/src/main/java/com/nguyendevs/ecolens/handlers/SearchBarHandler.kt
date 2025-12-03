@@ -14,6 +14,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.textfield.TextInputLayout
+import com.nguyendevs.ecolens.R
 
 class SearchBarHandler(
     private val context: Context,
