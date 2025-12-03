@@ -233,34 +233,31 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             val leastConcernColor = "#55f200"
             val notRankedColor = "#05deff"
 
-            val langInstruction = if (languageCode == "en") "in English" else "bằng tiếng Việt"
-            val commonNameDesc = if (languageCode == "en") "Common name in English" else "Tên thường gọi tiếng Việt chuẩn nhất"
+            val langInstruction = if (languageCode == "en") "in English" else "bằng Tiếng Việt"
+            val commonNameDesc = if (languageCode == "en") "Common name in English" else "Tên thường gọi Tiếng Việt chuẩn nhất"
 
             val prompt = """
-You are a professional biologist. Provide detailed information about "$scientificName" $langInstruction.
-
-=== OUTPUT FORMAT ===
-Return ONLY valid JSON (no markdown, no ```json):
-
-{
-    "commonName": "$commonNameDesc",
-    "kingdom": "Name only",
-    "phylum": "Name only", 
-    "className": "Name only",
-    "order": "Name only",
-    "family": "Scientific name <i>(common name)</i> if available",
-    "genus": "Scientific name <i>(common name)</i> if available",
-    "species": "Scientific name <i>(common name)</i> if available",
-    "rank": "Taxonomic rank",
-    "description": "4-sentence overview with <b>bold</b> for key features and <font color='$highlightColor'><b>green bold</b></font> for places/names/measurements.",
-    "characteristics": "Bullet points (•) on new lines covering morphology, size, colors. Use <b>bold</b> and <font color='$highlightColor'><b>green bold</b></font> formatting.",
-    "distribution": "Vietnam first (if applicable), then worldwide. Use <font color='$highlightColor'><b>green bold</b></font> for locations.",
-    "habitat": "Specific environment details with formatting.",
-    "conservationStatus": "Status with color: <font color='$dangerColor'><b>Critically Endangered/Endangered</b></font>, <font color='$redBookColor'><b>Red Book/Vulnerable</b></font>, <font color='$vulnerableColor'><b>Near Threatened</b></font>, <font color='$leastConcernColor'><b>Least Concern</b></font>, <font color='$notRankedColor'><b>Not Ranked</b></font>"
-}
-
-CRITICAL: Return ONLY the JSON object. No explanations, no markdown fences, no extra text.
-""".trimIndent()
+                   You are a professional biologist. Provide detailed information about "$scientificName" $langInstruction.
+                       === OUTPUT FORMAT ===
+                   Return ONLY valid JSON (no markdown, no ```json):
+                   {
+                   "commonName": "$commonNameDesc",
+                   "kingdom": "Vietnamese Name only",
+                   "phylum": "Vietnamese Name only", 
+                   "className": "Vietnamese Name only",
+                   "order": "Vietnamese Name only",
+                   "family": "Scientific name <i>(common name)</i> if available",
+                   "genus": "Scientific name <i>(common name)</i> if available",
+                   "species": "Scientific name <i>(common name)</i> if available",
+                   "rank": "Taxonomic rank",
+                   "description": "4-sentence overview with <b>bold</b> for key features and <font color='$highlightColor'><b>green bold</b></font> for places/names/measurements.",
+                   "characteristics": "Bullet points (•) on new lines covering morphology, size, colors. Use <b>bold</b> and <font color='$highlightColor'><b>green bold</b></font> formatting.",
+                   "distribution": "Vietnam first (if applicable), then worldwide. Use <font color='$highlightColor'><b>green bold</b></font> for locations.",
+                   "habitat": "Specific environment details with formatting.",
+                   "conservationStatus": "Status with color: <font color='$dangerColor'><b>Critically Endangered/Endangered</b></font>, <font color='$redBookColor'><b>Red Book/Vulnerable</b></font>, <font color='$vulnerableColor'><b>Near Threatened</b></font>, <font color='$leastConcernColor'><b>Least Concern</b></font>, <font color='$notRankedColor'><b>Not Ranked</b></font> and some info from IUCN"
+                   }
+                   CRITICAL: Return ONLY the JSON object. No explanations, no markdown fences, no extra text.
+                   """.trimIndent()
 
             val workerUrl = "https://ecolens.tainguyen-devs.workers.dev/gemini"
             val requestBody = mapOf(
