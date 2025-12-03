@@ -2,9 +2,11 @@ package com.nguyendevs.ecolens.handlers
 
 import android.app.Activity
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import com.nguyendevs.ecolens.R
-import com.nguyendevs.ecolens.activities.LanguageSelectionActivity
+import com.nguyendevs.ecolens.fragments.LanguageSelectionFragment
 import com.nguyendevs.ecolens.managers.LanguageManager
 
 class SettingsHandler(
@@ -31,7 +33,6 @@ class SettingsHandler(
     }
 
     fun updateLanguageDisplay() {
-        // Kiểm tra xem view đã được khởi tạo chưa
         if (!::tvCurrentLanguage.isInitialized) {
             return
         }
@@ -45,8 +46,21 @@ class SettingsHandler(
     }
 
     private fun openLanguageSelection() {
-        val intent = LanguageSelectionActivity.newIntent(activity)
-        activity.startActivity(intent)
-        activity.overridePendingTransition(R.anim.scale_in, R.anim.hold)
+        val fragmentContainer = (activity as AppCompatActivity)
+            .findViewById<FrameLayout>(R.id.fragmentContainer)
+
+        fragmentContainer.visibility = View.VISIBLE
+
+        val fragment = LanguageSelectionFragment()
+        (activity as AppCompatActivity).supportFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                R.anim.fade_in,
+                R.anim.fade_out,
+                R.anim.fade_in,
+                R.anim.fade_out
+            )
+            .replace(R.id.fragmentContainer, fragment)
+            .addToBackStack("language_selection")
+            .commit()
     }
 }

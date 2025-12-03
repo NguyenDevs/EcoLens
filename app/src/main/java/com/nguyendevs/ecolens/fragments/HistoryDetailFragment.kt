@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.activities
+package com.nguyendevs.ecolens.fragments
 
 import android.graphics.Color
 import android.os.Build

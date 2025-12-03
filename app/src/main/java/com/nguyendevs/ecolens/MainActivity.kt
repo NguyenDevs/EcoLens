@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
@@ -19,7 +20,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.nguyendevs.ecolens.activities.CameraActivity
-import com.nguyendevs.ecolens.activities.HistoryDetailFragment
+import com.nguyendevs.ecolens.fragments.HistoryDetailFragment
 import com.nguyendevs.ecolens.adapters.HistoryAdapter
 import com.nguyendevs.ecolens.handlers.SpeciesInfoHandler
 import com.nguyendevs.ecolens.managers.NavigationManager
@@ -209,13 +210,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onBackPressed() {
-        if (imageZoomHandler.isFullScreenVisible()) {
-            imageZoomHandler.hideFullScreen()
-        } else {
-            super.onBackPressed()
-        }
-    }
+
 
 
 
@@ -407,5 +402,24 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         speakerManager.shutdown()
         super.onDestroy()
+    }
+
+    override fun onBackPressed() {
+        val fragmentContainer = findViewById<FrameLayout>(R.id.fragmentContainer)
+
+        // Nếu fragment container đang hiển thị
+        if (fragmentContainer.visibility == View.VISIBLE) {
+            if (supportFragmentManager.backStackEntryCount > 0) {
+                supportFragmentManager.popBackStack()
+                fragmentContainer.visibility = View.GONE
+                return
+            }
+        }
+        // Xử lý back cho zoom image
+        if (imageZoomHandler.isFullScreenVisible()) {
+            imageZoomHandler.hideFullScreen()
+        } else {
+            super.onBackPressed()
+        }
     }
 }

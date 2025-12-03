@@ -1,10 +1,12 @@
-package com.nguyendevs.ecolens.activities
+package com.nguyendevs.ecolens.fragments
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.nguyendevs.ecolens.R
@@ -12,36 +14,34 @@ import com.nguyendevs.ecolens.adapters.LanguageAdapter
 import com.nguyendevs.ecolens.managers.LanguageManager
 import com.nguyendevs.ecolens.model.Language
 
-class LanguageSelectionActivity : AppCompatActivity() {
+class LanguageSelectionFragment : Fragment() {
 
     private lateinit var languageManager: LanguageManager
     private lateinit var rvLanguages: RecyclerView
     private lateinit var btnBack: ImageView
     private lateinit var languageAdapter: LanguageAdapter
 
-    companion object {
-        fun newIntent(context: Context): Intent {
-            return Intent(context, LanguageSelectionActivity::class.java)
-        }
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_language_selection, container, false)
     }
 
-    override fun attachBaseContext(newBase: Context) {
-        languageManager = LanguageManager(newBase)
-        super.attachBaseContext(languageManager.updateBaseContext(newBase))
-    }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_language_selection)
+        languageManager = LanguageManager(requireContext())
 
-        initViews()
+        btnBack = view.findViewById(R.id.btnBack)
+        rvLanguages = view.findViewById(R.id.rvLanguages)
+
         setupLanguageList()
-        setupListeners()
-    }
 
-    private fun initViews() {
-        btnBack = findViewById(R.id.btnBack)
-        rvLanguages = findViewById(R.id.rvLanguages)
+        btnBack.setOnClickListener {
+            closeFragment()
+        }
     }
 
     private fun setupLanguageList() {
@@ -67,14 +67,8 @@ class LanguageSelectionActivity : AppCompatActivity() {
         }
 
         rvLanguages.apply {
-            layoutManager = LinearLayoutManager(this@LanguageSelectionActivity)
+            layoutManager = LinearLayoutManager(requireContext())
             adapter = languageAdapter
-        }
-    }
-
-    private fun setupListeners() {
-        btnBack.setOnClickListener {
-            finish()
         }
     }
 
@@ -82,15 +76,19 @@ class LanguageSelectionActivity : AppCompatActivity() {
         if (language.code != languageManager.getLanguage()) {
             languageManager.setLanguage(language.code)
 
-            // Restart app to apply language
-            val intent = packageManager.getLaunchIntentForPackage(packageName)
-            intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-            startActivity(intent)
-            finish()
+            // Restart app để apply ngôn ngữ
+            val intent: Intent? = requireActivity().packageManager
+                .getLaunchIntentForPackage(requireActivity().packageName)
+
+            intent?.let {
+                it.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(it)
+                requireActivity().finish()
+            }
         }
     }
-    override fun finish() {
-        super.finish()
-        overridePendingTransition(R.anim.hold_scale, R.anim.scale_out)
+
+    private fun closeFragment() {
+        parentFragmentManager.popBackStack()
     }
 }
