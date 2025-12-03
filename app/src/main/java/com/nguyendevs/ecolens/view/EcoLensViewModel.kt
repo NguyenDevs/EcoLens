@@ -150,10 +150,25 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 val requestFile = imageFile.asRequestBody("image/jpeg".toMediaTypeOrNull())
                 val imagePart = MultipartBody.Part.createFormData("image", imageFile.name, requestFile)
 
-                val response = apiService.identifySpecies(
-                    image = imagePart,
-                    locale = languageCode
-                )
+                Log.d(TAG, "📤 Đang gửi request đến Worker...")
+
+                val response = try {
+                    apiService.identifySpecies(
+                        image = imagePart,
+                        locale = languageCode
+                    )
+                } catch (e: Exception) {
+                    Log.e(TAG, "❌ Lỗi khi gọi API: ${e.message}", e)
+
+                    // Log raw response nếu có
+                    if (e is retrofit2.HttpException) {
+                        val errorBody = e.response()?.errorBody()?.string()
+                        Log.e(TAG, "📛 HTTP Error Body: $errorBody")
+                    }
+                    throw e
+                }
+
+                Log.d(TAG, "✅ Response từ Worker thành công")
 
                 if (response.results.isNotEmpty()) {
                     val topResult = response.results.first()

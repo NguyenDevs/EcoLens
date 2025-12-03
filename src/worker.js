@@ -14,55 +14,82 @@ export default {
 
         // Gemini API Proxy
         if (url.pathname === '/gemini') {
-            const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
-            const apiKey = env.GEMINI_API_KEY;
+            try {
+                const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
+                const apiKey = env.GEMINI_API_KEY;
 
-            const body = await request.json();
+                const body = await request.json();
 
-            const response = await fetch(`${geminiUrl}?key=${apiKey}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            });
+                const response = await fetch(`${geminiUrl}?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
 
-            const data = await response.json();
-            return new Response(JSON.stringify(data), {
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-            });
+                const data = await response.json();
+                return new Response(JSON.stringify(data), {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                    status: response.status
+                });
+            } catch (error) {
+                return new Response(JSON.stringify({ error: error.message }), {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                    status: 500
+                });
+            }
         }
 
         // iNaturalist API Proxy
         if (url.pathname.startsWith('/inaturalist/')) {
-            const inaturalistPath = url.pathname.replace('/inaturalist', '');
-            const inaturalistUrl = `https://api.inaturalist.org${inaturalistPath}${url.search}`;
-            const token = env.INATURALIST_API_TOKEN;
+            try {
+                const inaturalistPath = url.pathname.replace('/inaturalist', '');
+                const inaturalistUrl = `https://api.inaturalist.org${inaturalistPath}${url.search}`;
+                const token = env.INATURALIST_API_TOKEN;
 
-            const headers = {
-                'Authorization': `Bearer ${token}`,
-                'Accept': 'application/json'
-            };
+                // Clone request để forward
+                const headers = new Headers();
+                headers.set('Authorization', `Bearer ${token}`);
 
-            if (request.method === 'POST') {
-                const formData = await request.formData();
-                const response = await fetch(inaturalistUrl, {
-                    method: 'POST',
-                    headers: headers,
-                    body: formData
-                });
+                let responseData;
 
-                const data = await response.json();
-                return new Response(JSON.stringify(data), {
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-                });
-            } else {
-                const response = await fetch(inaturalistUrl, {
-                    method: request.method,
-                    headers: headers
-                });
+                if (request.method === 'POST') {
+                    // Forward multipart form data as-is
+                    const formData = await request.formData();
 
-                const data = await response.json();
-                return new Response(JSON.stringify(data), {
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+                    const response = await fetch(inaturalistUrl, {
+                        method: 'POST',
+                        headers: headers,
+                        body: formData
+                    });
+
+                    responseData = await response.json();
+
+                    return new Response(JSON.stringify(responseData), {
+                        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                        status: response.status
+                    });
+                } else {
+                    headers.set('Accept', 'application/json');
+
+                    const response = await fetch(inaturalistUrl, {
+                        method: request.method,
+                        headers: headers
+                    });
+
+                    responseData = await response.json();
+
+                    return new Response(JSON.stringify(responseData), {
+                        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                        status: response.status
+                    });
+                }
+            } catch (error) {
+                return new Response(JSON.stringify({
+                    error: error.message,
+                    stack: error.stack
+                }), {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                    status: 500
                 });
             }
         }
