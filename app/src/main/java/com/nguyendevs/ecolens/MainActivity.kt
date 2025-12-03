@@ -249,6 +249,14 @@ class MainActivity : AppCompatActivity() {
     private fun setupBottomNavigation() {
         findViewById<BottomNavigationView>(R.id.bottomNavigation)
             .setOnItemSelectedListener { item ->
+                // Đóng fragment container nếu đang mở
+                val fragmentContainer = findViewById<FrameLayout>(R.id.fragmentContainer)
+                if (fragmentContainer.visibility == View.VISIBLE) {
+                    fragmentContainer.visibility = View.GONE
+                    // Clear back stack
+                    supportFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                }
+
                 when (item.itemId) {
                     R.id.nav_home -> {
                         val state = viewModel.uiState.value
