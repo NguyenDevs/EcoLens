@@ -10,7 +10,7 @@ interface INaturalistApi {
         @Part image: MultipartBody.Part,
         @Query("lat") lat: Double = 16.0544,
         @Query("lng") lng: Double = 108.2022,
-        @Query("locale") locale: String = "vi"
+        @Query("locale") locale: String
     ): IdentificationResponse
 
     @GET("v1/taxa/{id}")

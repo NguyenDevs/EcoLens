@@ -17,6 +17,14 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
 
     var onSpeechFinished: (() -> Unit)? = null
 
+    fun setLanguage(langCode: String) {
+        val locale = Locale(langCode)
+        val result = textToSpeech?.setLanguage(locale)
+        if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+            Log.e("SpeakerManager", "Language $langCode not supported")
+        }
+    }
+
     init {
         textToSpeech = TextToSpeech(context, this)
         textToSpeech?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {

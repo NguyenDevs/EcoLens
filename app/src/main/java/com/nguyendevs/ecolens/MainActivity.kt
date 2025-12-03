@@ -1,5 +1,6 @@
 package com.nguyendevs.ecolens
 
+import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.view.MotionEvent
@@ -24,6 +25,8 @@ import com.nguyendevs.ecolens.handlers.SpeciesInfoHandler
 import com.nguyendevs.ecolens.managers.NavigationManager
 import com.nguyendevs.ecolens.managers.PermissionManager
 import com.nguyendevs.ecolens.managers.SpeakerManager
+import com.nguyendevs.ecolens.managers.LanguageManager
+import com.nguyendevs.ecolens.handlers.SettingsHandler
 import com.nguyendevs.ecolens.model.HistoryEntry
 import com.nguyendevs.ecolens.handlers.ImageZoomHandler
 import com.nguyendevs.ecolens.handlers.LoadingAnimationHandler
@@ -39,6 +42,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var historyContainer: View
     private lateinit var myGardenContainer: View
     private lateinit var settingsContainer: View
+
 
     // Home screen views
     private lateinit var imagePreview: ImageView
@@ -59,6 +63,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var searchBarHandler: SearchBarHandler
     private lateinit var imageZoomHandler: ImageZoomHandler
     private lateinit var loadingAnimationHandler: LoadingAnimationHandler
+    private lateinit var settingsHandler: SettingsHandler
 
     // Managers
     private lateinit var speakerManager: SpeakerManager
@@ -66,6 +71,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navigationManager: NavigationManager
     private lateinit var permissionManager: PermissionManager
     private lateinit var speciesInfoHandler: SpeciesInfoHandler
+    private lateinit var languageManager: LanguageManager
 
     private var imageUri: Uri? = null
 
@@ -76,6 +82,7 @@ class MainActivity : AppCompatActivity() {
         if (result.resultCode == RESULT_OK) {
             val uriString = result.data?.getStringExtra(CameraActivity.KEY_IMAGE_URI)
             if (uriString != null) {
+
                 if (searchBarHandler.isExpanded()) {
                     searchBarHandler.collapseSearchBar()
                 }
@@ -86,9 +93,10 @@ class MainActivity : AppCompatActivity() {
                     .load(capturedUri)
                     .centerCrop()
                     .into(imagePreview)
+                val currentLang = languageManager.getLanguage()
 
                 imageZoomHandler.setImageUri(capturedUri)
-                viewModel.identifySpecies(capturedUri)
+                viewModel.identifySpecies(capturedUri, currentLang)
             }
         }
     }
@@ -101,6 +109,11 @@ class MainActivity : AppCompatActivity() {
         if (!allGranted) {
             permissionManager.showPermissionDeniedDialog()
         }
+    }
+
+    override fun attachBaseContext(newBase: Context) {
+        languageManager = LanguageManager(newBase)
+        super.attachBaseContext(languageManager.updateBaseContext(newBase))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -142,6 +155,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initHandlers() {
+        settingsHandler = SettingsHandler(this, languageManager, settingsContainer)
+        settingsHandler.setup()
+
         // Search Bar Handler
         searchBarHandler = SearchBarHandler(
             this,
@@ -176,6 +192,7 @@ class MainActivity : AppCompatActivity() {
             historyContainer,
             myGardenContainer,
             settingsContainer
+
         )
 
         permissionManager = PermissionManager(this, permissionLauncher)
@@ -199,6 +216,8 @@ class MainActivity : AppCompatActivity() {
             super.onBackPressed()
         }
     }
+
+
 
     private fun setupViewModel() {
         viewModel = ViewModelProvider(
@@ -285,6 +304,8 @@ class MainActivity : AppCompatActivity() {
             viewModel.uiState.value.speciesInfo?.let { info ->
                 val textToRead = TextToSpeechGenerator.generateSpeechText(info)
                 if (textToRead.isNotEmpty()) {
+                    // Set ngôn ngữ trước khi nói
+                    speakerManager.setLanguage(languageManager.getLanguage())
                     speakerManager.speak(textToRead)
                     toggleSpeakerUI(isSpeaking = true)
                 }

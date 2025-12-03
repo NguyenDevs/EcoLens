@@ -128,7 +128,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun identifySpecies(imageUri: Uri) {
+    fun identifySpecies(imageUri: Uri, languageCode: String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
                 isLoading = true,
@@ -155,7 +155,10 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 val requestFile = imageFile.asRequestBody("image/jpeg".toMediaTypeOrNull())
                 val imagePart = MultipartBody.Part.createFormData("image", imageFile.name, requestFile)
 
-                val response = apiService.identifySpecies(imagePart)
+                val response = apiService.identifySpecies(
+                    image = imagePart,
+                    locale = languageCode
+                )
 
                 if (response.results.isNotEmpty()) {
                     val topResult = response.results.first()
@@ -165,7 +168,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                     Log.d(TAG, "Tìm thấy loài: $scientificName, confidence: ${topResult.combined_score}")
 
                     Log.d(TAG, "Gọi Gemini API...")
-                    val speciesInfo = fetchDetailsFromGemini(scientificName, topResult.combined_score)
+                    val speciesInfo = fetchDetailsFromGemini(scientificName, topResult.combined_score, languageCode)
 
                     val finalInfo = speciesInfo.copy(
                         commonName = speciesInfo.commonName.ifEmpty { taxon.preferred_common_name ?: scientificName },
@@ -206,7 +209,11 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    private suspend fun fetchDetailsFromGemini(scientificName: String, confidence: Double): SpeciesInfo {
+    private suspend fun fetchDetailsFromGemini(
+        scientificName: String,
+        confidence: Double,
+        languageCode: String
+    ): SpeciesInfo {
         return try {
             val highlightColor = "#00796B"
             val dangerColor = "#8B0000"
@@ -215,8 +222,12 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             val leastConcernColor = "#55f200"
             val notRankedColor = "#05deff"
 
+            val langInstruction = if (languageCode == "en") "bằng tiếng Anh (English)" else "bằng tiếng Việt"
+
+            val commonNameDesc = if (languageCode == "en") "Common name in English" else "Tên thường gọi tiếng Việt chuẩn nhất"
+
             val prompt = """
-            Bạn là một nhà sinh vật học chuyên nghiệp. Hãy cung cấp thông tin chi tiết về loài có tên khoa học "$scientificName" bằng tiếng Việt.
+            Bạn là một nhà sinh vật học chuyên nghiệp. Hãy cung cấp thông tin chi tiết về loài có tên khoa học "$scientificName" $langInstruction.
             
             === YÊU CẦU ĐỊNH DẠNG ===
             
@@ -229,10 +240,10 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                - CHỈ sử dụng các thẻ HTML cơ bản (<b>, <font>), KHÔNG dùng Markdown (**)
             
             2. TRƯỜNG PHÂN LOẠI (kingdom, phylum, className, order, family, genus, species):
-               - CHỈ ghi TÊN, KHÔNG thêm tiền tố ("Giới", "Ngành", "Lớp", "Bộ", "Họ", "Chi", "Loài")
-               - Ví dụ ĐÚNG: "Động vật", "Dây sống", "Thú"
+               - CHỈ ghi TÊN, KHÔNG thêm tiền tố ("Giới", "Ngành", "Lớp", "Bộ", "Họ", "Chi", "Loài", "Kingdom", "Phylum", etc.)
+               - Ví dụ ĐÚNG: "Động vật", "Dây sống", "Thú" (hoặc "Animalia", "Chordata" nếu là tiếng Anh)
                - Ví dụ SAI: "Giới Động vật", "Ngành Dây sống", "Lớp Thú"
-               - Với family, genus, species: Ưu tiên tên tiếng Anh, nếu có tên tiếng Việt thì ghi trong ngoặc đơn VÀ BỌC TOÀN BỘ PHẦN NGOẶC VÀ NỘI DUNG TRONG <i>...</i>
+               - Với family, genus, species: Ưu tiên tên tiếng Anh/Latin. Nếu có tên địa phương (Việt/Anh) thì ghi trong ngoặc đơn VÀ BỌC TOÀN BỘ PHẦN NGOẶC VÀ NỘI DUNG TRONG <i>...</i>
                  + Ví dụ: "Felidae (Họ Mèo)", "Panthera (Chi Báo)"
             
             3. TRƯỜNG CONSERVATIONSTATUS - MÀU SẮC ĐÁNH DẤU:
@@ -244,26 +255,26 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             
             === YÊU CẦU NỘI DUNG ===
             
-            - description: Mô tả tổng quan (5 câu), có thụt đầu dòng
-            - characteristics: Trình bày dạng gạch đầu dòng (•), xuống dòng giữa các gạch dầu dòng, tập trung vào hình thái, kích thước, màu sắc
-            - distribution: Ưu tiên phân bố tại Việt Nam trước, sau đó mới đến thế giới. Nếu không có ở Việt Nam, phải nói rõ
-            - habitat: Môi trường sống cụ thể, có thụt đầu dòng
-            - conservationStatus: Tình trạng bảo tồn hiện tại, có thụt đầu dòng
+            - description: Mô tả tổng quan (khoảng 5 câu), có thụt đầu dòng.
+            - characteristics: Trình bày dạng gạch đầu dòng (•), xuống dòng giữa các ý, tập trung vào hình thái, kích thước, màu sắc.
+            - distribution: Ưu tiên phân bố tại Việt Nam trước (nếu có), sau đó đến thế giới.
+            - habitat: Môi trường sống cụ thể, có thụt đầu dòng.
+            - conservationStatus: Tình trạng bảo tồn hiện tại.
             
             === ĐỊNH DẠNG ĐẦU RA ===
             
             Trả về JSON thuần túy (KHÔNG có markdown fence, KHÔNG có ```json):
             
             {
-                "commonName": "Tên thường gọi tiếng Việt chuẩn nhất",
-                "kingdom": "Tên giới (chỉ tên, không có 'Giới')",
+                "commonName": "$commonNameDesc",
+                "kingdom": "Tên giới (chỉ tên)",
                 "phylum": "Tên ngành (chỉ tên)",
                 "className": "Tên lớp (chỉ tên)",
                 "order": "Tên bộ (chỉ tên)",
-                "family": "Tên họ tiếng Anh (Tên Việt)",
-                "genus": "Tên chi tiếng Anh (Tên Việt)",
-                "species": "Tên loài tiếng Anh (Tên Việt)",
-                "rank": "Cấp phân loại (ví dụ: Loài, Phân loài, Chi...)",
+                "family": "Tên họ (Tên thường gọi nếu có)",
+                "genus": "Tên chi (Tên thường gọi nếu có)",
+                "species": "Tên loài (Tên thường gọi nếu có)",
+                "rank": "Cấp phân loại",
                 "description": "...",
                 "characteristics": "...",
                 "distribution": "...",
@@ -275,19 +286,17 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             val response = geminiModel.generateContent(prompt)
             val jsonString = response.text?.replace("```json", "")?.replace("```", "")?.trim() ?: ""
 
-            Log.d(TAG, "Gemini response: ${jsonString.take(100)}...")
-
             val gson = Gson()
             val info = gson.fromJson(jsonString, SpeciesInfo::class.java)
 
             val cleanedInfo = info.copy(
-                kingdom = removeRankPrefix(info.kingdom, "Giới"),
-                phylum = removeRankPrefix(info.phylum, "Ngành"),
-                className = removeRankPrefix(info.className, "Lớp"),
-                order = removeRankPrefix(info.order, "Bộ"),
-                family = removeRankPrefix(info.family, "Họ"),
-                genus = removeRankPrefix(info.genus, "Chi"),
-                species = removeRankPrefix(info.species, "Loài"),
+                kingdom = removeRankPrefix(info.kingdom, "Giới|Kingdom"),
+                phylum = removeRankPrefix(info.phylum, "Ngành|Phylum"),
+                className = removeRankPrefix(info.className, "Lớp|Class"),
+                order = removeRankPrefix(info.order, "Bộ|Order"),
+                family = removeRankPrefix(info.family, "Họ|Family"),
+                genus = removeRankPrefix(info.genus, "Chi|Genus"),
+                species = removeRankPrefix(info.species, "Loài|Species"),
                 scientificName = scientificName,
                 confidence = confidence
             )
@@ -296,18 +305,24 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
         } catch (e: Exception) {
             Log.e(TAG, "❌ Lỗi khi parse Gemini response: ${e.message}", e)
+
+            val errorMsg = if (languageCode == "en")
+                "Could not retrieve details from AI at this time."
+            else
+                "Không thể lấy thông tin chi tiết từ AI vào lúc này."
+
             SpeciesInfo(
                 commonName = scientificName,
                 scientificName = scientificName,
-                description = "Không thể lấy thông tin chi tiết từ AI vào lúc này.",
+                description = errorMsg,
                 confidence = confidence
             )
         }
     }
 
-    private fun removeRankPrefix(text: String, prefix: String): String {
+    private fun removeRankPrefix(text: String, prefixPattern: String): String {
         val trimmedText = text.trim()
-        val regex = Regex("^(?i)$prefix\\s*[:]?\\s*")
+        val regex = Regex("^(?i)($prefixPattern)\\s*[:]?\\s*")
         return trimmedText.replaceFirst(regex, "").replaceFirstChar {
             if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
         }

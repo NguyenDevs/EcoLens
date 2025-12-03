@@ -1,0 +1,51 @@
+<resources>
+    <string name="app_name">EcoLens</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_history">History</string>
+    <string name="nav_my_garden">My Garden</string>
+    <string name="nav_settings">Settings</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="language_label">Language</string>
+    <string name="lang_vietnamese">Tiếng Việt</string>
+    <string name="lang_english">English</string>
+
+    <string name="camera">Camera</string>
+    <string name="image_preview">Image Preview</string>
+    <string name="no_image">No Image</string>
+    <string name="error">Error</string>
+    <string name="confidence">Confidence</string>
+    <string name="history">History</string>
+    <string name="my_garden">My Garden</string>
+    <string name="settings">Settings</string>
+
+    <string name="app_title">EcoLens</string>
+    <string name="app_subtitle">Identify species via images</string>
+    <string name="analyzing">Analyzing image…</string>
+    <string name="no_image_selected">No image selected</string>
+    <string name="error_occurred">An error occurred</string>
+
+    <string name="taxonomy_title">🔬 Scientific Classification</string>
+    <string name="label_kingdom">Kingdom:</string>
+    <string name="label_phylum">Phylum:</string>
+    <string name="label_class">Class:</string>
+    <string name="label_order">Order:</string>
+    <string name="label_family">Family:</string>
+    <string name="label_genus">Genus:</string>
+    <string name="label_species">Species:</string>
+
+    <string name="section_description">📖 Description</string>
+    <string name="section_characteristics">✨ Characteristics</string>
+    <string name="section_distribution">🌍 Distribution</string>
+    <string name="section_habitat">🏞️ Habitat</string>
+    <string name="section_conservation">🛡️ Conservation Status</string>
+
+    <string name="history_placeholder">Recognition History</string>
+    <string name="history_subtitle">Feature under development</string>
+    <string name="garden_placeholder">My Garden</string>
+    <string name="garden_subtitle">Save your favorite species</string>
+    <string name="settings_placeholder">Settings</string>
+    <string name="settings_subtitle">Application options</string>
+    <string name="search">Search</string>
+    <string name="speak">Read content</string>
+</resources>
