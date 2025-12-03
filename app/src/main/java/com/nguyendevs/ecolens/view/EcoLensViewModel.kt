@@ -3,7 +3,6 @@ package com.nguyendevs.ecolens.view
 import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
-import java.util.concurrent.TimeUnit
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
@@ -36,6 +35,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.util.Locale
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 class EcoLensViewModel(application: Application) : AndroidViewModel(application) {
     private val TAG = "EcoLensViewModel"
@@ -47,15 +47,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     val searchTextAction: LiveData<String?> get() = _searchTextAction
 
     private val apiService = RetrofitClient.iNaturalistApi
-
-    fun triggerSearch(query: String) {
-        _searchTextAction.value = query
-    }
-
-    fun resetSearchAction() {
-        _searchTextAction.value = null
-    }
-
     private val historyDao = HistoryDatabase.getDatabase(application).historyDao()
 
     val history: StateFlow<List<HistoryEntry>> = historyDao.getAllHistory()
@@ -65,52 +56,12 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             initialValue = emptyList()
         )
 
-    private suspend fun saveBitmapToInternalStorage(context: Context, bitmap: Bitmap): String? {
-        return withContext(Dispatchers.IO) {
-            try {
-                val filename = "species_${UUID.randomUUID()}.jpg"
-                val file = File(context.filesDir, filename)
-
-                Log.d(TAG, "Đường dẫn file sẽ lưu: ${file.absolutePath}")
-
-                FileOutputStream(file).use { outputStream ->
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 85, outputStream)
-                    outputStream.flush()
-                }
-                bitmap.recycle()
-
-                file.absolutePath
-            } catch (e: Exception) {
-                Log.e(TAG, "❌ Lỗi khi lưu ảnh: ${e.message}", e)
-                e.printStackTrace()
-                null
-            }
-        }
+    fun triggerSearch(query: String) {
+        _searchTextAction.value = query
     }
 
-    private fun saveToHistory(bitmap: Bitmap, speciesInfo: SpeciesInfo) {
-        viewModelScope.launch {
-            try {
-                val localPath = saveBitmapToInternalStorage(getApplication(), bitmap)
-
-                if (localPath != null) {
-                    withContext(Dispatchers.IO) {
-                        val newEntry = HistoryEntry(
-                            imagePath = localPath,
-                            speciesInfo = speciesInfo,
-                            timestamp = System.currentTimeMillis(),
-                            isFavorite = false
-                        )
-                        historyDao.insert(newEntry)
-                    }
-                } else {
-                    Log.e(TAG, "❌ Không thể lưu ảnh vào internal storage")
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "❌ Lỗi khi lưu vào lịch sử: ${e.message}", e)
-                e.printStackTrace()
-            }
-        }
+    fun resetSearchAction() {
+        _searchTextAction.value = null
     }
 
     fun toggleFavorite(entry: HistoryEntry) {
@@ -119,7 +70,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 val updatedEntry = entry.copy(isFavorite = !entry.isFavorite)
                 historyDao.update(updatedEntry)
             } catch (e: Exception) {
-                Log.e(TAG, "❌ Lỗi khi toggle favorite: ${e.message}", e)
+                Log.e(TAG, "Lỗi khi toggle favorite: ${e.message}", e)
             }
         }
     }
@@ -131,76 +82,51 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 error = null,
                 speciesInfo = null
             )
+
             var bitmapForHistory: Bitmap? = null
             try {
                 val context = getApplication<Application>()
-                bitmapForHistory = try {
-                    context.contentResolver.openInputStream(imageUri)?.use { inputStream ->
-                        BitmapFactory.decodeStream(inputStream)
-                    }
-                } catch (e: Exception) {
-                    Log.e(TAG, "Lỗi khi đọc bitmap cho history: ${e.message}")
-                    null
-                }
 
-                if (bitmapForHistory != null) {
-                    Log.d(TAG, "✅ Đã đọc bitmap cho history: ${bitmapForHistory.width}x${bitmapForHistory.height}")
+                // Đọc bitmap để lưu lịch sử
+                bitmapForHistory = context.contentResolver.openInputStream(imageUri)?.use { inputStream ->
+                    BitmapFactory.decodeStream(inputStream)
                 }
 
                 val imageFile = uriToFile(context, imageUri)
                 val requestFile = imageFile.asRequestBody("image/jpeg".toMediaTypeOrNull())
                 val imagePart = MultipartBody.Part.createFormData("image", imageFile.name, requestFile)
 
-                Log.d(TAG, "📤 Đang gửi request đến Worker...")
-
-                val response = try {
-                    apiService.identifySpecies(
-                        image = imagePart,
-                        locale = languageCode
-                    )
-                } catch (e: Exception) {
-                    Log.e(TAG, "❌ Lỗi khi gọi API: ${e.message}", e)
-
-                    // Log raw response nếu có
-                    if (e is retrofit2.HttpException) {
-                        val errorBody = e.response()?.errorBody()?.string()
-                        Log.e(TAG, "📛 HTTP Error Body: $errorBody")
-                    }
-                    throw e
-                }
-
-                Log.d(TAG, "✅ Response từ Worker thành công")
+                Log.d(TAG, "Đang gửi ảnh đến Worker để nhận diện...")
+                val response = apiService.identifySpecies(image = imagePart, locale = languageCode)
 
                 if (response.results.isNotEmpty()) {
                     val topResult = response.results.first()
                     val taxon = topResult.taxon
                     val scientificName = taxon.name
+                    val confidence = topResult.combined_score
 
-                    Log.d(TAG, "Tìm thấy loài: $scientificName, confidence: ${topResult.combined_score}")
+                    Log.d(TAG, "Nhận diện thành công: $scientificName (độ tin cậy: ${confidence * 100}%)")
 
-                    Log.d(TAG, "Gọi Gemini API...")
-                    val speciesInfo = fetchDetailsFromGemini(scientificName, topResult.combined_score, languageCode)
+                    // Gọi Gemini lấy thông tin chi tiết
+                    val speciesInfo = fetchDetailsFromGemini(scientificName, confidence, languageCode)
 
                     val finalInfo = speciesInfo.copy(
                         commonName = speciesInfo.commonName.ifEmpty { taxon.preferred_common_name ?: scientificName },
                         scientificName = scientificName,
-                        confidence = topResult.combined_score,
-                        kingdom = if(speciesInfo.kingdom.isEmpty()) taxon.ancestors?.find { it.rank == "kingdom" }?.name ?: "" else speciesInfo.kingdom
+                        confidence = confidence,
+                        kingdom = speciesInfo.kingdom.ifEmpty {
+                            taxon.ancestors?.find { it.rank == "kingdom" }?.name ?: ""
+                        }
                     )
-                    Log.d(TAG, "Thông tin cuối cùng: ${finalInfo.commonName}")
 
-                    if (bitmapForHistory != null) {
-                        saveToHistory(bitmapForHistory, finalInfo)
-                    } else {
-                        Log.e(TAG, "⚠️ Không thể lưu lịch sử vì bitmap null")
-                    }
+                    // Lưu vào lịch sử
+                    bitmapForHistory?.let { saveToHistory(it, finalInfo) }
 
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         speciesInfo = finalInfo
                     )
                 } else {
-                    Log.w(TAG, "Không tìm thấy kết quả từ API")
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         error = context.getString(R.string.error_no_result)
@@ -209,8 +135,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
                 imageFile.delete()
             } catch (e: Exception) {
-                Log.e(TAG, "❌ Lỗi khi nhận diện: ${e.message}", e)
-                e.printStackTrace()
+                Log.e(TAG, "Lỗi khi nhận diện loài: ${e.message}", e)
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     error = getApplication<Application>().getString(R.string.error_prefix, e.message ?: "Unknown")
@@ -223,9 +148,11 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         scientificName: String,
         confidence: Double,
         languageCode: String
-    ): SpeciesInfo {
-        return try {
+    ): SpeciesInfo = withContext(Dispatchers.IO) {
+        try {
             val context = getApplication<Application>()
+            val isVietnamese = languageCode != "en"
+
             val highlightColor = "#00796B"
             val dangerColor = "#8B0000"
             val redBookColor = "#c97408"
@@ -233,31 +160,60 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             val leastConcernColor = "#55f200"
             val notRankedColor = "#05deff"
 
-            val langInstruction = if (languageCode == "en") "in English" else "bằng Tiếng Việt"
-            val commonNameDesc = if (languageCode == "en") "Common name in English" else "Tên thường gọi Tiếng Việt chuẩn nhất"
+            val commonNameDesc = if (isVietnamese)
+                "Tên thường gọi Tiếng Việt chuẩn nhất"
+            else
+                "Common name in English"
 
-            val prompt = """
-                   You are a professional biologist. Provide detailed information about "$scientificName" $langInstruction.
-                       === OUTPUT FORMAT ===
-                   Return ONLY valid JSON (DO NO USE markdown format, NO ```json):
-                   {
-                   "commonName": "$commonNameDesc",
-                   "kingdom": "Vietnamese Name only",
-                   "phylum": "Vietnamese Name only", 
-                   "className": "Vietnamese Name only",
-                   "order": "Vietnamese Name only",
-                   "family": "Scientific name <i>(common name)</i> if available",
-                   "genus": "Scientific name <i>(common name)</i> if available",
-                   "species": "Scientific name <i>(common name)</i> if available",
-                   "rank": "Taxonomic rank",
-                   "description": "4-sentence overview with <b>bold</b> for key features and <font color='$highlightColor'><b>green bold</b></font> for places/names/measurements.",
-                   "characteristics": "Bullet points (•) on new lines covering morphology, size, colors. Use <b>bold</b> and <font color='$highlightColor'><b>green bold</b></font> formatting.",
-                   "distribution": "Vietnam first (if applicable), then worldwide. Use <font color='$highlightColor'><b>green bold</b></font> for locations.",
-                   "habitat": "Specific environment details with formatting.",
-                   "conservationStatus": "Status with color: <font color='$dangerColor'><b>Critically Endangered/Endangered</b></font>, <font color='$redBookColor'><b>Red Book/Vulnerable</b></font>, <font color='$vulnerableColor'><b>Near Threatened</b></font>, <font color='$leastConcernColor'><b>Least Concern</b></font>, <font color='$notRankedColor'><b>Not Ranked</b></font> and some info from IUCN"
-                   }
-                   CRITICAL: Return ONLY the JSON object. No explanations, no markdown fences, no extra text.
-                   """.trimIndent()
+            val prompt = if (isVietnamese) {
+                """
+                Bạn là nhà sinh vật học chuyên nghiệp. Hãy cung cấp thông tin chi tiết về loài "$scientificName" bằng Tiếng Việt chuẩn mực.
+                
+                === ĐỊNH DẠNG KẾT XUẤT ===
+                CHỈ trả về JSON hợp lệ (CẤM dùng markdown, KHÔNG có ```json, chỉ được dùng th <b> cho in đậm, <i> cho chữ nghiêng):
+                {
+                  "commonName": "$commonNameDesc",
+                  "kingdom": "Chỉ tên Tiếng Việt",
+                  "phylum": "Chỉ tên Tiếng Việt",
+                  "className": "Chỉ tên Tiếng Việt",
+                  "order": "Chỉ tên Tiếng Việt",
+                  "family": "Tên khoa học <i>(tên thường nếu có)</i>",
+                  "genus": "Tên khoa học <i>(tên thường nếu có)</i>",
+                  "species": "Tên khoa học <i>(tên thường nếu có)</i>",
+                  "rank": "Cấp phân loại",
+                  "description": "Tổng quan 4 câu ngắn gọn, dùng <b>in đậm</b> cho đặc điểm nổi bật và <font color='$highlightColor'><b>xanh đậm</b></font> cho địa danh, tên riêng, số đo.",
+                  "characteristics": "Danh sách gạch đầu dòng (•) mỗi dòng một ý về hình thái, kích thước, màu sắc. Dùng <b>in đậm</b> và <font color='$highlightColor'><b>xanh đậm</b></font>.",
+                  "distribution": "Ưu tiên Việt Nam trước (nếu có), sau đó toàn cầu. Dùng <font color='$highlightColor'><b>xanh đậm</b></font> cho tên địa danh.",
+                  "habitat": "Mô tả chi tiết môi trường sống, có định dạng đẹp.",
+                  "conservationStatus": "Trạng thái bảo tồn kèm màu: <font color='$dangerColor'><b>Cực kỳ nguy cấp</b></font>, <font color='$dangerColor'><b>Nguy cấp</b></font>, <font color='$redBookColor'><b>Sách Đỏ Việt Nam</b></font>, <font color='$vulnerableColor'><b>Sắp nguy cấp</b></font>, <font color='$leastConcernColor'><b>Ít lo ngại</b></font>, <font color='$notRankedColor'><b>Chưa đánh giá</b></font> và thêm thông tin từ IUCN."
+                }
+                QUAN TRỌNG: Chỉ trả về đúng đối tượng JSON. Không giải thích, không văn bản thừa.
+                """.trimIndent()
+            } else {
+                """
+                You are a professional biologist. Provide detailed information about "$scientificName" in English.
+                
+                === OUTPUT FORMAT ===
+                Return ONLY valid JSON (DO NOT use markdown, NO ```json):
+                {
+                  "commonName": "$commonNameDesc",
+                  "kingdom": "Name only",
+                  "phylum": "Name only",
+                  "className": "Name only",
+                  "order": "Name only",
+                  "family": "Scientific name",
+                  "genus": "Scientific name",
+                  "species": "Scientific name",
+                  "rank": "Taxonomic rank",
+                  "description": "4-sentence overview with <b>bold</b> for key features and <font color='$highlightColor'><b>green bold</b></font> for places/names/measurements.",
+                  "characteristics": "Bullet points (•) on new lines covering morphology, size, colors. Use <b>bold</b> and <font color='$highlightColor'><b>green bold</b></font> formatting.",
+                  "distribution": "Vietnam first (if applicable), then worldwide. Use <font color='$highlightColor'><b>green bold</b></font> for locations.",
+                  "habitat": "Specific environment details with formatting.",
+                  "conservationStatus": "Status with color: <font color='$dangerColor'><b>Critically Endangered</b></font>, <font color='$dangerColor'><b>Endangered</b></font>, <font color='$redBookColor'><b>Vulnerable (Vietnam Red Data Book)</b></font>, <font color='$vulnerableColor'><b>Near Threatened</b></font>, <font color='$leastConcernColor'><b>Least Concern</b></font>, <font color='$notRankedColor'><b>Not Evaluated</b></font> and additional info from IUCN."
+                }
+                CRITICAL: Return ONLY the JSON object. No explanations, no markdown fences, no extra text.
+                """.trimIndent()
+            }
 
             val workerUrl = "https://ecolens.tainguyen-devs.workers.dev/gemini"
             val requestBody = mapOf(
@@ -279,57 +235,46 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 .post(body)
                 .build()
 
-            val response = withContext(Dispatchers.IO) {
-                client.newCall(request).execute()
-            }
-
+            val response = client.newCall(request).execute()
             val responseBody = response.body?.string() ?: ""
-            Log.d(TAG, "📥 Raw Gemini response: $responseBody")
+            Log.d(TAG, "Raw Gemini response: $responseBody")
 
             val geminiResponse = Gson().fromJson(responseBody, GeminiResponse::class.java)
             val jsonString = geminiResponse.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text ?: ""
 
-            Log.d(TAG, "📄 Extracted JSON string: $jsonString")
-
-            // ✅ CLEAN JSON AGGRESSIVELY
             val cleanedJson = jsonString
-                .replace("```json", "")
-                .replace("```", "")
+                .replace("```json", "", ignoreCase = true)
+                .replace("```", "", ignoreCase = true)
                 .trim()
                 .let { text ->
-                    // Extract only JSON object
                     val start = text.indexOf('{')
                     val end = text.lastIndexOf('}')
-                    if (start >= 0 && end > start) {
-                        text.substring(start, end + 1)
-                    } else {
-                        text
-                    }
+                    if (start >= 0 && end > start) text.substring(start, end + 1) else text
                 }
 
-            Log.d(TAG, "🧹 Cleaned JSON: $cleanedJson")
-
-            // ✅ CHECK IF JSON IS VALID BEFORE PARSING
             if (cleanedJson.isEmpty() || !cleanedJson.startsWith("{")) {
-                throw IllegalStateException("Invalid JSON response from Gemini")
+                throw IllegalStateException("Invalid JSON from Gemini")
             }
 
-            val info = Gson().fromJson(cleanedJson, SpeciesInfo::class.java)
+            val rawInfo = Gson().fromJson(cleanedJson, SpeciesInfo::class.java)
+                ?: throw IllegalStateException("Failed to parse SpeciesInfo")
 
-            // ✅ NULL CHECK BEFORE USING
-            if (info == null) {
-                Log.e(TAG, "❌ Gson returned null - JSON parsing failed")
-                throw IllegalStateException("Failed to parse JSON to SpeciesInfo")
-            }
+            val cleanedInfo = rawInfo.copy(
+                kingdom = removeRankPrefix(rawInfo.kingdom ?: "", if (isVietnamese) "Giới" else "Kingdom"),
+                phylum = removeRankPrefix(rawInfo.phylum ?: "", if (isVietnamese) "Ngành" else "Phylum"),
+                className = removeRankPrefix(rawInfo.className ?: "", if (isVietnamese) "Lớp" else "Class"),
+                order = removeRankPrefix(rawInfo.order ?: "", if (isVietnamese) "Bộ" else "Order"),
+                family = removeRankPrefix(rawInfo.family ?: "", if (isVietnamese) "Họ" else "Family"),
+                genus = removeRankPrefix(rawInfo.genus ?: "", if (isVietnamese) "Chi" else "Genus"),
+                species = removeRankPrefix(rawInfo.species ?: "", if (isVietnamese) "Loài" else "Species"),
 
-            val cleanedInfo = info.copy(
-                kingdom = removeRankPrefix(info.kingdom ?: "", "Giới|Kingdom"),
-                phylum = removeRankPrefix(info.phylum ?: "", "Ngành|Phylum"),
-                className = removeRankPrefix(info.className ?: "", "Lớp|Class"),
-                order = removeRankPrefix(info.order ?: "", "Bộ|Order"),
-                family = removeRankPrefix(info.family ?: "", "Họ|Family"),
-                genus = removeRankPrefix(info.genus ?: "", "Chi|Genus"),
-                species = removeRankPrefix(info.species ?: "", "Loài|Species"),
+                // Áp dụng dọn dẹp Markdown cho các trường mô tả
+                description = cleanMarkdownToHtml(rawInfo.description),
+                characteristics = cleanMarkdownToHtml(rawInfo.characteristics),
+                distribution = cleanMarkdownToHtml(rawInfo.distribution),
+                habitat = cleanMarkdownToHtml(rawInfo.habitat),
+                conservationStatus = cleanMarkdownToHtml(rawInfo.conservationStatus),
+
                 scientificName = scientificName,
                 confidence = confidence
             )
@@ -337,14 +282,11 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             cleanedInfo
 
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Lỗi khi parse Gemini response: ${e.message}", e)
-            e.printStackTrace()
-
-            val context = getApplication<Application>()
+            Log.e(TAG, "Lỗi khi lấy thông tin từ Gemini: ${e.message}", e)
             val errorMsg = if (languageCode == "en")
-                context.getString(R.string.error_occurred)
+                getApplication<Application>().getString(R.string.error_occurred)
             else
-                context.getString(R.string.error_default)
+                getApplication<Application>().getString(R.string.error_default)
 
             SpeciesInfo(
                 commonName = scientificName,
@@ -355,42 +297,81 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    private fun removeRankPrefix(text: String, prefixPattern: String): String {
-        val trimmedText = text.trim()
-        val regex = Regex("^(?i)($prefixPattern)\\s*[:]?\\s*")
-        return trimmedText.replaceFirst(regex, "").replaceFirstChar {
+
+    private fun cleanMarkdownToHtml(text: String?): String {
+        if (text.isNullOrBlank()) return ""
+
+        return text
+            // **bold** hoặc __bold__ → <b>bold</b>
+            .replace(Regex("(?<!\\\\)\\*\\*(?!\\s)(.+?)(?<!\\\\)\\*\\*")) { "<b>${it.groupValues[1]}</b>" }
+            .replace(Regex("(?<!\\\\)__(?!\\s)(.+?)(?<!\\\\)__")) { "<b>${it.groupValues[1]}</b>" }
+
+            // *italic* hoặc _italic_ → <i>italic</i>
+            .replace(Regex("(?<!\\\\)\\*(?!\\s)(.+?)(?<!\\\\)\\*")) { "<i>${it.groupValues[1]}</i>" }
+            .replace(Regex("(?<!\\\\)_(?!\\s)(.+?)(?<!\\\\)_")) { "<i>${it.groupValues[1]}</i>" }
+
+            // Xử lý trường hợp bị escape \* → bỏ escape (tùy chọn)
+            .replace("\\*", "*")
+            .replace("\\_", "_")
+    }
+
+
+    private fun removeRankPrefix(text: String, prefix: String): String {
+        val trimmed = text.trim()
+        val regex = Regex("^(?i)$prefix\\s*[:\\-\\s]+")
+        return trimmed.replaceFirst(regex, "").replaceFirstChar {
             if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
-        }
+        }.trim()
     }
 
-    private suspend fun uriToFile(context: Context, uri: Uri): File {
+    private suspend fun saveBitmapToInternalStorage(context: Context, bitmap: Bitmap): String? {
         return withContext(Dispatchers.IO) {
-            val inputStream = context.contentResolver.openInputStream(uri)
-            val bitmap = BitmapFactory.decodeStream(inputStream)
-            inputStream?.close()
-
-            val file = File(context.cacheDir, "temp_image_${System.currentTimeMillis()}.jpg")
-            FileOutputStream(file).use { outputStream ->
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
+            try {
+                val filename = "species_${UUID.randomUUID()}.jpg"
+                val file = File(context.filesDir, filename)
+                FileOutputStream(file).use { out ->
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 85, out)
+                }
+                bitmap.recycle()
+                file.absolutePath
+            } catch (e: Exception) {
+                Log.e(TAG, "Lỗi lưu ảnh: ${e.message}", e)
+                null
             }
-            bitmap.recycle()
-            file
         }
     }
 
-    data class GeminiResponse(
-        val candidates: List<Candidate>?
-    )
+    private fun saveToHistory(bitmap: Bitmap, speciesInfo: SpeciesInfo) {
+        viewModelScope.launch {
+            val path = saveBitmapToInternalStorage(getApplication(), bitmap)
+            if (path != null) {
+                val entry = HistoryEntry(
+                    imagePath = path,
+                    speciesInfo = speciesInfo,
+                    timestamp = System.currentTimeMillis(),
+                    isFavorite = false
+                )
+                historyDao.insert(entry)
+            }
+        }
+    }
 
-    data class Candidate(
-        val content: Content?
-    )
+    private suspend fun uriToFile(context: Context, uri: Uri): File = withContext(Dispatchers.IO) {
+        val inputStream = context.contentResolver.openInputStream(uri)!!
+        val bitmap = BitmapFactory.decodeStream(inputStream)
+        inputStream.close()
 
-    data class Content(
-        val parts: List<Part>?
-    )
+        val file = File(context.cacheDir, "temp_${System.currentTimeMillis()}.jpg")
+        FileOutputStream(file).use { out ->
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out)
+        }
+        bitmap.recycle()
+        file
+    }
 
-    data class Part(
-        val text: String?
-    )
+    // Gemini response model
+    data class GeminiResponse(val candidates: List<Candidate>?)
+    data class Candidate(val content: Content?)
+    data class Content(val parts: List<Part>?)
+    data class Part(val text: String?)
 }
