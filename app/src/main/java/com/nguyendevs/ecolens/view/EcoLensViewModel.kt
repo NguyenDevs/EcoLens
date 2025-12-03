@@ -3,6 +3,7 @@ package com.nguyendevs.ecolens.view
 import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
+import java.util.concurrent.TimeUnit
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
@@ -299,7 +300,12 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 )
             )
 
-            val client = OkHttpClient()
+            val client = OkHttpClient.Builder()
+                .connectTimeout(60, TimeUnit.SECONDS)
+                .readTimeout(180, TimeUnit.SECONDS)
+                .writeTimeout(180, TimeUnit.SECONDS)
+                .build()
+
             val json = Gson().toJson(requestBody)
             val body = json.toRequestBody("application/json".toMediaTypeOrNull())
             val request = Request.Builder()
