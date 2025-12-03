@@ -15,8 +15,7 @@ export default {
         // Gemini API Proxy
         if (url.pathname === '/gemini') {
             try {
-                // ✅ ĐỔI SANG MODEL STABLE VÀ KHÔNG BỊ REGION LOCK
-                const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+                const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
                 const apiKey = env.GEMINI_API_KEY;
 
                 if (!apiKey) {
