@@ -1,37 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="background_color">#F9F9F9</color>
-
-    <!-- EcoLens Theme Colors -->
+    <!-- Primary Colors -->
     <color name="green_primary">#018367</color>
     <color name="green_primary_2">#033826</color>
     <color name="green_light">#4CAF50</color>
     <color name="green_dark">#00796B</color>
+
+    <!-- Background Colors -->
+    <color name="background_color">#F9F9F9</color>
     <color name="background_light">#F9F9F9</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="transparent">#00FFFFFF</color>
+
+    <!-- Text Colors -->
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#808080</color>
+    <color name="text_disabled">#BDBDBD</color>
 
     <!-- Bottom Navigation Colors -->
     <color name="bottom_nav_selected">#033826</color>
     <color name="bottom_nav_unselected">#CCD7D1</color>
-    <!-- Material Design Colors -->
-    <color name="white">#FFFFFF</color>
-    <color name="gray">#808080</color>
-    <color name="transparent">#00FFFFFF</color>
-    <color name="black">#000000</color>
+
+    <!-- Error Colors -->
     <color name="error_red">#D32F2F</color>
     <color name="error_background">#FFEBEE</color>
 
-    <color name="text_primary">#808080</color>
-
-    <!-- Confidence levels -->
+    <!-- Confidence Level Colors -->
     <color name="confidence_high">#00A86B</color>
     <color name="confidence_medium">#F57C00</color>
     <color name="confidence_low">#D32F2F</color>
 
+    <!-- Confidence Background Colors -->
     <color name="confidence_bg_high">#E8F5E9</color>
     <color name="confidence_bg_medium">#FFF3E0</color>
     <color name="confidence_bg_low">#FFEBEE</color>
 
+    <!-- Confidence Text Colors -->
     <color name="confidence_text_high">#00796B</color>
     <color name="confidence_text_medium">#E65100</color>
     <color name="confidence_text_low">#C62828</color>
+
+    <!-- Utility Colors -->
+    <color name="gray">#808080</color>
 </resources>

@@ -174,65 +174,65 @@ class SpeciesInfoHandler(
 
         val shareText = buildString {
             append(context.getString(R.string.share_title))
-            append("\n━━━━━━━━━━━━━━━━━━━━━\n\n")
+            append("\n━━━━━━━━━━━━━━━━━━━━\n\n")
 
             append("📌 ${info.commonName}\n")
             append("🔬 ${info.scientificName}\n")
             append("✅ ${context.getString(R.string.label_confidence_template, confidencePercent)}\n\n")
 
-            append("━━━━━━━━━━━━━━━━━━━━━\n")
+            append("━━━━━━━━━━━━━━━━━━━━\n")
             append(context.getString(R.string.share_taxonomy_title))
-            append("\n━━━━━━━━━━━━━━━━━━━━━\n\n")
+            append("\n━━━━━━━━━━━━━━━━━━━━\n\n")
 
-            if (info.kingdom.isNotEmpty()) append("• ${context.getString(R.string.label_kingdom)} ${info.kingdom}\n")
-            if (info.phylum.isNotEmpty()) append("• ${context.getString(R.string.label_phylum)} ${info.phylum}\n")
-            if (info.className.isNotEmpty()) append("• ${context.getString(R.string.label_class)} ${info.className}\n")
-            if (info.order.isNotEmpty()) append("• ${context.getString(R.string.label_order)} ${info.order}\n")
-            if (info.family.isNotEmpty()) append("• ${context.getString(R.string.label_family)} ${info.family}\n")
-            if (info.genus.isNotEmpty()) append("• ${context.getString(R.string.label_genus)} ${info.genus}\n")
-            if (info.species.isNotEmpty()) append("• ${context.getString(R.string.label_species)} ${info.species}\n")
+            if (info.kingdom.isNotEmpty()) append("• ${context.getString(R.string.label_kingdom)} ${stripHtml(info.kingdom)}\n")
+            if (info.phylum.isNotEmpty()) append("• ${context.getString(R.string.label_phylum)} ${stripHtml(info.phylum)}\n")
+            if (info.className.isNotEmpty()) append("• ${context.getString(R.string.label_class)} ${stripHtml(info.className)}\n")
+            if (info.order.isNotEmpty()) append("• ${context.getString(R.string.label_order)} ${stripHtml(info.order)}\n")
+            if (info.family.isNotEmpty()) append("• ${context.getString(R.string.label_family)} ${stripHtml(info.family)}\n")
+            if (info.genus.isNotEmpty()) append("• ${context.getString(R.string.label_genus)} ${stripHtml(info.genus)}\n")
+            if (info.species.isNotEmpty()) append("• ${context.getString(R.string.label_species)} ${stripHtml(info.species)}\n")
 
             if (info.description.isNotEmpty()) {
-                append("\n━━━━━━━━━━━━━━━━━━━━━\n")
+                append("\n━━━━━━━━━━━━━━━━━━━━\n")
                 append(context.getString(R.string.share_desc_title))
-                append("\n━━━━━━━━━━━━━━━━━━━━━\n\n")
+                append("\n━━━━━━━━━━━━━━━━━━━━\n\n")
                 append(stripHtml(info.description))
                 append("\n")
             }
 
             if (info.characteristics.isNotEmpty()) {
-                append("\n━━━━━━━━━━━━━━━━━━━━━\n")
+                append("\n━━━━━━━━━━━━━━━━━━━━\n")
                 append(context.getString(R.string.share_char_title))
-                append("\n━━━━━━━━━━━━━━━━━━━━━\n\n")
+                append("\n━━━━━━━━━━━━━━━━━━━━\n\n")
                 append(stripHtml(info.characteristics))
                 append("\n")
             }
 
             if (info.distribution.isNotEmpty()) {
-                append("\n━━━━━━━━━━━━━━━━━━━━━\n")
+                append("\n━━━━━━━━━━━━━━━━━━━━\n")
                 append(context.getString(R.string.share_dist_title))
-                append("\n━━━━━━━━━━━━━━━━━━━━━\n\n")
+                append("\n━━━━━━━━━━━━━━━━━━━━\n\n")
                 append(stripHtml(info.distribution))
                 append("\n")
             }
 
             if (info.habitat.isNotEmpty()) {
-                append("\n━━━━━━━━━━━━━━━━━━━━━\n")
+                append("\n━━━━━━━━━━━━━━━━━━━━\n")
                 append(context.getString(R.string.share_hab_title))
-                append("\n━━━━━━━━━━━━━━━━━━━━━\n\n")
+                append("\n━━━━━━━━━━━━━━━━━━━━\n\n")
                 append(stripHtml(info.habitat))
                 append("\n")
             }
 
             if (info.conservationStatus.isNotEmpty()) {
-                append("\n━━━━━━━━━━━━━━━━━━━━━\n")
+                append("\n━━━━━━━━━━━━━━━━━━━━\n")
                 append(context.getString(R.string.share_cons_title))
-                append("\n━━━━━━━━━━━━━━━━━━━━━\n\n")
+                append("\n━━━━━━━━━━━━━━━━━━━━\n\n")
                 append(stripHtml(info.conservationStatus))
                 append("\n")
             }
 
-            append("\n━━━━━━━━━━━━━━━━━━━━━\n")
+            append("\n━━━━━━━━━━━━━━━━━━━━\n")
             append(context.getString(R.string.share_footer))
         }
 

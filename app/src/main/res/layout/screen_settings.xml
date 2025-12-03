@@ -17,65 +17,74 @@
             android:textStyle="bold"
             android:layout_marginBottom="24dp"/>
 
+    <!-- Preferences Section -->
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/preferences"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:layout_marginBottom="12dp"
+            android:textAllCaps="true"/>
+
+    <!-- Language Option -->
     <com.google.android.material.card.MaterialCardView
+            android:id="@+id/languageOption"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="16dp"
             app:cardElevation="2dp"
-            app:cardBackgroundColor="@android:color/white">
+            android:layout_marginBottom="16dp"
+            app:cardBackgroundColor="@android:color/white"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
 
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+
+            <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_language"
+                    app:tint="@color/green_primary"/>
 
             <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
-
-                <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_settings"
-                        app:tint="@color/green_primary"/>
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="12dp">
 
                 <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/language_label"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="#424242"
-                        android:layout_marginStart="12dp"/>
-            </LinearLayout>
-
-            <RadioGroup
-                    android:id="@+id/rgLanguage"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                <RadioButton
-                        android:id="@+id/rbVietnamese"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/lang_vietnamese"
                         android:textSize="16sp"
-                        android:paddingStart="8dp"/>
+                        android:textColor="@android:color/black"/>
 
-                <RadioButton
-                        android:id="@+id/rbEnglish"
-                        android:layout_width="match_parent"
+                <TextView
+                        android:id="@+id/tvCurrentLanguage"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/lang_english"
-                        android:textSize="16sp"
-                        android:paddingStart="8dp"/>
-            </RadioGroup>
+                        android:textSize="14sp"
+                        android:textColor="@color/green_primary"
+                        android:layout_marginTop="2dp"/>
+            </LinearLayout>
+
+            <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_arrow_right"
+                    app:tint="@color/text_secondary"/>
 
         </LinearLayout>
+
     </com.google.android.material.card.MaterialCardView>
 
 </LinearLayout>

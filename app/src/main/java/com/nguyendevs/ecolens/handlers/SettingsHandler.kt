@@ -1,48 +1,52 @@
 package com.nguyendevs.ecolens.handlers
 
 import android.app.Activity
-import android.content.Intent
-import android.widget.RadioButton
-import android.widget.RadioGroup
+import android.view.View
+import android.widget.TextView
 import com.nguyendevs.ecolens.R
+import com.nguyendevs.ecolens.activities.LanguageSelectionActivity
 import com.nguyendevs.ecolens.managers.LanguageManager
 
 class SettingsHandler(
     private val activity: Activity,
     private val languageManager: LanguageManager,
-    private val settingsView: android.view.View
+    private val settingsView: View
 ) {
+    private lateinit var tvCurrentLanguage: TextView
+    private lateinit var languageOption: View
+
     fun setup() {
-        val rgLanguage = settingsView.findViewById<RadioGroup>(R.id.rgLanguage)
-        val rbVietnamese = settingsView.findViewById<RadioButton>(R.id.rbVietnamese)
-        val rbEnglish = settingsView.findViewById<RadioButton>(R.id.rbEnglish)
+        try {
+            languageOption = settingsView.findViewById(R.id.languageOption)
+            tvCurrentLanguage = settingsView.findViewById(R.id.tvCurrentLanguage)
 
-        // Set trạng thái checked dựa trên ngôn ngữ hiện tại
-        if (languageManager.getLanguage() == LanguageManager.LANG_EN) {
-            rbEnglish.isChecked = true
-        } else {
-            rbVietnamese.isChecked = true
-        }
+            updateLanguageDisplay()
 
-        rgLanguage.setOnCheckedChangeListener { _, checkedId ->
-            val newLang = when (checkedId) {
-                R.id.rbEnglish -> LanguageManager.LANG_EN
-                else -> LanguageManager.LANG_VI
+            languageOption.setOnClickListener {
+                openLanguageSelection()
             }
-
-            // Nếu ngôn ngữ thực sự thay đổi thì mới recreate
-            if (newLang != languageManager.getLanguage()) {
-                languageManager.setLanguage(newLang)
-                restartActivity()
-            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
-    private fun restartActivity() {
-        val intent = activity.intent
-        activity.finish()
+    fun updateLanguageDisplay() {
+        // Kiểm tra xem view đã được khởi tạo chưa
+        if (!::tvCurrentLanguage.isInitialized) {
+            return
+        }
+
+        val currentLang = languageManager.getLanguage()
+        tvCurrentLanguage.text = when (currentLang) {
+            LanguageManager.LANG_EN -> activity.getString(R.string.lang_english)
+            LanguageManager.LANG_VI -> activity.getString(R.string.lang_vietnamese)
+            else -> activity.getString(R.string.lang_english)
+        }
+    }
+
+    private fun openLanguageSelection() {
+        val intent = LanguageSelectionActivity.newIntent(activity)
         activity.startActivity(intent)
-        // Loại bỏ hiệu ứng chuyển cảnh để mượt hơn
-        activity.overridePendingTransition(0, 0)
+        activity.overridePendingTransition(R.anim.scale_in, R.anim.hold)
     }
 }

@@ -40,6 +40,9 @@
             </intent-filter>
         </activity>
         <activity
+                android:name=".activities.LanguageSelectionActivity"
+                android:screenOrientation="portrait"/>
+        <activity
                 android:name=".activities.CameraActivity"
                 android:screenOrientation="portrait"
                 android:theme="@style/Theme.AppCompat.NoActionBar"

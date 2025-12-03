@@ -104,6 +104,7 @@
     <string name="settings_placeholder">Settings</string>
     <string name="settings_subtitle">Application options</string>
     <string name="language_label">Language</string>
+    <string name="preferences">Preferences</string>
     <string name="lang_vietnamese">Tiếng Việt</string>
     <string name="lang_english">English</string>
 

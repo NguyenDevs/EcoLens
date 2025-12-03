@@ -104,6 +104,7 @@
     <string name="settings_placeholder">Cài đặt</string>
     <string name="settings_subtitle">Các tùy chọn cài đặt</string>
     <string name="language_label">Ngôn ngữ</string>
+    <string name="preferences">Giao diện</string>
     <string name="lang_vietnamese">Tiếng Việt</string>
     <string name="lang_english">English</string>
 

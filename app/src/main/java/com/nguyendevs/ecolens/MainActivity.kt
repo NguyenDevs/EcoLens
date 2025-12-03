@@ -399,6 +399,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        settingsHandler.updateLanguageDisplay()
+    }
+
     override fun onDestroy() {
         speakerManager.shutdown()
         super.onDestroy()
