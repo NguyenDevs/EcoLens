@@ -1,4 +1,3 @@
-import java.util.Properties
 
 plugins {
     id("com.android.application")
@@ -6,14 +5,6 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
-fun getApiKey(propertyKey: String): String {
-    val properties = Properties()
-    val localPropertiesFile = rootProject.file("local.properties")
-    if (localPropertiesFile.exists()) {
-        properties.load(localPropertiesFile.inputStream())
-    }
-    return properties.getProperty(propertyKey, "")
-}
 
 android {
     namespace = "com.nguyendevs.ecolens"
@@ -27,9 +18,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        buildConfigField("String", "INATURALIST_API_TOKEN", "\"${getApiKey("INATURALIST_API_TOKEN")}\"")
-        buildConfigField("String", "GEMINI_API_KEY", "\"${getApiKey("GEMINI_API_KEY")}\"")
     }
 
     buildTypes {
