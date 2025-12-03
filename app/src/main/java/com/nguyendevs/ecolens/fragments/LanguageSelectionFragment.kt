@@ -51,13 +51,13 @@ class LanguageSelectionFragment : Fragment() {
             Language(
                 code = LanguageManager.LANG_EN,
                 name = getString(R.string.lang_english),
-                flagEmoji = "🇺🇸",
+                flagDrawable = R.drawable.flag_england,  // Dùng flag có sẵn
                 isSelected = currentLang == LanguageManager.LANG_EN
             ),
             Language(
                 code = LanguageManager.LANG_VI,
                 name = getString(R.string.lang_vietnamese),
-                flagEmoji = "🇻🇳",
+                flagDrawable = R.drawable.flag_vietnam,  // Dùng flag có sẵn
                 isSelected = currentLang == LanguageManager.LANG_VI
             )
         )
