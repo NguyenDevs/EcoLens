@@ -17,7 +17,7 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
     private var isPaused = false
 
     private val RATE_NORMAL = 1.0f
-    private val RATE_VIETNAMESE = 1.05f  
+    private val RATE_VIETNAMESE = 1.05f
 
     var onSpeechFinished: (() -> Unit)? = null
 

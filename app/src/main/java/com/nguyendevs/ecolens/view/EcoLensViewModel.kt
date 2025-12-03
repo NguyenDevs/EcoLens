@@ -239,7 +239,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             val prompt = """
                    You are a professional biologist. Provide detailed information about "$scientificName" $langInstruction.
                        === OUTPUT FORMAT ===
-                   Return ONLY valid JSON (NO markdown, NO ```json):
+                   Return ONLY valid JSON (DO NO USE markdown format, NO ```json):
                    {
                    "commonName": "$commonNameDesc",
                    "kingdom": "Vietnamese Name only",
