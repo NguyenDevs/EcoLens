@@ -42,7 +42,7 @@
 
     <string name="history_placeholder">Recognition History</string>
     <string name="history_subtitle">Feature under development</string>
-    <string name="garden_placeholder">My Garden</string>
+    <string name="garden_placeholder">Favorites</string>
     <string name="garden_subtitle">Save your favorite species</string>
     <string name="settings_placeholder">Settings</string>
     <string name="settings_subtitle">Application options</string>

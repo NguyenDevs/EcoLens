@@ -10,6 +10,41 @@
     <string name="lang_vietnamese">Tiếng Việt</string>
     <string name="lang_english">English</string>
 
-    <string name="camera">Camera</string>
+    <string name="camera">Máy ảnh</string>
+    <string name="image_preview">Xem trước ảnh</string>
+    <string name="no_image">Không có ảnh</string>
+    <string name="error">Lỗi</string>
+    <string name="confidence">Độ tin cậy</string>
+    <string name="history">Lịch sử</string>
+    <string name="my_garden">Yêu thích</string>
+    <string name="settings">Cài đặt</string>
+
+    <string name="app_title">EcoLens</string>
+    <string name="app_subtitle">Nhận diện động thực vật bằng hình ảnh</string>
+    <string name="no_image_selected">Chưa chọn ảnh</string>
+    <string name="error_occurred">Đã xảy ra lỗi</string>
+
+    <string name="taxonomy_title">🔬 Phân loại khoa học</string>
+    <string name="label_kingdom">Giới:</string>
+    <string name="label_phylum">Ngành:</string>
+    <string name="label_class">Lớp:</string>
+    <string name="label_order">Bộ:</string>
+    <string name="label_family">Họ:</string>
+    <string name="label_genus">Chi:</string>
+    <string name="label_species">Loài:</string>
     <string name="analyzing">Đang phân tích hình ảnh…</string>
+    <string name="section_description">📖 Mô tả</string>
+    <string name="section_characteristics">✨ Đặc điểm</string>
+    <string name="section_distribution">🌍 Phân bố</string>
+    <string name="section_habitat">🏞️ Môi trường sống</string>
+    <string name="section_conservation">🛡️ Tình trạng bảo tồn</string>
+
+    <string name="history_placeholder">Lịch sử nhận diện</string>
+    <string name="history_subtitle">Chức năng đang được phát triển</string>
+    <string name="garden_placeholder">Lưu trữ các loài yêu thích</string>
+    <string name="garden_subtitle">Lưu trữ các loài yêu thích</string>
+    <string name="settings_placeholder">Cài đặt</string>
+    <string name="settings_subtitle">Các tùy chọn cài đặt</string>
+    <string name="search">Tìm kiếm</string>
+    <string name="speak">Đọc nội dung</string>
 </resources>
