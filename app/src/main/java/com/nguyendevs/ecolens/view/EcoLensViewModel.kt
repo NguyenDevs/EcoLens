@@ -237,61 +237,30 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             val commonNameDesc = if (languageCode == "en") "Common name in English" else "Tên thường gọi tiếng Việt chuẩn nhất"
 
             val prompt = """
-            You are a professional biologist. Please provide detailed information about the species with scientific name "$scientificName" $langInstruction.
-            
-            === FORMAT REQUIREMENTS ===
-            
-            1. CONTENT FIELDS (description, characteristics, distribution, habitat, conservationStatus):
-               - Use <b>...</b> for bold text for main features and notable properties
-               - Use <font color='$highlightColor'><b>...</b></font> for green color and bold for:
-                 + Specific place names
-                 + Proper names
-                 + Important size measurements (length, weight, dimensions...)
-               - ONLY use basic HTML tags (<b>, <font>), DO NOT use Markdown (**)
-            
-            2. CLASSIFICATION FIELDS (kingdom, phylum, className, order, family, genus, species):
-               - ONLY write the NAME, DO NOT add prefixes ("Kingdom", "Phylum", "Class", etc.)
-               - Example CORRECT: "Animalia", "Chordata", "Mammalia" (or Vietnamese equivalents)
-               - Example WRONG: "Kingdom Animalia", "Phylum Chordata"
-               - For family, genus, species: Prioritize English/Latin names. If there's a local name, put it in parentheses AND wrap the ENTIRE parenthetical phrase in <i>...</i>
-                 + Example: "Felidae <i>(Cat Family)</i>", "Panthera <i>(Big Cats)</i>"
-            
-            3. CONSERVATIONSTATUS FIELD - COLOR CODING:
-               - Critically Endangered/Endangered: <font color='$dangerColor'><b>...</b></font>
-               - Red Book/Vulnerable: <font color='$redBookColor'><b>...</b></font>
-               - Near Threatened: <font color='$vulnerableColor'><b>...</b></font>
-               - Least Concern: <font color='$leastConcernColor'><b>...</b></font>
-               - Not Ranked: <font color='$notRankedColor'><b>...</b></font>
-            
-            === CONTENT REQUIREMENTS ===
-            
-            - description: General overview (about 5 sentences), with paragraph indentation.
-            - characteristics: Present in bullet point format (•), new line between points, focus on morphology, size, colors.
-            - distribution: Prioritize distribution in Vietnam first (if applicable), then worldwide.
-            - habitat: Specific living environment, with paragraph indentation.
-            - conservationStatus: Current conservation status.
-            
-            === OUTPUT FORMAT ===
-            
-            Return pure JSON (NO markdown fence, NO ```json):
-            
-            {
-                "commonName": "$commonNameDesc",
-                "kingdom": "Kingdom name (name only)",
-                "phylum": "Phylum name (name only)",
-                "className": "Class name (name only)",
-                "order": "Order name (name only)",
-                "family": "Family name (common name if available)",
-                "genus": "Genus name (common name if available)",
-                "species": "Species name (common name if available)",
-                "rank": "Classification rank",
-                "description": "...",
-                "characteristics": "...",
-                "distribution": "...",
-                "habitat": "...",
-                "conservationStatus": "..."
-            }
-        """.trimIndent()
+You are a professional biologist. Provide detailed information about "$scientificName" $langInstruction.
+
+=== OUTPUT FORMAT ===
+Return ONLY valid JSON (no markdown, no ```json):
+
+{
+    "commonName": "$commonNameDesc",
+    "kingdom": "Name only",
+    "phylum": "Name only", 
+    "className": "Name only",
+    "order": "Name only",
+    "family": "Scientific name <i>(common name)</i> if available",
+    "genus": "Scientific name <i>(common name)</i> if available",
+    "species": "Scientific name <i>(common name)</i> if available",
+    "rank": "Taxonomic rank",
+    "description": "4-sentence overview with <b>bold</b> for key features and <font color='$highlightColor'><b>green bold</b></font> for places/names/measurements.",
+    "characteristics": "Bullet points (•) on new lines covering morphology, size, colors. Use <b>bold</b> and <font color='$highlightColor'><b>green bold</b></font> formatting.",
+    "distribution": "Vietnam first (if applicable), then worldwide. Use <font color='$highlightColor'><b>green bold</b></font> for locations.",
+    "habitat": "Specific environment details with formatting.",
+    "conservationStatus": "Status with color: <font color='$dangerColor'><b>Critically Endangered/Endangered</b></font>, <font color='$redBookColor'><b>Red Book/Vulnerable</b></font>, <font color='$vulnerableColor'><b>Near Threatened</b></font>, <font color='$leastConcernColor'><b>Least Concern</b></font>, <font color='$notRankedColor'><b>Not Ranked</b></font>"
+}
+
+CRITICAL: Return ONLY the JSON object. No explanations, no markdown fences, no extra text.
+""".trimIndent()
 
             val workerUrl = "https://ecolens.tainguyen-devs.workers.dev/gemini"
             val requestBody = mapOf(
@@ -318,20 +287,52 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             }
 
             val responseBody = response.body?.string() ?: ""
+            Log.d(TAG, "📥 Raw Gemini response: $responseBody")
+
             val geminiResponse = Gson().fromJson(responseBody, GeminiResponse::class.java)
             val jsonString = geminiResponse.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text ?: ""
 
-            val cleanedJson = jsonString.replace("```json", "").replace("```", "").trim()
+            Log.d(TAG, "📄 Extracted JSON string: $jsonString")
+
+            // ✅ CLEAN JSON AGGRESSIVELY
+            val cleanedJson = jsonString
+                .replace("```json", "")
+                .replace("```", "")
+                .trim()
+                .let { text ->
+                    // Extract only JSON object
+                    val start = text.indexOf('{')
+                    val end = text.lastIndexOf('}')
+                    if (start >= 0 && end > start) {
+                        text.substring(start, end + 1)
+                    } else {
+                        text
+                    }
+                }
+
+            Log.d(TAG, "🧹 Cleaned JSON: $cleanedJson")
+
+            // ✅ CHECK IF JSON IS VALID BEFORE PARSING
+            if (cleanedJson.isEmpty() || !cleanedJson.startsWith("{")) {
+                throw IllegalStateException("Invalid JSON response from Gemini")
+            }
+
             val info = Gson().fromJson(cleanedJson, SpeciesInfo::class.java)
 
+            // ✅ NULL CHECK BEFORE USING
+            if (info == null) {
+                Log.e(TAG, "❌ Gson returned null - JSON parsing failed")
+                throw IllegalStateException("Failed to parse JSON to SpeciesInfo")
+            }
+
             val cleanedInfo = info.copy(
-                kingdom = removeRankPrefix(info.kingdom, "Giới|Kingdom"),
-                phylum = removeRankPrefix(info.phylum, "Ngành|Phylum"),
-                className = removeRankPrefix(info.className, "Lớp|Class"),
-                order = removeRankPrefix(info.order, "Bộ|Order"),
-                family = removeRankPrefix(info.family, "Họ|Family"),
-                genus = removeRankPrefix(info.genus, "Chi|Genus"),
-                species = removeRankPrefix(info.species, "Loài|Species"),
+                kingdom = removeRankPrefix(info.kingdom ?: "", "Giới|Kingdom"),
+                phylum = removeRankPrefix(info.phylum ?: "", "Ngành|Phylum"),
+                className = removeRankPrefix(info.className ?: "", "Lớp|Class"),
+                order = removeRankPrefix(info.order ?: "", "Bộ|Order"),
+                family = removeRankPrefix(info.family ?: "", "Họ|Family"),
+                genus = removeRankPrefix(info.genus ?: "", "Chi|Genus"),
+                species = removeRankPrefix(info.species ?: "", "Loài|Species"),
                 scientificName = scientificName,
                 confidence = confidence
             )
@@ -340,6 +341,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
         } catch (e: Exception) {
             Log.e(TAG, "❌ Lỗi khi parse Gemini response: ${e.message}", e)
+            e.printStackTrace()
 
             val context = getApplication<Application>()
             val errorMsg = if (languageCode == "en")

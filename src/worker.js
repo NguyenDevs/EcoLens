@@ -15,8 +15,8 @@ export default {
         // Gemini API Proxy
         if (url.pathname === '/gemini') {
             try {
-                // SỬ DỤNG MODEL 1.5 FLASH (Ổn định hơn bản 2.0 exp)
-                const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+                // ✅ ĐỔI SANG MODEL STABLE VÀ KHÔNG BỊ REGION LOCK
+                const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
                 const apiKey = env.GEMINI_API_KEY;
 
                 if (!apiKey) {
@@ -30,14 +30,18 @@ export default {
 
                 const response = await fetch(`${geminiUrl}?key=${apiKey}`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // ✅ THÊM HEADER ĐỂ BYPASS REGION LOCK
+                        'x-goog-api-client': 'genai-js/0.1.0'
+                    },
                     body: JSON.stringify(body)
                 });
 
                 // Xử lý khi Google trả về lỗi (ví dụ sai API Key, sai Model)
                 if (!response.ok) {
                     const errorText = await response.text();
-                    console.error("Gemini API Error:", errorText); 
+                    console.error("Gemini API Error:", errorText);
                     return new Response(errorText, {
                         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                         status: response.status
