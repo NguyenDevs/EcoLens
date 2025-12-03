@@ -15,8 +15,16 @@ export default {
         // Gemini API Proxy
         if (url.pathname === '/gemini') {
             try {
-                const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
+                // SỬ DỤNG MODEL 1.5 FLASH (Ổn định hơn bản 2.0 exp)
+                const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
                 const apiKey = env.GEMINI_API_KEY;
+
+                if (!apiKey) {
+                    return new Response(JSON.stringify({ error: "Missing GEMINI_API_KEY on server" }), {
+                        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                        status: 500
+                    });
+                }
 
                 const body = await request.json();
 
@@ -26,13 +34,24 @@ export default {
                     body: JSON.stringify(body)
                 });
 
+                // Xử lý khi Google trả về lỗi (ví dụ sai API Key, sai Model)
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error("Gemini API Error:", errorText); 
+                    return new Response(errorText, {
+                        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                        status: response.status
+                    });
+                }
+
                 const data = await response.json();
                 return new Response(JSON.stringify(data), {
                     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                    status: response.status
+                    status: 200
                 });
+
             } catch (error) {
-                return new Response(JSON.stringify({ error: error.message }), {
+                return new Response(JSON.stringify({ error: error.message, stack: error.stack }), {
                     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                     status: 500
                 });
