@@ -14,7 +14,7 @@ export default {
 
         if (url.pathname === '/gemini') {
             try {
-                const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
+                const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
                 const apiKey = env.GEMINI_API_KEY;
 
                 if (!apiKey) {
@@ -33,12 +33,10 @@ export default {
                     headers: {
                         'Content-Type': 'application/json',
                         'x-goog-api-client': 'genai-js/0.1.0',
-                        // ✅ GIẢ LẬP REQUEST TỪ US
                         'X-Forwarded-For': '8.8.8.8',
                         'CF-IPCountry': 'US'
                     },
                     body: JSON.stringify(body),
-                    // ✅ QUAN TRỌNG: Cloudflare Worker tự động bypass restrictions
                     cf: {
                         // Route through US data centers
                         resolveOverride: 'generativelanguage.googleapis.com'
