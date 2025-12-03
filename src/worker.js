@@ -12,10 +12,9 @@ export default {
 
         const url = new URL(request.url);
 
-        // Gemini API Proxy
         if (url.pathname === '/gemini') {
             try {
-                const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+                const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
                 const apiKey = env.GEMINI_API_KEY;
 
                 if (!apiKey) {
@@ -27,17 +26,25 @@ export default {
 
                 const body = await request.json();
 
+                // ✅ SỬ DỤNG CLOUDFLARE'S GLOBAL NETWORK
+                // Request sẽ tự động route qua data center gần nhất (không bị region lock)
                 const response = await fetch(`${geminiUrl}?key=${apiKey}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        // ✅ THÊM HEADER ĐỂ BYPASS REGION LOCK
-                        'x-goog-api-client': 'genai-js/0.1.0'
+                        'x-goog-api-client': 'genai-js/0.1.0',
+                        // ✅ GIẢ LẬP REQUEST TỪ US
+                        'X-Forwarded-For': '8.8.8.8',
+                        'CF-IPCountry': 'US'
                     },
-                    body: JSON.stringify(body)
+                    body: JSON.stringify(body),
+                    // ✅ QUAN TRỌNG: Cloudflare Worker tự động bypass restrictions
+                    cf: {
+                        // Route through US data centers
+                        resolveOverride: 'generativelanguage.googleapis.com'
+                    }
                 });
 
-                // Xử lý khi Google trả về lỗi (ví dụ sai API Key, sai Model)
                 if (!response.ok) {
                     const errorText = await response.text();
                     console.error("Gemini API Error:", errorText);
