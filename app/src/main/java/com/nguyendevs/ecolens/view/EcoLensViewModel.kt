@@ -3,6 +3,10 @@ package com.nguyendevs.ecolens.view
 import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
@@ -280,11 +284,31 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             }
         """.trimIndent()
 
-            val response = geminiModel.generateContent(prompt)
-            val jsonString = response.text?.replace("```json", "")?.replace("```", "")?.trim() ?: ""
+            val workerUrl = "https://ecolens.tainguyen-devs.workers.dev/gemini"
+            val requestBody = mapOf(
+                "contents" to listOf(
+                    mapOf("parts" to listOf(mapOf("text" to prompt)))
+                )
+            )
 
-            val gson = Gson()
-            val info = gson.fromJson(jsonString, SpeciesInfo::class.java)
+            val client = OkHttpClient()
+            val json = Gson().toJson(requestBody)
+            val body = RequestBody.create("application/json".toMediaTypeOrNull(), json)
+            val request = Request.Builder()
+                .url(workerUrl)
+                .post(body)
+                .build()
+
+            val response = withContext(Dispatchers.IO) {
+                client.newCall(request).execute()
+            }
+
+            val responseBody = response.body?.string() ?: ""
+            val geminiResponse = Gson().fromJson(responseBody, GeminiResponse::class.java)
+            val jsonString = geminiResponse.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text ?: ""
+
+            val cleanedJson = jsonString.replace("```json", "").replace("```", "").trim()
+            val info = Gson().fromJson(cleanedJson, SpeciesInfo::class.java)
 
             val cleanedInfo = info.copy(
                 kingdom = removeRankPrefix(info.kingdom, "Giới|Kingdom"),
@@ -340,4 +364,20 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             file
         }
     }
+
+    data class GeminiResponse(
+        val candidates: List<Candidate>?
+    )
+
+    data class Candidate(
+        val content: Content?
+    )
+
+    data class Content(
+        val parts: List<Part>?
+    )
+
+    data class Part(
+        val text: String?
+    )
 }

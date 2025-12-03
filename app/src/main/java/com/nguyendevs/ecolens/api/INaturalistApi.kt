@@ -5,7 +5,7 @@ import retrofit2.http.*
 
 interface INaturalistApi {
     @Multipart
-    @POST("v1/computervision/score_image")
+    @POST("inaturalist/v1/computervision/score_image")
     suspend fun identifySpecies(
         @Part image: MultipartBody.Part,
         @Query("lat") lat: Double = 16.0544,
@@ -13,7 +13,7 @@ interface INaturalistApi {
         @Query("locale") locale: String
     ): IdentificationResponse
 
-    @GET("v1/taxa/{id}")
+    @GET("inaturalist/v1/taxa/{id}")
     suspend fun getTaxonDetails(
         @Path("id") taxonId: Int,
         @Query("locale") locale: String = "vi"
