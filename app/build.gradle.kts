@@ -54,7 +54,9 @@ android {
         buildConfig = true
     }
 }
-
+configurations.all {
+    exclude(group = "com.intellij", module = "annotations")
+}
 dependencies {
     implementation("androidx.room:room-compiler:2.8.4")
     val camerax_version = "1.3.3"
@@ -78,6 +80,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.0")
+    implementation("com.google.guava:guava:31.1-android")
 
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.cardview:cardview:1.0.0")
