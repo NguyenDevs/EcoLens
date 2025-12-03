@@ -25,9 +25,6 @@ export default {
                 }
 
                 const body = await request.json();
-
-                // ✅ SỬ DỤNG CLOUDFLARE'S GLOBAL NETWORK
-                // Request sẽ tự động route qua data center gần nhất (không bị region lock)
                 const response = await fetch(`${geminiUrl}?key=${apiKey}`, {
                     method: 'POST',
                     headers: {
