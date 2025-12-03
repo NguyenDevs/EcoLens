@@ -32,7 +32,7 @@
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Lịch sử nhận diện"
+                android:text="@string/history_title_label"
                 android:textSize="20sp"
                 android:textColor="#757575"
                 android:layout_marginTop="16dp" />
@@ -40,7 +40,7 @@
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Chức năng đang được phát triển"
+                android:text="@string/history_subtitle"
                 android:textSize="14sp"
                 android:textColor="#BDBDBD"
                 android:layout_marginTop="8dp" />

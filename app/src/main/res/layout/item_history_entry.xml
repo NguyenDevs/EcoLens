@@ -44,13 +44,13 @@
                     app:cardElevation="0dp"
                     app:strokeWidth="0dp">
                 <ImageView
-                    android:id="@+id/ivHistoryImage"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    android:contentDescription="Ảnh nhận diện"
-                    android:background="@drawable/ic_image"
-                    android:backgroundTint="@color/confidence_high"/>
+                        android:id="@+id/ivHistoryImage"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:contentDescription="@string/history_image"
+                        android:background="@drawable/ic_image"
+                        android:backgroundTint="@color/confidence_high"/>
 
             </com.google.android.material.card.MaterialCardView>
 
@@ -68,7 +68,7 @@
                         android:textStyle="bold"
                         android:textSize="18sp"
                         android:textColor="@color/green_primary"
-                        android:text="Tên thường gọi"/>
+                        android:text="@string/label_common_name"/>
 
                 <TextView
                         android:id="@+id/tvHistoryScientificName"
@@ -77,7 +77,7 @@
                         android:textSize="14sp"
                         android:textColor="#757575"
                         android:textStyle="italic"
-                        android:text="Tên khoa học"/>
+                        android:text="@string/label_scientific_name"/>
 
                 <TextView
                         android:id="@+id/tvHistoryTime"
@@ -86,7 +86,7 @@
                         android:textSize="12sp"
                         android:textColor="#BDBDBD"
                         android:layout_marginTop="4dp"
-                        android:text="Thời gian: 10:30 AM"/>
+                        android:text="@string/time_prefix"/>
 
             </LinearLayout>
 
@@ -95,7 +95,7 @@
                     android:layout_height="24dp"
                     android:layout_gravity="center_vertical"
                     android:src="@drawable/ic_search"
-                    android:contentDescription="Xem chi tiết"
+                    android:contentDescription="@string/view_detail"
                     app:tint="#BDBDBD"/>
 
         </LinearLayout>

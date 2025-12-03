@@ -10,7 +10,8 @@
             android:id="@+id/detailImageView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="centerCrop"/>
+            android:scaleType="centerCrop"
+            android:contentDescription="@string/detail_image"/>
 
     <ImageView
             android:id="@+id/btnBack"
@@ -20,6 +21,7 @@
             android:src="@drawable/ic_close"
             app:tint="@android:color/white"
             android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/back"
             android:elevation="10dp"/>
 
     <androidx.core.widget.NestedScrollView
@@ -39,7 +41,7 @@
                     android:id="@+id/tvCommonName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Tên loài"
+                    android:text="@string/label_common_name"
                     android:textSize="24sp"
                     android:textStyle="bold"
                     android:textColor="@android:color/white"/>
@@ -48,7 +50,7 @@
                     android:id="@+id/tvScientificName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Scientific Name"
+                    android:text="@string/label_scientific_name"
                     android:textSize="18sp"
                     android:textStyle="italic"
                     android:textColor="#BBBBBB"
@@ -64,7 +66,7 @@
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🔬 Phân loại khoa học"
+                    android:text="@string/taxonomy_title"
                     android:textSize="18sp"
                     android:textColor="@color/green_light"
                     android:textStyle="bold"
@@ -94,7 +96,7 @@
                         android:id="@+id/lblDescription"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="📖 Mô tả"
+                        android:text="@string/section_description"
                         android:textSize="18sp"
                         android:textColor="@color/green_light"
                         android:textStyle="bold"
@@ -113,7 +115,7 @@
                         android:id="@+id/lblCharacteristics"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="✨ Đặc điểm"
+                        android:text="@string/section_characteristics"
                         android:textSize="18sp"
                         android:textColor="@color/green_light"
                         android:textStyle="bold"
@@ -133,7 +135,7 @@
                         android:id="@+id/lblDistribution"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="🌍 Phân bố"
+                        android:text="@string/section_distribution"
                         android:textSize="18sp"
                         android:textColor="@color/green_light"
                         android:textStyle="bold"
@@ -153,7 +155,7 @@
                         android:id="@+id/lblHabitat"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="🏞️ Môi trường sống"
+                        android:text="@string/section_habitat"
                         android:textSize="18sp"
                         android:textColor="@color/green_light"
                         android:textStyle="bold"
@@ -173,7 +175,7 @@
                         android:id="@+id/lblConservation"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="🛡️ Tình trạng bảo tồn"
+                        android:text="@string/section_conservation"
                         android:textSize="18sp"
                         android:textColor="@color/green_light"
                         android:textStyle="bold"
@@ -201,6 +203,7 @@
             android:layout_gravity="bottom|end"
             android:layout_margin="24dp"
             android:src="@drawable/ic_favorite"
+            android:contentDescription="@string/favorite"
             app:backgroundTint="@color/white"
             app:tint="@color/gray" />
 

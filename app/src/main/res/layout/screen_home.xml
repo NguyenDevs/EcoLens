@@ -17,7 +17,7 @@
                 android:id="@+id/tvAppTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="EcoLens"
+                android:text="@string/app_title"
                 android:textSize="32sp"
                 android:textColor="#00796B"
                 android:textStyle="bold" android:paddingTop="15dp"/>
@@ -26,7 +26,7 @@
                 android:id="@+id/tvAppSubtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Nhận diện động thực vật bằng hình ảnh."
+                android:text="@string/app_subtitle_home"
                 android:textSize="16sp"
                 android:textColor="#757575"
                 android:layout_marginTop="4dp" />
@@ -88,7 +88,7 @@
                         android:padding="8dp"
                         app:tint="@android:color/white"
                         android:visibility="gone"
-                        android:contentDescription="Phóng to" />
+                        android:contentDescription="@string/zoom_in" />
 
             </FrameLayout>
 
@@ -108,7 +108,7 @@
                     android:id="@+id/tvLoading"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Đang phân tích hình ảnh..."
+                    android:text="@string/loading_analyzing"
                     android:textSize="16sp"
                     android:textColor="#00796B"
                     android:textStyle="bold"
@@ -148,7 +148,7 @@
                         android:layout_weight="1"
                         android:layout_marginStart="12dp"
                         android:textColor="#D32F2F"
-                        android:text="Đã xảy ra lỗi" />
+                        android:text="@string/error_default" />
 
             </LinearLayout>
 

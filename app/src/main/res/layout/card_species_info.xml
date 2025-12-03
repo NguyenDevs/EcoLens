@@ -15,14 +15,14 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="20dp"
-            >
+    >
 
         <!-- Common Name -->
         <TextView
                 android:id="@+id/tvCommonName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Tên thường gọi"
+                android:text="@string/label_common_name"
                 android:textSize="24sp"
                 android:textColor="#00796B"
                 android:textStyle="bold" />
@@ -40,7 +40,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Scientific name"
+                    android:text="@string/label_scientific_name"
                     android:textSize="18sp"
                     android:textStyle="italic"
                     android:textColor="#757575" />
@@ -53,7 +53,7 @@
                     android:padding="6dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:alpha="0.6"
-                    android:contentDescription="Copy scientific name" />
+                    android:contentDescription="@string/copy_scientific_name" />
             <ImageView
                     android:id="@+id/btnShareInfo"
                     android:layout_width="32dp"
@@ -62,7 +62,7 @@
                     android:padding="6dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:alpha="0.6"
-                    android:contentDescription="Copy scientific name" />
+                    android:contentDescription="@string/share_info" />
         </LinearLayout>
 
         <!-- Confidence Badge -->
@@ -95,7 +95,7 @@
                         android:id="@+id/tvConfidence"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Độ tin cậy: 95%"
+                        android:text="@string/confidence_format"
                         android:textColor="#00796B"
                         android:textStyle="bold"
                         android:layout_marginStart="8dp" />
@@ -114,7 +114,7 @@
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🔬 Phân loại khoa học"
+                android:text="@string/taxonomy_title"
                 android:textSize="20sp"
                 android:textColor="#00796B"
                 android:textStyle="bold"
@@ -139,7 +139,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
-                        android:text="Giới:"
+                        android:text="@string/label_kingdom"
                         android:textSize="14sp"
                         android:textColor="#757575" />
                 <TextView
@@ -163,7 +163,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
-                        android:text="Ngành:"
+                        android:text="@string/label_phylum"
                         android:textSize="14sp"
                         android:textColor="#757575" />
                 <TextView
@@ -187,7 +187,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
-                        android:text="Lớp:"
+                        android:text="@string/label_class"
                         android:textSize="14sp"
                         android:textColor="#757575" />
                 <TextView
@@ -211,7 +211,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
-                        android:text="Bộ:"
+                        android:text="@string/label_order"
                         android:textSize="14sp"
                         android:textColor="#757575" />
                 <TextView
@@ -235,7 +235,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
-                        android:text="Họ:"
+                        android:text="@string/label_family"
                         android:textSize="14sp"
                         android:textColor="#757575" />
                 <TextView
@@ -259,7 +259,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
-                        android:text="Chi:"
+                        android:text="@string/label_genus"
                         android:textSize="14sp"
                         android:textColor="#757575" />
                 <TextView
@@ -283,7 +283,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
-                        android:text="Loài:"
+                        android:text="@string/label_species"
                         android:textSize="14sp"
                         android:textColor="#757575" />
                 <TextView
@@ -309,7 +309,7 @@
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="📖 Mô tả"
+                    android:text="@string/section_description"
                     android:textSize="20sp"
                     android:textColor="#00796B"
                     android:textStyle="bold" />
@@ -337,7 +337,7 @@
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="✨ Đặc điểm"
+                    android:text="@string/section_characteristics"
                     android:textSize="20sp"
                     android:textColor="#00796B"
                     android:textStyle="bold" />
@@ -365,7 +365,7 @@
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🌍 Phân bố"
+                    android:text="@string/section_distribution"
                     android:textSize="20sp"
                     android:textColor="#00796B"
                     android:textStyle="bold" />
@@ -393,7 +393,7 @@
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🏞️ Môi trường sống"
+                    android:text="@string/section_habitat"
                     android:textSize="20sp"
                     android:textColor="#00796B"
                     android:textStyle="bold" />
@@ -420,7 +420,7 @@
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🛡️ Tình trạng bảo tồn"
+                    android:text="@string/section_conservation"
                     android:textSize="20sp"
                     android:textColor="#00796B"
                     android:textStyle="bold" />
