@@ -3,10 +3,6 @@ package com.nguyendevs.ecolens.view
 import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
@@ -14,9 +10,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.google.ai.client.generativeai.GenerativeModel
 import com.google.gson.Gson
-import com.nguyendevs.ecolens.BuildConfig
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.database.HistoryDatabase
 import com.nguyendevs.ecolens.model.EcoLensUiState
@@ -33,11 +27,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import java.io.FileOutputStream
-import java.util.UUID
 import java.util.Locale
+import java.util.UUID
 
 class EcoLensViewModel(application: Application) : AndroidViewModel(application) {
     private val TAG = "EcoLensViewModel"
@@ -49,10 +46,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     val searchTextAction: LiveData<String?> get() = _searchTextAction
 
     private val apiService = RetrofitClient.iNaturalistApi
-    private val geminiModel = GenerativeModel(
-        modelName = "gemini-2.5-flash",
-        apiKey = BuildConfig.GEMINI_API_KEY
-    )
 
     fun triggerSearch(query: String) {
         _searchTextAction.value = query
@@ -293,7 +286,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
             val client = OkHttpClient()
             val json = Gson().toJson(requestBody)
-            val body = RequestBody.create("application/json".toMediaTypeOrNull(), json)
+            val body = json.toRequestBody("application/json".toMediaTypeOrNull())
             val request = Request.Builder()
                 .url(workerUrl)
                 .post(body)
