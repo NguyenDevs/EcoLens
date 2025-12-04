@@ -139,9 +139,16 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
             .setDuration(300)
             .start()
 
-        // Measure the target height
+        val widthSpec = if (optionsContainer.width > 0) {
+            View.MeasureSpec.makeMeasureSpec(optionsContainer.width, View.MeasureSpec.EXACTLY)
+        } else {
+            val displayMetrics = resources.displayMetrics
+            val screenWidth = displayMetrics.widthPixels
+            View.MeasureSpec.makeMeasureSpec(screenWidth, View.MeasureSpec.AT_MOST)
+        }
+
         optionsContainer.measure(
-            View.MeasureSpec.makeMeasureSpec(optionsContainer.width, View.MeasureSpec.EXACTLY),
+            widthSpec,
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
         )
         val targetHeight = optionsContainer.measuredHeight
