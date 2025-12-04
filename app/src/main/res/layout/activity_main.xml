@@ -43,7 +43,7 @@
             android:id="@+id/searchBarContainer"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="25dp"
             android:layout_marginEnd="16dp"
             android:layout_gravity="top|end"
             app:cardCornerRadius="25dp"

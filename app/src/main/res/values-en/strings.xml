@@ -2,8 +2,8 @@
     <!-- App Info -->
     <string name="app_name">EcoLens</string>
     <string name="app_title">EcoLens</string>
-    <string name="app_subtitle">Identify species via images</string>
-    <string name="app_subtitle_home">Identify species via images.</string>
+    <string name="app_subtitle">IDENTIFY SPECIES VIA IMAGES</string>
+    <string name="app_subtitle_home">IDENTIFY SPECIES VIA IMAGES</string>
 
     <!-- Navigation -->
     <string name="nav_home">Home</string>

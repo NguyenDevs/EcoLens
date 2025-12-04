@@ -256,6 +256,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                     R.id.nav_history -> {
+                        navigationManager.showHistoryScreen()
                         showHistoryFragment()
                         fabMute.visibility = View.GONE
                     }

@@ -2,8 +2,8 @@
     <!-- App Info -->
     <string name="app_name">EcoLens</string>
     <string name="app_title">EcoLens</string>
-    <string name="app_subtitle">Nhận diện động thực vật bằng hình ảnh</string>
-    <string name="app_subtitle_home">Nhận diện động thực vật bằng hình ảnh.</string>
+    <string name="app_subtitle">NHẬN DIỆN ĐỘNG THỰC VẬT QUA HÌNH ẢNH</string>
+    <string name="app_subtitle_home">NHẬN DIỆN ĐỘNG THỰC VẬT QUA HÌNH ẢNH</string>
 
     <!-- Navigation -->
     <string name="nav_home">Trang chủ</string>
