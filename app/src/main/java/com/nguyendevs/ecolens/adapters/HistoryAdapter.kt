@@ -15,9 +15,10 @@ import java.util.Locale
 import java.util.TimeZone
 
 class HistoryAdapter(
-
     private var historyList: List<HistoryEntry>,
-    private val clickListener: (HistoryEntry) -> Unit) : RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
+    private val clickListener: (HistoryEntry) -> Unit,
+    private val favoriteClickListener: (HistoryEntry) -> Unit
+) : RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
 
     private val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).apply {
         timeZone = TimeZone.getDefault()
@@ -39,7 +40,7 @@ class HistoryAdapter(
 
     override fun onBindViewHolder(holder: HistoryViewHolder, position: Int) {
         val entry = historyList[position]
-        holder.bind(entry, clickListener)
+        holder.bind(entry, clickListener, favoriteClickListener)
 
         val showDateHeader = position == 0 || !isSameDay(entry.timestamp, historyList[position - 1].timestamp)
         holder.bindDateHeader(entry.timestamp, showDateHeader)
@@ -57,8 +58,13 @@ class HistoryAdapter(
         private val tvScientificName: TextView = itemView.findViewById(R.id.tvHistoryScientificName)
         private val tvTime: TextView = itemView.findViewById(R.id.tvHistoryTime)
         private val tvDateHeader: TextView = itemView.findViewById(R.id.tvDateHeader)
+        private val ivFavorite: ImageView = itemView.findViewById(R.id.ivHistoryFavorite)
 
-        fun bind(entry: HistoryEntry, clickListener: (HistoryEntry) -> Unit) {
+        fun bind(
+            entry: HistoryEntry,
+            clickListener: (HistoryEntry) -> Unit,
+            favoriteClickListener: (HistoryEntry) -> Unit
+        ) {
             val context = itemView.context
 
             tvCommonName.text = entry.speciesInfo.commonName.ifEmpty {
@@ -74,8 +80,15 @@ class HistoryAdapter(
                 .centerCrop()
                 .into(ivImage)
 
+            // Cập nhật icon yêu thích
+            updateFavoriteIcon(ivFavorite, entry.isFavorite)
+
             itemView.setOnClickListener {
                 clickListener(entry)
+            }
+
+            ivFavorite.setOnClickListener {
+                favoriteClickListener(entry)
             }
         }
 
@@ -85,6 +98,16 @@ class HistoryAdapter(
                 tvDateHeader.visibility = View.VISIBLE
             } else {
                 tvDateHeader.visibility = View.GONE
+            }
+        }
+
+        private fun updateFavoriteIcon(imageView: ImageView, isFavorite: Boolean) {
+            if (isFavorite) {
+                imageView.setImageResource(R.drawable.ic_favorite)
+                imageView.setColorFilter(android.graphics.Color.RED)
+            } else {
+                imageView.setImageResource(R.drawable.ic_favorite)
+                imageView.setColorFilter(android.graphics.Color.GRAY)
             }
         }
     }
