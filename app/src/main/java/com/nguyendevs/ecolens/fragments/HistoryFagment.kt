@@ -231,6 +231,7 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
 
     private fun showDateRangePickerDialog() {
         val builder = MaterialDatePicker.Builder.dateRangePicker()
+            .setTitleText(R.string.select_date)
             .setTheme(R.style.CustomMaterialDatePickerTheme)
             .setSelection(
                 androidx.core.util.Pair(
@@ -249,7 +250,6 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
             applyDateFilter(startDate, endDate)
         }
     }
-
 
     private fun applyDateFilter(startDate: Long, endDate: Long) {
         filterStartDate = startDate

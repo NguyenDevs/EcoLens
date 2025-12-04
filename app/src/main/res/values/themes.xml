@@ -32,8 +32,6 @@
 
         <!-- Bottom Navigation -->
         <item name="bottomNavigationStyle">@style/Widget.EcoLens.BottomNavigationView</item>
-
-
     </style>
 
     <style name="Theme.EcoLens" parent="Base.Theme.EcoLens" />
@@ -73,11 +71,58 @@
         <item name="cardBackgroundColor">@android:color/white</item>
     </style>
 
+    <!-- Custom Material DatePicker Theme -->
     <style name="CustomMaterialDatePickerTheme" parent="ThemeOverlay.Material3.MaterialCalendar">
         <item name="colorPrimary">@color/green_primary</item>
         <item name="colorOnPrimary">@color/white</item>
-        <item name="materialCalendarHeaderTitle">@string/empty</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/black</item>
+
+        <!-- Header customization -->
+        <item name="materialCalendarHeaderLayout">@style/HeaderLayoutCustom</item>
+        <item name="materialCalendarHeaderTitle">@style/HeaderTitleCustom</item>
+        <item name="materialCalendarHeaderSelection">@style/HeaderSelectionCustom</item>
+        <item name="materialCalendarHeaderDivider">@style/HeaderDividerCustom</item>
+
+        <!-- Text colors -->
         <item name="android:textColorPrimary">@color/black</item>
+    </style>
+
+    <!-- Custom Header Layout -->
+    <style name="HeaderLayoutCustom" parent="Widget.Material3.MaterialCalendar.HeaderLayout">
+        <item name="android:background">@color/green_primary</item>
+        <item name="android:paddingTop">24dp</item>
+        <item name="android:paddingBottom">16dp</item>
+        <item name="android:paddingStart">24dp</item>
+        <item name="android:paddingEnd">24dp</item>
+    </style>
+
+    <!-- Custom Header Title - Align Left and Uppercase -->
+    <style name="HeaderTitleCustom" parent="Widget.Material3.MaterialCalendar.HeaderTitle">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:gravity">start</item>
+        <item name="android:textAlignment">textStart</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_marginBottom">8dp</item>
+    </style>
+
+    <!-- Custom Header Selection (Selected Date) -->
+    <style name="HeaderSelectionCustom" parent="Widget.Material3.MaterialCalendar.HeaderSelection">
+        <item name="android:textSize">32sp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:gravity">start</item>
+        <item name="android:textAlignment">textStart</item>
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
+    <!-- Custom Header Divider -->
+    <style name="HeaderDividerCustom" parent="Widget.Material3.MaterialCalendar.HeaderDivider">
+        <item name="android:background">@color/white</item>
+        <item name="android:layout_height">1dp</item>
     </style>
 
 </resources>
