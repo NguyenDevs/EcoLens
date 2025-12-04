@@ -1,6 +1,5 @@
 package com.nguyendevs.ecolens.fragments
 
-import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.text.Html
@@ -9,19 +8,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.model.HistoryEntry
-import com.nguyendevs.ecolens.view.EcoLensViewModel
 
 class HistoryDetailFragment : Fragment() {
 
     private var historyEntry: HistoryEntry? = null
-    private val viewModel: EcoLensViewModel by activityViewModels()
 
     fun setData(entry: HistoryEntry) {
         this.historyEntry = entry
@@ -41,10 +35,9 @@ class HistoryDetailFragment : Fragment() {
         val entry = historyEntry ?: return
         val info = entry.speciesInfo
 
-        // Ánh xạ View
+        // Ánh xạ View (đã xoá btnFavorite)
         val imageView = view.findViewById<ImageView>(R.id.detailImageView)
         val btnBack = view.findViewById<ImageView>(R.id.btnBack)
-        val btnFavorite = view.findViewById<FloatingActionButton>(R.id.btnFavorite)
 
         val tvCommonName = view.findViewById<TextView>(R.id.tvCommonName)
         val tvScientificName = view.findViewById<TextView>(R.id.tvScientificName)
@@ -74,7 +67,6 @@ class HistoryDetailFragment : Fragment() {
         tvScientificName.text = info.scientificName
 
         val taxonomyHtml = buildString {
-            // Dùng getString() thay vì cứng chữ
             if (info.kingdom.isNotEmpty()) append("• ${getString(R.string.label_kingdom)} ${info.kingdom}<br>")
             if (info.phylum.isNotEmpty()) append("• ${getString(R.string.label_phylum)} ${info.phylum}<br>")
             if (info.className.isNotEmpty()) append("• ${getString(R.string.label_class)} ${info.className}<br>")
@@ -84,9 +76,7 @@ class HistoryDetailFragment : Fragment() {
             if (info.species.isNotEmpty()) append("• ${getString(R.string.label_species)} ${info.species}")
         }
 
-        val taxonomySpanned =
-            Html.fromHtml(taxonomyHtml, Html.FROM_HTML_MODE_LEGACY)
-
+        val taxonomySpanned = Html.fromHtml(taxonomyHtml, Html.FROM_HTML_MODE_LEGACY)
         tvTaxonomy.text = taxonomySpanned
 
         displaySection(tvDescription, lblDescription, info.description)
@@ -96,19 +86,10 @@ class HistoryDetailFragment : Fragment() {
         displaySection(tvConservation, lblConservation, info.conservationStatus)
 
         btnBack.setOnClickListener {
+            // Ẩn fragment container khi quay lại
+            val fragmentContainer = activity?.findViewById<View>(R.id.fragmentContainer)
+            fragmentContainer?.visibility = View.GONE
             parentFragmentManager.popBackStack()
-        }
-
-        updateFavoriteIcon(btnFavorite, entry.isFavorite)
-
-        btnFavorite.setOnClickListener {
-            viewModel.toggleFavorite(entry)
-
-            val newStatus = !entry.isFavorite
-
-            historyEntry = entry.copy(isFavorite = newStatus)
-
-            updateFavoriteIcon(btnFavorite, newStatus)
         }
     }
 
@@ -125,16 +106,6 @@ class HistoryDetailFragment : Fragment() {
         } else {
             labelView.visibility = View.GONE
             textView.visibility = View.GONE
-        }
-    }
-
-    private fun updateFavoriteIcon(fab: FloatingActionButton, isFav: Boolean) {
-        if (isFav) {
-            fab.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_favorite))
-            fab.setColorFilter(Color.RED)
-        } else {
-            fab.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_favorite))
-            fab.setColorFilter(Color.GRAY)
         }
     }
 }
