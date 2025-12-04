@@ -19,7 +19,7 @@
             android:layout_height="48dp"
             android:layout_margin="16dp"
             android:src="@drawable/ic_close"
-            app:tint="@android:color/white"
+            app:tint="@color/white"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/back"
             android:elevation="10dp"/>
