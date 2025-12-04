@@ -87,8 +87,8 @@
 
     <!-- History Screen -->
     <string name="history">History</string>
-    <string name="history_title_label">Recognition History</string>
-    <string name="history_placeholder">Recognition History</string>
+    <string name="history_title_label">History</string>
+    <string name="history_placeholder">History</string>
     <string name="history_subtitle">Feature under development</string>
 
     <!-- My Garden Screen -->
@@ -154,5 +154,9 @@
 
     <!-- General -->
     <string name="cancel">Cancel</string>
+    <string name="options">OPTIONS</string>
+    <string name="lists">HISTORY</string>
+    <string name="select_date">Select date</string>
+    <string name="history_empty">History empty</string>
 
 </resources>

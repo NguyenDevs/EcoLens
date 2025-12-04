@@ -87,8 +87,8 @@
 
     <!-- History Screen -->
     <string name="history">Lịch sử</string>
-    <string name="history_title_label">Lịch sử nhận diện</string>
-    <string name="history_placeholder">Lịch sử nhận diện</string>
+    <string name="history_title_label">Lịch sử</string>
+    <string name="history_placeholder">Lịch sử</string>
     <string name="history_subtitle">Chức năng đang được phát triển</string>
 
     <!-- My Garden Screen -->
@@ -154,5 +154,14 @@
 
     <!-- General -->
     <string name="cancel">Hủy</string>
+
+    <!-- Colors (for references) -->
+    <string name="text_secondary" translatable="false">text_secondary</string>
+    <string name="background_color" translatable="false">background_color</string>
+
+    <string name="options">TÙY CHỌN</string>
+    <string name="lists">DANH SÁCH</string>
+    <string name="select_date">Chọn khoảng thời gian</string>
+    <string name="history_empty">Chưa có lịch sử</string>
 
 </resources>

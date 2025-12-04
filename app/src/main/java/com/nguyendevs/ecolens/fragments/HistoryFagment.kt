@@ -1,10 +1,15 @@
 package com.nguyendevs.ecolens.fragments
 
+import android.animation.ValueAnimator
 import android.app.DatePickerDialog
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -27,32 +32,42 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
     private lateinit var adapter: HistoryAdapter
     private lateinit var rvHistory: RecyclerView
     private lateinit var emptyStateContainer: View
-    private lateinit var btnSort: ImageView
-    private lateinit var btnFilterByDate: ImageView
-    private lateinit var filterInfoCard: MaterialCardView
-    private lateinit var tvFilterInfo: TextView
+    private lateinit var btnSort: MaterialCardView
+    private lateinit var btnFilterByDate: MaterialCardView
+    private lateinit var tvCurrentSort: TextView
+    private lateinit var tvFilterSubtitle: TextView
     private lateinit var btnClearFilter: ImageView
+    private lateinit var optionsHeader: LinearLayout
+    private lateinit var optionsContainer: LinearLayout
+    private lateinit var ivExpandIcon: ImageView
 
     private var currentSortOption = HistorySortOption.NEWEST_FIRST
     private var filterStartDate: Long? = null
     private var filterEndDate: Long? = null
+    private var isOptionsExpanded = false
 
     private val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        initViews(view)
+        setupAdapter()
+        observeHistory()
+        setupClickListeners()
+    }
+
+    private fun initViews(view: View) {
         rvHistory = view.findViewById(R.id.rvHistory)
         emptyStateContainer = view.findViewById(R.id.emptyStateContainer)
         btnSort = view.findViewById(R.id.btnSort)
         btnFilterByDate = view.findViewById(R.id.btnFilterByDate)
-        filterInfoCard = view.findViewById(R.id.filterInfoCard)
-        tvFilterInfo = view.findViewById(R.id.tvFilterInfo)
+        tvCurrentSort = view.findViewById(R.id.tvCurrentSort)
+        tvFilterSubtitle = view.findViewById(R.id.tvFilterSubtitle)
         btnClearFilter = view.findViewById(R.id.btnClearFilter)
-
-        setupAdapter()
-        observeHistory()
-        setupClickListeners()
+        optionsHeader = view.findViewById(R.id.optionsHeader)
+        optionsContainer = view.findViewById(R.id.optionsContainer)
+        ivExpandIcon = view.findViewById(R.id.ivExpandIcon)
     }
 
     private fun setupAdapter() {
@@ -90,6 +105,10 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
     }
 
     private fun setupClickListeners() {
+        optionsHeader.setOnClickListener {
+            toggleOptionsExpansion()
+        }
+
         btnSort.setOnClickListener {
             showSortDialog()
         }
@@ -101,6 +120,77 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
         btnClearFilter.setOnClickListener {
             clearDateFilter()
         }
+    }
+
+    private fun toggleOptionsExpansion() {
+        if (isOptionsExpanded) {
+            collapseOptions()
+        } else {
+            expandOptions()
+        }
+    }
+
+    private fun expandOptions() {
+        isOptionsExpanded = true
+
+        // Rotate icon
+        ivExpandIcon.animate()
+            .rotation(180f)
+            .setDuration(300)
+            .start()
+
+        // Measure the target height
+        optionsContainer.measure(
+            View.MeasureSpec.makeMeasureSpec(optionsContainer.width, View.MeasureSpec.EXACTLY),
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        )
+        val targetHeight = optionsContainer.measuredHeight
+
+        // Animate height from 0 to target
+        optionsContainer.layoutParams.height = 0
+        optionsContainer.visibility = View.VISIBLE
+
+        val animator = ValueAnimator.ofInt(0, targetHeight)
+        animator.addUpdateListener { animation ->
+            val value = animation.animatedValue as Int
+            val layoutParams = optionsContainer.layoutParams
+            layoutParams.height = value
+            optionsContainer.layoutParams = layoutParams
+        }
+        animator.interpolator = AccelerateDecelerateInterpolator()
+        animator.duration = 300
+        animator.start()
+    }
+
+    private fun collapseOptions() {
+        isOptionsExpanded = false
+
+        // Rotate icon back
+        ivExpandIcon.animate()
+            .rotation(0f)
+            .setDuration(300)
+            .start()
+
+        val initialHeight = optionsContainer.height
+        val animator = ValueAnimator.ofInt(initialHeight, 0)
+
+        animator.addUpdateListener { animation ->
+            val value = animation.animatedValue as Int
+            val layoutParams = optionsContainer.layoutParams
+            layoutParams.height = value
+            optionsContainer.layoutParams = layoutParams
+        }
+
+        animator.addListener(object : android.animation.AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: android.animation.Animator) {
+                optionsContainer.visibility = View.GONE
+                optionsContainer.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+            }
+        })
+
+        animator.interpolator = AccelerateDecelerateInterpolator()
+        animator.duration = 300
+        animator.start()
     }
 
     private fun showSortDialog() {
@@ -122,6 +212,8 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
                     1 -> HistorySortOption.OLDEST_FIRST
                     else -> HistorySortOption.NEWEST_FIRST
                 }
+
+                tvCurrentSort.text = options[which]
                 observeHistory()
                 dialog.dismiss()
             }
@@ -134,7 +226,6 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
     private fun showDateRangePickerDialog() {
         val calendar = Calendar.getInstance()
 
-        // Chọn ngày bắt đầu
         DatePickerDialog(
             requireContext(),
             { _, year, month, dayOfMonth ->
@@ -143,7 +234,6 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
                 startCalendar.set(Calendar.MILLISECOND, 0)
                 val startDate = startCalendar.timeInMillis
 
-                // Sau khi chọn ngày bắt đầu, chọn ngày kết thúc
                 showEndDatePicker(startDate)
             },
             calendar.get(Calendar.YEAR),
@@ -168,7 +258,6 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
                 val endDate = endCalendar.timeInMillis
 
                 if (endDate < startDate) {
-                    // Hiển thị lỗi nếu ngày kết thúc < ngày bắt đầu
                     MaterialAlertDialogBuilder(requireContext())
                         .setTitle(getString(R.string.error))
                         .setMessage(getString(R.string.end_date_before_start_date_error))
@@ -194,8 +283,13 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
 
         val startDateStr = dateFormatter.format(startDate)
         val endDateStr = dateFormatter.format(endDate)
-        tvFilterInfo.text = getString(R.string.filter_date_range, startDateStr, endDateStr)
-        filterInfoCard.visibility = View.VISIBLE
+
+        // Update subtitle with filter info
+        tvFilterSubtitle.text = "$startDateStr - $endDateStr"
+        tvFilterSubtitle.setTextColor(resources.getColor(R.color.green_primary, null))
+
+        // Show clear button
+        btnClearFilter.visibility = View.VISIBLE
 
         observeHistory()
     }
@@ -203,7 +297,14 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
     private fun clearDateFilter() {
         filterStartDate = null
         filterEndDate = null
-        filterInfoCard.visibility = View.GONE
+
+        // Reset subtitle
+        tvFilterSubtitle.text = "Chọn khoảng thời gian"
+        tvFilterSubtitle.setTextColor(resources.getColor(R.color.text_secondary, null))
+
+        // Hide clear button
+        btnClearFilter.visibility = View.GONE
+
         observeHistory()
     }
 
@@ -216,7 +317,6 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
             .addToBackStack(null)
             .commit()
 
-        // Hiển thị fragment container
         val fragmentContainer = activity?.findViewById<View>(R.id.fragmentContainer)
         fragmentContainer?.visibility = View.VISIBLE
     }

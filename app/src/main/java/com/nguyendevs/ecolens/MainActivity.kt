@@ -7,28 +7,24 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
 import android.widget.FrameLayout
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.nguyendevs.ecolens.activities.CameraActivity
 import com.nguyendevs.ecolens.fragments.HistoryDetailFragment
-import com.nguyendevs.ecolens.adapters.HistoryAdapter
+import com.nguyendevs.ecolens.fragments.HistoryFragment
 import com.nguyendevs.ecolens.handlers.SpeciesInfoHandler
 import com.nguyendevs.ecolens.managers.NavigationManager
 import com.nguyendevs.ecolens.managers.PermissionManager
 import com.nguyendevs.ecolens.managers.SpeakerManager
 import com.nguyendevs.ecolens.managers.LanguageManager
 import com.nguyendevs.ecolens.handlers.SettingsHandler
-import com.nguyendevs.ecolens.model.HistoryEntry
 import com.nguyendevs.ecolens.handlers.ImageZoomHandler
 import com.nguyendevs.ecolens.handlers.LoadingAnimationHandler
 import com.nguyendevs.ecolens.handlers.SearchBarHandler
@@ -40,10 +36,9 @@ import kotlinx.coroutines.launch
 class MainActivity : AppCompatActivity() {
     // Containers
     private lateinit var homeContainer: View
-    private lateinit var historyContainer: View
+    private lateinit var historyContainer: FrameLayout
     private lateinit var myGardenContainer: View
     private lateinit var settingsContainer: View
-
 
     // Home screen views
     private lateinit var imagePreview: ImageView
@@ -55,10 +50,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fabSpeak: FloatingActionButton
     private lateinit var fabMute: FloatingActionButton
 
-    // History screen views
-    private lateinit var rvHistory: RecyclerView
-    private lateinit var emptyStateContainer: LinearLayout
-    private lateinit var historyAdapter: HistoryAdapter
+    // Fragment
+    private var historyFragment: HistoryFragment? = null
 
     // Handlers
     private lateinit var searchBarHandler: SearchBarHandler
@@ -126,7 +119,6 @@ class MainActivity : AppCompatActivity() {
         initManagers()
         setupViewModel()
         setupBottomNavigation()
-        setupHistoryScreen()
         setupFAB()
         setupObservers()
 
@@ -149,10 +141,6 @@ class MainActivity : AppCompatActivity() {
         errorCard = findViewById(R.id.errorCard)
         errorText = findViewById(R.id.errorText)
         speciesInfoCard = findViewById(R.id.speciesInfoCard)
-
-        // History screen views
-        rvHistory = historyContainer.findViewById(R.id.rvHistory)
-        emptyStateContainer = historyContainer.findViewById(R.id.emptyStateContainer)
     }
 
     private fun initHandlers() {
@@ -193,7 +181,6 @@ class MainActivity : AppCompatActivity() {
             historyContainer,
             myGardenContainer,
             settingsContainer
-
         )
 
         permissionManager = PermissionManager(this, permissionLauncher)
@@ -210,10 +197,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-
-
-
     private fun setupViewModel() {
         viewModel = ViewModelProvider(
             this,
@@ -221,46 +204,41 @@ class MainActivity : AppCompatActivity() {
         )[EcoLensViewModel::class.java]
     }
 
-    private fun setupHistoryScreen() {
-        historyAdapter = HistoryAdapter(
-            historyList = emptyList(),
-            clickListener = { entry ->
-                openHistoryDetail(entry)
-            },
-            favoriteClickListener = { entry ->
-                viewModel.toggleFavorite(entry)
-            }
-        )
+    private fun showHistoryFragment() {
+        // Ẩn tất cả containers khác
+        homeContainer.visibility = View.GONE
+        myGardenContainer.visibility = View.GONE
+        settingsContainer.visibility = View.GONE
 
-        rvHistory.apply {
-            layoutManager = LinearLayoutManager(this@MainActivity)
-            adapter = historyAdapter
+        // Hiển thị history container
+        historyContainer.visibility = View.VISIBLE
+
+        // Tạo fragment nếu chưa có
+        if (historyFragment == null) {
+            historyFragment = HistoryFragment()
         }
-    }
 
-    private fun openHistoryDetail(entry: HistoryEntry) {
-        val detailFragment = HistoryDetailFragment()
-        detailFragment.setData(entry)
-
-        supportFragmentManager.beginTransaction()
-            .setCustomAnimations(
-                R.anim.slide_in_bottom, R.anim.hold,
-                R.anim.hold, R.anim.slide_out_bottom
-            )
-            .replace(R.id.fragment_container, detailFragment)
-            .addToBackStack("history_detail")
-            .commit()
+        // Replace fragment vào historyContainer
+        val currentFragment = supportFragmentManager.findFragmentById(R.id.historyContainer)
+        if (currentFragment !is HistoryFragment) {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.historyContainer, historyFragment!!)
+                .commit()
+        }
     }
 
     private fun setupBottomNavigation() {
         findViewById<BottomNavigationView>(R.id.bottomNavigation)
             .setOnItemSelectedListener { item ->
-                // Đóng fragment container nếu đang mở
+                // Đóng fragment container nếu đang mở (cho detail view)
                 val fragmentContainer = findViewById<FrameLayout>(R.id.fragmentContainer)
                 if (fragmentContainer.visibility == View.VISIBLE) {
                     fragmentContainer.visibility = View.GONE
                     // Clear back stack
-                    supportFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                    supportFragmentManager.popBackStack(
+                        null,
+                        androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE
+                    )
                 }
 
                 when (item.itemId) {
@@ -278,7 +256,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                     R.id.nav_history -> {
-                        navigationManager.showHistoryScreen()
+                        showHistoryFragment()
                         fabMute.visibility = View.GONE
                     }
                     R.id.nav_my_garden -> {
@@ -344,6 +322,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupObservers() {
+        // Chỉ observe UI state cho home screen
         lifecycleScope.launch {
             viewModel.uiState.collect { state ->
                 if (homeContainer.visibility == View.VISIBLE) {
@@ -356,14 +335,9 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        lifecycleScope.launch {
-            viewModel.getHistoryBySortOption(
-                com.nguyendevs.ecolens.model.HistorySortOption.NEWEST_FIRST
-            ).collect { historyList ->
-                historyAdapter.updateList(historyList)
-                updateHistoryVisibility(historyList.isNotEmpty())
-            }
-        }
+
+        // History được quản lý bởi HistoryFragment
+        // Không cần observe history ở đây nữa
     }
 
     private fun updateUIState(isLoading: Boolean, error: String?) {
@@ -400,16 +374,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateHistoryVisibility(hasHistory: Boolean) {
-        if (hasHistory) {
-            rvHistory.visibility = View.VISIBLE
-            emptyStateContainer.visibility = View.GONE
-        } else {
-            rvHistory.visibility = View.GONE
-            emptyStateContainer.visibility = View.VISIBLE
-        }
-    }
-
     override fun onResume() {
         super.onResume()
         settingsHandler.updateLanguageDisplay()
@@ -423,7 +387,7 @@ class MainActivity : AppCompatActivity() {
     override fun onBackPressed() {
         val fragmentContainer = findViewById<FrameLayout>(R.id.fragmentContainer)
 
-        // Nếu fragment container đang hiển thị
+        // Nếu fragment container đang hiển thị (detail view)
         if (fragmentContainer.visibility == View.VISIBLE) {
             if (supportFragmentManager.backStackEntryCount > 0) {
                 supportFragmentManager.popBackStack()
@@ -431,6 +395,7 @@ class MainActivity : AppCompatActivity() {
                 return
             }
         }
+
         // Xử lý back cho zoom image
         if (imageZoomHandler.isFullScreenVisible()) {
             imageZoomHandler.hideFullScreen()

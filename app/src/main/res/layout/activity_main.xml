@@ -11,16 +11,17 @@
             android:id="@+id/mainContent"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="70dp">
+            android:layout_marginBottom="60dp">
 
         <include
                 android:id="@+id/homeContainer"
                 layout="@layout/screen_home"
                 android:visibility="visible"/>
 
-        <include
+        <FrameLayout
                 android:id="@+id/historyContainer"
-                layout="@layout/screen_history"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:visibility="gone"/>
 
         <include
@@ -32,6 +33,11 @@
                 android:id="@+id/settingsContainer"
                 layout="@layout/screen_settings"
                 android:visibility="gone"/>
+        <FrameLayout
+                android:id="@+id/fragment_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:elevation="10dp"/>
     </FrameLayout>
     <com.google.android.material.card.MaterialCardView
             android:id="@+id/searchBarContainer"
@@ -193,12 +199,6 @@
             android:translationY="18dp"
             android:translationZ="12dp" />
 
-
-    <FrameLayout
-            android:id="@+id/fragment_container"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:elevation="10dp" />
 
     <FrameLayout
             android:id="@+id/fullScreenContainer"

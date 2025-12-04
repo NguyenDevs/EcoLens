@@ -8,6 +8,7 @@
         android:padding="24dp"
         android:background="@color/background_color">
 
+    <!-- Preferences Section -->
     <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -16,8 +17,6 @@
             android:textColor="@color/green_primary"
             android:textStyle="bold"
             android:layout_marginBottom="24dp"/>
-
-    <!-- Preferences Section -->
     <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
