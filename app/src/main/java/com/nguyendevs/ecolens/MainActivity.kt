@@ -8,10 +8,14 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.transition.AutoTransition
+import android.view.ViewGroup
+import androidx.transition.TransitionManager
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.transition.Fade
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.card.MaterialCardView
@@ -32,8 +36,6 @@ import com.nguyendevs.ecolens.utils.KeyboardUtils
 import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.launch
-import androidx.transition.AutoTransition
-import androidx.transition.TransitionManager
 
 class MainActivity : AppCompatActivity() {
     // Containers
@@ -41,6 +43,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var historyContainer: FrameLayout
     private lateinit var myGardenContainer: View
     private lateinit var settingsContainer: View
+
+    // Navigation
+    private lateinit var bottomNav: BottomNavigationView
+    private lateinit var fabCamera: FloatingActionButton
+    private lateinit var fabCameraNav: FloatingActionButton
 
     // Home screen views
     private lateinit var imagePreview: ImageView
@@ -130,6 +137,8 @@ class MainActivity : AppCompatActivity() {
         setupFAB()
         setupObservers()
 
+        setupBackStackListener()
+
         navigationManager.showHomeScreen(false)
     }
 
@@ -139,6 +148,11 @@ class MainActivity : AppCompatActivity() {
         historyContainer = findViewById(R.id.historyContainer)
         myGardenContainer = findViewById(R.id.myGardenContainer)
         settingsContainer = findViewById(R.id.settingsContainer)
+
+        // Navigation Views
+        bottomNav = findViewById(R.id.bottomNavigation)
+        fabCamera = findViewById(R.id.fabCamera)
+        fabCameraNav = findViewById(R.id.fabCameraNav)
 
         // Home screen views
         fabSpeak = findViewById(R.id.fabSpeak)
@@ -210,6 +224,34 @@ class MainActivity : AppCompatActivity() {
             this,
             ViewModelProvider.AndroidViewModelFactory.getInstance(application)
         )[EcoLensViewModel::class.java]
+    }
+
+    private fun setupBackStackListener() {
+        supportFragmentManager.addOnBackStackChangedListener {
+            val shouldShowNav = supportFragmentManager.backStackEntryCount == 0
+            setBottomNavVisibility(shouldShowNav)
+        }
+    }
+
+    private fun setBottomNavVisibility(visible: Boolean) {
+        val targetVisibility = if (visible) View.VISIBLE else View.GONE
+
+        // Nếu trạng thái không đổi thì không cần animate lại
+        if (bottomNav.visibility == targetVisibility) return
+
+        val transition = Fade()
+        transition.duration = 200 // Thời gian fade (ms)
+        transition.addTarget(bottomNav)
+        transition.addTarget(fabCamera)
+        transition.addTarget(fabCameraNav)
+
+        // Layout gốc để transition manager hoạt động
+        val root = findViewById<ViewGroup>(R.id.mainContent).parent as ViewGroup
+        TransitionManager.beginDelayedTransition(root, transition)
+
+        bottomNav.visibility = targetVisibility
+        fabCamera.visibility = targetVisibility
+        fabCameraNav.visibility = targetVisibility
     }
 
     private fun showHistoryFragment() {
@@ -404,12 +446,14 @@ class MainActivity : AppCompatActivity() {
         if (fragmentContainer.visibility == View.VISIBLE) {
             if (supportFragmentManager.backStackEntryCount > 0) {
                 supportFragmentManager.popBackStack()
-                fragmentContainer.visibility = View.GONE
+
+                if (supportFragmentManager.backStackEntryCount == 1) {
+                    fragmentContainer.visibility = View.GONE
+                }
                 return
             }
         }
 
-        // Xử lý back cho zoom image
         if (imageZoomHandler.isFullScreenVisible()) {
             imageZoomHandler.hideFullScreen()
         } else {

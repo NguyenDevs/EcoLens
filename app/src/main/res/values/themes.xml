@@ -75,9 +75,7 @@
 
     <style name="CustomMaterialDatePickerTheme" parent="ThemeOverlay.Material3.MaterialCalendar">
         <item name="colorPrimary">@color/green_primary</item>
-
         <item name="colorOnPrimary">@color/white</item>
-
         <item name="materialCalendarHeaderLayout">@style/HeaderLayoutCentered</item>
         <item name="materialCalendarHeaderTitle">@style/HeaderTitleCentered</item>
         <item name="android:textColorPrimary">@color/black</item>
@@ -91,6 +89,9 @@
         <item name="android:textSize">18sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/green_primary</item>
-    </style>
+
+        <item name="android:gravity">center</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:layout_width">match_parent</item> </style>
 
 </resources>
