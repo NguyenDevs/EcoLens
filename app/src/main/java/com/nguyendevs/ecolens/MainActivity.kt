@@ -239,7 +239,7 @@ class MainActivity : AppCompatActivity() {
         if (bottomNav.visibility == targetVisibility) return
 
         val transition = Fade()
-        transition.duration = 200
+        transition.duration = 150
         transition.addTarget(bottomNav)
         transition.addTarget(fabCamera)
         transition.addTarget(fabCameraNav)
