@@ -73,5 +73,24 @@
         <item name="cardBackgroundColor">@android:color/white</item>
     </style>
 
+    <style name="CustomMaterialDatePickerTheme" parent="ThemeOverlay.Material3.MaterialCalendar">
+        <item name="colorPrimary">@color/green_primary</item>
+
+        <item name="colorOnPrimary">@color/white</item>
+
+        <item name="materialCalendarHeaderLayout">@style/HeaderLayoutCentered</item>
+        <item name="materialCalendarHeaderTitle">@style/HeaderTitleCentered</item>
+        <item name="android:textColorPrimary">@color/black</item>
+    </style>
+
+    <style name="HeaderLayoutCentered" parent="Widget.Material3.MaterialCalendar.HeaderLayout">
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="HeaderTitleCentered" parent="Widget.Material3.MaterialCalendar.HeaderTitle">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/green_primary</item>
+    </style>
 
 </resources>

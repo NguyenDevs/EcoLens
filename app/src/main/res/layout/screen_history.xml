@@ -118,12 +118,6 @@
                                 android:layout_marginTop="2dp"/>
                     </LinearLayout>
 
-                    <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@drawable/ic_arrow_right"
-                            app:tint="@color/text_secondary"/>
-
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
@@ -196,12 +190,6 @@
 
                         </LinearLayout>
                     </LinearLayout>
-
-                    <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@drawable/ic_arrow_right"
-                            app:tint="@color/text_secondary"/>
 
                 </LinearLayout>
 

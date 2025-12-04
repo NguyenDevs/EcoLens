@@ -18,6 +18,12 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val workerUrl = project.findProperty("WORKER_URL") as? String ?: "https://ecolens.tainguyen-devs.workers.dev/"
+
+        // Tạo biến BuildConfig.WORKER_BASE_URL
+        buildConfigField("String", "WORKER_BASE_URL", "\"$workerUrl\"")
+
     }
 
     buildTypes {

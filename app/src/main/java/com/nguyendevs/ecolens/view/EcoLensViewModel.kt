@@ -31,6 +31,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import com.nguyendevs.ecolens.BuildConfig
 import java.io.File
 import java.io.FileOutputStream
 import java.util.Locale
@@ -230,7 +231,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 """.trimIndent()
             }
 
-            val workerUrl = "https://ecolens.tainguyen-devs.workers.dev/gemini"
+            val workerUrl = "${BuildConfig.WORKER_BASE_URL}gemini"
             val requestBody = mapOf(
                 "contents" to listOf(
                     mapOf("parts" to listOf(mapOf("text" to prompt)))

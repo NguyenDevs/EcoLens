@@ -5,14 +5,15 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import com.nguyendevs.ecolens.BuildConfig
 import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    private const val WORKER_BASE_URL = "https://ecolens.tainguyen-devs.workers.dev/"
+    private const val WORKER_BASE_URL = BuildConfig.WORKER_BASE_URL
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY // Sẽ log toàn bộ request/response
+        level = HttpLoggingInterceptor.Level.BODY
     }
 
     private val okHttpClient = OkHttpClient.Builder()

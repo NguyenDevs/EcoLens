@@ -15,6 +15,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.adapters.HistoryAdapter
@@ -153,7 +154,6 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
         )
         val targetHeight = optionsContainer.measuredHeight
 
-        // Animate height from 0 to target
         optionsContainer.layoutParams.height = 0
         optionsContainer.visibility = View.VISIBLE
 
@@ -172,7 +172,6 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
     private fun collapseOptions() {
         isOptionsExpanded = false
 
-        // Rotate icon back
         ivExpandIcon.animate()
             .rotation(0f)
             .setDuration(300)
@@ -231,56 +230,24 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
     }
 
     private fun showDateRangePickerDialog() {
-        val calendar = Calendar.getInstance()
+        val builder = MaterialDatePicker.Builder.dateRangePicker()
+            .setTitleText(R.string.select_date)
+            .setTheme(R.style.CustomMaterialDatePickerTheme)
+            .setSelection(
+                androidx.core.util.Pair(
+                    filterStartDate ?: MaterialDatePicker.todayInUtcMilliseconds(),
+                    filterEndDate ?: MaterialDatePicker.todayInUtcMilliseconds()
+                )
+            )
 
-        DatePickerDialog(
-            requireContext(),
-            { _, year, month, dayOfMonth ->
-                val startCalendar = Calendar.getInstance()
-                startCalendar.set(year, month, dayOfMonth, 0, 0, 0)
-                startCalendar.set(Calendar.MILLISECOND, 0)
-                val startDate = startCalendar.timeInMillis
+        val picker = builder.build()
+        picker.show(parentFragmentManager, "DATE_RANGE_PICKER")
 
-                showEndDatePicker(startDate)
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        ).apply {
-            setTitle(getString(R.string.select_start_date))
-            show()
-        }
-    }
+        picker.addOnPositiveButtonClickListener { selection ->
+            val startDate = selection.first
+            val endDate = selection.second
 
-    private fun showEndDatePicker(startDate: Long) {
-        val calendar = Calendar.getInstance()
-        calendar.timeInMillis = startDate
-
-        DatePickerDialog(
-            requireContext(),
-            { _, year, month, dayOfMonth ->
-                val endCalendar = Calendar.getInstance()
-                endCalendar.set(year, month, dayOfMonth, 23, 59, 59)
-                endCalendar.set(Calendar.MILLISECOND, 999)
-                val endDate = endCalendar.timeInMillis
-
-                if (endDate < startDate) {
-                    MaterialAlertDialogBuilder(requireContext())
-                        .setTitle(getString(R.string.error))
-                        .setMessage(getString(R.string.end_date_before_start_date_error))
-                        .setPositiveButton(getString(R.string.ok), null)
-                        .show()
-                } else {
-                    applyDateFilter(startDate, endDate)
-                }
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        ).apply {
-            setTitle(getString(R.string.select_end_date))
-            datePicker.minDate = startDate
-            show()
+            applyDateFilter(startDate, endDate)
         }
     }
 
@@ -291,11 +258,9 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
         val startDateStr = dateFormatter.format(startDate)
         val endDateStr = dateFormatter.format(endDate)
 
-        // Update subtitle with filter info
         tvFilterSubtitle.text = "$startDateStr - $endDateStr"
         tvFilterSubtitle.setTextColor(resources.getColor(R.color.green_primary, null))
 
-        // Show clear button
         btnClearFilter.visibility = View.VISIBLE
 
         observeHistory()
@@ -306,7 +271,7 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
         filterEndDate = null
 
         // Reset subtitle
-        tvFilterSubtitle.text = "Chọn khoảng thời gian"
+        tvFilterSubtitle.text = getString(R.string.select_date)
         tvFilterSubtitle.setTextColor(resources.getColor(R.color.text_secondary, null))
 
         // Hide clear button
