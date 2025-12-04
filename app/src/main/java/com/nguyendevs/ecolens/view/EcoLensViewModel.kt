@@ -393,19 +393,55 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     }
 
     private suspend fun uriToFile(context: Context, uri: Uri): File = withContext(Dispatchers.IO) {
-        val inputStream = context.contentResolver.openInputStream(uri)!!
-        val bitmap = BitmapFactory.decodeStream(inputStream)
+        val contentResolver = context.contentResolver
+        val inputStream = contentResolver.openInputStream(uri)!!
+
+        val originalBitmap = BitmapFactory.decodeStream(inputStream)
         inputStream.close()
+
+        val rotatedBitmap = try {
+            val inputStreamForExif = contentResolver.openInputStream(uri)
+            if (inputStreamForExif != null) {
+                val exif = androidx.exifinterface.media.ExifInterface(inputStreamForExif)
+                val orientation = exif.getAttributeInt(
+                    androidx.exifinterface.media.ExifInterface.TAG_ORIENTATION,
+                    androidx.exifinterface.media.ExifInterface.ORIENTATION_NORMAL
+                )
+                inputStreamForExif.close()
+
+                val matrix = android.graphics.Matrix()
+                when (orientation) {
+                    androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
+                    androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
+                    androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
+                }
+
+                if (orientation != androidx.exifinterface.media.ExifInterface.ORIENTATION_NORMAL) {
+                    Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.width, originalBitmap.height, matrix, true)
+                } else {
+                    originalBitmap
+                }
+            } else {
+                originalBitmap
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Lỗi đọc EXIF: ${e.message}")
+            originalBitmap
+        }
 
         val file = File(context.cacheDir, "temp_${System.currentTimeMillis()}.jpg")
         FileOutputStream(file).use { out ->
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out)
+            rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 80, out)
         }
-        bitmap.recycle()
+
+        if (rotatedBitmap != originalBitmap) {
+            originalBitmap.recycle()
+        }
+        rotatedBitmap.recycle()
+
         file
     }
 
-    // Gemini response model
     data class GeminiResponse(val candidates: List<Candidate>?)
     data class Candidate(val content: Content?)
     data class Content(val parts: List<Part>?)
