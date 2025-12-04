@@ -89,14 +89,14 @@
     <string name="history">Lịch sử</string>
     <string name="history_title_label">Lịch sử</string>
     <string name="history_placeholder">Lịch sử</string>
-    <string name="history_subtitle">Chức năng đang được phát triển</string>
+    <string name="history_subtitle">Xem lịch sử các loài đã nhận diện</string>
 
     <!-- My Garden Screen -->
     <string name="my_garden">Yêu thích</string>
     <string name="my_garden_title">Mục yêu thích</string>
-    <string name="my_garden_desc">Lưu trữ các loài yêu thích</string>
-    <string name="garden_placeholder">Lưu trữ các loài yêu thích</string>
-    <string name="garden_subtitle">Lưu trữ các loài yêu thích</string>
+    <string name="my_garden_desc">Tính năng đang trong quá trình phát triển</string>
+    <string name="garden_placeholder">Tính năng đang trong quá trình phát triển</string>
+    <string name="garden_subtitle">Tính năng đang trong quá trình phát triển</string>
 
     <!-- Settings Screen -->
     <string name="settings">Cài đặt</string>

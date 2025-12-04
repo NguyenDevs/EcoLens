@@ -1,5 +1,3 @@
-// com/nguyendevs/ecolens/fragments/HistoryDetailFragment.kt
-
 package com.nguyendevs.ecolens.fragments
 
 import android.os.Build
@@ -12,14 +10,14 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope // Cần thêm import này
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions // Cần thêm import này
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.model.HistoryEntry
-import kotlinx.coroutines.Dispatchers // Cần thêm import này
-import kotlinx.coroutines.launch // Cần thêm import này
-import kotlinx.coroutines.withContext // Cần thêm import này
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class HistoryDetailFragment : Fragment() {
 

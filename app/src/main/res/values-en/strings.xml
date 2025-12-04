@@ -89,14 +89,14 @@
     <string name="history">History</string>
     <string name="history_title_label">History</string>
     <string name="history_placeholder">History</string>
-    <string name="history_subtitle">Feature under development</string>
+    <string name="history_subtitle">Xem lịch sử các loài đã nhận diện</string>
 
     <!-- My Garden Screen -->
     <string name="my_garden">Favorites</string>
     <string name="my_garden_title">Favorites</string>
-    <string name="my_garden_desc">Save your favorite species</string>
+    <string name="my_garden_desc">Feature under development</string>
     <string name="garden_placeholder">Favorites</string>
-    <string name="garden_subtitle">Save your favorite species</string>
+    <string name="garden_subtitle">Feature under development</string>
 
     <!-- Settings Screen -->
     <string name="settings">Settings</string>
