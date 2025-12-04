@@ -29,8 +29,7 @@
             android:layout_height="match_parent"
             app:behavior_peekHeight="300dp"
             android:background="@drawable/rounded_history_dark_bg"
-            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
-    android:paddingBottom="30dp">
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
         <LinearLayout
                 android:layout_width="match_parent"

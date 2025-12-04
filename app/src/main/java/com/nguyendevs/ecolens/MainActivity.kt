@@ -36,6 +36,7 @@ import com.nguyendevs.ecolens.utils.KeyboardUtils
 import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.launch
+import androidx.core.view.isVisible
 
 class MainActivity : AppCompatActivity() {
     // Containers
@@ -44,10 +45,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var myGardenContainer: View
     private lateinit var settingsContainer: View
 
-    // Navigation
-    private lateinit var bottomNav: BottomNavigationView
-    private lateinit var fabCamera: FloatingActionButton
-    private lateinit var fabCameraNav: FloatingActionButton
 
     // Home screen views
     private lateinit var imagePreview: ImageView
@@ -137,7 +134,6 @@ class MainActivity : AppCompatActivity() {
         setupFAB()
         setupObservers()
 
-        setupBackStackListener()
 
         navigationManager.showHomeScreen(false)
     }
@@ -148,11 +144,6 @@ class MainActivity : AppCompatActivity() {
         historyContainer = findViewById(R.id.historyContainer)
         myGardenContainer = findViewById(R.id.myGardenContainer)
         settingsContainer = findViewById(R.id.settingsContainer)
-
-        // Navigation Views
-        bottomNav = findViewById(R.id.bottomNavigation)
-        fabCamera = findViewById(R.id.fabCamera)
-        fabCameraNav = findViewById(R.id.fabCameraNav)
 
         // Home screen views
         fabSpeak = findViewById(R.id.fabSpeak)
@@ -226,31 +217,6 @@ class MainActivity : AppCompatActivity() {
         )[EcoLensViewModel::class.java]
     }
 
-    private fun setupBackStackListener() {
-        supportFragmentManager.addOnBackStackChangedListener {
-            val shouldShowNav = supportFragmentManager.backStackEntryCount == 0
-            setBottomNavVisibility(shouldShowNav)
-        }
-    }
-
-    private fun setBottomNavVisibility(visible: Boolean) {
-        val targetVisibility = if (visible) View.VISIBLE else View.GONE
-
-        if (bottomNav.visibility == targetVisibility) return
-
-        val transition = Fade()
-        transition.duration = 150
-        transition.addTarget(bottomNav)
-        transition.addTarget(fabCamera)
-        transition.addTarget(fabCameraNav)
-
-        val root = findViewById<ViewGroup>(R.id.mainContent).parent as ViewGroup
-        TransitionManager.beginDelayedTransition(root, transition)
-
-        bottomNav.visibility = targetVisibility
-        fabCamera.visibility = targetVisibility
-        fabCameraNav.visibility = targetVisibility
-    }
 
     private fun showHistoryFragment() {
         homeContainer.visibility = View.GONE
@@ -430,7 +396,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         val fragmentContainer = findViewById<FrameLayout>(R.id.fragmentContainer)
-        if (fragmentContainer.visibility == View.VISIBLE) {
+        if (fragmentContainer.isVisible) {
             if (supportFragmentManager.backStackEntryCount > 0) {
                 supportFragmentManager.popBackStack()
 
