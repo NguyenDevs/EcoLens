@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
+
     <!-- Base application theme -->
     <style name="Base.Theme.EcoLens" parent="Theme.Material3.Light.NoActionBar">
         <!-- Primary colors -->
@@ -32,7 +33,7 @@
         <!-- Bottom Navigation -->
         <item name="bottomNavigationStyle">@style/Widget.EcoLens.BottomNavigationView</item>
 
-        
+
     </style>
 
     <style name="Theme.EcoLens" parent="Base.Theme.EcoLens" />
