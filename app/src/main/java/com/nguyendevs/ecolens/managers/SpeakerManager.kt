@@ -14,6 +14,7 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
 
     private var sentenceList: List<String> = emptyList()
     private var currentSentenceIndex = 0
+    private var currentRawText: String? = null
     private var isPaused = false
 
     private val RATE_NORMAL = 1.0f
@@ -63,7 +64,6 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
 
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
-            // Mặc định khởi tạo là tiếng Việt
             setLanguage("vi")
             isLoaded = true
         } else {
@@ -73,8 +73,15 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
 
     fun speak(text: String) {
         if (!isLoaded) return
+        if (isPaused && text == currentRawText) {
+            isPaused = false
+            speakCurrentSentence(TextToSpeech.QUEUE_FLUSH)
+            return
+        }
 
         isPaused = false
+        currentRawText = text
+
         val cleanedText = removeVietnameseInParentheses(text)
         val newSentences = splitTextToSentences(cleanedText)
 
@@ -88,8 +95,10 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
     }
 
     fun pause() {
-        isPaused = true
-        textToSpeech?.stop()
+        if (isSpeaking()) {
+            isPaused = true
+            textToSpeech?.stop()
+        }
     }
 
     private fun speakCurrentSentence(queueMode: Int) {
