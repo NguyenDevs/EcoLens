@@ -89,17 +89,25 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 error = null,
                 speciesInfo = null
             )
-
-            var bitmapForHistory: Bitmap? = null
             try {
                 val context = getApplication<Application>()
 
-                // Đọc bitmap để lưu lịch sử
-                bitmapForHistory = context.contentResolver.openInputStream(imageUri)?.use { inputStream ->
-                    BitmapFactory.decodeStream(inputStream)
+                val (imageFile, bitmapForHistory) = withContext(Dispatchers.IO) {
+
+                    val file = uriToFile(context, imageUri)
+
+                    val inputStream = context.contentResolver.openInputStream(imageUri)
+                    val originalBitmap = BitmapFactory.decodeStream(inputStream)
+                    inputStream?.close()
+
+                    val scaledBitmap = scaleBitmapDown(originalBitmap, 1024)
+                    if (originalBitmap != scaledBitmap) {
+                        originalBitmap?.recycle() // Giải phóng ảnh gốc to
+                    }
+
+                    Pair(file, scaledBitmap)
                 }
 
-                val imageFile = uriToFile(context, imageUri)
                 val requestFile = imageFile.asRequestBody("image/jpeg".toMediaTypeOrNull())
                 val imagePart = MultipartBody.Part.createFormData("image", imageFile.name, requestFile)
 
@@ -112,11 +120,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                     val scientificName = taxon.name
                     val confidence = topResult.combined_score
 
-                    Log.d(TAG, "Nhận diện thành công: $scientificName (độ tin cậy: ${confidence * 100}%)")
-
-                    // Gọi Gemini lấy thông tin chi tiết
                     val speciesInfo = fetchDetailsFromGemini(scientificName, confidence, languageCode)
-
                     val finalInfo = speciesInfo.copy(
                         commonName = speciesInfo.commonName.ifEmpty { taxon.preferred_common_name ?: scientificName },
                         scientificName = scientificName,
@@ -126,7 +130,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                         }
                     )
 
-                    // Lưu vào lịch sử
+                    // Lưu vào lịch sử (đã có bitmap tối ưu)
                     bitmapForHistory?.let { saveToHistory(it, finalInfo) }
 
                     _uiState.value = _uiState.value.copy(
@@ -140,7 +144,11 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                     )
                 }
 
-                imageFile.delete()
+                // Xóa file tạm
+                withContext(Dispatchers.IO) {
+                    if (imageFile.exists()) imageFile.delete()
+                }
+
             } catch (e: Exception) {
                 Log.e(TAG, "Lỗi khi nhận diện loài: ${e.message}", e)
                 _uiState.value = _uiState.value.copy(
@@ -346,6 +354,27 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 null
             }
         }
+    }
+
+    private fun scaleBitmapDown(bitmap: Bitmap?, maxDimension: Int): Bitmap? {
+        if (bitmap == null) return null
+        val originalWidth = bitmap.width
+        val originalHeight = bitmap.height
+        var newWidth = originalWidth
+        var newHeight = originalHeight
+
+        if (originalWidth > maxDimension || originalHeight > maxDimension) {
+            val ratio = originalWidth.toFloat() / originalHeight.toFloat()
+            if (ratio > 1) {
+                newWidth = maxDimension
+                newHeight = (maxDimension / ratio).toInt()
+            } else {
+                newHeight = maxDimension
+                newWidth = (maxDimension * ratio).toInt()
+            }
+            return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
+        }
+        return bitmap
     }
 
     private fun saveToHistory(bitmap: Bitmap, speciesInfo: SpeciesInfo) {
