@@ -222,9 +222,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupHistoryScreen() {
-        historyAdapter = HistoryAdapter(emptyList()) { entry ->
-            openHistoryDetail(entry)
-        }
+        historyAdapter = HistoryAdapter(
+            historyList = emptyList(),
+            clickListener = { entry ->
+                openHistoryDetail(entry)
+            },
+            favoriteClickListener = { entry ->
+                viewModel.toggleFavorite(entry)
+            }
+        )
 
         rvHistory.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
@@ -351,7 +357,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
         lifecycleScope.launch {
-            viewModel.history.collect { historyList ->
+            viewModel.getHistoryBySortOption(
+                com.nguyendevs.ecolens.model.HistorySortOption.NEWEST_FIRST
+            ).collect { historyList ->
                 historyAdapter.updateList(historyList)
                 updateHistoryVisibility(historyList.isNotEmpty())
             }
