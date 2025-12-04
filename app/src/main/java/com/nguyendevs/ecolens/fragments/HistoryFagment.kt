@@ -313,6 +313,12 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
         detailFragment.setData(entry)
 
         parentFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                R.anim.slide_in_bottom,
+                R.anim.hold,
+                R.anim.hold,
+                R.anim.slide_out_bottom  
+            )
             .replace(R.id.fragmentContainer, detailFragment)
             .addToBackStack(null)
             .commit()
