@@ -208,6 +208,15 @@ class MainActivity : AppCompatActivity() {
                 toggleSpeakerUI(isSpeaking = false)
             }
         }
+
+        supportFragmentManager.addOnBackStackChangedListener {
+            val fragmentContainer = findViewById<FrameLayout>(R.id.fragmentContainer)
+            if (supportFragmentManager.backStackEntryCount > 0) {
+                fragmentContainer.visibility = View.VISIBLE
+            } else {
+                fragmentContainer.visibility = View.GONE
+            }
+        }
     }
 
     private fun setupViewModel() {
