@@ -32,6 +32,8 @@ import com.nguyendevs.ecolens.utils.KeyboardUtils
 import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.launch
+import androidx.transition.AutoTransition
+import androidx.transition.TransitionManager
 
 class MainActivity : AppCompatActivity() {
     // Containers
@@ -228,50 +230,54 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupBottomNavigation() {
-        findViewById<BottomNavigationView>(R.id.bottomNavigation)
-            .setOnItemSelectedListener { item ->
-                // Đóng fragment container nếu đang mở (cho detail view)
-                val fragmentContainer = findViewById<FrameLayout>(R.id.fragmentContainer)
-                if (fragmentContainer.visibility == View.VISIBLE) {
-                    fragmentContainer.visibility = View.GONE
-                    // Clear back stack
-                    supportFragmentManager.popBackStack(
-                        null,
-                        androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE
-                    )
-                }
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
 
-                when (item.itemId) {
-                    R.id.nav_home -> {
-                        val state = viewModel.uiState.value
-                        val hasInfo = state.speciesInfo != null
-                                && !state.isLoading
-                                && state.error == null
-                        navigationManager.showHomeScreen(hasInfo)
+        bottomNav.setOnItemSelectedListener { item ->
+            val transition = AutoTransition()
+            transition.duration = 150
+            TransitionManager.beginDelayedTransition(bottomNav, transition)
 
-                        if (hasInfo) {
-                            toggleSpeakerUI(speakerManager.isSpeaking())
-                        } else {
-                            fabMute.visibility = View.GONE
-                        }
-                    }
-                    R.id.nav_history -> {
-                        navigationManager.showHistoryScreen()
-                        showHistoryFragment()
-                        fabMute.visibility = View.GONE
-                    }
-                    R.id.nav_my_garden -> {
-                        navigationManager.showMyGardenScreen()
-                        fabMute.visibility = View.GONE
-                    }
-                    R.id.nav_settings -> {
-                        navigationManager.showSettingsScreen()
-                        fabMute.visibility = View.GONE
-                    }
-                    else -> return@setOnItemSelectedListener false
-                }
-                true
+            val fragmentContainer = findViewById<FrameLayout>(R.id.fragmentContainer)
+            if (fragmentContainer.visibility == View.VISIBLE) {
+                fragmentContainer.visibility = View.GONE
+                // Clear back stack
+                supportFragmentManager.popBackStack(
+                    null,
+                    androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE
+                )
             }
+
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    val state = viewModel.uiState.value
+                    val hasInfo = state.speciesInfo != null
+                            && !state.isLoading
+                            && state.error == null
+                    navigationManager.showHomeScreen(hasInfo)
+
+                    if (hasInfo) {
+                        toggleSpeakerUI(speakerManager.isSpeaking())
+                    } else {
+                        fabMute.visibility = View.GONE
+                    }
+                }
+                R.id.nav_history -> {
+                    navigationManager.showHistoryScreen()
+                    showHistoryFragment()
+                    fabMute.visibility = View.GONE
+                }
+                R.id.nav_my_garden -> {
+                    navigationManager.showMyGardenScreen()
+                    fabMute.visibility = View.GONE
+                }
+                R.id.nav_settings -> {
+                    navigationManager.showSettingsScreen()
+                    fabMute.visibility = View.GONE
+                }
+                else -> return@setOnItemSelectedListener false
+            }
+            true
+        }
     }
 
     private fun toggleSpeakerUI(isSpeaking: Boolean) {

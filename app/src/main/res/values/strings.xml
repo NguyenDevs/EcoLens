@@ -164,4 +164,8 @@
     <string name="select_date">Chọn khoảng thời gian</string>
     <string name="history_empty">Chưa có lịch sử</string>
 
+    <string name="about_label">Thông tin</string>
+    <string name="about_app_title">Về chúng tôi</string>
+    <string name="about_app_desc">Ứng dụng EcoLens, nhận diện động thực vật qua hình ảnh được phát triển bởi @NguyenDevs</string>
+
 </resources>

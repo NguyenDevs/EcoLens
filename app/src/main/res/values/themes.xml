@@ -31,6 +31,8 @@
 
         <!-- Bottom Navigation -->
         <item name="bottomNavigationStyle">@style/Widget.EcoLens.BottomNavigationView</item>
+
+        
     </style>
 
     <style name="Theme.EcoLens" parent="Base.Theme.EcoLens" />
@@ -69,4 +71,6 @@
         <item name="cardElevation">4dp</item>
         <item name="cardBackgroundColor">@android:color/white</item>
     </style>
+
+
 </resources>

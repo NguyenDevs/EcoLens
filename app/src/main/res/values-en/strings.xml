@@ -159,4 +159,8 @@
     <string name="select_date">Select date</string>
     <string name="history_empty">History empty</string>
 
+    <string name="about_label">Info</string>
+    <string name="about_app_title">About us</string>
+    <string name="about_app_desc">EcoLens, identify species via images developed by @NguyenDevs</string>
+
 </resources>
