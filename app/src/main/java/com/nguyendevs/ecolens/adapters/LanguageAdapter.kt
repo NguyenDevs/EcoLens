@@ -24,7 +24,6 @@ class LanguageAdapter(
             ivFlag.setImageResource(language.flagDrawable)
             tvLanguageName.text = language.name
 
-            // Hiển thị border xanh khi được chọn
             if (language.isSelected) {
                 card.strokeWidth = 4
                 card.strokeColor = itemView.context.getColor(R.color.green_primary)

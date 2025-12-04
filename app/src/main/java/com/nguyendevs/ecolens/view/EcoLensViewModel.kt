@@ -50,7 +50,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     private val apiService = RetrofitClient.iNaturalistApi
     private val historyDao = HistoryDatabase.getDatabase(application).historyDao()
 
-    // Phương thức mới cho sắp xếp và lọc lịch sử
     fun getHistoryBySortOption(sortOption: HistorySortOption): Flow<List<HistoryEntry>> {
         return when (sortOption) {
             HistorySortOption.NEWEST_FIRST -> historyDao.getAllHistoryNewestFirst()
@@ -131,7 +130,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                         }
                     )
 
-                    // Lưu vào lịch sử (đã có bitmap tối ưu)
                     bitmapForHistory?.let { saveToHistory(it, finalInfo) }
 
                     _uiState.value = _uiState.value.copy(
@@ -145,7 +143,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                     )
                 }
 
-                // Xóa file tạm
                 withContext(Dispatchers.IO) {
                     if (imageFile.exists()) imageFile.delete()
                 }
@@ -284,7 +281,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 genus = removeRankPrefix(rawInfo.genus ?: "", if (isVietnamese) "Chi" else "Genus"),
                 species = removeRankPrefix(rawInfo.species ?: "", if (isVietnamese) "Loài" else "Species"),
 
-                // Áp dụng dọn dẹp Markdown cho các trường mô tả
                 description = cleanMarkdownToHtml(rawInfo.description),
                 characteristics = cleanMarkdownToHtml(rawInfo.characteristics),
                 distribution = cleanMarkdownToHtml(rawInfo.distribution),

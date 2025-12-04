@@ -51,13 +51,13 @@ class LanguageSelectionFragment : Fragment() {
             Language(
                 code = LanguageManager.LANG_EN,
                 name = getString(R.string.lang_english),
-                flagDrawable = R.drawable.flag_england,  // Dùng flag có sẵn
+                flagDrawable = R.drawable.flag_england,
                 isSelected = currentLang == LanguageManager.LANG_EN
             ),
             Language(
                 code = LanguageManager.LANG_VI,
                 name = getString(R.string.lang_vietnamese),
-                flagDrawable = R.drawable.flag_vietnam,  // Dùng flag có sẵn
+                flagDrawable = R.drawable.flag_vietnam,
                 isSelected = currentLang == LanguageManager.LANG_VI
             )
         )
@@ -76,7 +76,6 @@ class LanguageSelectionFragment : Fragment() {
         if (language.code != languageManager.getLanguage()) {
             languageManager.setLanguage(language.code)
 
-            // Restart app để apply ngôn ngữ
             val intent: Intent? = requireActivity().packageManager
                 .getLaunchIntentForPackage(requireActivity().packageName)
 

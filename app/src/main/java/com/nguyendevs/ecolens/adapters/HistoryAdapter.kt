@@ -80,7 +80,6 @@ class HistoryAdapter(
                 .centerCrop()
                 .into(ivImage)
 
-            // Cập nhật icon yêu thích
             updateFavoriteIcon(ivFavorite, entry.isFavorite)
 
             itemView.setOnClickListener {

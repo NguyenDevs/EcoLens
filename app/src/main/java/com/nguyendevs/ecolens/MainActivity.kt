@@ -236,16 +236,14 @@ class MainActivity : AppCompatActivity() {
     private fun setBottomNavVisibility(visible: Boolean) {
         val targetVisibility = if (visible) View.VISIBLE else View.GONE
 
-        // Nếu trạng thái không đổi thì không cần animate lại
         if (bottomNav.visibility == targetVisibility) return
 
         val transition = Fade()
-        transition.duration = 200 // Thời gian fade (ms)
+        transition.duration = 200
         transition.addTarget(bottomNav)
         transition.addTarget(fabCamera)
         transition.addTarget(fabCameraNav)
 
-        // Layout gốc để transition manager hoạt động
         val root = findViewById<ViewGroup>(R.id.mainContent).parent as ViewGroup
         TransitionManager.beginDelayedTransition(root, transition)
 
@@ -255,20 +253,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showHistoryFragment() {
-        // Ẩn tất cả containers khác
         homeContainer.visibility = View.GONE
         myGardenContainer.visibility = View.GONE
         settingsContainer.visibility = View.GONE
 
-        // Hiển thị history container
         historyContainer.visibility = View.VISIBLE
 
-        // Tạo fragment nếu chưa có
         if (historyFragment == null) {
             historyFragment = HistoryFragment()
         }
 
-        // Replace fragment vào historyContainer
         val currentFragment = supportFragmentManager.findFragmentById(R.id.historyContainer)
         if (currentFragment !is HistoryFragment) {
             supportFragmentManager.beginTransaction()
@@ -288,7 +282,6 @@ class MainActivity : AppCompatActivity() {
             val fragmentContainer = findViewById<FrameLayout>(R.id.fragmentContainer)
             if (fragmentContainer.visibility == View.VISIBLE) {
                 fragmentContainer.visibility = View.GONE
-                // Clear back stack
                 supportFragmentManager.popBackStack(
                     null,
                     androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE
@@ -377,7 +370,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupObservers() {
-        // Chỉ observe UI state cho home screen
         lifecycleScope.launch {
             viewModel.uiState.collect { state ->
                 if (homeContainer.visibility == View.VISIBLE) {
@@ -390,9 +382,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-
-        // History được quản lý bởi HistoryFragment
-        // Không cần observe history ở đây nữa
     }
 
     private fun updateUIState(isLoading: Boolean, error: String?) {
@@ -441,8 +430,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         val fragmentContainer = findViewById<FrameLayout>(R.id.fragmentContainer)
-
-        // Nếu fragment container đang hiển thị (detail view)
         if (fragmentContainer.visibility == View.VISIBLE) {
             if (supportFragmentManager.backStackEntryCount > 0) {
                 supportFragmentManager.popBackStack()

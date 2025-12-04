@@ -270,11 +270,9 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
         filterStartDate = null
         filterEndDate = null
 
-        // Reset subtitle
         tvFilterSubtitle.text = getString(R.string.select_date)
         tvFilterSubtitle.setTextColor(resources.getColor(R.color.text_secondary, null))
 
-        // Hide clear button
         btnClearFilter.visibility = View.GONE
 
         observeHistory()

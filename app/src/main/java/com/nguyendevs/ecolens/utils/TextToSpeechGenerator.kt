@@ -17,11 +17,9 @@ object TextToSpeechGenerator {
 
         val sb = StringBuilder()
         sb.append("${info.commonName}. ")
-        // Dùng resource string thay vì cứng "Tên khoa học"
         sb.append("${context.getString(R.string.tts_scientific_name)} ${info.scientificName}. ")
 
         val taxonomyList = mutableListOf<String>()
-        // Dùng resource string cho các cấp phân loại
         if (info.kingdom.isNotEmpty()) taxonomyList.add("${context.getString(R.string.label_kingdom)} ${stripHtml(info.kingdom)}")
         if (info.phylum.isNotEmpty()) taxonomyList.add("${context.getString(R.string.label_phylum)} ${stripHtml(info.phylum)}")
         if (info.className.isNotEmpty()) taxonomyList.add("${context.getString(R.string.label_class)} ${stripHtml(info.className)}")
@@ -36,7 +34,6 @@ object TextToSpeechGenerator {
             sb.append(". ")
         }
 
-        // Dùng resource string cho các tiêu đề mục
         if (info.description.isNotEmpty()) {
             sb.append("${context.getString(R.string.section_description)}. ${stripHtml(info.description)}. ")
         }

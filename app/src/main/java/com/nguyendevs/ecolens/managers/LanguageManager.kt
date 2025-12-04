@@ -15,17 +15,14 @@ class LanguageManager(private val context: Context) {
 
     private val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 
-    // Lấy mã ngôn ngữ hiện tại (mặc định là 'vi')
     fun getLanguage(): String {
         return prefs.getString(KEY_LANG, LANG_VI) ?: LANG_VI
     }
 
-    // Lưu ngôn ngữ mới
     fun setLanguage(langCode: String) {
         prefs.edit().putString(KEY_LANG, langCode).apply()
     }
 
-    // Hàm update context để áp dụng ngôn ngữ (quan trọng cho Android N+)
     fun updateBaseContext(context: Context): Context {
         val lang = getLanguage()
         val locale = Locale(lang)
