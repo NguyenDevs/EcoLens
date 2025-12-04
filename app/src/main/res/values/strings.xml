@@ -133,4 +133,26 @@
 
     <!-- Feature Status -->
     <string name="feature_developing">Chức năng đang được phát triển</string>
+
+    <!-- Sort options -->
+    <string name="sort_by">Sắp xếp theo</string>
+    <string name="sort_newest_first">Ngày mới nhất</string>
+    <string name="sort_oldest_first">Ngày cũ nhất</string>
+    <string name="sort">Sắp xếp</string>
+
+    <!-- Date filter -->
+    <string name="filter_by_date">Lọc theo ngày</string>
+    <string name="select_start_date">Chọn ngày bắt đầu</string>
+    <string name="select_end_date">Chọn ngày kết thúc</string>
+    <string name="filter_date_range">Từ %1$s đến %2$s</string>
+    <string name="clear_filter">Xóa bộ lọc</string>
+    <string name="end_date_before_start_date_error">Ngày kết thúc phải sau ngày bắt đầu</string>
+
+    <!-- Icons -->
+    <string name="ic_calendar">ic_calendar</string>
+    <string name="ic_sort">ic_sort</string>
+
+    <!-- General -->
+    <string name="cancel">Hủy</string>
+
 </resources>
