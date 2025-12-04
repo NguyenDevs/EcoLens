@@ -78,20 +78,26 @@ class MainActivity : AppCompatActivity() {
         if (result.resultCode == RESULT_OK) {
             val uriString = result.data?.getStringExtra(CameraActivity.KEY_IMAGE_URI)
             if (uriString != null) {
-
                 if (searchBarHandler.isExpanded()) {
                     searchBarHandler.collapseSearchBar()
                 }
 
+                val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
+                if (bottomNav.selectedItemId != R.id.nav_home) {
+                    bottomNav.selectedItemId = R.id.nav_home
+                }
+
                 val capturedUri = Uri.parse(uriString)
                 imageUri = capturedUri
+
                 Glide.with(this)
                     .load(capturedUri)
                     .centerCrop()
                     .into(imagePreview)
-                val currentLang = languageManager.getLanguage()
 
+                val currentLang = languageManager.getLanguage()
                 imageZoomHandler.setImageUri(capturedUri)
+
                 viewModel.identifySpecies(capturedUri, currentLang)
             }
         }
