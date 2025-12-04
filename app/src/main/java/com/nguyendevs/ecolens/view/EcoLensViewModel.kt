@@ -15,14 +15,14 @@ import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.database.HistoryDatabase
 import com.nguyendevs.ecolens.model.EcoLensUiState
 import com.nguyendevs.ecolens.model.HistoryEntry
+import com.nguyendevs.ecolens.model.HistorySortOption
 import com.nguyendevs.ecolens.model.SpeciesInfo
 import com.nguyendevs.ecolens.network.RetrofitClient
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -49,12 +49,19 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     private val apiService = RetrofitClient.iNaturalistApi
     private val historyDao = HistoryDatabase.getDatabase(application).historyDao()
 
-    val history: StateFlow<List<HistoryEntry>> = historyDao.getAllHistory()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+    // Phương thức mới cho sắp xếp và lọc lịch sử
+    fun getHistoryBySortOption(sortOption: HistorySortOption): Flow<List<HistoryEntry>> {
+        return when (sortOption) {
+            HistorySortOption.NEWEST_FIRST -> historyDao.getAllHistoryNewestFirst()
+            HistorySortOption.OLDEST_FIRST -> historyDao.getAllHistoryOldestFirst()
+        }
+    }
+
+    fun deleteAllHistory() {
+        viewModelScope.launch(Dispatchers.IO) {
+            historyDao.deleteAll()
+        }
+    }
 
     fun triggerSearch(query: String) {
         _searchTextAction.value = query
