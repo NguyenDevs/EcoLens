@@ -226,7 +226,7 @@
                 android:paddingBottom="33dp"
                 android:clipToPadding="false"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                android:visibility="visible"/>
+                android:visibility="gone"/>
 
         <!-- Empty state -->
         <LinearLayout
