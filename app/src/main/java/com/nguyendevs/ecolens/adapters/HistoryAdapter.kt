@@ -1,3 +1,5 @@
+// FILE: nguyendevs/ecolens/EcoLens-312c2dae705bb34fd90d29e6d1b5003c678c945f/app/src/main/java/com/nguyendevs/ecolens/adapters/HistoryAdapter.kt
+
 package com.nguyendevs.ecolens.adapters
 
 import android.view.LayoutInflater
@@ -112,7 +114,9 @@ class HistoryAdapter(
             }
             itemContainer.background = bgDrawable
 
-            itemView.setOnClickListener { clickListener(entry) }
+            // --- SỬA LỖI TẠI ĐÂY ---
+            // Đặt listener vào itemContainer thay vì itemView vì trong XML itemContainer có clickable=true
+            itemContainer.setOnClickListener { clickListener(entry) }
         }
     }
 }

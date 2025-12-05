@@ -1,3 +1,5 @@
+// FILE: nguyendevs/ecolens/EcoLens-312c2dae705bb34fd90d29e6d1b5003c678c945f/app/src/main/java/com/nguyendevs/ecolens/MainActivity.kt
+
 package com.nguyendevs.ecolens
 
 import android.content.Context
@@ -5,6 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
@@ -14,6 +17,8 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.transition.Fade
+import androidx.transition.TransitionManager
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.card.MaterialCardView
@@ -31,6 +36,7 @@ import kotlinx.coroutines.launch
 class MainActivity : AppCompatActivity() {
 
     // --- Views ---
+    private lateinit var mainContent: ViewGroup // Container cha để apply Transition
     private lateinit var homeContainer: View
     private lateinit var settingsContainer: View
     private lateinit var myGardenContainer: View
@@ -52,7 +58,6 @@ class MainActivity : AppCompatActivity() {
 
     // --- Fragments ---
     private var historyFragment: HistoryFragment? = null
-    // Bạn có thể thêm MyGardenFragment, SettingsFragment vào đây nếu muốn chuyển hẳn sang Fragment
 
     // --- Handlers & Managers ---
     private lateinit var searchBarHandler: SearchBarHandler
@@ -110,12 +115,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun initViews() {
         // Ánh xạ View từ layout activity_main.xml
-        // LƯU Ý: Bạn cần đảm bảo ID trong XML khớp với code này
+        mainContent = findViewById(R.id.mainContent)
         homeContainer = findViewById(R.id.homeContainer)
-        // History Container cũ trong XML có thể đổi tên hoặc dùng chung fragment_container
-        // Ở đây tôi dùng fragment_container cho HistoryFragment
         fragmentContainer = findViewById(R.id.historyContainer)
-        overlayContainer = findViewById(R.id.fragmentContainer) // ID này dùng cho Detail
+        // ID này là container full màn hình (z-index cao nhất) dùng cho DetailFragment
+        overlayContainer = findViewById(R.id.fragmentContainer)
 
         myGardenContainer = findViewById(R.id.myGardenContainer)
         settingsContainer = findViewById(R.id.settingsContainer)
@@ -170,7 +174,7 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread { toggleSpeakerUI(false) }
         }
 
-        // Listener để ẩn hiện overlay container khi back stack thay đổi
+        // Listener để ẩn hiện overlay container khi back stack thay đổi (khi mở Detail)
         supportFragmentManager.addOnBackStackChangedListener {
             val count = supportFragmentManager.backStackEntryCount
             overlayContainer.isVisible = count > 0
@@ -208,8 +212,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // --- Logic chuyển Tab không dùng TransitionManager ---
+    // --- Logic chuyển Tab CÓ HOẠT ẢNH ---
     private fun updateNavigationState(itemId: Int) {
+        // Tạo hiệu ứng Fade 100ms
+        val transition = Fade()
+        transition.duration = 100
+        TransitionManager.beginDelayedTransition(mainContent, transition)
+
         // 1. Ẩn tất cả container trước
         homeContainer.visibility = View.GONE
         fragmentContainer.visibility = View.GONE
@@ -243,12 +252,9 @@ class MainActivity : AppCompatActivity() {
                     historyFragment = HistoryFragment()
                     transaction.add(R.id.historyContainer, historyFragment!!, "HISTORY")
                 } else {
-                    // Nếu fragment đã ẩn thì hiện lên (nếu dùng cơ chế hide/show cho fragment)
-                    // Ở đây layout container visibility đã xử lý việc ẩn hiện,
-                    // nhưng đảm bảo fragment attach đúng
+                    // Fragment đã được add rồi, chỉ cần layout visibility (đã xử lý ở trên)
                 }
                 transaction.commitNowAllowingStateLoss()
-                // commitNow để đảm bảo UI cập nhật ngay lập tức, tránh khựng
             }
             R.id.nav_my_garden -> myGardenContainer.visibility = View.VISIBLE
             R.id.nav_settings -> settingsContainer.visibility = View.VISIBLE
