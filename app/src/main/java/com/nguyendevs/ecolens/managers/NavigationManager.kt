@@ -19,7 +19,7 @@ class NavigationManager(
         val root = searchBarContainer.parent as? ViewGroup ?: return
 
         val fade = Fade()
-        fade.duration = 150
+        fade.duration = 100
 
         TransitionManager.beginDelayedTransition(root, fade)
     }

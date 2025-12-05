@@ -7,14 +7,13 @@
         android:orientation="vertical"
         android:background="@color/background_soft">
 
-    <!-- Header cố định -->
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp"
-            app:cardElevation="6dp"
-            android:background="@drawable/top_history_corner"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="24dp"
             android:paddingBottom="10dp">
 
         <TextView
@@ -24,59 +23,52 @@
                 android:textSize="32sp"
                 android:textColor="@color/green_primary"
                 android:textStyle="bold"
-                android:paddingEnd="5dp"
-                android:paddingStart="0dp"
                 android:layout_marginTop="4dp"
-                android:layout_marginBottom="10dp"/>
+                android:layout_marginBottom="24dp"/>
 
-        <!-- Actions Section Header - Clickable -->
-        <LinearLayout
+        <FrameLayout
                 android:id="@+id/optionsHeader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingTop="3dp"
-                android:paddingBottom="3dp"
                 android:clickable="true"
-                android:focusable="true">
+                android:focusable="true"
+                android:layout_marginBottom="12dp">
 
             <TextView
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:text="@string/options"
-                    android:textSize="14sp"
+                    android:textSize="13sp"
                     android:textColor="@color/text_secondary"
-                    android:textAllCaps="true"/>
+                    android:textStyle="bold"
+                    android:textAllCaps="true"
+                    android:layout_marginStart="4dp"/>
 
             <ImageView
                     android:id="@+id/ivExpandIcon"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="end|center_vertical"
                     android:src="@drawable/ic_arrow_down"
                     app:tint="@color/text_secondary"/>
+        </FrameLayout>
 
-        </LinearLayout>
-
-        <!-- Expandable Options Container -->
         <LinearLayout
                 android:id="@+id/optionsContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="12dp"
                 android:visibility="gone">
 
-            <!-- Sort Option -->
             <com.google.android.material.card.MaterialCardView
                     android:id="@+id/btnSort"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="2dp"
                     android:layout_marginBottom="12dp"
-                    app:cardBackgroundColor="@android:color/white"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="0dp"
+                    app:cardBackgroundColor="@color/white"
                     android:clickable="true"
                     android:focusable="true"
                     android:foreground="?attr/selectableItemBackground">
@@ -88,25 +80,33 @@
                         android:padding="16dp"
                         android:gravity="center_vertical">
 
-                    <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_sort"
-                            app:tint="@color/green_primary"/>
+                    <FrameLayout
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/bg_flag_rounded"
+                            android:backgroundTint="#F0F7F4">
+                        <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_sort"
+                                app:tint="@color/green_primary"/>
+                    </FrameLayout>
 
                     <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:orientation="vertical"
-                            android:layout_marginStart="12dp">
+                            android:layout_marginStart="16dp">
 
                         <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/sort_by"
                                 android:textSize="16sp"
-                                android:textColor="@android:color/black"/>
+                                android:textColor="@color/text_primary"
+                                android:textStyle="bold"/>
 
                         <TextView
                                 android:id="@+id/tvCurrentSort"
@@ -114,22 +114,27 @@
                                 android:layout_height="wrap_content"
                                 android:text="@string/sort_newest_first"
                                 android:textSize="14sp"
-                                android:textColor="@color/green_primary"
+                                android:textColor="@color/text_secondary"
                                 android:layout_marginTop="2dp"/>
                     </LinearLayout>
 
+                    <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_arrow_right"
+                            app:tint="#C0C0C0"/>
                 </LinearLayout>
-
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Filter by Date Option -->
             <com.google.android.material.card.MaterialCardView
                     android:id="@+id/btnFilterByDate"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
                     app:cardCornerRadius="16dp"
-                    app:cardElevation="2dp"
-                    app:cardBackgroundColor="@android:color/white"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="0dp"
+                    app:cardBackgroundColor="@color/white"
                     android:clickable="true"
                     android:focusable="true"
                     android:foreground="?attr/selectableItemBackground">
@@ -141,25 +146,33 @@
                         android:padding="16dp"
                         android:gravity="center_vertical">
 
-                    <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_calendar"
-                            app:tint="@color/green_primary"/>
+                    <FrameLayout
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/bg_flag_rounded"
+                            android:backgroundTint="#F0F7F4">
+                        <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_calendar"
+                                app:tint="@color/green_primary"/>
+                    </FrameLayout>
 
                     <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:orientation="vertical"
-                            android:layout_marginStart="12dp">
+                            android:layout_marginStart="16dp">
 
                         <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/filter_by_date"
                                 android:textSize="16sp"
-                                android:textColor="@android:color/black"/>
+                                android:textColor="@color/text_primary"
+                                android:textStyle="bold"/>
 
                         <LinearLayout
                                 android:layout_width="match_parent"
@@ -182,43 +195,40 @@
                                     android:layout_width="20dp"
                                     android:layout_height="20dp"
                                     android:src="@drawable/ic_close"
-                                    android:contentDescription="@string/clear_filter"
                                     android:background="?attr/selectableItemBackgroundBorderless"
-                                    android:padding="2dp"
-                                    app:tint="@color/green_primary"
+                                    android:padding="4dp"
+                                    app:tint="@color/error_red"
                                     android:visibility="gone"/>
-
                         </LinearLayout>
                     </LinearLayout>
 
+                    <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_arrow_right"
+                            app:tint="#C0C0C0"/>
                 </LinearLayout>
-
             </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
-
-
     </LinearLayout>
+
     <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:background="@color/background_soft"
             android:layout_weight="1">
 
-        <!-- RecyclerView -->
         <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvHistory"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
-                android:paddingTop="8dp"
-                android:paddingBottom="33dp"
+                android:paddingTop="0dp"
+                android:paddingBottom="80dp"
                 android:clipToPadding="false"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                android:visibility="gone"/>
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
-        <!-- Empty state -->
         <LinearLayout
                 android:id="@+id/emptyStateContainer"
                 android:layout_width="wrap_content"
@@ -232,15 +242,17 @@
                     android:layout_width="80dp"
                     android:layout_height="80dp"
                     android:src="@drawable/ic_history"
-                    android:contentDescription="@string/history"
-                    app:tint="#BDBDBD" />
+                    android:alpha="0.3"
+                    app:tint="@color/text_secondary"
+                    android:contentDescription="@string/history_empty"/>
 
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/history_empty"
-                    android:textSize="20sp"
-                    android:textColor="#757575"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_secondary"
                     android:layout_marginTop="16dp" />
 
             <TextView
@@ -248,12 +260,10 @@
                     android:layout_height="wrap_content"
                     android:text="@string/history_subtitle"
                     android:textSize="14sp"
-                    android:textColor="#BDBDBD"
+                    android:textColor="@color/text_secondary"
                     android:layout_marginTop="8dp"
                     android:textAlignment="center"/>
-
         </LinearLayout>
-
     </FrameLayout>
 
 </LinearLayout>

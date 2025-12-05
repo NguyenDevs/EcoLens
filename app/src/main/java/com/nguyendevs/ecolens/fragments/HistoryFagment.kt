@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -38,7 +39,7 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
     private lateinit var tvCurrentSort: TextView
     private lateinit var tvFilterSubtitle: TextView
     private lateinit var btnClearFilter: ImageView
-    private lateinit var optionsHeader: LinearLayout
+    private lateinit var optionsHeader: FrameLayout
     private lateinit var optionsContainer: LinearLayout
     private lateinit var ivExpandIcon: ImageView
 

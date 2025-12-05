@@ -14,16 +14,17 @@
             android:paddingStart="20dp"
             android:paddingTop="24dp"
             android:paddingEnd="20dp"
-            android:paddingBottom="100dp"> <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:layout_marginBottom="4dp"
-            android:text="@string/app_title"
-            android:textColor="@color/green_primary"
-            android:textSize="34sp"
-            android:textStyle="bold" />
+            android:paddingBottom="100dp">
 
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="24dp"
+                android:text="@string/app_title"
+                android:textColor="@color/green_primary"
+                android:textSize="32sp"
+                android:textStyle="bold" />
         <TextView
                 android:id="@+id/tvAppSubtitle"
                 android:layout_width="wrap_content"
