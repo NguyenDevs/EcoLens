@@ -1,415 +1,407 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="1dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="10dp"
-        android:paddingBottom="16dp"
-        android:layout_marginStart="1dp"
-        android:layout_marginEnd="1dp"
-        app:cardBackgroundColor="@android:color/white">
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+                                                   xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                   android:layout_width="match_parent"
+                                                   android:layout_height="wrap_content"
+                                                   android:layout_margin="16dp"
+                                                   app:cardBackgroundColor="@color/white"
+                                                   app:cardCornerRadius="24dp"
+                                                   app:cardElevation="0dp"
+                                                   app:strokeWidth="0dp">
 
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp"
-    >
+            android:padding="24dp">
 
-        <!-- Common Name -->
-        <TextView
-                android:id="@+id/tvCommonName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/label_common_name"
-                android:textSize="24sp"
-                android:textColor="#00796B"
-                android:textStyle="bold" />
-
-        <!-- Scientific Name with Copy Button -->
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="4dp"
-                android:gravity="center_vertical">
+                android:gravity="top"
+                android:orientation="horizontal">
 
             <TextView
-                    android:id="@+id/tvScientificName"
+                    android:id="@+id/tvCommonName"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:text="@string/label_common_name"
+                    android:textColor="@color/green_primary"
+                    android:textSize="26sp"
+                    android:textStyle="bold" />
+
+            <ImageView
+                    android:id="@+id/btnShareInfo"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/bg_white_rounded"
+                    android:backgroundTint="#F5F7F6"
+                    android:contentDescription="@string/share_info"
+                    android:padding="10dp"
+                    android:src="@drawable/ic_share"
+                    app:tint="@color/green_primary" />
+        </LinearLayout>
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+            <TextView
+                    android:id="@+id/tvScientificName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:text="@string/label_scientific_name"
+                    android:textColor="@color/text_secondary"
                     android:textSize="18sp"
-                    android:textStyle="italic"
-                    android:textColor="#757575" />
+                    android:textStyle="italic" />
 
             <ImageView
                     android:id="@+id/btnCopyScientificName"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="8dp"
+                    android:alpha="0.6"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/copy_scientific_name"
+                    android:padding="4dp"
                     android:src="@drawable/ic_copy"
-                    android:padding="6dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:alpha="0.6"
-                    android:contentDescription="@string/copy_scientific_name" />
-            <ImageView
-                    android:id="@+id/btnShareInfo"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:src="@drawable/ic_share"
-                    android:padding="6dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:alpha="0.6"
-                    android:contentDescription="@string/share_info" />
+                    app:tint="@color/text_secondary" />
         </LinearLayout>
 
-        <!-- Confidence Badge -->
         <com.google.android.material.card.MaterialCardView
                 android:id="@+id/confidenceCard"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                app:cardCornerRadius="12dp"
+                android:layout_marginTop="16dp"
                 app:cardBackgroundColor="#E8F5E9"
-                app:cardElevation="0dp">
+                app:cardCornerRadius="100dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
 
             <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="8dp"
-                    android:paddingStart="16dp"
+                    android:paddingStart="12dp"
+                    android:paddingTop="6dp"
                     android:paddingEnd="16dp"
-                    android:gravity="center_vertical">
+                    android:paddingBottom="6dp">
 
                 <ImageView
                         android:id="@+id/iconConfidence"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:contentDescription="@string/confidence"
                         android:src="@drawable/ic_check_circle"
-                        android:contentDescription="@string/confidence" />
+                        app:tint="@color/green_dark" />
 
                 <TextView
                         android:id="@+id/tvConfidence"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
                         android:text="@string/confidence_format"
-                        android:textColor="#00796B"
-                        android:textStyle="bold"
-                        android:layout_marginStart="8dp" />
+                        android:textColor="@color/green_dark"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Divider -->
         <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#E0E0E0"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp" />
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="24dp"
+                android:background="#F0F0F0" />
 
-        <!-- Taxonomy Section -->
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
                 android:text="@string/taxonomy_title"
-                android:textSize="20sp"
-                android:textColor="#00796B"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp" />
+                android:textColor="@color/text_primary"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
-        <!-- Taxonomy Rows -->
         <LinearLayout
                 android:id="@+id/taxonomyContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:background="@drawable/bg_white_rounded"
+                android:backgroundTint="#F8F9FA"
+                android:orientation="vertical"
+                android:padding="20dp">
 
-            <!-- Giới -->
             <LinearLayout
                     android:id="@+id/rowKingdom"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp">
+                    android:paddingBottom="8dp">
                 <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
                         android:text="@string/label_kingdom"
-                        android:textSize="14sp"
-                        android:textColor="#757575" />
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp" />
                 <TextView
                         android:id="@+id/tvKingdom"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
+                        android:textColor="@color/text_primary"
                         android:textSize="14sp"
-                        android:textColor="#424242" />
+                        android:textStyle="bold"/>
             </LinearLayout>
 
-            <!-- Ngành -->
             <LinearLayout
                     android:id="@+id/rowPhylum"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp">
+                    android:paddingBottom="8dp">
                 <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
                         android:text="@string/label_phylum"
-                        android:textSize="14sp"
-                        android:textColor="#757575" />
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp" />
                 <TextView
                         android:id="@+id/tvPhylum"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
+                        android:textColor="@color/text_primary"
                         android:textSize="14sp"
-                        android:textColor="#424242" />
+                        android:textStyle="bold"/>
             </LinearLayout>
 
-            <!-- Lớp -->
             <LinearLayout
                     android:id="@+id/rowClass"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp">
+                    android:paddingBottom="8dp">
                 <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
                         android:text="@string/label_class"
-                        android:textSize="14sp"
-                        android:textColor="#757575" />
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp" />
                 <TextView
                         android:id="@+id/tvClass"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
+                        android:textColor="@color/text_primary"
                         android:textSize="14sp"
-                        android:textColor="#424242" />
+                        android:textStyle="bold"/>
             </LinearLayout>
 
-            <!-- Bộ -->
             <LinearLayout
                     android:id="@+id/rowOrder"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp">
+                    android:paddingBottom="8dp">
                 <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
                         android:text="@string/label_order"
-                        android:textSize="14sp"
-                        android:textColor="#757575" />
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp" />
                 <TextView
                         android:id="@+id/tvOrder"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
+                        android:textColor="@color/text_primary"
                         android:textSize="14sp"
-                        android:textColor="#424242" />
+                        android:textStyle="bold"/>
             </LinearLayout>
 
-            <!-- Họ -->
             <LinearLayout
                     android:id="@+id/rowFamily"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp">
+                    android:paddingBottom="8dp">
                 <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
                         android:text="@string/label_family"
-                        android:textSize="14sp"
-                        android:textColor="#757575" />
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp" />
                 <TextView
                         android:id="@+id/tvFamily"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
+                        android:textColor="@color/text_primary"
                         android:textSize="14sp"
-                        android:textColor="#424242" />
+                        android:textStyle="bold"/>
             </LinearLayout>
 
-            <!-- Chi -->
             <LinearLayout
                     android:id="@+id/rowGenus"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp">
+                    android:paddingBottom="8dp">
                 <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
                         android:text="@string/label_genus"
-                        android:textSize="14sp"
-                        android:textColor="#757575" />
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp" />
                 <TextView
                         android:id="@+id/tvGenus"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
+                        android:textColor="@color/text_primary"
                         android:textSize="14sp"
-                        android:textColor="#424242" />
+                        android:textStyle="bold"/>
             </LinearLayout>
 
-            <!-- Loài -->
             <LinearLayout
                     android:id="@+id/rowSpecies"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp">
+                    android:orientation="horizontal">
                 <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
                         android:text="@string/label_species"
-                        android:textSize="14sp"
-                        android:textColor="#757575" />
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp" />
                 <TextView
                         android:id="@+id/tvSpecies"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
+                        android:textColor="@color/text_primary"
                         android:textSize="14sp"
-                        android:textColor="#424242" />
+                        android:textStyle="bold"/>
             </LinearLayout>
 
         </LinearLayout>
 
-        <!-- Description Section -->
         <LinearLayout
                 android:id="@+id/sectionDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="24dp"
                 android:visibility="gone">
 
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/section_description"
-                    android:textSize="20sp"
-                    android:textColor="#00796B"
+                    android:textSize="18sp"
+                    android:textColor="@color/text_primary"
                     android:textStyle="bold" />
 
             <TextView
                     android:id="@+id/tvDescription"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:textColor="#424242"
-                    android:lineSpacingExtra="8dp"
+                    android:textSize="15sp"
+                    android:textColor="@color/text_secondary"
+                    android:lineSpacingExtra="6dp"
                     android:layout_marginTop="8dp" />
-
         </LinearLayout>
 
-        <!-- Characteristics Section -->
         <LinearLayout
                 android:id="@+id/sectionCharacteristics"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="24dp"
                 android:visibility="gone">
 
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/section_characteristics"
-                    android:textSize="20sp"
-                    android:textColor="#00796B"
+                    android:textSize="18sp"
+                    android:textColor="@color/text_primary"
                     android:textStyle="bold" />
 
             <TextView
                     android:id="@+id/tvCharacteristics"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:textColor="#424242"
-                    android:lineSpacingExtra="8dp"
+                    android:textSize="15sp"
+                    android:textColor="@color/text_secondary"
+                    android:lineSpacingExtra="6dp"
                     android:layout_marginTop="8dp" />
-
         </LinearLayout>
 
-        <!-- Distribution Section -->
         <LinearLayout
                 android:id="@+id/sectionDistribution"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="24dp"
                 android:visibility="gone">
 
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/section_distribution"
-                    android:textSize="20sp"
-                    android:textColor="#00796B"
+                    android:textSize="18sp"
+                    android:textColor="@color/text_primary"
                     android:textStyle="bold" />
 
             <TextView
                     android:id="@+id/tvDistribution"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:textColor="#424242"
-                    android:lineSpacingExtra="8dp"
+                    android:textSize="15sp"
+                    android:textColor="@color/text_secondary"
+                    android:lineSpacingExtra="6dp"
                     android:layout_marginTop="8dp" />
-
         </LinearLayout>
 
-        <!-- Habitat Section -->
         <LinearLayout
                 android:id="@+id/sectionHabitat"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="24dp"
                 android:visibility="gone">
 
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/section_habitat"
-                    android:textSize="20sp"
-                    android:textColor="#00796B"
+                    android:textSize="18sp"
+                    android:textColor="@color/text_primary"
                     android:textStyle="bold" />
 
             <TextView
                     android:id="@+id/tvHabitat"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:textColor="#424242"
-                    android:lineSpacingExtra="8dp"
+                    android:textSize="15sp"
+                    android:textColor="@color/text_secondary"
+                    android:lineSpacingExtra="6dp"
                     android:layout_marginTop="8dp" />
-
         </LinearLayout>
 
         <LinearLayout
@@ -417,26 +409,25 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="24dp"
                 android:visibility="gone">
 
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/section_conservation"
-                    android:textSize="20sp"
-                    android:textColor="#00796B"
+                    android:textSize="18sp"
+                    android:textColor="@color/text_primary"
                     android:textStyle="bold" />
 
             <TextView
                     android:id="@+id/tvConservationStatus"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:textColor="#424242"
-                    android:lineSpacingExtra="8dp"
+                    android:textSize="15sp"
+                    android:textColor="@color/text_secondary"
+                    android:lineSpacingExtra="6dp"
                     android:layout_marginTop="8dp" />
-
         </LinearLayout>
 
     </LinearLayout>

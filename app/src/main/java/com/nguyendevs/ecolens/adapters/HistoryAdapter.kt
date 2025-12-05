@@ -40,10 +40,12 @@ class HistoryAdapter(
 
     override fun onBindViewHolder(holder: HistoryViewHolder, position: Int) {
         val entry = historyList[position]
-        holder.bind(entry, clickListener, favoriteClickListener)
 
-        val showDateHeader = position == 0 || !isSameDay(entry.timestamp, historyList[position - 1].timestamp)
-        holder.bindDateHeader(entry.timestamp, showDateHeader)
+        // Logic check ngày
+        val isFirstItemOfDay = position == 0 || !isSameDay(entry.timestamp, historyList[position - 1].timestamp)
+        val isLastItemOfDay = position == historyList.size - 1 || !isSameDay(entry.timestamp, historyList[position + 1].timestamp)
+
+        holder.bind(entry, isFirstItemOfDay, isLastItemOfDay, clickListener)
     }
 
     override fun getItemCount(): Int = historyList.size
@@ -58,56 +60,59 @@ class HistoryAdapter(
         private val tvScientificName: TextView = itemView.findViewById(R.id.tvHistoryScientificName)
         private val tvTime: TextView = itemView.findViewById(R.id.tvHistoryTime)
         private val tvDateHeader: TextView = itemView.findViewById(R.id.tvDateHeader)
-        private val ivFavorite: ImageView = itemView.findViewById(R.id.ivHistoryFavorite)
+        private val divider: View = itemView.findViewById(R.id.divider)
+        private val itemContainer: View = itemView.findViewById(R.id.itemContainer)
 
         fun bind(
             entry: HistoryEntry,
-            clickListener: (HistoryEntry) -> Unit,
-            favoriteClickListener: (HistoryEntry) -> Unit
+            isFirstItemOfDay: Boolean,
+            isLastItemOfDay: Boolean,
+            clickListener: (HistoryEntry) -> Unit
         ) {
             val context = itemView.context
 
-            tvCommonName.text = entry.speciesInfo.commonName.ifEmpty {
-                context.getString(R.string.unknown_common_name)
-            }
-            tvScientificName.text = entry.speciesInfo.scientificName.ifEmpty {
-                context.getString(R.string.unknown_scientific_name)
-            }
-            tvTime.text = "${context.getString(R.string.time_prefix)}${timeFormatter.format(Date(entry.timestamp))}"
+            // Data binding
+            tvCommonName.text = entry.speciesInfo.commonName.ifEmpty { context.getString(R.string.unknown_common_name) }
+            tvScientificName.text = entry.speciesInfo.scientificName.ifEmpty { context.getString(R.string.unknown_scientific_name) }
+            tvTime.text = timeFormatter.format(Date(entry.timestamp))
 
-            Glide.with(itemView.context)
+            Glide.with(context)
                 .load(entry.imagePath)
                 .centerCrop()
                 .into(ivImage)
 
-            updateFavoriteIcon(ivFavorite, entry.isFavorite)
-
-            itemView.setOnClickListener {
-                clickListener(entry)
-            }
-
-            ivFavorite.setOnClickListener {
-                favoriteClickListener(entry)
-            }
-        }
-
-        fun bindDateHeader(timestamp: Long, show: Boolean) {
-            if (show) {
-                tvDateHeader.text = dateFormatter.format(Date(timestamp))
+            // 1. Xử lý Date Header
+            if (isFirstItemOfDay) {
+                tvDateHeader.text = dateFormatter.format(Date(entry.timestamp))
                 tvDateHeader.visibility = View.VISIBLE
             } else {
                 tvDateHeader.visibility = View.GONE
             }
-        }
 
-        private fun updateFavoriteIcon(imageView: ImageView, isFavorite: Boolean) {
-            if (isFavorite) {
-                imageView.setImageResource(R.drawable.ic_favorite)
-                imageView.setColorFilter(android.graphics.Color.RED)
+            // 2. Xử lý Divider (Ẩn nếu là item cuối của nhóm)
+            divider.visibility = if (isLastItemOfDay) View.GONE else View.VISIBLE
+
+            // 3. Xử lý Bo góc Background (Tạo hiệu ứng Grouped List như ảnh)
+            val bgDrawable = android.graphics.drawable.GradientDrawable()
+            bgDrawable.setColor(context.getColor(R.color.white))
+            val radius = context.resources.displayMetrics.density * 16 // 16dp
+
+            if (isFirstItemOfDay && isLastItemOfDay) {
+                // Item duy nhất trong ngày: Bo cả 4 góc
+                bgDrawable.cornerRadii = floatArrayOf(radius, radius, radius, radius, radius, radius, radius, radius)
+            } else if (isFirstItemOfDay) {
+                // Đầu danh sách: Bo 2 góc trên
+                bgDrawable.cornerRadii = floatArrayOf(radius, radius, radius, radius, 0f, 0f, 0f, 0f)
+            } else if (isLastItemOfDay) {
+                // Cuối danh sách: Bo 2 góc dưới
+                bgDrawable.cornerRadii = floatArrayOf(0f, 0f, 0f, 0f, radius, radius, radius, radius)
             } else {
-                imageView.setImageResource(R.drawable.ic_favorite)
-                imageView.setColorFilter(android.graphics.Color.GRAY)
+                // Ở giữa: Không bo góc
+                bgDrawable.cornerRadius = 0f
             }
+            itemContainer.background = bgDrawable
+
+            itemView.setOnClickListener { clickListener(entry) }
         }
     }
 }
