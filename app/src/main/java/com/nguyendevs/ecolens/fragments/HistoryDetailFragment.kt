@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Html
 import android.text.Spanned
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -159,19 +160,31 @@ class HistoryDetailFragment : Fragment() {
         addSection(container, getString(R.string.section_conservation), info.conservationStatus)
     }
 
-    // Thêm từng section text vào layout
     private fun addSection(container: LinearLayout, title: String, content: String) {
         if (content.isBlank()) return
 
         val titleView = TextView(context).apply {
             text = title
-            textSize = 18f
+            textSize = 20f
             setTextColor(ContextCompat.getColor(context, R.color.text_primary))
             setTypeface(null, android.graphics.Typeface.BOLD)
-            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-                topMargin = 32
-                bottomMargin = 8
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin = 24.dpToPx()
+                bottomMargin = 10.dpToPx()
             }
+        }
+
+        val divider = View(context).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                1.dpToPx()
+            ).apply {
+                bottomMargin = 12.dpToPx()
+            }
+            setBackgroundColor(Color.parseColor("#F0F0F0"))
         }
 
         val contentView = TextView(context).apply {
@@ -181,7 +194,9 @@ class HistoryDetailFragment : Fragment() {
             setLineSpacing(0f, 1.4f)
         }
 
+        // Thêm theo thứ tự: Tiêu đề -> Đường kẻ -> Nội dung
         container.addView(titleView)
+        container.addView(divider)
         container.addView(contentView)
     }
 
@@ -226,5 +241,14 @@ class HistoryDetailFragment : Fragment() {
         } else {
             result
         }
+    }
+
+    // Hàm tiện ích chuyển đổi dp sang px (Chỉ giữ lại 1 hàm)
+    private fun Int.dpToPx(): Int {
+        return TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            this.toFloat(),
+            resources.displayMetrics
+        ).toInt()
     }
 }
