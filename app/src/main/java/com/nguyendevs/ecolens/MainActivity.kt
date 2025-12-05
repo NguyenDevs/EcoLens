@@ -162,9 +162,19 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread { toggleSpeakerUI(false) }
         }
 
+        // FIX: Xử lý visibility của overlayContainer để không cắt ngang animation thoát
         supportFragmentManager.addOnBackStackChangedListener {
             val count = supportFragmentManager.backStackEntryCount
-            overlayContainer.isVisible = count > 0
+            if (count > 0) {
+                overlayContainer.visibility = View.VISIBLE
+            } else {
+                // Trì hoãn việc ẩn container để animation slide_out (300ms) có thể chạy xong
+                overlayContainer.postDelayed({
+                    if (supportFragmentManager.backStackEntryCount == 0) {
+                        overlayContainer.visibility = View.GONE
+                    }
+                }, 400)
+            }
         }
     }
 

@@ -13,15 +13,14 @@
             android:id="@+id/appBarLayout"
             android:layout_width="match_parent"
             android:layout_height="320dp"
-            android:background="@android:color/transparent"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+            android:background="@android:color/transparent">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
                 android:id="@+id/collapsingToolbar"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:contentScrim="@color/green_primary"
-                app:layout_scrollFlags="scroll|exitUntilCollapsed|snap">
+                app:contentScrim="@android:color/transparent"
+                app:layout_scrollFlags="scroll|snap">
 
             <ImageView
                     android:id="@+id/ivDetailImage"
@@ -38,28 +37,21 @@
                     android:layout_gravity="bottom"
                     android:background="@drawable/gradient_shadow_bottom" />
 
-            <androidx.appcompat.widget.Toolbar
-                    android:id="@+id/toolbar"
-                    android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize"
-                    app:layout_collapseMode="pin"
-                    app:navigationIcon="@drawable/ic_back" />
-
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/bg_bottom_sheet_rounded"
             android:layout_marginTop="-24dp"
-            android:paddingTop="24dp"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/bg_bottom_sheet_rounded"
                 android:orientation="vertical"
+                android:paddingTop="24dp"
                 android:paddingStart="20dp"
                 android:paddingEnd="20dp"
                 android:paddingBottom="40dp">
@@ -139,14 +131,28 @@
                     android:id="@+id/layoutTaxonomy"
                     layout="@layout/layout_taxonomy_grid"/>
             <LinearLayout
-                android:id="@+id/containerSections"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="24dp"/>
+                    android:id="@+id/containerSections"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="24dp"/>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|start"
+            android:layout_margin="16dp"
+            android:src="@drawable/ic_back"
+            app:fabSize="mini"
+            app:backgroundTint="@android:color/transparent"
+            app:tint="@android:color/white"
+            app:elevation="0dp"
+            app:pressedTranslationZ="0dp"
+            android:contentDescription="@string/back"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fabAction"

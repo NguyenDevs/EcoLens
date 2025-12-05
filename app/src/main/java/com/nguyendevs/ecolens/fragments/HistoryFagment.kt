@@ -206,7 +206,9 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
         picker.show(parentFragmentManager, "DATE_RANGE_PICKER")
         picker.addOnPositiveButtonClickListener { selection ->
             filterStartDate = selection.first
-            filterEndDate = selection.second
+            // FIX: Cộng thêm gần 24h để bao gồm hết ngày kết thúc (23:59:59)
+            filterEndDate = selection.second + 86400000L - 1L
+
             tvFilterSubtitle.text = "${dateFormatter.format(selection.first)} - ${dateFormatter.format(selection.second)}"
             tvFilterSubtitle.setTextColor(resources.getColor(R.color.green_primary, null))
             btnClearFilter.visibility = View.VISIBLE

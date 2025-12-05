@@ -5,13 +5,13 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.text.Html
+import android.text.Spanned
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
@@ -51,11 +51,26 @@ class HistoryDetailFragment : Fragment() {
         val entry = historyEntry ?: return
         val info = entry.speciesInfo
 
-        setupToolbar(view)
+        setupBackButton(view)
         bindHeader(view, entry, info)
         bindTaxonomy(view, info)
         bindContent(view, info)
         setupFab(view, info)
+    }
+
+    // FIX: Dừng đọc khi Fragment không còn hiển thị (thoát, back, chuyển tab)
+    override fun onStop() {
+        super.onStop()
+        if (isSpeaking) {
+            speakerManager.pause()
+            isSpeaking = false
+
+            // Reset trạng thái nút FAB về "Đọc"
+            view?.findViewById<FloatingActionButton>(R.id.fabAction)?.let { fab ->
+                fab.setImageResource(R.drawable.ic_speak)
+                fab.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green_primary))
+            }
+        }
     }
 
     // Hủy SpeakerManager khi Fragment bị hủy
@@ -64,14 +79,17 @@ class HistoryDetailFragment : Fragment() {
         super.onDestroy()
     }
 
-    // Cấu hình Toolbar và CollapsingToolbarLayout
-    private fun setupToolbar(view: View) {
-        val toolbar = view.findViewById<Toolbar>(R.id.toolbar)
+    // Thiết lập nút Back (FAB)
+    private fun setupBackButton(view: View) {
+        val btnBack = view.findViewById<FloatingActionButton>(R.id.btnBack)
+        btnBack.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
+
+        // Cấu hình CollapsingToolbarLayout để ảnh hưởng đến status bar
         val collapsingToolbar = view.findViewById<CollapsingToolbarLayout>(R.id.collapsingToolbar)
-
         collapsingToolbar.setContentScrimColor(Color.TRANSPARENT)
-
-        toolbar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
+        collapsingToolbar.setStatusBarScrimColor(Color.TRANSPARENT)
     }
 
     // Hiển thị thông tin cơ bản ở phần đầu (Tên, Ảnh, Tag Giới/Họ)
@@ -108,7 +126,11 @@ class HistoryDetailFragment : Fragment() {
 
         fun setTaxonomyText(viewId: Int, value: String) {
             val textView = taxonomyLayout.findViewById<TextView>(viewId)
-            textView.text = value.ifEmpty { "N/A" }
+            if (value.isNotEmpty()) {
+                textView.text = fromHtml(value)
+            } else {
+                textView.text = "N/A"
+            }
         }
 
         setTaxonomyText(R.id.tvKingdom, info.kingdom)
@@ -148,8 +170,7 @@ class HistoryDetailFragment : Fragment() {
         }
 
         val contentView = TextView(context).apply {
-            text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                Html.fromHtml(content, Html.FROM_HTML_MODE_LEGACY) else Html.fromHtml(content)
+            text = fromHtml(content)
             textSize = 15f
             setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
             setLineSpacing(0f, 1.4f)
@@ -183,6 +204,22 @@ class HistoryDetailFragment : Fragment() {
                 fab.backgroundTintList = ColorStateList.valueOf(Color.RED)
                 isSpeaking = true
             }
+        }
+    }
+
+    // Hàm tiện ích để chuyển đổi HTML String sang Spanned
+    private fun fromHtml(html: String): Spanned {
+        val result = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT)
+        } else {
+            @Suppress("DEPRECATION")
+            Html.fromHtml(html)
+        }
+        // Loại bỏ khoảng trắng thừa ở cuối do Html.fromHtml tạo ra
+        return if (result.isNotEmpty() && result[result.length - 1] == '\n') {
+            result.subSequence(0, result.length - 1) as Spanned
+        } else {
+            result
         }
     }
 }
