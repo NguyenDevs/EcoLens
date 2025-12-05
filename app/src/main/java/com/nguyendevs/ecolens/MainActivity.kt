@@ -49,8 +49,8 @@ class MainActivity : AppCompatActivity() {
     // Home screen views
     private lateinit var imagePreview: ImageView
     private lateinit var loadingOverlay: View
-    private lateinit var loadingCard: MaterialCardView
-    private lateinit var errorCard: MaterialCardView
+    private lateinit var loadingCard: View
+    private lateinit var errorCard: View
     private lateinit var errorText: TextView
     private lateinit var speciesInfoCard: MaterialCardView
     private lateinit var fabSpeak: FloatingActionButton
