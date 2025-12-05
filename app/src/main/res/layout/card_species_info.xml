@@ -157,8 +157,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp"
-                        android:textStyle="bold"/>
+                        android:textSize="14sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -180,8 +179,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp"
-                        android:textStyle="bold"/>
+                        android:textSize="14sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -203,8 +201,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp"
-                        android:textStyle="bold"/>
+                        android:textSize="14sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -226,8 +223,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp"
-                        android:textStyle="bold"/>
+                        android:textSize="14sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -249,8 +245,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp"
-                        android:textStyle="bold"/>
+                        android:textSize="14sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -272,8 +267,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp"
-                        android:textStyle="bold"/>
+                        android:textSize="14sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -294,8 +288,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp"
-                        android:textStyle="bold"/>
+                        android:textSize="14sp" />
             </LinearLayout>
 
         </LinearLayout>
@@ -312,9 +305,16 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/section_description"
-                    android:textSize="18sp"
+                    android:textSize="20sp"
                     android:textColor="@color/text_primary"
                     android:textStyle="bold" />
+
+            <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#E0E0E0"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"/>
 
             <TextView
                     android:id="@+id/tvDescription"
@@ -322,8 +322,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="15sp"
                     android:textColor="@color/text_secondary"
-                    android:lineSpacingExtra="6dp"
-                    android:layout_marginTop="8dp" />
+                    android:lineSpacingExtra="6dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -338,9 +337,16 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/section_characteristics"
-                    android:textSize="18sp"
+                    android:textSize="20sp"
                     android:textColor="@color/text_primary"
                     android:textStyle="bold" />
+
+            <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#E0E0E0"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"/>
 
             <TextView
                     android:id="@+id/tvCharacteristics"
@@ -348,8 +354,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="15sp"
                     android:textColor="@color/text_secondary"
-                    android:lineSpacingExtra="6dp"
-                    android:layout_marginTop="8dp" />
+                    android:lineSpacingExtra="6dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -364,9 +369,16 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/section_distribution"
-                    android:textSize="18sp"
+                    android:textSize="20sp"
                     android:textColor="@color/text_primary"
                     android:textStyle="bold" />
+
+            <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#E0E0E0"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"/>
 
             <TextView
                     android:id="@+id/tvDistribution"
@@ -374,8 +386,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="15sp"
                     android:textColor="@color/text_secondary"
-                    android:lineSpacingExtra="6dp"
-                    android:layout_marginTop="8dp" />
+                    android:lineSpacingExtra="6dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -390,9 +401,16 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/section_habitat"
-                    android:textSize="18sp"
+                    android:textSize="20sp"
                     android:textColor="@color/text_primary"
                     android:textStyle="bold" />
+
+            <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#E0E0E0"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"/>
 
             <TextView
                     android:id="@+id/tvHabitat"
@@ -400,8 +418,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="15sp"
                     android:textColor="@color/text_secondary"
-                    android:lineSpacingExtra="6dp"
-                    android:layout_marginTop="8dp" />
+                    android:lineSpacingExtra="6dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -416,9 +433,16 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/section_conservation"
-                    android:textSize="18sp"
+                    android:textSize="20sp"
                     android:textColor="@color/text_primary"
                     android:textStyle="bold" />
+
+            <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#E0E0E0"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"/>
 
             <TextView
                     android:id="@+id/tvConservationStatus"
@@ -426,8 +450,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="15sp"
                     android:textColor="@color/text_secondary"
-                    android:lineSpacingExtra="6dp"
-                    android:layout_marginTop="8dp" />
+                    android:lineSpacingExtra="6dp" />
         </LinearLayout>
 
     </LinearLayout>

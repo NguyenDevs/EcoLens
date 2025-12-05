@@ -115,11 +115,17 @@ class SpeciesInfoHandler(
         val textView = speciesInfoCard.findViewById<TextView>(textViewId)
 
         if (text.isNotEmpty()) {
+            val formattedText = if (text.contains("<i>")) {
+                "<b>" + text.replace("<i>", "</b><i>")
+            } else {
+                "<b>$text</b>"
+            }
+
             val styledText = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY)
+                Html.fromHtml(formattedText, Html.FROM_HTML_MODE_LEGACY)
             } else {
                 @Suppress("DEPRECATION")
-                Html.fromHtml(text)
+                Html.fromHtml(formattedText)
             }
             textView?.text = styledText
             row?.visibility = View.VISIBLE
