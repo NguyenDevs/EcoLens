@@ -23,6 +23,7 @@ class SpeciesInfoHandler(
     private val onCopySuccess: (String) -> Unit
 ) {
 
+    // Hiển thị thông tin loài đầy đủ
     fun displaySpeciesInfo(info: SpeciesInfo, imageUri: Uri?) {
         setupCopyButton(info)
         setupShareButton(info, imageUri)
@@ -32,6 +33,7 @@ class SpeciesInfoHandler(
         displayConservationStatus(info.conservationStatus)
     }
 
+    // Thiết lập nút sao chép tên khoa học
     private fun setupCopyButton(info: SpeciesInfo) {
         val btnCopy = speciesInfoCard.findViewById<ImageView>(R.id.btnCopyScientificName)
         btnCopy?.setOnClickListener {
@@ -44,6 +46,7 @@ class SpeciesInfoHandler(
         }
     }
 
+    // Thiết lập nút chia sẻ thông tin
     private fun setupShareButton(info: SpeciesInfo, imageUri: Uri?) {
         val btnShare = speciesInfoCard.findViewById<ImageView>(R.id.btnShareInfo)
         btnShare?.setOnClickListener {
@@ -51,6 +54,7 @@ class SpeciesInfoHandler(
         }
     }
 
+    // Hiển thị thông tin cơ bản (Tên, độ tin cậy)
     private fun displayBasicInfo(info: SpeciesInfo) {
         val confidenceValue = info.confidence.coerceIn(0.0, 100.0)
         val confidencePercent = String.format("%.2f", confidenceValue)
@@ -86,6 +90,7 @@ class SpeciesInfoHandler(
         }
     }
 
+    // Hiển thị phân loại khoa học
     private fun displayTaxonomy(info: SpeciesInfo) {
         setTaxonomyRow(R.id.rowKingdom, R.id.tvKingdom, info.kingdom)
         setTaxonomyRow(R.id.rowPhylum, R.id.tvPhylum, info.phylum)
@@ -96,6 +101,7 @@ class SpeciesInfoHandler(
         setTaxonomyRow(R.id.rowSpecies, R.id.tvSpecies, info.species)
     }
 
+    // Hiển thị các phần mô tả chi tiết
     private fun displaySections(info: SpeciesInfo) {
         setSectionVisibility(R.id.sectionDescription, R.id.tvDescription, info.description)
         setSectionVisibility(R.id.sectionCharacteristics, R.id.tvCharacteristics, info.characteristics)
@@ -103,6 +109,7 @@ class SpeciesInfoHandler(
         setSectionVisibility(R.id.sectionHabitat, R.id.tvHabitat, info.habitat)
     }
 
+    // Thiết lập hiển thị cho từng dòng phân loại
     private fun setTaxonomyRow(rowId: Int, textViewId: Int, text: String) {
         val row = speciesInfoCard.findViewById<LinearLayout>(rowId)
         val textView = speciesInfoCard.findViewById<TextView>(textViewId)
@@ -121,6 +128,7 @@ class SpeciesInfoHandler(
         }
     }
 
+    // Thiết lập hiển thị cho từng phần nội dung
     private fun setSectionVisibility(sectionId: Int, textViewId: Int, text: String) {
         val section = speciesInfoCard.findViewById<LinearLayout>(sectionId)
         val textView = speciesInfoCard.findViewById<TextView>(textViewId)
@@ -145,6 +153,7 @@ class SpeciesInfoHandler(
         }
     }
 
+    // Hiển thị trạng thái bảo tồn
     private fun displayConservationStatus(status: String) {
         val section = speciesInfoCard.findViewById<LinearLayout>(R.id.sectionConservation)
         val textView = speciesInfoCard.findViewById<TextView>(R.id.tvConservationStatus)
@@ -165,6 +174,7 @@ class SpeciesInfoHandler(
         }
     }
 
+    // Chia sẻ thông tin loài qua Intent
     private fun shareSpeciesInfo(info: SpeciesInfo, imageUri: Uri?) {
         val confidencePercent = if (info.confidence > 1) {
             String.format("%.2f", info.confidence)
@@ -267,6 +277,7 @@ class SpeciesInfoHandler(
         }
     }
 
+    // Loại bỏ thẻ HTML
     private fun stripHtml(html: String): String {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT).toString()

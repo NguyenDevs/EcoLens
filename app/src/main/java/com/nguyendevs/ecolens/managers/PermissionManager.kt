@@ -14,6 +14,7 @@ class PermissionManager(
     private val permissionLauncher: ActivityResultLauncher<Array<String>>
 ) {
 
+    // Kiểm tra quyền truy cập camera và bộ nhớ
     fun hasPermissions(): Boolean {
         val camera = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
                 PackageManager.PERMISSION_GRANTED
@@ -27,6 +28,7 @@ class PermissionManager(
         return camera && storage
     }
 
+    // Yêu cầu cấp quyền
     fun requestPermissions() {
         val perms = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             arrayOf(Manifest.permission.CAMERA, Manifest.permission.READ_MEDIA_IMAGES)
@@ -36,6 +38,7 @@ class PermissionManager(
         permissionLauncher.launch(perms)
     }
 
+    // Hiển thị dialog thông báo quyền bị từ chối
     fun showPermissionDeniedDialog() {
         MaterialAlertDialogBuilder(context)
             .setTitle(context.getString(R.string.permission_title))

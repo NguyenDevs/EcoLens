@@ -5,6 +5,8 @@ import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.model.SpeciesInfo
 
 object TextToSpeechGenerator {
+
+    // Tạo văn bản để đọc từ thông tin loài
     fun generateSpeechText(context: Context, info: SpeciesInfo): String {
         fun stripHtml(html: String): String {
             return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {

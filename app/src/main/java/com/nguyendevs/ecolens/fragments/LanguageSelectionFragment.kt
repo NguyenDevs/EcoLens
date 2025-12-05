@@ -16,11 +16,12 @@ import com.nguyendevs.ecolens.model.Language
 
 class LanguageSelectionFragment : Fragment() {
 
-    private lateinit var languageManager: LanguageManager
-    private lateinit var rvLanguages: RecyclerView
     private lateinit var btnBack: ImageView
     private lateinit var languageAdapter: LanguageAdapter
+    private lateinit var languageManager: LanguageManager
+    private lateinit var rvLanguages: RecyclerView
 
+    // Inflate layout cho Fragment
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -29,6 +30,7 @@ class LanguageSelectionFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_language_selection, container, false)
     }
 
+    // Sau khi view được tạo, thiết lập các thành phần
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -44,6 +46,7 @@ class LanguageSelectionFragment : Fragment() {
         }
     }
 
+    // Thiết lập danh sách ngôn ngữ
     private fun setupLanguageList() {
         val currentLang = languageManager.getLanguage()
 
@@ -72,6 +75,7 @@ class LanguageSelectionFragment : Fragment() {
         }
     }
 
+    // Xử lý khi chọn ngôn ngữ mới
     private fun onLanguageSelected(language: Language) {
         if (language.code != languageManager.getLanguage()) {
             languageManager.setLanguage(language.code)
@@ -87,6 +91,7 @@ class LanguageSelectionFragment : Fragment() {
         }
     }
 
+    // Đóng Fragment
     private fun closeFragment() {
         parentFragmentManager.popBackStack()
     }

@@ -1,5 +1,3 @@
-// FILE: nguyendevs/ecolens/EcoLens-312c2dae705bb34fd90d29e6d1b5003c678c945f/app/src/main/java/com/nguyendevs/ecolens/adapters/HistoryAdapter.kt
-
 package com.nguyendevs.ecolens.adapters
 
 import android.view.LayoutInflater
@@ -29,42 +27,47 @@ class HistoryAdapter(
         timeZone = TimeZone.getDefault()
     }
 
+    // Cập nhật danh sách lịch sử
     fun updateList(newList: List<HistoryEntry>) {
         historyList = newList
         notifyDataSetChanged()
     }
 
+    // Tạo ViewHolder mới
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_history_entry, parent, false)
         return HistoryViewHolder(view)
     }
 
+    // Gắn dữ liệu vào ViewHolder
     override fun onBindViewHolder(holder: HistoryViewHolder, position: Int) {
         val entry = historyList[position]
 
-        // Logic check ngày
         val isFirstItemOfDay = position == 0 || !isSameDay(entry.timestamp, historyList[position - 1].timestamp)
         val isLastItemOfDay = position == historyList.size - 1 || !isSameDay(entry.timestamp, historyList[position + 1].timestamp)
 
         holder.bind(entry, isFirstItemOfDay, isLastItemOfDay, clickListener)
     }
 
+    // Lấy số lượng item
     override fun getItemCount(): Int = historyList.size
 
+    // Kiểm tra hai timestamp có cùng ngày không
     private fun isSameDay(timestamp1: Long, timestamp2: Long): Boolean {
         return dateFormatter.format(Date(timestamp1)) == dateFormatter.format(Date(timestamp2))
     }
 
     inner class HistoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val ivImage: ImageView = itemView.findViewById(R.id.ivHistoryImage)
-        private val tvCommonName: TextView = itemView.findViewById(R.id.tvHistoryCommonName)
-        private val tvScientificName: TextView = itemView.findViewById(R.id.tvHistoryScientificName)
-        private val tvTime: TextView = itemView.findViewById(R.id.tvHistoryTime)
-        private val tvDateHeader: TextView = itemView.findViewById(R.id.tvDateHeader)
         private val divider: View = itemView.findViewById(R.id.divider)
         private val itemContainer: View = itemView.findViewById(R.id.itemContainer)
+        private val ivImage: ImageView = itemView.findViewById(R.id.ivHistoryImage)
+        private val tvCommonName: TextView = itemView.findViewById(R.id.tvHistoryCommonName)
+        private val tvDateHeader: TextView = itemView.findViewById(R.id.tvDateHeader)
+        private val tvScientificName: TextView = itemView.findViewById(R.id.tvHistoryScientificName)
+        private val tvTime: TextView = itemView.findViewById(R.id.tvHistoryTime)
 
+        // Gắn dữ liệu vào các view
         fun bind(
             entry: HistoryEntry,
             isFirstItemOfDay: Boolean,
@@ -73,7 +76,6 @@ class HistoryAdapter(
         ) {
             val context = itemView.context
 
-            // Data binding
             tvCommonName.text = entry.speciesInfo.commonName.ifEmpty { context.getString(R.string.unknown_common_name) }
             tvScientificName.text = entry.speciesInfo.scientificName.ifEmpty { context.getString(R.string.unknown_scientific_name) }
             tvTime.text = timeFormatter.format(Date(entry.timestamp))
@@ -83,7 +85,6 @@ class HistoryAdapter(
                 .centerCrop()
                 .into(ivImage)
 
-            // 1. Xử lý Date Header
             if (isFirstItemOfDay) {
                 tvDateHeader.text = dateFormatter.format(Date(entry.timestamp))
                 tvDateHeader.visibility = View.VISIBLE
@@ -91,31 +92,23 @@ class HistoryAdapter(
                 tvDateHeader.visibility = View.GONE
             }
 
-            // 2. Xử lý Divider (Ẩn nếu là item cuối của nhóm)
             divider.visibility = if (isLastItemOfDay) View.GONE else View.VISIBLE
 
-            // 3. Xử lý Bo góc Background (Tạo hiệu ứng Grouped List như ảnh)
             val bgDrawable = android.graphics.drawable.GradientDrawable()
             bgDrawable.setColor(context.getColor(R.color.white))
-            val radius = context.resources.displayMetrics.density * 16 // 16dp
+            val radius = context.resources.displayMetrics.density * 16
 
             if (isFirstItemOfDay && isLastItemOfDay) {
-                // Item duy nhất trong ngày: Bo cả 4 góc
                 bgDrawable.cornerRadii = floatArrayOf(radius, radius, radius, radius, radius, radius, radius, radius)
             } else if (isFirstItemOfDay) {
-                // Đầu danh sách: Bo 2 góc trên
                 bgDrawable.cornerRadii = floatArrayOf(radius, radius, radius, radius, 0f, 0f, 0f, 0f)
             } else if (isLastItemOfDay) {
-                // Cuối danh sách: Bo 2 góc dưới
                 bgDrawable.cornerRadii = floatArrayOf(0f, 0f, 0f, 0f, radius, radius, radius, radius)
             } else {
-                // Ở giữa: Không bo góc
                 bgDrawable.cornerRadius = 0f
             }
             itemContainer.background = bgDrawable
 
-            // --- SỬA LỖI TẠI ĐÂY ---
-            // Đặt listener vào itemContainer thay vì itemView vì trong XML itemContainer có clickable=true
             itemContainer.setOnClickListener { clickListener(entry) }
         }
     }

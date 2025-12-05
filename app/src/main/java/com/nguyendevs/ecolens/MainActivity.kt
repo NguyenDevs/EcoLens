@@ -1,5 +1,3 @@
-// FILE: nguyendevs/ecolens/EcoLens-312c2dae705bb34fd90d29e6d1b5003c678c945f/app/src/main/java/com/nguyendevs/ecolens/MainActivity.kt
-
 package com.nguyendevs.ecolens
 
 import android.content.Context
@@ -14,7 +12,6 @@ import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.transition.Fade
@@ -25,7 +22,6 @@ import com.google.android.material.card.MaterialCardView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.nguyendevs.ecolens.activities.CameraActivity
 import com.nguyendevs.ecolens.fragments.HistoryFragment
-import com.nguyendevs.ecolens.fragments.LanguageSelectionFragment
 import com.nguyendevs.ecolens.handlers.*
 import com.nguyendevs.ecolens.managers.*
 import com.nguyendevs.ecolens.utils.KeyboardUtils
@@ -35,44 +31,34 @@ import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
-    // --- Views ---
-    private lateinit var mainContent: ViewGroup // Container cha để apply Transition
-    private lateinit var homeContainer: View
-    private lateinit var settingsContainer: View
-    private lateinit var myGardenContainer: View
-    // Container dành riêng cho Fragment (History)
-    private lateinit var fragmentContainer: FrameLayout
-    // Container đè lên tất cả để hiển thị Detail/Full Screen
-    private lateinit var overlayContainer: FrameLayout
-
-    // Home specific views
-    private lateinit var imagePreview: ImageView
-    private lateinit var loadingOverlay: View
-    private lateinit var loadingCard: View
     private lateinit var errorCard: View
     private lateinit var errorText: TextView
-    private lateinit var speciesInfoCard: MaterialCardView
-    private lateinit var fabSpeak: FloatingActionButton
     private lateinit var fabMute: FloatingActionButton
-    private lateinit var searchBarContainer: View
-
-    // --- Fragments ---
-    private var historyFragment: HistoryFragment? = null
-
-    // --- Handlers & Managers ---
-    private lateinit var searchBarHandler: SearchBarHandler
+    private lateinit var fabSpeak: FloatingActionButton
+    private lateinit var fragmentContainer: FrameLayout
+    private lateinit var homeContainer: View
+    private lateinit var imagePreview: ImageView
     private lateinit var imageZoomHandler: ImageZoomHandler
+    private lateinit var languageManager: LanguageManager
     private lateinit var loadingAnimationHandler: LoadingAnimationHandler
+    private lateinit var loadingCard: View
+    private lateinit var loadingOverlay: View
+    private lateinit var mainContent: ViewGroup
+    private lateinit var myGardenContainer: View
+    private lateinit var overlayContainer: FrameLayout
+    private lateinit var permissionManager: PermissionManager
+    private lateinit var searchBarContainer: View
+    private lateinit var searchBarHandler: SearchBarHandler
+    private lateinit var settingsContainer: View
     private lateinit var settingsHandler: SettingsHandler
     private lateinit var speakerManager: SpeakerManager
-    private lateinit var viewModel: EcoLensViewModel
-    private lateinit var permissionManager: PermissionManager
+    private lateinit var speciesInfoCard: MaterialCardView
     private lateinit var speciesInfoHandler: SpeciesInfoHandler
-    private lateinit var languageManager: LanguageManager
+    private lateinit var viewModel: EcoLensViewModel
 
+    private var historyFragment: HistoryFragment? = null
     private var imageUri: Uri? = null
 
-    // --- Launchers ---
     private val cameraActivityLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -92,11 +78,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Gắn ngữ cảnh cơ sở với ngôn ngữ đã chọn
     override fun attachBaseContext(newBase: Context) {
         languageManager = LanguageManager(newBase)
         super.attachBaseContext(languageManager.updateBaseContext(newBase))
     }
 
+    // Khởi tạo Activity
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -109,16 +97,14 @@ class MainActivity : AppCompatActivity() {
         setupFAB()
         setupObservers()
 
-        // Mặc định hiển thị Home
         updateNavigationState(R.id.nav_home)
     }
 
+    // Khởi tạo các View
     private fun initViews() {
-        // Ánh xạ View từ layout activity_main.xml
         mainContent = findViewById(R.id.mainContent)
         homeContainer = findViewById(R.id.homeContainer)
         fragmentContainer = findViewById(R.id.historyContainer)
-        // ID này là container full màn hình (z-index cao nhất) dùng cho DetailFragment
         overlayContainer = findViewById(R.id.fragmentContainer)
 
         myGardenContainer = findViewById(R.id.myGardenContainer)
@@ -135,6 +121,7 @@ class MainActivity : AppCompatActivity() {
         speciesInfoCard = findViewById(R.id.speciesInfoCard)
     }
 
+    // Khởi tạo các Handler
     private fun initHandlers() {
         settingsHandler = SettingsHandler(this, languageManager, settingsContainer)
         settingsHandler.setup()
@@ -162,6 +149,7 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    // Khởi tạo các Manager
     private fun initManagers() {
         permissionManager = PermissionManager(this, permissionLauncher)
 
@@ -174,13 +162,13 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread { toggleSpeakerUI(false) }
         }
 
-        // Listener để ẩn hiện overlay container khi back stack thay đổi (khi mở Detail)
         supportFragmentManager.addOnBackStackChangedListener {
             val count = supportFragmentManager.backStackEntryCount
             overlayContainer.isVisible = count > 0
         }
     }
 
+    // Thiết lập ViewModel
     private fun setupViewModel() {
         viewModel = ViewModelProvider(
             this,
@@ -188,11 +176,12 @@ class MainActivity : AppCompatActivity() {
         )[EcoLensViewModel::class.java]
     }
 
+    // Xử lý ảnh đã chụp
     private fun handleCapturedImage(uri: Uri) {
         if (searchBarHandler.isExpanded()) searchBarHandler.collapseSearchBar()
 
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
-        bottomNav.selectedItemId = R.id.nav_home // Chuyển về tab Home
+        bottomNav.selectedItemId = R.id.nav_home
 
         imageUri = uri
         Glide.with(this).load(uri).centerCrop().into(imagePreview)
@@ -200,10 +189,10 @@ class MainActivity : AppCompatActivity() {
         viewModel.identifySpecies(uri, languageManager.getLanguage())
     }
 
+    // Thiết lập Bottom Navigation
     private fun setupBottomNavigation() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
         bottomNav.setOnItemSelectedListener { item ->
-            // Xóa hết backstack (ví dụ đang xem chi tiết ở tab khác)
             if (supportFragmentManager.backStackEntryCount > 0) {
                 supportFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
             }
@@ -212,31 +201,26 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // --- Logic chuyển Tab CÓ HOẠT ẢNH ---
+    // Cập nhật trạng thái điều hướng với hiệu ứng chuyển
     private fun updateNavigationState(itemId: Int) {
-        // Tạo hiệu ứng Fade 100ms
         val transition = Fade()
         transition.duration = 100
         TransitionManager.beginDelayedTransition(mainContent, transition)
 
-        // 1. Ẩn tất cả container trước
         homeContainer.visibility = View.GONE
         fragmentContainer.visibility = View.GONE
         myGardenContainer.visibility = View.GONE
         settingsContainer.visibility = View.GONE
 
-        // Ẩn UI chung của Home
         searchBarContainer.visibility = View.GONE
         fabSpeak.visibility = View.GONE
         fabMute.visibility = View.GONE
 
-        // 2. Hiện container tương ứng
         when (itemId) {
             R.id.nav_home -> {
                 homeContainer.visibility = View.VISIBLE
                 searchBarContainer.visibility = View.VISIBLE
 
-                // Khôi phục trạng thái nút nói
                 val state = viewModel.uiState.value
                 val hasInfo = state.speciesInfo != null && !state.isLoading && state.error == null
                 if (hasInfo && !speakerManager.isSpeaking()) {
@@ -252,7 +236,6 @@ class MainActivity : AppCompatActivity() {
                     historyFragment = HistoryFragment()
                     transaction.add(R.id.historyContainer, historyFragment!!, "HISTORY")
                 } else {
-                    // Fragment đã được add rồi, chỉ cần layout visibility (đã xử lý ở trên)
                 }
                 transaction.commitNowAllowingStateLoss()
             }
@@ -261,6 +244,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Thiết lập các nút FAB
     private fun setupFAB() {
         findViewById<FloatingActionButton>(R.id.fabCamera).setOnClickListener {
             if (permissionManager.hasPermissions()) {
@@ -288,16 +272,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Chuyển đổi giao diện loa
     private fun toggleSpeakerUI(isSpeaking: Boolean) {
         if (homeContainer.visibility != View.VISIBLE) return
         fabSpeak.visibility = if (!isSpeaking) View.VISIBLE else View.GONE
         fabMute.visibility = if (isSpeaking) View.VISIBLE else View.GONE
     }
 
+    // Thiết lập các Observer
     private fun setupObservers() {
         lifecycleScope.launch {
             viewModel.uiState.collect { state ->
-                // Chỉ update UI khi đang ở Home
                 if (homeContainer.visibility == View.VISIBLE) {
                     updateHomeUI(state)
                 }
@@ -305,6 +290,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Cập nhật giao diện Home
     private fun updateHomeUI(state: com.nguyendevs.ecolens.model.EcoLensUiState) {
         val isLoading = state.isLoading
         val error = state.error
@@ -330,21 +316,25 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Xử lý sự kiện chạm để ẩn bàn phím
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
         KeyboardUtils.handleTouchEvent(this, event)
         return super.dispatchTouchEvent(event)
     }
 
+    // Cập nhật hiển thị ngôn ngữ khi quay lại
     override fun onResume() {
         super.onResume()
         settingsHandler.updateLanguageDisplay()
     }
 
+    // Dọn dẹp tài nguyên
     override fun onDestroy() {
         speakerManager.shutdown()
         super.onDestroy()
     }
 
+    // Xử lý nút Back
     override fun onBackPressed() {
         if (imageZoomHandler.isFullScreenVisible()) {
             imageZoomHandler.hideFullScreen()

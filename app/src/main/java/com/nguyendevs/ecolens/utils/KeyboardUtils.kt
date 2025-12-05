@@ -8,6 +8,8 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 
 object KeyboardUtils {
+
+    // Xử lý sự kiện chạm để ẩn bàn phím khi chạm ngoài EditText
     fun handleTouchEvent(activity: Activity, event: MotionEvent): Boolean {
         if (event.action == MotionEvent.ACTION_DOWN) {
             val v = activity.currentFocus

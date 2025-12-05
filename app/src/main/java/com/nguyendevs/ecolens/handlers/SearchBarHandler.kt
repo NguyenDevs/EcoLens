@@ -23,10 +23,13 @@ class SearchBarHandler(
     private val etSearchQuery: EditText,
     private val btnSearchAction: ImageView
 ) {
-    private var isSearchBarExpanded = false
-    private val expandedWidthPx = (330 * context.resources.displayMetrics.density).toInt()
-    private val collapsedWidthPx = (50 * context.resources.displayMetrics.density).toInt()
 
+    private val collapsedWidthPx = (50 * context.resources.displayMetrics.density).toInt()
+    private val expandedWidthPx = (330 * context.resources.displayMetrics.density).toInt()
+
+    private var isSearchBarExpanded = false
+
+    // Thiết lập sự kiện cho thanh tìm kiếm
     fun setup() {
         btnSearchAction.setOnClickListener {
             if (!isSearchBarExpanded) {
@@ -46,6 +49,7 @@ class SearchBarHandler(
         }
     }
 
+    // Mở rộng thanh tìm kiếm
     fun expandSearchBar(text: String = "") {
         if (!isSearchBarExpanded) {
             val animator = ValueAnimator.ofInt(collapsedWidthPx, expandedWidthPx)
@@ -82,6 +86,7 @@ class SearchBarHandler(
         }
     }
 
+    // Thu gọn thanh tìm kiếm
     fun collapseSearchBar() {
         if (isSearchBarExpanded) {
             val animator = ValueAnimator.ofInt(expandedWidthPx, collapsedWidthPx)
@@ -102,8 +107,10 @@ class SearchBarHandler(
         }
     }
 
+    // Kiểm tra trạng thái mở rộng
     fun isExpanded() = isSearchBarExpanded
 
+    // Thực hiện tìm kiếm Google
     private fun performGoogleSearch() {
         val query = etSearchQuery.text.toString().trim()
         if (query.isNotEmpty()) {

@@ -2,7 +2,6 @@ package com.nguyendevs.ecolens.handlers
 
 import android.app.Activity
 import android.view.View
-
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -16,10 +15,12 @@ class SettingsHandler(
     private val languageManager: LanguageManager,
     private val settingsView: View
 ) {
-    private lateinit var tvCurrentLanguage: TextView
-    private lateinit var languageOption: View
-    private lateinit var aboutOption: View
 
+    private lateinit var aboutOption: View
+    private lateinit var languageOption: View
+    private lateinit var tvCurrentLanguage: TextView
+
+    // Thiết lập các tùy chọn trong Settings
     fun setup() {
         try {
             languageOption = settingsView.findViewById(R.id.languageOption)
@@ -40,6 +41,7 @@ class SettingsHandler(
         }
     }
 
+    // Cập nhật hiển thị ngôn ngữ hiện tại
     fun updateLanguageDisplay() {
         if (!::tvCurrentLanguage.isInitialized) {
             return
@@ -53,6 +55,7 @@ class SettingsHandler(
         }
     }
 
+    // Mở màn hình chọn ngôn ngữ
     private fun openLanguageSelection() {
         val fragmentContainer = (activity as AppCompatActivity)
             .findViewById<FrameLayout>(R.id.fragmentContainer)
@@ -72,6 +75,7 @@ class SettingsHandler(
             .commit()
     }
 
+    // Mở màn hình About
     private fun openAboutScreen() {
         val fragmentContainer = (activity as AppCompatActivity)
             .findViewById<FrameLayout>(R.id.fragmentContainer)

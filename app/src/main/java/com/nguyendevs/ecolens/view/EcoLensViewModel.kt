@@ -11,6 +11,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
+import com.nguyendevs.ecolens.BuildConfig
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.database.HistoryDatabase
 import com.nguyendevs.ecolens.model.EcoLensUiState
@@ -31,7 +32,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import com.nguyendevs.ecolens.BuildConfig
 import java.io.File
 import java.io.FileOutputStream
 import java.util.Locale
@@ -39,17 +39,19 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 class EcoLensViewModel(application: Application) : AndroidViewModel(application) {
+
     private val TAG = "EcoLensViewModel"
-
-    private val _uiState = MutableStateFlow(EcoLensUiState())
-    val uiState: StateFlow<EcoLensUiState> = _uiState.asStateFlow()
-
-    private val _searchTextAction = MutableLiveData<String?>()
-    val searchTextAction: LiveData<String?> get() = _searchTextAction
 
     private val apiService = RetrofitClient.iNaturalistApi
     private val historyDao = HistoryDatabase.getDatabase(application).historyDao()
 
+    private val _searchTextAction = MutableLiveData<String?>()
+    val searchTextAction: LiveData<String?> get() = _searchTextAction
+
+    private val _uiState = MutableStateFlow(EcoLensUiState())
+    val uiState: StateFlow<EcoLensUiState> = _uiState.asStateFlow()
+
+    // Lấy danh sách lịch sử theo tùy chọn sắp xếp
     fun getHistoryBySortOption(sortOption: HistorySortOption): Flow<List<HistoryEntry>> {
         return when (sortOption) {
             HistorySortOption.NEWEST_FIRST -> historyDao.getAllHistoryNewestFirst()
@@ -57,20 +59,24 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    // Xóa toàn bộ lịch sử
     fun deleteAllHistory() {
         viewModelScope.launch(Dispatchers.IO) {
             historyDao.deleteAll()
         }
     }
 
+    // Kích hoạt tìm kiếm với từ khóa
     fun triggerSearch(query: String) {
         _searchTextAction.value = query
     }
 
+    // Reset trạng thái tìm kiếm
     fun resetSearchAction() {
         _searchTextAction.value = null
     }
 
+    // Chuyển đổi trạng thái yêu thích
     fun toggleFavorite(entry: HistoryEntry) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -82,6 +88,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    // Nhận diện loài từ ảnh
     fun identifySpecies(imageUri: Uri, languageCode: String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
@@ -102,7 +109,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
                     val scaledBitmap = scaleBitmapDown(originalBitmap, 1024)
                     if (originalBitmap != scaledBitmap) {
-                        originalBitmap?.recycle() // Giải phóng ảnh gốc to
+                        originalBitmap?.recycle()
                     }
 
                     Pair(file, scaledBitmap)
@@ -157,6 +164,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    // Lấy thông tin chi tiết từ Gemini AI
     private suspend fun fetchDetailsFromGemini(
         scientificName: String,
         confidence: Double,
@@ -309,25 +317,20 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-
+    // Chuyển đổi Markdown sang HTML
     private fun cleanMarkdownToHtml(text: String?): String {
         if (text.isNullOrBlank()) return ""
 
         return text
-            // **bold** hoặc __bold__ → <b>bold</b>
             .replace(Regex("(?<!\\\\)\\*\\*(?!\\s)(.+?)(?<!\\\\)\\*\\*")) { "<b>${it.groupValues[1]}</b>" }
             .replace(Regex("(?<!\\\\)__(?!\\s)(.+?)(?<!\\\\)__")) { "<b>${it.groupValues[1]}</b>" }
-
-            // *italic* hoặc _italic_ → <i>italic</i>
             .replace(Regex("(?<!\\\\)\\*(?!\\s)(.+?)(?<!\\\\)\\*")) { "<i>${it.groupValues[1]}</i>" }
             .replace(Regex("(?<!\\\\)_(?!\\s)(.+?)(?<!\\\\)_")) { "<i>${it.groupValues[1]}</i>" }
-
-            // Xử lý trường hợp bị escape \* → bỏ escape (tùy chọn)
             .replace("\\*", "*")
             .replace("\\_", "_")
     }
 
-
+    // Loại bỏ tiền tố cấp phân loại
     private fun removeRankPrefix(text: String, prefix: String): String {
         val trimmed = text.trim()
         val regex = Regex("^(?i)$prefix\\s*[:\\-\\s]+")
@@ -336,6 +339,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }.trim()
     }
 
+    // Lưu Bitmap vào bộ nhớ trong
     private suspend fun saveBitmapToInternalStorage(context: Context, bitmap: Bitmap): String? {
         return withContext(Dispatchers.IO) {
             try {
@@ -353,6 +357,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    // Thu nhỏ Bitmap theo kích thước tối đa
     private fun scaleBitmapDown(bitmap: Bitmap?, maxDimension: Int): Bitmap? {
         if (bitmap == null) return null
         val originalWidth = bitmap.width
@@ -374,6 +379,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         return bitmap
     }
 
+    // Lưu thông tin vào lịch sử
     private fun saveToHistory(bitmap: Bitmap, speciesInfo: SpeciesInfo) {
         viewModelScope.launch {
             val path = saveBitmapToInternalStorage(getApplication(), bitmap)
@@ -389,6 +395,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    // Chuyển đổi Uri sang File với xử lý xoay ảnh
     private suspend fun uriToFile(context: Context, uri: Uri): File = withContext(Dispatchers.IO) {
         val contentResolver = context.contentResolver
         val inputStream = contentResolver.openInputStream(uri)!!

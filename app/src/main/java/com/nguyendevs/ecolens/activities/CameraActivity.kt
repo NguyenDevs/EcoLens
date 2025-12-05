@@ -24,18 +24,42 @@ import java.util.concurrent.Executors
 
 class CameraActivity : AppCompatActivity() {
 
-    private lateinit var cameraExecutor: ExecutorService
-    private var imageCapture: ImageCapture? = null
-    private var camera: Camera? = null
-    private lateinit var outputDirectory: File
-    private lateinit var viewFinder: PreviewView
-    private lateinit var closeButton: ImageView
-    private lateinit var uploadButton: ImageView
-    private lateinit var flashToggle: ImageView
-    private lateinit var rotateButton: ImageView
+    companion object {
+        private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
+        const val KEY_IMAGE_URI = "image_uri"
 
+        fun newIntent(context: Context): Intent {
+            return Intent(context, CameraActivity::class.java)
+        }
+    }
+
+    private lateinit var cameraExecutor: ExecutorService
+    private lateinit var closeButton: ImageView
+    private lateinit var flashToggle: ImageView
+    private lateinit var outputDirectory: File
+    private lateinit var rotateButton: ImageView
+    private lateinit var uploadButton: ImageView
+    private lateinit var viewFinder: PreviewView
+
+    private var camera: Camera? = null
+    private var imageCapture: ImageCapture? = null
     private var lensFacing = CameraSelector.LENS_FACING_BACK
 
+    private val selectImageFromGalleryResult = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            val resultIntent = Intent().apply {
+                data = it
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                putExtra(KEY_IMAGE_URI, it.toString())
+
+            }
+            setResult(RESULT_OK, resultIntent)
+            finish()
+            overridePendingTransition(R.anim.hold, R.anim.slide_out_bottom)
+        }
+    }
+
+    // Khởi tạo Activity
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera)
@@ -79,35 +103,32 @@ class CameraActivity : AppCompatActivity() {
             toggleFlash()
         }
     }
-    private fun openGallery() {
-        selectImageFromGalleryResult.launch("image/*")
-    }
 
-    private val selectImageFromGalleryResult = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let {
-            val resultIntent = Intent().apply {
-                data = it
-                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                putExtra(KEY_IMAGE_URI, it.toString())
-
-            }
-            setResult(RESULT_OK, resultIntent)
-            finish()
-            overridePendingTransition(R.anim.hold, R.anim.slide_out_bottom)
-        }
-    }
-
+    // Xử lý nút Back
     override fun onBackPressed() {
         super.onBackPressed()
         finish()
         overridePendingTransition(R.anim.hold, R.anim.slide_out_bottom)
     }
 
+    // Xử lý nút navigation
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true
     }
 
+    // Dọn dẹp tài nguyên
+    override fun onDestroy() {
+        super.onDestroy()
+        cameraExecutor.shutdown()
+    }
+
+    // Mở thư viện ảnh
+    private fun openGallery() {
+        selectImageFromGalleryResult.launch("image/*")
+    }
+
+    // Khởi động camera
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
@@ -155,6 +176,7 @@ class CameraActivity : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
+    // Bật/tắt đèn flash
     private fun toggleFlash() {
         val imageCapture = imageCapture ?: return
         val currentMode = imageCapture.flashMode
@@ -168,6 +190,7 @@ class CameraActivity : AppCompatActivity() {
         updateFlashIcon(newMode)
     }
 
+    // Cập nhật icon đèn flash
     private fun updateFlashIcon(mode: Int) {
         val iconRes = when (mode) {
             ImageCapture.FLASH_MODE_ON -> R.drawable.ic_lightning
@@ -176,7 +199,7 @@ class CameraActivity : AppCompatActivity() {
         flashToggle.setImageResource(iconRes)
     }
 
-
+    // Chụp ảnh
     private fun takePhoto() {
         val imageCapture = imageCapture ?: return
 
@@ -207,24 +230,11 @@ class CameraActivity : AppCompatActivity() {
             })
     }
 
+    // Lấy thư mục lưu ảnh
     private fun getOutputDirectory(): File {
         val mediaDir = externalMediaDirs.firstOrNull()?.let {
             File(it, resources.getString(R.string.app_name)).apply { mkdirs() }
         }
         return if (mediaDir != null && mediaDir.exists()) mediaDir else cacheDir
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        cameraExecutor.shutdown()
-    }
-
-    companion object {
-        private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
-        const val KEY_IMAGE_URI = "image_uri"
-
-        fun newIntent(context: Context): Intent {
-            return Intent(context, CameraActivity::class.java)
-        }
     }
 }
