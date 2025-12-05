@@ -14,73 +14,73 @@
     <TextView
             android:text="@string/label_kingdom"
             style="@style/TaxonomyLabelStyle"
-            app:layout_columnWeight="0.4" />
+            app:layout_columnWeight="0.35" />
     <TextView
             android:id="@+id/tvKingdom"
             tools:text="Plantae"
             style="@style/TaxonomyValueStyle"
-            app:layout_columnWeight="0.6" />
+            app:layout_columnWeight="0.65" />
 
     <TextView
             android:text="@string/label_phylum"
             style="@style/TaxonomyLabelStyle"
-            app:layout_columnWeight="0.4" />
+            app:layout_columnWeight="0.35" />
     <TextView
             android:id="@+id/tvPhylum"
             tools:text="Tracheophyta"
             style="@style/TaxonomyValueStyle"
-            app:layout_columnWeight="0.6" />
+            app:layout_columnWeight="0.65" />
 
     <TextView
             android:text="@string/label_class"
             style="@style/TaxonomyLabelStyle"
-            app:layout_columnWeight="0.4" />
+            app:layout_columnWeight="0.35" />
     <TextView
             android:id="@+id/tvClass"
             tools:text="Magnoliopsida"
             style="@style/TaxonomyValueStyle"
-            app:layout_columnWeight="0.6" />
+            app:layout_columnWeight="0.65" />
 
     <TextView
             android:text="@string/label_order"
             style="@style/TaxonomyLabelStyle"
-            app:layout_columnWeight="0.4" />
+            app:layout_columnWeight="0.35" />
     <TextView
             android:id="@+id/tvOrder"
             tools:text="Rosales"
             style="@style/TaxonomyValueStyle"
-            app:layout_columnWeight="0.6" />
+            app:layout_columnWeight="0.65" />
 
     <TextView
             android:text="@string/label_family"
             style="@style/TaxonomyLabelStyle"
-            app:layout_columnWeight="0.4" />
+            app:layout_columnWeight="0.35" />
     <TextView
             android:id="@+id/tvFamily"
             tools:text="Rosaceae"
             style="@style/TaxonomyValueStyle"
-            app:layout_columnWeight="0.6" />
+            app:layout_columnWeight="0.65" />
 
     <TextView
             android:text="@string/label_genus"
             style="@style/TaxonomyLabelStyle"
-            app:layout_columnWeight="0.4" />
+            app:layout_columnWeight="0.35" />
     <TextView
             android:id="@+id/tvGenus"
             tools:text="Rosa"
             style="@style/TaxonomyValueStyle"
-            app:layout_columnWeight="0.6" />
+            app:layout_columnWeight="0.65" />
 
     <TextView
             android:text="@string/label_species"
             style="@style/TaxonomyLabelStyle"
             android:layout_marginBottom="0dp"
-            app:layout_columnWeight="0.4" />
+            app:layout_columnWeight="0.35" />
     <TextView
             android:id="@+id/tvSpecies"
             tools:text="Rosa sp."
             style="@style/TaxonomyValueStyle"
             android:layout_marginBottom="0dp"
-            app:layout_columnWeight="0.6" />
+            app:layout_columnWeight="0.65" />
 
 </androidx.gridlayout.widget.GridLayout>

@@ -113,7 +113,7 @@ class HistoryDetailFragment : Fragment() {
         }
 
         if (info.family.isNotEmpty()) {
-            tagFamily.text = info.family
+            tagFamily.text = fromHtml(info.family)
             tagFamily.visibility = View.VISIBLE
         } else {
             tagFamily.visibility = View.GONE
@@ -124,10 +124,15 @@ class HistoryDetailFragment : Fragment() {
     private fun bindTaxonomy(view: View, info: SpeciesInfo) {
         val taxonomyLayout = view.findViewById<View>(R.id.layoutTaxonomy) ?: return
 
+        fun formatTaxonomyText(rawText: String): Spanned {
+            val formattedHtml = "<b>" + rawText.replace("<i>", "</b><i>").replace("</i>", "</i><b>") + "</b>"
+            return fromHtml(formattedHtml)
+        }
+
         fun setTaxonomyText(viewId: Int, value: String) {
             val textView = taxonomyLayout.findViewById<TextView>(viewId)
             if (value.isNotEmpty()) {
-                textView.text = fromHtml(value)
+                textView.text = formatTaxonomyText(value)
             } else {
                 textView.text = "N/A"
             }
