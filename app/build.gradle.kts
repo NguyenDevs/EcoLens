@@ -88,6 +88,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     implementation("androidx.activity:activity-ktx:1.9.0")
+    implementation("androidx.gridlayout:gridlayout:1.0.0")
     implementation("androidx.fragment:fragment-ktx:1.7.0")
     implementation("androidx.coordinatorlayout:coordinatorlayout:1.2.0")
 

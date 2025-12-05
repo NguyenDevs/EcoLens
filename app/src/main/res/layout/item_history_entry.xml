@@ -28,7 +28,6 @@
             android:background="@color/white"
             android:clickable="true"
             android:focusable="true"
-            android:foreground="?attr/selectableItemBackground"
             android:padding="12dp">
 
         <com.google.android.material.imageview.ShapeableImageView

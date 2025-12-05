@@ -5,48 +5,41 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
-import android.widget.ImageView
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.TextView
-import androidx.transition.AutoTransition
-import android.view.ViewGroup
-import androidx.transition.TransitionManager
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.transition.Fade
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.nguyendevs.ecolens.activities.CameraActivity
-import com.nguyendevs.ecolens.fragments.HistoryDetailFragment
 import com.nguyendevs.ecolens.fragments.HistoryFragment
-import com.nguyendevs.ecolens.handlers.SpeciesInfoHandler
-import com.nguyendevs.ecolens.managers.NavigationManager
-import com.nguyendevs.ecolens.managers.PermissionManager
-import com.nguyendevs.ecolens.managers.SpeakerManager
-import com.nguyendevs.ecolens.managers.LanguageManager
-import com.nguyendevs.ecolens.handlers.SettingsHandler
-import com.nguyendevs.ecolens.handlers.ImageZoomHandler
-import com.nguyendevs.ecolens.handlers.LoadingAnimationHandler
-import com.nguyendevs.ecolens.handlers.SearchBarHandler
+import com.nguyendevs.ecolens.fragments.LanguageSelectionFragment
+import com.nguyendevs.ecolens.handlers.*
+import com.nguyendevs.ecolens.managers.*
 import com.nguyendevs.ecolens.utils.KeyboardUtils
 import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.launch
-import androidx.core.view.isVisible
 
 class MainActivity : AppCompatActivity() {
-    // Containers
+
+    // --- Views ---
     private lateinit var homeContainer: View
-    private lateinit var historyContainer: FrameLayout
-    private lateinit var myGardenContainer: View
     private lateinit var settingsContainer: View
+    private lateinit var myGardenContainer: View
+    // Container dành riêng cho Fragment (History)
+    private lateinit var fragmentContainer: FrameLayout
+    // Container đè lên tất cả để hiển thị Detail/Full Screen
+    private lateinit var overlayContainer: FrameLayout
 
-
-    // Home screen views
+    // Home specific views
     private lateinit var imagePreview: ImageView
     private lateinit var loadingOverlay: View
     private lateinit var loadingCard: View
@@ -55,64 +48,41 @@ class MainActivity : AppCompatActivity() {
     private lateinit var speciesInfoCard: MaterialCardView
     private lateinit var fabSpeak: FloatingActionButton
     private lateinit var fabMute: FloatingActionButton
+    private lateinit var searchBarContainer: View
 
-    // Fragment
+    // --- Fragments ---
     private var historyFragment: HistoryFragment? = null
+    // Bạn có thể thêm MyGardenFragment, SettingsFragment vào đây nếu muốn chuyển hẳn sang Fragment
 
-    // Handlers
+    // --- Handlers & Managers ---
     private lateinit var searchBarHandler: SearchBarHandler
     private lateinit var imageZoomHandler: ImageZoomHandler
     private lateinit var loadingAnimationHandler: LoadingAnimationHandler
     private lateinit var settingsHandler: SettingsHandler
-
-    // Managers
     private lateinit var speakerManager: SpeakerManager
     private lateinit var viewModel: EcoLensViewModel
-    private lateinit var navigationManager: NavigationManager
     private lateinit var permissionManager: PermissionManager
     private lateinit var speciesInfoHandler: SpeciesInfoHandler
     private lateinit var languageManager: LanguageManager
 
     private var imageUri: Uri? = null
 
-    // Camera Activity Launcher
+    // --- Launchers ---
     private val cameraActivityLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == RESULT_OK) {
             val uriString = result.data?.getStringExtra(CameraActivity.KEY_IMAGE_URI)
             if (uriString != null) {
-                if (searchBarHandler.isExpanded()) {
-                    searchBarHandler.collapseSearchBar()
-                }
-
-                val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
-                if (bottomNav.selectedItemId != R.id.nav_home) {
-                    bottomNav.selectedItemId = R.id.nav_home
-                }
-
-                val capturedUri = Uri.parse(uriString)
-                imageUri = capturedUri
-
-                Glide.with(this)
-                    .load(capturedUri)
-                    .centerCrop()
-                    .into(imagePreview)
-
-                val currentLang = languageManager.getLanguage()
-                imageZoomHandler.setImageUri(capturedUri)
-
-                viewModel.identifySpecies(capturedUri, currentLang)
+                handleCapturedImage(Uri.parse(uriString))
             }
         }
     }
 
-    // Permission Launcher
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        val allGranted = permissions.values.all { it }
-        if (!allGranted) {
+        if (!permissions.values.all { it }) {
             permissionManager.showPermissionDeniedDialog()
         }
     }
@@ -134,18 +104,23 @@ class MainActivity : AppCompatActivity() {
         setupFAB()
         setupObservers()
 
-
-        navigationManager.showHomeScreen(false)
+        // Mặc định hiển thị Home
+        updateNavigationState(R.id.nav_home)
     }
 
     private fun initViews() {
-        // Containers
+        // Ánh xạ View từ layout activity_main.xml
+        // LƯU Ý: Bạn cần đảm bảo ID trong XML khớp với code này
         homeContainer = findViewById(R.id.homeContainer)
-        historyContainer = findViewById(R.id.historyContainer)
+        // History Container cũ trong XML có thể đổi tên hoặc dùng chung fragment_container
+        // Ở đây tôi dùng fragment_container cho HistoryFragment
+        fragmentContainer = findViewById(R.id.historyContainer)
+        overlayContainer = findViewById(R.id.fragmentContainer) // ID này dùng cho Detail
+
         myGardenContainer = findViewById(R.id.myGardenContainer)
         settingsContainer = findViewById(R.id.settingsContainer)
+        searchBarContainer = findViewById(R.id.searchBarContainer)
 
-        // Home screen views
         fabSpeak = findViewById(R.id.fabSpeak)
         fabMute = findViewById(R.id.fabMute)
         imagePreview = findViewById(R.id.imagePreview)
@@ -160,17 +135,15 @@ class MainActivity : AppCompatActivity() {
         settingsHandler = SettingsHandler(this, languageManager, settingsContainer)
         settingsHandler.setup()
 
-        // Search Bar Handler
         searchBarHandler = SearchBarHandler(
             this,
-            findViewById(R.id.searchBarContainer),
+            searchBarContainer as MaterialCardView,
             findViewById(R.id.textInputLayoutSearch),
             findViewById(R.id.etSearchQuery),
             findViewById(R.id.btnSearchAction)
         )
         searchBarHandler.setup()
 
-        // Image Zoom Handler
         imageZoomHandler = ImageZoomHandler(
             findViewById(R.id.btnZoomIn),
             findViewById(R.id.btnZoomOut),
@@ -179,7 +152,6 @@ class MainActivity : AppCompatActivity() {
         )
         imageZoomHandler.setup()
 
-        // Loading Animation Handler
         loadingAnimationHandler = LoadingAnimationHandler(
             loadingCard.findViewById(R.id.tvLoading),
             lifecycleScope
@@ -187,15 +159,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initManagers() {
-        navigationManager = NavigationManager(
-            findViewById(R.id.searchBarContainer),
-            fabSpeak,
-            homeContainer,
-            historyContainer,
-            myGardenContainer,
-            settingsContainer
-        )
-
         permissionManager = PermissionManager(this, permissionLauncher)
 
         speciesInfoHandler = SpeciesInfoHandler(this, speciesInfoCard) { copiedText ->
@@ -204,18 +167,13 @@ class MainActivity : AppCompatActivity() {
 
         speakerManager = SpeakerManager(this)
         speakerManager.onSpeechFinished = {
-            runOnUiThread {
-                toggleSpeakerUI(isSpeaking = false)
-            }
+            runOnUiThread { toggleSpeakerUI(false) }
         }
 
+        // Listener để ẩn hiện overlay container khi back stack thay đổi
         supportFragmentManager.addOnBackStackChangedListener {
-            val fragmentContainer = findViewById<FrameLayout>(R.id.fragmentContainer)
-            if (supportFragmentManager.backStackEntryCount > 0) {
-                fragmentContainer.visibility = View.VISIBLE
-            } else {
-                fragmentContainer.visibility = View.GONE
-            }
+            val count = supportFragmentManager.backStackEntryCount
+            overlayContainer.isVisible = count > 0
         }
     }
 
@@ -226,171 +184,149 @@ class MainActivity : AppCompatActivity() {
         )[EcoLensViewModel::class.java]
     }
 
+    private fun handleCapturedImage(uri: Uri) {
+        if (searchBarHandler.isExpanded()) searchBarHandler.collapseSearchBar()
 
-    private fun showHistoryFragment() {
-        homeContainer.visibility = View.GONE
-        myGardenContainer.visibility = View.GONE
-        settingsContainer.visibility = View.GONE
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
+        bottomNav.selectedItemId = R.id.nav_home // Chuyển về tab Home
 
-        historyContainer.visibility = View.VISIBLE
-
-        if (historyFragment == null) {
-            historyFragment = HistoryFragment()
-        }
-
-        val currentFragment = supportFragmentManager.findFragmentById(R.id.historyContainer)
-        if (currentFragment !is HistoryFragment) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.historyContainer, historyFragment!!)
-                .commit()
-        }
+        imageUri = uri
+        Glide.with(this).load(uri).centerCrop().into(imagePreview)
+        imageZoomHandler.setImageUri(uri)
+        viewModel.identifySpecies(uri, languageManager.getLanguage())
     }
 
     private fun setupBottomNavigation() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
-
         bottomNav.setOnItemSelectedListener { item ->
-            val transition = AutoTransition()
-            transition.duration = 150
-            TransitionManager.beginDelayedTransition(bottomNav, transition)
-
-            val fragmentContainer = findViewById<FrameLayout>(R.id.fragmentContainer)
-            if (fragmentContainer.visibility == View.VISIBLE) {
-                fragmentContainer.visibility = View.GONE
-                supportFragmentManager.popBackStack(
-                    null,
-                    androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE
-                )
+            // Xóa hết backstack (ví dụ đang xem chi tiết ở tab khác)
+            if (supportFragmentManager.backStackEntryCount > 0) {
+                supportFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
             }
-
-            when (item.itemId) {
-                R.id.nav_home -> {
-                    val state = viewModel.uiState.value
-                    val hasInfo = state.speciesInfo != null
-                            && !state.isLoading
-                            && state.error == null
-                    navigationManager.showHomeScreen(hasInfo)
-
-                    if (hasInfo) {
-                        toggleSpeakerUI(speakerManager.isSpeaking())
-                    } else {
-                        fabMute.visibility = View.GONE
-                    }
-                }
-                R.id.nav_history -> {
-                    navigationManager.showHistoryScreen()
-                    showHistoryFragment()
-                    fabMute.visibility = View.GONE
-                }
-                R.id.nav_my_garden -> {
-                    navigationManager.showMyGardenScreen()
-                    fabMute.visibility = View.GONE
-                }
-                R.id.nav_settings -> {
-                    navigationManager.showSettingsScreen()
-                    fabMute.visibility = View.GONE
-                }
-                else -> return@setOnItemSelectedListener false
-            }
+            updateNavigationState(item.itemId)
             true
         }
     }
 
-    private fun toggleSpeakerUI(isSpeaking: Boolean) {
-        if (isSpeaking) {
-            fabSpeak.visibility = View.GONE
-            fabMute.visibility = View.VISIBLE
-        } else {
-            fabSpeak.visibility = View.VISIBLE
-            fabMute.visibility = View.GONE
+    // --- Logic chuyển Tab không dùng TransitionManager ---
+    private fun updateNavigationState(itemId: Int) {
+        // 1. Ẩn tất cả container trước
+        homeContainer.visibility = View.GONE
+        fragmentContainer.visibility = View.GONE
+        myGardenContainer.visibility = View.GONE
+        settingsContainer.visibility = View.GONE
+
+        // Ẩn UI chung của Home
+        searchBarContainer.visibility = View.GONE
+        fabSpeak.visibility = View.GONE
+        fabMute.visibility = View.GONE
+
+        // 2. Hiện container tương ứng
+        when (itemId) {
+            R.id.nav_home -> {
+                homeContainer.visibility = View.VISIBLE
+                searchBarContainer.visibility = View.VISIBLE
+
+                // Khôi phục trạng thái nút nói
+                val state = viewModel.uiState.value
+                val hasInfo = state.speciesInfo != null && !state.isLoading && state.error == null
+                if (hasInfo && !speakerManager.isSpeaking()) {
+                    fabSpeak.visibility = View.VISIBLE
+                } else if (speakerManager.isSpeaking()) {
+                    fabMute.visibility = View.VISIBLE
+                }
+            }
+            R.id.nav_history -> {
+                fragmentContainer.visibility = View.VISIBLE
+                val transaction = supportFragmentManager.beginTransaction()
+                if (historyFragment == null) {
+                    historyFragment = HistoryFragment()
+                    transaction.add(R.id.historyContainer, historyFragment!!, "HISTORY")
+                } else {
+                    // Nếu fragment đã ẩn thì hiện lên (nếu dùng cơ chế hide/show cho fragment)
+                    // Ở đây layout container visibility đã xử lý việc ẩn hiện,
+                    // nhưng đảm bảo fragment attach đúng
+                }
+                transaction.commitNowAllowingStateLoss()
+                // commitNow để đảm bảo UI cập nhật ngay lập tức, tránh khựng
+            }
+            R.id.nav_my_garden -> myGardenContainer.visibility = View.VISIBLE
+            R.id.nav_settings -> settingsContainer.visibility = View.VISIBLE
         }
     }
 
     private fun setupFAB() {
         findViewById<FloatingActionButton>(R.id.fabCamera).setOnClickListener {
-            checkPermissionsAndOpenCamera()
+            if (permissionManager.hasPermissions()) {
+                cameraActivityLauncher.launch(CameraActivity.newIntent(this))
+                overridePendingTransition(R.anim.slide_in_bottom, R.anim.hold)
+            } else {
+                permissionManager.requestPermissions()
+            }
         }
+
         fabSpeak.setOnClickListener {
             viewModel.uiState.value.speciesInfo?.let { info ->
-                val textToRead = TextToSpeechGenerator.generateSpeechText(this, info)
-                if (textToRead.isNotEmpty()) {
+                val text = TextToSpeechGenerator.generateSpeechText(this, info)
+                if (text.isNotEmpty()) {
                     speakerManager.setLanguage(languageManager.getLanguage())
-                    speakerManager.speak(textToRead)
-                    toggleSpeakerUI(isSpeaking = true)
+                    speakerManager.speak(text)
+                    toggleSpeakerUI(true)
                 }
             }
         }
+
         fabMute.setOnClickListener {
             speakerManager.pause()
-            toggleSpeakerUI(isSpeaking = false)
+            toggleSpeakerUI(false)
+        }
+    }
+
+    private fun toggleSpeakerUI(isSpeaking: Boolean) {
+        if (homeContainer.visibility != View.VISIBLE) return
+        fabSpeak.visibility = if (!isSpeaking) View.VISIBLE else View.GONE
+        fabMute.visibility = if (isSpeaking) View.VISIBLE else View.GONE
+    }
+
+    private fun setupObservers() {
+        lifecycleScope.launch {
+            viewModel.uiState.collect { state ->
+                // Chỉ update UI khi đang ở Home
+                if (homeContainer.visibility == View.VISIBLE) {
+                    updateHomeUI(state)
+                }
+            }
+        }
+    }
+
+    private fun updateHomeUI(state: com.nguyendevs.ecolens.model.EcoLensUiState) {
+        val isLoading = state.isLoading
+        val error = state.error
+
+        loadingOverlay.isVisible = isLoading
+        loadingCard.isVisible = isLoading
+
+        if (isLoading) loadingAnimationHandler.start() else loadingAnimationHandler.stop()
+
+        if (isLoading) {
+            speciesInfoCard.isVisible = false
+            errorCard.isVisible = false
+            fabSpeak.isVisible = false
+        } else if (error != null) {
+            errorText.text = error
+            errorCard.isVisible = true
+            speciesInfoCard.isVisible = false
+            fabSpeak.isVisible = false
+        } else if (state.speciesInfo != null) {
+            speciesInfoHandler.displaySpeciesInfo(state.speciesInfo, imageUri)
+            speciesInfoCard.isVisible = true
+            if (fabMute.visibility != View.VISIBLE) fabSpeak.isVisible = true
         }
     }
 
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
         KeyboardUtils.handleTouchEvent(this, event)
         return super.dispatchTouchEvent(event)
-    }
-
-    private fun checkPermissionsAndOpenCamera() {
-        if (permissionManager.hasPermissions()) {
-            openCameraActivity()
-        } else {
-            permissionManager.requestPermissions()
-        }
-    }
-
-    private fun openCameraActivity() {
-        cameraActivityLauncher.launch(CameraActivity.newIntent(this))
-        overridePendingTransition(R.anim.slide_in_bottom, R.anim.hold)
-    }
-
-    private fun setupObservers() {
-        lifecycleScope.launch {
-            viewModel.uiState.collect { state ->
-                if (homeContainer.visibility == View.VISIBLE) {
-                    updateUIState(state.isLoading, state.error)
-
-                    state.speciesInfo?.let { info ->
-                        speciesInfoHandler.displaySpeciesInfo(info, imageUri)
-                        speciesInfoCard.visibility = View.VISIBLE
-                    }
-                }
-            }
-        }
-    }
-
-    private fun updateUIState(isLoading: Boolean, error: String?) {
-        loadingOverlay.visibility = if (isLoading) View.VISIBLE else View.GONE
-        loadingCard.visibility = if (isLoading) View.VISIBLE else View.GONE
-
-        if (isLoading) {
-            loadingAnimationHandler.start()
-        } else {
-            loadingAnimationHandler.stop()
-        }
-
-        if (isLoading) {
-            speciesInfoCard.visibility = View.GONE
-            errorCard.visibility = View.GONE
-        }
-
-        if (viewModel.uiState.value.speciesInfo != null && !isLoading && error == null) {
-            if (fabMute.visibility != View.VISIBLE) {
-                fabSpeak.visibility = View.VISIBLE
-            }
-        } else {
-            fabSpeak.visibility = View.GONE
-            fabMute.visibility = View.GONE
-            speakerManager.pause()
-        }
-
-        if (error != null) {
-            errorText.text = error
-            errorCard.visibility = View.VISIBLE
-            speciesInfoCard.visibility = View.GONE
-        } else {
-            errorCard.visibility = View.GONE
-        }
     }
 
     override fun onResume() {
@@ -404,20 +340,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        val fragmentContainer = findViewById<FrameLayout>(R.id.fragmentContainer)
-        if (fragmentContainer.isVisible) {
-            if (supportFragmentManager.backStackEntryCount > 0) {
-                supportFragmentManager.popBackStack()
-
-                if (supportFragmentManager.backStackEntryCount == 1) {
-                    fragmentContainer.visibility = View.GONE
-                }
-                return
-            }
-        }
-
         if (imageZoomHandler.isFullScreenVisible()) {
             imageZoomHandler.hideFullScreen()
+            return
+        }
+
+        if (supportFragmentManager.backStackEntryCount > 0) {
+            supportFragmentManager.popBackStack()
+            return
+        }
+
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
+        if (bottomNav.selectedItemId != R.id.nav_home) {
+            bottomNav.selectedItemId = R.id.nav_home
         } else {
             super.onBackPressed()
         }
