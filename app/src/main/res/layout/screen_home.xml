@@ -92,13 +92,13 @@
                         android:layout_height="48dp"
                         android:layout_gravity="bottom|end"
                         android:layout_margin="16dp"
-                        android:background="@drawable/bg_white_rounded"
+                        android:background="@drawable/bg_black_rounded"
                         android:contentDescription="@string/zoom_in"
                         android:elevation="2dp"
                         android:padding="12dp"
                         android:src="@drawable/ic_zoomin"
                         android:visibility="gone"
-                        app:tint="@color/text_secondary" />
+                        app:tint="@color/white" />
 
             </FrameLayout>
 
