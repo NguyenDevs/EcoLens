@@ -1,11 +1,19 @@
 package com.nguyendevs.ecolens.activities
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.util.Log
+import android.view.ScaleGestureDetector
+import android.view.MotionEvent
 import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,6 +29,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 class CameraActivity : AppCompatActivity() {
 
@@ -40,10 +49,14 @@ class CameraActivity : AppCompatActivity() {
     private lateinit var rotateButton: ImageView
     private lateinit var uploadButton: ImageView
     private lateinit var viewFinder: PreviewView
+    private lateinit var captureButton: FloatingActionButton
+    private lateinit var focusIndicator: ImageView
 
     private var camera: Camera? = null
     private var imageCapture: ImageCapture? = null
     private var lensFacing = CameraSelector.LENS_FACING_BACK
+    private var cameraControl: CameraControl? = null
+    private var cameraInfo: CameraInfo? = null
 
     private val selectImageFromGalleryResult = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
@@ -59,25 +72,27 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
-    // Khởi tạo Activity
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera)
 
         viewFinder = findViewById(R.id.viewFinder)
         closeButton = findViewById(R.id.closeButton)
+        captureButton = findViewById(R.id.captureButton)
+        focusIndicator = findViewById(R.id.focusIndicator)
         cameraExecutor = Executors.newSingleThreadExecutor()
         outputDirectory = getOutputDirectory()
         uploadButton = findViewById(R.id.uploadButton)
         flashToggle = findViewById(R.id.flashToggle)
         rotateButton = findViewById(R.id.refreshButton)
 
-        cameraExecutor = Executors.newSingleThreadExecutor()
-        outputDirectory = getOutputDirectory()
-
         startCamera()
+        setupZoomAndFocus()
 
-        findViewById<FloatingActionButton>(R.id.captureButton).setOnClickListener {
+        captureButton.setOnClickListener {
+            performHapticFeedback()
+            animateCaptureButton()
             takePhoto()
         }
 
@@ -104,31 +119,26 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
-    // Xử lý nút Back
     override fun onBackPressed() {
         super.onBackPressed()
         finish()
         overridePendingTransition(R.anim.hold, R.anim.slide_out_bottom)
     }
 
-    // Xử lý nút navigation
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true
     }
 
-    // Dọn dẹp tài nguyên
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()
     }
 
-    // Mở thư viện ảnh
     private fun openGallery() {
         selectImageFromGalleryResult.launch("image/*")
     }
 
-    // Khởi động camera
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
@@ -155,6 +165,8 @@ class CameraActivity : AppCompatActivity() {
                 camera = cameraProvider.bindToLifecycle(
                     this, cameraSelector, preview, imageCapture
                 )
+                cameraControl = camera?.cameraControl
+                cameraInfo = camera?.cameraInfo
 
                 if (camera?.cameraInfo?.hasFlashUnit() == true) {
                     flashToggle.visibility = View.VISIBLE
@@ -176,7 +188,104 @@ class CameraActivity : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
-    // Bật/tắt đèn flash
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setupZoomAndFocus() {
+        val listener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            override fun onScale(detector: ScaleGestureDetector): Boolean {
+                val currentZoomRatio = cameraInfo?.zoomState?.value?.zoomRatio ?: 1f
+                val delta = detector.scaleFactor
+                cameraControl?.setZoomRatio(currentZoomRatio * delta)
+                return true
+            }
+        }
+
+        val scaleGestureDetector = ScaleGestureDetector(this, listener)
+
+        viewFinder.setOnTouchListener { _, event ->
+            scaleGestureDetector.onTouchEvent(event)
+            if (event.action == MotionEvent.ACTION_UP) {
+                // Logic Focus CameraX
+                val factory = viewFinder.meteringPointFactory
+                val point = factory.createPoint(event.x, event.y)
+                val action = FocusMeteringAction.Builder(point, FocusMeteringAction.FLAG_AF)
+                    .setAutoCancelDuration(3, TimeUnit.SECONDS)
+                    .build()
+                cameraControl?.startFocusAndMetering(action)
+
+                // Hiển thị vòng tròn/ô vuông focus
+                showFocusIndicator(event.x, event.y)
+            }
+            true
+        }
+    }
+
+    private fun showFocusIndicator(x: Float, y: Float) {
+        // FIX: Sử dụng animate().cancel() thay vì cancelAnimation()
+        focusIndicator.animate().cancel()
+
+        // Điều chỉnh vị trí để tâm ô vuông trùng với điểm chạm
+        focusIndicator.x = x - (focusIndicator.width / 2)
+        focusIndicator.y = y - (focusIndicator.height / 2) + viewFinder.top
+
+        focusIndicator.visibility = View.VISIBLE
+        focusIndicator.alpha = 1f
+        focusIndicator.scaleX = 1.3f
+        focusIndicator.scaleY = 1.3f
+
+        focusIndicator.animate()
+            .scaleX(1f)
+            .scaleY(1f)
+            .setDuration(300)
+            .setInterpolator(AccelerateDecelerateInterpolator())
+            .withEndAction {
+                focusIndicator.animate()
+                    .alpha(0f)
+                    .setStartDelay(500)
+                    .setDuration(300)
+                    .withEndAction {
+                        focusIndicator.visibility = View.INVISIBLE
+                    }
+                    .start()
+            }
+            .start()
+    }
+
+    private fun performHapticFeedback() {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                val vibrator = vibratorManager.defaultVibrator
+                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                @Suppress("DEPRECATION")
+                val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+                } else {
+                    @Suppress("DEPRECATION")
+                    vibrator.vibrate(50)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("CameraActivity", "Vibration failed: ${e.message}")
+        }
+    }
+
+    private fun animateCaptureButton() {
+        captureButton.animate()
+            .scaleX(0.85f)
+            .scaleY(0.85f)
+            .setDuration(100)
+            .withEndAction {
+                captureButton.animate()
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .setDuration(100)
+                    .start()
+            }
+            .start()
+    }
+
     private fun toggleFlash() {
         val imageCapture = imageCapture ?: return
         val currentMode = imageCapture.flashMode
@@ -190,7 +299,6 @@ class CameraActivity : AppCompatActivity() {
         updateFlashIcon(newMode)
     }
 
-    // Cập nhật icon đèn flash
     private fun updateFlashIcon(mode: Int) {
         val iconRes = when (mode) {
             ImageCapture.FLASH_MODE_ON -> R.drawable.ic_lightning
@@ -199,7 +307,6 @@ class CameraActivity : AppCompatActivity() {
         flashToggle.setImageResource(iconRes)
     }
 
-    // Chụp ảnh
     private fun takePhoto() {
         val imageCapture = imageCapture ?: return
 
@@ -230,7 +337,6 @@ class CameraActivity : AppCompatActivity() {
             })
     }
 
-    // Lấy thư mục lưu ảnh
     private fun getOutputDirectory(): File {
         val mediaDir = externalMediaDirs.firstOrNull()?.let {
             File(it, resources.getString(R.string.app_name)).apply { mkdirs() }

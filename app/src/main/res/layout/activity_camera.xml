@@ -8,7 +8,6 @@
         android:background="@android:color/black"
         tools:context=".activities.CameraActivity">
 
-    <!-- Camera Preview -->
     <androidx.camera.view.PreviewView
             android:id="@+id/viewFinder"
             android:layout_width="match_parent"
@@ -18,7 +17,16 @@
             app:layout_constraintEnd_toEndOf="parent" app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintBottom_toTopOf="@+id/captureButton" android:layout_marginTop="70dp"/>
 
-    <!-- Flash Toggle -->
+    <ImageView
+            android:id="@+id/focusIndicator"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:src="@drawable/bg_focus_ring"
+            android:visibility="invisible"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:ignore="ContentDescription" />
+
     <ImageView
             android:id="@+id/flashToggle"
             android:layout_width="40dp"
@@ -31,7 +39,6 @@
             app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent"
             android:layout_marginLeft="20dp"/>
 
-    <!-- Close Button-->
     <ImageView
             android:id="@+id/closeButton"
             android:layout_width="50dp"
@@ -45,7 +52,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Viewfinder Frame Overlay -->
     <FrameLayout
             android:id="@+id/viewfinderFrame"
             android:layout_width="350dp"
@@ -55,11 +61,8 @@
             app:layout_constraintEnd_toEndOf="@+id/viewFinder"
             app:layout_constraintDimensionRatio="3:3" app:layout_constraintBottom_toBottomOf="@+id/viewFinder"
             android:foreground="@drawable/camera_corner">
-
-
     </FrameLayout>
 
-    <!-- Upload Button -->
     <ImageView
             android:id="@+id/uploadButton"
             android:layout_width="56dp"
@@ -73,8 +76,6 @@
             app:layout_constraintEnd_toStartOf="@id/captureButton"
             app:layout_constraintStart_toStartOf="parent"/>
 
-    <!-- Capture Button -->
-
     <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/captureButton"
             android:layout_width="55dp"
@@ -86,14 +87,12 @@
             app:tint="@android:color/white"
             app:backgroundTint="@color/green_primary"
             android:contentDescription="@string/capture"
-
             app:borderWidth="0dp"
             app:elevation="1dp"
             android:layout_marginBottom="40dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
-
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/captureBorder"
@@ -113,7 +112,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Refresh/Rotate Button -->
     <ImageView
             android:id="@+id/refreshButton"
             android:layout_width="56dp"

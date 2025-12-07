@@ -117,12 +117,6 @@
                                 android:textColor="@color/text_secondary"
                                 android:layout_marginTop="2dp"/>
                     </LinearLayout>
-
-                    <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_arrow_right"
-                            app:tint="#C0C0C0"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -201,12 +195,6 @@
                                     android:visibility="gone"/>
                         </LinearLayout>
                     </LinearLayout>
-
-                    <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_arrow_right"
-                            app:tint="#C0C0C0"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

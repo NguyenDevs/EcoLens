@@ -14,7 +14,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.datepicker.MaterialDatePicker
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.adapters.HistoryAdapter
@@ -47,16 +46,15 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
     private var filterStartDate: Long? = null
     private var isOptionsExpanded = false
 
-    // Sau khi view được tạo, khởi tạo và thiết lập các thành phần
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initViews(view)
         setupAdapter()
         observeHistory()
         setupClickListeners()
+        updateSortUI()
     }
 
-    // Khởi tạo các View
     private fun initViews(view: View) {
         rvHistory = view.findViewById(R.id.rvHistory)
         emptyStateContainer = view.findViewById(R.id.emptyStateContainer)
@@ -70,7 +68,6 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
         ivExpandIcon = view.findViewById(R.id.ivExpandIcon)
     }
 
-    // Thiết lập Adapter cho RecyclerView
     private fun setupAdapter() {
         adapter = HistoryAdapter(
             historyList = emptyList(),
@@ -84,7 +81,6 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
         rvHistory.adapter = adapter
     }
 
-    // Chuyển đến màn hình chi tiết
     private fun navigateToDetail(entry: HistoryEntry) {
         val jsonEntry = Gson().toJson(entry)
         val fragment = HistoryDetailFragment().apply {
@@ -103,7 +99,6 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
             .commit()
     }
 
-    // Quan sát dữ liệu lịch sử từ ViewModel
     private fun observeHistory() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.getHistoryBySortOption(currentSortOption).collect { list ->
@@ -125,20 +120,39 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
         }
     }
 
-    // Thiết lập các sự kiện click
     private fun setupClickListeners() {
         optionsHeader.setOnClickListener { toggleOptionsExpansion() }
-        btnSort.setOnClickListener { showSortDialog() }
+
+        btnSort.setOnClickListener {
+            toggleSortOption()
+        }
+
         btnFilterByDate.setOnClickListener { showDateRangePickerDialog() }
         btnClearFilter.setOnClickListener { clearDateFilter() }
     }
 
-    // Chuyển đổi trạng thái mở rộng/thu gọn options
+    private fun toggleSortOption() {
+        currentSortOption = if (currentSortOption == HistorySortOption.NEWEST_FIRST) {
+            HistorySortOption.OLDEST_FIRST
+        } else {
+            HistorySortOption.NEWEST_FIRST
+        }
+        updateSortUI()
+        observeHistory()
+    }
+
+    private fun updateSortUI() {
+        if (currentSortOption == HistorySortOption.NEWEST_FIRST) {
+            tvCurrentSort.text = getString(R.string.sort_newest_first)
+        } else {
+            tvCurrentSort.text = getString(R.string.sort_oldest_first)
+        }
+    }
+
     private fun toggleOptionsExpansion() {
         if (isOptionsExpanded) collapseOptions() else expandOptions()
     }
 
-    // Mở rộng phần options
     private fun expandOptions() {
         isOptionsExpanded = true
         ivExpandIcon.animate().rotation(180f).setDuration(300).start()
@@ -159,7 +173,6 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
         animator.start()
     }
 
-    // Thu gọn phần options
     private fun collapseOptions() {
         isOptionsExpanded = false
         ivExpandIcon.animate().rotation(0f).setDuration(300).start()
@@ -180,23 +193,6 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
         animator.start()
     }
 
-    // Hiển thị dialog chọn cách sắp xếp
-    private fun showSortDialog() {
-        val options = arrayOf(getString(R.string.sort_newest_first), getString(R.string.sort_oldest_first))
-        val currentSelection = if (currentSortOption == HistorySortOption.NEWEST_FIRST) 0 else 1
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(getString(R.string.sort_by))
-            .setSingleChoiceItems(options, currentSelection) { dialog, which ->
-                currentSortOption = if (which == 0) HistorySortOption.NEWEST_FIRST else HistorySortOption.OLDEST_FIRST
-                tvCurrentSort.text = options[which]
-                observeHistory()
-                dialog.dismiss()
-            }
-            .setNegativeButton(getString(R.string.cancel), null)
-            .show()
-    }
-
-    // Hiển thị dialog chọn khoảng thời gian
     private fun showDateRangePickerDialog() {
         val builder = MaterialDatePicker.Builder.dateRangePicker()
             .setTitleText(R.string.select_date)
@@ -206,7 +202,6 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
         picker.show(parentFragmentManager, "DATE_RANGE_PICKER")
         picker.addOnPositiveButtonClickListener { selection ->
             filterStartDate = selection.first
-            // FIX: Cộng thêm gần 24h để bao gồm hết ngày kết thúc (23:59:59)
             filterEndDate = selection.second + 86400000L - 1L
 
             tvFilterSubtitle.text = "${dateFormatter.format(selection.first)} - ${dateFormatter.format(selection.second)}"
@@ -216,7 +211,6 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
         }
     }
 
-    // Xóa bộ lọc ngày tháng
     private fun clearDateFilter() {
         filterStartDate = null
         filterEndDate = null
