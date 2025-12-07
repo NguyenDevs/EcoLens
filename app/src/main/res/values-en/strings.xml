@@ -5,6 +5,10 @@
     <string name="app_subtitle">IDENTIFY SPECIES VIA IMAGES</string>
     <string name="app_subtitle_home">IDENTIFY SPECIES VIA IMAGES</string>
 
+    <string name="banner_title">Identify</string>
+    <string name="banner_subtitle">Flora and Fauna</string>
+    <string name="banner_action">Tap to capture</string>
+
     <!-- Navigation -->
     <string name="nav_home">Home</string>
     <string name="nav_history">History</string>

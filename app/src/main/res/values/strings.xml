@@ -1,17 +1,18 @@
 <resources>
-    <!-- App Info -->
     <string name="app_name">EcoLens</string>
     <string name="app_title">EcoLens</string>
     <string name="app_subtitle">NHẬN DIỆN ĐỘNG THỰC VẬT QUA HÌNH ẢNH</string>
-    <string name="app_subtitle_home">NHẬN DIỆN ĐỘNG THỰC VẬT QUA HÌNH ẢNH</string>
+    <string name="app_subtitle_home">Khám phá thế giới tự nhiên quanh bạn</string>
 
-    <!-- Navigation -->
+    <string name="banner_title">Nhận diện</string>
+    <string name="banner_subtitle">Động - Thực vật</string>
+    <string name="banner_action">Chạm để chụp</string>
+
     <string name="nav_home">Trang chủ</string>
     <string name="nav_history">Lịch sử</string>
     <string name="nav_my_garden">Yêu thích</string>
     <string name="nav_settings">Cài đặt</string>
 
-    <!-- Common Actions -->
     <string name="ok">OK</string>
     <string name="camera">Máy ảnh</string>
     <string name="search">Tìm kiếm</string>
@@ -34,7 +35,6 @@
     <string name="history_image">Ảnh lịch sử</string>
     <string name="search_hint">Tìm kiếm trên Google...</string>
 
-    <!-- Labels -->
     <string name="label_common_name">Tên thường gọi</string>
     <string name="label_scientific_name">Tên khoa học</string>
     <string name="label_confidence_template">Độ tin cậy: %s</string>
@@ -46,59 +46,47 @@
     <string name="label_genus">Chi:</string>
     <string name="label_species">Loài:</string>
 
-    <!-- TTS (Text-to-Speech) -->
     <string name="tts_scientific_name">Tên khoa học</string>
     <string name="tts_taxonomy">Phân loại khoa học</string>
 
-    <!-- Unknown Values -->
     <string name="unknown_common_name">[Không rõ tên thường gọi]</string>
     <string name="unknown_scientific_name">[Không rõ tên khoa học]</string>
 
-    <!-- Time & Date -->
     <string name="time_prefix">Thời gian: </string>
 
-    <!-- Permissions -->
     <string name="permission_title">Cần quyền truy cập</string>
     <string name="permission_message">Ứng dụng cần quyền camera và thư viện ảnh để hoạt động.</string>
 
-    <!-- Image Related -->
     <string name="image_preview">Xem trước ảnh</string>
     <string name="no_image">Không có ảnh</string>
     <string name="no_image_selected">Chưa chọn ảnh</string>
 
-    <!-- Analysis & Loading -->
     <string name="analyzing">Đang phân tích hình ảnh…</string>
     <string name="analyzing_text">Đang phân tích hình ảnh</string>
     <string name="loading_analyzing">Đang phân tích hình ảnh...</string>
 
-    <!-- Confidence -->
     <string name="confidence">Độ tin cậy</string>
     <string name="confidence_format">Độ tin cậy: %s%%</string>
 
-    <!-- Taxonomy Section -->
     <string name="taxonomy_title">🔬 Phân loại khoa học</string>
 
-    <!-- Information Sections -->
     <string name="section_description">📖 Mô tả</string>
     <string name="section_characteristics">✨ Đặc điểm</string>
     <string name="section_distribution">🌍 Phân bố</string>
     <string name="section_habitat">🏞️ Môi trường sống</string>
     <string name="section_conservation">🛡️ Tình trạng bảo tồn</string>
 
-    <!-- History Screen -->
     <string name="history">Lịch sử</string>
     <string name="history_title_label">Lịch sử</string>
     <string name="history_placeholder">Lịch sử</string>
     <string name="history_subtitle">Xem lịch sử các loài đã nhận diện</string>
 
-    <!-- My Garden Screen -->
     <string name="my_garden">Yêu thích</string>
     <string name="my_garden_title">Mục yêu thích</string>
     <string name="my_garden_desc">Tính năng đang trong quá trình phát triển</string>
     <string name="garden_placeholder">Tính năng đang trong quá trình phát triển</string>
     <string name="garden_subtitle">Tính năng đang trong quá trình phát triển</string>
 
-    <!-- Settings Screen -->
     <string name="settings">Cài đặt</string>
     <string name="settings_title">Cài đặt</string>
     <string name="settings_placeholder">Cài đặt</string>
@@ -108,7 +96,6 @@
     <string name="lang_vietnamese">Tiếng Việt</string>
     <string name="lang_english">English</string>
 
-    <!-- Share Feature -->
     <string name="share_title">🌿 THÔNG TIN LOÀI</string>
     <string name="share_taxonomy_title">🔬 PHÂN LOẠI KHOA HỌC</string>
     <string name="share_desc_title">📖 MÔ TẢ</string>
@@ -120,7 +107,6 @@
     <string name="share_subject">Thông tin về %s</string>
     <string name="share_chooser_title">Chia sẻ thông tin loài qua</string>
 
-    <!-- Errors -->
     <string name="error">Lỗi</string>
     <string name="error_occurred">Đã xảy ra lỗi</string>
     <string name="error_default">Đã xảy ra lỗi</string>
@@ -131,16 +117,13 @@
     <string name="error_capture">Lỗi chụp ảnh: %s</string>
     <string name="error_browser">Không tìm thấy trình duyệt web</string>
 
-    <!-- Feature Status -->
     <string name="feature_developing">Chức năng đang được phát triển</string>
 
-    <!-- Sort options -->
     <string name="sort_by">Sắp xếp theo</string>
     <string name="sort_newest_first">Ngày mới nhất</string>
     <string name="sort_oldest_first">Ngày cũ nhất</string>
     <string name="sort">Sắp xếp</string>
 
-    <!-- Date filter -->
     <string name="filter_by_date">Lọc theo ngày</string>
     <string name="select_start_date">Chọn ngày bắt đầu</string>
     <string name="select_end_date">Chọn ngày kết thúc</string>
@@ -148,14 +131,11 @@
     <string name="clear_filter">Xóa bộ lọc</string>
     <string name="end_date_before_start_date_error">Ngày kết thúc phải sau ngày bắt đầu</string>
 
-    <!-- Icons -->
     <string name="ic_calendar">ic_calendar</string>
     <string name="ic_sort">ic_sort</string>
 
-    <!-- General -->
     <string name="cancel">Hủy</string>
 
-    <!-- Colors (for references) -->
     <string name="text_secondary" translatable="false">text_secondary</string>
     <string name="background_color" translatable="false">background_color</string>
 
@@ -167,6 +147,5 @@
     <string name="about_label">Thông tin</string>
     <string name="about_app_title">Về chúng tôi</string>
     <string name="about_app_desc">Ứng dụng EcoLens, nhận diện động thực vật qua hình ảnh được phát triển bởi @NguyenDevs</string>
-
 
 </resources>

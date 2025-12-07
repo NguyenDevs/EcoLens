@@ -1,11 +1,13 @@
 package com.nguyendevs.ecolens
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
@@ -38,6 +40,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fragmentContainer: FrameLayout
     private lateinit var homeContainer: View
     private lateinit var imagePreview: ImageView
+    private lateinit var imagePreviewCard: MaterialCardView
+    private lateinit var initialStateLayout: View
     private lateinit var imageZoomHandler: ImageZoomHandler
     private lateinit var languageManager: LanguageManager
     private lateinit var loadingAnimationHandler: LoadingAnimationHandler
@@ -58,6 +62,7 @@ class MainActivity : AppCompatActivity() {
 
     private var historyFragment: HistoryFragment? = null
     private var imageUri: Uri? = null
+    private var isExpandedState = false
 
     private val cameraActivityLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -78,13 +83,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Gắn ngữ cảnh cơ sở với ngôn ngữ đã chọn
     override fun attachBaseContext(newBase: Context) {
         languageManager = LanguageManager(newBase)
         super.attachBaseContext(languageManager.updateBaseContext(newBase))
     }
 
-    // Khởi tạo Activity
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -100,7 +103,6 @@ class MainActivity : AppCompatActivity() {
         updateNavigationState(R.id.nav_home)
     }
 
-    // Khởi tạo các View
     private fun initViews() {
         mainContent = findViewById(R.id.mainContent)
         homeContainer = findViewById(R.id.homeContainer)
@@ -113,7 +115,11 @@ class MainActivity : AppCompatActivity() {
 
         fabSpeak = findViewById(R.id.fabSpeak)
         fabMute = findViewById(R.id.fabMute)
+
+        imagePreviewCard = findViewById(R.id.imagePreviewCard)
         imagePreview = findViewById(R.id.imagePreview)
+        initialStateLayout = findViewById(R.id.initialStateLayout)
+
         loadingOverlay = findViewById(R.id.loadingOverlay)
         loadingCard = findViewById(R.id.loadingCard)
         errorCard = findViewById(R.id.errorCard)
@@ -121,7 +127,6 @@ class MainActivity : AppCompatActivity() {
         speciesInfoCard = findViewById(R.id.speciesInfoCard)
     }
 
-    // Khởi tạo các Handler
     private fun initHandlers() {
         settingsHandler = SettingsHandler(this, languageManager, settingsContainer)
         settingsHandler.setup()
@@ -149,7 +154,6 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    // Khởi tạo các Manager
     private fun initManagers() {
         permissionManager = PermissionManager(this, permissionLauncher)
 
@@ -162,13 +166,11 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread { toggleSpeakerUI(false) }
         }
 
-        // FIX: Xử lý visibility của overlayContainer để không cắt ngang animation thoát
         supportFragmentManager.addOnBackStackChangedListener {
             val count = supportFragmentManager.backStackEntryCount
             if (count > 0) {
                 overlayContainer.visibility = View.VISIBLE
             } else {
-                // Trì hoãn việc ẩn container để animation slide_out (300ms) có thể chạy xong
                 overlayContainer.postDelayed({
                     if (supportFragmentManager.backStackEntryCount == 0) {
                         overlayContainer.visibility = View.GONE
@@ -178,7 +180,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Thiết lập ViewModel
     private fun setupViewModel() {
         viewModel = ViewModelProvider(
             this,
@@ -186,20 +187,66 @@ class MainActivity : AppCompatActivity() {
         )[EcoLensViewModel::class.java]
     }
 
-    // Xử lý ảnh đã chụp
     private fun handleCapturedImage(uri: Uri) {
+        if (speakerManager.isSpeaking()) {
+            speakerManager.pause()
+            toggleSpeakerUI(false)
+        }
+
         if (searchBarHandler.isExpanded()) searchBarHandler.collapseSearchBar()
 
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
         bottomNav.selectedItemId = R.id.nav_home
 
         imageUri = uri
-        Glide.with(this).load(uri).centerCrop().into(imagePreview)
-        imageZoomHandler.setImageUri(uri)
-        viewModel.identifySpecies(uri, languageManager.getLanguage())
+
+        animateCardExpansion {
+            Glide.with(this).load(uri).centerCrop().into(imagePreview)
+            imageZoomHandler.setImageUri(uri)
+            viewModel.identifySpecies(uri, languageManager.getLanguage())
+        }
     }
 
-    // Thiết lập Bottom Navigation
+    private fun animateCardExpansion(onAnimationComplete: () -> Unit) {
+        if (isExpandedState) {
+            onAnimationComplete()
+            return
+        }
+
+        val startHeight = imagePreviewCard.height
+        val targetHeight = (450 * resources.displayMetrics.density).toInt()
+
+        initialStateLayout.animate()
+            .alpha(0f)
+            .setDuration(200)
+            .withEndAction {
+                initialStateLayout.visibility = View.GONE
+
+                val heightAnimator = ValueAnimator.ofInt(startHeight, targetHeight)
+                heightAnimator.duration = 400
+                heightAnimator.interpolator = AccelerateDecelerateInterpolator()
+                heightAnimator.addUpdateListener { animator ->
+                    val params = imagePreviewCard.layoutParams
+                    params.height = animator.animatedValue as Int
+                    imagePreviewCard.layoutParams = params
+                }
+
+                heightAnimator.addListener(object : android.animation.AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: android.animation.Animator) {
+                        isExpandedState = true
+                        imagePreview.visibility = View.VISIBLE
+                        imagePreview.animate()
+                            .alpha(1f)
+                            .setDuration(300)
+                            .start()
+                        onAnimationComplete()
+                    }
+                })
+                heightAnimator.start()
+            }
+            .start()
+    }
+
     private fun setupBottomNavigation() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
         bottomNav.setOnItemSelectedListener { item ->
@@ -211,7 +258,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Cập nhật trạng thái điều hướng với hiệu ứng chuyển
     private fun updateNavigationState(itemId: Int) {
         val transition = Fade()
         transition.duration = 100
@@ -245,7 +291,6 @@ class MainActivity : AppCompatActivity() {
                 if (historyFragment == null) {
                     historyFragment = HistoryFragment()
                     transaction.add(R.id.historyContainer, historyFragment!!, "HISTORY")
-                } else {
                 }
                 transaction.commitNowAllowingStateLoss()
             }
@@ -254,9 +299,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Thiết lập các nút FAB
     private fun setupFAB() {
         findViewById<FloatingActionButton>(R.id.fabCamera).setOnClickListener {
+            if (speakerManager.isSpeaking()) {
+                speakerManager.pause()
+                toggleSpeakerUI(false)
+            }
+
             if (permissionManager.hasPermissions()) {
                 cameraActivityLauncher.launch(CameraActivity.newIntent(this))
                 overridePendingTransition(R.anim.slide_in_bottom, R.anim.hold)
@@ -282,14 +331,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Chuyển đổi giao diện loa
     private fun toggleSpeakerUI(isSpeaking: Boolean) {
         if (homeContainer.visibility != View.VISIBLE) return
         fabSpeak.visibility = if (!isSpeaking) View.VISIBLE else View.GONE
         fabMute.visibility = if (isSpeaking) View.VISIBLE else View.GONE
     }
 
-    // Thiết lập các Observer
     private fun setupObservers() {
         lifecycleScope.launch {
             viewModel.uiState.collect { state ->
@@ -300,7 +347,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Cập nhật giao diện Home
     private fun updateHomeUI(state: com.nguyendevs.ecolens.model.EcoLensUiState) {
         val isLoading = state.isLoading
         val error = state.error
@@ -326,25 +372,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Xử lý sự kiện chạm để ẩn bàn phím
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
         KeyboardUtils.handleTouchEvent(this, event)
         return super.dispatchTouchEvent(event)
     }
 
-    // Cập nhật hiển thị ngôn ngữ khi quay lại
     override fun onResume() {
         super.onResume()
         settingsHandler.updateLanguageDisplay()
     }
 
-    // Dọn dẹp tài nguyên
     override fun onDestroy() {
         speakerManager.shutdown()
         super.onDestroy()
     }
 
-    // Xử lý nút Back
     override fun onBackPressed() {
         if (imageZoomHandler.isFullScreenVisible()) {
             imageZoomHandler.hideFullScreen()
