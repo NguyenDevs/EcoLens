@@ -52,16 +52,16 @@ class LanguageSelectionFragment : Fragment() {
 
         val languages = listOf(
             Language(
-                code = LanguageManager.LANG_EN,
-                name = getString(R.string.lang_english),
-                flagDrawable = R.drawable.flag_england,
-                isSelected = currentLang == LanguageManager.LANG_EN
-            ),
-            Language(
                 code = LanguageManager.LANG_VI,
                 name = getString(R.string.lang_vietnamese),
                 flagDrawable = R.drawable.flag_vietnam,
                 isSelected = currentLang == LanguageManager.LANG_VI
+            ),
+            Language(
+                code = LanguageManager.LANG_EN,
+                name = getString(R.string.lang_english),
+                flagDrawable = R.drawable.flag_england,
+                isSelected = currentLang == LanguageManager.LANG_EN
             )
         )
 

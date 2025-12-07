@@ -77,7 +77,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:text="@string/lang_english"
-                    android:textColor="@color/text_secondary"
+                    android:textColor="@color/green_dark"
                     android:textSize="14sp" />
         </LinearLayout>
 

@@ -44,7 +44,7 @@
                 app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="24dp"
                 app:cardElevation="0dp"
-                app:strokeColor="#F0F0F0"
+                app:strokeColor="#E0E0E0"
                 app:strokeWidth="1dp">
 
             <FrameLayout
@@ -69,7 +69,7 @@
                             app:layout_constraintTop_toTopOf="parent"
                             android:layout_marginTop="40dp"
                             app:layout_constraintStart_toEndOf="@+id/imageView"
-                            android:layout_marginStart="5dp"/>
+                            android:layout_marginStart="7dp"/>
 
                     <TextView
                             android:id="@+id/tvBannerSubtitle"
@@ -81,7 +81,7 @@
                             app:layout_constraintTop_toBottomOf="@id/tvBannerTitle"
                             app:layout_constraintStart_toEndOf="@+id/imageView"
                             android:layout_marginTop="0dp"
-                            android:layout_marginStart="5dp"/>
+                            android:layout_marginStart="7dp"/>
 
                     <!-- Ảnh phía trên (foreground card) -->
                     <com.google.android.material.imageview.ShapeableImageView
@@ -89,10 +89,10 @@
                             android:layout_height="95dp"
                             android:src="@drawable/home_tree_2"
                             android:scaleType="centerCrop"
-                            android:alpha="0.6"
+                            android:alpha="0.4"
                             android:rotation="-25"
-                            android:translationX="25dp"
-                            android:translationY="15dp"
+                            android:translationX="33dp"
+                            android:translationY="19dp"
                             android:translationZ="-1dp"
                             app:shapeAppearanceOverlay="@style/ShapeAppearance.App.HomeTree"
                             app:layout_constraintEnd_toEndOf="parent"
@@ -106,7 +106,7 @@
                             android:scaleType="centerCrop"
                             android:alpha="0.8"
                             android:rotation="-8"
-                            android:translationX="30dp"
+                            android:translationX="33dp"
                             android:translationY="10dp"
                             android:translationZ="1dp"
                             app:shapeAppearanceOverlay="@style/ShapeAppearance.App.HomeTree"

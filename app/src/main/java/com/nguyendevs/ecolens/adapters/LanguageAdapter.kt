@@ -28,8 +28,10 @@ class LanguageAdapter(
             if (language.isSelected) {
                 card.strokeWidth = 4
                 card.strokeColor = itemView.context.getColor(R.color.green_primary)
+                tvLanguageName.setTextColor(itemView.context.getColor(R.color.green_dark))
             } else {
                 card.strokeWidth = 0
+                tvLanguageName.setTextColor(itemView.context.getColor(R.color.text_primary))
             }
 
             card.setOnClickListener {
