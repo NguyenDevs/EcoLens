@@ -59,7 +59,6 @@ class HistoryAdapter(
     }
 
     inner class HistoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val divider: View = itemView.findViewById(R.id.divider)
         private val itemContainer: View = itemView.findViewById(R.id.itemContainer)
         private val ivImage: ImageView = itemView.findViewById(R.id.ivHistoryImage)
         private val tvCommonName: TextView = itemView.findViewById(R.id.tvHistoryCommonName)
@@ -85,6 +84,7 @@ class HistoryAdapter(
                 .centerCrop()
                 .into(ivImage)
 
+            // Xử lý hiển thị Header ngày
             if (isFirstItemOfDay) {
                 tvDateHeader.text = dateFormatter.format(Date(entry.timestamp))
                 tvDateHeader.visibility = View.VISIBLE
@@ -92,10 +92,31 @@ class HistoryAdapter(
                 tvDateHeader.visibility = View.GONE
             }
 
-            divider.visibility = if (isLastItemOfDay) View.GONE else View.VISIBLE
+            // --- ĐOẠN CODE MỚI: Xử lý margin âm để gộp viền ---
+            // Tính độ dày viền (1dp) ra pixel
+            val strokeWidth = (1 * context.resources.displayMetrics.density).toInt()
 
+            // Lấy LayoutParams của itemView (item gốc của row)
+            val layoutParams = itemView.layoutParams as RecyclerView.LayoutParams
+
+            if (!isFirstItemOfDay) {
+                // Nếu không phải đầu ngày (tức là nằm dưới item khác cùng nhóm),
+                // kéo lên 1 khoảng bằng độ dày viền để 2 viền chồng lên nhau
+                layoutParams.topMargin = -strokeWidth
+            } else {
+                // Nếu là đầu ngày, giữ nguyên margin (không kéo lên)
+                layoutParams.topMargin = 0
+            }
+            itemView.layoutParams = layoutParams
+            // ---------------------------------------------------
+
+            // Tạo Background với bo góc và viền
             val bgDrawable = android.graphics.drawable.GradientDrawable()
             bgDrawable.setColor(context.getColor(R.color.white))
+
+            val strokeColor = android.graphics.Color.parseColor("#E0E0E0")
+            bgDrawable.setStroke(strokeWidth, strokeColor)
+
             val radius = context.resources.displayMetrics.density * 16
 
             if (isFirstItemOfDay && isLastItemOfDay) {

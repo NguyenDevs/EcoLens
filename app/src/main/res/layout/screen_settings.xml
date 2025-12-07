@@ -31,57 +31,68 @@
             android:textStyle="bold"
             android:textAllCaps="true" />
 
-    <LinearLayout
+    <com.google.android.material.card.MaterialCardView
             android:id="@+id/languageOption"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"
-            android:background="@drawable/bg_white_rounded"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeColor="#E0E0E0"
+            app:strokeWidth="1dp"
             android:clickable="true"
             android:focusable="true"
-            android:foreground="?attr/selectableItemBackground"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="16dp">
-
-        <FrameLayout
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/bg_flag_rounded"
-                android:backgroundTint="#F0F7F4"> <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_language"
-                app:tint="@color/green_primary" />
-        </FrameLayout>
+            android:foreground="?attr/selectableItemBackground">
 
         <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="16dp">
 
-            <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/language_label"
-                    android:textColor="@color/text_primary"
-                    android:textSize="16sp"
-                    android:textStyle="bold"/>
+            <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_flag_rounded"
+                    android:backgroundTint="#F0F7F4">
+                <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_language"
+                        app:tint="@color/green_primary" />
+            </FrameLayout>
 
-            <TextView
-                    android:id="@+id/tvCurrentLanguage"
-                    android:layout_width="wrap_content"
+            <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="@string/lang_english"
-                    android:textColor="@color/green_dark"
-                    android:textSize="14sp" />
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/language_label"
+                        android:textColor="@color/text_primary"
+                        android:textSize="16sp"
+                        android:textStyle="bold"/>
+
+                <TextView
+                        android:id="@+id/tvCurrentLanguage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/lang_english"
+                        android:textColor="@color/green_dark"
+                        android:textSize="14sp" />
+            </LinearLayout>
+
         </LinearLayout>
 
-    </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <TextView
             android:layout_width="wrap_content"
@@ -94,56 +105,66 @@
             android:textStyle="bold"
             android:textAllCaps="true" />
 
-    <LinearLayout
+    <com.google.android.material.card.MaterialCardView
             android:id="@+id/aboutOption"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_white_rounded"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeColor="#E0E0E0"
+            app:strokeWidth="1dp"
             android:clickable="true"
             android:focusable="true"
-            android:foreground="?attr/selectableItemBackground"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="16dp">
-
-        <FrameLayout
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/bg_flag_rounded"
-                android:backgroundTint="#F0F7F4">
-
-            <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_info"
-                    app:tint="@color/green_primary" />
-        </FrameLayout>
+            android:foreground="?attr/selectableItemBackground">
 
         <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="16dp">
 
-            <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/about_app_title"
-                    android:textColor="@color/text_primary"
-                    android:textSize="16sp"
-                    android:textStyle="bold"/>
+            <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_flag_rounded"
+                    android:backgroundTint="#F0F7F4">
 
-            <TextView
-                    android:layout_width="wrap_content"
+                <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_info"
+                        app:tint="@color/green_primary" />
+            </FrameLayout>
+
+            <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="EcoLens v1.0"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="14sp" />
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/about_app_title"
+                        android:textColor="@color/text_primary"
+                        android:textSize="16sp"
+                        android:textStyle="bold"/>
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="EcoLens v1.0"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp" />
+            </LinearLayout>
+
         </LinearLayout>
 
-    </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
 </LinearLayout>
