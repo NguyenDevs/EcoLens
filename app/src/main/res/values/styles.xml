@@ -31,4 +31,9 @@
         <item name="android:layout_marginBottom">12dp</item>
     </style>
 
+    <style name="ShapeAppearance.App.HomeTree" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
+    </style>
+
 </resources>

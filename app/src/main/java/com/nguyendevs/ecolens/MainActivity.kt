@@ -214,7 +214,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val startHeight = imagePreviewCard.height
-        val targetHeight = (450 * resources.displayMetrics.density).toInt()
+        val targetHeight = (290 * resources.displayMetrics.density).toInt()
 
         initialStateLayout.animate()
             .alpha(0f)
