@@ -4,6 +4,10 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
+/**
+ * Entity đại diện cho một tin nhắn trong phiên chat
+ * Có khóa ngoại liên kết với ChatSession
+ */
 @Entity(
     tableName = "chat_messages",
     foreignKeys = [ForeignKey(

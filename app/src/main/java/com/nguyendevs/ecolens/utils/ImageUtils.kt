@@ -10,8 +10,14 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 
+/**
+ * Object chứa các utility functions xử lý ảnh
+ */
 object ImageUtils {
 
+    /**
+     * Chuyển đổi Uri thành File với resize và xoay ảnh theo EXIF
+     */
     fun uriToFile(context: Context, uri: Uri, maxDimension: Int): File {
         val cacheDir = context.cacheDir
         val file = File(cacheDir, "temp_image_${System.currentTimeMillis()}.jpg")
@@ -58,6 +64,9 @@ object ImageUtils {
         return file
     }
 
+    /**
+     * Xoay ảnh nếu cần dựa trên thông tin EXIF orientation
+     */
     private fun rotateImageIfRequired(context: Context, bitmap: Bitmap, uri: Uri): Bitmap {
         var inputStream: InputStream? = null
         try {
@@ -78,12 +87,18 @@ object ImageUtils {
         }
     }
 
+    /**
+     * Xoay bitmap theo góc độ chỉ định
+     */
     private fun rotateBitmap(bitmap: Bitmap, degree: Float): Bitmap {
         val matrix = Matrix()
         matrix.postRotate(degree)
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
 
+    /**
+     * Lưu file vào internal storage của app
+     */
     fun saveBitmapToInternalStorage(context: Context, file: File): String? {
         return try {
             val filename = "species_${System.currentTimeMillis()}.jpg"

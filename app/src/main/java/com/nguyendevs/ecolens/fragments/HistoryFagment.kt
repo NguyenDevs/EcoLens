@@ -47,15 +47,17 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
     private var filterStartDate: Long? = null
     private var isOptionsExpanded = false
 
+    // Thiết lập các thành phần sau khi view được tạo
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initViews(view)
         setupAdapter()
-        observeHistory()
         setupClickListeners()
+        observeHistory()
         updateSortUI()
     }
 
+    // Khởi tạo các view component
     private fun initViews(view: View) {
         rvHistory = view.findViewById(R.id.rvHistory)
         emptyStateContainer = view.findViewById(R.id.emptyStateContainer)
@@ -69,6 +71,7 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
         ivExpandIcon = view.findViewById(R.id.ivExpandIcon)
     }
 
+    // Thiết lập adapter cho RecyclerView
     private fun setupAdapter() {
         adapter = HistoryAdapter(
             historyList = emptyList(),
@@ -78,21 +81,15 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
         rvHistory.adapter = adapter
     }
 
-    private fun navigateToDetail(entry: HistoryEntry) {
-        val jsonEntry = Gson().toJson(entry)
-        val fragment = HistoryDetailFragment().apply {
-            arguments = Bundle().apply {
-                putString("HISTORY_ENTRY_JSON", jsonEntry)
-            }
-        }
-
-        parentFragmentManager.beginTransaction()
-            .setCustomAnimations(R.anim.slide_in_bottom, R.anim.hold, R.anim.hold, R.anim.slide_out_bottom)
-            .add(R.id.fragmentContainer, fragment)
-            .addToBackStack("Detail")
-            .commit()
+    // Thiết lập các listener cho button
+    private fun setupClickListeners() {
+        optionsHeader.setOnClickListener { toggleOptionsExpansion() }
+        btnSort.setOnClickListener { toggleSortOption() }
+        btnFilterByDate.setOnClickListener { showDateRangePickerDialog() }
+        btnClearFilter.setOnClickListener { clearDateFilter() }
     }
 
+    // Quan sát dữ liệu lịch sử từ ViewModel
     private fun observeHistory() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.getHistoryBySortOption(currentSortOption, filterStartDate, filterEndDate)
@@ -109,13 +106,23 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
         }
     }
 
-    private fun setupClickListeners() {
-        optionsHeader.setOnClickListener { toggleOptionsExpansion() }
-        btnSort.setOnClickListener { toggleSortOption() }
-        btnFilterByDate.setOnClickListener { showDateRangePickerDialog() }
-        btnClearFilter.setOnClickListener { clearDateFilter() }
+    // Điều hướng đến màn hình chi tiết
+    private fun navigateToDetail(entry: HistoryEntry) {
+        val jsonEntry = Gson().toJson(entry)
+        val fragment = HistoryDetailFragment().apply {
+            arguments = Bundle().apply {
+                putString("HISTORY_ENTRY_JSON", jsonEntry)
+            }
+        }
+
+        parentFragmentManager.beginTransaction()
+            .setCustomAnimations(R.anim.slide_in_bottom, R.anim.hold, R.anim.hold, R.anim.slide_out_bottom)
+            .add(R.id.fragmentContainer, fragment)
+            .addToBackStack("Detail")
+            .commit()
     }
 
+    // Chuyển đổi tùy chọn sắp xếp
     private fun toggleSortOption() {
         currentSortOption = if (currentSortOption == HistorySortOption.NEWEST_FIRST) {
             HistorySortOption.OLDEST_FIRST
@@ -126,6 +133,7 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
         observeHistory()
     }
 
+    // Cập nhật giao diện sắp xếp
     private fun updateSortUI() {
         tvCurrentSort.text = if (currentSortOption == HistorySortOption.NEWEST_FIRST)
             getString(R.string.sort_newest_first)
@@ -133,10 +141,12 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
             getString(R.string.sort_oldest_first)
     }
 
+    // Chuyển đổi trạng thái mở rộng/thu gọn của options
     private fun toggleOptionsExpansion() {
         if (isOptionsExpanded) collapseOptions() else expandOptions()
     }
 
+    // Mở rộng phần options
     private fun expandOptions() {
         isOptionsExpanded = true
         ivExpandIcon.animate().rotation(180f).setDuration(300).start()
@@ -147,12 +157,14 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
         animateHeight(0, targetHeight)
     }
 
+    // Thu gọn phần options
     private fun collapseOptions() {
         isOptionsExpanded = false
         ivExpandIcon.animate().rotation(0f).setDuration(300).start()
         animateHeight(optionsContainer.height, 0) { optionsContainer.visibility = View.GONE }
     }
 
+    // Tạo animation cho chiều cao
     private fun animateHeight(from: Int, to: Int, onEnd: (() -> Unit)? = null) {
         val animator = ValueAnimator.ofInt(from, to)
         animator.addUpdateListener { animation ->
@@ -169,6 +181,7 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
         animator.start()
     }
 
+    // Hiển thị dialog chọn khoảng thời gian
     private fun showDateRangePickerDialog() {
         val builder = MaterialDatePicker.Builder.dateRangePicker()
             .setTitleText(R.string.select_date)
@@ -186,6 +199,7 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
         }
     }
 
+    // Xóa bộ lọc theo ngày
     private fun clearDateFilter() {
         filterStartDate = null
         filterEndDate = null

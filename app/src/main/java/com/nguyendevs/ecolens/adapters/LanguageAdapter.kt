@@ -52,7 +52,7 @@ class LanguageAdapter(
         holder.bind(languages[position])
     }
 
-    // Lấy số lượng item
+    // Lấy số lượng ngôn ngữ
     override fun getItemCount() = languages.size
 
     // Cập nhật danh sách ngôn ngữ

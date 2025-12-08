@@ -8,6 +8,9 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
+/**
+ * Object singleton cung cấp Retrofit client và API services
+ */
 object RetrofitClient {
 
     private const val WORKER_BASE_URL = BuildConfig.WORKER_BASE_URL

@@ -1,5 +1,9 @@
 package com.nguyendevs.ecolens.model
 
+/**
+ * Data class chứa thông tin chi tiết về một loài sinh vật
+ * Bao gồm phân loại khoa học và các thông tin mô tả
+ */
 data class SpeciesInfo(
     val commonName: String = "",
     val scientificName: String = "",

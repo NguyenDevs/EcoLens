@@ -27,6 +27,7 @@ class ChatFragment : Fragment() {
     private lateinit var btnSend: ImageView
     private lateinit var btnBack: ImageView
 
+    // Tạo view cho Fragment
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -35,6 +36,7 @@ class ChatFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_chat, container, false)
     }
 
+    // Thiết lập các thành phần sau khi view được tạo
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -48,6 +50,7 @@ class ChatFragment : Fragment() {
         }
     }
 
+    // Khởi tạo các view component
     private fun initViews(view: View) {
         rvChat = view.findViewById(R.id.rvChat)
         etInput = view.findViewById(R.id.etChatInput)
@@ -55,6 +58,7 @@ class ChatFragment : Fragment() {
         btnBack = view.findViewById(R.id.btnBack)
     }
 
+    // Thiết lập RecyclerView
     private fun setupRecyclerView() {
         rvChat.layoutManager = LinearLayoutManager(requireContext()).apply {
             stackFromEnd = true
@@ -62,6 +66,7 @@ class ChatFragment : Fragment() {
         rvChat.adapter = adapter
     }
 
+    // Thiết lập các listener cho button
     private fun setupListeners() {
         btnSend.setOnClickListener {
             val text = etInput.text.toString().trim()
@@ -76,6 +81,7 @@ class ChatFragment : Fragment() {
         }
     }
 
+    // Quan sát dữ liệu từ ViewModel
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.chatMessages.collectLatest { messages ->

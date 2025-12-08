@@ -5,7 +5,6 @@ import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.api.GeminiContent
 import com.nguyendevs.ecolens.api.GeminiPart
@@ -33,6 +32,10 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.util.Locale
 
+/**
+ * ViewModel chính quản lý logic nghiệp vụ cho toàn bộ ứng dụng EcoLens
+ * Bao gồm: nhận diện loài, quản lý lịch sử, và xử lý chat với AI
+ */
 class EcoLensViewModel(application: Application) : AndroidViewModel(application) {
 
     private val apiService = RetrofitClient.iNaturalistApi
@@ -48,6 +51,9 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     private val _chatMessages = MutableStateFlow<List<ChatMessage>>(emptyList())
     val chatMessages: StateFlow<List<ChatMessage>> = _chatMessages.asStateFlow()
 
+    /**
+     * Data class nội bộ để parse response từ Gemini API
+     */
     private data class GeminiRawResponse(
         val commonName: String = "",
         val scientificName: String = "",
@@ -67,6 +73,11 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         val confidence: Double = 0.0
     )
 
+    // ==================== HISTORY MANAGEMENT ====================
+
+    /**
+     * Lấy lịch sử theo tùy chọn sắp xếp và khoảng thời gian (nếu có)
+     */
     fun getHistoryBySortOption(
         sortOption: HistorySortOption,
         startDate: Long? = null,
@@ -85,12 +96,18 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    /**
+     * Xóa toàn bộ lịch sử
+     */
     fun deleteAllHistory() {
         viewModelScope.launch(Dispatchers.IO) {
             historyDao.deleteAll()
         }
     }
 
+    /**
+     * Chuyển đổi trạng thái yêu thích của một mục lịch sử
+     */
     fun toggleFavorite(entry: HistoryEntry) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -101,6 +118,11 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    // ==================== SPECIES IDENTIFICATION ====================
+
+    /**
+     * Nhận diện loài từ ảnh sử dụng iNaturalist API và Gemini AI
+     */
     fun identifySpecies(imageUri: Uri, languageCode: String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null, speciesInfo = null)
@@ -167,6 +189,9 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    /**
+     * Lấy thông tin chi tiết về loài từ Gemini AI
+     */
     private suspend fun fetchDetailsFromGemini(
         scientificName: String,
         confidence: Double,
@@ -174,69 +199,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     ): SpeciesInfo = withContext(Dispatchers.IO) {
         try {
             val isVietnamese = languageCode != "en"
-            val commonNameDesc = if (isVietnamese) "Tên thường gọi Tiếng Việt chuẩn nhất" else "Common name in English"
-
-            val prompt = if (isVietnamese) {
-                """
-                Bạn là nhà sinh vật học. Cung cấp thông tin chi tiết về loài "$scientificName" bằng Tiếng Việt.
-                
-                === QUY TẮC FORMAT ===
-                - Dùng ** để đánh dấu text cần in đậm (ví dụ: **từ khóa**)
-                - Dùng ## để đánh dấu text cần màu xanh highlight (ví dụ: ##Việt Nam##, ##50-60cm##)
-                - Dùng ~~ để đánh dấu text nghiêng (ví dụ: ~~tên thường~~)
-                - Dùng • cho bullet points, mỗi dòng một ý
-                
-                === ĐỊNH DẠNG JSON ===
-                {
-                  "commonName": "$commonNameDesc",
-                  "kingdom": "Chỉ tên Tiếng Việt",
-                  "phylum": "Chỉ tên Tiếng Việt",
-                  "className": "Chỉ tên Tiếng Việt",
-                  "order": "Chỉ tên Tiếng Việt",
-                  "family": "Tên khoa học ~~(tên thường)~~",
-                  "genus": "Tên khoa học ~~(tên thường)~~",
-                  "species": "Tên khoa học ~~(tên thường)~~",
-                  "rank": "Cấp phân loại",
-                  "description": "Tổng quan 4 câu ngắn gọn, dùng **in đậm** cho đặc điểm nổi bật và ##xanh đậm## cho địa danh, tên riêng, số đo.",
-                  "characteristics": "Danh sách gạch đầu dòng, mỗi dòng bắt đầu với • và một ý về hình thái, kích thước, màu sắc. Dùng **in đậm** và ##xanh đậm##.",
-                  "distribution": "Ưu tiên Việt Nam trước (nếu có), sau đó toàn cầu. Dùng ##xanh đậm## cho tên địa danh.",
-                  "habitat": "Mô tả chi tiết môi trường sống.",
-                  "conservationStatus": "Chỉ ghi một trong các trạng thái: Cực kỳ nguy cấp, Nguy cấp, Sách Đỏ Việt Nam, Sắp nguy cấp, Ít lo ngại, Chưa đánh giá. Thêm thông tin bổ sung từ IUCN nếu có."
-                }
-                
-                CHỈ TRẢ VỀ JSON, KHÔNG THÊM TEXT KHÁC.
-                """.trimIndent()
-            } else {
-                """
-                You are a biologist. Provide details about "$scientificName" in English.
-                
-                === FORMAT RULES ===
-                - Use ** for bold text (e.g., **keyword**)
-                - Use ## for green highlight (e.g., ##Vietnam##, ##50-60cm##)
-                - Use ~~ for italic text (e.g., ~~common name~~)
-                - Use • for bullet points, one point per line
-                
-                === JSON FORMAT ===
-                {
-                  "commonName": "$commonNameDesc",
-                  "kingdom": "Name only",
-                  "phylum": "Name only",
-                  "className": "Name only",
-                  "order": "Name only",
-                  "family": "Scientific name ~~(common name)~~",
-                  "genus": "Scientific name ~~(common name)~~",
-                  "species": "Scientific name ~~(common name)~~",
-                  "rank": "Rank",
-                  "description": "4-sentence overview with **bold** for key features and ##green highlight## for places/names/measurements.",
-                  "characteristics": "Bullet list, each line starts with • covering morphology, size, colors. Use **bold** and ##green highlight##.",
-                  "distribution": "Vietnam first (if applicable), then worldwide. Use ##green highlight## for locations.",
-                  "habitat": "Specific environment details.",
-                  "conservationStatus": "Only write one of these statuses: Critically Endangered, Endangered, Vulnerable (Vietnam Red Data Book), Near Threatened, Least Concern, Not Evaluated. Add additional IUCN info if available."
-                }
-                
-                RETURN ONLY JSON, NO ADDITIONAL TEXT.
-                """.trimIndent()
-            }
+            val prompt = buildGeminiPrompt(scientificName, isVietnamese)
 
             val request = GeminiRequest(
                 contents = listOf(
@@ -287,23 +250,88 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     }
 
     /**
+     * Xây dựng prompt cho Gemini API theo ngôn ngữ
+     */
+    private fun buildGeminiPrompt(scientificName: String, isVietnamese: Boolean): String {
+        val commonNameDesc = if (isVietnamese) "Tên thường gọi Tiếng Việt chuẩn nhất" else "Common name in English"
+
+        return if (isVietnamese) {
+            """
+            Bạn là nhà sinh vật học. Cung cấp thông tin chi tiết về loài "$scientificName" bằng Tiếng Việt.
+            
+            === QUY TẮC FORMAT ===
+            - Dùng ** để đánh dấu text cần in đậm (ví dụ: **từ khóa**)
+            - Dùng ## để đánh dấu text cần màu xanh highlight (ví dụ: ##Việt Nam##, ##50-60cm##)
+            - Dùng ~~ để đánh dấu text nghiêng (ví dụ: ~~tên thường~~)
+            - Dùng • cho bullet points, mỗi dòng một ý
+            
+            === ĐỊNH DẠNG JSON ===
+            {
+              "commonName": "$commonNameDesc",
+              "kingdom": "Chỉ tên Tiếng Việt",
+              "phylum": "Chỉ tên Tiếng Việt",
+              "className": "Chỉ tên Tiếng Việt",
+              "order": "Chỉ tên Tiếng Việt",
+              "family": "Tên khoa học ~~(tên thường)~~",
+              "genus": "Tên khoa học ~~(tên thường)~~",
+              "species": "Tên khoa học ~~(tên thường)~~",
+              "rank": "Cấp phân loại",
+              "description": "Tổng quan 4 câu ngắn gọn, dùng **in đậm** cho đặc điểm nổi bật và ##xanh đậm## cho địa danh, tên riêng, số đo.",
+              "characteristics": "Danh sách gạch đầu dòng, mỗi dòng bắt đầu với • và một ý về hình thái, kích thước, màu sắc. Dùng **in đậm** và ##xanh đậm##.",
+              "distribution": "Ưu tiên Việt Nam trước (nếu có), sau đó toàn cầu. Dùng ##xanh đậm## cho tên địa danh.",
+              "habitat": "Mô tả chi tiết môi trường sống.",
+              "conservationStatus": "Chỉ ghi một trong các trạng thái: Cực kỳ nguy cấp, Nguy cấp, Sách Đỏ Việt Nam, Sắp nguy cấp, Ít lo ngại, Chưa đánh giá. Thêm thông tin bổ sung từ IUCN nếu có."
+            }
+            
+            CHỈ TRẢ VỀ JSON, KHÔNG THÊM TEXT KHÁC.
+            """.trimIndent()
+        } else {
+            """
+            You are a biologist. Provide details about "$scientificName" in English.
+            
+            === FORMAT RULES ===
+            - Use ** for bold text (e.g., **keyword**)
+            - Use ## for green highlight (e.g., ##Vietnam##, ##50-60cm##)
+            - Use ~~ for italic text (e.g., ~~common name~~)
+            - Use • for bullet points, one point per line
+            
+            === JSON FORMAT ===
+            {
+              "commonName": "$commonNameDesc",
+              "kingdom": "Name only",
+              "phylum": "Name only",
+              "className": "Name only",
+              "order": "Name only",
+              "family": "Scientific name ~~(common name)~~",
+              "genus": "Scientific name ~~(common name)~~",
+              "species": "Scientific name ~~(common name)~~",
+              "rank": "Rank",
+              "description": "4-sentence overview with **bold** for key features and ##green highlight## for places/names/measurements.",
+              "characteristics": "Bullet list, each line starts with • covering morphology, size, colors. Use **bold** and ##green highlight##.",
+              "distribution": "Vietnam first (if applicable), then worldwide. Use ##green highlight## for locations.",
+              "habitat": "Specific environment details.",
+              "conservationStatus": "Only write one of these statuses: Critically Endangered, Endangered, Vulnerable (Vietnam Red Data Book), Near Threatened, Least Concern, Not Evaluated. Add additional IUCN info if available."
+            }
+            
+            RETURN ONLY JSON, NO ADDITIONAL TEXT.
+            """.trimIndent()
+        }
+    }
+
+    // ==================== TEXT FORMATTING UTILITIES ====================
+
+    /**
      * Parse text với delimiter đơn giản sang HTML
-     * ** -> bold
-     * ## -> highlighted green
-     * ~~ -> italic
+     * ** -> bold, ## -> highlighted green, ~~ -> italic
      */
     private fun parseToHtml(text: String, isConservationStatus: Boolean = false, isVietnamese: Boolean = true): String {
         if (text.isBlank()) return ""
 
         var result = text
-            // Convert ** to bold
             .replace(Regex("\\*\\*(.+?)\\*\\*")) { "<b>${it.groupValues[1]}</b>" }
-            // Convert ## to highlighted green
             .replace(Regex("##(.+?)##")) { "<font color='#00796B'><b>${it.groupValues[1]}</b></font>" }
-            // Convert ~~ to italic
             .replace(Regex("~~(.+?)~~")) { "<i>${it.groupValues[1]}</i>" }
 
-        // Xử lý conservation status với màu sắc tương ứng
         if (isConservationStatus) {
             result = colorizeConservationStatus(result, isVietnamese)
         }
@@ -338,7 +366,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
 
         var result = text
-        // Sắp xếp theo độ dài giảm dần để match chuỗi dài trước
         statusMap.entries.sortedByDescending { it.key.length }.forEach { (status, color) ->
             if (result.contains(status, ignoreCase = true)) {
                 result = result.replace(
@@ -350,6 +377,9 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         return result
     }
 
+    /**
+     * Làm sạch JSON string từ response của Gemini
+     */
     private fun cleanJsonString(json: String): String {
         return json.replace("```json", "", ignoreCase = true)
             .replace("```", "", ignoreCase = true)
@@ -361,18 +391,22 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             }
     }
 
+    /**
+     * Loại bỏ prefix rank (Giới, Ngành, Lớp, v.v.) khỏi tên phân loại
+     */
     private fun removeRankPrefix(text: String, prefix: String): String {
         return text.trim().replaceFirst(Regex("^(?i)$prefix\\s*[:\\-\\s]+"), "")
             .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
             .trim()
     }
 
+    // ==================== CHAT MANAGEMENT ====================
 
+    /**
+     * Bắt đầu lắng nghe tin nhắn từ một session cụ thể
+     */
     private fun startMessageCollection(sessionId: Long) {
-        // Hủy job cũ nếu đang chạy để ngăn update dữ liệu cũ
         messageCollectionJob?.cancel()
-
-        // Khởi tạo job mới
         messageCollectionJob = viewModelScope.launch {
             chatDao.getMessagesBySession(sessionId).collect { messages ->
                 _chatMessages.value = messages
@@ -380,27 +414,32 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    /**
+     * Load một session chat có sẵn
+     */
     fun loadChatSession(sessionId: Long) {
         currentSessionId = sessionId
-        // Thay thế đoạn code cũ bằng hàm helper
         startMessageCollection(sessionId)
     }
 
-    // 4. Cập nhật hàm startNewChatSession
+    /**
+     * Bắt đầu một session chat mới (chưa tạo trong DB)
+     */
     fun startNewChatSession() {
         currentSessionId = null
-        messageCollectionJob?.cancel() // Hủy lắng nghe ngay lập tức khi nhấn "Chat mới"
+        messageCollectionJob?.cancel()
         _chatMessages.value = emptyList()
     }
 
-    // 5. Cập nhật hàm initNewChatSession
+    /**
+     * Khởi tạo session chat mới với tin nhắn chào mừng
+     */
     fun initNewChatSession(welcomeMessage: String) {
         currentSessionId = null
-        messageCollectionJob?.cancel() // Đảm bảo không còn lắng nghe session nào
+        messageCollectionJob?.cancel()
         _chatMessages.value = emptyList()
 
         viewModelScope.launch(Dispatchers.IO) {
-            // Tạo session mới
             val newSession = ChatSession(
                 title = "Đoạn chat mới",
                 lastMessage = welcomeMessage,
@@ -409,7 +448,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             val newId = chatDao.insertSession(newSession)
             currentSessionId = newId
 
-            // Chèn tin nhắn chào mừng
             val welcomeMsg = ChatMessage(
                 sessionId = newId,
                 content = welcomeMessage,
@@ -418,20 +456,21 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             )
             chatDao.insertMessage(welcomeMsg)
 
-            // Chuyển về Main thread để bắt đầu lắng nghe session mới an toàn
             withContext(Dispatchers.Main) {
                 startMessageCollection(newId)
             }
         }
     }
 
+    /**
+     * Gửi tin nhắn chat và nhận phản hồi từ AI
+     */
     fun sendChatMessage(userMessage: String) {
         if (userMessage.isBlank()) return
 
         val sessionId = currentSessionId ?: return
 
         viewModelScope.launch(Dispatchers.IO) {
-            // 1. Lưu tin nhắn User vào DB
             val userChatMsg = ChatMessage(
                 sessionId = sessionId,
                 content = userMessage,
@@ -440,7 +479,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             )
             chatDao.insertMessage(userChatMsg)
 
-            // Cập nhật session: update title nếu là tin nhắn đầu tiên của user
             val currentSession = chatDao.getSessionById(sessionId)
             val newTitle = if (currentSession?.title == "Đoạn chat mới") userMessage.take(30) + "..." else currentSession?.title ?: "Chat"
 
@@ -452,43 +490,25 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 )
             )
 
-            // 2. Hiển thị Loading
             val loadingMsg = ChatMessage(sessionId = -1, content = "...", isUser = false, isLoading = true)
             _chatMessages.value = _chatMessages.value + loadingMsg
 
             try {
-                // 3. CHUẨN BỊ CONTEXT (Lịch sử chat)
-                // Lấy danh sách tin nhắn hiện tại (trừ loading)
                 val currentHistory = _chatMessages.value.filter { !it.isLoading }
-
-                val geminiContents = mutableListOf<GeminiContent>()
-
-                // Thêm System Instruction (Optional: Để định hình tính cách Bot)
-                // Gemini Flash 1.5 hỗ trợ system instruction qua API riêng,
-                // nhưng với endpoint hiện tại ta có thể 'mớm' vào lượt đầu tiên hoặc chỉ gửi history.
-                // Ở đây ta gửi history:
-
-                currentHistory.forEach { msg ->
-                    // Map tin nhắn DB sang định dạng Gemini
-                    // User -> role: "user"
-                    // Bot -> role: "model"
+                val geminiContents = currentHistory.map { msg ->
                     val role = if (msg.isUser) "user" else "model"
-                    geminiContents.add(
-                        GeminiContent(
-                            role = role,
-                            parts = listOf(GeminiPart(msg.content))
-                        )
+                    GeminiContent(
+                        role = role,
+                        parts = listOf(GeminiPart(msg.content))
                     )
                 }
 
-                // Gửi Request
                 val request = GeminiRequest(contents = geminiContents)
                 val response = apiService.askGemini(request)
 
                 val reply = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
                     ?: "Xin lỗi, tôi không thể trả lời lúc này."
 
-                // 4. Lưu tin nhắn Bot vào DB
                 val botChatMsg = ChatMessage(
                     sessionId = sessionId,
                     content = reply,
@@ -497,7 +517,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 )
                 chatDao.insertMessage(botChatMsg)
 
-                // Cập nhật session last message
                 chatDao.updateSession(
                     chatDao.getSessionById(sessionId)!!.copy(
                         lastMessage = reply,
@@ -507,9 +526,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
             } catch (e: Exception) {
                 e.printStackTrace()
-                // Xử lý lỗi: Xóa loading, thêm thông báo lỗi
-                // (Thực tế StateFlow sẽ tự update khi remove loadingMsg vì ta collect từ DB,
-                // nhưng loadingMsg là list tạm, nên ta chỉ cần insert msg lỗi vào DB)
                 val errorMsg = ChatMessage(sessionId = sessionId, content = "Lỗi kết nối: ${e.message}", isUser = false)
                 chatDao.insertMessage(errorMsg)
             }

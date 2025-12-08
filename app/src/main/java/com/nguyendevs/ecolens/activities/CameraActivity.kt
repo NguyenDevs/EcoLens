@@ -72,6 +72,7 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
+    // Khởi tạo giao diện và thiết lập camera
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -119,26 +120,31 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
+    // Xử lý sự kiện nút back
     override fun onBackPressed() {
         super.onBackPressed()
         finish()
         overridePendingTransition(R.anim.hold, R.anim.slide_out_bottom)
     }
 
+    // Xử lý nút navigate up
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true
     }
 
+    // Giải phóng tài nguyên khi Activity bị hủy
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()
     }
 
+    // Mở thư viện ảnh để chọn ảnh
     private fun openGallery() {
         selectImageFromGalleryResult.launch("image/*")
     }
 
+    // Khởi động camera và cấu hình các thông số
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
@@ -188,6 +194,7 @@ class CameraActivity : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
+    // Thiết lập tính năng zoom và focus cho camera
     @SuppressLint("ClickableViewAccessibility")
     private fun setupZoomAndFocus() {
         val listener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
@@ -204,7 +211,6 @@ class CameraActivity : AppCompatActivity() {
         viewFinder.setOnTouchListener { _, event ->
             scaleGestureDetector.onTouchEvent(event)
             if (event.action == MotionEvent.ACTION_UP) {
-                // Logic Focus CameraX
                 val factory = viewFinder.meteringPointFactory
                 val point = factory.createPoint(event.x, event.y)
                 val action = FocusMeteringAction.Builder(point, FocusMeteringAction.FLAG_AF)
@@ -212,18 +218,16 @@ class CameraActivity : AppCompatActivity() {
                     .build()
                 cameraControl?.startFocusAndMetering(action)
 
-                // Hiển thị vòng tròn/ô vuông focus
                 showFocusIndicator(event.x, event.y)
             }
             true
         }
     }
 
+    // Hiển thị hiệu ứng focus tại vị trí được chạm
     private fun showFocusIndicator(x: Float, y: Float) {
-        // FIX: Sử dụng animate().cancel() thay vì cancelAnimation()
         focusIndicator.animate().cancel()
 
-        // Điều chỉnh vị trí để tâm ô vuông trùng với điểm chạm
         focusIndicator.x = x - (focusIndicator.width / 2)
         focusIndicator.y = y - (focusIndicator.height / 2) + viewFinder.top
 
@@ -250,6 +254,7 @@ class CameraActivity : AppCompatActivity() {
             .start()
     }
 
+    // Tạo rung khi chụp ảnh
     private fun performHapticFeedback() {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -271,6 +276,7 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
+    // Tạo hiệu ứng animation cho nút chụp
     private fun animateCaptureButton() {
         captureButton.animate()
             .scaleX(0.85f)
@@ -286,6 +292,7 @@ class CameraActivity : AppCompatActivity() {
             .start()
     }
 
+    // Bật/tắt đèn flash
     private fun toggleFlash() {
         val imageCapture = imageCapture ?: return
         val currentMode = imageCapture.flashMode
@@ -299,6 +306,7 @@ class CameraActivity : AppCompatActivity() {
         updateFlashIcon(newMode)
     }
 
+    // Cập nhật icon flash dựa trên trạng thái
     private fun updateFlashIcon(mode: Int) {
         val iconRes = when (mode) {
             ImageCapture.FLASH_MODE_ON -> R.drawable.ic_lightning
@@ -307,6 +315,7 @@ class CameraActivity : AppCompatActivity() {
         flashToggle.setImageResource(iconRes)
     }
 
+    // Chụp ảnh và lưu vào file
     private fun takePhoto() {
         val imageCapture = imageCapture ?: return
 
@@ -337,6 +346,7 @@ class CameraActivity : AppCompatActivity() {
             })
     }
 
+    // Lấy thư mục lưu ảnh
     private fun getOutputDirectory(): File {
         val mediaDir = externalMediaDirs.firstOrNull()?.let {
             File(it, resources.getString(R.string.app_name)).apply { mkdirs() }

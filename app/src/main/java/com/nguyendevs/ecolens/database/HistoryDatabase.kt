@@ -9,18 +9,21 @@ import com.nguyendevs.ecolens.model.ChatMessage
 import com.nguyendevs.ecolens.model.ChatSession
 import com.nguyendevs.ecolens.model.HistoryEntry
 
-// Tăng version lên 2 và thêm entities mới
 @Database(entities = [HistoryEntry::class, ChatSession::class, ChatMessage::class], version = 2, exportSchema = false)
 @TypeConverters(HistoryTypeConverters::class)
 abstract class HistoryDatabase : RoomDatabase() {
 
+    // Truy cập DAO cho lịch sử
     abstract fun historyDao(): HistoryDao
+
+    // Truy cập DAO cho chat
     abstract fun chatDao(): ChatDao
 
     companion object {
         @Volatile
         private var INSTANCE: HistoryDatabase? = null
 
+        // Lấy instance của database (Singleton pattern)
         fun getDatabase(context: Context): HistoryDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(

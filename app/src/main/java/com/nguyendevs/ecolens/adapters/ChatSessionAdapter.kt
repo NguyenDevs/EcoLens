@@ -18,16 +18,19 @@ class ChatSessionAdapter(
     private val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     private val timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault())
 
+    // Cập nhật danh sách phiên chat
     fun updateList(newList: List<ChatSession>) {
         sessions = newList
         notifyDataSetChanged()
     }
 
+    // Tạo ViewHolder mới
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat_session, parent, false)
         return ViewHolder(view)
     }
 
+    // Gắn dữ liệu vào ViewHolder
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val session = sessions[position]
         val isFirstOfDay = position == 0 ||
@@ -36,6 +39,7 @@ class ChatSessionAdapter(
         holder.bind(session, isFirstOfDay)
     }
 
+    // Lấy số lượng phiên chat
     override fun getItemCount() = sessions.size
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -45,6 +49,7 @@ class ChatSessionAdapter(
         val tvTime: TextView = view.findViewById(R.id.tvTime)
         val card: View = view.findViewById(R.id.cardSession)
 
+        // Gắn dữ liệu phiên chat vào view
         fun bind(session: ChatSession, showHeader: Boolean) {
             tvDate.visibility = if (showHeader) View.VISIBLE else View.GONE
             tvDate.text = dateFormatter.format(Date(session.timestamp))

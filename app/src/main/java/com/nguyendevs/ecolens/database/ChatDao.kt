@@ -11,26 +11,31 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ChatDao {
-    // --- Sessions ---
+    // Thêm phiên chat mới
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSession(session: ChatSession): Long
 
+    // Cập nhật thông tin phiên chat
     @Update
     suspend fun updateSession(session: ChatSession)
 
+    // Lấy tất cả phiên chat sắp xếp theo thời gian mới nhất
     @Query("SELECT * FROM chat_sessions ORDER BY timestamp DESC")
     fun getAllSessions(): Flow<List<ChatSession>>
 
+    // Lấy phiên chat theo ID
     @Query("SELECT * FROM chat_sessions WHERE id = :id")
     suspend fun getSessionById(id: Long): ChatSession?
 
+    // Xóa phiên chat theo ID
     @Query("DELETE FROM chat_sessions WHERE id = :id")
     suspend fun deleteSession(id: Long)
 
-    // --- Messages ---
+    // Thêm tin nhắn mới
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMessage(message: ChatMessage)
 
+    // Lấy tất cả tin nhắn của một phiên chat
     @Query("SELECT * FROM chat_messages WHERE sessionId = :sessionId ORDER BY timestamp ASC")
     fun getMessagesBySession(sessionId: Long): Flow<List<ChatMessage>>
 }

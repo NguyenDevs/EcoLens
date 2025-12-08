@@ -21,7 +21,7 @@ class LanguageSelectionFragment : Fragment() {
     private lateinit var languageManager: LanguageManager
     private lateinit var rvLanguages: RecyclerView
 
-    // Inflate layout cho Fragment
+    // Tạo view cho Fragment
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -30,20 +30,21 @@ class LanguageSelectionFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_language_selection, container, false)
     }
 
-    // Sau khi view được tạo, thiết lập các thành phần
+    // Thiết lập các thành phần sau khi view được tạo
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         languageManager = LanguageManager(requireContext())
 
+        initViews(view)
+        setupLanguageList()
+        setupListeners()
+    }
+
+    // Khởi tạo các view component
+    private fun initViews(view: View) {
         btnBack = view.findViewById(R.id.btnBack)
         rvLanguages = view.findViewById(R.id.rvLanguages)
-
-        setupLanguageList()
-
-        btnBack.setOnClickListener {
-            closeFragment()
-        }
     }
 
     // Thiết lập danh sách ngôn ngữ
@@ -75,7 +76,14 @@ class LanguageSelectionFragment : Fragment() {
         }
     }
 
-    // Xử lý khi chọn ngôn ngữ mới
+    // Thiết lập các listener cho button
+    private fun setupListeners() {
+        btnBack.setOnClickListener {
+            closeFragment()
+        }
+    }
+
+    // Xử lý khi người dùng chọn ngôn ngữ mới
     private fun onLanguageSelected(language: Language) {
         if (language.code != languageManager.getLanguage()) {
             languageManager.setLanguage(language.code)

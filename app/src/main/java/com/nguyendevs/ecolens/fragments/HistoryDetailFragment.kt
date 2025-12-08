@@ -41,12 +41,12 @@ class HistoryDetailFragment : Fragment() {
         speakerManager = SpeakerManager(requireContext())
     }
 
-    // Inflate layout cho Fragment
+    // Tạo view cho Fragment
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_history_detail, container, false)
     }
 
-    // Sau khi view đã được tạo, tiến hành bind dữ liệu
+    // Thiết lập các thành phần sau khi view được tạo
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val entry = historyEntry ?: return
@@ -59,14 +59,13 @@ class HistoryDetailFragment : Fragment() {
         setupFab(view, info)
     }
 
-    // FIX: Dừng đọc khi Fragment không còn hiển thị (thoát, back, chuyển tab)
+    // Dừng phát âm thanh khi Fragment không còn hiển thị
     override fun onStop() {
         super.onStop()
         if (isSpeaking) {
             speakerManager.pause()
             isSpeaking = false
 
-            // Reset trạng thái nút FAB về "Đọc"
             view?.findViewById<FloatingActionButton>(R.id.fabAction)?.let { fab ->
                 fab.setImageResource(R.drawable.ic_speak)
                 fab.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green_primary))
@@ -80,20 +79,19 @@ class HistoryDetailFragment : Fragment() {
         super.onDestroy()
     }
 
-    // Thiết lập nút Back (FAB)
+    // Thiết lập nút Back và cấu hình CollapsingToolbar
     private fun setupBackButton(view: View) {
         val btnBack = view.findViewById<FloatingActionButton>(R.id.btnBack)
         btnBack.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
 
-        // Cấu hình CollapsingToolbarLayout để ảnh hưởng đến status bar
         val collapsingToolbar = view.findViewById<CollapsingToolbarLayout>(R.id.collapsingToolbar)
         collapsingToolbar.setContentScrimColor(Color.TRANSPARENT)
         collapsingToolbar.setStatusBarScrimColor(Color.TRANSPARENT)
     }
 
-    // Hiển thị thông tin cơ bản ở phần đầu (Tên, Ảnh, Tag Giới/Họ)
+    // Hiển thị thông tin header: tên, ảnh, tag Kingdom và Family
     private fun bindHeader(view: View, entry: HistoryEntry, info: SpeciesInfo) {
         val ivImage = view.findViewById<ImageView>(R.id.ivDetailImage)
         val tvCommon = view.findViewById<TextView>(R.id.tvCommonName)
@@ -121,7 +119,7 @@ class HistoryDetailFragment : Fragment() {
         }
     }
 
-    // Hiển thị bảng Phân loại khoa học (Taxonomy)
+    // Hiển thị bảng phân loại khoa học (Taxonomy)
     private fun bindTaxonomy(view: View, info: SpeciesInfo) {
         val taxonomyLayout = view.findViewById<View>(R.id.layoutTaxonomy) ?: return
 
@@ -148,7 +146,7 @@ class HistoryDetailFragment : Fragment() {
         setTaxonomyText(R.id.tvSpecies, info.species)
     }
 
-    // Hiển thị các nội dung chi tiết động (Mô tả, Đặc điểm, v.v.)
+    // Hiển thị các phần nội dung chi tiết (Mô tả, Đặc điểm, Phân bố, v.v.)
     private fun bindContent(view: View, info: SpeciesInfo) {
         val container = view.findViewById<LinearLayout>(R.id.containerSections)
         container.removeAllViews()
@@ -160,6 +158,7 @@ class HistoryDetailFragment : Fragment() {
         addSection(container, getString(R.string.section_conservation), info.conservationStatus)
     }
 
+    // Thêm một section nội dung với tiêu đề và nội dung
     private fun addSection(container: LinearLayout, title: String, content: String) {
         if (content.isBlank()) return
 
@@ -194,13 +193,12 @@ class HistoryDetailFragment : Fragment() {
             setLineSpacing(0f, 1.4f)
         }
 
-        // Thêm theo thứ tự: Tiêu đề -> Đường kẻ -> Nội dung
         container.addView(titleView)
         container.addView(divider)
         container.addView(contentView)
     }
 
-    // Cấu hình nút Floating Action Button (Đọc văn bản)
+    // Thiết lập Floating Action Button để đọc văn bản
     private fun setupFab(view: View, info: SpeciesInfo) {
         val fab = view.findViewById<FloatingActionButton>(R.id.fabAction)
 
@@ -227,7 +225,7 @@ class HistoryDetailFragment : Fragment() {
         }
     }
 
-    // Hàm tiện ích để chuyển đổi HTML String sang Spanned
+    // Chuyển đổi HTML string sang Spanned
     private fun fromHtml(html: String): Spanned {
         val result = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT)
@@ -235,7 +233,6 @@ class HistoryDetailFragment : Fragment() {
             @Suppress("DEPRECATION")
             Html.fromHtml(html)
         }
-        // Loại bỏ khoảng trắng thừa ở cuối do Html.fromHtml tạo ra
         return if (result.isNotEmpty() && result[result.length - 1] == '\n') {
             result.subSequence(0, result.length - 1) as Spanned
         } else {
@@ -243,7 +240,7 @@ class HistoryDetailFragment : Fragment() {
         }
     }
 
-    // Hàm tiện ích chuyển đổi dp sang px (Chỉ giữ lại 1 hàm)
+    // Chuyển đổi dp sang px
     private fun Int.dpToPx(): Int {
         return TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
