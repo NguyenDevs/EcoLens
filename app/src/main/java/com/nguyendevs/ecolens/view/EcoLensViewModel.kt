@@ -280,7 +280,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
               "characteristics": "Danh sách gạch đầu dòng, mỗi dòng bắt đầu với • và một ý về hình thái, kích thước, màu sắc. Dùng **in đậm** và ##xanh đậm##.",
               "distribution": "Ưu tiên Việt Nam trước (nếu có), sau đó toàn cầu. Dùng ##xanh đậm## cho tên địa danh.",
               "habitat": "Mô tả chi tiết môi trường sống.",
-              "conservationStatus": "Chỉ ghi một trong các trạng thái: Cực kỳ nguy cấp, Nguy cấp, Sách Đỏ Việt Nam, Sắp nguy cấp, Ít lo ngại, Chưa đánh giá. Thêm thông tin bổ sung từ IUCN nếu có."
+              "conservationStatus": "Chỉ ghi một trong các trạng thái: Cực kỳ nguy cấp, Nguy cấp, Sách Đỏ Việt Nam, Sắp nguy cấp, Ít lo ngại, Chưa đánh giá. Thêm một chút thông tin bổ sung từ IUCN nếu có."
             }
             
             CHỈ TRẢ VỀ JSON, KHÔNG THÊM TEXT KHÁC.
@@ -310,7 +310,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
               "characteristics": "Bullet list, each line starts with • covering morphology, size, colors. Use **bold** and ##green highlight##.",
               "distribution": "Vietnam first (if applicable), then worldwide. Use ##green highlight## for locations.",
               "habitat": "Specific environment details.",
-              "conservationStatus": "Only write one of these statuses: Critically Endangered, Endangered, Vulnerable (Vietnam Red Data Book), Near Threatened, Least Concern, Not Evaluated. Add additional IUCN info if available."
+              "conservationStatus": "Only write one of these statuses: Critically Endangered, Endangered, Vulnerable (Vietnam Red Data Book), Near Threatened, Least Concern, Not Evaluated. Add some additional IUCN info if available."
             }
             
             RETURN ONLY JSON, NO ADDITIONAL TEXT.
