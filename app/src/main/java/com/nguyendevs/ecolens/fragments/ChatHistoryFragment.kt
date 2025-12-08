@@ -26,7 +26,6 @@ class ChatHistoryFragment : Fragment(R.layout.fragment_chat_history) {
         val fab = view.findViewById<ExtendedFloatingActionButton>(R.id.fabNewChat)
 
         adapter = ChatSessionAdapter(emptyList()) { session ->
-            // Click vào item -> Mở ChatFragment với session cũ
             viewModel.loadChatSession(session.id)
             openChatScreen()
         }
@@ -34,7 +33,6 @@ class ChatHistoryFragment : Fragment(R.layout.fragment_chat_history) {
         rv.layoutManager = LinearLayoutManager(requireContext())
         rv.adapter = adapter
 
-        // Load danh sách session
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.allChatSessions.collectLatest { list ->
                 adapter.updateList(list)
@@ -42,7 +40,6 @@ class ChatHistoryFragment : Fragment(R.layout.fragment_chat_history) {
         }
 
         fab.setOnClickListener {
-            // Click New Chat -> Mở ChatFragment mới
             viewModel.startNewChatSession()
             openChatScreen()
         }

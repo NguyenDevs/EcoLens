@@ -30,7 +30,6 @@ class ChatSessionAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val session = sessions[position]
-        // Logic ẩn hiện ngày tháng
         val isFirstOfDay = position == 0 ||
                 dateFormatter.format(Date(session.timestamp)) != dateFormatter.format(Date(sessions[position-1].timestamp))
 

@@ -37,6 +37,7 @@ data class GeminiRequest(
 )
 
 data class GeminiContent(
+    val role: String? = "user",
     val parts: List<GeminiPart>
 )
 

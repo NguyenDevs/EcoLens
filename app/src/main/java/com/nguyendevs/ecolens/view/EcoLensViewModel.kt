@@ -236,7 +236,14 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 """.trimIndent()
             }
 
-            val request = GeminiRequest(listOf(GeminiContent(listOf(GeminiPart(prompt)))))
+            val request = GeminiRequest(
+                contents = listOf(
+                    GeminiContent(
+                        role = "user",
+                        parts = listOf(GeminiPart(text = prompt))
+                    )
+                )
+            )
             val response = apiService.askGemini(request)
 
             val jsonString = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text ?: ""
@@ -368,6 +375,36 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     }
 
 
+    fun initNewChatSession(welcomeMessage: String) {
+        currentSessionId = null
+        _chatMessages.value = emptyList()
+
+        viewModelScope.launch(Dispatchers.IO) {
+            // 1. Tạo session mới ngay lập tức
+            val newSession = ChatSession(
+                title = "Đoạn chat mới",
+                lastMessage = welcomeMessage,
+                timestamp = System.currentTimeMillis()
+            )
+            val newId = chatDao.insertSession(newSession)
+            currentSessionId = newId
+
+            // 2. Chèn tin nhắn chào mừng của BOT (isUser = false)
+            val welcomeMsg = ChatMessage(
+                sessionId = newId,
+                content = welcomeMessage,
+                isUser = false, // Đây là tin nhắn của Bot
+                timestamp = System.currentTimeMillis()
+            )
+            chatDao.insertMessage(welcomeMsg)
+
+            // 3. Collect dữ liệu để UI cập nhật
+            chatDao.getMessagesBySession(newId).collect { messages ->
+                _chatMessages.value = messages
+            }
+        }
+    }
+
     // Hàm gọi khi bắt đầu cuộc hội thoại mới (reset UI, chưa tạo DB vội)
     fun startNewChatSession() {
         currentSessionId = null
@@ -377,25 +414,10 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     fun sendChatMessage(userMessage: String) {
         if (userMessage.isBlank()) return
 
+        val sessionId = currentSessionId ?: return 
+
         viewModelScope.launch(Dispatchers.IO) {
-            // 1. Nếu chưa có session, tạo mới
-            val sessionId = currentSessionId ?: run {
-                val newSession = ChatSession(
-                    title = userMessage.take(30) + "...", // Lấy đoạn đầu làm tiêu đề
-                    lastMessage = userMessage,
-                    timestamp = System.currentTimeMillis()
-                )
-                val newId = chatDao.insertSession(newSession)
-                currentSessionId = newId
-
-                // Bắt đầu lắng nghe tin nhắn của session mới này ngay lập tức
-                launch {
-                    chatDao.getMessagesBySession(newId).collect { _chatMessages.value = it }
-                }
-                newId
-            }
-
-            // 2. Lưu tin nhắn User vào DB
+            // 1. Lưu tin nhắn User vào DB
             val userChatMsg = ChatMessage(
                 sessionId = sessionId,
                 content = userMessage,
@@ -404,27 +426,55 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             )
             chatDao.insertMessage(userChatMsg)
 
-            // Cập nhật lastMessage cho session
+            // Cập nhật session: update title nếu là tin nhắn đầu tiên của user
+            val currentSession = chatDao.getSessionById(sessionId)
+            val newTitle = if (currentSession?.title == "Đoạn chat mới") userMessage.take(30) + "..." else currentSession?.title ?: "Chat"
+
             chatDao.updateSession(
-                chatDao.getSessionById(sessionId)!!.copy(
+                currentSession!!.copy(
+                    title = newTitle,
                     lastMessage = userMessage,
                     timestamp = System.currentTimeMillis()
                 )
             )
 
-            // 3. Hiển thị trạng thái Loading (Fake message trên UI, không lưu DB)
+            // 2. Hiển thị Loading
             val loadingMsg = ChatMessage(sessionId = -1, content = "...", isUser = false, isLoading = true)
             _chatMessages.value = _chatMessages.value + loadingMsg
 
             try {
-                // 4. Gọi API Gemini
-                val prompt = "Bạn là EcoLens AI. Trả lời: \"$userMessage\""
-                val request = GeminiRequest(listOf(GeminiContent(listOf(GeminiPart(prompt)))))
+                // 3. CHUẨN BỊ CONTEXT (Lịch sử chat)
+                // Lấy danh sách tin nhắn hiện tại (trừ loading)
+                val currentHistory = _chatMessages.value.filter { !it.isLoading }
+
+                val geminiContents = mutableListOf<GeminiContent>()
+
+                // Thêm System Instruction (Optional: Để định hình tính cách Bot)
+                // Gemini Flash 1.5 hỗ trợ system instruction qua API riêng,
+                // nhưng với endpoint hiện tại ta có thể 'mớm' vào lượt đầu tiên hoặc chỉ gửi history.
+                // Ở đây ta gửi history:
+
+                currentHistory.forEach { msg ->
+                    // Map tin nhắn DB sang định dạng Gemini
+                    // User -> role: "user"
+                    // Bot -> role: "model"
+                    val role = if (msg.isUser) "user" else "model"
+                    geminiContents.add(
+                        GeminiContent(
+                            role = role,
+                            parts = listOf(GeminiPart(msg.content))
+                        )
+                    )
+                }
+
+                // Gửi Request
+                val request = GeminiRequest(contents = geminiContents)
                 val response = apiService.askGemini(request)
+
                 val reply = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
                     ?: "Xin lỗi, tôi không thể trả lời lúc này."
 
-                // 5. Lưu tin nhắn Bot vào DB (StateFlow sẽ tự cập nhật nhờ collect ở trên)
+                // 4. Lưu tin nhắn Bot vào DB
                 val botChatMsg = ChatMessage(
                     sessionId = sessionId,
                     content = reply,
@@ -433,7 +483,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 )
                 chatDao.insertMessage(botChatMsg)
 
-                // Cập nhật lại session với tin nhắn cuối của bot
+                // Cập nhật session last message
                 chatDao.updateSession(
                     chatDao.getSessionById(sessionId)!!.copy(
                         lastMessage = reply,
@@ -442,8 +492,11 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 )
 
             } catch (e: Exception) {
-                // Xử lý lỗi
-                val errorMsg = ChatMessage(sessionId = sessionId, content = "Lỗi: ${e.message}", isUser = false)
+                e.printStackTrace()
+                // Xử lý lỗi: Xóa loading, thêm thông báo lỗi
+                // (Thực tế StateFlow sẽ tự update khi remove loadingMsg vì ta collect từ DB,
+                // nhưng loadingMsg là list tạm, nên ta chỉ cần insert msg lỗi vào DB)
+                val errorMsg = ChatMessage(sessionId = sessionId, content = "Lỗi kết nối: ${e.message}", isUser = false)
                 chatDao.insertMessage(errorMsg)
             }
         }

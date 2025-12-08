@@ -39,9 +39,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="24dp"
-            android:text="Đoạn chat mới"
             android:textColor="@color/white"
-            app:icon="@drawable/ic_chat_bot"
+            app:icon="@drawable/ic_chat_add"
+            app:iconSize="35dp"
             app:iconTint="@color/white"
             android:backgroundTint="@color/green_primary"/>
 

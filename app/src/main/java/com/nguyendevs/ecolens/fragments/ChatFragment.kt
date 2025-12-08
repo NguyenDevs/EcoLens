@@ -44,7 +44,7 @@ class ChatFragment : Fragment() {
         observeViewModel()
 
         if (viewModel.chatMessages.value.isEmpty()) {
-            viewModel.sendChatMessage(getString(R.string.chat_welcome))
+            viewModel.initNewChatSession(getString(R.string.chat_welcome))
         }
     }
 
