@@ -12,7 +12,7 @@
     <!-- Navigation -->
     <string name="nav_home">Home</string>
     <string name="nav_history">History</string>
-    <string name="nav_my_garden">Favorites</string>
+    <string name="nav_my_garden">AI Assistant</string>
     <string name="nav_settings">Settings</string>
 
     <!-- Common Actions -->
@@ -30,7 +30,7 @@
     <string name="zoom_in">Zoom in</string>
     <string name="zoom_out">Zoom out</string>
     <string name="fullscreen_image">Fullscreen</string>
-    <string name="favorite">Favorites</string>
+    <string name="favorite">AI Assistant</string>
     <string name="view_detail">Detail</string>
     <string name="copy_scientific_name">Copy scientific name</string>
     <string name="share_info">Share info</string>

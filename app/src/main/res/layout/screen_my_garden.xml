@@ -1,41 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/background_color">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:background="@color/background_color"
+              android:paddingTop="24dp">
 
-    <LinearLayout
+    <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:orientation="vertical"
-            android:gravity="center_horizontal">
+            android:text="Trợ lý Sinh Học"
+            android:textSize="24sp"
+            android:textColor="@color/green_primary"
+            android:textStyle="bold"
+            android:layout_marginStart="20dp"
+            android:layout_marginBottom="16dp"/>
 
-        <ImageView
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:src="@drawable/ic_favorite"
-                android:contentDescription="@string/my_garden"
-                app:tint="#BDBDBD" />
+    <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvChat"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:paddingBottom="16dp"/>
 
-        <TextView
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="bottom"
+            android:padding="12dp"
+            android:background="@color/white"
+            android:elevation="8dp">
+
+        <EditText
+                android:id="@+id/etChatInput"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/bg_flag_rounded"
+                android:backgroundTint="#F5F5F5"
+                android:hint="Hỏi về động thực vật..."
+                android:padding="12dp"
+                android:maxLines="4"
+                android:minHeight="48dp"
+                android:layout_marginEnd="8dp"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btnSend"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/my_garden_title"
-                android:textSize="20sp"
-                android:textColor="#757575"
-                android:layout_marginTop="16dp" />
-
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/my_garden_desc"
-                android:textSize="14sp"
-                android:textColor="#BDBDBD"
-                android:layout_marginTop="8dp" />
+                android:src="@drawable/ic_arrow_right"
+                app:fabSize="mini"
+                app:backgroundTint="@color/green_primary"
+                app:tint="@color/white"
+                app:elevation="0dp"/>
 
     </LinearLayout>
 
-</FrameLayout>
+</LinearLayout>

@@ -58,6 +58,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var speakerManager: SpeakerManager
     private lateinit var speciesInfoCard: MaterialCardView
     private lateinit var speciesInfoHandler: SpeciesInfoHandler
+    private lateinit var chatHandler: ChatHandler
     private lateinit var viewModel: EcoLensViewModel
 
     private var historyFragment: HistoryFragment? = null
@@ -152,6 +153,13 @@ class MainActivity : AppCompatActivity() {
             loadingCard.findViewById(R.id.tvLoading),
             lifecycleScope
         )
+        chatHandler = ChatHandler(
+            this,
+            myGardenContainer,
+            viewModel,
+            this
+        )
+        chatHandler.setup()
     }
 
     private fun initManagers() {

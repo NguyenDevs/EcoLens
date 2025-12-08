@@ -22,6 +22,7 @@ import com.nguyendevs.ecolens.network.RetrofitClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import com.nguyendevs.ecolens.model.ChatMessage
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -450,4 +451,80 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     data class Candidate(val content: Content?)
     data class Content(val parts: List<Part>?)
     data class Part(val text: String?)
+
+    private val _chatMessages = MutableStateFlow<List<ChatMessage>>(emptyList())
+    val chatMessages: StateFlow<List<ChatMessage>> = _chatMessages.asStateFlow()
+
+    fun sendChatMessage(userMessage: String) {
+        if (userMessage.isBlank()) return
+
+        // 1. Thêm tin nhắn user vào list
+        val currentList = _chatMessages.value.toMutableList()
+        currentList.add(ChatMessage(userMessage, true))
+        // Thêm tin nhắn loading giả
+        currentList.add(ChatMessage("Đang suy nghĩ...", false, isLoading = true))
+        _chatMessages.value = currentList
+
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // Gọi API
+                val responseText = callGeminiForChat(userMessage)
+
+                // Cập nhật lại UI
+                withContext(Dispatchers.Main) {
+                    val updatedList = _chatMessages.value.toMutableList()
+                    // Xóa loading
+                    updatedList.removeLastOrNull()
+                    // Thêm câu trả lời thật
+                    updatedList.add(ChatMessage(responseText, false))
+                    _chatMessages.value = updatedList
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    val updatedList = _chatMessages.value.toMutableList()
+                    updatedList.removeLastOrNull()
+                    updatedList.add(ChatMessage("Lỗi: ${e.message}", false))
+                    _chatMessages.value = updatedList
+                }
+            }
+        }
+    }
+
+    private fun callGeminiForChat(message: String): String {
+        val workerUrl = "${BuildConfig.WORKER_BASE_URL}gemini"
+
+        // Prompt định hướng tính cách
+        val prompt = """
+            Bạn là EcoLens AI, một trợ lý ảo chuyên gia về sinh học, thiên nhiên và môi trường. 
+            Hãy trả lời câu hỏi sau của người dùng một cách thân thiện, chính xác và ngắn gọn bằng Tiếng Việt.
+            Nếu câu hỏi không liên quan đến động vật, thực vật hoặc thiên nhiên, hãy lịch sự từ chối.
+            
+            Câu hỏi: "$message"
+        """.trimIndent()
+
+        val requestBody = mapOf(
+            "contents" to listOf(
+                mapOf("parts" to listOf(mapOf("text" to prompt)))
+            )
+        )
+
+        val client = OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .build()
+
+        val json = Gson().toJson(requestBody)
+        val body = json.toRequestBody("application/json".toMediaTypeOrNull())
+        val request = Request.Builder()
+            .url(workerUrl)
+            .post(body)
+            .build()
+
+        val response = client.newCall(request).execute()
+        val responseBody = response.body?.string() ?: ""
+
+        val geminiResponse = Gson().fromJson(responseBody, GeminiResponse::class.java)
+        return geminiResponse.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
+            ?: "Xin lỗi, tôi không thể trả lời lúc này."
+    }
 }
