@@ -20,6 +20,7 @@ import com.nguyendevs.ecolens.adapters.HistoryAdapter
 import com.nguyendevs.ecolens.model.HistoryEntry
 import com.nguyendevs.ecolens.model.HistorySortOption
 import com.nguyendevs.ecolens.view.EcoLensViewModel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -71,12 +72,8 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
     private fun setupAdapter() {
         adapter = HistoryAdapter(
             historyList = emptyList(),
-            clickListener = { entry ->
-                navigateToDetail(entry)
-            },
-            favoriteClickListener = { entry ->
-                viewModel.toggleFavorite(entry)
-            }
+            clickListener = { entry -> navigateToDetail(entry) },
+            favoriteClickListener = { entry -> viewModel.toggleFavorite(entry) }
         )
         rvHistory.adapter = adapter
     }
@@ -90,10 +87,7 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
         }
 
         parentFragmentManager.beginTransaction()
-            .setCustomAnimations(
-                R.anim.slide_in_bottom, R.anim.hold,
-                R.anim.hold, R.anim.slide_out_bottom
-            )
+            .setCustomAnimations(R.anim.slide_in_bottom, R.anim.hold, R.anim.hold, R.anim.slide_out_bottom)
             .add(R.id.fragmentContainer, fragment)
             .addToBackStack("Detail")
             .commit()
@@ -101,32 +95,23 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
 
     private fun observeHistory() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.getHistoryBySortOption(currentSortOption).collect { list ->
-                val filteredList = if (filterStartDate != null && filterEndDate != null) {
-                    list.filter { it.timestamp in filterStartDate!!..filterEndDate!! }
-                } else {
-                    list
+            viewModel.getHistoryBySortOption(currentSortOption, filterStartDate, filterEndDate)
+                .collectLatest { list ->
+                    if (list.isEmpty()) {
+                        rvHistory.visibility = View.GONE
+                        emptyStateContainer.visibility = View.VISIBLE
+                    } else {
+                        rvHistory.visibility = View.VISIBLE
+                        emptyStateContainer.visibility = View.GONE
+                        adapter.updateList(list)
+                    }
                 }
-
-                if (filteredList.isEmpty()) {
-                    rvHistory.visibility = View.GONE
-                    emptyStateContainer.visibility = View.VISIBLE
-                } else {
-                    rvHistory.visibility = View.VISIBLE
-                    emptyStateContainer.visibility = View.GONE
-                    adapter.updateList(filteredList)
-                }
-            }
         }
     }
 
     private fun setupClickListeners() {
         optionsHeader.setOnClickListener { toggleOptionsExpansion() }
-
-        btnSort.setOnClickListener {
-            toggleSortOption()
-        }
-
+        btnSort.setOnClickListener { toggleSortOption() }
         btnFilterByDate.setOnClickListener { showDateRangePickerDialog() }
         btnClearFilter.setOnClickListener { clearDateFilter() }
     }
@@ -142,11 +127,10 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
     }
 
     private fun updateSortUI() {
-        if (currentSortOption == HistorySortOption.NEWEST_FIRST) {
-            tvCurrentSort.text = getString(R.string.sort_newest_first)
-        } else {
-            tvCurrentSort.text = getString(R.string.sort_oldest_first)
-        }
+        tvCurrentSort.text = if (currentSortOption == HistorySortOption.NEWEST_FIRST)
+            getString(R.string.sort_newest_first)
+        else
+            getString(R.string.sort_oldest_first)
     }
 
     private fun toggleOptionsExpansion() {
@@ -156,40 +140,32 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
     private fun expandOptions() {
         isOptionsExpanded = true
         ivExpandIcon.animate().rotation(180f).setDuration(300).start()
-
-        optionsContainer.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED))
+        optionsContainer.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
         val targetHeight = optionsContainer.measuredHeight
-
         optionsContainer.layoutParams.height = 0
         optionsContainer.visibility = View.VISIBLE
-
-        val animator = ValueAnimator.ofInt(0, targetHeight)
-        animator.addUpdateListener { animation ->
-            optionsContainer.layoutParams.height = animation.animatedValue as Int
-            optionsContainer.requestLayout()
-        }
-        animator.interpolator = AccelerateDecelerateInterpolator()
-        animator.duration = 300
-        animator.start()
+        animateHeight(0, targetHeight)
     }
 
     private fun collapseOptions() {
         isOptionsExpanded = false
         ivExpandIcon.animate().rotation(0f).setDuration(300).start()
+        animateHeight(optionsContainer.height, 0) { optionsContainer.visibility = View.GONE }
+    }
 
-        val initialHeight = optionsContainer.height
-        val animator = ValueAnimator.ofInt(initialHeight, 0)
+    private fun animateHeight(from: Int, to: Int, onEnd: (() -> Unit)? = null) {
+        val animator = ValueAnimator.ofInt(from, to)
         animator.addUpdateListener { animation ->
             optionsContainer.layoutParams.height = animation.animatedValue as Int
             optionsContainer.requestLayout()
         }
-        animator.addListener(object : android.animation.AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: android.animation.Animator) {
-                optionsContainer.visibility = View.GONE
-            }
-        })
         animator.interpolator = AccelerateDecelerateInterpolator()
         animator.duration = 300
+        onEnd?.let {
+            animator.addListener(object : android.animation.AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: android.animation.Animator) { it() }
+            })
+        }
         animator.start()
     }
 
@@ -203,7 +179,6 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
         picker.addOnPositiveButtonClickListener { selection ->
             filterStartDate = selection.first
             filterEndDate = selection.second + 86400000L - 1L
-
             tvFilterSubtitle.text = "${dateFormatter.format(selection.first)} - ${dateFormatter.format(selection.second)}"
             tvFilterSubtitle.setTextColor(resources.getColor(R.color.green_primary, null))
             btnClearFilter.visibility = View.VISIBLE

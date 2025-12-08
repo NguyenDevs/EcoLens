@@ -18,4 +18,9 @@ interface INaturalistApi {
         @Path("id") taxonId: Int,
         @Query("locale") locale: String = "vi"
     ): TaxonDetailsResponse
+
+    @POST("gemini")
+    suspend fun askGemini(
+        @Body request: GeminiRequest
+    ): GeminiResponse
 }

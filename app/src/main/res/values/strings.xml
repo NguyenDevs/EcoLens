@@ -27,7 +27,7 @@
     <string name="zoom_in">Phóng to</string>
     <string name="zoom_out">Thu nhỏ</string>
     <string name="fullscreen_image">Ảnh toàn màn hình</string>
-    <string name="favorite">Trợ lý AI</string>
+    <string name="favorite">Trợ lý</string>
     <string name="view_detail">Xem chi tiết</string>
     <string name="copy_scientific_name">Sao chép tên khoa học</string>
     <string name="share_info">Chia sẻ thông tin</string>
@@ -81,7 +81,7 @@
     <string name="history_placeholder">Lịch sử</string>
     <string name="history_subtitle">Xem lịch sử các loài đã nhận diện</string>
 
-    <string name="my_garden">Yêu thích</string>
+    <string name="my_garden">Trợ lý</string>
     <string name="my_garden_title">Mục yêu thích</string>
     <string name="my_garden_desc">Tính năng đang trong quá trình phát triển</string>
     <string name="garden_placeholder">Tính năng đang trong quá trình phát triển</string>

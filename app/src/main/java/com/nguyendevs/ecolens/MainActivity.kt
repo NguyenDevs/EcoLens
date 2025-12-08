@@ -94,9 +94,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         initViews()
-        initHandlers()
+        setupViewModel()  // ✅ DI CHUYỂN LÊN TRƯỚC initHandlers()
+        initHandlers()    // ✅ BÂY GIỜ viewModel ĐÃ ĐƯỢC KHỞI TẠO
         initManagers()
-        setupViewModel()
         setupBottomNavigation()
         setupFAB()
         setupObservers()
@@ -128,6 +128,13 @@ class MainActivity : AppCompatActivity() {
         speciesInfoCard = findViewById(R.id.speciesInfoCard)
     }
 
+    private fun setupViewModel() {
+        viewModel = ViewModelProvider(
+            this,
+            ViewModelProvider.AndroidViewModelFactory.getInstance(application)
+        )[EcoLensViewModel::class.java]
+    }
+
     private fun initHandlers() {
         settingsHandler = SettingsHandler(this, languageManager, settingsContainer)
         settingsHandler.setup()
@@ -156,7 +163,7 @@ class MainActivity : AppCompatActivity() {
         chatHandler = ChatHandler(
             this,
             myGardenContainer,
-            viewModel,
+            viewModel,  // ✅ BÂY GIỜ viewModel ĐÃ ĐƯỢC KHỞI TẠO
             this
         )
         chatHandler.setup()
@@ -186,13 +193,6 @@ class MainActivity : AppCompatActivity() {
                 }, 400)
             }
         }
-    }
-
-    private fun setupViewModel() {
-        viewModel = ViewModelProvider(
-            this,
-            ViewModelProvider.AndroidViewModelFactory.getInstance(application)
-        )[EcoLensViewModel::class.java]
     }
 
     private fun handleCapturedImage(uri: Uri) {

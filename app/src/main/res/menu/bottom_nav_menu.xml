@@ -19,7 +19,7 @@
 
     <item
             android:id="@+id/nav_my_garden"
-            android:icon="@drawable/ic_favorite"
+            android:icon="@drawable/ic_chat_bot"
             android:title="@string/nav_my_garden" />
 
     <item

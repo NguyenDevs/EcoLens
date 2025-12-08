@@ -1,6 +1,5 @@
 package com.nguyendevs.ecolens.api
 
-// iNaturalist API Models
 data class Taxon(
     val id: Int,
     val name: String,
@@ -31,4 +30,24 @@ data class TaxonDetailsResponse(
 data class TaxonDetail(
     val id: Int,
     val wikipedia_summary: String = ""
+)
+
+data class GeminiRequest(
+    val contents: List<GeminiContent>
+)
+
+data class GeminiContent(
+    val parts: List<GeminiPart>
+)
+
+data class GeminiPart(
+    val text: String
+)
+
+data class GeminiResponse(
+    val candidates: List<GeminiCandidate>?
+)
+
+data class GeminiCandidate(
+    val content: GeminiContent?
 )
