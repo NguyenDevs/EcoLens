@@ -23,7 +23,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.nguyendevs.ecolens.activities.CameraActivity
-import com.nguyendevs.ecolens.fragments.ChatFragment
+import com.nguyendevs.ecolens.fragments.ChatHistoryFragment
 import com.nguyendevs.ecolens.fragments.HistoryFragment
 import com.nguyendevs.ecolens.handlers.*
 import com.nguyendevs.ecolens.managers.*
@@ -263,10 +263,7 @@ class MainActivity : AppCompatActivity() {
 
             if (item.itemId == R.id.nav_my_garden) {
                 openChatFragment()
-                // Giữ nguyên tab hiện tại là Home hoặc History bên dưới visual, hoặc set item này checked
-                // Nếu muốn Chatbot hoạt động như một màn hình modal đè lên:
                 return@setOnItemSelectedListener false
-                // Return false để không sáng icon tab Garden, giữ icon cũ đang sáng
             }
 
             updateNavigationState(item.itemId)
@@ -276,7 +273,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun openChatFragment() {
         overlayContainer.visibility = View.VISIBLE
-        val fragment = ChatFragment()
+        val fragment = ChatHistoryFragment()
         supportFragmentManager.beginTransaction()
             .setCustomAnimations(
                 R.anim.fade_in,
@@ -285,7 +282,7 @@ class MainActivity : AppCompatActivity() {
                 R.anim.fade_out
             )
             .replace(R.id.fragmentContainer, fragment)
-            .addToBackStack("chat_fragment")
+            .addToBackStack("chat_history")
             .commit()
     }
 

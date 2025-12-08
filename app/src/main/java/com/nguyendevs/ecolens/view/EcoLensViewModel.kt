@@ -11,11 +11,13 @@ import com.nguyendevs.ecolens.api.GeminiContent
 import com.nguyendevs.ecolens.api.GeminiPart
 import com.nguyendevs.ecolens.api.GeminiRequest
 import com.nguyendevs.ecolens.database.HistoryDatabase
+import com.nguyendevs.ecolens.database.ChatDao
 import com.nguyendevs.ecolens.model.ChatMessage
 import com.nguyendevs.ecolens.model.EcoLensUiState
 import com.nguyendevs.ecolens.model.HistoryEntry
 import com.nguyendevs.ecolens.model.HistorySortOption
 import com.nguyendevs.ecolens.model.SpeciesInfo
+import com.nguyendevs.ecolens.model.ChatSession
 import com.nguyendevs.ecolens.network.RetrofitClient
 import com.nguyendevs.ecolens.utils.ImageUtils
 import kotlinx.coroutines.Dispatchers
@@ -34,8 +36,11 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
     private val apiService = RetrofitClient.iNaturalistApi
     private val historyDao = HistoryDatabase.getDatabase(application).historyDao()
+    private val chatDao = HistoryDatabase.getDatabase(application).chatDao()
 
     private val _uiState = MutableStateFlow(EcoLensUiState())
+    private var currentSessionId: Long? = null
+    val allChatSessions: Flow<List<ChatSession>> = chatDao.getAllSessions()
     val uiState: StateFlow<EcoLensUiState> = _uiState.asStateFlow()
 
     private val _chatMessages = MutableStateFlow<List<ChatMessage>>(emptyList())
@@ -353,35 +358,93 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             .trim()
     }
 
+    fun loadChatSession(sessionId: Long) {
+        currentSessionId = sessionId
+        viewModelScope.launch {
+            chatDao.getMessagesBySession(sessionId).collect { messages ->
+                _chatMessages.value = messages
+            }
+        }
+    }
+
+
+    // Hàm gọi khi bắt đầu cuộc hội thoại mới (reset UI, chưa tạo DB vội)
+    fun startNewChatSession() {
+        currentSessionId = null
+        _chatMessages.value = emptyList() // Hoặc list chứa message Welcome
+    }
+
     fun sendChatMessage(userMessage: String) {
         if (userMessage.isBlank()) return
 
-        val currentList = _chatMessages.value.toMutableList()
-        currentList.add(ChatMessage(userMessage, true))
-        currentList.add(ChatMessage("Đang suy nghĩ...", false, isLoading = true))
-        _chatMessages.value = currentList
-
         viewModelScope.launch(Dispatchers.IO) {
+            // 1. Nếu chưa có session, tạo mới
+            val sessionId = currentSessionId ?: run {
+                val newSession = ChatSession(
+                    title = userMessage.take(30) + "...", // Lấy đoạn đầu làm tiêu đề
+                    lastMessage = userMessage,
+                    timestamp = System.currentTimeMillis()
+                )
+                val newId = chatDao.insertSession(newSession)
+                currentSessionId = newId
+
+                // Bắt đầu lắng nghe tin nhắn của session mới này ngay lập tức
+                launch {
+                    chatDao.getMessagesBySession(newId).collect { _chatMessages.value = it }
+                }
+                newId
+            }
+
+            // 2. Lưu tin nhắn User vào DB
+            val userChatMsg = ChatMessage(
+                sessionId = sessionId,
+                content = userMessage,
+                isUser = true,
+                timestamp = System.currentTimeMillis()
+            )
+            chatDao.insertMessage(userChatMsg)
+
+            // Cập nhật lastMessage cho session
+            chatDao.updateSession(
+                chatDao.getSessionById(sessionId)!!.copy(
+                    lastMessage = userMessage,
+                    timestamp = System.currentTimeMillis()
+                )
+            )
+
+            // 3. Hiển thị trạng thái Loading (Fake message trên UI, không lưu DB)
+            val loadingMsg = ChatMessage(sessionId = -1, content = "...", isUser = false, isLoading = true)
+            _chatMessages.value = _chatMessages.value + loadingMsg
+
             try {
-                val prompt = "Bạn là EcoLens AI, chuyên gia sinh học. Trả lời ngắn gọn bằng Tiếng Việt: \"$userMessage\""
+                // 4. Gọi API Gemini
+                val prompt = "Bạn là EcoLens AI. Trả lời: \"$userMessage\""
                 val request = GeminiRequest(listOf(GeminiContent(listOf(GeminiPart(prompt)))))
                 val response = apiService.askGemini(request)
+                val reply = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
+                    ?: "Xin lỗi, tôi không thể trả lời lúc này."
 
-                val reply = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text ?: "Xin lỗi, tôi không thể trả lời."
+                // 5. Lưu tin nhắn Bot vào DB (StateFlow sẽ tự cập nhật nhờ collect ở trên)
+                val botChatMsg = ChatMessage(
+                    sessionId = sessionId,
+                    content = reply,
+                    isUser = false,
+                    timestamp = System.currentTimeMillis()
+                )
+                chatDao.insertMessage(botChatMsg)
 
-                withContext(Dispatchers.Main) {
-                    val updatedList = _chatMessages.value.toMutableList()
-                    updatedList.removeLastOrNull()
-                    updatedList.add(ChatMessage(reply, false))
-                    _chatMessages.value = updatedList
-                }
+                // Cập nhật lại session với tin nhắn cuối của bot
+                chatDao.updateSession(
+                    chatDao.getSessionById(sessionId)!!.copy(
+                        lastMessage = reply,
+                        timestamp = System.currentTimeMillis()
+                    )
+                )
+
             } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    val updatedList = _chatMessages.value.toMutableList()
-                    updatedList.removeLastOrNull()
-                    updatedList.add(ChatMessage("Lỗi: ${e.message}", false))
-                    _chatMessages.value = updatedList
-                }
+                // Xử lý lỗi
+                val errorMsg = ChatMessage(sessionId = sessionId, content = "Lỗi: ${e.message}", isUser = false)
+                chatDao.insertMessage(errorMsg)
             }
         }
     }

@@ -5,13 +5,17 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.nguyendevs.ecolens.model.ChatMessage
+import com.nguyendevs.ecolens.model.ChatSession
 import com.nguyendevs.ecolens.model.HistoryEntry
 
-@Database(entities = [HistoryEntry::class], version = 1, exportSchema = false)
+// Tăng version lên 2 và thêm entities mới
+@Database(entities = [HistoryEntry::class, ChatSession::class, ChatMessage::class], version = 2, exportSchema = false)
 @TypeConverters(HistoryTypeConverters::class)
 abstract class HistoryDatabase : RoomDatabase() {
 
     abstract fun historyDao(): HistoryDao
+    abstract fun chatDao(): ChatDao
 
     companion object {
         @Volatile
@@ -23,7 +27,9 @@ abstract class HistoryDatabase : RoomDatabase() {
                     context.applicationContext,
                     HistoryDatabase::class.java,
                     "ecolens_history_db"
-                ).build()
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
                 instance
             }
