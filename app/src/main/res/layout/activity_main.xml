@@ -25,11 +25,6 @@
                 android:visibility="gone"/>
 
         <include
-                android:id="@+id/myGardenContainer"
-                layout="@layout/screen_chat_bot"
-                android:visibility="gone"/>
-
-        <include
                 android:id="@+id/settingsContainer"
                 layout="@layout/screen_settings"
                 android:visibility="gone"/>
@@ -230,6 +225,15 @@
                 android:contentDescription="@string/zoom_out" />
 
     </FrameLayout>
+    <include
+            android:id="@+id/myGardenContainer"
+            layout="@layout/screen_chat_bot"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:elevation="50dp"
+            android:clickable="true"
+            android:focusable="true"/>
     <FrameLayout
             android:id="@+id/fragmentContainer"
             android:layout_width="match_parent"

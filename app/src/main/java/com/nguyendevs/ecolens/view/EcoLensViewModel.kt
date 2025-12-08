@@ -212,11 +212,11 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                   "genus": "Scientific name",
                   "species": "Scientific name",
                   "rank": "Rank",
-                  "description": "4-sentence overview, <b>bold</b>, <font color='$highlightColor'><b>green bold</b></font> for names/measurements.",
-                  "characteristics": "A single string with bullet points (•), <b>bold</b>, <font color='$highlightColor'><b>green bold</b></font>.",
-                  "distribution": "VN first. <font color='$highlightColor'><b>green bold</b></font>.",
-                  "habitat": "Habitat details.",
-                  "conservationStatus": "Status color: <font color='$dangerColor'><b>Critically Endangered</b></font>, <font color='$dangerColor'><b>Endangered</b></font>, <font color='$redBookColor'><b>Vulnerable</b></font>, <font color='$vulnerableColor'><b>Near Threatened</b></font>, <font color='$leastConcernColor'><b>Least Concern</b></font>, <font color='$notRankedColor'><b>Not Evaluated</b></font>."
+                  "description": "4-sentence overview with <b>bold</b> for key features and <font color='$highlightColor'><b>green bold</b></font> for places/names/measurements.",
+                  "characteristics": "Bullet points (•) on new lines covering morphology, size, colors. Use <b>bold</b> and <font color='$highlightColor'><b>green bold</b></font> formatting.",
+                  "distribution": "Vietnam first (if applicable), then worldwide. Use <font color='$highlightColor'><b>green bold</b></font> for locations.",
+                  "habitat": "Specific environment details with formatting.",
+                  "conservationStatus": "Status with color: <font color='$dangerColor'><b>Critically Endangered</b></font>, <font color='$dangerColor'><b>Endangered</b></font>, <font color='$redBookColor'><b>Vulnerable (Vietnam Red Data Book)</b></font>, <font color='$vulnerableColor'><b>Near Threatened</b></font>, <font color='$leastConcernColor'><b>Least Concern</b></font>, <font color='$notRankedColor'><b>Not Evaluated</b></font> and additional info from IUCN."
                 }
                 RETURN ONLY JSON.
                 """.trimIndent()

@@ -313,9 +313,8 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.nav_my_garden -> {
                 myGardenContainer.visibility = View.VISIBLE
-                bottomNav.visibility = View.GONE
-                fabCamera.visibility = View.GONE
                 searchBarContainer.visibility = View.GONE
+
             }
             R.id.nav_settings -> settingsContainer.visibility = View.VISIBLE
         }
