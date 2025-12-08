@@ -13,6 +13,11 @@ import com.nguyendevs.ecolens.adapters.ChatSessionAdapter
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import android.content.Context
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 
 class ChatHistoryFragment : Fragment(R.layout.fragment_chat_history) {
 
@@ -54,6 +59,7 @@ class ChatHistoryFragment : Fragment(R.layout.fragment_chat_history) {
     // Thiết lập listener cho nút tạo chat mới
     private fun setupFabListener(fab: ExtendedFloatingActionButton) {
         fab.setOnClickListener {
+            performHapticFeedback()
             viewModel.startNewChatSession()
             openChatScreen()
         }
@@ -66,5 +72,28 @@ class ChatHistoryFragment : Fragment(R.layout.fragment_chat_history) {
             .replace(R.id.fragmentContainer, ChatFragment())
             .addToBackStack("chat_detail")
             .commit()
+    }
+
+    // Hàm tạo hiệu ứng rung
+    private fun performHapticFeedback() {
+        try {
+            val context = requireContext()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                val vibrator = vibratorManager.defaultVibrator
+                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                @Suppress("DEPRECATION")
+                val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+                } else {
+                    @Suppress("DEPRECATION")
+                    vibrator.vibrate(50)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }

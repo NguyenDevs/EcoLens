@@ -22,6 +22,7 @@ import com.nguyendevs.ecolens.adapters.ChatAdapter
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import android.view.inputmethod.InputMethodManager
 
 class ChatFragment : Fragment() {
 
@@ -53,6 +54,11 @@ class ChatFragment : Fragment() {
 
         if (viewModel.chatMessages.value.isEmpty()) {
             viewModel.initNewChatSession(getString(R.string.chat_welcome))
+        }
+        etInput.post {
+            etInput.requestFocus()
+            val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(etInput, InputMethodManager.SHOW_IMPLICIT)
         }
     }
 
