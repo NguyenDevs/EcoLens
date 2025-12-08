@@ -4,59 +4,135 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical"
-              android:background="@color/background_color"
-              android:paddingTop="24dp">
+              android:background="@color/background_soft">
 
-    <TextView
-            android:layout_width="wrap_content"
+    <!-- Header với shadow nhẹ -->
+    <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Trợ lý AI"
-            android:textSize="24sp"
-            android:textColor="@color/green_primary"
-            android:textStyle="bold"
-            android:layout_marginStart="20dp"
-            android:layout_marginBottom="16dp"/>
+            app:cardElevation="4dp"
+            app:cardCornerRadius="0dp"
+            app:cardBackgroundColor="@color/white">
 
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="16dp">
+
+            <ImageView
+                    android:id="@+id/btnBackChat"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:src="@drawable/ic_back"
+                    app:tint="@color/text_primary"
+                    android:padding="10dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"/>
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="@string/my_garden_title"
+                    android:textSize="20sp"
+                    android:textColor="@color/green_primary"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.01"/>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Chat RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvChat"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:clipToPadding="false"
-            android:paddingBottom="16dp"/>
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:scrollbars="vertical"
+            android:overScrollMode="ifContentScrolls"/>
 
+    <!-- Input Area với design hiện đại -->
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="bottom"
-            android:padding="12dp"
+            android:orientation="vertical"
             android:background="@color/white"
             android:elevation="8dp">
 
-        <EditText
-                android:id="@+id/etChatInput"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/bg_flag_rounded"
-                android:backgroundTint="#F5F5F5"
-                android:hint="Hỏi về động thực vật..."
-                android:padding="12dp"
-                android:maxLines="4"
-                android:minHeight="48dp"
-                android:layout_marginEnd="8dp"/>
+        <!-- Divider mỏng -->
+        <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="#E8E8E8"/>
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/btnSend"
-                android:layout_width="wrap_content"
+        <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_arrow_right"
-                app:fabSize="mini"
-                app:backgroundTint="@color/green_primary"
-                app:tint="@color/white"
-                app:elevation="0dp"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp">
 
+            <!-- Input field với border mỏng hơn -->
+            <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:cardCornerRadius="22dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="#D0D0D0"
+                    app:strokeWidth="0.5dp"
+                    app:cardBackgroundColor="@color/white">
+
+                <EditText
+                        android:id="@+id/etChatInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:hint="@string/chat_hint"
+                        android:paddingStart="18dp"
+                        android:paddingEnd="18dp"
+                        android:paddingTop="10dp"
+                        android:paddingBottom="10dp"
+                        android:textSize="15sp"
+                        android:maxLines="4"
+                        android:minHeight="44dp"
+                        android:inputType="textCapSentences|textMultiLine"
+                        android:textColor="@color/text_primary"
+                        android:textColorHint="#999999"/>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_marginStart="10dp"
+                    app:cardCornerRadius="22dp"
+                    app:cardElevation="0dp"
+                    app:cardBackgroundColor="@color/green_primary">
+
+                <ImageView
+                        android:id="@+id/btnSend"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_send"
+                        android:padding="10dp"
+                        app:tint="@color/white"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:focusable="true"/>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>

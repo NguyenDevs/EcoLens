@@ -1,5 +1,4 @@
 <resources>
-    <!-- App Info -->
     <string name="app_name">EcoLens</string>
     <string name="app_title">EcoLens</string>
     <string name="app_subtitle">IDENTIFY SPECIES VIA IMAGES</string>
@@ -9,13 +8,11 @@
     <string name="banner_subtitle">Flora and Fauna</string>
     <string name="banner_action">Tap to capture</string>
 
-    <!-- Navigation -->
     <string name="nav_home">Home</string>
     <string name="nav_history">History</string>
     <string name="nav_my_garden">AI Assistant</string>
     <string name="nav_settings">Settings</string>
 
-    <!-- Common Actions -->
     <string name="ok">OK</string>
     <string name="camera">Camera</string>
     <string name="search">Search</string>
@@ -38,7 +35,6 @@
     <string name="history_image">Image history</string>
     <string name="search_hint">Search on Google...</string>
 
-    <!-- Labels -->
     <string name="label_common_name">Common name</string>
     <string name="label_scientific_name">Scientific name</string>
     <string name="label_confidence_template">Confidence: %s</string>
@@ -50,59 +46,47 @@
     <string name="label_genus">Genus:</string>
     <string name="label_species">Species:</string>
 
-    <!-- TTS (Text-to-Speech) -->
     <string name="tts_scientific_name">Scientific name</string>
     <string name="tts_taxonomy">Scientific classification</string>
 
-    <!-- Unknown Values -->
     <string name="unknown_common_name">[Unknown common name]</string>
     <string name="unknown_scientific_name">[Unknown scientific name]</string>
 
-    <!-- Time & Date -->
     <string name="time_prefix">Time: </string>
 
-    <!-- Permissions -->
     <string name="permission_title">Permission Required</string>
     <string name="permission_message">This app needs camera and storage permissions to function.</string>
 
-    <!-- Image Related -->
     <string name="image_preview">Image Preview</string>
     <string name="no_image">No Image</string>
     <string name="no_image_selected">No image selected</string>
 
-    <!-- Analysis & Loading -->
     <string name="analyzing">Analyzing image…</string>
     <string name="analyzing_text">Analyzing image</string>
     <string name="loading_analyzing">Analyzing image...</string>
 
-    <!-- Confidence -->
     <string name="confidence">Confidence</string>
     <string name="confidence_format">Confidence: %s%%</string>
 
-    <!-- Taxonomy Section -->
     <string name="taxonomy_title">🔬 Scientific Classification</string>
 
-    <!-- Information Sections -->
     <string name="section_description">📖 Description</string>
     <string name="section_characteristics">✨ Characteristics</string>
     <string name="section_distribution">🌍 Distribution</string>
     <string name="section_habitat">🏞️ Habitat</string>
     <string name="section_conservation">🛡️ Conservation Status</string>
 
-    <!-- History Screen -->
     <string name="history">History</string>
     <string name="history_title_label">History</string>
     <string name="history_placeholder">History</string>
-    <string name="history_subtitle">Xem lịch sử các loài đã nhận diện</string>
+    <string name="history_subtitle">View identification history</string>
 
-    <!-- My Garden Screen -->
-    <string name="my_garden">Assistant</string>
-    <string name="my_garden_title">Favorites</string>
-    <string name="my_garden_desc">Feature under development</string>
-    <string name="garden_placeholder">Favorites</string>
-    <string name="garden_subtitle">Feature under development</string>
+    <string name="my_garden">AI Assistant</string>
+    <string name="my_garden_title">AI Assistant</string>
+    <string name="my_garden_desc">Chat about biology with AI</string>
+    <string name="garden_placeholder">AI Assistant</string>
+    <string name="garden_subtitle">Chat about biology with AI</string>
 
-    <!-- Settings Screen -->
     <string name="settings">Settings</string>
     <string name="settings_title">Settings</string>
     <string name="settings_placeholder">Settings</string>
@@ -112,7 +96,6 @@
     <string name="lang_vietnamese">Tiếng Việt</string>
     <string name="lang_english">English</string>
 
-    <!-- Share Feature -->
     <string name="share_title">🌿 SPECIES INFORMATION</string>
     <string name="share_taxonomy_title">🔬 SCIENTIFIC CLASSIFICATION</string>
     <string name="share_desc_title">📖 DESCRIPTION</string>
@@ -124,7 +107,6 @@
     <string name="share_subject">Information about %s</string>
     <string name="share_chooser_title">Share species information via</string>
 
-    <!-- Errors -->
     <string name="error">Error</string>
     <string name="error_occurred">An error occurred</string>
     <string name="error_default">An error occurred</string>
@@ -135,16 +117,13 @@
     <string name="error_capture">Capture error: %s</string>
     <string name="error_browser">Web browser not found</string>
 
-    <!-- Feature Status -->
     <string name="feature_developing">Feature under development</string>
 
-    <!-- Sort options -->
     <string name="sort_by">Sort by</string>
     <string name="sort_newest_first">Newest first</string>
     <string name="sort_oldest_first">Oldest first</string>
     <string name="sort">Sort</string>
 
-    <!-- Date filter -->
     <string name="filter_by_date">Filter by date</string>
     <string name="select_start_date">Select start date</string>
     <string name="select_end_date">Select end date</string>
@@ -152,11 +131,9 @@
     <string name="clear_filter">Clear filter</string>
     <string name="end_date_before_start_date_error">End date must be after start date</string>
 
-    <!-- Icons -->
     <string name="ic_calendar">ic_calendar</string>
     <string name="ic_sort">ic_sort</string>
 
-    <!-- General -->
     <string name="cancel">Cancel</string>
     <string name="options">OPTIONS</string>
     <string name="lists">HISTORY</string>
@@ -167,5 +144,8 @@
     <string name="about_app_title">About us</string>
     <string name="about_app_desc">EcoLens, identify species via images developed by @NguyenDevs</string>
 
+    <string name="chat_hint">Ask about flora and fauna...</string>
+    <string name="chat_welcome">Hi, I\'m EcoLens AI. How can I help you?</string>
+    <string name="chat_thinking">Thinking...</string>
 
 </resources>

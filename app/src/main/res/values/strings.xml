@@ -81,11 +81,11 @@
     <string name="history_placeholder">Lịch sử</string>
     <string name="history_subtitle">Xem lịch sử các loài đã nhận diện</string>
 
-    <string name="my_garden">Trợ lý</string>
-    <string name="my_garden_title">Mục yêu thích</string>
-    <string name="my_garden_desc">Tính năng đang trong quá trình phát triển</string>
-    <string name="garden_placeholder">Tính năng đang trong quá trình phát triển</string>
-    <string name="garden_subtitle">Tính năng đang trong quá trình phát triển</string>
+    <string name="my_garden">Trợ lý AI</string>
+    <string name="my_garden_title">Trợ lý AI</string>
+    <string name="my_garden_desc">Hỏi đáp về sinh vật học với AI</string>
+    <string name="garden_placeholder">Trợ lý AI</string>
+    <string name="garden_subtitle">Hỏi đáp về sinh vật học với AI</string>
 
     <string name="settings">Cài đặt</string>
     <string name="settings_title">Cài đặt</string>
@@ -147,5 +147,9 @@
     <string name="about_label">Thông tin</string>
     <string name="about_app_title">Về chúng tôi</string>
     <string name="about_app_desc">Ứng dụng EcoLens, nhận diện động thực vật qua hình ảnh được phát triển bởi @NguyenDevs</string>
+
+    <string name="chat_hint">Hỏi về động thực vật...</string>
+    <string name="chat_welcome">Chào EcoLens, bạn có thể giúp gì cho tôi?</string>
+    <string name="chat_thinking">Đang suy nghĩ...</string>
 
 </resources>

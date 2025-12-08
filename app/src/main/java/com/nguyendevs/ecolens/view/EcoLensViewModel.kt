@@ -190,11 +190,11 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                   "genus": "Tên khoa học (tên thường)",
                   "species": "Tên khoa học (tên thường)",
                   "rank": "Cấp phân loại",
-                  "description": "Tổng quan 4 câu, dùng <b>in đậm</b>, <font color='$highlightColor'><b>xanh đậm</b></font> cho tên riêng/số đo.",
-                  "characteristics": "Một chuỗi văn bản chứa các gạch đầu dòng (•), <b>in đậm</b>, <font color='$highlightColor'><b>xanh đậm</b></font>.",
-                  "distribution": "Ưu tiên VN. Dùng <font color='$highlightColor'><b>xanh đậm</b></font>.",
-                  "habitat": "Mô tả môi trường sống.",
-                  "conservationStatus": "Trạng thái màu: <font color='$dangerColor'><b>Cực kỳ nguy cấp</b></font>, <font color='$dangerColor'><b>Nguy cấp</b></font>, <font color='$redBookColor'><b>Sách Đỏ VN</b></font>, <font color='$vulnerableColor'><b>Sắp nguy cấp</b></font>, <font color='$leastConcernColor'><b>Ít lo ngại</b></font>, <font color='$notRankedColor'><b>Chưa đánh giá</b></font>."
+                  "description": "Tổng quan 4 câu ngắn gọn, dùng <b>in đậm</b> cho đặc điểm nổi bật và <font color='$highlightColor'><b>xanh đậm</b></font> cho địa danh, tên riêng, số đo.",
+                  "characteristics": "Danh sách gạch đầu dòng (•) mỗi dòng một ý về hình thái, kích thước, màu sắc. Dùng <b>in đậm</b> và <font color='$highlightColor'><b>xanh đậm</b></font>.",
+                  "distribution": "Ưu tiên Việt Nam trước (nếu có), sau đó toàn cầu. Dùng <font color='$highlightColor'><b>xanh đậm</b></font> cho tên địa danh.",
+                  "habitat": "Mô tả chi tiết môi trường sống, có định dạng đẹp.",
+                  "conservationStatus": "Trạng thái bảo tồn kèm màu: <font color='$dangerColor'><b>Cực kỳ nguy cấp</b></font>, <font color='$dangerColor'><b>Nguy cấp</b></font>, <font color='$redBookColor'><b>Sách Đỏ Việt Nam</b></font>, <font color='$vulnerableColor'><b>Sắp nguy cấp</b></font>, <font color='$leastConcernColor'><b>Ít lo ngại</b></font>, <font color='$notRankedColor'><b>Chưa đánh giá</b></font> và thêm thông tin từ IUCN."
                 }
                 CHỈ TRẢ VỀ JSON.
                 """.trimIndent()

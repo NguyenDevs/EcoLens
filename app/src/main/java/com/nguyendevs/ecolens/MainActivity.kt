@@ -37,6 +37,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var errorText: TextView
     private lateinit var fabMute: FloatingActionButton
     private lateinit var fabSpeak: FloatingActionButton
+    private lateinit var fabCamera: FloatingActionButton
+    private lateinit var bottomNav: BottomNavigationView
     private lateinit var fragmentContainer: FrameLayout
     private lateinit var homeContainer: View
     private lateinit var imagePreview: ImageView
@@ -94,8 +96,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         initViews()
-        setupViewModel()  // ✅ DI CHUYỂN LÊN TRƯỚC initHandlers()
-        initHandlers()    // ✅ BÂY GIỜ viewModel ĐÃ ĐƯỢC KHỞI TẠO
+        setupViewModel()
+        initHandlers()
         initManagers()
         setupBottomNavigation()
         setupFAB()
@@ -116,6 +118,8 @@ class MainActivity : AppCompatActivity() {
 
         fabSpeak = findViewById(R.id.fabSpeak)
         fabMute = findViewById(R.id.fabMute)
+        fabCamera = findViewById(R.id.fabCamera)
+        bottomNav = findViewById(R.id.bottomNavigation)
 
         imagePreviewCard = findViewById(R.id.imagePreviewCard)
         imagePreview = findViewById(R.id.imagePreview)
@@ -163,9 +167,12 @@ class MainActivity : AppCompatActivity() {
         chatHandler = ChatHandler(
             this,
             myGardenContainer,
-            viewModel,  // ✅ BÂY GIỜ viewModel ĐÃ ĐƯỢC KHỞI TẠO
+            viewModel,
             this
-        )
+        ) {
+            // Exit Chat callback
+            exitChatMode()
+        }
         chatHandler.setup()
     }
 
@@ -203,7 +210,6 @@ class MainActivity : AppCompatActivity() {
 
         if (searchBarHandler.isExpanded()) searchBarHandler.collapseSearchBar()
 
-        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
         bottomNav.selectedItemId = R.id.nav_home
 
         imageUri = uri
@@ -256,7 +262,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupBottomNavigation() {
-        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
         bottomNav.setOnItemSelectedListener { item ->
             if (supportFragmentManager.backStackEntryCount > 0) {
                 supportFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
@@ -280,6 +285,10 @@ class MainActivity : AppCompatActivity() {
         fabSpeak.visibility = View.GONE
         fabMute.visibility = View.GONE
 
+        // Default visibility for Nav items
+        bottomNav.visibility = View.VISIBLE
+        fabCamera.visibility = View.VISIBLE
+
         when (itemId) {
             R.id.nav_home -> {
                 homeContainer.visibility = View.VISIBLE
@@ -302,13 +311,22 @@ class MainActivity : AppCompatActivity() {
                 }
                 transaction.commitNowAllowingStateLoss()
             }
-            R.id.nav_my_garden -> myGardenContainer.visibility = View.VISIBLE
+            R.id.nav_my_garden -> {
+                myGardenContainer.visibility = View.VISIBLE
+                bottomNav.visibility = View.GONE
+                fabCamera.visibility = View.GONE
+                searchBarContainer.visibility = View.GONE
+            }
             R.id.nav_settings -> settingsContainer.visibility = View.VISIBLE
         }
     }
 
+    private fun exitChatMode() {
+        bottomNav.selectedItemId = R.id.nav_home
+    }
+
     private fun setupFAB() {
-        findViewById<FloatingActionButton>(R.id.fabCamera).setOnClickListener {
+        fabCamera.setOnClickListener {
             if (speakerManager.isSpeaking()) {
                 speakerManager.pause()
                 toggleSpeakerUI(false)
@@ -406,7 +424,11 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
+        if (myGardenContainer.visibility == View.VISIBLE) {
+            exitChatMode()
+            return
+        }
+
         if (bottomNav.selectedItemId != R.id.nav_home) {
             bottomNav.selectedItemId = R.id.nav_home
         } else {
