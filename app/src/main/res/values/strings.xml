@@ -149,7 +149,7 @@
     <string name="about_app_desc">Ứng dụng EcoLens, nhận diện động thực vật qua hình ảnh được phát triển bởi @NguyenDevs</string>
 
     <string name="chat_hint">Hỏi về động thực vật...</string>
-    <string name="chat_welcome">Chào EcoLens, bạn có thể giúp gì cho tôi?</string>
+    <string name="chat_welcome">Tôi là EcoLens. Tôi có thể giúp gì cho bạn?</string>
     <string name="chat_thinking">Đang suy nghĩ...</string>
 
 </resources>

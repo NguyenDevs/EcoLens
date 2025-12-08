@@ -145,7 +145,7 @@
     <string name="about_app_desc">EcoLens, identify species via images developed by @NguyenDevs</string>
 
     <string name="chat_hint">Ask about flora and fauna...</string>
-    <string name="chat_welcome">Hi, I\'m EcoLens AI. How can I help you?</string>
+    <string name="chat_welcome">I\'m EcoLens AI. How can I help you?</string>
     <string name="chat_thinking">Thinking...</string>
 
 </resources>

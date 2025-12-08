@@ -328,9 +328,27 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         if (text.isBlank()) return ""
 
         var result = text
+
+            // Regex bắt dòng bắt đầu bằng 1-6 dấu #, sau đó là khoảng trắng và nội dung
+            .replace(Regex("^(#{1,6})\\s+(.+)$", RegexOption.MULTILINE)) { matchResult ->
+                "<br><b>${matchResult.groupValues[2]}</b>"
+            }
+            // 1. Xử lý in đậm: **text** -> <b>text</b>
             .replace(Regex("\\*\\*(.+?)\\*\\*")) { "<b>${it.groupValues[1]}</b>" }
-            .replace(Regex("##(.+?)##")) { "<font color='#00796B'><b>${it.groupValues[1]}</b></font>" }
+
+            // 2. Xử lý in nghiêng: *text* hoặc ~~text~~ -> <i>text</i>
+            // (Gemini Chat thường dùng * cho in nghiêng)
+            .replace(Regex("(?<!\\*)\\*(?!\\*)(.+?)(?<!\\*)\\*(?!\\*)")) { "<i>${it.groupValues[1]}</i>" }
             .replace(Regex("~~(.+?)~~")) { "<i>${it.groupValues[1]}</i>" }
+
+            // 3. Xử lý highlight màu xanh: ##text## -> màu xanh đậm
+            .replace(Regex("##(.+?)##")) { "<font color='#00796B'><b>${it.groupValues[1]}</b></font>" }
+
+            // 4. Xử lý gạch đầu dòng: * đầu dòng -> •
+            .replace(Regex("^\\*\\s+", RegexOption.MULTILINE)) { "• " }
+
+            // 5. Xử lý xuống dòng: \n -> <br> (quan trọng cho hiển thị trên TextView)
+            .replace("\n", "<br>")
 
         if (isConservationStatus) {
             result = colorizeConservationStatus(result, isVietnamese)
@@ -402,9 +420,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
     // ==================== CHAT MANAGEMENT ====================
 
-    /**
-     * Bắt đầu lắng nghe tin nhắn từ một session cụ thể
-     */
     private fun startMessageCollection(sessionId: Long) {
         messageCollectionJob?.cancel()
         messageCollectionJob = viewModelScope.launch {
@@ -414,17 +429,11 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    /**
-     * Load một session chat có sẵn
-     */
     fun loadChatSession(sessionId: Long) {
         currentSessionId = sessionId
         startMessageCollection(sessionId)
     }
 
-    /**
-     * Bắt đầu một session chat mới (chưa tạo trong DB)
-     */
     fun startNewChatSession() {
         currentSessionId = null
         messageCollectionJob?.cancel()
@@ -432,7 +441,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     }
 
     /**
-     * Khởi tạo session chat mới với tin nhắn chào mừng
+     * Khởi tạo session chat mới. Tái sử dụng nếu phiên gần nhất trống.
      */
     fun initNewChatSession(welcomeMessage: String) {
         currentSessionId = null
@@ -440,89 +449,82 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         _chatMessages.value = emptyList()
 
         viewModelScope.launch(Dispatchers.IO) {
-            val newSession = ChatSession(
-                title = "Đoạn chat mới",
-                lastMessage = welcomeMessage,
-                timestamp = System.currentTimeMillis()
-            )
-            val newId = chatDao.insertSession(newSession)
-            currentSessionId = newId
+            // Kiểm tra tái sử dụng phiên chat
+            val latestSession = chatDao.getLatestSession()
+            var sessionToReuseId: Long? = null
 
-            val welcomeMsg = ChatMessage(
-                sessionId = newId,
-                content = welcomeMessage,
-                isUser = false,
-                timestamp = System.currentTimeMillis()
-            )
-            chatDao.insertMessage(welcomeMsg)
+            if (latestSession != null) {
+                val userMsgCount = chatDao.getUserMessageCount(latestSession.id)
+                if (userMsgCount == 0) {
+                    sessionToReuseId = latestSession.id
+                    chatDao.updateSession(latestSession.copy(timestamp = System.currentTimeMillis()))
+                }
+            }
 
-            withContext(Dispatchers.Main) {
-                startMessageCollection(newId)
+            if (sessionToReuseId != null) {
+                currentSessionId = sessionToReuseId
+                withContext(Dispatchers.Main) {
+                    startMessageCollection(sessionToReuseId)
+                }
+            } else {
+                val newSession = ChatSession(title = "Đoạn chat mới", lastMessage = welcomeMessage, timestamp = System.currentTimeMillis())
+                val newId = chatDao.insertSession(newSession)
+                currentSessionId = newId
+
+                val welcomeMsg = ChatMessage(sessionId = newId, content = welcomeMessage, isUser = false, timestamp = System.currentTimeMillis())
+                chatDao.insertMessage(welcomeMsg)
+
+                withContext(Dispatchers.Main) {
+                    startMessageCollection(newId)
+                }
             }
         }
     }
 
     /**
-     * Gửi tin nhắn chat và nhận phản hồi từ AI
+     * Gửi tin nhắn, sửa lỗi API 400 và áp dụng format HTML cho Bot response.
      */
     fun sendChatMessage(userMessage: String) {
         if (userMessage.isBlank()) return
-
         val sessionId = currentSessionId ?: return
 
         viewModelScope.launch(Dispatchers.IO) {
-            val userChatMsg = ChatMessage(
-                sessionId = sessionId,
-                content = userMessage,
-                isUser = true,
-                timestamp = System.currentTimeMillis()
-            )
+            // 1. Lưu tin nhắn User
+            val userChatMsg = ChatMessage(sessionId = sessionId, content = userMessage, isUser = true, timestamp = System.currentTimeMillis())
             chatDao.insertMessage(userChatMsg)
 
+            // 2. Cập nhật tiêu đề phiên chat
             val currentSession = chatDao.getSessionById(sessionId)
             val newTitle = if (currentSession?.title == "Đoạn chat mới") userMessage.take(30) + "..." else currentSession?.title ?: "Chat"
+            chatDao.updateSession(currentSession!!.copy(title = newTitle, lastMessage = userMessage, timestamp = System.currentTimeMillis()))
 
-            chatDao.updateSession(
-                currentSession!!.copy(
-                    title = newTitle,
-                    lastMessage = userMessage,
-                    timestamp = System.currentTimeMillis()
-                )
-            )
-
+            // 3. Hiển thị loading
             val loadingMsg = ChatMessage(sessionId = -1, content = "...", isUser = false, isLoading = true)
             _chatMessages.value = _chatMessages.value + loadingMsg
 
             try {
-                val currentHistory = _chatMessages.value.filter { !it.isLoading }
+                // 4. FIX LỖI API 400: Thêm thủ công tin nhắn User vào context gửi đi
+                val currentHistory = _chatMessages.value.filter { !it.isLoading && it.sessionId == sessionId }.toMutableList()
+                currentHistory.add(userChatMsg)
+
                 val geminiContents = currentHistory.map { msg ->
                     val role = if (msg.isUser) "user" else "model"
-                    GeminiContent(
-                        role = role,
-                        parts = listOf(GeminiPart(msg.content))
-                    )
+                    GeminiContent(role = role, parts = listOf(GeminiPart(msg.content)))
                 }
 
                 val request = GeminiRequest(contents = geminiContents)
                 val response = apiService.askGemini(request)
-
                 val reply = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
                     ?: "Xin lỗi, tôi không thể trả lời lúc này."
 
-                val botChatMsg = ChatMessage(
-                    sessionId = sessionId,
-                    content = reply,
-                    isUser = false,
-                    timestamp = System.currentTimeMillis()
-                )
+                // 5. TEXT FORMATTING: Format text Bot trả về (Bold, Color...) và xử lý xuống dòng
+                val formattedReply = parseToHtml(reply).replace("\n", "<br>")
+
+                // 6. Lưu phản hồi vào DB
+                val botChatMsg = ChatMessage(sessionId = sessionId, content = formattedReply, isUser = false, timestamp = System.currentTimeMillis())
                 chatDao.insertMessage(botChatMsg)
 
-                chatDao.updateSession(
-                    chatDao.getSessionById(sessionId)!!.copy(
-                        lastMessage = reply,
-                        timestamp = System.currentTimeMillis()
-                    )
-                )
+                chatDao.updateSession(chatDao.getSessionById(sessionId)!!.copy(lastMessage = reply, timestamp = System.currentTimeMillis()))
 
             } catch (e: Exception) {
                 e.printStackTrace()

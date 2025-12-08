@@ -27,6 +27,10 @@ interface ChatDao {
     @Query("SELECT * FROM chat_sessions WHERE id = :id")
     suspend fun getSessionById(id: Long): ChatSession?
 
+    //Lấy phiên chat mới nhất
+    @Query("SELECT * FROM chat_sessions ORDER BY timestamp DESC LIMIT 1")
+    suspend fun getLatestSession(): ChatSession?
+
     // Xóa phiên chat theo ID
     @Query("DELETE FROM chat_sessions WHERE id = :id")
     suspend fun deleteSession(id: Long)
@@ -38,4 +42,8 @@ interface ChatDao {
     // Lấy tất cả tin nhắn của một phiên chat
     @Query("SELECT * FROM chat_messages WHERE sessionId = :sessionId ORDER BY timestamp ASC")
     fun getMessagesBySession(sessionId: Long): Flow<List<ChatMessage>>
+
+    //Đếm số tin nhắn CỦA NGƯỜI DÙNG trong một phiên (dùng để check xem user đã chat chưa)
+    @Query("SELECT COUNT(*) FROM chat_messages WHERE sessionId = :sessionId AND isUser = 1")
+    suspend fun getUserMessageCount(sessionId: Long): Int
 }
