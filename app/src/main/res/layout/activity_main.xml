@@ -28,12 +28,14 @@
                 android:id="@+id/settingsContainer"
                 layout="@layout/screen_settings"
                 android:visibility="gone"/>
+
         <FrameLayout
                 android:id="@+id/fragment_container"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:elevation="10dp"/>
     </FrameLayout>
+
     <com.google.android.material.card.MaterialCardView
             android:id="@+id/searchBarContainer"
             android:layout_width="50dp"
@@ -225,15 +227,7 @@
                 android:contentDescription="@string/zoom_out" />
 
     </FrameLayout>
-    <include
-            android:id="@+id/myGardenContainer"
-            layout="@layout/screen_chat_bot"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone"
-            android:elevation="50dp"
-            android:clickable="true"
-            android:focusable="true"/>
+
     <FrameLayout
             android:id="@+id/fragmentContainer"
             android:layout_width="match_parent"

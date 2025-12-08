@@ -23,6 +23,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.nguyendevs.ecolens.activities.CameraActivity
+import com.nguyendevs.ecolens.fragments.ChatFragment
 import com.nguyendevs.ecolens.fragments.HistoryFragment
 import com.nguyendevs.ecolens.handlers.*
 import com.nguyendevs.ecolens.managers.*
@@ -50,7 +51,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var loadingCard: View
     private lateinit var loadingOverlay: View
     private lateinit var mainContent: ViewGroup
-    private lateinit var myGardenContainer: View
     private lateinit var overlayContainer: FrameLayout
     private lateinit var permissionManager: PermissionManager
     private lateinit var searchBarContainer: View
@@ -60,7 +60,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var speakerManager: SpeakerManager
     private lateinit var speciesInfoCard: MaterialCardView
     private lateinit var speciesInfoHandler: SpeciesInfoHandler
-    private lateinit var chatHandler: ChatHandler
     private lateinit var viewModel: EcoLensViewModel
 
     private var historyFragment: HistoryFragment? = null
@@ -110,9 +109,9 @@ class MainActivity : AppCompatActivity() {
         mainContent = findViewById(R.id.mainContent)
         homeContainer = findViewById(R.id.homeContainer)
         fragmentContainer = findViewById(R.id.historyContainer)
+        // overlayContainer là container nằm đè lên tất cả (cho chat, language selection, about)
         overlayContainer = findViewById(R.id.fragmentContainer)
 
-        myGardenContainer = findViewById(R.id.myGardenContainer)
         settingsContainer = findViewById(R.id.settingsContainer)
         searchBarContainer = findViewById(R.id.searchBarContainer)
 
@@ -164,16 +163,6 @@ class MainActivity : AppCompatActivity() {
             loadingCard.findViewById(R.id.tvLoading),
             lifecycleScope
         )
-        chatHandler = ChatHandler(
-            this,
-            myGardenContainer,
-            viewModel,
-            this
-        ) {
-            // Exit Chat callback
-            exitChatMode()
-        }
-        chatHandler.setup()
     }
 
     private fun initManagers() {
@@ -188,11 +177,13 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread { toggleSpeakerUI(false) }
         }
 
+        // Xử lý hiển thị overlayContainer khi có Fragment (Chat, Language, About)
         supportFragmentManager.addOnBackStackChangedListener {
             val count = supportFragmentManager.backStackEntryCount
             if (count > 0) {
                 overlayContainer.visibility = View.VISIBLE
             } else {
+                // Delay nhẹ để animation fade out kịp chạy xong
                 overlayContainer.postDelayed({
                     if (supportFragmentManager.backStackEntryCount == 0) {
                         overlayContainer.visibility = View.GONE
@@ -263,12 +254,39 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupBottomNavigation() {
         bottomNav.setOnItemSelectedListener { item ->
+            // Nếu đang ở Fragment con (như Chat), back về trước khi chuyển tab
             if (supportFragmentManager.backStackEntryCount > 0) {
+                // Không pop nếu click vào tab hiện tại (logic tùy biến)
+                // Ở đây ta pop hết để về trạng thái gốc của tab
                 supportFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
             }
+
+            if (item.itemId == R.id.nav_my_garden) {
+                openChatFragment()
+                // Giữ nguyên tab hiện tại là Home hoặc History bên dưới visual, hoặc set item này checked
+                // Nếu muốn Chatbot hoạt động như một màn hình modal đè lên:
+                return@setOnItemSelectedListener false
+                // Return false để không sáng icon tab Garden, giữ icon cũ đang sáng
+            }
+
             updateNavigationState(item.itemId)
             true
         }
+    }
+
+    private fun openChatFragment() {
+        overlayContainer.visibility = View.VISIBLE
+        val fragment = ChatFragment()
+        supportFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                R.anim.fade_in,
+                R.anim.fade_out,
+                R.anim.fade_in,
+                R.anim.fade_out
+            )
+            .replace(R.id.fragmentContainer, fragment)
+            .addToBackStack("chat_fragment")
+            .commit()
     }
 
     private fun updateNavigationState(itemId: Int) {
@@ -278,7 +296,7 @@ class MainActivity : AppCompatActivity() {
 
         homeContainer.visibility = View.GONE
         fragmentContainer.visibility = View.GONE
-        myGardenContainer.visibility = View.GONE
+        // Không còn myGardenContainer cũ nữa
         settingsContainer.visibility = View.GONE
 
         searchBarContainer.visibility = View.GONE
@@ -311,17 +329,8 @@ class MainActivity : AppCompatActivity() {
                 }
                 transaction.commitNowAllowingStateLoss()
             }
-            R.id.nav_my_garden -> {
-                myGardenContainer.visibility = View.VISIBLE
-                searchBarContainer.visibility = View.GONE
-
-            }
             R.id.nav_settings -> settingsContainer.visibility = View.VISIBLE
         }
-    }
-
-    private fun exitChatMode() {
-        bottomNav.selectedItemId = R.id.nav_home
     }
 
     private fun setupFAB() {
@@ -420,11 +429,6 @@ class MainActivity : AppCompatActivity() {
 
         if (supportFragmentManager.backStackEntryCount > 0) {
             supportFragmentManager.popBackStack()
-            return
-        }
-
-        if (myGardenContainer.visibility == View.VISIBLE) {
-            exitChatMode()
             return
         }
 

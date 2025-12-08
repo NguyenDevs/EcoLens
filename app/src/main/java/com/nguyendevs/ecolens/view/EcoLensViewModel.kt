@@ -167,18 +167,18 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     ): SpeciesInfo = withContext(Dispatchers.IO) {
         try {
             val isVietnamese = languageCode != "en"
-            val highlightColor = "#00796B"
-            val dangerColor = "#8B0000"
-            val redBookColor = "#c97408"
-            val vulnerableColor = "#eddb11"
-            val leastConcernColor = "#55f200"
-            val notRankedColor = "#05deff"
-
             val commonNameDesc = if (isVietnamese) "Tên thường gọi Tiếng Việt chuẩn nhất" else "Common name in English"
 
             val prompt = if (isVietnamese) {
                 """
                 Bạn là nhà sinh vật học. Cung cấp thông tin chi tiết về loài "$scientificName" bằng Tiếng Việt.
+                
+                === QUY TẮC FORMAT ===
+                - Dùng ** để đánh dấu text cần in đậm (ví dụ: **từ khóa**)
+                - Dùng ## để đánh dấu text cần màu xanh highlight (ví dụ: ##Việt Nam##, ##50-60cm##)
+                - Dùng ~~ để đánh dấu text nghiêng (ví dụ: ~~tên thường~~)
+                - Dùng • cho bullet points, mỗi dòng một ý
+                
                 === ĐỊNH DẠNG JSON ===
                 {
                   "commonName": "$commonNameDesc",
@@ -186,21 +186,29 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                   "phylum": "Chỉ tên Tiếng Việt",
                   "className": "Chỉ tên Tiếng Việt",
                   "order": "Chỉ tên Tiếng Việt",
-                  "family": "Tên khoa học (tên thường)",
-                  "genus": "Tên khoa học (tên thường)",
-                  "species": "Tên khoa học (tên thường)",
+                  "family": "Tên khoa học ~~(tên thường)~~",
+                  "genus": "Tên khoa học ~~(tên thường)~~",
+                  "species": "Tên khoa học ~~(tên thường)~~",
                   "rank": "Cấp phân loại",
-                  "description": "Tổng quan 4 câu ngắn gọn, dùng <b>in đậm</b> cho đặc điểm nổi bật và <font color='$highlightColor'><b>xanh đậm</b></font> cho địa danh, tên riêng, số đo.",
-                  "characteristics": "Danh sách gạch đầu dòng (•) mỗi dòng một ý về hình thái, kích thước, màu sắc. Dùng <b>in đậm</b> và <font color='$highlightColor'><b>xanh đậm</b></font>.",
-                  "distribution": "Ưu tiên Việt Nam trước (nếu có), sau đó toàn cầu. Dùng <font color='$highlightColor'><b>xanh đậm</b></font> cho tên địa danh.",
-                  "habitat": "Mô tả chi tiết môi trường sống, có định dạng đẹp.",
-                  "conservationStatus": "Trạng thái bảo tồn kèm màu: <font color='$dangerColor'><b>Cực kỳ nguy cấp</b></font>, <font color='$dangerColor'><b>Nguy cấp</b></font>, <font color='$redBookColor'><b>Sách Đỏ Việt Nam</b></font>, <font color='$vulnerableColor'><b>Sắp nguy cấp</b></font>, <font color='$leastConcernColor'><b>Ít lo ngại</b></font>, <font color='$notRankedColor'><b>Chưa đánh giá</b></font> và thêm thông tin từ IUCN."
+                  "description": "Tổng quan 4 câu ngắn gọn, dùng **in đậm** cho đặc điểm nổi bật và ##xanh đậm## cho địa danh, tên riêng, số đo.",
+                  "characteristics": "Danh sách gạch đầu dòng, mỗi dòng bắt đầu với • và một ý về hình thái, kích thước, màu sắc. Dùng **in đậm** và ##xanh đậm##.",
+                  "distribution": "Ưu tiên Việt Nam trước (nếu có), sau đó toàn cầu. Dùng ##xanh đậm## cho tên địa danh.",
+                  "habitat": "Mô tả chi tiết môi trường sống.",
+                  "conservationStatus": "Chỉ ghi một trong các trạng thái: Cực kỳ nguy cấp, Nguy cấp, Sách Đỏ Việt Nam, Sắp nguy cấp, Ít lo ngại, Chưa đánh giá. Thêm thông tin bổ sung từ IUCN nếu có."
                 }
-                CHỈ TRẢ VỀ JSON.
+                
+                CHỈ TRẢ VỀ JSON, KHÔNG THÊM TEXT KHÁC.
                 """.trimIndent()
             } else {
                 """
                 You are a biologist. Provide details about "$scientificName" in English.
+                
+                === FORMAT RULES ===
+                - Use ** for bold text (e.g., **keyword**)
+                - Use ## for green highlight (e.g., ##Vietnam##, ##50-60cm##)
+                - Use ~~ for italic text (e.g., ~~common name~~)
+                - Use • for bullet points, one point per line
+                
                 === JSON FORMAT ===
                 {
                   "commonName": "$commonNameDesc",
@@ -208,17 +216,18 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                   "phylum": "Name only",
                   "className": "Name only",
                   "order": "Name only",
-                  "family": "Scientific name",
-                  "genus": "Scientific name",
-                  "species": "Scientific name",
+                  "family": "Scientific name ~~(common name)~~",
+                  "genus": "Scientific name ~~(common name)~~",
+                  "species": "Scientific name ~~(common name)~~",
                   "rank": "Rank",
-                  "description": "4-sentence overview with <b>bold</b> for key features and <font color='$highlightColor'><b>green bold</b></font> for places/names/measurements.",
-                  "characteristics": "Bullet points (•) on new lines covering morphology, size, colors. Use <b>bold</b> and <font color='$highlightColor'><b>green bold</b></font> formatting.",
-                  "distribution": "Vietnam first (if applicable), then worldwide. Use <font color='$highlightColor'><b>green bold</b></font> for locations.",
-                  "habitat": "Specific environment details with formatting.",
-                  "conservationStatus": "Status with color: <font color='$dangerColor'><b>Critically Endangered</b></font>, <font color='$dangerColor'><b>Endangered</b></font>, <font color='$redBookColor'><b>Vulnerable (Vietnam Red Data Book)</b></font>, <font color='$vulnerableColor'><b>Near Threatened</b></font>, <font color='$leastConcernColor'><b>Least Concern</b></font>, <font color='$notRankedColor'><b>Not Evaluated</b></font> and additional info from IUCN."
+                  "description": "4-sentence overview with **bold** for key features and ##green highlight## for places/names/measurements.",
+                  "characteristics": "Bullet list, each line starts with • covering morphology, size, colors. Use **bold** and ##green highlight##.",
+                  "distribution": "Vietnam first (if applicable), then worldwide. Use ##green highlight## for locations.",
+                  "habitat": "Specific environment details.",
+                  "conservationStatus": "Only write one of these statuses: Critically Endangered, Endangered, Vulnerable (Vietnam Red Data Book), Near Threatened, Least Concern, Not Evaluated. Add additional IUCN info if available."
                 }
-                RETURN ONLY JSON.
+                
+                RETURN ONLY JSON, NO ADDITIONAL TEXT.
                 """.trimIndent()
             }
 
@@ -241,19 +250,19 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 phylum = removeRankPrefix(rawInfo.phylum, if (isVietnamese) "Ngành" else "Phylum"),
                 className = removeRankPrefix(rawInfo.className, if (isVietnamese) "Lớp" else "Class"),
                 order = removeRankPrefix(rawInfo.order, if (isVietnamese) "Bộ" else "Order"),
-                family = removeRankPrefix(rawInfo.family, if (isVietnamese) "Họ" else "Family"),
-                genus = removeRankPrefix(rawInfo.genus, if (isVietnamese) "Chi" else "Genus"),
-                species = removeRankPrefix(rawInfo.species, if (isVietnamese) "Loài" else "Species"),
+                family = parseToHtml(removeRankPrefix(rawInfo.family, if (isVietnamese) "Họ" else "Family")),
+                genus = parseToHtml(removeRankPrefix(rawInfo.genus, if (isVietnamese) "Chi" else "Genus")),
+                species = parseToHtml(removeRankPrefix(rawInfo.species, if (isVietnamese) "Loài" else "Species")),
 
                 commonName = rawInfo.commonName,
                 scientificName = scientificName,
                 rank = rawInfo.rank,
 
-                description = cleanMarkdownToHtml(rawInfo.description),
-                characteristics = cleanMarkdownToHtml(characteristicsText),
-                distribution = cleanMarkdownToHtml(rawInfo.distribution),
-                habitat = cleanMarkdownToHtml(rawInfo.habitat),
-                conservationStatus = cleanMarkdownToHtml(rawInfo.conservationStatus),
+                description = parseToHtml(rawInfo.description),
+                characteristics = parseToHtml(characteristicsText),
+                distribution = parseToHtml(rawInfo.distribution),
+                habitat = parseToHtml(rawInfo.habitat),
+                conservationStatus = parseToHtml(rawInfo.conservationStatus, isConservationStatus = true, isVietnamese = isVietnamese),
                 confidence = confidence
             )
 
@@ -261,6 +270,70 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             val errorMsg = if (languageCode == "en") "An error occurred" else "Đã xảy ra lỗi"
             SpeciesInfo(commonName = scientificName, scientificName = scientificName, description = errorMsg, confidence = confidence)
         }
+    }
+
+    /**
+     * Parse text với delimiter đơn giản sang HTML
+     * ** -> bold
+     * ## -> highlighted green
+     * ~~ -> italic
+     */
+    private fun parseToHtml(text: String, isConservationStatus: Boolean = false, isVietnamese: Boolean = true): String {
+        if (text.isBlank()) return ""
+
+        var result = text
+            // Convert ** to bold
+            .replace(Regex("\\*\\*(.+?)\\*\\*")) { "<b>${it.groupValues[1]}</b>" }
+            // Convert ## to highlighted green
+            .replace(Regex("##(.+?)##")) { "<font color='#00796B'><b>${it.groupValues[1]}</b></font>" }
+            // Convert ~~ to italic
+            .replace(Regex("~~(.+?)~~")) { "<i>${it.groupValues[1]}</i>" }
+
+        // Xử lý conservation status với màu sắc tương ứng
+        if (isConservationStatus) {
+            result = colorizeConservationStatus(result, isVietnamese)
+        }
+
+        return result
+    }
+
+    /**
+     * Thêm màu sắc cho các trạng thái bảo tồn
+     */
+    private fun colorizeConservationStatus(text: String, isVietnamese: Boolean): String {
+        val statusMap = if (isVietnamese) {
+            mapOf(
+                "Cực kỳ nguy cấp" to "#8B0000",
+                "Nguy cấp" to "#8B0000",
+                "Sách Đỏ Việt Nam" to "#c97408",
+                "Sách Đỏ" to "#c97408",
+                "Sắp nguy cấp" to "#eddb11",
+                "Ít lo ngại" to "#55f200",
+                "Chưa đánh giá" to "#05deff"
+            )
+        } else {
+            mapOf(
+                "Critically Endangered" to "#8B0000",
+                "Endangered" to "#8B0000",
+                "Vulnerable (Vietnam Red Data Book)" to "#c97408",
+                "Vulnerable" to "#c97408",
+                "Near Threatened" to "#eddb11",
+                "Least Concern" to "#55f200",
+                "Not Evaluated" to "#05deff"
+            )
+        }
+
+        var result = text
+        // Sắp xếp theo độ dài giảm dần để match chuỗi dài trước
+        statusMap.entries.sortedByDescending { it.key.length }.forEach { (status, color) ->
+            if (result.contains(status, ignoreCase = true)) {
+                result = result.replace(
+                    Regex("(?i)$status"),
+                    "<font color='$color'><b>$status</b></font>"
+                )
+            }
+        }
+        return result
     }
 
     private fun cleanJsonString(json: String): String {
@@ -272,15 +345,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 val end = text.lastIndexOf('}')
                 if (start >= 0 && end > start) text.substring(start, end + 1) else text
             }
-    }
-
-    private fun cleanMarkdownToHtml(text: String?): String {
-        if (text.isNullOrBlank()) return ""
-        return text.replace(Regex("(?<!\\\\)\\*\\*(?!\\s)(.+?)(?<!\\\\)\\*\\*")) { "<b>${it.groupValues[1]}</b>" }
-            .replace(Regex("(?<!\\\\)__(?!\\s)(.+?)(?<!\\\\)__")) { "<b>${it.groupValues[1]}</b>" }
-            .replace(Regex("(?<!\\\\)\\*(?!\\s)(.+?)(?<!\\\\)\\*")) { "<i>${it.groupValues[1]}</i>" }
-            .replace(Regex("(?<!\\\\)_(?!\\s)(.+?)(?<!\\\\)_")) { "<i>${it.groupValues[1]}</i>" }
-            .replace("\\*", "*").replace("\\_", "_")
     }
 
     private fun removeRankPrefix(text: String, prefix: String): String {
