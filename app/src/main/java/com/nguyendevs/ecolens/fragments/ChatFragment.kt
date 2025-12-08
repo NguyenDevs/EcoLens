@@ -1,6 +1,12 @@
 package com.nguyendevs.ecolens.fragments
 
+import android.content.Context
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -71,6 +77,7 @@ class ChatFragment : Fragment() {
         btnSend.setOnClickListener {
             val text = etInput.text.toString().trim()
             if (text.isNotEmpty()) {
+                performHapticFeedback()
                 viewModel.sendChatMessage(text)
                 etInput.text.clear()
             }
@@ -92,6 +99,29 @@ class ChatFragment : Fragment() {
                     }
                 }
             }
+        }
+    }
+
+    // Tạo hiệu ứng rung phản hồi (Haptic Feedback)
+    private fun performHapticFeedback() {
+        try {
+            val context = requireContext()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                val vibrator = vibratorManager.defaultVibrator
+                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                @Suppress("DEPRECATION")
+                val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+                } else {
+                    @Suppress("DEPRECATION")
+                    vibrator.vibrate(50)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("ChatFragment", "Vibration failed: ${e.message}")
         }
     }
 }
