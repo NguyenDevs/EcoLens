@@ -26,7 +26,7 @@
 
         <include
                 android:id="@+id/myGardenContainer"
-                layout="@layout/screen_my_garden"
+                layout="@layout/screen_chat_bot"
                 android:visibility="gone"/>
 
         <include
