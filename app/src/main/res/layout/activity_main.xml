@@ -24,6 +24,12 @@
                 android:layout_height="match_parent"
                 android:visibility="gone"/>
 
+        <FrameLayout
+                android:id="@+id/myGardenContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"/>
+
         <include
                 android:id="@+id/settingsContainer"
                 layout="@layout/screen_settings"

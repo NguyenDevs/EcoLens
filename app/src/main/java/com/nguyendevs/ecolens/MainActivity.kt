@@ -2,6 +2,7 @@ package com.nguyendevs.ecolens
 
 import android.animation.ValueAnimator
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.MotionEvent
@@ -42,6 +43,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var bottomNav: BottomNavigationView
     private lateinit var fragmentContainer: FrameLayout
     private lateinit var homeContainer: View
+    private lateinit var myGardenContainer: FrameLayout
     private lateinit var imagePreview: ImageView
     private lateinit var imagePreviewCard: MaterialCardView
     private lateinit var initialStateLayout: View
@@ -63,6 +65,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: EcoLensViewModel
 
     private var historyFragment: HistoryFragment? = null
+    private var chatHistoryFragment: ChatHistoryFragment? = null
     private var imageUri: Uri? = null
     private var isExpandedState = false
 
@@ -109,7 +112,7 @@ class MainActivity : AppCompatActivity() {
         mainContent = findViewById(R.id.mainContent)
         homeContainer = findViewById(R.id.homeContainer)
         fragmentContainer = findViewById(R.id.historyContainer)
-        // overlayContainer là container nằm đè lên tất cả (cho chat, language selection, about)
+        myGardenContainer = findViewById(R.id.myGardenContainer)
         overlayContainer = findViewById(R.id.fragmentContainer)
 
         settingsContainer = findViewById(R.id.settingsContainer)
@@ -177,13 +180,11 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread { toggleSpeakerUI(false) }
         }
 
-        // Xử lý hiển thị overlayContainer khi có Fragment (Chat, Language, About)
         supportFragmentManager.addOnBackStackChangedListener {
             val count = supportFragmentManager.backStackEntryCount
             if (count > 0) {
                 overlayContainer.visibility = View.VISIBLE
             } else {
-                // Delay nhẹ để animation fade out kịp chạy xong
                 overlayContainer.postDelayed({
                     if (supportFragmentManager.backStackEntryCount == 0) {
                         overlayContainer.visibility = View.GONE
@@ -254,36 +255,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupBottomNavigation() {
         bottomNav.setOnItemSelectedListener { item ->
-            // Nếu đang ở Fragment con (như Chat), back về trước khi chuyển tab
             if (supportFragmentManager.backStackEntryCount > 0) {
-                // Không pop nếu click vào tab hiện tại (logic tùy biến)
-                // Ở đây ta pop hết để về trạng thái gốc của tab
                 supportFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
-            }
-
-            if (item.itemId == R.id.nav_my_garden) {
-                openChatFragment()
-                return@setOnItemSelectedListener false
             }
 
             updateNavigationState(item.itemId)
             true
         }
-    }
-
-    private fun openChatFragment() {
-        overlayContainer.visibility = View.VISIBLE
-        val fragment = ChatHistoryFragment()
-        supportFragmentManager.beginTransaction()
-            .setCustomAnimations(
-                R.anim.fade_in,
-                R.anim.fade_out,
-                R.anim.fade_in,
-                R.anim.fade_out
-            )
-            .replace(R.id.fragmentContainer, fragment)
-            .addToBackStack("chat_history")
-            .commit()
     }
 
     private fun updateNavigationState(itemId: Int) {
@@ -293,14 +271,13 @@ class MainActivity : AppCompatActivity() {
 
         homeContainer.visibility = View.GONE
         fragmentContainer.visibility = View.GONE
-        // Không còn myGardenContainer cũ nữa
+        myGardenContainer.visibility = View.GONE
         settingsContainer.visibility = View.GONE
 
         searchBarContainer.visibility = View.GONE
         fabSpeak.visibility = View.GONE
         fabMute.visibility = View.GONE
 
-        // Default visibility for Nav items
         bottomNav.visibility = View.VISIBLE
         fabCamera.visibility = View.VISIBLE
 
@@ -323,6 +300,15 @@ class MainActivity : AppCompatActivity() {
                 if (historyFragment == null) {
                     historyFragment = HistoryFragment()
                     transaction.add(R.id.historyContainer, historyFragment!!, "HISTORY")
+                }
+                transaction.commitNowAllowingStateLoss()
+            }
+            R.id.nav_my_garden -> {
+                myGardenContainer.visibility = View.VISIBLE
+                val transaction = supportFragmentManager.beginTransaction()
+                if (chatHistoryFragment == null) {
+                    chatHistoryFragment = ChatHistoryFragment()
+                    transaction.add(R.id.myGardenContainer, chatHistoryFragment!!, "CHAT_HISTORY")
                 }
                 transaction.commitNowAllowingStateLoss()
             }
