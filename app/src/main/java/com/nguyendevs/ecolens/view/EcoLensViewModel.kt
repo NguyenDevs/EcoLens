@@ -21,6 +21,7 @@ import com.nguyendevs.ecolens.model.ChatSession
 import com.nguyendevs.ecolens.network.RetrofitClient
 import com.nguyendevs.ecolens.utils.ImageUtils
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -37,6 +38,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     private val apiService = RetrofitClient.iNaturalistApi
     private val historyDao = HistoryDatabase.getDatabase(application).historyDao()
     private val chatDao = HistoryDatabase.getDatabase(application).chatDao()
+    private var messageCollectionJob: Job? = null
 
     private val _uiState = MutableStateFlow(EcoLensUiState())
     private var currentSessionId: Long? = null
@@ -365,22 +367,40 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             .trim()
     }
 
-    fun loadChatSession(sessionId: Long) {
-        currentSessionId = sessionId
-        viewModelScope.launch {
+
+    private fun startMessageCollection(sessionId: Long) {
+        // Hủy job cũ nếu đang chạy để ngăn update dữ liệu cũ
+        messageCollectionJob?.cancel()
+
+        // Khởi tạo job mới
+        messageCollectionJob = viewModelScope.launch {
             chatDao.getMessagesBySession(sessionId).collect { messages ->
                 _chatMessages.value = messages
             }
         }
     }
 
+    fun loadChatSession(sessionId: Long) {
+        currentSessionId = sessionId
+        // Thay thế đoạn code cũ bằng hàm helper
+        startMessageCollection(sessionId)
+    }
 
+    // 4. Cập nhật hàm startNewChatSession
+    fun startNewChatSession() {
+        currentSessionId = null
+        messageCollectionJob?.cancel() // Hủy lắng nghe ngay lập tức khi nhấn "Chat mới"
+        _chatMessages.value = emptyList()
+    }
+
+    // 5. Cập nhật hàm initNewChatSession
     fun initNewChatSession(welcomeMessage: String) {
         currentSessionId = null
+        messageCollectionJob?.cancel() // Đảm bảo không còn lắng nghe session nào
         _chatMessages.value = emptyList()
 
         viewModelScope.launch(Dispatchers.IO) {
-            // 1. Tạo session mới ngay lập tức
+            // Tạo session mới
             val newSession = ChatSession(
                 title = "Đoạn chat mới",
                 lastMessage = welcomeMessage,
@@ -389,32 +409,26 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             val newId = chatDao.insertSession(newSession)
             currentSessionId = newId
 
-            // 2. Chèn tin nhắn chào mừng của BOT (isUser = false)
+            // Chèn tin nhắn chào mừng
             val welcomeMsg = ChatMessage(
                 sessionId = newId,
                 content = welcomeMessage,
-                isUser = false, // Đây là tin nhắn của Bot
+                isUser = false,
                 timestamp = System.currentTimeMillis()
             )
             chatDao.insertMessage(welcomeMsg)
 
-            // 3. Collect dữ liệu để UI cập nhật
-            chatDao.getMessagesBySession(newId).collect { messages ->
-                _chatMessages.value = messages
+            // Chuyển về Main thread để bắt đầu lắng nghe session mới an toàn
+            withContext(Dispatchers.Main) {
+                startMessageCollection(newId)
             }
         }
-    }
-
-    // Hàm gọi khi bắt đầu cuộc hội thoại mới (reset UI, chưa tạo DB vội)
-    fun startNewChatSession() {
-        currentSessionId = null
-        _chatMessages.value = emptyList() // Hoặc list chứa message Welcome
     }
 
     fun sendChatMessage(userMessage: String) {
         if (userMessage.isBlank()) return
 
-        val sessionId = currentSessionId ?: return 
+        val sessionId = currentSessionId ?: return
 
         viewModelScope.launch(Dispatchers.IO) {
             // 1. Lưu tin nhắn User vào DB

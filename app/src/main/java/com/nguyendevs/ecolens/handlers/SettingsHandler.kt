@@ -65,10 +65,10 @@ class SettingsHandler(
         val fragment = LanguageSelectionFragment()
         (activity as AppCompatActivity).supportFragmentManager.beginTransaction()
             .setCustomAnimations(
-                R.anim.fade_in,
-                R.anim.fade_out,
-                R.anim.fade_in,
-                R.anim.fade_out
+                R.anim.fade_in_2,
+                R.anim.fade_out_2,
+                R.anim.fade_in_2,
+                R.anim.fade_out_2
             )
             .replace(R.id.fragmentContainer, fragment)
             .addToBackStack("language_selection")
@@ -85,10 +85,10 @@ class SettingsHandler(
         val fragment = AboutFragment()
         (activity as AppCompatActivity).supportFragmentManager.beginTransaction()
             .setCustomAnimations(
-                R.anim.fade_in,
-                R.anim.fade_out,
-                R.anim.fade_in,
-                R.anim.fade_out
+                R.anim.fade_in_2,
+                R.anim.fade_out_2,
+                R.anim.fade_in_2,
+                R.anim.fade_out_2
             )
             .replace(R.id.fragmentContainer, fragment)
             .addToBackStack("about_screen")

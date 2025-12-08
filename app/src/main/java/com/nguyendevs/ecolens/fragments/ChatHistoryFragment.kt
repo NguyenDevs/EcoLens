@@ -48,7 +48,7 @@ class ChatHistoryFragment : Fragment(R.layout.fragment_chat_history) {
     private fun openChatScreen() {
         parentFragmentManager.beginTransaction()
             .setCustomAnimations(R.anim.slide_in_right, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)
-            .replace(R.id.fragmentContainer, ChatFragment()) // fragmentContainer là cái overlay ở MainActivity
+            .replace(R.id.fragmentContainer, ChatFragment())
             .addToBackStack("chat_detail")
             .commit()
     }
