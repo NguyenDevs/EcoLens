@@ -177,6 +177,8 @@
             app:labelVisibilityMode="labeled"
             app:itemIconSize="24dp"
             style="@style/BottomNavigationViewCustom"
+            app:itemTextAppearanceActive="@style/BottomNavTextBold"
+            app:itemTextAppearanceInactive="@style/BottomNavTextBold"
             app:menu="@menu/bottom_nav_menu"
             app:itemRippleColor="@null"
             android:paddingBottom="10dp"/>

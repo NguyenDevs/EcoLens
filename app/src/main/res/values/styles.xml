@@ -36,4 +36,8 @@
         <item name="cornerSize">16dp</item>
     </style>
 
+    <style name="BottomNavTextBold">
+        <item name="android:textStyle">bold</item>
+    </style>
+
 </resources>

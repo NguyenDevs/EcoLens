@@ -10,7 +10,7 @@
 
     <string name="nav_home">Home</string>
     <string name="nav_history">History</string>
-    <string name="nav_my_garden">AI Assistant</string>
+    <string name="nav_my_garden">Assistant</string>
     <string name="nav_settings">Settings</string>
 
     <string name="ok">OK</string>
@@ -81,10 +81,10 @@
     <string name="history_placeholder">History</string>
     <string name="history_subtitle">View identification history</string>
 
-    <string name="my_garden">AI Assistant</string>
-    <string name="my_garden_title">AI Assistant</string>
+    <string name="my_garden">Assistant</string>
+    <string name="my_garden_title">Assistant</string>
     <string name="my_garden_desc">Chat about biology with AI</string>
-    <string name="garden_placeholder">AI Assistant</string>
+    <string name="garden_placeholder">Assistant</string>
     <string name="garden_subtitle">Chat about biology with AI</string>
 
     <string name="settings">Settings</string>
@@ -147,5 +147,6 @@
     <string name="chat_hint">Ask about flora and fauna...</string>
     <string name="chat_welcome">I\'m EcoLens AI. How can I help you?</string>
     <string name="chat_thinking">Thinking...</string>
+    <string name="delete_chat">Delete chat</string>
 
 </resources>

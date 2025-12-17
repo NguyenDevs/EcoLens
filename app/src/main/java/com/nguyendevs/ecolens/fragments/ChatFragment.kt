@@ -83,8 +83,8 @@ class ChatFragment : Fragment() {
 
         etInput.post {
             etInput.requestFocus()
-            val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.showSoftInput(etInput, InputMethodManager.SHOW_IMPLICIT)
+            // val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            // imm.showSoftInput(etInput, InputMethodManager.SHOW_IMPLICIT)
         }
     }
 
@@ -127,6 +127,17 @@ class ChatFragment : Fragment() {
         val popup = PopupMenu(requireContext(), anchor)
         popup.menuInflater.inflate(R.menu.menu_chat, popup.menu)
 
+        try {
+            val fieldMPopup = PopupMenu::class.java.getDeclaredField("mPopup")
+            fieldMPopup.isAccessible = true
+            val mPopup = fieldMPopup.get(popup)
+            mPopup.javaClass
+                .getDeclaredMethod("setForceShowIcon", Boolean::class.javaPrimitiveType)
+                .invoke(mPopup, true)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_delete_chat -> {
