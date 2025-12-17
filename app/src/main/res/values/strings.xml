@@ -153,6 +153,8 @@
     <string name="chat_thinking">Đang suy nghĩ...</string>
     <string name="delete_chat">Xóa đoạn chat</string>
 
+    <string name="new_chat">Đoạn chat mới</string>
+    <string name="cant_reply">Xin lỗi, tôi không thể trả lời lúc này.</string>
     <string name="dialog_delete_chat_title">Xóa đoạn chat</string>
     <string name="dialog_delete_chat_message">Bạn có chắc muốn xóa đoạn chat này không?</string>
     <string name="action_delete">Xóa</string>

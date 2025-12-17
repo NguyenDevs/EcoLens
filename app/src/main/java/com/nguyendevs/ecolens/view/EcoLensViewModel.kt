@@ -468,7 +468,12 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                     startMessageCollection(sessionToReuseId)
                 }
             } else {
-                val newSession = ChatSession(title = "Đoạn chat mới", lastMessage = welcomeMessage, timestamp = System.currentTimeMillis())
+                val defaultTitle = getApplication<Application>().getString(R.string.new_chat)
+                val newSession = ChatSession(
+                    title = defaultTitle,
+                    lastMessage = welcomeMessage,
+                    timestamp = System.currentTimeMillis()
+                )
                 val newId = chatDao.insertSession(newSession)
                 currentSessionId = newId
 
@@ -495,8 +500,13 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             chatDao.insertMessage(userChatMsg)
 
             // 2. Cập nhật tiêu đề phiên chat
+            val defaultTitle = getApplication<Application>().getString(R.string.new_chat)
             val currentSession = chatDao.getSessionById(sessionId)
-            val newTitle = if (currentSession?.title == "Đoạn chat mới") userMessage.take(30) + "..." else currentSession?.title ?: "Chat"
+            val newTitle = if (currentSession?.title == defaultTitle) {
+                userMessage.take(30) + "..."
+            } else {
+                currentSession?.title ?: "Chat"
+            }
             chatDao.updateSession(currentSession!!.copy(title = newTitle, lastMessage = userMessage, timestamp = System.currentTimeMillis()))
 
             // 3. Hiển thị loading
@@ -513,10 +523,11 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                     GeminiContent(role = role, parts = listOf(GeminiPart(msg.content)))
                 }
 
+                val cantreply = getApplication<Application>().getString(R.string.cant_reply)
                 val request = GeminiRequest(contents = geminiContents)
                 val response = apiService.askGemini(request)
                 val reply = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
-                    ?: "Xin lỗi, tôi không thể trả lời lúc này."
+                    ?: cantreply
 
                 // 5. TEXT FORMATTING: Format text Bot trả về (Bold, Color...) và xử lý xuống dòng
                 val formattedReply = parseToHtml(reply).replace("\n", "<br>")
