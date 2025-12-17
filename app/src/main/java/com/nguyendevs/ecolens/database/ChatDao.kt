@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import com.nguyendevs.ecolens.model.ChatMessage
 import com.nguyendevs.ecolens.model.ChatSession
@@ -31,9 +32,13 @@ interface ChatDao {
     @Query("SELECT * FROM chat_sessions ORDER BY timestamp DESC LIMIT 1")
     suspend fun getLatestSession(): ChatSession?
 
-    // Xóa phiên chat theo ID
+    // Xóa phiên chat (CASCADE sẽ tự động xóa messages liên quan)
     @Query("DELETE FROM chat_sessions WHERE id = :id")
     suspend fun deleteSession(id: Long)
+
+    // Xóa tất cả tin nhắn của một phiên chat
+    @Query("DELETE FROM chat_messages WHERE sessionId = :sessionId")
+    suspend fun deleteMessagesBySession(sessionId: Long)
 
     // Thêm tin nhắn mới
     @Insert(onConflict = OnConflictStrategy.REPLACE)

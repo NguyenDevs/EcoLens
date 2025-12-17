@@ -12,6 +12,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.PopupMenu
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -33,8 +35,27 @@ class ChatFragment : Fragment() {
     private lateinit var etInput: EditText
     private lateinit var btnSend: ImageView
     private lateinit var btnBack: ImageView
+    private lateinit var btnMenu: ImageView
 
-    // Tạo view cho Fragment
+    private var currentSessionId: Long? = null
+
+    companion object {
+        private const val ARG_SESSION_ID = "session_id"
+
+        fun newInstance(sessionId: Long? = null): ChatFragment {
+            return ChatFragment().apply {
+                arguments = Bundle().apply {
+                    sessionId?.let { putLong(ARG_SESSION_ID, it) }
+                }
+            }
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        currentSessionId = arguments?.getLong(ARG_SESSION_ID, -1L)?.takeIf { it != -1L }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -43,7 +64,6 @@ class ChatFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_chat, container, false)
     }
 
-    // Thiết lập các thành phần sau khi view được tạo
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -52,9 +72,15 @@ class ChatFragment : Fragment() {
         setupListeners()
         observeViewModel()
 
-        if (viewModel.chatMessages.value.isEmpty()) {
+        // FIX: Kiểm tra xem có sessionId không
+        if (currentSessionId != null) {
+            // Nếu có sessionId -> load chat cũ (KHÔNG tạo mới)
+            viewModel.loadChatSession(currentSessionId!!)
+        } else {
+            // Nếu không có sessionId -> tạo chat mới
             viewModel.initNewChatSession(getString(R.string.chat_welcome))
         }
+
         etInput.post {
             etInput.requestFocus()
             val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -62,15 +88,14 @@ class ChatFragment : Fragment() {
         }
     }
 
-    // Khởi tạo các view component
     private fun initViews(view: View) {
         rvChat = view.findViewById(R.id.rvChat)
         etInput = view.findViewById(R.id.etChatInput)
         btnSend = view.findViewById(R.id.btnSend)
         btnBack = view.findViewById(R.id.btnBack)
+        btnMenu = view.findViewById(R.id.btnMenu)
     }
 
-    // Thiết lập RecyclerView
     private fun setupRecyclerView() {
         rvChat.layoutManager = LinearLayoutManager(requireContext()).apply {
             stackFromEnd = true
@@ -78,7 +103,6 @@ class ChatFragment : Fragment() {
         rvChat.adapter = adapter
     }
 
-    // Thiết lập các listener cho button
     private fun setupListeners() {
         btnSend.setOnClickListener {
             val text = etInput.text.toString().trim()
@@ -92,9 +116,43 @@ class ChatFragment : Fragment() {
         btnBack.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
+
+        // Menu 3 chấm
+        btnMenu.setOnClickListener {
+            showMenuPopup(it)
+        }
     }
 
-    // Quan sát dữ liệu từ ViewModel
+    private fun showMenuPopup(anchor: View) {
+        val popup = PopupMenu(requireContext(), anchor)
+        popup.menuInflater.inflate(R.menu.menu_chat, popup.menu)
+
+        popup.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.action_delete_chat -> {
+                    showDeleteConfirmDialog()
+                    true
+                }
+                else -> false
+            }
+        }
+        popup.show()
+    }
+
+    private fun showDeleteConfirmDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Xóa đoạn chat")
+            .setMessage("Bạn có chắc muốn xóa đoạn chat này không?")
+            .setPositiveButton("Xóa") { _, _ ->
+                currentSessionId?.let { sessionId ->
+                    viewModel.deleteChatSession(sessionId)
+                    parentFragmentManager.popBackStack()
+                }
+            }
+            .setNegativeButton("Hủy", null)
+            .show()
+    }
+
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.chatMessages.collectLatest { messages ->
@@ -108,7 +166,6 @@ class ChatFragment : Fragment() {
         }
     }
 
-    // Tạo hiệu ứng rung phản hồi (Haptic Feedback)
     private fun performHapticFeedback() {
         try {
             val context = requireContext()

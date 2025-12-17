@@ -2,6 +2,7 @@ package com.nguyendevs.ecolens.model
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
@@ -15,13 +16,16 @@ import androidx.room.PrimaryKey
         parentColumns = ["id"],
         childColumns = ["sessionId"],
         onDelete = ForeignKey.CASCADE
-    )]
+    )],
+    indices = [Index("sessionId")]
 )
 data class ChatMessage(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
     val sessionId: Long,
     val content: String,
     val isUser: Boolean,
     val timestamp: Long = System.currentTimeMillis(),
     val isLoading: Boolean = false
 )
+

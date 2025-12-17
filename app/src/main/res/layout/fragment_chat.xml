@@ -22,6 +22,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"
                 android:backgroundTint="@color/white"
                 android:padding="8dp"
                 android:src="@drawable/ic_back"
@@ -37,6 +38,21 @@
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@color/text_primary"/>
+
+        <!-- Icon menu 3 chấm -->
+        <ImageView
+                android:id="@+id/btnMenu"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
+                android:padding="8dp"
+                android:src="@drawable/ic_more_vert"
+                app:tint="@color/text_primary"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:contentDescription="Menu"/>
     </RelativeLayout>
 
     <androidx.recyclerview.widget.RecyclerView

@@ -57,6 +57,10 @@ class HistoryDetailFragment : Fragment() {
         bindTaxonomy(view, info)
         bindContent(view, info)
         setupFab(view, info)
+        view.findViewById<FloatingActionButton>(R.id.fab_speak)?.let { fab ->
+            fab.show()
+            fab.bringToFront()
+        }
     }
 
     // Dừng phát âm thanh khi Fragment không còn hiển thị

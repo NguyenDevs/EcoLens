@@ -9,7 +9,7 @@ import com.nguyendevs.ecolens.model.ChatMessage
 import com.nguyendevs.ecolens.model.ChatSession
 import com.nguyendevs.ecolens.model.HistoryEntry
 
-@Database(entities = [HistoryEntry::class, ChatSession::class, ChatMessage::class], version = 2, exportSchema = false)
+@Database(entities = [HistoryEntry::class, ChatSession::class, ChatMessage::class], version = 3, exportSchema = false)
 @TypeConverters(HistoryTypeConverters::class)
 abstract class HistoryDatabase : RoomDatabase() {
 
@@ -23,13 +23,12 @@ abstract class HistoryDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: HistoryDatabase? = null
 
-        // Lấy instance của database (Singleton pattern)
         fun getDatabase(context: Context): HistoryDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     HistoryDatabase::class.java,
-                    "ecolens_history_db"
+                    "ecolens_database"
                 )
                     .fallbackToDestructiveMigration()
                     .build()

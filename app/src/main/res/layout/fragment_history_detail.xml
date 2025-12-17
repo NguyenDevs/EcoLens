@@ -169,7 +169,7 @@
             android:src="@drawable/ic_speak"
             app:tint="@color/white"
             app:backgroundTint="@color/green_primary"
-            app:elevation="6dp"
+            app:elevation="13dp"
             app:pressedTranslationZ="12dp"
             app:useCompatPadding="true"
             android:clickable="true"

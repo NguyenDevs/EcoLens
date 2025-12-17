@@ -2,6 +2,7 @@ package com.nguyendevs.ecolens.view
 
 import android.app.Application
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
@@ -530,6 +531,32 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 e.printStackTrace()
                 val errorMsg = ChatMessage(sessionId = sessionId, content = "Lỗi kết nối: ${e.message}", isUser = false)
                 chatDao.insertMessage(errorMsg)
+            }
+        }
+    }
+
+    /**
+     * Xóa phiên chat và tất cả tin nhắn trong đó
+     */
+    fun deleteChatSession(sessionId: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // QUAN TRỌNG: Xóa messages trước, sau đó mới xóa session
+                chatDao.deleteMessagesBySession(sessionId)
+                chatDao.deleteSession(sessionId)
+
+                Log.d("EcoLensViewModel", "Deleted session $sessionId successfully")
+
+                // Nếu đang xem phiên chat này, reset về trạng thái mới
+                if (currentSessionId == sessionId) {
+                    withContext(Dispatchers.Main) {
+                        currentSessionId = null
+                        messageCollectionJob?.cancel()
+                        _chatMessages.value = emptyList()
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("EcoLensViewModel", "Delete chat session failed: ${e.message}", e)
             }
         }
     }
