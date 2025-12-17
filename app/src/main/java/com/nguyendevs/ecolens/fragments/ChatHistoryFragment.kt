@@ -24,10 +24,8 @@ class ChatHistoryFragment : Fragment(R.layout.fragment_chat_history) {
     private val viewModel: EcoLensViewModel by activityViewModels()
     private lateinit var adapter: ChatSessionAdapter
 
-    // Thiết lập các thành phần sau khi view được tạo
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         val rv = view.findViewById<RecyclerView>(R.id.rvChatHistory)
         val fab = view.findViewById<ExtendedFloatingActionButton>(R.id.fabNewChat)
 
@@ -36,11 +34,9 @@ class ChatHistoryFragment : Fragment(R.layout.fragment_chat_history) {
         setupFabListener(fab)
     }
 
-    // Thiết lập RecyclerView với adapter
     private fun setupRecyclerView(rv: RecyclerView) {
         adapter = ChatSessionAdapter(emptyList()) { session ->
-            viewModel.loadChatSession(session.id)
-            openChatScreen()
+            openChatScreen(session.id)
         }
 
         rv.layoutManager = LinearLayoutManager(requireContext())
@@ -60,16 +56,17 @@ class ChatHistoryFragment : Fragment(R.layout.fragment_chat_history) {
     private fun setupFabListener(fab: ExtendedFloatingActionButton) {
         fab.setOnClickListener {
             performHapticFeedback()
-            viewModel.startNewChatSession()
-            openChatScreen()
+            openChatScreen(null)
         }
     }
 
     // Mở màn hình chat
-    private fun openChatScreen() {
+    private fun openChatScreen(sessionId: Long?) {
+        val fragment = ChatFragment.newInstance(sessionId)
+
         parentFragmentManager.beginTransaction()
             .setCustomAnimations(R.anim.slide_in_right, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)
-            .replace(R.id.fragmentContainer, ChatFragment())
+            .replace(R.id.fragmentContainer, fragment)
             .addToBackStack("chat_detail")
             .commit()
     }
