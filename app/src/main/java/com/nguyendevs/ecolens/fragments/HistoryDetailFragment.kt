@@ -66,7 +66,7 @@ class HistoryDetailFragment : Fragment() {
             speakerManager.pause()
             isSpeaking = false
 
-            view?.findViewById<FloatingActionButton>(R.id.fabAction)?.let { fab ->
+            view?.findViewById<FloatingActionButton>(R.id.fab_speak)?.let { fab ->
                 fab.setImageResource(R.drawable.ic_speak)
                 fab.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green_primary))
             }
@@ -200,7 +200,7 @@ class HistoryDetailFragment : Fragment() {
 
     // Thiết lập Floating Action Button để đọc văn bản
     private fun setupFab(view: View, info: SpeciesInfo) {
-        val fab = view.findViewById<FloatingActionButton>(R.id.fabAction)
+        val fab = view.findViewById<FloatingActionButton>(R.id.fab_speak)
 
         speakerManager.onSpeechFinished = {
             activity?.runOnUiThread {
