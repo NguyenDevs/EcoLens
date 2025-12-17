@@ -19,54 +19,69 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="24dp"
                 android:text="@string/my_garden_title"
                 android:textColor="@color/green_primary"
                 android:textSize="32sp"
                 android:textStyle="bold"/>
 
-        <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvChatHistory"
+        <!-- Thêm spacer để cân bằng với phần Options header của History -->
+
+
+        <!-- Wrap RecyclerView và Empty State trong FrameLayout giống Layout 1 -->
+        <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clipToPadding="false"
-                android:paddingBottom="80dp"/>
+                android:layout_height="0dp"
+                android:layout_weight="1">
+
+            <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvChatHistory"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:paddingBottom="80dp"/>
+
+            <LinearLayout
+                    android:layout_marginTop="34.5dp"
+                    android:id="@+id/emptyStateContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    android:padding="32dp">
+
+                <ImageView
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:src="@drawable/ic_chat_bot"
+                        android:alpha="0.3"
+                        app:tint="@color/text_secondary"
+                        android:contentDescription="@string/my_garden_title"/>
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/history_empty"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_secondary"
+                        android:layout_marginTop="16dp" />
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/garden_subtitle"
+                        android:textSize="14sp"
+                        android:textColor="@color/text_secondary"
+                        android:layout_marginTop="8dp"
+                        android:textAlignment="center"/>
+            </LinearLayout>
+
+        </FrameLayout>
+
     </LinearLayout>
-    <LinearLayout
-            android:id="@+id/emptyStateContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:orientation="vertical"
-            android:gravity="center_horizontal"
-            android:padding="32dp">
 
-        <ImageView
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:src="@drawable/ic_chat_bot"
-                android:alpha="0.3"
-                app:tint="@color/text_secondary"
-                android:contentDescription="@string/my_garden_title"/>
-
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/history_empty"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/text_secondary"
-                android:layout_marginTop="16dp" />
-
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/garden_subtitle"
-                android:textSize="14sp"
-                android:textColor="@color/text_secondary"
-                android:layout_marginTop="8dp"
-                android:textAlignment="center"/>
-    </LinearLayout>
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
             android:id="@+id/fabNewChat"
             android:layout_width="wrap_content"

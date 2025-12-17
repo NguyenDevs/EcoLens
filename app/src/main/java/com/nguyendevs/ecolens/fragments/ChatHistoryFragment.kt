@@ -24,12 +24,17 @@ class ChatHistoryFragment : Fragment(R.layout.fragment_chat_history) {
     private val viewModel: EcoLensViewModel by activityViewModels()
     private lateinit var adapter: ChatSessionAdapter
 
+    private lateinit var rvChatHistory: RecyclerView
+    private lateinit var emptyStateContainer: View
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val rv = view.findViewById<RecyclerView>(R.id.rvChatHistory)
+
+        rvChatHistory = view.findViewById(R.id.rvChatHistory)
+        emptyStateContainer = view.findViewById(R.id.emptyStateContainer)
         val fab = view.findViewById<ExtendedFloatingActionButton>(R.id.fabNewChat)
 
-        setupRecyclerView(rv)
+        setupRecyclerView(rvChatHistory)
         observeChatSessions()
         setupFabListener(fab)
     }
@@ -47,6 +52,13 @@ class ChatHistoryFragment : Fragment(R.layout.fragment_chat_history) {
     private fun observeChatSessions() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.allChatSessions.collectLatest { list ->
+                if (list.isEmpty()) {
+                    rvChatHistory.visibility = View.GONE
+                    emptyStateContainer.visibility = View.VISIBLE
+                } else {
+                    rvChatHistory.visibility = View.VISIBLE
+                    emptyStateContainer.visibility = View.GONE
+                }
                 adapter.updateList(list)
             }
         }
