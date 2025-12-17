@@ -78,7 +78,10 @@ class ChatFragment : Fragment() {
             viewModel.loadChatSession(currentSessionId!!)
         } else {
             // Nếu không có sessionId -> tạo chat mới
-            viewModel.initNewChatSession(getString(R.string.chat_welcome))
+            viewModel.initNewChatSession(
+                getString(R.string.chat_welcome),
+                getString(R.string.new_chat)
+            )
         }
 
         etInput.post {
@@ -108,7 +111,7 @@ class ChatFragment : Fragment() {
             val text = etInput.text.toString().trim()
             if (text.isNotEmpty()) {
                 performHapticFeedback()
-                viewModel.sendChatMessage(text)
+                viewModel.sendChatMessage(text, getString(R.string.new_chat))
                 etInput.text.clear()
             }
         }

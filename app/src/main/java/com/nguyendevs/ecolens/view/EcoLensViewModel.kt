@@ -444,7 +444,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     /**
      * Khởi tạo session chat mới. Tái sử dụng nếu phiên gần nhất trống.
      */
-    fun initNewChatSession(welcomeMessage: String) {
+    fun initNewChatSession(welcomeMessage: String, defaultTitle: String) {
         currentSessionId = null
         messageCollectionJob?.cancel()
         _chatMessages.value = emptyList()
@@ -468,7 +468,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                     startMessageCollection(sessionToReuseId)
                 }
             } else {
-                val defaultTitle = getApplication<Application>().getString(R.string.new_chat)
                 val newSession = ChatSession(
                     title = defaultTitle,
                     lastMessage = welcomeMessage,
@@ -490,7 +489,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     /**
      * Gửi tin nhắn, sửa lỗi API 400 và áp dụng format HTML cho Bot response.
      */
-    fun sendChatMessage(userMessage: String) {
+    fun sendChatMessage(userMessage: String, defaultTitle: String) {
         if (userMessage.isBlank()) return
         val sessionId = currentSessionId ?: return
 
@@ -500,7 +499,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             chatDao.insertMessage(userChatMsg)
 
             // 2. Cập nhật tiêu đề phiên chat
-            val defaultTitle = getApplication<Application>().getString(R.string.new_chat)
             val currentSession = chatDao.getSessionById(sessionId)
             val newTitle = if (currentSession?.title == defaultTitle) {
                 userMessage.take(30) + "..."
