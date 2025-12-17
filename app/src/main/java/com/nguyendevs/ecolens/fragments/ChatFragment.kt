@@ -152,15 +152,15 @@ class ChatFragment : Fragment() {
 
     private fun showDeleteConfirmDialog() {
         AlertDialog.Builder(requireContext())
-            .setTitle("Xóa đoạn chat")
-            .setMessage("Bạn có chắc muốn xóa đoạn chat này không?")
-            .setPositiveButton("Xóa") { _, _ ->
+            .setTitle(R.string.dialog_delete_chat_title)
+            .setMessage(R.string.dialog_delete_chat_message)
+            .setPositiveButton(R.string.action_delete) { _, _ ->
                 currentSessionId?.let { sessionId ->
                     viewModel.deleteChatSession(sessionId)
                     parentFragmentManager.popBackStack()
                 }
             }
-            .setNegativeButton("Hủy", null)
+            .setNegativeButton(R.string.action_cancel, null)
             .show()
     }
 
