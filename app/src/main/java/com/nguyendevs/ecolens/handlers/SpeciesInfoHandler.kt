@@ -26,7 +26,8 @@ import kotlinx.coroutines.*
 class SpeciesInfoHandler(
     private val context: Context,
     private val speciesInfoCard: MaterialCardView,
-    private val onCopySuccess: (String) -> Unit
+    private val onCopySuccess: (String) -> Unit,
+    private var confidenceRotationAnimator: ObjectAnimator? = null
 ) {
 
     private val handlerScope = CoroutineScope(Dispatchers.Main + Job())
@@ -198,7 +199,20 @@ class SpeciesInfoHandler(
             iconConfidence?.imageTintList = ContextCompat.getColorStateList(context, R.color.text_secondary)
             confidenceCard?.setCardBackgroundColor(ContextCompat.getColor(context, R.color.gray_light))
             tvConfidence?.setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
+
+            if (confidenceRotationAnimator == null && iconConfidence != null) {
+                confidenceRotationAnimator = ObjectAnimator.ofFloat(iconConfidence, "rotation", 0f, 360f).apply {
+                    duration = 1000
+                    repeatCount = ObjectAnimator.INFINITE
+                    interpolator = android.view.animation.LinearInterpolator()
+                    start()
+                }
+            }
         } else {
+            confidenceRotationAnimator?.cancel()
+            confidenceRotationAnimator = null
+            iconConfidence?.rotation = 0f
+
             val confidenceValue = info.confidence.coerceIn(0.0, 100.0)
             val confidencePercent = String.format("%.2f", confidenceValue)
             tvConfidence?.text = context.getString(R.string.confidence_format, confidencePercent)
