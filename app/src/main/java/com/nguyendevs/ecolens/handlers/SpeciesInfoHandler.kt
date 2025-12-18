@@ -32,6 +32,9 @@ class SpeciesInfoHandler(
     private val handlerScope = CoroutineScope(Dispatchers.Main + Job())
     private val viewCache = mutableMapOf<Int, View>()
 
+    // Track các row đã được hiển thị để tránh animate lại
+    private val displayedRows = mutableSetOf<Int>()
+
     init {
         cacheViews()
     }
@@ -88,8 +91,8 @@ class SpeciesInfoHandler(
                 displayCommonName(SpeciesInfo(commonName = "...", scientificName = ""))
                 displayScientificName(info)
                 displayConfidence(info, isWaiting = true)
-                viewCache[R.id.taxonomyContainer]?.visibility = View.VISIBLE
-                viewCache[R.id.taxonomyContainer]?.alpha = 1f
+
+                prepareTaxonomyContainer()
             }
             LoadingStage.COMMON_NAME -> {
                 displayCommonName(info)
@@ -121,6 +124,9 @@ class SpeciesInfoHandler(
     }
 
     private fun clearAllViews() {
+        // Reset tracking
+        displayedRows.clear()
+
         val viewsToHide = listOf(
             R.id.tvCommonName, R.id.tvScientificName, R.id.confidenceCard,
             R.id.taxonomyContainer, R.id.rowKingdom, R.id.rowPhylum, R.id.rowClass,
@@ -136,13 +142,30 @@ class SpeciesInfoHandler(
             }
         }
 
-        val textViewsToClear = listOf(
-            R.id.tvCommonName, R.id.tvScientificName, R.id.tvConfidence,
+        val textViews = listOf(
             R.id.tvKingdom, R.id.tvPhylum, R.id.tvClass, R.id.tvOrder,
-            R.id.tvFamily, R.id.tvGenus, R.id.tvSpecies, R.id.tvDescription,
-            R.id.tvCharacteristics, R.id.tvDistribution, R.id.tvHabitat, R.id.tvConservationStatus
+            R.id.tvFamily, R.id.tvGenus, R.id.tvSpecies
         )
-        textViewsToClear.forEach { (viewCache[it] as? TextView)?.text = "" }
+        textViews.forEach { (viewCache[it] as? TextView)?.text = "" }
+    }
+
+    private fun prepareTaxonomyContainer() {
+        val container = viewCache[R.id.taxonomyContainer]
+        container?.visibility = View.VISIBLE
+        container?.alpha = 1f
+
+        // Đặt tất cả các row về trạng thái INVISIBLE
+        val rowIds = listOf(
+            R.id.rowKingdom, R.id.rowPhylum, R.id.rowClass,
+            R.id.rowOrder, R.id.rowFamily, R.id.rowGenus, R.id.rowSpecies
+        )
+        rowIds.forEach { id ->
+            viewCache[id]?.apply {
+                visibility = View.INVISIBLE
+                alpha = 0f
+                translationY = 0f
+            }
+        }
     }
 
     private fun displayScientificName(info: SpeciesInfo) {
@@ -180,7 +203,7 @@ class SpeciesInfoHandler(
             val confidencePercent = String.format("%.2f", confidenceValue)
             tvConfidence?.text = context.getString(R.string.confidence_format, confidencePercent)
 
-            val (icon, tint, bg, textCol) = when {
+            val (icon, tint, bg, text) = when {
                 confidenceValue >= 50f -> Quadruple(R.drawable.ic_check_circle, R.color.confidence_high, R.color.confidence_bg_high, R.color.confidence_text_high)
                 confidenceValue >= 25f -> Quadruple(R.drawable.ic_check_warning_circle, R.color.confidence_medium, R.color.confidence_bg_medium, R.color.confidence_text_medium)
                 else -> Quadruple(R.drawable.ic_check_not_circle, R.color.confidence_low, R.color.confidence_bg_low, R.color.confidence_text_low)
@@ -189,7 +212,7 @@ class SpeciesInfoHandler(
             iconConfidence?.setImageResource(icon)
             iconConfidence?.imageTintList = ContextCompat.getColorStateList(context, tint)
             confidenceCard?.setCardBackgroundColor(ContextCompat.getColor(context, bg))
-            tvConfidence?.setTextColor(ContextCompat.getColor(context, textCol))
+            tvConfidence?.setTextColor(ContextCompat.getColor(context, text))
         }
 
         confidenceCard?.let {
@@ -215,34 +238,44 @@ class SpeciesInfoHandler(
             Triple(R.id.rowSpecies, R.id.tvSpecies, info.species)
         )
 
-        var delayAmount = 0L
         rows.forEach { (rowId, tvId, text) ->
             val rowView = viewCache[rowId]
             val textView = viewCache[tvId] as? TextView
 
-            if (rowView != null && textView != null && text.isNotEmpty() && text != "..." && text != "N/A") {
-                val formattedText = if (text.contains("<i>")) "<b>" + text.replace("<i>", "</b><i>") else "<b>$text</b>"
-                textView.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    Html.fromHtml(formattedText, Html.FROM_HTML_MODE_LEGACY)
+            if (rowView != null && textView != null) {
+                val hasData = text.isNotEmpty() && text != "..." && text != "N/A"
+
+                if (hasData) {
+                    // Chỉ animate nếu row này chưa được hiển thị
+                    if (!displayedRows.contains(rowId)) {
+                        val formattedText = if (text.contains("<i>")) "<b>" + text.replace("<i>", "</b><i>") else "<b>$text</b>"
+                        textView.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            Html.fromHtml(formattedText, Html.FROM_HTML_MODE_LEGACY)
+                        } else {
+                            @Suppress("DEPRECATION") Html.fromHtml(formattedText)
+                        }
+
+                        rowView.visibility = View.VISIBLE
+                        rowView.alpha = 0f
+                        rowView.translationY = -10f
+
+                        rowView.animate()
+                            .alpha(1f)
+                            .translationY(0f)
+                            .setDuration(300)
+                            .setInterpolator(DecelerateInterpolator())
+                            .start()
+
+                        // Đánh dấu row này đã được hiển thị
+                        displayedRows.add(rowId)
+                    }
                 } else {
-                    @Suppress("DEPRECATION") Html.fromHtml(formattedText)
+                    // Nếu không có data và chưa hiển thị, giữ INVISIBLE
+                    if (!displayedRows.contains(rowId)) {
+                        rowView.visibility = View.INVISIBLE
+                        rowView.alpha = 0f
+                    }
                 }
-
-                rowView.visibility = View.VISIBLE
-                rowView.alpha = 0f
-                rowView.translationY = 20f
-
-                rowView.animate()
-                    .alpha(1f)
-                    .translationY(0f)
-                    .setDuration(400)
-                    .setStartDelay(delayAmount)
-                    .setInterpolator(DecelerateInterpolator())
-                    .start()
-
-                delayAmount += 80
-            } else {
-                rowView?.visibility = View.GONE
             }
         }
     }
@@ -264,11 +297,11 @@ class SpeciesInfoHandler(
                 if (it.visibility != View.VISIBLE) {
                     it.visibility = View.VISIBLE
                     it.alpha = 0f
-                    it.translationY = 20f
+                    it.translationY = 15f
                     it.animate()
                         .alpha(1f)
                         .translationY(0f)
-                        .setDuration(500)
+                        .setDuration(450)
                         .setInterpolator(DecelerateInterpolator())
                         .start()
                 }
@@ -289,7 +322,6 @@ class SpeciesInfoHandler(
                 @Suppress("DEPRECATION") Html.fromHtml(status)
             }
             textView?.setTextColor(ContextCompat.getColor(context, R.color.black))
-
             section?.let {
                 if (it.visibility != View.VISIBLE) {
                     it.visibility = View.VISIBLE
@@ -340,7 +372,14 @@ class SpeciesInfoHandler(
             if (info.genus.isNotEmpty()) append("• ${context.getString(R.string.label_genus)} ${stripHtml(info.genus)}\n")
             if (info.species.isNotEmpty()) append("• ${context.getString(R.string.label_species)} ${stripHtml(info.species)}\n")
 
-            listOf(info.description to R.string.share_desc_title, info.characteristics to R.string.share_char_title, info.distribution to R.string.share_dist_title, info.habitat to R.string.share_hab_title, info.conservationStatus to R.string.share_cons_title).forEach { (content, title) ->
+            val contentList = listOf(
+                info.description to R.string.share_desc_title,
+                info.characteristics to R.string.share_char_title,
+                info.distribution to R.string.share_dist_title,
+                info.habitat to R.string.share_hab_title,
+                info.conservationStatus to R.string.share_cons_title
+            )
+            contentList.forEach { (content, title) ->
                 if (content.isNotEmpty()) {
                     append("\n━━━━━━━━━━━━━━━━━━━━\n${context.getString(title)}\n━━━━━━━━━━━━━━━━━━━━\n\n${stripHtml(content)}\n")
                 }
