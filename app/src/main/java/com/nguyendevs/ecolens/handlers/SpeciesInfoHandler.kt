@@ -1,6 +1,7 @@
 package com.nguyendevs.ecolens.handlers
 
 import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -83,6 +84,7 @@ class SpeciesInfoHandler(
             LoadingStage.SCIENTIFIC_NAME -> {
                 setupCopyButton(info)
                 setupShareButton(info, imageUri)
+                displayCommonName(SpeciesInfo(commonName = "...", scientificName = ""))
                 displayScientificName(info)
                 displayConfidence(info, isWaiting = true)
             }
@@ -165,13 +167,14 @@ class SpeciesInfoHandler(
         }
     }
 
+    @SuppressLint("StringFormatInvalid")
     private fun displayConfidence(info: SpeciesInfo, isWaiting: Boolean) {
         val tvConfidence = viewCache[R.id.tvConfidence] as? TextView
         val confidenceCard = viewCache[R.id.confidenceCard] as? MaterialCardView
         val iconConfidence = viewCache[R.id.iconConfidence] as? ImageView
 
         if (isWaiting) {
-            tvConfidence?.text = "..."
+            tvConfidence?.text = context.getString(R.string.confidence, "...%")
             iconConfidence?.setImageResource(R.drawable.ic_rotate)
             iconConfidence?.imageTintList = ContextCompat.getColorStateList(context, R.color.text_secondary)
             confidenceCard?.setCardBackgroundColor(ContextCompat.getColor(context, R.color.gray_light))
@@ -241,10 +244,9 @@ class SpeciesInfoHandler(
                 Triple(R.id.rowSpecies, R.id.tvSpecies, info.species)
             )
 
-            rows.forEach { (rowId, tvId, text) ->
+            for ((rowId, tvId, text) in rows) {
                 if (text.isNotEmpty() && text != "..." && text != "N/A") {
                     setTaxonomyRowData(rowId, tvId, text)
-                    delay(80)
                 }
             }
         }
