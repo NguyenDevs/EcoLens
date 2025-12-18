@@ -1,6 +1,5 @@
 package com.nguyendevs.ecolens.handlers
 
-import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
@@ -26,6 +25,7 @@ import android.view.animation.DecelerateInterpolator
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -40,14 +40,12 @@ class SpeciesInfoHandler(
     private val speciesInfoCard: MaterialCardView,
     private val onCopySuccess: (String) -> Unit
 ) {
-
     private val handlerScope = CoroutineScope(Dispatchers.Main + Job())
     private val viewCache = mutableMapOf<Int, View>()
     private val displayedRows = mutableSetOf<Int>()
 
     private var confidenceRotationAnimator: ObjectAnimator? = null
     private var taxonomyShimmerAnimator: ValueAnimator? = null
-    private var lastScrollY = 0
 
     init {
         cacheViews()
@@ -97,7 +95,6 @@ class SpeciesInfoHandler(
             LoadingStage.NONE -> {
                 handlerScope.coroutineContext.cancelChildren()
                 clearAllViews()
-                return
             }
             LoadingStage.SCIENTIFIC_NAME -> {
                 setupCopyButton(info)
@@ -177,7 +174,14 @@ class SpeciesInfoHandler(
         tvCommonName?.let {
             it.text = info.commonName
             it.visibility = View.VISIBLE
-            fadeIn(it, 300)
+
+            if (info.commonName == "...") {
+                it.alpha = 0f
+                it.setTextColor(Color.TRANSPARENT)
+            } else {
+                it.setTextColor(ContextCompat.getColor(context, R.color.green_primary))
+                fadeIn(it, 300)
+            }
         }
     }
 
@@ -325,26 +329,17 @@ class SpeciesInfoHandler(
                 val offset = diagonal * (progress - 0.3f)
 
                 val backgroundColor = Color.parseColor("#ECEFF1")
-
-                val transparent = Color.parseColor("#00ECEFF1")  // Trong suốt hoàn toàn
-                val fadeIn1 = Color.parseColor("#40F5F7F9")      // 25% opacity
-                val fadeIn2 = Color.parseColor("#80F8F9FB")      // 50% opacity
-                val shimmerColor = Color.parseColor("#FFFAFBFC") // 100% opacity - sáng nhất
-                val fadeOut2 = Color.parseColor("#80F8F9FB")     // 50% opacity
-                val fadeOut1 = Color.parseColor("#40F5F7F9")     // 25% opacity
+                val transparent = Color.parseColor("#00ECEFF1")
+                val fadeIn1 = Color.parseColor("#40F5F7F9")
+                val fadeIn2 = Color.parseColor("#80F8F9FB")
+                val shimmerColor = Color.parseColor("#FFFAFBFC")
+                val fadeOut2 = Color.parseColor("#80F8F9FB")
+                val fadeOut1 = Color.parseColor("#40F5F7F9")
 
                 val gradient = LinearGradient(
                     offset, offset,
                     offset + shimmerWidth, offset + shimmerWidth,
-                    intArrayOf(
-                        transparent,   // 0% - hoàn toàn trong suốt
-                        fadeIn1,       // 20%
-                        fadeIn2,       // 35%
-                        shimmerColor,  // 50% - sáng nhất
-                        fadeOut2,      // 65%
-                        fadeOut1,      // 80%
-                        transparent    // 100% - hoàn toàn trong suốt
-                    ),
+                    intArrayOf(transparent, fadeIn1, fadeIn2, shimmerColor, fadeOut2, fadeOut1, transparent),
                     floatArrayOf(0f, 0.2f, 0.35f, 0.5f, 0.65f, 0.8f, 1f),
                     Shader.TileMode.CLAMP
                 )
@@ -364,12 +359,7 @@ class SpeciesInfoHandler(
                     override fun onDraw(shape: Shape, canvas: Canvas, p: Paint) {
                         val cornerRadius = 20f.dpToPx()
                         val path = Path().apply {
-                            addRoundRect(
-                                0f, 0f,
-                                width, height,
-                                cornerRadius, cornerRadius,
-                                Path.Direction.CW
-                            )
+                            addRoundRect(0f, 0f, width, height, cornerRadius, cornerRadius, Path.Direction.CW)
                         }
                         canvas.save()
                         canvas.clipPath(path)
@@ -415,20 +405,27 @@ class SpeciesInfoHandler(
             }
 
             textView?.text = spanned
-            section?.let {
-                if (it.visibility != View.VISIBLE) {
+            section?.let { sectionView ->
+                if (sectionView.visibility != View.VISIBLE) {
                     val scrollView = findScrollView(speciesInfoCard)
-                    val currentScrollY = scrollView?.scrollY ?: 0
+                    val scrollY = scrollView?.scrollY ?: 0
+                    val scrollHeight = scrollView?.getChildAt(0)?.height ?: 0
+                    val viewportHeight = scrollView?.height ?: 0
 
-                    it.visibility = View.VISIBLE
-                    it.alpha = 0f
-                    it.translationY = 15f
+                    sectionView.visibility = View.VISIBLE
+                    sectionView.alpha = 0f
+                    sectionView.translationY = 15f
 
-                    it.post {
-                        scrollView?.scrollTo(0, currentScrollY)
+                    sectionView.post {
+                        scrollView?.let { sv ->
+                            val isAtBottom = (scrollY + viewportHeight >= scrollHeight - 50)
+                            if (!isAtBottom) {
+                                sv.scrollTo(0, scrollY)
+                            }
+                        }
                     }
 
-                    it.animate()
+                    sectionView.animate()
                         .alpha(1f)
                         .translationY(0f)
                         .setDuration(450)
@@ -452,19 +449,26 @@ class SpeciesInfoHandler(
                 @Suppress("DEPRECATION") Html.fromHtml(status)
             }
             textView?.setTextColor(ContextCompat.getColor(context, R.color.black))
-            section?.let {
-                if (it.visibility != View.VISIBLE) {
+            section?.let { sectionView ->
+                if (sectionView.visibility != View.VISIBLE) {
                     val scrollView = findScrollView(speciesInfoCard)
-                    val currentScrollY = scrollView?.scrollY ?: 0
+                    val scrollY = scrollView?.scrollY ?: 0
+                    val scrollHeight = scrollView?.getChildAt(0)?.height ?: 0
+                    val viewportHeight = scrollView?.height ?: 0
 
-                    it.visibility = View.VISIBLE
-                    it.alpha = 0f
+                    sectionView.visibility = View.VISIBLE
+                    sectionView.alpha = 0f
 
-                    it.post {
-                        scrollView?.scrollTo(0, currentScrollY)
+                    sectionView.post {
+                        scrollView?.let { sv ->
+                            val isAtBottom = (scrollY + viewportHeight >= scrollHeight - 50)
+                            if (!isAtBottom) {
+                                sv.scrollTo(0, scrollY)
+                            }
+                        }
                     }
 
-                    fadeIn(it, 400)
+                    fadeIn(sectionView, 400)
                 }
             }
         } else {
@@ -472,16 +476,17 @@ class SpeciesInfoHandler(
         }
     }
 
-    private fun findScrollView(view: View): android.widget.ScrollView? {
+    private fun findScrollView(view: View): ScrollView? {
         var parent = view.parent
         while (parent != null) {
-            if (parent is android.widget.ScrollView) {
+            if (parent is ScrollView) {
                 return parent
             }
             parent = parent.parent
         }
         return null
     }
+
     private fun setupCopyButton(info: SpeciesInfo) {
         viewCache[R.id.btnCopyScientificName]?.setOnClickListener {
             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -542,7 +547,9 @@ class SpeciesInfoHandler(
                     putExtra(Intent.EXTRA_STREAM, imageUri)
                     clipData = ClipData.newRawUri(null, imageUri)
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                } else type = "text/plain"
+                } else {
+                    type = "text/plain"
+                }
                 putExtra(Intent.EXTRA_TEXT, shareText)
                 putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.share_subject, info.commonName))
             }
@@ -568,5 +575,10 @@ class SpeciesInfoHandler(
         handlerScope.cancel()
     }
 
-    data class Quadruple<out A, out B, out C, out D>(val first: A, val second: B, val third: C, val fourth: D)
+    data class Quadruple<out A, out B, out C, out D>(
+        val first: A,
+        val second: B,
+        val third: C,
+        val fourth: D
+    )
 }
