@@ -1,17 +1,29 @@
 package com.nguyendevs.ecolens.handlers
 
+import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.LinearGradient
+import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.Shader
+import android.graphics.drawable.ShapeDrawable
+import android.graphics.drawable.shapes.RectShape
+import android.graphics.drawable.shapes.Shape
 import android.net.Uri
 import android.os.Build
 import android.text.Html
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.DecelerateInterpolator
+import android.view.animation.LinearInterpolator
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -26,15 +38,15 @@ import kotlinx.coroutines.*
 class SpeciesInfoHandler(
     private val context: Context,
     private val speciesInfoCard: MaterialCardView,
-    private val onCopySuccess: (String) -> Unit,
-    private var confidenceRotationAnimator: ObjectAnimator? = null
+    private val onCopySuccess: (String) -> Unit
 ) {
 
     private val handlerScope = CoroutineScope(Dispatchers.Main + Job())
     private val viewCache = mutableMapOf<Int, View>()
-
-    // Track các row đã được hiển thị để tránh animate lại
     private val displayedRows = mutableSetOf<Int>()
+
+    private var confidenceRotationAnimator: ObjectAnimator? = null
+    private var taxonomyShimmerAnimator: ValueAnimator? = null
 
     init {
         cacheViews()
@@ -92,7 +104,6 @@ class SpeciesInfoHandler(
                 displayCommonName(SpeciesInfo(commonName = "...", scientificName = ""))
                 displayScientificName(info)
                 displayConfidence(info, isWaiting = true)
-
                 prepareTaxonomyContainer()
             }
             LoadingStage.COMMON_NAME -> {
@@ -125,8 +136,9 @@ class SpeciesInfoHandler(
     }
 
     private fun clearAllViews() {
-        // Reset tracking
         displayedRows.clear()
+        stopConfidenceAnimation()
+        stopTaxonomyShimmer()
 
         val viewsToHide = listOf(
             R.id.tvCommonName, R.id.tvScientificName, R.id.confidenceCard,
@@ -148,25 +160,6 @@ class SpeciesInfoHandler(
             R.id.tvFamily, R.id.tvGenus, R.id.tvSpecies
         )
         textViews.forEach { (viewCache[it] as? TextView)?.text = "" }
-    }
-
-    private fun prepareTaxonomyContainer() {
-        val container = viewCache[R.id.taxonomyContainer]
-        container?.visibility = View.VISIBLE
-        container?.alpha = 1f
-
-        // Đặt tất cả các row về trạng thái INVISIBLE
-        val rowIds = listOf(
-            R.id.rowKingdom, R.id.rowPhylum, R.id.rowClass,
-            R.id.rowOrder, R.id.rowFamily, R.id.rowGenus, R.id.rowSpecies
-        )
-        rowIds.forEach { id ->
-            viewCache[id]?.apply {
-                visibility = View.INVISIBLE
-                alpha = 0f
-                translationY = 0f
-            }
-        }
     }
 
     private fun displayScientificName(info: SpeciesInfo) {
@@ -204,14 +197,12 @@ class SpeciesInfoHandler(
                 confidenceRotationAnimator = ObjectAnimator.ofFloat(iconConfidence, "rotation", 0f, 360f).apply {
                     duration = 1000
                     repeatCount = ObjectAnimator.INFINITE
-                    interpolator = android.view.animation.LinearInterpolator()
+                    interpolator = LinearInterpolator()
                     start()
                 }
             }
         } else {
-            confidenceRotationAnimator?.cancel()
-            confidenceRotationAnimator = null
-            iconConfidence?.rotation = 0f
+            stopConfidenceAnimation()
 
             val confidenceValue = info.confidence.coerceIn(0.0, 100.0)
             val confidencePercent = String.format("%.2f", confidenceValue)
@@ -237,7 +228,28 @@ class SpeciesInfoHandler(
         }
     }
 
+    private fun prepareTaxonomyContainer() {
+        val container = viewCache[R.id.taxonomyContainer]
+        container?.visibility = View.VISIBLE
+        container?.alpha = 1f
+
+        startTaxonomyShimmer(container)
+
+        val rowIds = listOf(
+            R.id.rowKingdom, R.id.rowPhylum, R.id.rowClass,
+            R.id.rowOrder, R.id.rowFamily, R.id.rowGenus, R.id.rowSpecies
+        )
+        rowIds.forEach { id ->
+            viewCache[id]?.apply {
+                visibility = View.INVISIBLE
+                alpha = 0f
+                translationY = 0f
+            }
+        }
+    }
+
     private fun displayTaxonomyWaterfall(info: SpeciesInfo) {
+        stopTaxonomyShimmer()
         val container = viewCache[R.id.taxonomyContainer]
         container?.visibility = View.VISIBLE
         container?.alpha = 1f
@@ -260,7 +272,6 @@ class SpeciesInfoHandler(
                 val hasData = text.isNotEmpty() && text != "..." && text != "N/A"
 
                 if (hasData) {
-                    // Chỉ animate nếu row này chưa được hiển thị
                     if (!displayedRows.contains(rowId)) {
                         val formattedText = if (text.contains("<i>")) "<b>" + text.replace("<i>", "</b><i>") else "<b>$text</b>"
                         textView.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -280,11 +291,9 @@ class SpeciesInfoHandler(
                             .setInterpolator(DecelerateInterpolator())
                             .start()
 
-                        // Đánh dấu row này đã được hiển thị
                         displayedRows.add(rowId)
                     }
                 } else {
-                    // Nếu không có data và chưa hiển thị, giữ INVISIBLE
                     if (!displayedRows.contains(rowId)) {
                         rowView.visibility = View.INVISIBLE
                         rowView.alpha = 0f
@@ -292,6 +301,112 @@ class SpeciesInfoHandler(
                 }
             }
         }
+    }
+
+    private fun startTaxonomyShimmer(view: View?) {
+        if (view == null || taxonomyShimmerAnimator != null) return
+
+        taxonomyShimmerAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 2000
+            repeatCount = ValueAnimator.INFINITE
+            repeatMode = ValueAnimator.RESTART
+            interpolator = LinearInterpolator()
+
+            addUpdateListener { animator ->
+                val progress = animator.animatedValue as Float
+                val width = view.width.toFloat()
+                val height = view.height.toFloat()
+
+                if (width <= 0 || height <= 0) return@addUpdateListener
+
+                // Tính toán vị trí shimmer theo đường chéo từ trên trái -> dưới phải
+                val diagonal = Math.sqrt((width * width + height * height).toDouble()).toFloat()
+                val shimmerWidth = diagonal * 0.5f
+                val offset = diagonal * (progress - 0.3f)
+
+                // Màu nền cố định
+                val backgroundColor = Color.parseColor("#ECEFF1")
+
+                // Tạo gradient với fade in/out hoàn toàn về transparent
+                val transparent = Color.parseColor("#00ECEFF1")  // Trong suốt hoàn toàn
+                val fadeIn1 = Color.parseColor("#40F5F7F9")      // 25% opacity
+                val fadeIn2 = Color.parseColor("#80F8F9FB")      // 50% opacity
+                val shimmerColor = Color.parseColor("#FFFAFBFC") // 100% opacity - sáng nhất
+                val fadeOut2 = Color.parseColor("#80F8F9FB")     // 50% opacity
+                val fadeOut1 = Color.parseColor("#40F5F7F9")     // 25% opacity
+
+                // Tạo gradient mượt mà với alpha transition
+                val gradient = LinearGradient(
+                    offset, offset,
+                    offset + shimmerWidth, offset + shimmerWidth,
+                    intArrayOf(
+                        transparent,   // 0% - hoàn toàn trong suốt
+                        fadeIn1,       // 20%
+                        fadeIn2,       // 35%
+                        shimmerColor,  // 50% - sáng nhất
+                        fadeOut2,      // 65%
+                        fadeOut1,      // 80%
+                        transparent    // 100% - hoàn toàn trong suốt
+                    ),
+                    floatArrayOf(0f, 0.2f, 0.35f, 0.5f, 0.65f, 0.8f, 1f),
+                    Shader.TileMode.CLAMP
+                )
+
+                val paint = Paint().apply {
+                    shader = gradient
+                    isAntiAlias = true
+                    isDither = true
+                }
+
+                // Paint cho background màu cố định
+                val bgPaint = Paint().apply {
+                    color = backgroundColor
+                    isAntiAlias = true
+                }
+
+                // Tạo drawable với góc bo tròn
+                val shapeDrawable = object : ShapeDrawable(RectShape()) {
+                    override fun onDraw(shape: Shape, canvas: Canvas, p: Paint) {
+                        val cornerRadius = 20f.dpToPx()
+                        val path = Path().apply {
+                            addRoundRect(
+                                0f, 0f,
+                                width, height,
+                                cornerRadius, cornerRadius,
+                                Path.Direction.CW
+                            )
+                        }
+                        canvas.save()
+                        canvas.clipPath(path)
+                        // Vẽ background trước
+                        canvas.drawRect(0f, 0f, width, height, bgPaint)
+                        // Vẽ shimmer gradient overlay
+                        canvas.drawRect(0f, 0f, width, height, paint)
+                        canvas.restore()
+                    }
+                }
+
+                view.background = shapeDrawable
+                view.invalidate()
+            }
+            start()
+        }
+    }
+
+    private fun stopTaxonomyShimmer() {
+        taxonomyShimmerAnimator?.cancel()
+        taxonomyShimmerAnimator = null
+        val container = viewCache[R.id.taxonomyContainer]
+        container?.let {
+            it.setBackgroundResource(R.drawable.bg_white_rounded)
+            it.backgroundTintList = ContextCompat.getColorStateList(context, R.color.gray_light_f8)
+        }
+    }
+
+    private fun stopConfidenceAnimation() {
+        confidenceRotationAnimator?.cancel()
+        confidenceRotationAnimator = null
+        (viewCache[R.id.iconConfidence] as? ImageView)?.rotation = 0f
     }
 
     private fun displaySection(sectionId: Int, textViewId: Int, text: String) {
@@ -426,7 +541,11 @@ class SpeciesInfoHandler(
         }.trim()
     }
 
+    private fun Float.dpToPx(): Float = this * context.resources.displayMetrics.density
+
     fun onDestroy() {
+        stopConfidenceAnimation()
+        stopTaxonomyShimmer()
         handlerScope.cancel()
     }
 
