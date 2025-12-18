@@ -99,7 +99,8 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
     fun identifySpecies(imageUri: Uri, languageCode: String) {
         viewModelScope.launch {
-            _uiState.value = EcoLensUiState(isLoading = true, loadingStage = LoadingStage.NONE)
+            _uiState.value = EcoLensUiState(isLoading = true, speciesInfo = null, error = null, loadingStage = LoadingStage.NONE)
+            delay(100)
 
             try {
                 val context = getApplication<Application>()

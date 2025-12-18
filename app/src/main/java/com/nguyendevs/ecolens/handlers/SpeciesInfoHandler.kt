@@ -74,15 +74,15 @@ class SpeciesInfoHandler(
     }
 
     fun displaySpeciesInfo(info: SpeciesInfo, imageUri: Uri?, stage: LoadingStage) {
-        setupCopyButton(info)
-        setupShareButton(info, imageUri)
-
         when (stage) {
             LoadingStage.NONE -> {
                 handlerScope.coroutineContext.cancelChildren()
                 clearAllViews()
+                return
             }
             LoadingStage.SCIENTIFIC_NAME -> {
+                setupCopyButton(info)
+                setupShareButton(info, imageUri)
                 displayScientificName(info)
                 displayConfidence(info, isWaiting = true)
             }
@@ -108,7 +108,10 @@ class SpeciesInfoHandler(
             LoadingStage.CONSERVATION -> {
                 displayConservationStatus(info.conservationStatus)
             }
-            LoadingStage.COMPLETE -> {}
+            LoadingStage.COMPLETE -> {
+                setupCopyButton(info)
+                setupShareButton(info, imageUri)
+            }
         }
     }
 
@@ -126,6 +129,22 @@ class SpeciesInfoHandler(
                 it.alpha = 0f
             }
         }
+
+        (viewCache[R.id.tvCommonName] as? TextView)?.text = ""
+        (viewCache[R.id.tvScientificName] as? TextView)?.text = ""
+        (viewCache[R.id.tvConfidence] as? TextView)?.text = ""
+        (viewCache[R.id.tvKingdom] as? TextView)?.text = ""
+        (viewCache[R.id.tvPhylum] as? TextView)?.text = ""
+        (viewCache[R.id.tvClass] as? TextView)?.text = ""
+        (viewCache[R.id.tvOrder] as? TextView)?.text = ""
+        (viewCache[R.id.tvFamily] as? TextView)?.text = ""
+        (viewCache[R.id.tvGenus] as? TextView)?.text = ""
+        (viewCache[R.id.tvSpecies] as? TextView)?.text = ""
+        (viewCache[R.id.tvDescription] as? TextView)?.text = ""
+        (viewCache[R.id.tvCharacteristics] as? TextView)?.text = ""
+        (viewCache[R.id.tvDistribution] as? TextView)?.text = ""
+        (viewCache[R.id.tvHabitat] as? TextView)?.text = ""
+        (viewCache[R.id.tvConservationStatus] as? TextView)?.text = ""
     }
 
     private fun displayScientificName(info: SpeciesInfo) {
@@ -194,10 +213,20 @@ class SpeciesInfoHandler(
 
     private fun displayTaxonomy(info: SpeciesInfo) {
         val container = viewCache[R.id.taxonomyContainer]
+
+        val rowIds = listOf(
+            R.id.rowKingdom, R.id.rowPhylum, R.id.rowClass,
+            R.id.rowOrder, R.id.rowFamily, R.id.rowGenus, R.id.rowSpecies
+        )
+
+        rowIds.forEach { id ->
+            viewCache[id]?.alpha = 0f
+        }
+
         container?.let {
             if (it.visibility != View.VISIBLE) {
+                it.alpha = 1f
                 it.visibility = View.VISIBLE
-                fadeIn(it, 200)
             }
         }
 
@@ -241,10 +270,13 @@ class SpeciesInfoHandler(
         textView?.text = styledText
 
         row?.let {
-            if (it.visibility != View.VISIBLE) {
-                it.alpha = 0f
-                it.visibility = View.VISIBLE
-                fadeIn(it, 200)
+            it.alpha = 0f
+            it.visibility = View.VISIBLE
+
+            ObjectAnimator.ofFloat(it, "alpha", 0f, 1f).apply {
+                duration = 200
+                interpolator = AccelerateDecelerateInterpolator()
+                start()
             }
         }
     }

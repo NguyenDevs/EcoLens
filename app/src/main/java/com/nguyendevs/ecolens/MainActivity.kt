@@ -28,6 +28,7 @@ import com.nguyendevs.ecolens.fragments.HistoryFragment
 import com.nguyendevs.ecolens.handlers.*
 import com.nguyendevs.ecolens.managers.*
 import com.nguyendevs.ecolens.model.LoadingStage
+import com.nguyendevs.ecolens.model.SpeciesInfo
 import com.nguyendevs.ecolens.utils.KeyboardUtils
 import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
 import com.nguyendevs.ecolens.view.EcoLensViewModel
@@ -381,10 +382,15 @@ class MainActivity : AppCompatActivity() {
 
         if (isLoading) loadingAnimationHandler.start() else loadingAnimationHandler.stop()
 
-        if (isLoading && loadingStage == LoadingStage.NONE) {
+        if (loadingStage == LoadingStage.NONE && state.speciesInfo == null) {
             speciesInfoCard.isVisible = false
             errorCard.isVisible = false
             fabSpeak.isVisible = false
+            speciesInfoHandler.displaySpeciesInfo(
+                SpeciesInfo(scientificName = "", commonName = ""),
+                null,
+                LoadingStage.NONE
+            )
         } else if (error != null) {
             errorText.text = error
             errorCard.isVisible = true
