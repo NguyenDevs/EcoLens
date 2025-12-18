@@ -8,7 +8,8 @@
                                                    app:cardCornerRadius="24dp"
                                                    app:strokeColor="#E0E0E0"
                                                    app:cardElevation="0dp"
-                                                   app:strokeWidth="1dp">
+                                                   app:strokeWidth="1dp"
+                                                   android:descendantFocusability="blocksDescendants">
 
     <LinearLayout
             android:layout_width="match_parent"
@@ -34,6 +35,7 @@
 
             <ImageView
                     android:id="@+id/btnShareInfo"
+                    android:visibility="gone"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_marginStart="8dp"
@@ -63,6 +65,7 @@
 
             <ImageView
                     android:id="@+id/btnCopyScientificName"
+                    android:visibility="gone"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_marginStart="8dp"
