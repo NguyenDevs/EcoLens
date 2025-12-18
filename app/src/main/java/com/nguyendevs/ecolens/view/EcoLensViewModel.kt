@@ -103,7 +103,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
             try {
                 val context = getApplication<Application>()
-
                 val imageFile = withContext(Dispatchers.Default) {
                     ImageUtils.uriToFile(context, imageUri, 1024)
                 }
@@ -119,145 +118,95 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                     val scientificName = taxon.name
                     val confidence = topResult.combined_score
 
-                    val initialInfo = SpeciesInfo(
-                        scientificName = scientificName,
-                        confidence = confidence
-                    )
-
                     _uiState.value = EcoLensUiState(
                         isLoading = true,
-                        speciesInfo = initialInfo,
+                        speciesInfo = SpeciesInfo(
+                            scientificName = scientificName,
+                            confidence = confidence,
+                            commonName = "..."
+                        ),
                         loadingStage = LoadingStage.SCIENTIFIC_NAME
                     )
+                    delay(400)
 
-                    delay(300)
+                    val geminiInfo = fetchDetailsFromGemini(scientificName, confidence, languageCode)
 
-                    val infoWithCommonName = initialInfo.copy(
-                        commonName = taxon.preferred_common_name?.ifEmpty { taxon.name } ?: taxon.name,
-                        rank = taxon.rank
-                    )
+                    val finalCommonName = geminiInfo.commonName.ifEmpty {
+                        taxon.preferred_common_name ?: scientificName
+                    }
 
-                    _uiState.value = EcoLensUiState(
-                        isLoading = true,
-                        speciesInfo = infoWithCommonName,
+                    _uiState.value = _uiState.value.copy(
+                        speciesInfo = _uiState.value.speciesInfo?.copy(
+                            commonName = finalCommonName,
+                            rank = taxon.rank
+                        ),
                         loadingStage = LoadingStage.COMMON_NAME
                     )
+                    delay(500)
 
-                    delay(300)
-
-                    val speciesInfo = fetchDetailsFromGemini(scientificName, confidence, languageCode)
-
-                    val infoWithTaxonomy = infoWithCommonName.copy(
-                        kingdom = speciesInfo.kingdom,
-                        phylum = speciesInfo.phylum,
-                        className = speciesInfo.className,
-                        order = speciesInfo.order,
-                        family = speciesInfo.family,
-                        genus = speciesInfo.genus,
-                        species = speciesInfo.species
+                    val taxonomyStages = listOf(
+                        { info: SpeciesInfo -> info.copy(kingdom = geminiInfo.kingdom) },
+                        { info: SpeciesInfo -> info.copy(phylum = geminiInfo.phylum) },
+                        { info: SpeciesInfo -> info.copy(className = geminiInfo.className) },
+                        { info: SpeciesInfo -> info.copy(order = geminiInfo.order) },
+                        { info: SpeciesInfo -> info.copy(family = geminiInfo.family) },
+                        { info: SpeciesInfo -> info.copy(genus = geminiInfo.genus) },
+                        { info: SpeciesInfo -> info.copy(species = geminiInfo.species) }
                     )
 
-                    _uiState.value = EcoLensUiState(
-                        isLoading = true,
-                        speciesInfo = infoWithTaxonomy,
-                        loadingStage = LoadingStage.TAXONOMY
+                    taxonomyStages.forEach { transform ->
+                        val updatedInfo = transform(_uiState.value.speciesInfo!!)
+                        _uiState.value = _uiState.value.copy(
+                            speciesInfo = updatedInfo,
+                            loadingStage = LoadingStage.TAXONOMY
+                        )
+                        delay(300)
+                    }
+
+                    val contentStages = listOf(
+                        Pair(LoadingStage.DESCRIPTION, geminiInfo.description),
+                        Pair(LoadingStage.CHARACTERISTICS, geminiInfo.characteristics),
+                        Pair(LoadingStage.DISTRIBUTION, geminiInfo.distribution),
+                        Pair(LoadingStage.HABITAT, geminiInfo.habitat),
+                        Pair(LoadingStage.CONSERVATION, geminiInfo.conservationStatus)
                     )
 
-                    delay(300)
-
-                    speciesInfo.description.takeIf { it.isNotEmpty() }?.let { desc ->
-                        _uiState.value = EcoLensUiState(
-                            isLoading = true,
-                            speciesInfo = infoWithTaxonomy.copy(description = desc),
-                            loadingStage = LoadingStage.DESCRIPTION
-                        )
-                        delay(300)
-                    }
-
-                    speciesInfo.characteristics.takeIf { it.isNotEmpty() }?.let { chars ->
-                        val current = _uiState.value.speciesInfo
-                        _uiState.value = EcoLensUiState(
-                            isLoading = true,
-                            speciesInfo = current?.copy(characteristics = chars),
-                            loadingStage = LoadingStage.CHARACTERISTICS
-                        )
-                        delay(300)
-                    }
-
-                    speciesInfo.distribution.takeIf { it.isNotEmpty() }?.let { dist ->
-                        val current = _uiState.value.speciesInfo
-                        _uiState.value = EcoLensUiState(
-                            isLoading = true,
-                            speciesInfo = current?.copy(distribution = dist),
-                            loadingStage = LoadingStage.DISTRIBUTION
-                        )
-                        delay(300)
-                    }
-
-                    speciesInfo.habitat.takeIf { it.isNotEmpty() }?.let { hab ->
-                        val current = _uiState.value.speciesInfo
-                        _uiState.value = EcoLensUiState(
-                            isLoading = true,
-                            speciesInfo = current?.copy(habitat = hab),
-                            loadingStage = LoadingStage.HABITAT
-                        )
-                        delay(300)
-                    }
-
-                    speciesInfo.conservationStatus.takeIf { it.isNotEmpty() }?.let { cons ->
-                        val current = _uiState.value.speciesInfo
-                        _uiState.value = EcoLensUiState(
-                            isLoading = true,
-                            speciesInfo = current?.copy(conservationStatus = cons),
-                            loadingStage = LoadingStage.CONSERVATION
-                        )
-                        delay(300)
-                    }
-
-                    val finalInfo = _uiState.value.speciesInfo?.copy(
-                        commonName = speciesInfo.commonName.ifEmpty {
-                            taxon.preferred_common_name ?: scientificName
+                    var currentInfo = _uiState.value.speciesInfo
+                    contentStages.forEach { (stage, content) ->
+                        if (content.isNotEmpty()) {
+                            currentInfo = when(stage) {
+                                LoadingStage.DESCRIPTION -> currentInfo?.copy(description = content)
+                                LoadingStage.CHARACTERISTICS -> currentInfo?.copy(characteristics = content)
+                                LoadingStage.DISTRIBUTION -> currentInfo?.copy(distribution = content)
+                                LoadingStage.HABITAT -> currentInfo?.copy(habitat = content)
+                                LoadingStage.CONSERVATION -> currentInfo?.copy(conservationStatus = content)
+                                else -> currentInfo
+                            }
+                            _uiState.value = _uiState.value.copy(
+                                speciesInfo = currentInfo,
+                                loadingStage = stage
+                            )
+                            delay(400)
                         }
-                    ) ?: speciesInfo.copy(
-                        scientificName = scientificName,
-                        confidence = confidence
-                    )
+                    }
 
-                    _uiState.value = EcoLensUiState(
-                        isLoading = false,
-                        speciesInfo = finalInfo,
-                        loadingStage = LoadingStage.COMPLETE
-                    )
+                    _uiState.value = _uiState.value.copy(isLoading = false, loadingStage = LoadingStage.COMPLETE)
 
                     withContext(Dispatchers.IO) {
                         val savedPath = ImageUtils.saveBitmapToInternalStorage(context, imageFile)
                         if (savedPath != null) {
-                            historyDao.insert(
-                                HistoryEntry(
-                                    imagePath = savedPath,
-                                    speciesInfo = finalInfo,
-                                    timestamp = System.currentTimeMillis()
-                                )
-                            )
+                            historyDao.insert(HistoryEntry(
+                                imagePath = savedPath,
+                                speciesInfo = currentInfo ?: geminiInfo,
+                                timestamp = System.currentTimeMillis()
+                            ))
                         }
                     }
-
                 } else {
-                    _uiState.value = EcoLensUiState(
-                        isLoading = false,
-                        error = context.getString(R.string.error_no_result)
-                    )
+                    _uiState.value = EcoLensUiState(isLoading = false, error = context.getString(R.string.error_no_result))
                 }
-
-                withContext(Dispatchers.IO) {
-                    if (imageFile.exists()) imageFile.delete()
-                }
-
             } catch (e: Exception) {
-                _uiState.value = EcoLensUiState(
-                    isLoading = false,
-                    error = getApplication<Application>().getString(R.string.error_prefix, e.message ?: "Unknown")
-                )
+                _uiState.value = EcoLensUiState(isLoading = false, error = "Lỗi: ${e.message}")
             }
         }
     }

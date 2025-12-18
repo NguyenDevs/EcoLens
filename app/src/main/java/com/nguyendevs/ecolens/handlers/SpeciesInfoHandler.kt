@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.Build
 import android.text.Html
 import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -74,12 +75,16 @@ class SpeciesInfoHandler(
         setupShareButton(info, imageUri)
 
         when (stage) {
+            LoadingStage.NONE -> {
+                clearAllViews()
+            }
             LoadingStage.SCIENTIFIC_NAME -> {
                 displayScientificName(info)
+                displayConfidence(info, isWaiting = true)
             }
             LoadingStage.COMMON_NAME -> {
                 displayCommonName(info)
-                displayConfidence(info)
+                displayConfidence(info, isWaiting = false)
             }
             LoadingStage.TAXONOMY -> {
                 displayTaxonomy(info)
@@ -99,10 +104,21 @@ class SpeciesInfoHandler(
             LoadingStage.CONSERVATION -> {
                 displayConservationStatus(info.conservationStatus)
             }
-            LoadingStage.COMPLETE -> {
-            }
-            LoadingStage.NONE -> {
-            }
+            LoadingStage.COMPLETE -> {}
+        }
+    }
+
+    private fun clearAllViews() {
+        val viewsToHide = listOf(
+            R.id.tvCommonName, R.id.tvScientificName, R.id.confidenceCard,
+            R.id.rowKingdom, R.id.rowPhylum, R.id.rowClass, R.id.rowOrder,
+            R.id.rowFamily, R.id.rowGenus, R.id.rowSpecies,
+            R.id.sectionDescription, R.id.sectionCharacteristics,
+            R.id.sectionDistribution, R.id.sectionHabitat, R.id.sectionConservation
+        )
+        viewsToHide.forEach { id ->
+            viewCache[id]?.visibility = View.GONE
+            viewCache[id]?.alpha = 0f
         }
     }
 
@@ -110,6 +126,7 @@ class SpeciesInfoHandler(
         val tvScientificName = viewCache[R.id.tvScientificName] as? TextView
         tvScientificName?.let {
             it.text = info.scientificName
+            it.visibility = View.VISIBLE
             fadeIn(it)
         }
     }
@@ -118,42 +135,53 @@ class SpeciesInfoHandler(
         val tvCommonName = viewCache[R.id.tvCommonName] as? TextView
         tvCommonName?.let {
             it.text = info.commonName
+            it.visibility = View.VISIBLE
             fadeIn(it)
         }
     }
 
-    private fun displayConfidence(info: SpeciesInfo) {
-        val confidenceValue = info.confidence.coerceIn(0.0, 100.0)
-        val confidencePercent = String.format("%.2f", confidenceValue)
-
+    private fun displayConfidence(info: SpeciesInfo, isWaiting: Boolean) {
         val tvConfidence = viewCache[R.id.tvConfidence] as? TextView
         val confidenceCard = viewCache[R.id.confidenceCard] as? MaterialCardView
         val iconConfidence = viewCache[R.id.iconConfidence] as? ImageView
 
-        tvConfidence?.text = context.getString(R.string.confidence_format, confidencePercent)
+        if (isWaiting) {
+            tvConfidence?.text = "..."
+            iconConfidence?.setImageResource(R.drawable.ic_rotate)
+            iconConfidence?.imageTintList = ContextCompat.getColorStateList(context, R.color.text_secondary)
+            confidenceCard?.setCardBackgroundColor(ContextCompat.getColor(context, R.color.gray_light))
+            tvConfidence?.setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
+        } else {
+            val confidenceValue = info.confidence.coerceIn(0.0, 100.0)
+            val confidencePercent = String.format("%.2f", confidenceValue)
+            tvConfidence?.text = context.getString(R.string.confidence_format, confidencePercent)
 
-        when {
-            confidenceValue >= 50f -> {
-                iconConfidence?.setImageResource(R.drawable.ic_check_circle)
-                iconConfidence?.imageTintList = ContextCompat.getColorStateList(context, R.color.confidence_high)
-                confidenceCard?.setCardBackgroundColor(ContextCompat.getColor(context, R.color.confidence_bg_high))
-                tvConfidence?.setTextColor(ContextCompat.getColor(context, R.color.confidence_text_high))
-            }
-            confidenceValue >= 25f -> {
-                iconConfidence?.setImageResource(R.drawable.ic_check_warning_circle)
-                iconConfidence?.imageTintList = ContextCompat.getColorStateList(context, R.color.confidence_medium)
-                confidenceCard?.setCardBackgroundColor(ContextCompat.getColor(context, R.color.confidence_bg_medium))
-                tvConfidence?.setTextColor(ContextCompat.getColor(context, R.color.confidence_text_medium))
-            }
-            else -> {
-                iconConfidence?.setImageResource(R.drawable.ic_check_not_circle)
-                iconConfidence?.imageTintList = ContextCompat.getColorStateList(context, R.color.confidence_low)
-                confidenceCard?.setCardBackgroundColor(ContextCompat.getColor(context, R.color.confidence_bg_low))
-                tvConfidence?.setTextColor(ContextCompat.getColor(context, R.color.confidence_text_low))
+            when {
+                confidenceValue >= 50f -> {
+                    iconConfidence?.setImageResource(R.drawable.ic_check_circle)
+                    iconConfidence?.imageTintList = ContextCompat.getColorStateList(context, R.color.confidence_high)
+                    confidenceCard?.setCardBackgroundColor(ContextCompat.getColor(context, R.color.confidence_bg_high))
+                    tvConfidence?.setTextColor(ContextCompat.getColor(context, R.color.confidence_text_high))
+                }
+                confidenceValue >= 25f -> {
+                    iconConfidence?.setImageResource(R.drawable.ic_check_warning_circle)
+                    iconConfidence?.imageTintList = ContextCompat.getColorStateList(context, R.color.confidence_medium)
+                    confidenceCard?.setCardBackgroundColor(ContextCompat.getColor(context, R.color.confidence_bg_medium))
+                    tvConfidence?.setTextColor(ContextCompat.getColor(context, R.color.confidence_text_medium))
+                }
+                else -> {
+                    iconConfidence?.setImageResource(R.drawable.ic_check_not_circle)
+                    iconConfidence?.imageTintList = ContextCompat.getColorStateList(context, R.color.confidence_low)
+                    confidenceCard?.setCardBackgroundColor(ContextCompat.getColor(context, R.color.confidence_bg_low))
+                    tvConfidence?.setTextColor(ContextCompat.getColor(context, R.color.confidence_text_low))
+                }
             }
         }
 
-        confidenceCard?.let { fadeIn(it) }
+        if (confidenceCard?.visibility != View.VISIBLE) {
+            confidenceCard?.visibility = View.VISIBLE
+            fadeIn(confidenceCard!!)
+        }
     }
 
     private fun displayTaxonomy(info: SpeciesInfo) {
@@ -185,8 +213,10 @@ class SpeciesInfoHandler(
             textView?.setTextColor(ContextCompat.getColor(context, R.color.black))
 
             section?.let {
-                it.visibility = View.VISIBLE
-                fadeIn(it)
+                if (it.visibility != View.VISIBLE) {
+                    it.visibility = View.VISIBLE
+                    fadeIn(it)
+                }
             }
         } else {
             section?.visibility = View.GONE
@@ -200,7 +230,6 @@ class SpeciesInfoHandler(
             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = ClipData.newPlainText("Scientific Name", textToCopy)
             clipboard.setPrimaryClip(clip)
-
             onCopySuccess(textToCopy)
         }
     }
@@ -216,7 +245,7 @@ class SpeciesInfoHandler(
         val row = viewCache[rowId] as? LinearLayout
         val textView = viewCache[textViewId] as? TextView
 
-        if (text.isNotEmpty()) {
+        if (text.isNotEmpty() && text != "..." && text != "N/A") {
             val formattedText = if (text.contains("<i>")) {
                 "<b>" + text.replace("<i>", "</b><i>")
             } else {
@@ -230,12 +259,11 @@ class SpeciesInfoHandler(
                 Html.fromHtml(formattedText)
             }
             textView?.text = styledText
-            row?.let {
-                it.visibility = View.VISIBLE
-                fadeIn(it)
+
+            if (row?.visibility != View.VISIBLE) {
+                row?.visibility = View.VISIBLE
+                fadeIn(row!!)
             }
-        } else {
-            row?.visibility = View.GONE
         }
     }
 
@@ -247,7 +275,6 @@ class SpeciesInfoHandler(
             val htmlText = text.trim()
                 .replace("\n•", "<br>•")
                 .replace("\n", "<br>")
-                .replace("<br>•", "<br>•")
 
             val spanned = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 Html.fromHtml(htmlText, Html.FROM_HTML_MODE_LEGACY)
@@ -258,8 +285,10 @@ class SpeciesInfoHandler(
 
             textView?.text = spanned
             section?.let {
-                it.visibility = View.VISIBLE
-                fadeIn(it)
+                if (it.visibility != View.VISIBLE) {
+                    it.visibility = View.VISIBLE
+                    fadeIn(it)
+                }
             }
         } else {
             section?.visibility = View.GONE
@@ -269,7 +298,8 @@ class SpeciesInfoHandler(
     private fun fadeIn(view: View) {
         view.alpha = 0f
         ObjectAnimator.ofFloat(view, "alpha", 0f, 1f).apply {
-            duration = 300
+            duration = 400
+            interpolator = AccelerateDecelerateInterpolator()
             start()
         }
     }
@@ -284,11 +314,9 @@ class SpeciesInfoHandler(
         val shareText = buildString {
             append(context.getString(R.string.share_title))
             append("\n━━━━━━━━━━━━━━━━━━━━\n\n")
-
             append("📌 ${info.commonName}\n")
             append("🔬 ${info.scientificName}\n")
             append("✅ ${context.getString(R.string.label_confidence_template, confidencePercent)}\n\n")
-
             append("━━━━━━━━━━━━━━━━━━━━\n")
             append(context.getString(R.string.share_taxonomy_title))
             append("\n━━━━━━━━━━━━━━━━━━━━\n\n")
@@ -301,44 +329,22 @@ class SpeciesInfoHandler(
             if (info.genus.isNotEmpty()) append("• ${context.getString(R.string.label_genus)} ${stripHtml(info.genus)}\n")
             if (info.species.isNotEmpty()) append("• ${context.getString(R.string.label_species)} ${stripHtml(info.species)}\n")
 
-            if (info.description.isNotEmpty()) {
-                append("\n━━━━━━━━━━━━━━━━━━━━\n")
-                append(context.getString(R.string.share_desc_title))
-                append("\n━━━━━━━━━━━━━━━━━━━━\n\n")
-                append(stripHtml(info.description))
-                append("\n")
-            }
+            val sections = listOf(
+                info.description to R.string.share_desc_title,
+                info.characteristics to R.string.share_char_title,
+                info.distribution to R.string.share_dist_title,
+                info.habitat to R.string.share_hab_title,
+                info.conservationStatus to R.string.share_cons_title
+            )
 
-            if (info.characteristics.isNotEmpty()) {
-                append("\n━━━━━━━━━━━━━━━━━━━━\n")
-                append(context.getString(R.string.share_char_title))
-                append("\n━━━━━━━━━━━━━━━━━━━━\n\n")
-                append(stripHtml(info.characteristics))
-                append("\n")
-            }
-
-            if (info.distribution.isNotEmpty()) {
-                append("\n━━━━━━━━━━━━━━━━━━━━\n")
-                append(context.getString(R.string.share_dist_title))
-                append("\n━━━━━━━━━━━━━━━━━━━━\n\n")
-                append(stripHtml(info.distribution))
-                append("\n")
-            }
-
-            if (info.habitat.isNotEmpty()) {
-                append("\n━━━━━━━━━━━━━━━━━━━━\n")
-                append(context.getString(R.string.share_hab_title))
-                append("\n━━━━━━━━━━━━━━━━━━━━\n\n")
-                append(stripHtml(info.habitat))
-                append("\n")
-            }
-
-            if (info.conservationStatus.isNotEmpty()) {
-                append("\n━━━━━━━━━━━━━━━━━━━━\n")
-                append(context.getString(R.string.share_cons_title))
-                append("\n━━━━━━━━━━━━━━━━━━━━\n\n")
-                append(stripHtml(info.conservationStatus))
-                append("\n")
+            sections.forEach { (content, titleRes) ->
+                if (content.isNotEmpty()) {
+                    append("\n━━━━━━━━━━━━━━━━━━━━\n")
+                    append(context.getString(titleRes))
+                    append("\n━━━━━━━━━━━━━━━━━━━━\n\n")
+                    append(stripHtml(content))
+                    append("\n")
+                }
             }
 
             append("\n━━━━━━━━━━━━━━━━━━━━\n")
@@ -346,32 +352,21 @@ class SpeciesInfoHandler(
         }
 
         try {
-            if (imageUri != null) {
-                val shareIntent = Intent().apply {
-                    action = Intent.ACTION_SEND
+            val shareIntent = Intent().apply {
+                action = Intent.ACTION_SEND
+                if (imageUri != null) {
                     type = "image/*"
                     putExtra(Intent.EXTRA_STREAM, imageUri)
-                    putExtra(Intent.EXTRA_TEXT, shareText)
-                    putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.share_subject, info.commonName))
                     clipData = ClipData.newRawUri(null, imageUri)
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                }
-
-                val chooserIntent = Intent.createChooser(shareIntent, context.getString(R.string.share_chooser_title))
-                chooserIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-
-                context.startActivity(chooserIntent)
-            } else {
-                val shareIntent = Intent().apply {
-                    action = Intent.ACTION_SEND
+                } else {
                     type = "text/plain"
-                    putExtra(Intent.EXTRA_TEXT, shareText)
-                    putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.share_subject, info.commonName))
                 }
-                context.startActivity(Intent.createChooser(shareIntent, context.getString(R.string.share_chooser_title)))
+                putExtra(Intent.EXTRA_TEXT, shareText)
+                putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.share_subject, info.commonName))
             }
+            context.startActivity(Intent.createChooser(shareIntent, context.getString(R.string.share_chooser_title)))
         } catch (e: Exception) {
-            e.printStackTrace()
             Toast.makeText(context, "${context.getString(R.string.error)}: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
