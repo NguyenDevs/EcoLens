@@ -11,6 +11,7 @@ import android.os.Build
 import android.text.Html
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.DecelerateInterpolator
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -129,6 +130,7 @@ class SpeciesInfoHandler(
             viewCache[id]?.let {
                 it.visibility = View.GONE
                 it.alpha = 0f
+                it.translationY = 0f
             }
         }
 
@@ -216,14 +218,16 @@ class SpeciesInfoHandler(
 
     private fun displayTaxonomy(info: SpeciesInfo) {
         val container = viewCache[R.id.taxonomyContainer]
-
         val rowIds = listOf(
             R.id.rowKingdom, R.id.rowPhylum, R.id.rowClass,
             R.id.rowOrder, R.id.rowFamily, R.id.rowGenus, R.id.rowSpecies
         )
 
         rowIds.forEach { id ->
-            viewCache[id]?.alpha = 0f
+            viewCache[id]?.apply {
+                alpha = 0f
+                visibility = View.INVISIBLE
+            }
         }
 
         container?.let {
@@ -244,42 +248,44 @@ class SpeciesInfoHandler(
                 Triple(R.id.rowSpecies, R.id.tvSpecies, info.species)
             )
 
+            var delayAmount = 0L
             for ((rowId, tvId, text) in rows) {
                 if (text.isNotEmpty() && text != "..." && text != "N/A") {
-                    setTaxonomyRowData(rowId, tvId, text)
+                    updateTaxonomyTextView(tvId, text)
+                    animateTaxonomyRow(rowId, delayAmount)
+                    delayAmount += 70
                 }
             }
         }
     }
 
-    private fun setTaxonomyRowData(rowId: Int, textViewId: Int, text: String) {
-        val row = viewCache[rowId] as? LinearLayout
+    private fun updateTaxonomyTextView(textViewId: Int, text: String) {
         val textView = viewCache[textViewId] as? TextView
-
         val formattedText = if (text.contains("<i>")) {
             "<b>" + text.replace("<i>", "</b><i>")
         } else {
             "<b>$text</b>"
         }
 
-        val styledText = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        textView?.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Html.fromHtml(formattedText, Html.FROM_HTML_MODE_LEGACY)
         } else {
             @Suppress("DEPRECATION")
             Html.fromHtml(formattedText)
         }
+    }
 
-        textView?.text = styledText
-
-        row?.let {
-            it.alpha = 0f
-            it.visibility = View.VISIBLE
-
-            ObjectAnimator.ofFloat(it, "alpha", 0f, 1f).apply {
-                duration = 200
-                interpolator = AccelerateDecelerateInterpolator()
-                start()
-            }
+    private fun animateTaxonomyRow(rowId: Int, delay: Long) {
+        viewCache[rowId]?.let { row ->
+            row.visibility = View.VISIBLE
+            row.translationY = 15f
+            row.animate()
+                .alpha(1f)
+                .translationY(0f)
+                .setStartDelay(delay)
+                .setDuration(300)
+                .setInterpolator(DecelerateInterpolator())
+                .start()
         }
     }
 
