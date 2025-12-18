@@ -97,8 +97,6 @@ class SpeciesInfoHandler(
                 clearAllViews()
             }
             LoadingStage.SCIENTIFIC_NAME -> {
-                //setupCopyButton(info)
-                //setupShareButton(info, imageUri)
                 displayCommonName(SpeciesInfo(commonName = "...", scientificName = ""))
                 displayScientificName(info)
                 displayConfidence(info, isWaiting = true)
@@ -112,19 +110,12 @@ class SpeciesInfoHandler(
                 displayTaxonomyWaterfall(info)
             }
             LoadingStage.DESCRIPTION -> {
-                displaySection(R.id.sectionDescription, R.id.tvDescription, info.description)
+                preloadAllSections(info)
             }
-            LoadingStage.CHARACTERISTICS -> {
-                displaySection(R.id.sectionCharacteristics, R.id.tvCharacteristics, info.characteristics)
-            }
-            LoadingStage.DISTRIBUTION -> {
-                displaySection(R.id.sectionDistribution, R.id.tvDistribution, info.distribution)
-            }
-            LoadingStage.HABITAT -> {
-                displaySection(R.id.sectionHabitat, R.id.tvHabitat, info.habitat)
-            }
+            LoadingStage.CHARACTERISTICS,
+            LoadingStage.DISTRIBUTION,
+            LoadingStage.HABITAT,
             LoadingStage.CONSERVATION -> {
-                displayConservationStatus(info.conservationStatus)
             }
             LoadingStage.COMPLETE -> {
                 val btnShare = viewCache[R.id.btnShareInfo]
@@ -322,6 +313,77 @@ class SpeciesInfoHandler(
         }
     }
 
+    private fun preloadAllSections(info: SpeciesInfo) {
+        val sectionsData = listOf(
+            Triple(R.id.sectionDescription, R.id.tvDescription, info.description),
+            Triple(R.id.sectionCharacteristics, R.id.tvCharacteristics, info.characteristics),
+            Triple(R.id.sectionDistribution, R.id.tvDistribution, info.distribution),
+            Triple(R.id.sectionHabitat, R.id.tvHabitat, info.habitat)
+        )
+
+        sectionsData.forEach { (sectionId, textViewId, text) ->
+            val section = viewCache[sectionId] as? LinearLayout
+            val textView = viewCache[textViewId] as? TextView
+
+            if (text.isNotEmpty()) {
+                val htmlText = text.trim().replace("\n•", "<br>•").replace("\n", "<br>")
+                val spanned = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    Html.fromHtml(htmlText, Html.FROM_HTML_MODE_LEGACY)
+                } else {
+                    @Suppress("DEPRECATION") Html.fromHtml(htmlText)
+                }
+                textView?.text = spanned
+                section?.visibility = View.VISIBLE
+                section?.alpha = 0f
+            } else {
+                section?.visibility = View.GONE
+            }
+        }
+
+        if (info.conservationStatus.isNotEmpty()) {
+            val section = viewCache[R.id.sectionConservation] as? LinearLayout
+            val textView = viewCache[R.id.tvConservationStatus] as? TextView
+
+            textView?.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                Html.fromHtml(info.conservationStatus, Html.FROM_HTML_MODE_COMPACT)
+            } else {
+                @Suppress("DEPRECATION") Html.fromHtml(info.conservationStatus)
+            }
+            textView?.setTextColor(ContextCompat.getColor(context, R.color.black))
+            section?.visibility = View.VISIBLE
+            section?.alpha = 0f
+        } else {
+            viewCache[R.id.sectionConservation]?.visibility = View.GONE
+        }
+
+        animateSectionsFadeIn()
+    }
+
+    private fun animateSectionsFadeIn() {
+        val sections = listOf(
+            R.id.sectionDescription,
+            R.id.sectionCharacteristics,
+            R.id.sectionDistribution,
+            R.id.sectionHabitat,
+            R.id.sectionConservation
+        )
+
+        var delayCounter = 0L
+        sections.forEach { sectionId ->
+            val section = viewCache[sectionId]
+            if (section?.visibility == View.VISIBLE) {
+                section.postDelayed({
+                    section.animate()
+                        .alpha(1f)
+                        .setDuration(500)
+                        .setInterpolator(DecelerateInterpolator(1.5f))
+                        .start()
+                }, delayCounter)
+                delayCounter += 150L
+            }
+        }
+    }
+
     private fun startTaxonomyShimmer(view: View?) {
         if (view == null || taxonomyShimmerAnimator != null) return
 
@@ -404,74 +466,6 @@ class SpeciesInfoHandler(
         confidenceRotationAnimator?.cancel()
         confidenceRotationAnimator = null
         (viewCache[R.id.iconConfidence] as? ImageView)?.rotation = 0f
-    }
-
-    private fun displaySection(sectionId: Int, textViewId: Int, text: String) {
-        val section = viewCache[sectionId] as? LinearLayout
-        val textView = viewCache[textViewId] as? TextView
-
-        if (text.isNotEmpty()) {
-            val htmlText = text.trim().replace("\n•", "<br>•").replace("\n", "<br>")
-            val spanned = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                Html.fromHtml(htmlText, Html.FROM_HTML_MODE_LEGACY)
-            } else {
-                @Suppress("DEPRECATION") Html.fromHtml(htmlText)
-            }
-
-            textView?.text = spanned
-            section?.let { sectionView ->
-                if (sectionView.visibility != View.VISIBLE) {
-                    sectionView.visibility = View.VISIBLE
-                    sectionView.alpha = 0f
-                    sectionView.translationY = 15f
-
-                    sectionView.animate()
-                        .alpha(1f)
-                        .translationY(0f)
-                        .setDuration(450)
-                        .setInterpolator(DecelerateInterpolator())
-                        .start()
-                }
-            }
-        } else {
-            section?.visibility = View.GONE
-        }
-    }
-
-    private fun displayConservationStatus(status: String) {
-        val section = viewCache[R.id.sectionConservation] as? LinearLayout
-        val textView = viewCache[R.id.tvConservationStatus] as? TextView
-
-        if (status.isNotEmpty()) {
-            textView?.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                Html.fromHtml(status, Html.FROM_HTML_MODE_COMPACT)
-            } else {
-                @Suppress("DEPRECATION") Html.fromHtml(status)
-            }
-            textView?.setTextColor(ContextCompat.getColor(context, R.color.black))
-
-            section?.let { sectionView ->
-                if (sectionView.visibility != View.VISIBLE) {
-                    sectionView.visibility = View.VISIBLE
-                    sectionView.alpha = 0f
-
-                    fadeIn(sectionView, 400)
-                }
-            }
-        } else {
-            section?.visibility = View.GONE
-        }
-    }
-
-    private fun findScrollView(view: View): ScrollView? {
-        var parent = view.parent
-        while (parent != null) {
-            if (parent is ScrollView) {
-                return parent
-            }
-            parent = parent.parent
-        }
-        return null
     }
 
     private fun setupCopyButton(info: SpeciesInfo) {
