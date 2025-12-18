@@ -97,8 +97,8 @@ class SpeciesInfoHandler(
                 clearAllViews()
             }
             LoadingStage.SCIENTIFIC_NAME -> {
-                setupCopyButton(info)
-                setupShareButton(info, imageUri)
+                //setupCopyButton(info)
+                //setupShareButton(info, imageUri)
                 displayCommonName(SpeciesInfo(commonName = "...", scientificName = ""))
                 displayScientificName(info)
                 displayConfidence(info, isWaiting = true)
@@ -127,8 +127,22 @@ class SpeciesInfoHandler(
                 displayConservationStatus(info.conservationStatus)
             }
             LoadingStage.COMPLETE -> {
+                val btnShare = viewCache[R.id.btnShareInfo]
+                val btnCopy = viewCache[R.id.btnCopyScientificName]
+
                 setupCopyButton(info)
                 setupShareButton(info, imageUri)
+
+                btnShare?.apply {
+                    visibility = View.VISIBLE
+                    alpha = 0f
+                    animate().alpha(1f).setDuration(500).start()
+                }
+                btnCopy?.apply {
+                    visibility = View.VISIBLE
+                    alpha = 0f
+                    animate().alpha(1f).setDuration(500).start()
+                }
             }
         }
     }
@@ -407,23 +421,9 @@ class SpeciesInfoHandler(
             textView?.text = spanned
             section?.let { sectionView ->
                 if (sectionView.visibility != View.VISIBLE) {
-                    val scrollView = findScrollView(speciesInfoCard)
-                    val scrollY = scrollView?.scrollY ?: 0
-                    val scrollHeight = scrollView?.getChildAt(0)?.height ?: 0
-                    val viewportHeight = scrollView?.height ?: 0
-
                     sectionView.visibility = View.VISIBLE
                     sectionView.alpha = 0f
                     sectionView.translationY = 15f
-
-                    sectionView.post {
-                        scrollView?.let { sv ->
-                            val isAtBottom = (scrollY + viewportHeight >= scrollHeight - 50)
-                            if (!isAtBottom) {
-                                sv.scrollTo(0, scrollY)
-                            }
-                        }
-                    }
 
                     sectionView.animate()
                         .alpha(1f)
@@ -449,24 +449,11 @@ class SpeciesInfoHandler(
                 @Suppress("DEPRECATION") Html.fromHtml(status)
             }
             textView?.setTextColor(ContextCompat.getColor(context, R.color.black))
+
             section?.let { sectionView ->
                 if (sectionView.visibility != View.VISIBLE) {
-                    val scrollView = findScrollView(speciesInfoCard)
-                    val scrollY = scrollView?.scrollY ?: 0
-                    val scrollHeight = scrollView?.getChildAt(0)?.height ?: 0
-                    val viewportHeight = scrollView?.height ?: 0
-
                     sectionView.visibility = View.VISIBLE
                     sectionView.alpha = 0f
-
-                    sectionView.post {
-                        scrollView?.let { sv ->
-                            val isAtBottom = (scrollY + viewportHeight >= scrollHeight - 50)
-                            if (!isAtBottom) {
-                                sv.scrollTo(0, scrollY)
-                            }
-                        }
-                    }
 
                     fadeIn(sectionView, 400)
                 }
