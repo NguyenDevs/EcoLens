@@ -133,7 +133,7 @@ class SpeciesInfoHandler(
         tvScientificName?.let {
             it.text = info.scientificName
             it.visibility = View.VISIBLE
-            fadeIn(it)
+            fadeIn(it, 200)
         }
     }
 
@@ -142,7 +142,7 @@ class SpeciesInfoHandler(
         tvCommonName?.let {
             it.text = info.commonName
             it.visibility = View.VISIBLE
-            fadeIn(it)
+            fadeIn(it, 200)
         }
     }
 
@@ -187,7 +187,7 @@ class SpeciesInfoHandler(
         confidenceCard?.let {
             if (it.visibility != View.VISIBLE) {
                 it.visibility = View.VISIBLE
-                fadeIn(it)
+                fadeIn(it, 200)
             }
         }
     }
@@ -197,7 +197,7 @@ class SpeciesInfoHandler(
         container?.let {
             if (it.visibility != View.VISIBLE) {
                 it.visibility = View.VISIBLE
-                fadeIn(it, 300)
+                fadeIn(it, 200)
             }
         }
 
@@ -215,7 +215,7 @@ class SpeciesInfoHandler(
             rows.forEach { (rowId, tvId, text) ->
                 if (text.isNotEmpty() && text != "..." && text != "N/A") {
                     setTaxonomyRowData(rowId, tvId, text)
-                    delay(100)
+                    delay(80)
                 }
             }
         }
@@ -242,8 +242,9 @@ class SpeciesInfoHandler(
 
         row?.let {
             if (it.visibility != View.VISIBLE) {
+                it.alpha = 0f
                 it.visibility = View.VISIBLE
-                fadeIn(it, 350)
+                fadeIn(it, 200)
             }
         }
     }
@@ -268,8 +269,9 @@ class SpeciesInfoHandler(
 
             section?.let {
                 if (it.visibility != View.VISIBLE) {
+                    it.alpha = 0f
                     it.visibility = View.VISIBLE
-                    fadeIn(it)
+                    fadeIn(it, 250)
                 }
             }
         } else {
@@ -314,8 +316,9 @@ class SpeciesInfoHandler(
             textView?.text = spanned
             section?.let {
                 if (it.visibility != View.VISIBLE) {
+                    it.alpha = 0f
                     it.visibility = View.VISIBLE
-                    fadeIn(it)
+                    fadeIn(it, 250)
                 }
             }
         } else {
@@ -323,9 +326,8 @@ class SpeciesInfoHandler(
         }
     }
 
-    private fun fadeIn(view: View, durationMs: Long = 400) {
-        view.alpha = 0f
-        ObjectAnimator.ofFloat(view, "alpha", 0f, 1f).apply {
+    private fun fadeIn(view: View, durationMs: Long = 200) {
+        ObjectAnimator.ofFloat(view, "alpha", view.alpha, 1f).apply {
             duration = durationMs
             interpolator = AccelerateDecelerateInterpolator()
             start()
