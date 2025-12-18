@@ -19,6 +19,7 @@ import com.google.android.material.card.MaterialCardView
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.model.LoadingStage
 import com.nguyendevs.ecolens.model.SpeciesInfo
+import kotlinx.coroutines.*
 
 class SpeciesInfoHandler(
     private val context: Context,
@@ -26,6 +27,7 @@ class SpeciesInfoHandler(
     private val onCopySuccess: (String) -> Unit
 ) {
 
+    private val handlerScope = CoroutineScope(Dispatchers.Main + Job())
     private val viewCache = mutableMapOf<Int, View>()
 
     init {
@@ -40,14 +42,15 @@ class SpeciesInfoHandler(
         viewCache[R.id.iconConfidence] = speciesInfoCard.findViewById(R.id.iconConfidence)
         viewCache[R.id.btnCopyScientificName] = speciesInfoCard.findViewById(R.id.btnCopyScientificName)
         viewCache[R.id.btnShareInfo] = speciesInfoCard.findViewById(R.id.btnShareInfo)
+        viewCache[R.id.taxonomyContainer] = speciesInfoCard.findViewById(R.id.taxonomyContainer)
 
-        viewCache[R.id.rowKingdom] = speciesInfoCard.findViewById(R.id.rowKingdom)
-        viewCache[R.id.rowPhylum] = speciesInfoCard.findViewById(R.id.rowPhylum)
-        viewCache[R.id.rowClass] = speciesInfoCard.findViewById(R.id.rowClass)
-        viewCache[R.id.rowOrder] = speciesInfoCard.findViewById(R.id.rowOrder)
-        viewCache[R.id.rowFamily] = speciesInfoCard.findViewById(R.id.rowFamily)
-        viewCache[R.id.rowGenus] = speciesInfoCard.findViewById(R.id.rowGenus)
-        viewCache[R.id.rowSpecies] = speciesInfoCard.findViewById(R.id.rowSpecies)
+        val rowIds = listOf(
+            R.id.rowKingdom, R.id.rowPhylum, R.id.rowClass,
+            R.id.rowOrder, R.id.rowFamily, R.id.rowGenus, R.id.rowSpecies
+        )
+        rowIds.forEach { id ->
+            speciesInfoCard.findViewById<View>(id)?.let { viewCache[id] = it }
+        }
 
         viewCache[R.id.tvKingdom] = speciesInfoCard.findViewById(R.id.tvKingdom)
         viewCache[R.id.tvPhylum] = speciesInfoCard.findViewById(R.id.tvPhylum)
@@ -76,6 +79,7 @@ class SpeciesInfoHandler(
 
         when (stage) {
             LoadingStage.NONE -> {
+                handlerScope.coroutineContext.cancelChildren()
                 clearAllViews()
             }
             LoadingStage.SCIENTIFIC_NAME -> {
@@ -111,14 +115,16 @@ class SpeciesInfoHandler(
     private fun clearAllViews() {
         val viewsToHide = listOf(
             R.id.tvCommonName, R.id.tvScientificName, R.id.confidenceCard,
-            R.id.rowKingdom, R.id.rowPhylum, R.id.rowClass, R.id.rowOrder,
-            R.id.rowFamily, R.id.rowGenus, R.id.rowSpecies,
+            R.id.taxonomyContainer, R.id.rowKingdom, R.id.rowPhylum, R.id.rowClass,
+            R.id.rowOrder, R.id.rowFamily, R.id.rowGenus, R.id.rowSpecies,
             R.id.sectionDescription, R.id.sectionCharacteristics,
             R.id.sectionDistribution, R.id.sectionHabitat, R.id.sectionConservation
         )
         viewsToHide.forEach { id ->
-            viewCache[id]?.visibility = View.GONE
-            viewCache[id]?.alpha = 0f
+            viewCache[id]?.let {
+                it.visibility = View.GONE
+                it.alpha = 0f
+            }
         }
     }
 
@@ -178,20 +184,68 @@ class SpeciesInfoHandler(
             }
         }
 
-        if (confidenceCard?.visibility != View.VISIBLE) {
-            confidenceCard?.visibility = View.VISIBLE
-            fadeIn(confidenceCard!!)
+        confidenceCard?.let {
+            if (it.visibility != View.VISIBLE) {
+                it.visibility = View.VISIBLE
+                fadeIn(it)
+            }
         }
     }
 
     private fun displayTaxonomy(info: SpeciesInfo) {
-        setTaxonomyRow(R.id.rowKingdom, R.id.tvKingdom, info.kingdom)
-        setTaxonomyRow(R.id.rowPhylum, R.id.tvPhylum, info.phylum)
-        setTaxonomyRow(R.id.rowClass, R.id.tvClass, info.className)
-        setTaxonomyRow(R.id.rowOrder, R.id.tvOrder, info.order)
-        setTaxonomyRow(R.id.rowFamily, R.id.tvFamily, info.family)
-        setTaxonomyRow(R.id.rowGenus, R.id.tvGenus, info.genus)
-        setTaxonomyRow(R.id.rowSpecies, R.id.tvSpecies, info.species)
+        val container = viewCache[R.id.taxonomyContainer]
+        container?.let {
+            if (it.visibility != View.VISIBLE) {
+                it.visibility = View.VISIBLE
+                fadeIn(it, 300)
+            }
+        }
+
+        handlerScope.launch {
+            val rows = listOf(
+                Triple(R.id.rowKingdom, R.id.tvKingdom, info.kingdom),
+                Triple(R.id.rowPhylum, R.id.tvPhylum, info.phylum),
+                Triple(R.id.rowClass, R.id.tvClass, info.className),
+                Triple(R.id.rowOrder, R.id.tvOrder, info.order),
+                Triple(R.id.rowFamily, R.id.tvFamily, info.family),
+                Triple(R.id.rowGenus, R.id.tvGenus, info.genus),
+                Triple(R.id.rowSpecies, R.id.tvSpecies, info.species)
+            )
+
+            rows.forEach { (rowId, tvId, text) ->
+                if (text.isNotEmpty() && text != "..." && text != "N/A") {
+                    setTaxonomyRowData(rowId, tvId, text)
+                    delay(100)
+                }
+            }
+        }
+    }
+
+    private fun setTaxonomyRowData(rowId: Int, textViewId: Int, text: String) {
+        val row = viewCache[rowId] as? LinearLayout
+        val textView = viewCache[textViewId] as? TextView
+
+        val formattedText = if (text.contains("<i>")) {
+            "<b>" + text.replace("<i>", "</b><i>")
+        } else {
+            "<b>$text</b>"
+        }
+
+        val styledText = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Html.fromHtml(formattedText, Html.FROM_HTML_MODE_LEGACY)
+        } else {
+            @Suppress("DEPRECATION")
+            Html.fromHtml(formattedText)
+        }
+
+        textView?.text = styledText
+
+        row?.let {
+            if (it.visibility != View.VISIBLE) {
+                it.visibility = View.VISIBLE
+                fadeIn(it, 350)
+            }
+        }
     }
 
     private fun displaySection(sectionId: Int, textViewId: Int, text: String) {
@@ -241,32 +295,6 @@ class SpeciesInfoHandler(
         }
     }
 
-    private fun setTaxonomyRow(rowId: Int, textViewId: Int, text: String) {
-        val row = viewCache[rowId] as? LinearLayout
-        val textView = viewCache[textViewId] as? TextView
-
-        if (text.isNotEmpty() && text != "..." && text != "N/A") {
-            val formattedText = if (text.contains("<i>")) {
-                "<b>" + text.replace("<i>", "</b><i>")
-            } else {
-                "<b>$text</b>"
-            }
-
-            val styledText = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                Html.fromHtml(formattedText, Html.FROM_HTML_MODE_LEGACY)
-            } else {
-                @Suppress("DEPRECATION")
-                Html.fromHtml(formattedText)
-            }
-            textView?.text = styledText
-
-            if (row?.visibility != View.VISIBLE) {
-                row?.visibility = View.VISIBLE
-                fadeIn(row!!)
-            }
-        }
-    }
-
     private fun setSectionVisibility(sectionId: Int, textViewId: Int, text: String) {
         val section = viewCache[sectionId] as? LinearLayout
         val textView = viewCache[textViewId] as? TextView
@@ -295,10 +323,10 @@ class SpeciesInfoHandler(
         }
     }
 
-    private fun fadeIn(view: View) {
+    private fun fadeIn(view: View, durationMs: Long = 400) {
         view.alpha = 0f
         ObjectAnimator.ofFloat(view, "alpha", 0f, 1f).apply {
-            duration = 400
+            duration = durationMs
             interpolator = AccelerateDecelerateInterpolator()
             start()
         }
@@ -378,5 +406,9 @@ class SpeciesInfoHandler(
             @Suppress("DEPRECATION")
             Html.fromHtml(html).toString()
         }.trim()
+    }
+
+    fun onDestroy() {
+        handlerScope.cancel()
     }
 }
