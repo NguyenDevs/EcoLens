@@ -47,6 +47,7 @@ class SpeciesInfoHandler(
 
     private var confidenceRotationAnimator: ObjectAnimator? = null
     private var taxonomyShimmerAnimator: ValueAnimator? = null
+    private var lastScrollY = 0
 
     init {
         cacheViews()
@@ -319,15 +320,12 @@ class SpeciesInfoHandler(
 
                 if (width <= 0 || height <= 0) return@addUpdateListener
 
-                // Tính toán vị trí shimmer theo đường chéo từ trên trái -> dưới phải
                 val diagonal = Math.sqrt((width * width + height * height).toDouble()).toFloat()
                 val shimmerWidth = diagonal * 0.5f
                 val offset = diagonal * (progress - 0.3f)
 
-                // Màu nền cố định
                 val backgroundColor = Color.parseColor("#ECEFF1")
 
-                // Tạo gradient với fade in/out hoàn toàn về transparent
                 val transparent = Color.parseColor("#00ECEFF1")  // Trong suốt hoàn toàn
                 val fadeIn1 = Color.parseColor("#40F5F7F9")      // 25% opacity
                 val fadeIn2 = Color.parseColor("#80F8F9FB")      // 50% opacity
@@ -335,7 +333,6 @@ class SpeciesInfoHandler(
                 val fadeOut2 = Color.parseColor("#80F8F9FB")     // 50% opacity
                 val fadeOut1 = Color.parseColor("#40F5F7F9")     // 25% opacity
 
-                // Tạo gradient mượt mà với alpha transition
                 val gradient = LinearGradient(
                     offset, offset,
                     offset + shimmerWidth, offset + shimmerWidth,
@@ -358,13 +355,11 @@ class SpeciesInfoHandler(
                     isDither = true
                 }
 
-                // Paint cho background màu cố định
                 val bgPaint = Paint().apply {
                     color = backgroundColor
                     isAntiAlias = true
                 }
 
-                // Tạo drawable với góc bo tròn
                 val shapeDrawable = object : ShapeDrawable(RectShape()) {
                     override fun onDraw(shape: Shape, canvas: Canvas, p: Paint) {
                         val cornerRadius = 20f.dpToPx()
@@ -378,9 +373,7 @@ class SpeciesInfoHandler(
                         }
                         canvas.save()
                         canvas.clipPath(path)
-                        // Vẽ background trước
                         canvas.drawRect(0f, 0f, width, height, bgPaint)
-                        // Vẽ shimmer gradient overlay
                         canvas.drawRect(0f, 0f, width, height, paint)
                         canvas.restore()
                     }
@@ -424,9 +417,17 @@ class SpeciesInfoHandler(
             textView?.text = spanned
             section?.let {
                 if (it.visibility != View.VISIBLE) {
+                    val scrollView = findScrollView(speciesInfoCard)
+                    val currentScrollY = scrollView?.scrollY ?: 0
+
                     it.visibility = View.VISIBLE
                     it.alpha = 0f
                     it.translationY = 15f
+
+                    it.post {
+                        scrollView?.scrollTo(0, currentScrollY)
+                    }
+
                     it.animate()
                         .alpha(1f)
                         .translationY(0f)
@@ -453,8 +454,16 @@ class SpeciesInfoHandler(
             textView?.setTextColor(ContextCompat.getColor(context, R.color.black))
             section?.let {
                 if (it.visibility != View.VISIBLE) {
+                    val scrollView = findScrollView(speciesInfoCard)
+                    val currentScrollY = scrollView?.scrollY ?: 0
+
                     it.visibility = View.VISIBLE
                     it.alpha = 0f
+
+                    it.post {
+                        scrollView?.scrollTo(0, currentScrollY)
+                    }
+
                     fadeIn(it, 400)
                 }
             }
@@ -463,6 +472,16 @@ class SpeciesInfoHandler(
         }
     }
 
+    private fun findScrollView(view: View): android.widget.ScrollView? {
+        var parent = view.parent
+        while (parent != null) {
+            if (parent is android.widget.ScrollView) {
+                return parent
+            }
+            parent = parent.parent
+        }
+        return null
+    }
     private fun setupCopyButton(info: SpeciesInfo) {
         viewCache[R.id.btnCopyScientificName]?.setOnClickListener {
             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
