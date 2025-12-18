@@ -2,7 +2,6 @@ package com.nguyendevs.ecolens
 
 import android.animation.ValueAnimator
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.MotionEvent
@@ -28,6 +27,7 @@ import com.nguyendevs.ecolens.fragments.ChatHistoryFragment
 import com.nguyendevs.ecolens.fragments.HistoryFragment
 import com.nguyendevs.ecolens.handlers.*
 import com.nguyendevs.ecolens.managers.*
+import com.nguyendevs.ecolens.model.LoadingStage
 import com.nguyendevs.ecolens.utils.KeyboardUtils
 import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
 import com.nguyendevs.ecolens.view.EcoLensViewModel
@@ -287,8 +287,10 @@ class MainActivity : AppCompatActivity() {
                 searchBarContainer.visibility = View.VISIBLE
 
                 val state = viewModel.uiState.value
+                val isComplete = state.loadingStage == LoadingStage.COMPLETE
                 val hasInfo = state.speciesInfo != null && !state.isLoading && state.error == null
-                if (hasInfo && !speakerManager.isSpeaking()) {
+
+                if (isComplete && hasInfo && !speakerManager.isSpeaking()) {
                     fabSpeak.visibility = View.VISIBLE
                 } else if (speakerManager.isSpeaking()) {
                     fabMute.visibility = View.VISIBLE
@@ -367,13 +369,14 @@ class MainActivity : AppCompatActivity() {
     private fun updateHomeUI(state: com.nguyendevs.ecolens.model.EcoLensUiState) {
         val isLoading = state.isLoading
         val error = state.error
+        val loadingStage = state.loadingStage
 
         loadingOverlay.isVisible = isLoading
         loadingCard.isVisible = isLoading
 
         if (isLoading) loadingAnimationHandler.start() else loadingAnimationHandler.stop()
 
-        if (isLoading) {
+        if (isLoading && loadingStage == LoadingStage.NONE) {
             speciesInfoCard.isVisible = false
             errorCard.isVisible = false
             fabSpeak.isVisible = false
@@ -383,9 +386,16 @@ class MainActivity : AppCompatActivity() {
             speciesInfoCard.isVisible = false
             fabSpeak.isVisible = false
         } else if (state.speciesInfo != null) {
-            speciesInfoHandler.displaySpeciesInfo(state.speciesInfo, imageUri)
             speciesInfoCard.isVisible = true
-            if (fabMute.visibility != View.VISIBLE) fabSpeak.isVisible = true
+            errorCard.isVisible = false
+
+            speciesInfoHandler.displaySpeciesInfo(state.speciesInfo, imageUri, loadingStage)
+
+            if (loadingStage == LoadingStage.COMPLETE && fabMute.visibility != View.VISIBLE) {
+                fabSpeak.isVisible = true
+            } else {
+                fabSpeak.isVisible = false
+            }
         }
     }
 

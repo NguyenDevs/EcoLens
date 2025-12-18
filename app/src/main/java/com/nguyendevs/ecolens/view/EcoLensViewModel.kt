@@ -12,16 +12,12 @@ import com.nguyendevs.ecolens.api.GeminiPart
 import com.nguyendevs.ecolens.api.GeminiRequest
 import com.nguyendevs.ecolens.database.HistoryDatabase
 import com.nguyendevs.ecolens.database.ChatDao
-import com.nguyendevs.ecolens.model.ChatMessage
-import com.nguyendevs.ecolens.model.EcoLensUiState
-import com.nguyendevs.ecolens.model.HistoryEntry
-import com.nguyendevs.ecolens.model.HistorySortOption
-import com.nguyendevs.ecolens.model.SpeciesInfo
-import com.nguyendevs.ecolens.model.ChatSession
+import com.nguyendevs.ecolens.model.*
 import com.nguyendevs.ecolens.network.RetrofitClient
 import com.nguyendevs.ecolens.utils.ImageUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,10 +29,6 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.util.Locale
 
-/**
- * ViewModel chính quản lý logic nghiệp vụ cho toàn bộ ứng dụng EcoLens
- * Bao gồm: nhận diện loài, quản lý lịch sử, và xử lý chat với AI
- */
 class EcoLensViewModel(application: Application) : AndroidViewModel(application) {
 
     private val apiService = RetrofitClient.iNaturalistApi
@@ -52,9 +44,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     private val _chatMessages = MutableStateFlow<List<ChatMessage>>(emptyList())
     val chatMessages: StateFlow<List<ChatMessage>> = _chatMessages.asStateFlow()
 
-    /**
-     * Data class nội bộ để parse response từ Gemini API
-     */
     private data class GeminiRawResponse(
         val commonName: String = "",
         val scientificName: String = "",
@@ -74,11 +63,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         val confidence: Double = 0.0
     )
 
-    // ==================== HISTORY MANAGEMENT ====================
-
-    /**
-     * Lấy lịch sử theo tùy chọn sắp xếp và khoảng thời gian (nếu có)
-     */
     fun getHistoryBySortOption(
         sortOption: HistorySortOption,
         startDate: Long? = null,
@@ -97,18 +81,12 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    /**
-     * Xóa toàn bộ lịch sử
-     */
     fun deleteAllHistory() {
         viewModelScope.launch(Dispatchers.IO) {
             historyDao.deleteAll()
         }
     }
 
-    /**
-     * Chuyển đổi trạng thái yêu thích của một mục lịch sử
-     */
     fun toggleFavorite(entry: HistoryEntry) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -119,14 +97,9 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    // ==================== SPECIES IDENTIFICATION ====================
-
-    /**
-     * Nhận diện loài từ ảnh sử dụng iNaturalist API và Gemini AI
-     */
     fun identifySpecies(imageUri: Uri, languageCode: String) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null, speciesInfo = null)
+            _uiState.value = EcoLensUiState(isLoading = true, loadingStage = LoadingStage.NONE)
 
             try {
                 val context = getApplication<Application>()
@@ -146,14 +119,114 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                     val scientificName = taxon.name
                     val confidence = topResult.combined_score
 
-                    val speciesInfo = fetchDetailsFromGemini(scientificName, confidence, languageCode)
-                    val finalInfo = speciesInfo.copy(
-                        commonName = speciesInfo.commonName.ifEmpty { taxon.preferred_common_name ?: scientificName },
+                    val initialInfo = SpeciesInfo(
                         scientificName = scientificName,
-                        confidence = confidence,
-                        kingdom = speciesInfo.kingdom.ifEmpty {
-                            taxon.ancestors.find { it.rank == "kingdom" }?.name ?: ""
+                        confidence = confidence
+                    )
+
+                    _uiState.value = EcoLensUiState(
+                        isLoading = true,
+                        speciesInfo = initialInfo,
+                        loadingStage = LoadingStage.SCIENTIFIC_NAME
+                    )
+
+                    delay(300)
+
+                    val infoWithCommonName = initialInfo.copy(
+                        commonName = taxon.preferred_common_name?.ifEmpty { taxon.name } ?: taxon.name,
+                        rank = taxon.rank
+                    )
+
+                    _uiState.value = EcoLensUiState(
+                        isLoading = true,
+                        speciesInfo = infoWithCommonName,
+                        loadingStage = LoadingStage.COMMON_NAME
+                    )
+
+                    delay(300)
+
+                    val speciesInfo = fetchDetailsFromGemini(scientificName, confidence, languageCode)
+
+                    val infoWithTaxonomy = infoWithCommonName.copy(
+                        kingdom = speciesInfo.kingdom,
+                        phylum = speciesInfo.phylum,
+                        className = speciesInfo.className,
+                        order = speciesInfo.order,
+                        family = speciesInfo.family,
+                        genus = speciesInfo.genus,
+                        species = speciesInfo.species
+                    )
+
+                    _uiState.value = EcoLensUiState(
+                        isLoading = true,
+                        speciesInfo = infoWithTaxonomy,
+                        loadingStage = LoadingStage.TAXONOMY
+                    )
+
+                    delay(300)
+
+                    speciesInfo.description.takeIf { it.isNotEmpty() }?.let { desc ->
+                        _uiState.value = EcoLensUiState(
+                            isLoading = true,
+                            speciesInfo = infoWithTaxonomy.copy(description = desc),
+                            loadingStage = LoadingStage.DESCRIPTION
+                        )
+                        delay(300)
+                    }
+
+                    speciesInfo.characteristics.takeIf { it.isNotEmpty() }?.let { chars ->
+                        val current = _uiState.value.speciesInfo
+                        _uiState.value = EcoLensUiState(
+                            isLoading = true,
+                            speciesInfo = current?.copy(characteristics = chars),
+                            loadingStage = LoadingStage.CHARACTERISTICS
+                        )
+                        delay(300)
+                    }
+
+                    speciesInfo.distribution.takeIf { it.isNotEmpty() }?.let { dist ->
+                        val current = _uiState.value.speciesInfo
+                        _uiState.value = EcoLensUiState(
+                            isLoading = true,
+                            speciesInfo = current?.copy(distribution = dist),
+                            loadingStage = LoadingStage.DISTRIBUTION
+                        )
+                        delay(300)
+                    }
+
+                    speciesInfo.habitat.takeIf { it.isNotEmpty() }?.let { hab ->
+                        val current = _uiState.value.speciesInfo
+                        _uiState.value = EcoLensUiState(
+                            isLoading = true,
+                            speciesInfo = current?.copy(habitat = hab),
+                            loadingStage = LoadingStage.HABITAT
+                        )
+                        delay(300)
+                    }
+
+                    speciesInfo.conservationStatus.takeIf { it.isNotEmpty() }?.let { cons ->
+                        val current = _uiState.value.speciesInfo
+                        _uiState.value = EcoLensUiState(
+                            isLoading = true,
+                            speciesInfo = current?.copy(conservationStatus = cons),
+                            loadingStage = LoadingStage.CONSERVATION
+                        )
+                        delay(300)
+                    }
+
+                    val finalInfo = _uiState.value.speciesInfo?.copy(
+                        commonName = speciesInfo.commonName.ifEmpty {
+                            taxon.preferred_common_name ?: scientificName
                         }
+                    ) ?: speciesInfo.copy(
+                        scientificName = scientificName,
+                        confidence = confidence
+                    )
+
+                    _uiState.value = EcoLensUiState(
+                        isLoading = false,
+                        speciesInfo = finalInfo,
+                        loadingStage = LoadingStage.COMPLETE
                     )
 
                     withContext(Dispatchers.IO) {
@@ -169,9 +242,8 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                         }
                     }
 
-                    _uiState.value = _uiState.value.copy(isLoading = false, speciesInfo = finalInfo)
                 } else {
-                    _uiState.value = _uiState.value.copy(
+                    _uiState.value = EcoLensUiState(
                         isLoading = false,
                         error = context.getString(R.string.error_no_result)
                     )
@@ -182,7 +254,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 }
 
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
+                _uiState.value = EcoLensUiState(
                     isLoading = false,
                     error = getApplication<Application>().getString(R.string.error_prefix, e.message ?: "Unknown")
                 )
@@ -190,9 +262,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    /**
-     * Lấy thông tin chi tiết về loài từ Gemini AI
-     */
     private suspend fun fetchDetailsFromGemini(
         scientificName: String,
         confidence: Double,
@@ -250,9 +319,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    /**
-     * Xây dựng prompt cho Gemini API theo ngôn ngữ
-     */
     private fun buildGeminiPrompt(scientificName: String, isVietnamese: Boolean): String {
         val commonNameDesc = if (isVietnamese) "Tên thường gọi Tiếng Việt chuẩn nhất" else "Common name in English"
 
@@ -319,36 +385,18 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    // ==================== TEXT FORMATTING UTILITIES ====================
-
-    /**
-     * Parse text với delimiter đơn giản sang HTML
-     * ** -> bold, ## -> highlighted green, ~~ -> italic
-     */
     private fun parseToHtml(text: String, isConservationStatus: Boolean = false, isVietnamese: Boolean = true): String {
         if (text.isBlank()) return ""
 
         var result = text
-
-            // Regex bắt dòng bắt đầu bằng 1-6 dấu #, sau đó là khoảng trắng và nội dung
             .replace(Regex("^(#{1,6})\\s+(.+)$", RegexOption.MULTILINE)) { matchResult ->
                 "<br><b>${matchResult.groupValues[2]}</b>"
             }
-            // 1. Xử lý in đậm: **text** -> <b>text</b>
             .replace(Regex("\\*\\*(.+?)\\*\\*")) { "<b>${it.groupValues[1]}</b>" }
-
-            // 2. Xử lý in nghiêng: *text* hoặc ~~text~~ -> <i>text</i>
-            // (Gemini Chat thường dùng * cho in nghiêng)
             .replace(Regex("(?<!\\*)\\*(?!\\*)(.+?)(?<!\\*)\\*(?!\\*)")) { "<i>${it.groupValues[1]}</i>" }
             .replace(Regex("~~(.+?)~~")) { "<i>${it.groupValues[1]}</i>" }
-
-            // 3. Xử lý highlight màu xanh: ##text## -> màu xanh đậm
             .replace(Regex("##(.+?)##")) { "<font color='#00796B'><b>${it.groupValues[1]}</b></font>" }
-
-            // 4. Xử lý gạch đầu dòng: * đầu dòng -> •
             .replace(Regex("^\\*\\s+", RegexOption.MULTILINE)) { "• " }
-
-            // 5. Xử lý xuống dòng: \n -> <br> (quan trọng cho hiển thị trên TextView)
             .replace("\n", "<br>")
 
         if (isConservationStatus) {
@@ -358,9 +406,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         return result
     }
 
-    /**
-     * Thêm màu sắc cho các trạng thái bảo tồn
-     */
     private fun colorizeConservationStatus(text: String, isVietnamese: Boolean): String {
         val statusMap = if (isVietnamese) {
             mapOf(
@@ -396,9 +441,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         return result
     }
 
-    /**
-     * Làm sạch JSON string từ response của Gemini
-     */
     private fun cleanJsonString(json: String): String {
         return json.replace("```json", "", ignoreCase = true)
             .replace("```", "", ignoreCase = true)
@@ -410,16 +452,11 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             }
     }
 
-    /**
-     * Loại bỏ prefix rank (Giới, Ngành, Lớp, v.v.) khỏi tên phân loại
-     */
     private fun removeRankPrefix(text: String, prefix: String): String {
         return text.trim().replaceFirst(Regex("^(?i)$prefix\\s*[:\\-\\s]+"), "")
             .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
             .trim()
     }
-
-    // ==================== CHAT MANAGEMENT ====================
 
     private fun startMessageCollection(sessionId: Long) {
         messageCollectionJob?.cancel()
@@ -441,16 +478,12 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         _chatMessages.value = emptyList()
     }
 
-    /**
-     * Khởi tạo session chat mới. Tái sử dụng nếu phiên gần nhất trống.
-     */
     fun initNewChatSession(welcomeMessage: String, defaultTitle: String) {
         currentSessionId = null
         messageCollectionJob?.cancel()
         _chatMessages.value = emptyList()
 
         viewModelScope.launch(Dispatchers.IO) {
-            // Kiểm tra tái sử dụng phiên chat
             val latestSession = chatDao.getLatestSession()
             var sessionToReuseId: Long? = null
 
@@ -486,19 +519,14 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    /**
-     * Gửi tin nhắn, sửa lỗi API 400 và áp dụng format HTML cho Bot response.
-     */
     fun sendChatMessage(userMessage: String, defaultTitle: String) {
         if (userMessage.isBlank()) return
         val sessionId = currentSessionId ?: return
 
         viewModelScope.launch(Dispatchers.IO) {
-            // 1. Lưu tin nhắn User
             val userChatMsg = ChatMessage(sessionId = sessionId, content = userMessage, isUser = true, timestamp = System.currentTimeMillis())
             chatDao.insertMessage(userChatMsg)
 
-            // 2. Cập nhật tiêu đề phiên chat
             val currentSession = chatDao.getSessionById(sessionId)
             val newTitle = if (currentSession?.title == defaultTitle) {
                 userMessage.take(30) + "..."
@@ -507,12 +535,10 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             }
             chatDao.updateSession(currentSession!!.copy(title = newTitle, lastMessage = userMessage, timestamp = System.currentTimeMillis()))
 
-            // 3. Hiển thị loading
             val loadingMsg = ChatMessage(sessionId = -1, content = "...", isUser = false, isLoading = true)
             _chatMessages.value = _chatMessages.value + loadingMsg
 
             try {
-                // 4. FIX LỖI API 400: Thêm thủ công tin nhắn User vào context gửi đi
                 val currentHistory = _chatMessages.value.filter { !it.isLoading && it.sessionId == sessionId }.toMutableList()
                 currentHistory.add(userChatMsg)
 
@@ -527,10 +553,8 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 val reply = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
                     ?: cantreply
 
-                // 5. TEXT FORMATTING: Format text Bot trả về (Bold, Color...) và xử lý xuống dòng
                 val formattedReply = parseToHtml(reply).replace("\n", "<br>")
 
-                // 6. Lưu phản hồi vào DB
                 val botChatMsg = ChatMessage(sessionId = sessionId, content = formattedReply, isUser = false, timestamp = System.currentTimeMillis())
                 chatDao.insertMessage(botChatMsg)
 
@@ -544,19 +568,14 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    /**
-     * Xóa phiên chat và tất cả tin nhắn trong đó
-     */
     fun deleteChatSession(sessionId: Long) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                // QUAN TRỌNG: Xóa messages trước, sau đó mới xóa session
                 chatDao.deleteMessagesBySession(sessionId)
                 chatDao.deleteSession(sessionId)
 
                 Log.d("EcoLensViewModel", "Deleted session $sessionId successfully")
 
-                // Nếu đang xem phiên chat này, reset về trạng thái mới
                 if (currentSessionId == sessionId) {
                     withContext(Dispatchers.Main) {
                         currentSessionId = null
