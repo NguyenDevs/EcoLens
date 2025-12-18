@@ -49,6 +49,11 @@ class HistoryDetailFragment : Fragment() {
     // Thiết lập các thành phần sau khi view được tạo
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        if (speakerManager.isSpeaking()) {
+            speakerManager.pause()
+        }
+
         val entry = historyEntry ?: return
         val info = entry.speciesInfo
 
@@ -57,9 +62,41 @@ class HistoryDetailFragment : Fragment() {
         bindTaxonomy(view, info)
         bindContent(view, info)
         setupFab(view, info)
+
         view.findViewById<FloatingActionButton>(R.id.fab_speak)?.let { fab ->
             fab.show()
             fab.bringToFront()
+        }
+    }
+
+    private fun setupFab(view: View, info: SpeciesInfo) {
+        val fab = view.findViewById<FloatingActionButton>(R.id.fab_speak)
+
+        speakerManager.onSpeechFinished = {
+            activity?.runOnUiThread {
+                updateFabUI(fab, false)
+            }
+        }
+
+        fab.setOnClickListener {
+            if (isSpeaking) {
+                speakerManager.pause()
+                updateFabUI(fab, false)
+            } else {
+                speakerManager.speak(TextToSpeechGenerator.generateSpeechText(requireContext(), info))
+                updateFabUI(fab, true)
+            }
+        }
+    }
+
+    private fun updateFabUI(fab: FloatingActionButton, speaking: Boolean) {
+        isSpeaking = speaking
+        if (speaking) {
+            fab.setImageResource(R.drawable.ic_mute)
+            fab.backgroundTintList = ColorStateList.valueOf(Color.RED)
+        } else {
+            fab.setImageResource(R.drawable.ic_speak)
+            fab.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green_primary))
         }
     }
 
@@ -200,33 +237,6 @@ class HistoryDetailFragment : Fragment() {
         container.addView(titleView)
         container.addView(divider)
         container.addView(contentView)
-    }
-
-    // Thiết lập Floating Action Button để đọc văn bản
-    private fun setupFab(view: View, info: SpeciesInfo) {
-        val fab = view.findViewById<FloatingActionButton>(R.id.fab_speak)
-
-        speakerManager.onSpeechFinished = {
-            activity?.runOnUiThread {
-                isSpeaking = false
-                fab.setImageResource(R.drawable.ic_speak)
-                fab.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green_primary))
-            }
-        }
-
-        fab.setOnClickListener {
-            if (isSpeaking) {
-                speakerManager.pause()
-                fab.setImageResource(R.drawable.ic_speak)
-                fab.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green_primary))
-                isSpeaking = false
-            } else {
-                speakerManager.speak(TextToSpeechGenerator.generateSpeechText(requireContext(), info))
-                fab.setImageResource(R.drawable.ic_mute)
-                fab.backgroundTintList = ColorStateList.valueOf(Color.RED)
-                isSpeaking = true
-            }
-        }
     }
 
     // Chuyển đổi HTML string sang Spanned

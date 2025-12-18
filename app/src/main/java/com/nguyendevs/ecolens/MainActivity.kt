@@ -265,6 +265,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateNavigationState(itemId: Int) {
+        if (speakerManager.isSpeaking()) {
+            speakerManager.pause()
+            toggleSpeakerUI(false)
+        }
+
         val transition = Fade()
         transition.duration = 100
         TransitionManager.beginDelayedTransition(mainContent, transition)
