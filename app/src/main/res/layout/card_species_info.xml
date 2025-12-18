@@ -302,7 +302,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginTop="24dp"
-                android:alpha="0"
                 android:visibility="gone">
 
             <TextView
@@ -335,7 +334,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginTop="24dp"
-                android:alpha="0"
                 android:visibility="gone">
 
             <TextView
@@ -368,7 +366,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginTop="24dp"
-                android:alpha="0"
                 android:visibility="gone">
 
             <TextView
@@ -401,7 +398,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginTop="24dp"
-                android:alpha="0"
                 android:visibility="gone">
 
             <TextView
@@ -434,7 +430,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginTop="24dp"
-                android:alpha="0"
                 android:visibility="gone">
 
             <TextView
