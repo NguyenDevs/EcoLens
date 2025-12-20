@@ -97,12 +97,11 @@ class SpeciesInfoHandler(
                 clearAllViews()
             }
             LoadingStage.SCIENTIFIC_NAME -> {
-                //setupCopyButton(info)
-                //setupShareButton(info, imageUri)
                 displayCommonName(SpeciesInfo(commonName = "...", scientificName = ""))
                 displayScientificName(info)
                 displayConfidence(info, isWaiting = true)
                 prepareTaxonomyContainer()
+                hideButtons()
             }
             LoadingStage.COMMON_NAME -> {
                 displayCommonName(info)
@@ -127,22 +126,9 @@ class SpeciesInfoHandler(
                 displayConservationStatus(info.conservationStatus)
             }
             LoadingStage.COMPLETE -> {
-                val btnShare = viewCache[R.id.btnShareInfo]
-                val btnCopy = viewCache[R.id.btnCopyScientificName]
-
                 setupCopyButton(info)
                 setupShareButton(info, imageUri)
-
-                btnShare?.apply {
-                    visibility = View.VISIBLE
-                    alpha = 0f
-                    animate().alpha(1f).setDuration(500).start()
-                }
-                btnCopy?.apply {
-                    visibility = View.VISIBLE
-                    alpha = 0f
-                    animate().alpha(1f).setDuration(500).start()
-                }
+                showButtonsWithAnimation()
             }
         }
     }
@@ -430,6 +416,9 @@ class SpeciesInfoHandler(
                         .translationY(0f)
                         .setDuration(450)
                         .setInterpolator(DecelerateInterpolator())
+                        .withEndAction {
+                            smoothScrollToView(sectionView)
+                        }
                         .start()
                 }
             }
@@ -455,7 +444,14 @@ class SpeciesInfoHandler(
                     sectionView.visibility = View.VISIBLE
                     sectionView.alpha = 0f
 
-                    fadeIn(sectionView, 400)
+                    sectionView.animate()
+                        .alpha(1f)
+                        .setDuration(400)
+                        .setInterpolator(DecelerateInterpolator())
+                        .withEndAction {
+                            smoothScrollToView(sectionView)
+                        }
+                        .start()
                 }
             }
         } else {
@@ -472,6 +468,60 @@ class SpeciesInfoHandler(
             parent = parent.parent
         }
         return null
+    }
+
+    private fun smoothScrollToView(view: View) {
+        view.post {
+            val scrollView = findScrollView(view)
+            scrollView?.let { sv ->
+                val scrollY = view.top + view.height - sv.height + sv.paddingBottom + 100
+                if (scrollY > sv.scrollY) {
+                    sv.smoothScrollTo(0, scrollY)
+                }
+            }
+        }
+    }
+
+    private fun hideButtons() {
+        val btnShare = viewCache[R.id.btnShareInfo]
+        val btnCopy = viewCache[R.id.btnCopyScientificName]
+
+        btnShare?.visibility = View.GONE
+        btnCopy?.visibility = View.GONE
+    }
+
+    private fun showButtonsWithAnimation() {
+        val btnShare = viewCache[R.id.btnShareInfo]
+        val btnCopy = viewCache[R.id.btnCopyScientificName]
+
+        btnShare?.apply {
+            visibility = View.VISIBLE
+            alpha = 0f
+            scaleX = 0.8f
+            scaleY = 0.8f
+            animate()
+                .alpha(1f)
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(400)
+                .setInterpolator(DecelerateInterpolator())
+                .start()
+        }
+
+        btnCopy?.apply {
+            visibility = View.VISIBLE
+            alpha = 0f
+            scaleX = 0.8f
+            scaleY = 0.8f
+            animate()
+                .alpha(1f)
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(400)
+                .setStartDelay(100)
+                .setInterpolator(DecelerateInterpolator())
+                .start()
+        }
     }
 
     private fun setupCopyButton(info: SpeciesInfo) {
