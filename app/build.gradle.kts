@@ -92,6 +92,8 @@ dependencies {
     implementation("androidx.fragment:fragment-ktx:1.7.0")
     implementation("androidx.coordinatorlayout:coordinatorlayout:1.2.0")
 
+    implementation("io.noties.markwon:core:4.6.2")
+    
     // --- GEMINI SDK ---
     implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
 
