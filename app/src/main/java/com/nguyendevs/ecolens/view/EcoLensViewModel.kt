@@ -494,13 +494,14 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     private fun buildGeminiPrompt(scientificName: String, isVietnamese: Boolean): String {
         val commonNameDesc = if (isVietnamese) "Tên thường gọi Tiếng Việt chuẩn nhất" else "Common name in English"
 
+        // Thay đổi: Yêu cầu Gemini dùng thẻ <font color="..."> thay vì <span style="...">
         return if (isVietnamese) {
             """
         Bạn là nhà sinh vật học. Cung cấp thông tin chi tiết về loài "$scientificName" bằng Tiếng Việt.
         
         === QUY TẮC FORMAT ===
         - Dùng **text** để in đậm
-        - Dùng <span style="color:#00796B"><b>text</b></span> để tô màu xanh và in đậm
+        - Dùng <font color="#00796B"><b>text</b></font> để tô màu xanh và in đậm
         - Dùng <i>text</i> để nghiêng
         - Dùng • cho bullet points
         
@@ -515,9 +516,9 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
           "genus": "Tên khoa học <i>(tên thường)</i>",
           "species": "Tên khoa học <i>(tên thường)</i>",
           "rank": "Cấp phân loại",
-          "description": "Tổng quan 4 câu, dùng **in đậm** cho đặc điểm nổi bật và <span style='color:#00796B'><b>xanh đậm</b></span> cho địa danh, số đo.",
-          "characteristics": "Danh sách gạch đầu dòng, mỗi dòng bắt đầu • và một ý về hình thái. Dùng **in đậm** và <span style='color:#00796B'><b>xanh</b></span>.",
-          "distribution": "Ưu tiên Việt Nam trước (nếu có), sau đó toàn cầu. Dùng <span style='color:#00796B'><b>xanh</b></span> cho địa danh.",
+          "description": "Tổng quan 4 câu, dùng **in đậm** cho đặc điểm nổi bật và <font color='#00796B'><b>xanh đậm</b></font> cho địa danh, số đo.",
+          "characteristics": "Danh sách gạch đầu dòng, mỗi dòng bắt đầu • và một ý về hình thái. Dùng **in đậm** và <font color='#00796B'><b>xanh</b></font>.",
+          "distribution": "Ưu tiên Việt Nam trước (nếu có), sau đó toàn cầu. Dùng <font color='#00796B'><b>xanh</b></font> cho địa danh.",
           "habitat": "Mô tả chi tiết môi trường sống.",
           "conservationStatus": "Chỉ ghi một trong các trạng thái: Cực kỳ nguy cấp, Nguy cấp, Sách Đỏ Việt Nam, Sắp nguy cấp, Ít lo ngại, Chưa đánh giá. Thêm thông tin bổ sung từ IUCN nếu có."
         }
@@ -530,7 +531,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         
         === FORMAT RULES ===
         - Use **text** for bold
-        - Use <span style="color:#00796B"><b>text</b></span> for green bold
+        - Use <font color="#00796B"><b>text</b></font> for green bold
         - Use <i>text</i> for italic
         - Use • for bullet points
         
@@ -545,9 +546,9 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
           "genus": "Scientific name <i>(common name)</i>",
           "species": "Scientific name <i>(common name)</i>",
           "rank": "Rank",
-          "description": "4-sentence overview with **bold** for key features and <span style='color:#00796B'><b>green bold</b></span> for places/measurements.",
-          "characteristics": "Bullet list, each line starts with • covering morphology. Use **bold** and <span style='color:#00796B'><b>green</b></span>.",
-          "distribution": "Vietnam first (if applicable), then worldwide. Use <span style='color:#00796B'><b>green</b></span> for locations.",
+          "description": "4-sentence overview with **bold** for key features and <font color='#00796B'><b>green bold</b></font> for places/measurements.",
+          "characteristics": "Bullet list, each line starts with • covering morphology. Use **bold** and <font color='#00796B'><b>green</b></font>.",
+          "distribution": "Vietnam first (if applicable), then worldwide. Use <font color='#00796B'><b>green</b></font> for locations.",
           "habitat": "Specific environment details.",
           "conservationStatus": "Only write one status: Critically Endangered, Endangered, Vulnerable (Vietnam Red Data Book), Near Threatened, Least Concern, Not Evaluated. Add IUCN info if available."
         }
@@ -618,7 +619,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             if (result.contains(status, ignoreCase = true)) {
                 result = result.replace(
                     Regex("(?i)$status"),
-                    "<span style='color:$color'><b>$status</b></span>"
+                    "<font color='$color'><b>$status</b></font>"
                 )
             }
         }
