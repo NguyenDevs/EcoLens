@@ -522,16 +522,46 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         val sessionId = currentSessionId ?: return
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                // Lưu ý: Cần thêm hàm deleteMessageById vào ChatDao.kt
                 chatDao.deleteMessageById(aiMessage.id)
-
-                withContext(Dispatchers.Main) {
-                    // Tận dụng hàm sendChatMessage có sẵn của bạn để trả lời lại
-                    sendChatMessage(originalUserQuery, getApplication<com.nguyendevs.ecolens.EcoLensApplication>().getString(R.string.new_chat))
-                }
+                executeGeminiFlow(sessionId, originalUserQuery)
             } catch (e: Exception) {
                 Log.e("EcoLensViewModel", "Renew failed: ${e.message}")
             }
+        }
+    }
+
+    private suspend fun executeGeminiFlow(sessionId: Long, userMessage: String) {
+        val loadingMsg = ChatMessage(sessionId = -1, content = "...", isUser = false, isLoading = true)
+        _chatMessages.value = _chatMessages.value + loadingMsg
+
+        try {
+            val currentHistory = _chatMessages.value.filter { !it.isLoading && it.sessionId == sessionId }.toMutableList()
+
+            val geminiContents = currentHistory.map { msg ->
+                val role = if (msg.isUser) "user" else "model"
+                GeminiPart(msg.content)
+                com.nguyendevs.ecolens.api.GeminiContent(role = role, parts = listOf(com.nguyendevs.ecolens.api.GeminiPart(msg.content)))
+            }
+
+            val request = com.nguyendevs.ecolens.api.GeminiRequest(contents = geminiContents)
+            val response = apiService.askGemini(request)
+            val reply = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
+                ?: getApplication<com.nguyendevs.ecolens.EcoLensApplication>().getString(R.string.cant_reply)
+
+            val formattedReply = parseToHtml(reply).replace("\n", "<br>")
+            val botChatMsg = ChatMessage(sessionId = sessionId, content = formattedReply, isUser = false, timestamp = System.currentTimeMillis())
+
+            chatDao.insertMessage(botChatMsg)
+
+            val updatedSession = chatDao.getSessionById(sessionId)
+            updatedSession?.let {
+                chatDao.updateSession(it.copy(lastMessage = reply, timestamp = System.currentTimeMillis()))
+            }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            val errorMsg = ChatMessage(sessionId = sessionId, content = "Lỗi kết nối: ${e.message}", isUser = false)
+            chatDao.insertMessage(errorMsg)
         }
     }
 

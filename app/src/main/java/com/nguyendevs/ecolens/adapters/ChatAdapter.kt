@@ -44,7 +44,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
 
     override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
         val message = messages[position]
-        holder.bind(message)
+        holder.bind(message, position)
 
         if (!message.isLoading) {
             if (message.isUser) {
@@ -52,9 +52,12 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
                     actionListener.onCopy(message.content)
                     true
                 }
+                holder.cardView.setOnClickListener(null)
             } else {
-                holder.btnCopyAi.setOnClickListener { actionListener.onCopy(message.content) }
-                holder.btnShareAi.setOnClickListener { actionListener.onShare(message.content) }
+                holder.cardView.setOnLongClickListener(null)
+                val plainText = Html.fromHtml(message.content).toString()
+                holder.btnCopyAi.setOnClickListener { actionListener.onCopy(plainText) }
+                holder.btnShareAi.setOnClickListener { actionListener.onShare(plainText) }
                 holder.btnRenewAi.setOnClickListener { actionListener.onRenew(position, message) }
             }
         }
@@ -93,9 +96,11 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
             }
         }
 
-        fun stopAnimation() { handler.removeCallbacks(animateRunnable) }
+        fun stopAnimation() {
+            handler.removeCallbacks(animateRunnable)
+        }
 
-        fun bind(message: ChatMessage) {
+        fun bind(message: ChatMessage, position: Int) {
             stopAnimation()
             layoutAiActions.visibility = View.GONE
 
@@ -122,7 +127,10 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
                     container.gravity = Gravity.START
                     cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.white))
                     tvMessage.setTextColor(ContextCompat.getColor(itemView.context, R.color.text_primary))
-                    layoutAiActions.visibility = View.VISIBLE
+
+                    if (position > 0) {
+                        layoutAiActions.visibility = View.VISIBLE
+                    }
                 }
             }
         }
