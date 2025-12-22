@@ -565,15 +565,18 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         val match = parenthesesPattern.find(text)
 
         return if (match != null) {
-            val beforeParentheses = text.substring(0, match.range.first).trim()
-            val insideParentheses = match.groupValues[1]
-                .replace("_", "")
-                .replace("*", "")
-                .trim()
+            var beforeParentheses = text.substring(0, match.range.first)
+
+            beforeParentheses = beforeParentheses.replace("_", "").replace("*", "").trim()
+
+            var insideParentheses = match.groupValues[1]
+
+            insideParentheses = insideParentheses.replace("_", "").replace("*", "").trim()
 
             "<b>$beforeParentheses</b> <i>($insideParentheses)</i>"
         } else {
-            "<b>$text</b>"
+            val cleanText = text.replace("_", "").replace("*", "").trim()
+            "<b>$cleanText</b>"
         }
     }
 

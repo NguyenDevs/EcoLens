@@ -36,8 +36,6 @@ class SpeciesInfoHandler(
     private val handlerScope = CoroutineScope(Dispatchers.Main + Job())
     private val viewCache = mutableMapOf<Int, View>()
     private val displayedRows = mutableSetOf<Int>()
-
-    // Khởi tạo Markwon với HtmlPlugin
     private val markwon = Markwon.builder(context)
         .usePlugin(HtmlPlugin.create())
         .build()
@@ -61,6 +59,8 @@ class SpeciesInfoHandler(
                 displayScientificName(info)
                 displayConfidence(info, isWaiting = true)
                 prepareTaxonomyContainer()
+                setupCopyButton(info)
+                showCopyButtonAnimation()
                 hideButtons()
             }
 
@@ -94,9 +94,8 @@ class SpeciesInfoHandler(
             }
 
             LoadingStage.COMPLETE -> {
-                setupCopyButton(info)
                 setupShareButton(info, imageUri)
-                showButtonsWithAnimation()
+                showShareButtonAnimation()
             }
         }
     }
@@ -185,14 +184,14 @@ class SpeciesInfoHandler(
     private fun displayCommonName(info: SpeciesInfo) {
         val tvCommonName = viewCache[R.id.tvCommonName] as? TextView
         tvCommonName?.let {
-            markwon.setMarkdown(it, info.commonName)
-            it.visibility = View.VISIBLE
-
             if (info.commonName == "...") {
+                it.text = "..."
                 it.alpha = 0f
                 it.setTextColor(Color.TRANSPARENT)
             } else {
                 it.setTextColor(ContextCompat.getColor(context, R.color.green_primary))
+                markwon.setMarkdown(it, info.commonName)
+                it.visibility = View.VISIBLE
                 fadeIn(it, 300)
             }
         }
@@ -308,7 +307,6 @@ class SpeciesInfoHandler(
 
                 if (hasData) {
                     if (!displayedRows.contains(rowId)) {
-                        // Dùng Markwon để render HTML với màu sắc
                         markwon.setMarkdown(textView, text)
 
                         rowView.visibility = View.VISIBLE
@@ -418,6 +416,7 @@ class SpeciesInfoHandler(
         (viewCache[R.id.iconConfidence] as? ImageView)?.rotation = 0f
     }
 
+
     private fun displaySection(sectionId: Int, textViewId: Int, text: String) {
         val section = viewCache[sectionId] as? LinearLayout
         val textView = viewCache[textViewId] as? TextView
@@ -425,7 +424,7 @@ class SpeciesInfoHandler(
         if (text.isNotEmpty()) {
             val trimmedText = text.trim()
             textView?.let { tv ->
-                // Dùng Markwon để render HTML với màu sắc
+                // Markwon xử lý text cho mô tả, đặc điểm, v.v.
                 markwon.setMarkdown(tv, trimmedText)
             }
 
@@ -457,9 +456,8 @@ class SpeciesInfoHandler(
 
         if (status.isNotEmpty()) {
             textView?.let { tv ->
-                // Dùng Markwon để render HTML với màu sắc
-                markwon.setMarkdown(tv, status)
                 tv.setTextColor(ContextCompat.getColor(context, R.color.black))
+                markwon.setMarkdown(tv, status)
             }
 
             section?.let { sectionView ->
@@ -507,15 +505,11 @@ class SpeciesInfoHandler(
 
     private fun hideButtons() {
         val btnShare = viewCache[R.id.btnShareInfo]
-        val btnCopy = viewCache[R.id.btnCopyScientificName]
         btnShare?.visibility = View.GONE
-        btnCopy?.visibility = View.GONE
     }
 
-    private fun showButtonsWithAnimation() {
+    private fun showShareButtonAnimation() {
         val btnShare = viewCache[R.id.btnShareInfo]
-        val btnCopy = viewCache[R.id.btnCopyScientificName]
-
         btnShare?.apply {
             visibility = View.VISIBLE
             alpha = 0f
@@ -529,20 +523,24 @@ class SpeciesInfoHandler(
                 .setInterpolator(DecelerateInterpolator())
                 .start()
         }
+    }
 
-        btnCopy?.apply {
-            visibility = View.VISIBLE
-            alpha = 0f
-            scaleX = 0.8f
-            scaleY = 0.8f
-            animate()
-                .alpha(1f)
-                .scaleX(1f)
-                .scaleY(1f)
-                .setDuration(400)
-                .setStartDelay(100)
-                .setInterpolator(DecelerateInterpolator())
-                .start()
+    private fun showCopyButtonAnimation(){
+    val btnCopy = viewCache[R.id.btnCopyScientificName]
+
+    btnCopy?.apply{
+        visibility = View.VISIBLE
+        alpha = 0f
+        scaleX = 0.8f
+        scaleY = 0.8f
+        animate()
+            .alpha(1f)
+            .scaleX(1f)
+            .scaleY(1f)
+            .setDuration(400)
+            .setStartDelay(100)
+            .setInterpolator(DecelerateInterpolator())
+            .start()
         }
     }
 
@@ -632,7 +630,6 @@ class SpeciesInfoHandler(
         } else {
             @Suppress("DEPRECATION") Html.fromHtml(html).toString()
         }
-        // Loại bỏ các ký tự markdown còn sót lại
         text = text.replace(Regex("\\*\\*(.*?)\\*\\*"), "$1")
         text = text.replace(Regex("\\*(.*?)\\*"), "$1")
         return text.trim()
