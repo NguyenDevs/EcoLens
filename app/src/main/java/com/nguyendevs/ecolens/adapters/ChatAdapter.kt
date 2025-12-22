@@ -123,7 +123,6 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
             layoutAiActions.visibility = View.GONE
             tvMessage.alpha = 1f
 
-            // Reset listener
             cardView.setOnClickListener(null)
             cardView.setOnLongClickListener(null)
             btnCopyAi.setOnClickListener(null)
@@ -161,7 +160,6 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
                     }
                 }
                 else -> {
-                    // Hiển thị nội dung
                     val formattedText = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         Html.fromHtml(message.content, Html.FROM_HTML_MODE_COMPACT)
                     } else {
@@ -184,9 +182,6 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
 
                         btnCopyAi.visibility = View.VISIBLE
                         btnShareAi.visibility = View.VISIBLE
-
-                        // --- LOGIC COPY/SHARE ĐÃ ĐƯỢC THÊM LẠI Ở ĐÂY ---
-                        // Chỉ convert HTML -> String khi người dùng thực sự bấm nút (tránh lag UI)
                         btnCopyAi.setOnClickListener {
                             val plainText = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                                 Html.fromHtml(message.content, Html.FROM_HTML_MODE_COMPACT).toString()
