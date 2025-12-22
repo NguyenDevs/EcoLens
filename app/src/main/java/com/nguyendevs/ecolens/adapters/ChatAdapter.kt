@@ -19,7 +19,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.model.ChatMessage
+import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.Markwon
+import io.noties.markwon.core.MarkwonTheme
 import io.noties.markwon.html.HtmlPlugin
 
 class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerView.Adapter<ChatAdapter.ChatViewHolder>() {
@@ -37,6 +39,20 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
         if (!::markwon.isInitialized) {
             markwon = Markwon.builder(parent.context)
                 .usePlugin(HtmlPlugin.create())
+                // [THÊM ĐOẠN PLUGIN NÀY ĐỂ CẤU HÌNH H1-H6]
+                .usePlugin(object : AbstractMarkwonPlugin() {
+                    override fun configureTheme(builder: MarkwonTheme.Builder) {
+                        builder
+                            .headingTextSizeMultipliers(floatArrayOf(
+                                2.0f,   // h1 (#)
+                                1.5f,   // h2 (##)
+                                1.17f,  // h3 (###)
+                                1.0f,   // h4 (####)
+                                0.83f,  // h5 (#####)
+                                0.67f   // h6 (######)
+                            ))
+                    }
+                })
                 .build()
         }
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat_message, parent, false)

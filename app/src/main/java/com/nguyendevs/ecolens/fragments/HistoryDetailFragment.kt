@@ -2,6 +2,7 @@ package com.nguyendevs.ecolens.fragments
 
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.text.Html
 import android.util.TypedValue
@@ -22,15 +23,21 @@ import com.nguyendevs.ecolens.managers.SpeakerManager
 import com.nguyendevs.ecolens.model.HistoryEntry
 import com.nguyendevs.ecolens.model.SpeciesInfo
 import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
-import io.noties.markwon.Markwon
-import io.noties.markwon.html.HtmlPlugin
 
 class HistoryDetailFragment : Fragment() {
 
     private lateinit var speakerManager: SpeakerManager
-    private lateinit var markwon: Markwon
     private var historyEntry: HistoryEntry? = null
     private var isSpeaking = false
+
+    private fun TextView.setHtml(html: String) {
+        text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT)
+        } else {
+            @Suppress("DEPRECATION")
+            Html.fromHtml(html)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,11 +45,6 @@ class HistoryDetailFragment : Fragment() {
             historyEntry = Gson().fromJson(json, HistoryEntry::class.java)
         }
         speakerManager = SpeakerManager(requireContext())
-
-        // Khởi tạo Markwon với HtmlPlugin
-        markwon = Markwon.builder(requireContext())
-            .usePlugin(HtmlPlugin.create())
-            .build()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -107,19 +109,18 @@ class HistoryDetailFragment : Fragment() {
 
         Glide.with(this).load(entry.imagePath).centerCrop().into(ivImage)
 
-        // Dùng Markwon để render HTML
-        markwon.setMarkdown(tvCommon, info.commonName)
-        markwon.setMarkdown(tvScientific, info.scientificName)
+        tvCommon.setHtml(info.commonName)
+        tvScientific.setHtml(info.scientificName)
 
         if (info.kingdom.isNotEmpty()) {
-            markwon.setMarkdown(tagKingdom, info.kingdom)
+            tagKingdom.setHtml(info.kingdom)
             tagKingdom.visibility = View.VISIBLE
         } else {
             tagKingdom.visibility = View.GONE
         }
 
         if (info.family.isNotEmpty()) {
-            markwon.setMarkdown(tagFamily, info.family)
+            tagFamily.setHtml(info.family)
             tagFamily.visibility = View.VISIBLE
         } else {
             tagFamily.visibility = View.GONE
@@ -132,8 +133,7 @@ class HistoryDetailFragment : Fragment() {
         fun setTaxonomyText(viewId: Int, value: String) {
             val textView = taxonomyLayout.findViewById<TextView>(viewId)
             if (value.isNotEmpty()) {
-                // Dùng Markwon để render HTML
-                markwon.setMarkdown(textView, value)
+                textView.setHtml(value)
             } else {
                 textView.text = "N/A"
             }
@@ -190,8 +190,7 @@ class HistoryDetailFragment : Fragment() {
             textSize = 15f
             setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
             setLineSpacing(0f, 1.4f)
-            // Dùng Markwon để render HTML với màu sắc
-            markwon.setMarkdown(this, content)
+            setHtml(content)
         }
 
         container.addView(titleView)

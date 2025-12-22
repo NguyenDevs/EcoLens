@@ -24,8 +24,6 @@ import com.google.android.material.card.MaterialCardView
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.model.LoadingStage
 import com.nguyendevs.ecolens.model.SpeciesInfo
-import io.noties.markwon.Markwon
-import io.noties.markwon.html.HtmlPlugin
 import kotlinx.coroutines.*
 
 class SpeciesInfoHandler(
@@ -36,15 +34,21 @@ class SpeciesInfoHandler(
     private val handlerScope = CoroutineScope(Dispatchers.Main + Job())
     private val viewCache = mutableMapOf<Int, View>()
     private val displayedRows = mutableSetOf<Int>()
-    private val markwon = Markwon.builder(context)
-        .usePlugin(HtmlPlugin.create())
-        .build()
 
     private var confidenceRotationAnimator: ObjectAnimator? = null
     private var taxonomyShimmerAnimator: ValueAnimator? = null
 
     init {
         cacheViews()
+    }
+
+    private fun renderHtml(textView: TextView, htmlContent: String) {
+        textView.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Html.fromHtml(htmlContent, Html.FROM_HTML_MODE_COMPACT)
+        } else {
+            @Suppress("DEPRECATION")
+            Html.fromHtml(htmlContent)
+        }
     }
 
     fun displaySpeciesInfo(info: SpeciesInfo, imageUri: Uri?, stage: LoadingStage) {
@@ -175,7 +179,7 @@ class SpeciesInfoHandler(
     private fun displayScientificName(info: SpeciesInfo) {
         val tvScientificName = viewCache[R.id.tvScientificName] as? TextView
         tvScientificName?.let {
-            markwon.setMarkdown(it, info.scientificName)
+            renderHtml(it, info.scientificName)
             it.visibility = View.VISIBLE
             fadeIn(it, 300)
         }
@@ -190,7 +194,7 @@ class SpeciesInfoHandler(
                 it.setTextColor(Color.TRANSPARENT)
             } else {
                 it.setTextColor(ContextCompat.getColor(context, R.color.green_primary))
-                markwon.setMarkdown(it, info.commonName)
+                renderHtml(it, info.commonName)
                 it.visibility = View.VISIBLE
                 fadeIn(it, 300)
             }
@@ -307,7 +311,7 @@ class SpeciesInfoHandler(
 
                 if (hasData) {
                     if (!displayedRows.contains(rowId)) {
-                        markwon.setMarkdown(textView, text)
+                        renderHtml(textView, text)
 
                         rowView.visibility = View.VISIBLE
                         rowView.alpha = 0f
@@ -424,8 +428,7 @@ class SpeciesInfoHandler(
         if (text.isNotEmpty()) {
             val trimmedText = text.trim()
             textView?.let { tv ->
-                // Markwon xử lý text cho mô tả, đặc điểm, v.v.
-                markwon.setMarkdown(tv, trimmedText)
+                renderHtml(tv, trimmedText)
             }
 
             section?.let { sectionView ->
@@ -456,8 +459,7 @@ class SpeciesInfoHandler(
 
         if (status.isNotEmpty()) {
             textView?.let { tv ->
-                tv.setTextColor(ContextCompat.getColor(context, R.color.black))
-                markwon.setMarkdown(tv, status)
+                renderHtml(tv, status)
             }
 
             section?.let { sectionView ->
@@ -526,21 +528,21 @@ class SpeciesInfoHandler(
     }
 
     private fun showCopyButtonAnimation(){
-    val btnCopy = viewCache[R.id.btnCopyScientificName]
+        val btnCopy = viewCache[R.id.btnCopyScientificName]
 
-    btnCopy?.apply{
-        visibility = View.VISIBLE
-        alpha = 0f
-        scaleX = 0.8f
-        scaleY = 0.8f
-        animate()
-            .alpha(1f)
-            .scaleX(1f)
-            .scaleY(1f)
-            .setDuration(400)
-            .setStartDelay(100)
-            .setInterpolator(DecelerateInterpolator())
-            .start()
+        btnCopy?.apply{
+            visibility = View.VISIBLE
+            alpha = 0f
+            scaleX = 0.8f
+            scaleY = 0.8f
+            animate()
+                .alpha(1f)
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(400)
+                .setStartDelay(100)
+                .setInterpolator(DecelerateInterpolator())
+                .start()
         }
     }
 
