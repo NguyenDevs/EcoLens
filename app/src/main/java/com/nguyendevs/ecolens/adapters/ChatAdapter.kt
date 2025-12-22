@@ -33,14 +33,32 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
     private val messages = mutableListOf<ChatMessage>()
 
     fun submitList(newMessages: List<ChatMessage>) {
+        val oldSize = messages.size
+        val newSize = newMessages.size
+
         messages.clear()
         messages.addAll(newMessages)
-        notifyDataSetChanged()
+
+        if (newSize > oldSize) {
+            notifyItemRangeInserted(oldSize, newSize - oldSize)
+        } else if (newSize == oldSize && newSize > 0) {
+            notifyItemChanged(newSize - 1, "STREAMING")
+        } else {
+            notifyDataSetChanged()
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat_message, parent, false)
         return ChatViewHolder(view)
+    }
+
+    override fun onBindViewHolder(holder: ChatViewHolder, position: Int, payloads: MutableList<Any>) {
+        if (payloads.isNotEmpty() && payloads[0] == "STREAMING") {
+            holder.bindStreamingText(messages[position])
+        } else {
+            super.onBindViewHolder(holder, position, payloads)
+        }
     }
 
     override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
@@ -62,7 +80,6 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
                 holder.btnRenewAi.setOnClickListener { actionListener.onRenew(position, message) }
             }
         } else {
-            // Disable interactions khi đang streaming
             holder.cardView.setOnLongClickListener(null)
             holder.cardView.setOnClickListener(null)
             holder.btnCopyAi.setOnClickListener(null)
@@ -111,13 +128,19 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
             cursorAnimator = null
         }
 
+        fun bindStreamingText(message: ChatMessage) {
+            if (message.isStreaming) {
+                tvMessage.text = message.content + " ▌"
+            }
+        }
+
         fun bind(message: ChatMessage, position: Int) {
             stopAnimation()
             layoutAiActions.visibility = View.GONE
+            tvMessage.alpha = 1f
 
             when {
                 message.isLoading -> {
-                    // Loading state (chờ response)
                     container.gravity = Gravity.START
                     cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.white))
                     tvMessage.setTextColor(ContextCompat.getColor(itemView.context, R.color.text_primary))
@@ -126,33 +149,22 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
                     loadingAnimateRunnable.run()
                 }
                 message.isStreaming -> {
-                    // Streaming state - hiển thị nội dung đang được streaming
                     container.gravity = Gravity.START
                     cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.white))
                     tvMessage.setTextColor(ContextCompat.getColor(itemView.context, R.color.text_primary))
 
-                    val formattedText = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        Html.fromHtml(message.content + "▌", Html.FROM_HTML_MODE_COMPACT)
-                    } else {
-                        @Suppress("DEPRECATION") Html.fromHtml(message.content + "▌")
-                    }
-                    tvMessage.text = formattedText
-
-                    // Thêm hiệu ứng nhấp nháy cursor
+                    bindStreamingText(message)
                     startCursorAnimation()
 
-                    // Không hiển thị actions khi đang streaming
                     layoutAiActions.visibility = View.GONE
                 }
                 message.isUser -> {
-                    // User message
                     tvMessage.text = message.content
                     container.gravity = Gravity.END
                     cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.green_primary))
                     tvMessage.setTextColor(ContextCompat.getColor(itemView.context, R.color.white))
                 }
                 else -> {
-                    // AI message hoàn thành
                     val formattedText = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         Html.fromHtml(message.content, Html.FROM_HTML_MODE_COMPACT)
                     } else {
@@ -163,24 +175,33 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
                     cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.white))
                     tvMessage.setTextColor(ContextCompat.getColor(itemView.context, R.color.text_primary))
 
-                    // Hiển thị actions cho AI message (trừ message đầu tiên)
                     if (position > 0) {
                         layoutAiActions.visibility = View.VISIBLE
+
+                        if (position == messages.size - 1) {
+                            btnRenewAi.visibility = View.VISIBLE
+                        } else {
+                            btnRenewAi.visibility = View.GONE
+                        }
+
+                        btnCopyAi.visibility = View.VISIBLE
+                        btnShareAi.visibility = View.VISIBLE
                     }
                 }
             }
         }
 
         private fun startCursorAnimation() {
-            cursorAnimator = ValueAnimator.ofFloat(1f, 0f).apply {
-                duration = 530
-                repeatCount = ValueAnimator.INFINITE
-                repeatMode = ValueAnimator.REVERSE
-                addUpdateListener { animator ->
-                    val alpha = animator.animatedValue as Float
-                    tvMessage.alpha = 0.7f + (alpha * 0.3f) // Dao động từ 0.7 -> 1.0
+            if (cursorAnimator == null) {
+                cursorAnimator = ValueAnimator.ofFloat(1f, 0.4f).apply {
+                    duration = 500
+                    repeatCount = ValueAnimator.INFINITE
+                    repeatMode = ValueAnimator.REVERSE
+                    addUpdateListener {
+                        // Empty listener to keep animator running if needed logic later
+                    }
+                    start()
                 }
-                start()
             }
         }
     }

@@ -87,10 +87,12 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
     }
 
     private fun setupRecyclerView() {
-        rvChat.layoutManager = LinearLayoutManager(requireContext()).apply {
+        val layoutManager = LinearLayoutManager(requireContext()).apply {
             stackFromEnd = true
         }
+        rvChat.layoutManager = layoutManager
         rvChat.adapter = adapter
+        rvChat.itemAnimator = null
     }
 
     private fun setupListeners() {
@@ -175,19 +177,29 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
     }
 
     private fun observeViewModel() {
-        // Observe chat messages
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.chatMessages.collectLatest { messages ->
+                val isNewMessageAdded = messages.size > adapter.itemCount
+
+                val layoutManager = rvChat.layoutManager as LinearLayoutManager
+                val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
+                val isAtBottom = lastVisibleItemPosition == adapter.itemCount - 1
+
                 adapter.submitList(messages)
+
                 if (messages.isNotEmpty()) {
-                    rvChat.post {
-                        rvChat.smoothScrollToPosition(messages.size - 1)
+                    if (isNewMessageAdded) {
+                        rvChat.scrollToPosition(messages.size - 1)
+                    } else if (isAtBottom) {
+                        val lastPos = messages.size - 1
+                        if (layoutManager.findLastCompletelyVisibleItemPosition() < lastPos) {
+                            rvChat.scrollToPosition(lastPos)
+                        }
                     }
                 }
             }
         }
 
-        // Observe streaming state để disable/enable UI
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isStreamingActive.collectLatest { isStreaming ->
                 updateUIForStreamingState(isStreaming)
@@ -197,19 +209,16 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
 
     private fun updateUIForStreamingState(isStreaming: Boolean) {
         if (isStreaming) {
-            // Disable send button và làm mờ
             btnSend.isEnabled = false
             btnSend.alpha = 0.5f
             etInput.isEnabled = false
             etInput.alpha = 0.7f
 
-            // Disable back và menu
             btnBack.isEnabled = false
             btnBack.alpha = 0.5f
             btnMenu.isEnabled = false
             btnMenu.alpha = 0.5f
         } else {
-            // Enable lại tất cả
             btnSend.isEnabled = true
             btnSend.alpha = 1f
             etInput.isEnabled = true
