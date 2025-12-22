@@ -40,6 +40,18 @@ object RetrofitClient {
                 }
             }
         }
+        // Thêm xử lý lỗi 429 cho Gemini
+        else if (response.code == 429) {
+            appContext?.let { context ->
+                android.os.Handler(android.os.Looper.getMainLooper()).post {
+                    Toast.makeText(
+                        context,
+                        "Vượt hạn mức token Gemini. Vui lòng thử lại sau.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
 
         response
     }
