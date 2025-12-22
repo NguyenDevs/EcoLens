@@ -1,5 +1,7 @@
 package com.nguyendevs.ecolens.adapters
 
+import android.os.Build
+import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -33,8 +35,9 @@ class ChatSessionAdapter(
     // Gắn dữ liệu vào ViewHolder
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val session = sessions[position]
+
         val isFirstOfDay = position == 0 ||
-                dateFormatter.format(Date(session.timestamp)) != dateFormatter.format(Date(sessions[position-1].timestamp))
+                dateFormatter.format(Date(session.timestamp)) != dateFormatter.format(Date(sessions[position - 1].timestamp))
 
         holder.bind(session, isFirstOfDay)
     }
@@ -55,7 +58,14 @@ class ChatSessionAdapter(
             tvDate.text = dateFormatter.format(Date(session.timestamp))
 
             tvTitle.text = session.title
-            tvLastMessage.text = session.lastMessage
+            val formattedPreview = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                Html.fromHtml(session.lastMessage, Html.FROM_HTML_MODE_COMPACT)
+            } else {
+                @Suppress("DEPRECATION")
+                Html.fromHtml(session.lastMessage)
+            }
+            tvLastMessage.text = formattedPreview
+
             tvTime.text = timeFormatter.format(Date(session.timestamp))
 
             card.setOnClickListener { onClick(session) }

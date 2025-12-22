@@ -41,6 +41,9 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
 
         if (newSize > oldSize) {
             notifyItemRangeInserted(oldSize, newSize - oldSize)
+            if (oldSize > 0) {
+                notifyItemChanged(oldSize - 1)
+            }
         } else if (newSize == oldSize && newSize > 0) {
             val lastMsg = messages[newSize - 1]
             if (lastMsg.isStreaming) {
@@ -182,6 +185,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
 
                         btnCopyAi.visibility = View.VISIBLE
                         btnShareAi.visibility = View.VISIBLE
+
                         btnCopyAi.setOnClickListener {
                             val plainText = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                                 Html.fromHtml(message.content, Html.FROM_HTML_MODE_COMPACT).toString()
@@ -190,7 +194,6 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
                             }
                             actionListener.onCopy(plainText)
                         }
-
                         btnShareAi.setOnClickListener {
                             val plainText = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                                 Html.fromHtml(message.content, Html.FROM_HTML_MODE_COMPACT).toString()
@@ -199,7 +202,6 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
                             }
                             actionListener.onShare(plainText)
                         }
-
                         btnRenewAi.setOnClickListener { actionListener.onRenew(position, message) }
                     }
                 }
