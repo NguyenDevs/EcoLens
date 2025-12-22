@@ -41,7 +41,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     private val isGenerating = AtomicBoolean(false)
     private val streamingMessageId = AtomicLong(-1L)
 
-    // StateFlow để theo dõi trạng thái streaming
     private val _isStreamingActive = MutableStateFlow(false)
     val isStreamingActive: StateFlow<Boolean> = _isStreamingActive.asStateFlow()
 
@@ -64,7 +63,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         val confidence: Double = 0.0
     )
 
-    // Các hàm History giữ nguyên...
     fun getHistoryBySortOption(
         sortOption: HistorySortOption,
         startDate: Long? = null,
@@ -99,7 +97,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    // identifySpecies giữ nguyên logic, chỉ thay đổi hàm xử lý text
     fun identifySpecies(imageUri: Uri, languageCode: String) {
         viewModelScope.launch {
             _uiState.value = EcoLensUiState(isLoading = true, speciesInfo = null, error = null, loadingStage = LoadingStage.NONE)
@@ -245,15 +242,14 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 else -> ""
             }
 
-            // UPDATED: Sử dụng processMarkdown thay vì parseToHtml
             SpeciesInfo(
-                kingdom = removeRankPrefix(rawInfo.kingdom, if (isVietnamese) "Giới" else "Kingdom"),
-                phylum = removeRankPrefix(rawInfo.phylum, if (isVietnamese) "Ngành" else "Phylum"),
-                className = removeRankPrefix(rawInfo.className, if (isVietnamese) "Lớp" else "Class"),
-                order = removeRankPrefix(rawInfo.order, if (isVietnamese) "Bộ" else "Order"),
-                family = processMarkdown(removeRankPrefix(rawInfo.family, if (isVietnamese) "Họ" else "Family")),
-                genus = processMarkdown(removeRankPrefix(rawInfo.genus, if (isVietnamese) "Chi" else "Genus")),
-                species = processMarkdown(removeRankPrefix(rawInfo.species, if (isVietnamese) "Loài" else "Species")),
+                kingdom = formatTaxonomyRank(removeRankPrefix(rawInfo.kingdom, if (isVietnamese) "Giới" else "Kingdom"), isVietnamese),
+                phylum = formatTaxonomyRank(removeRankPrefix(rawInfo.phylum, if (isVietnamese) "Ngành" else "Phylum"), isVietnamese),
+                className = formatTaxonomyRank(removeRankPrefix(rawInfo.className, if (isVietnamese) "Lớp" else "Class"), isVietnamese),
+                order = formatTaxonomyRank(removeRankPrefix(rawInfo.order, if (isVietnamese) "Bộ" else "Order"), isVietnamese),
+                family = formatTaxonomyRank(removeRankPrefix(rawInfo.family, if (isVietnamese) "Họ" else "Family"), isVietnamese),
+                genus = formatTaxonomyRank(removeRankPrefix(rawInfo.genus, if (isVietnamese) "Chi" else "Genus"), isVietnamese),
+                species = formatTaxonomyRank(removeRankPrefix(rawInfo.species, if (isVietnamese) "Loài" else "Species"), isVietnamese),
 
                 commonName = rawInfo.commonName,
                 scientificName = scientificName,
@@ -263,7 +259,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 characteristics = processMarkdown(characteristicsText),
                 distribution = processMarkdown(rawInfo.distribution),
                 habitat = processMarkdown(rawInfo.habitat),
-                // Conservation Status vẫn cần xử lý màu sắc
                 conservationStatus = processMarkdown(rawInfo.conservationStatus, isConservationStatus = true, isVietnamese = isVietnamese),
                 confidence = confidence
             )
@@ -340,21 +335,36 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    // UPDATED: Đổi tên và logic từ parseToHtml sang processMarkdown
-    // Không còn convert thủ công ** sang <b>, giữ nguyên cho Markwon xử lý
-    // Chỉ xử lý các ký hiệu đặc biệt (màu sắc) và định dạng dòng
+    private fun formatTaxonomyRank(text: String, isVietnamese: Boolean): String {
+        val hasTilde = text.contains("~~")
+
+        val processed = processMarkdown(text, isVietnamese = isVietnamese)
+
+        return if (hasTilde) {
+            val firstUnderscore = processed.indexOf('_')
+            if (firstUnderscore > 0) {
+                val mainPart = processed.substring(0, firstUnderscore).trim()
+                val suffixPart = processed.substring(firstUnderscore)
+                "**$mainPart** $suffixPart"
+            } else {
+                "**$processed**"
+            }
+        } else {
+            if (processed.isNotEmpty() && processed != "...") {
+                "**$processed**"
+            } else {
+                processed
+            }
+        }
+    }
+
     private fun processMarkdown(text: String, isConservationStatus: Boolean = false, isVietnamese: Boolean = true): String {
         if (text.isBlank()) return ""
 
-        // Markwon có thể render thẻ HTML màu sắc, nên ta convert cú pháp ##...## sang thẻ <font>
         var result = text
             .replace(Regex("##(.+?)##")) { "<font color='#00796B'><b>${it.groupValues[1]}</b></font>" }
-            // Convert custom ~~ thành markdown italic chuẩn (_) hoặc giữ nguyên nếu cấu hình Markwon hỗ trợ strikethrough
             .replace(Regex("~~(.+?)~~")) { "_${it.groupValues[1]}_" }
-
-        // Không replace \n thành <br> nữa vì Markwon xử lý xuống dòng chuẩn Markdown
-        // Tuy nhiên, để đảm bảo bullet point hiển thị đẹp, có thể thêm newline trước bullet nếu chưa có
-        // result = result.replace("\n", "<br>") // REMOVED
+            .replace("\n", "<br>")
 
         if (isConservationStatus) {
             result = colorizeConservationStatus(result, isVietnamese)
@@ -363,7 +373,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         return result
     }
 
-    // Hàm này giữ nguyên việc thêm thẻ color HTML vì Markwon render được
     private fun colorizeConservationStatus(text: String, isVietnamese: Boolean): String {
         val statusMap = if (isVietnamese) {
             mapOf(
@@ -522,7 +531,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     private suspend fun executeGeminiStreamingFlow(sessionId: Long) {
         _isStreamingActive.value = true
 
-        // Tạo message tạm với ID để có thể update
         val tempMessage = ChatMessage(
             sessionId = sessionId,
             content = "",
@@ -536,7 +544,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
         try {
             val currentHistory = chatDao.getMessagesBySession(sessionId).first()
-                .filter { !it.isStreaming } // Loại bỏ message streaming cũ nếu có
+                .filter { !it.isStreaming }
 
             val geminiContents = currentHistory.map { msg ->
                 val role = if (msg.isUser) "user" else "model"
@@ -551,20 +559,13 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 if (responseBody != null) {
                     var accumulatedText = ""
 
-                    // Đọc stream từng dòng
                     responseBody.byteStream().bufferedReader().use { reader ->
                         var line: String?
                         while (reader.readLine().also { line = it } != null) {
                             val currentLine = line ?: continue
-
-                            // Parse SSE format: "data: {...}"
                             if (currentLine.startsWith("data: ")) {
                                 val jsonData = currentLine.substring(6).trim()
-
-                                // Skip nếu là "[DONE]" marker
-                                if (jsonData == "[DONE]") {
-                                    break
-                                }
+                                if (jsonData == "[DONE]") break
 
                                 try {
                                     val streamResponse = gson.fromJson(jsonData, GeminiResponse::class.java)
@@ -572,25 +573,17 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
                                     if (!chunk.isNullOrEmpty()) {
                                         accumulatedText += chunk
-
-                                        // UPDATED: Không replace newline thành <br> nữa, để Markwon tự xử lý
-                                        // Chỉ cần process màu sắc nếu có (thường chat stream ít màu sắc phức tạp ngay lập tức)
                                         val formattedText = processMarkdown(accumulatedText)
                                         chatDao.updateMessageContent(messageId, formattedText)
-
-                                        // Delay nhỏ để animation mượt
                                         delay(50)
                                     }
                                 } catch (e: Exception) {
                                     Log.e("Streaming", "Parse error: ${e.message}")
-                                    // Continue với chunk tiếp theo
                                 }
                             }
                         }
                     }
 
-                    // Khi hoàn thành, cập nhật isStreaming = false
-                    // UPDATED: Sử dụng processMarkdown
                     val finalFormattedText = processMarkdown(accumulatedText)
                     chatDao.updateMessage(
                         ChatMessage(
@@ -603,7 +596,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                         )
                     )
 
-                    // Update session
                     val updatedSession = chatDao.getSessionById(sessionId)
                     updatedSession?.let {
                         chatDao.updateSession(it.copy(
@@ -641,9 +633,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             try {
                 chatDao.deleteMessagesBySession(sessionId)
                 chatDao.deleteSession(sessionId)
-
                 Log.d("EcoLensViewModel", "Deleted session $sessionId successfully")
-
                 if (currentSessionId == sessionId) {
                     withContext(Dispatchers.Main) {
                         currentSessionId = null

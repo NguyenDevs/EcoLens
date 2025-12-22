@@ -27,7 +27,7 @@ import io.noties.markwon.html.HtmlPlugin
 class HistoryDetailFragment : Fragment() {
 
     private lateinit var speakerManager: SpeakerManager
-    private lateinit var markwon: Markwon // Markwon instance
+    private lateinit var markwon: Markwon
 
     private var historyEntry: HistoryEntry? = null
     private var isSpeaking = false
@@ -40,7 +40,6 @@ class HistoryDetailFragment : Fragment() {
         }
         speakerManager = SpeakerManager(requireContext())
 
-        // Khởi tạo Markwon với HtmlPlugin để hỗ trợ màu sắc (<font color=...>)
         markwon = Markwon.builder(requireContext())
             .usePlugin(HtmlPlugin.create())
             .build()
@@ -148,7 +147,6 @@ class HistoryDetailFragment : Fragment() {
 
         Glide.with(this).load(entry.imagePath).centerCrop().into(ivImage)
 
-        // Sử dụng Markwon cho tên (phòng trường hợp có formatting)
         markwon.setMarkdown(tvCommon, info.commonName)
         markwon.setMarkdown(tvScientific, info.scientificName)
 
@@ -174,7 +172,6 @@ class HistoryDetailFragment : Fragment() {
         fun setTaxonomyText(viewId: Int, value: String) {
             val textView = taxonomyLayout.findViewById<TextView>(viewId)
             if (value.isNotEmpty()) {
-                // Sử dụng Markwon để render. ViewModel đã xử lý format (**) và (_)
                 markwon.setMarkdown(textView, value)
             } else {
                 textView.text = "N/A"
@@ -231,7 +228,6 @@ class HistoryDetailFragment : Fragment() {
         }
 
         val contentView = TextView(context).apply {
-            // Sử dụng Markwon để render nội dung có màu sắc và định dạng
             markwon.setMarkdown(this, content)
 
             textSize = 15f

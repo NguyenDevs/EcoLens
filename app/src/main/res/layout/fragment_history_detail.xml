@@ -112,7 +112,6 @@
                         tools:text="Giới Thực vật"
                         android:textColor="@color/green_dark"
                         android:textSize="12sp"
-                        android:textStyle="bold"
                         android:layout_marginEnd="8dp"/>
 
                 <TextView
@@ -127,7 +126,7 @@
                         tools:text="Họ Hoa hồng"
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp"
-                        android:textStyle="bold"/>
+                        />
             </LinearLayout>
 
             <View
