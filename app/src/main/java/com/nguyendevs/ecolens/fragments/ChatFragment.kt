@@ -2,6 +2,7 @@ package com.nguyendevs.ecolens.fragments
 
 import android.content.*
 import android.os.*
+import android.text.Html
 import android.util.Log
 import android.view.*
 import android.widget.*
@@ -22,18 +23,15 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
 
     private val viewModel: EcoLensViewModel by activityViewModels()
     private lateinit var adapter: ChatAdapter
-
     private lateinit var rvChat: RecyclerView
     private lateinit var etInput: EditText
     private lateinit var btnSend: ImageView
     private lateinit var btnBack: ImageView
     private lateinit var btnMenu: ImageView
-
     private var currentSessionId: Long? = null
 
     companion object {
         private const val ARG_SESSION_ID = "session_id"
-
         fun newInstance(sessionId: Long? = null): ChatFragment {
             return ChatFragment().apply {
                 arguments = Bundle().apply {
@@ -49,9 +47,7 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.fragment_chat, container, false)
     }
@@ -73,9 +69,30 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
             )
         }
 
-        etInput.post {
-            etInput.requestFocus()
+        etInput.post { etInput.requestFocus() }
+    }
+
+    override fun onCopy(text: String) {
+        performHapticFeedback()
+        val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val cleanText = stripHtml(text)
+        val clip = ClipData.newPlainText("EcoLens", cleanText)
+        clipboard.setPrimaryClip(clip)
+        Toast.makeText(requireContext(), "Đã sao chép", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onShare(text: String) {
+        val cleanText = stripHtml(text)
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, cleanText)
         }
+        startActivity(Intent.createChooser(intent, "Chia sẻ tin nhắn"))
+    }
+
+    override fun onRenew(position: Int, message: ChatMessage) {
+        performHapticFeedback()
+        viewModel.renewAiResponse(message)
     }
 
     private fun initViews(view: View) {
@@ -104,41 +121,13 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
                 etInput.text.clear()
             }
         }
-
-        btnBack.setOnClickListener {
-            parentFragmentManager.popBackStack()
-        }
-
-        btnMenu.setOnClickListener {
-            showMenuPopup(it)
-        }
-    }
-
-    override fun onCopy(text: String) {
-        performHapticFeedback()
-        val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val clip = ClipData.newPlainText("EcoLens", text)
-        clipboard.setPrimaryClip(clip)
-        Toast.makeText(requireContext(), "Đã sao chép", Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onShare(text: String) {
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, text)
-        }
-        startActivity(Intent.createChooser(intent, "Chia sẻ tin nhắn"))
-    }
-
-    override fun onRenew(position: Int, message: ChatMessage) {
-        performHapticFeedback()
-        viewModel.renewAiResponse(message)
+        btnBack.setOnClickListener { parentFragmentManager.popBackStack() }
+        btnMenu.setOnClickListener { showMenuPopup(it) }
     }
 
     private fun showMenuPopup(anchor: View) {
         val popup = PopupMenu(requireContext(), anchor)
         popup.menuInflater.inflate(R.menu.menu_chat, popup.menu)
-
         try {
             val fieldMPopup = PopupMenu::class.java.getDeclaredField("mPopup")
             fieldMPopup.isAccessible = true
@@ -149,7 +138,6 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_delete_chat -> {
@@ -198,7 +186,6 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
                 }
             }
         }
-
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isStreamingActive.collectLatest { isStreaming ->
                 updateUIForStreamingState(isStreaming)
@@ -207,27 +194,17 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
     }
 
     private fun updateUIForStreamingState(isStreaming: Boolean) {
-        if (isStreaming) {
-            btnSend.isEnabled = false
-            btnSend.alpha = 0.5f
-            etInput.isEnabled = false
-            etInput.alpha = 0.7f
+        val alpha = if (isStreaming) 0.5f else 1f
+        val enabled = !isStreaming
 
-            btnBack.isEnabled = false
-            btnBack.alpha = 0.5f
-            btnMenu.isEnabled = false
-            btnMenu.alpha = 0.5f
-        } else {
-            btnSend.isEnabled = true
-            btnSend.alpha = 1f
-            etInput.isEnabled = true
-            etInput.alpha = 1f
-
-            btnBack.isEnabled = true
-            btnBack.alpha = 1f
-            btnMenu.isEnabled = true
-            btnMenu.alpha = 1f
-        }
+        btnSend.isEnabled = enabled
+        btnSend.alpha = alpha
+        etInput.isEnabled = enabled
+        etInput.alpha = if (isStreaming) 0.7f else 1f
+        btnBack.isEnabled = enabled
+        btnBack.alpha = alpha
+        btnMenu.isEnabled = enabled
+        btnMenu.alpha = alpha
     }
 
     private fun performHapticFeedback() {
@@ -235,8 +212,7 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
             val context = requireContext()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-                val vibrator = vibratorManager.defaultVibrator
-                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+                vibratorManager.defaultVibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
             } else {
                 @Suppress("DEPRECATION")
                 val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
@@ -245,5 +221,17 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         } catch (e: Exception) {
             Log.e("ChatFragment", "Vibration failed: ${e.message}")
         }
+    }
+
+    private fun stripHtml(html: String): String {
+        var text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT).toString()
+        } else {
+            @Suppress("DEPRECATION") Html.fromHtml(html).toString()
+        }
+        text = text.replace(Regex("\\*\\*(.*?)\\*\\*"), "$1")
+        text = text.replace(Regex("##(.*?)##"), "$1")
+        text = text.replace(Regex("~~(.*?)~~"), "$1")
+        return text.trim()
     }
 }

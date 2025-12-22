@@ -7,12 +7,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.LinearGradient
-import android.graphics.Paint
-import android.graphics.Path
-import android.graphics.Shader
+import android.graphics.*
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.RectShape
 import android.graphics.drawable.shapes.Shape
@@ -23,11 +18,7 @@ import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.LinearInterpolator
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.ScrollView
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.core.content.ContextCompat
 import com.google.android.material.card.MaterialCardView
 import com.nguyendevs.ecolens.R
@@ -46,6 +37,7 @@ class SpeciesInfoHandler(
     private val viewCache = mutableMapOf<Int, View>()
     private val displayedRows = mutableSetOf<Int>()
 
+    // Khởi tạo Markwon với HtmlPlugin
     private val markwon = Markwon.builder(context)
         .usePlugin(HtmlPlugin.create())
         .build()
@@ -55,6 +47,64 @@ class SpeciesInfoHandler(
 
     init {
         cacheViews()
+    }
+
+    fun displaySpeciesInfo(info: SpeciesInfo, imageUri: Uri?, stage: LoadingStage) {
+        when (stage) {
+            LoadingStage.NONE -> {
+                handlerScope.coroutineContext.cancelChildren()
+                clearAllViews()
+            }
+
+            LoadingStage.SCIENTIFIC_NAME -> {
+                displayCommonName(SpeciesInfo(commonName = "...", scientificName = ""))
+                displayScientificName(info)
+                displayConfidence(info, isWaiting = true)
+                prepareTaxonomyContainer()
+                hideButtons()
+            }
+
+            LoadingStage.COMMON_NAME -> {
+                displayCommonName(info)
+                displayConfidence(info, isWaiting = false)
+            }
+
+            LoadingStage.TAXONOMY -> {
+                displayTaxonomyWaterfall(info)
+            }
+
+            LoadingStage.DESCRIPTION -> {
+                displaySection(R.id.sectionDescription, R.id.tvDescription, info.description)
+            }
+
+            LoadingStage.CHARACTERISTICS -> {
+                displaySection(R.id.sectionCharacteristics, R.id.tvCharacteristics, info.characteristics)
+            }
+
+            LoadingStage.DISTRIBUTION -> {
+                displaySection(R.id.sectionDistribution, R.id.tvDistribution, info.distribution)
+            }
+
+            LoadingStage.HABITAT -> {
+                displaySection(R.id.sectionHabitat, R.id.tvHabitat, info.habitat)
+            }
+
+            LoadingStage.CONSERVATION -> {
+                displayConservationStatus(info.conservationStatus)
+            }
+
+            LoadingStage.COMPLETE -> {
+                setupCopyButton(info)
+                setupShareButton(info, imageUri)
+                showButtonsWithAnimation()
+            }
+        }
+    }
+
+    fun onDestroy() {
+        stopConfidenceAnimation()
+        stopTaxonomyShimmer()
+        handlerScope.cancel()
     }
 
     private fun cacheViews() {
@@ -96,49 +146,6 @@ class SpeciesInfoHandler(
         viewCache[R.id.tvConservationStatus] = speciesInfoCard.findViewById(R.id.tvConservationStatus)
     }
 
-    fun displaySpeciesInfo(info: SpeciesInfo, imageUri: Uri?, stage: LoadingStage) {
-        when (stage) {
-            LoadingStage.NONE -> {
-                handlerScope.coroutineContext.cancelChildren()
-                clearAllViews()
-            }
-            LoadingStage.SCIENTIFIC_NAME -> {
-                displayCommonName(SpeciesInfo(commonName = "...", scientificName = ""))
-                displayScientificName(info)
-                displayConfidence(info, isWaiting = true)
-                prepareTaxonomyContainer()
-                hideButtons()
-            }
-            LoadingStage.COMMON_NAME -> {
-                displayCommonName(info)
-                displayConfidence(info, isWaiting = false)
-            }
-            LoadingStage.TAXONOMY -> {
-                displayTaxonomyWaterfall(info)
-            }
-            LoadingStage.DESCRIPTION -> {
-                displaySection(R.id.sectionDescription, R.id.tvDescription, info.description)
-            }
-            LoadingStage.CHARACTERISTICS -> {
-                displaySection(R.id.sectionCharacteristics, R.id.tvCharacteristics, info.characteristics)
-            }
-            LoadingStage.DISTRIBUTION -> {
-                displaySection(R.id.sectionDistribution, R.id.tvDistribution, info.distribution)
-            }
-            LoadingStage.HABITAT -> {
-                displaySection(R.id.sectionHabitat, R.id.tvHabitat, info.habitat)
-            }
-            LoadingStage.CONSERVATION -> {
-                displayConservationStatus(info.conservationStatus)
-            }
-            LoadingStage.COMPLETE -> {
-                setupCopyButton(info)
-                setupShareButton(info, imageUri)
-                showButtonsWithAnimation()
-            }
-        }
-    }
-
     private fun clearAllViews() {
         displayedRows.clear()
         stopConfidenceAnimation()
@@ -169,7 +176,7 @@ class SpeciesInfoHandler(
     private fun displayScientificName(info: SpeciesInfo) {
         val tvScientificName = viewCache[R.id.tvScientificName] as? TextView
         tvScientificName?.let {
-            it.text = info.scientificName
+            markwon.setMarkdown(it, info.scientificName)
             it.visibility = View.VISIBLE
             fadeIn(it, 300)
         }
@@ -178,7 +185,7 @@ class SpeciesInfoHandler(
     private fun displayCommonName(info: SpeciesInfo) {
         val tvCommonName = viewCache[R.id.tvCommonName] as? TextView
         tvCommonName?.let {
-            it.text = info.commonName
+            markwon.setMarkdown(it, info.commonName)
             it.visibility = View.VISIBLE
 
             if (info.commonName == "...") {
@@ -220,9 +227,26 @@ class SpeciesInfoHandler(
             tvConfidence?.text = context.getString(R.string.confidence_format, confidencePercent)
 
             val (icon, tint, bg, text) = when {
-                confidenceValue >= 50f -> Quadruple(R.drawable.ic_check_circle, R.color.confidence_high, R.color.confidence_bg_high, R.color.confidence_text_high)
-                confidenceValue >= 25f -> Quadruple(R.drawable.ic_check_warning_circle, R.color.confidence_medium, R.color.confidence_bg_medium, R.color.confidence_text_medium)
-                else -> Quadruple(R.drawable.ic_check_not_circle, R.color.confidence_low, R.color.confidence_bg_low, R.color.confidence_text_low)
+                confidenceValue >= 50f -> Quadruple(
+                    R.drawable.ic_check_circle,
+                    R.color.confidence_high,
+                    R.color.confidence_bg_high,
+                    R.color.confidence_text_high
+                )
+
+                confidenceValue >= 25f -> Quadruple(
+                    R.drawable.ic_check_warning_circle,
+                    R.color.confidence_medium,
+                    R.color.confidence_bg_medium,
+                    R.color.confidence_text_medium
+                )
+
+                else -> Quadruple(
+                    R.drawable.ic_check_not_circle,
+                    R.color.confidence_low,
+                    R.color.confidence_bg_low,
+                    R.color.confidence_text_low
+                )
             }
 
             iconConfidence?.setImageResource(icon)
@@ -284,6 +308,7 @@ class SpeciesInfoHandler(
 
                 if (hasData) {
                     if (!displayedRows.contains(rowId)) {
+                        // Dùng Markwon để render HTML với màu sắc
                         markwon.setMarkdown(textView, text)
 
                         rowView.visibility = View.VISIBLE
@@ -400,6 +425,7 @@ class SpeciesInfoHandler(
         if (text.isNotEmpty()) {
             val trimmedText = text.trim()
             textView?.let { tv ->
+                // Dùng Markwon để render HTML với màu sắc
                 markwon.setMarkdown(tv, trimmedText)
             }
 
@@ -431,6 +457,7 @@ class SpeciesInfoHandler(
 
         if (status.isNotEmpty()) {
             textView?.let { tv ->
+                // Dùng Markwon để render HTML với màu sắc
                 markwon.setMarkdown(tv, status)
                 tv.setTextColor(ContextCompat.getColor(context, R.color.black))
             }
@@ -481,7 +508,6 @@ class SpeciesInfoHandler(
     private fun hideButtons() {
         val btnShare = viewCache[R.id.btnShareInfo]
         val btnCopy = viewCache[R.id.btnCopyScientificName]
-
         btnShare?.visibility = View.GONE
         btnCopy?.visibility = View.GONE
     }
@@ -523,8 +549,9 @@ class SpeciesInfoHandler(
     private fun setupCopyButton(info: SpeciesInfo) {
         viewCache[R.id.btnCopyScientificName]?.setOnClickListener {
             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            clipboard.setPrimaryClip(ClipData.newPlainText("Scientific Name", info.scientificName))
-            onCopySuccess(info.scientificName)
+            val cleanName = stripHtml(info.scientificName)
+            clipboard.setPrimaryClip(ClipData.newPlainText("Scientific Name", cleanName))
+            onCopySuccess(cleanName)
         }
     }
 
@@ -543,12 +570,13 @@ class SpeciesInfoHandler(
     }
 
     private fun shareSpeciesInfo(info: SpeciesInfo, imageUri: Uri?) {
-        val confidencePercent = String.format("%.2f", if (info.confidence > 1) info.confidence else info.confidence * 100)
+        val confidencePercent =
+            String.format("%.2f", if (info.confidence > 1) info.confidence else info.confidence * 100)
         val shareText = buildString {
             append(context.getString(R.string.share_title))
             append("\n━━━━━━━━━━━━━━━━━━━━\n\n")
-            append("📌 ${info.commonName}\n🔬 ${info.scientificName}\n")
-            append("✅ ${context.getString(R.string.label_confidence_template, confidencePercent)}\n\n")
+            append("📌 ${stripHtml(info.commonName)}\n🔬 ${stripHtml(info.scientificName)}\n")
+            append("✅ ${context.getString(R.string.label_confidence_template, confidencePercent)}%\n\n")
             append("━━━━━━━━━━━━━━━━━━━━\n${context.getString(R.string.share_taxonomy_title)}\n━━━━━━━━━━━━━━━━━━━━\n\n")
             if (info.kingdom.isNotEmpty()) append("• ${context.getString(R.string.label_kingdom)} ${stripHtml(info.kingdom)}\n")
             if (info.phylum.isNotEmpty()) append("• ${context.getString(R.string.label_phylum)} ${stripHtml(info.phylum)}\n")
@@ -567,7 +595,13 @@ class SpeciesInfoHandler(
             )
             contentList.forEach { (content, title) ->
                 if (content.isNotEmpty()) {
-                    append("\n━━━━━━━━━━━━━━━━━━━━\n${context.getString(title)}\n━━━━━━━━━━━━━━━━━━━━\n\n${stripHtml(content)}\n")
+                    append(
+                        "\n━━━━━━━━━━━━━━━━━━━━\n${context.getString(title)}\n━━━━━━━━━━━━━━━━━━━━\n\n${
+                            stripHtml(
+                                content
+                            )
+                        }\n"
+                    )
                 }
             }
             append("\n━━━━━━━━━━━━━━━━━━━━\n${context.getString(R.string.share_footer)}")
@@ -584,7 +618,7 @@ class SpeciesInfoHandler(
                     type = "text/plain"
                 }
                 putExtra(Intent.EXTRA_TEXT, shareText)
-                putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.share_subject, info.commonName))
+                putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.share_subject, stripHtml(info.commonName)))
             }
             context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_chooser_title)))
         } catch (e: Exception) {
@@ -593,25 +627,20 @@ class SpeciesInfoHandler(
     }
 
     private fun stripHtml(html: String): String {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        var text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT).toString()
         } else {
             @Suppress("DEPRECATION") Html.fromHtml(html).toString()
-        }.trim()
+        }
+        // Loại bỏ các ký tự markdown còn sót lại
+        text = text.replace(Regex("\\*\\*(.*?)\\*\\*"), "$1")
+        text = text.replace(Regex("\\*(.*?)\\*"), "$1")
+        return text.trim()
     }
 
     private fun Float.dpToPx(): Float = this * context.resources.displayMetrics.density
 
-    fun onDestroy() {
-        stopConfidenceAnimation()
-        stopTaxonomyShimmer()
-        handlerScope.cancel()
-    }
-
     data class Quadruple<out A, out B, out C, out D>(
-        val first: A,
-        val second: B,
-        val third: C,
-        val fourth: D
+        val first: A, val second: B, val third: C, val fourth: D
     )
 }

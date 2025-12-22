@@ -33,31 +33,6 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
     private val messages = mutableListOf<ChatMessage>()
     private lateinit var markwon: Markwon
 
-    fun submitList(newMessages: List<ChatMessage>) {
-        val oldSize = messages.size
-        val newSize = newMessages.size
-
-        messages.clear()
-        messages.addAll(newMessages)
-
-        if (newSize > oldSize) {
-            notifyItemRangeInserted(oldSize, newSize - oldSize)
-            if (oldSize > 0) {
-                notifyItemChanged(oldSize - 1)
-            }
-        } else if (newSize == oldSize && newSize > 0) {
-            val lastMsg = messages[newSize - 1]
-            if (lastMsg.isStreaming) {
-                notifyItemChanged(newSize - 1, "STREAMING")
-            } else {
-                notifyItemChanged(newSize - 1)
-            }
-        } else {
-            notifyDataSetChanged()
-        }
-    }
-
-    // UPDATED: Thêm HtmlPlugin
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
         if (!::markwon.isInitialized) {
             markwon = Markwon.builder(parent.context)
@@ -77,8 +52,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
     }
 
     override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
-        val message = messages[position]
-        holder.bind(message, position)
+        holder.bind(messages[position], position)
     }
 
     override fun onViewRecycled(holder: ChatViewHolder) {
@@ -88,14 +62,36 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
 
     override fun getItemCount(): Int = messages.size
 
+    fun submitList(newMessages: List<ChatMessage>) {
+        val oldSize = messages.size
+        val newSize = newMessages.size
+
+        messages.clear()
+        messages.addAll(newMessages)
+
+        if (newSize > oldSize) {
+            notifyItemRangeInserted(oldSize, newSize - oldSize)
+            if (oldSize > 0) notifyItemChanged(oldSize - 1)
+        } else if (newSize == oldSize && newSize > 0) {
+            val lastMsg = messages[newSize - 1]
+            if (lastMsg.isStreaming) {
+                notifyItemChanged(newSize - 1, "STREAMING")
+            } else {
+                notifyItemChanged(newSize - 1)
+            }
+        } else {
+            notifyDataSetChanged()
+        }
+    }
+
     inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val container: LinearLayout = itemView.findViewById(R.id.chatContainer)
-        val cardView: MaterialCardView = itemView.findViewById(R.id.cardMessage)
+        private val cardView: MaterialCardView = itemView.findViewById(R.id.cardMessage)
         private val tvMessage: TextView = itemView.findViewById(R.id.tvMessage)
         private val layoutAiActions: LinearLayout = itemView.findViewById(R.id.layoutAiActions)
-        val btnCopyAi: ImageView = itemView.findViewById(R.id.btnCopyAi)
-        val btnShareAi: ImageView = itemView.findViewById(R.id.btnShareAi)
-        val btnRenewAi: ImageView = itemView.findViewById(R.id.btnRenewAi)
+        private val btnCopyAi: ImageView = itemView.findViewById(R.id.btnCopyAi)
+        private val btnShareAi: ImageView = itemView.findViewById(R.id.btnShareAi)
+        private val btnRenewAi: ImageView = itemView.findViewById(R.id.btnRenewAi)
 
         private val handler = Handler(Looper.getMainLooper())
         private var loopCount = 0
@@ -104,8 +100,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
         private val loadingAnimateRunnable = object : Runnable {
             override fun run() {
                 loopCount++
-                val baseText = "..."
-                val spannable = SpannableString(baseText)
+                val spannable = SpannableString("...")
                 val visibleDots = (loopCount % 3) + 1
                 if (visibleDots < 3) {
                     spannable.setSpan(ForegroundColorSpan(Color.TRANSPARENT), visibleDots, 3, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
@@ -152,10 +147,8 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
                     container.gravity = Gravity.START
                     cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.white))
                     tvMessage.setTextColor(ContextCompat.getColor(itemView.context, R.color.text_primary))
-
                     bindStreamingText(message)
                     startCursorAnimation()
-
                     layoutAiActions.visibility = View.GONE
                 }
                 message.isUser -> {
@@ -163,7 +156,6 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
                     container.gravity = Gravity.END
                     cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.green_primary))
                     tvMessage.setTextColor(ContextCompat.getColor(itemView.context, R.color.white))
-
                     cardView.setOnLongClickListener {
                         actionListener.onCopy(message.content)
                         true
@@ -171,29 +163,18 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
                 }
                 else -> {
                     markwon.setMarkdown(tvMessage, message.content)
-
                     container.gravity = Gravity.START
                     cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.white))
                     tvMessage.setTextColor(ContextCompat.getColor(itemView.context, R.color.text_primary))
 
                     if (position > 0) {
                         layoutAiActions.visibility = View.VISIBLE
-
-                        if (position == messages.size - 1) {
-                            btnRenewAi.visibility = View.VISIBLE
-                        } else {
-                            btnRenewAi.visibility = View.GONE
-                        }
-
+                        btnRenewAi.visibility = if (position == messages.size - 1) View.VISIBLE else View.GONE
                         btnCopyAi.visibility = View.VISIBLE
                         btnShareAi.visibility = View.VISIBLE
 
-                        btnCopyAi.setOnClickListener {
-                            actionListener.onCopy(message.content)
-                        }
-                        btnShareAi.setOnClickListener {
-                            actionListener.onShare(message.content)
-                        }
+                        btnCopyAi.setOnClickListener { actionListener.onCopy(message.content) }
+                        btnShareAi.setOnClickListener { actionListener.onShare(message.content) }
                         btnRenewAi.setOnClickListener { actionListener.onRenew(position, message) }
                     }
                 }
