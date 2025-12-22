@@ -29,6 +29,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.util.Locale
+import java.util.concurrent.atomic.AtomicBoolean
 
 class EcoLensViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -44,6 +45,8 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
     private val _chatMessages = MutableStateFlow<List<ChatMessage>>(emptyList())
     val chatMessages: StateFlow<List<ChatMessage>> = _chatMessages.asStateFlow()
+
+    private val isGenerating = AtomicBoolean(false)
 
     private data class GeminiRawResponse(
         val commonName: String = "",
@@ -474,6 +477,8 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         if (userMessage.isBlank()) return
         val sessionId = currentSessionId ?: return
 
+        if (isGenerating.getAndSet(true)) return
+
         viewModelScope.launch(Dispatchers.IO) {
             val userChatMsg = ChatMessage(sessionId = sessionId, content = userMessage, isUser = true, timestamp = System.currentTimeMillis())
             chatDao.insertMessage(userChatMsg)
@@ -491,12 +496,20 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun renewAiResponse(aiMessage: ChatMessage) {
-        val sessionId = currentSessionId ?: return
+        if (isGenerating.getAndSet(true)) return
+
+        val sessionId = currentSessionId
+        if (sessionId == null) {
+            isGenerating.set(false)
+            return
+        }
+
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 chatDao.deleteMessageById(aiMessage.id)
                 executeGeminiFlow(sessionId)
             } catch (e: Exception) {
+                isGenerating.set(false)
                 Log.e("EcoLensViewModel", "Renew failed: ${e.message}")
             }
         }
@@ -540,6 +553,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             withContext(Dispatchers.Main) {
                 _chatMessages.value = _chatMessages.value.filter { !it.isLoading }
             }
+            isGenerating.set(false)
         }
     }
 
