@@ -33,6 +33,7 @@ import com.google.android.material.card.MaterialCardView
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.model.LoadingStage
 import com.nguyendevs.ecolens.model.SpeciesInfo
+import io.noties.markwon.Markwon
 import kotlinx.coroutines.*
 
 class SpeciesInfoHandler(
@@ -43,6 +44,9 @@ class SpeciesInfoHandler(
     private val handlerScope = CoroutineScope(Dispatchers.Main + Job())
     private val viewCache = mutableMapOf<Int, View>()
     private val displayedRows = mutableSetOf<Int>()
+
+    // Tạo Markwon instance
+    private val markwon = Markwon.create(context)
 
     private var confidenceRotationAnimator: ObjectAnimator? = null
     private var taxonomyShimmerAnimator: ValueAnimator? = null
@@ -253,6 +257,7 @@ class SpeciesInfoHandler(
         }
     }
 
+    // UPDATED: Sử dụng Markwon để render, thay đổi cách xử lý string từ HTML tag sang Markdown syntax
     private fun displayTaxonomyWaterfall(info: SpeciesInfo) {
         stopTaxonomyShimmer()
         val container = viewCache[R.id.taxonomyContainer]
@@ -278,12 +283,16 @@ class SpeciesInfoHandler(
 
                 if (hasData) {
                     if (!displayedRows.contains(rowId)) {
-                        val formattedText = if (text.contains("<i>")) "<b>" + text.replace("<i>", "</b><i>") else "<b>$text</b>"
-                        textView.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            Html.fromHtml(formattedText, Html.FROM_HTML_MODE_LEGACY)
+                        // Chuyển đổi logic cũ: thay vì chèn <b> và <i> HTML, ta dùng Markdown
+                        // Markwon core mặc định không render HTML tags như <i> trừ khi có plugin.
+                        // Ta chuyển <i> thành _ (nghiêng) và bọc tất cả trong ** (đậm).
+                        val formattedText = if (text.contains("<i>")) {
+                            "**" + text.replace("<i>", "_").replace("</i>", "_") + "**"
                         } else {
-                            @Suppress("DEPRECATION") Html.fromHtml(formattedText)
+                            "**$text**"
                         }
+
+                        markwon.setMarkdown(textView, formattedText)
 
                         rowView.visibility = View.VISIBLE
                         rowView.alpha = 0f
@@ -392,19 +401,17 @@ class SpeciesInfoHandler(
         (viewCache[R.id.iconConfidence] as? ImageView)?.rotation = 0f
     }
 
+    // UPDATED: Sử dụng Markwon.setMarkdown thay vì Html.fromHtml và xóa logic replace <br> thủ công
     private fun displaySection(sectionId: Int, textViewId: Int, text: String) {
         val section = viewCache[sectionId] as? LinearLayout
         val textView = viewCache[textViewId] as? TextView
 
         if (text.isNotEmpty()) {
-            val htmlText = text.trim().replace("\n•", "<br>•").replace("\n", "<br>")
-            val spanned = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                Html.fromHtml(htmlText, Html.FROM_HTML_MODE_LEGACY)
-            } else {
-                @Suppress("DEPRECATION") Html.fromHtml(htmlText)
+            val trimmedText = text.trim()
+            textView?.let { tv ->
+                markwon.setMarkdown(tv, trimmedText)
             }
 
-            textView?.text = spanned
             section?.let { sectionView ->
                 if (sectionView.visibility != View.VISIBLE) {
                     sectionView.visibility = View.VISIBLE
@@ -427,17 +434,16 @@ class SpeciesInfoHandler(
         }
     }
 
+    // UPDATED: Sử dụng Markwon.setMarkdown
     private fun displayConservationStatus(status: String) {
         val section = viewCache[R.id.sectionConservation] as? LinearLayout
         val textView = viewCache[R.id.tvConservationStatus] as? TextView
 
         if (status.isNotEmpty()) {
-            textView?.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                Html.fromHtml(status, Html.FROM_HTML_MODE_COMPACT)
-            } else {
-                @Suppress("DEPRECATION") Html.fromHtml(status)
+            textView?.let { tv ->
+                markwon.setMarkdown(tv, status)
+                tv.setTextColor(ContextCompat.getColor(context, R.color.black))
             }
-            textView?.setTextColor(ContextCompat.getColor(context, R.color.black))
 
             section?.let { sectionView ->
                 if (sectionView.visibility != View.VISIBLE) {
@@ -596,6 +602,8 @@ class SpeciesInfoHandler(
         }
     }
 
+    // Method này dùng để strip tag khi share text thuần (không phải để hiển thị UI)
+    // Giữ nguyên Html.fromHtml hoặc dùng regex cơ bản vì Markwon chủ yếu dùng để render View.
     private fun stripHtml(html: String): String {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT).toString()

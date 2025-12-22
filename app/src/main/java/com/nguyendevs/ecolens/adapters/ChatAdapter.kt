@@ -2,10 +2,8 @@ package com.nguyendevs.ecolens.adapters
 
 import android.animation.ValueAnimator
 import android.graphics.Color
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.text.Html
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
@@ -21,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.model.ChatMessage
+import io.noties.markwon.Markwon
 
 class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerView.Adapter<ChatAdapter.ChatViewHolder>() {
 
@@ -31,6 +30,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
     }
 
     private val messages = mutableListOf<ChatMessage>()
+    private lateinit var markwon: Markwon
 
     fun submitList(newMessages: List<ChatMessage>) {
         val oldSize = messages.size
@@ -56,7 +56,11 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
         }
     }
 
+    // UPDATED: Khởi tạo Markwon instance tại đây để dùng cho việc render Markdown
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
+        if (!::markwon.isInitialized) {
+            markwon = Markwon.create(parent.context)
+        }
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat_message, parent, false)
         return ChatViewHolder(view)
     }
@@ -115,12 +119,16 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
             tvMessage.alpha = 1f
         }
 
+        // UPDATED: Sử dụng Markwon để render text streaming thay vì text thuần nếu cần (ở đây giữ nguyên text + cursor)
         fun bindStreamingText(message: ChatMessage) {
             if (message.isStreaming) {
-                tvMessage.text = message.content + " ▌"
+                // Với streaming, ta tạm thời set text raw để hiệu năng tốt hơn,
+                // hoặc có thể dùng markwon.setMarkdown(tvMessage, message.content + " ▌") nếu muốn render markdown realtime
+                markwon.setMarkdown(tvMessage, message.content + " ▌")
             }
         }
 
+        // UPDATED: Thay thế Html.fromHtml bằng Markwon để render nội dung tin nhắn
         fun bind(message: ChatMessage, position: Int) {
             stopAnimation()
             layoutAiActions.visibility = View.GONE
@@ -152,7 +160,8 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
                     layoutAiActions.visibility = View.GONE
                 }
                 message.isUser -> {
-                    tvMessage.text = message.content
+                    // User message thường là text thuần, nhưng dùng Markwon vẫn tốt cho nhất quán
+                    markwon.setMarkdown(tvMessage, message.content)
                     container.gravity = Gravity.END
                     cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.green_primary))
                     tvMessage.setTextColor(ContextCompat.getColor(itemView.context, R.color.white))
@@ -163,12 +172,8 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
                     }
                 }
                 else -> {
-                    val formattedText = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        Html.fromHtml(message.content, Html.FROM_HTML_MODE_COMPACT)
-                    } else {
-                        @Suppress("DEPRECATION") Html.fromHtml(message.content)
-                    }
-                    tvMessage.text = formattedText
+                    // Render Markdown message từ AI
+                    markwon.setMarkdown(tvMessage, message.content)
 
                     container.gravity = Gravity.START
                     cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.white))
@@ -186,21 +191,12 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
                         btnCopyAi.visibility = View.VISIBLE
                         btnShareAi.visibility = View.VISIBLE
 
+                        // Copy raw markdown content thay vì text đã format
                         btnCopyAi.setOnClickListener {
-                            val plainText = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                Html.fromHtml(message.content, Html.FROM_HTML_MODE_COMPACT).toString()
-                            } else {
-                                @Suppress("DEPRECATION") Html.fromHtml(message.content).toString()
-                            }
-                            actionListener.onCopy(plainText)
+                            actionListener.onCopy(message.content)
                         }
                         btnShareAi.setOnClickListener {
-                            val plainText = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                Html.fromHtml(message.content, Html.FROM_HTML_MODE_COMPACT).toString()
-                            } else {
-                                @Suppress("DEPRECATION") Html.fromHtml(message.content).toString()
-                            }
-                            actionListener.onShare(plainText)
+                            actionListener.onShare(message.content)
                         }
                         btnRenewAi.setOnClickListener { actionListener.onRenew(position, message) }
                     }

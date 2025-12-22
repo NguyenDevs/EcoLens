@@ -99,7 +99,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    // identifySpecies giữ nguyên...
+    // identifySpecies giữ nguyên logic, chỉ thay đổi hàm xử lý text
     fun identifySpecies(imageUri: Uri, languageCode: String) {
         viewModelScope.launch {
             _uiState.value = EcoLensUiState(isLoading = true, speciesInfo = null, error = null, loadingStage = LoadingStage.NONE)
@@ -245,24 +245,26 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 else -> ""
             }
 
+            // UPDATED: Sử dụng processMarkdown thay vì parseToHtml
             SpeciesInfo(
                 kingdom = removeRankPrefix(rawInfo.kingdom, if (isVietnamese) "Giới" else "Kingdom"),
                 phylum = removeRankPrefix(rawInfo.phylum, if (isVietnamese) "Ngành" else "Phylum"),
                 className = removeRankPrefix(rawInfo.className, if (isVietnamese) "Lớp" else "Class"),
                 order = removeRankPrefix(rawInfo.order, if (isVietnamese) "Bộ" else "Order"),
-                family = parseToHtml(removeRankPrefix(rawInfo.family, if (isVietnamese) "Họ" else "Family")),
-                genus = parseToHtml(removeRankPrefix(rawInfo.genus, if (isVietnamese) "Chi" else "Genus")),
-                species = parseToHtml(removeRankPrefix(rawInfo.species, if (isVietnamese) "Loài" else "Species")),
+                family = processMarkdown(removeRankPrefix(rawInfo.family, if (isVietnamese) "Họ" else "Family")),
+                genus = processMarkdown(removeRankPrefix(rawInfo.genus, if (isVietnamese) "Chi" else "Genus")),
+                species = processMarkdown(removeRankPrefix(rawInfo.species, if (isVietnamese) "Loài" else "Species")),
 
                 commonName = rawInfo.commonName,
                 scientificName = scientificName,
                 rank = rawInfo.rank,
 
-                description = parseToHtml(rawInfo.description),
-                characteristics = parseToHtml(characteristicsText),
-                distribution = parseToHtml(rawInfo.distribution),
-                habitat = parseToHtml(rawInfo.habitat),
-                conservationStatus = parseToHtml(rawInfo.conservationStatus, isConservationStatus = true, isVietnamese = isVietnamese),
+                description = processMarkdown(rawInfo.description),
+                characteristics = processMarkdown(characteristicsText),
+                distribution = processMarkdown(rawInfo.distribution),
+                habitat = processMarkdown(rawInfo.habitat),
+                // Conservation Status vẫn cần xử lý màu sắc
+                conservationStatus = processMarkdown(rawInfo.conservationStatus, isConservationStatus = true, isVietnamese = isVietnamese),
                 confidence = confidence
             )
 
@@ -338,19 +340,21 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    private fun parseToHtml(text: String, isConservationStatus: Boolean = false, isVietnamese: Boolean = true): String {
+    // UPDATED: Đổi tên và logic từ parseToHtml sang processMarkdown
+    // Không còn convert thủ công ** sang <b>, giữ nguyên cho Markwon xử lý
+    // Chỉ xử lý các ký hiệu đặc biệt (màu sắc) và định dạng dòng
+    private fun processMarkdown(text: String, isConservationStatus: Boolean = false, isVietnamese: Boolean = true): String {
         if (text.isBlank()) return ""
 
+        // Markwon có thể render thẻ HTML màu sắc, nên ta convert cú pháp ##...## sang thẻ <font>
         var result = text
-            .replace(Regex("^(#{1,6})\\s+(.+)$", RegexOption.MULTILINE)) { matchResult ->
-                "<br><b>${matchResult.groupValues[2]}</b>"
-            }
-            .replace(Regex("\\*\\*(.+?)\\*\\*")) { "<b>${it.groupValues[1]}</b>" }
-            .replace(Regex("(?<!\\*)\\*(?!\\*)(.+?)(?<!\\*)\\*(?!\\*)")) { "<i>${it.groupValues[1]}</i>" }
-            .replace(Regex("~~(.+?)~~")) { "<i>${it.groupValues[1]}</i>" }
             .replace(Regex("##(.+?)##")) { "<font color='#00796B'><b>${it.groupValues[1]}</b></font>" }
-            .replace(Regex("^\\*\\s+", RegexOption.MULTILINE)) { "• " }
-            .replace("\n", "<br>")
+            // Convert custom ~~ thành markdown italic chuẩn (_) hoặc giữ nguyên nếu cấu hình Markwon hỗ trợ strikethrough
+            .replace(Regex("~~(.+?)~~")) { "_${it.groupValues[1]}_" }
+
+        // Không replace \n thành <br> nữa vì Markwon xử lý xuống dòng chuẩn Markdown
+        // Tuy nhiên, để đảm bảo bullet point hiển thị đẹp, có thể thêm newline trước bullet nếu chưa có
+        // result = result.replace("\n", "<br>") // REMOVED
 
         if (isConservationStatus) {
             result = colorizeConservationStatus(result, isVietnamese)
@@ -359,6 +363,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         return result
     }
 
+    // Hàm này giữ nguyên việc thêm thẻ color HTML vì Markwon render được
     private fun colorizeConservationStatus(text: String, isVietnamese: Boolean): String {
         val statusMap = if (isVietnamese) {
             mapOf(
@@ -568,8 +573,9 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                                     if (!chunk.isNullOrEmpty()) {
                                         accumulatedText += chunk
 
-                                        // Format HTML cho từng chunk
-                                        val formattedText = parseToHtml(accumulatedText).replace("\n", "<br>")
+                                        // UPDATED: Không replace newline thành <br> nữa, để Markwon tự xử lý
+                                        // Chỉ cần process màu sắc nếu có (thường chat stream ít màu sắc phức tạp ngay lập tức)
+                                        val formattedText = processMarkdown(accumulatedText)
                                         chatDao.updateMessageContent(messageId, formattedText)
 
                                         // Delay nhỏ để animation mượt
@@ -584,7 +590,8 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                     }
 
                     // Khi hoàn thành, cập nhật isStreaming = false
-                    val finalFormattedText = parseToHtml(accumulatedText).replace("\n", "<br>")
+                    // UPDATED: Sử dụng processMarkdown
+                    val finalFormattedText = processMarkdown(accumulatedText)
                     chatDao.updateMessage(
                         ChatMessage(
                             id = messageId,

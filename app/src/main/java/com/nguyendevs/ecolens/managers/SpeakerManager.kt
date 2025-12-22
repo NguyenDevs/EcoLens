@@ -84,7 +84,8 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
         isPaused = false
         currentRawText = text
 
-        val cleanedText = removeVietnameseInParentheses(text)
+        // UPDATED: Gọi hàm clean text đã được cập nhật
+        val cleanedText = cleanupForSpeech(text)
         val newSentences = splitTextToSentences(cleanedText)
 
         sentenceList = newSentences
@@ -123,12 +124,19 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
         }
     }
 
-    // Loại bỏ nội dung tiếng Việt trong ngoặc đơn
-    private fun removeVietnameseInParentheses(text: String): String {
-        return text.replace(Regex("\\s*\\([^)]*[ạ-ỹĂăÂâĐđÊêÔôƠơƯư][^)]*\\)"), "")
+    // UPDATED: Đổi tên và cập nhật logic dọn dẹp
+    private fun cleanupForSpeech(text: String): String {
+        var result = text
+
+        // 1. Loại bỏ nội dung tiếng Việt trong ngoặc đơn (giữ nguyên logic cũ)
+        result = result.replace(Regex("\\s*\\([^)]*[ạ-ỹĂăÂâĐđÊêÔôƠơƯư][^)]*\\)"), "")
             .replace(Regex("\\s*\\([^)]*[Họ|Chi|Loài][^)]*\\)"), "")
-            .replace(Regex("\\s+"), " ")
-            .trim()
+
+        // 2. Loại bỏ ký tự Markdown (*, #, _, ~) nếu còn sót lại
+        result = result.replace(Regex("[*#_~]"), "")
+
+        // 3. Chuẩn hóa khoảng trắng
+        return result.replace(Regex("\\s+"), " ").trim()
     }
 
     // Tách văn bản thành các câu

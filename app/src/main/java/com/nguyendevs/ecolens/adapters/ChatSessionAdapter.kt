@@ -1,7 +1,5 @@
 package com.nguyendevs.ecolens.adapters
 
-import android.os.Build
-import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.model.ChatSession
+import io.noties.markwon.Markwon
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -19,6 +18,7 @@ class ChatSessionAdapter(
 
     private val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     private val timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault())
+    private lateinit var markwon: Markwon
 
     // Cập nhật danh sách phiên chat
     fun updateList(newList: List<ChatSession>) {
@@ -26,8 +26,11 @@ class ChatSessionAdapter(
         notifyDataSetChanged()
     }
 
-    // Tạo ViewHolder mới
+    // UPDATED: Khởi tạo Markwon instance tại đây
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        if (!::markwon.isInitialized) {
+            markwon = Markwon.create(parent.context)
+        }
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat_session, parent, false)
         return ViewHolder(view)
     }
@@ -52,19 +55,15 @@ class ChatSessionAdapter(
         val tvTime: TextView = view.findViewById(R.id.tvTime)
         val card: View = view.findViewById(R.id.cardSession)
 
-        // Gắn dữ liệu phiên chat vào view
+        // UPDATED: Sử dụng Markwon để render preview tin nhắn cuối cùng thay vì Html.fromHtml
         fun bind(session: ChatSession, showHeader: Boolean) {
             tvDate.visibility = if (showHeader) View.VISIBLE else View.GONE
             tvDate.text = dateFormatter.format(Date(session.timestamp))
 
             tvTitle.text = session.title
-            val formattedPreview = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                Html.fromHtml(session.lastMessage, Html.FROM_HTML_MODE_COMPACT)
-            } else {
-                @Suppress("DEPRECATION")
-                Html.fromHtml(session.lastMessage)
-            }
-            tvLastMessage.text = formattedPreview
+
+            // Thay thế logic Html cũ bằng Markwon
+            markwon.setMarkdown(tvLastMessage, session.lastMessage)
 
             tvTime.text = timeFormatter.format(Date(session.timestamp))
 

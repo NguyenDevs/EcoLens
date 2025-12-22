@@ -9,6 +9,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.model.HistoryEntry
+import io.noties.markwon.Markwon
+import io.noties.markwon.html.HtmlPlugin
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -27,6 +29,9 @@ class HistoryAdapter(
         timeZone = TimeZone.getDefault()
     }
 
+    // Khởi tạo Markwon
+    private lateinit var markwon: Markwon
+
     // Cập nhật danh sách lịch sử
     fun updateList(newList: List<HistoryEntry>) {
         historyList = newList
@@ -35,6 +40,11 @@ class HistoryAdapter(
 
     // Tạo ViewHolder mới
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryViewHolder {
+        if (!::markwon.isInitialized) {
+            markwon = Markwon.builder(parent.context)
+                .usePlugin(HtmlPlugin.create())
+                .build()
+        }
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_history_entry, parent, false)
         return HistoryViewHolder(view)
@@ -75,8 +85,13 @@ class HistoryAdapter(
         ) {
             val context = itemView.context
 
-            tvCommonName.text = entry.speciesInfo.commonName.ifEmpty { context.getString(R.string.unknown_common_name) }
-            tvScientificName.text = entry.speciesInfo.scientificName.ifEmpty { context.getString(R.string.unknown_scientific_name) }
+            val commonText = entry.speciesInfo.commonName.ifEmpty { context.getString(R.string.unknown_common_name) }
+            val scientificText = entry.speciesInfo.scientificName.ifEmpty { context.getString(R.string.unknown_scientific_name) }
+
+            // Sử dụng Markwon để render text
+            markwon.setMarkdown(tvCommonName, commonText)
+            markwon.setMarkdown(tvScientificName, scientificText)
+
             tvTime.text = timeFormatter.format(Date(entry.timestamp))
 
             Glide.with(context)

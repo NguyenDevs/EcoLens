@@ -2,10 +2,7 @@ package com.nguyendevs.ecolens.fragments
 
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
-import android.text.Html
-import android.text.Spanned
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -24,10 +21,13 @@ import com.nguyendevs.ecolens.managers.SpeakerManager
 import com.nguyendevs.ecolens.model.HistoryEntry
 import com.nguyendevs.ecolens.model.SpeciesInfo
 import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
+import io.noties.markwon.Markwon
+import io.noties.markwon.html.HtmlPlugin
 
 class HistoryDetailFragment : Fragment() {
 
     private lateinit var speakerManager: SpeakerManager
+    private lateinit var markwon: Markwon // Markwon instance
 
     private var historyEntry: HistoryEntry? = null
     private var isSpeaking = false
@@ -39,6 +39,11 @@ class HistoryDetailFragment : Fragment() {
             historyEntry = Gson().fromJson(json, HistoryEntry::class.java)
         }
         speakerManager = SpeakerManager(requireContext())
+
+        // Khởi tạo Markwon với HtmlPlugin để hỗ trợ màu sắc (<font color=...>)
+        markwon = Markwon.builder(requireContext())
+            .usePlugin(HtmlPlugin.create())
+            .build()
     }
 
     // Tạo view cho Fragment
@@ -142,18 +147,20 @@ class HistoryDetailFragment : Fragment() {
         val tagFamily = view.findViewById<TextView>(R.id.tagFamily)
 
         Glide.with(this).load(entry.imagePath).centerCrop().into(ivImage)
-        tvCommon.text = info.commonName
-        tvScientific.text = info.scientificName
+
+        // Sử dụng Markwon cho tên (phòng trường hợp có formatting)
+        markwon.setMarkdown(tvCommon, info.commonName)
+        markwon.setMarkdown(tvScientific, info.scientificName)
 
         if (info.kingdom.isNotEmpty()) {
-            tagKingdom.text = info.kingdom
+            markwon.setMarkdown(tagKingdom, info.kingdom)
             tagKingdom.visibility = View.VISIBLE
         } else {
             tagKingdom.visibility = View.GONE
         }
 
         if (info.family.isNotEmpty()) {
-            tagFamily.text = fromHtml(info.family)
+            markwon.setMarkdown(tagFamily, info.family)
             tagFamily.visibility = View.VISIBLE
         } else {
             tagFamily.visibility = View.GONE
@@ -164,15 +171,11 @@ class HistoryDetailFragment : Fragment() {
     private fun bindTaxonomy(view: View, info: SpeciesInfo) {
         val taxonomyLayout = view.findViewById<View>(R.id.layoutTaxonomy) ?: return
 
-        fun formatTaxonomyText(rawText: String): Spanned {
-            val formattedHtml = "<b>" + rawText.replace("<i>", "</b><i>").replace("</i>", "</i><b>") + "</b>"
-            return fromHtml(formattedHtml)
-        }
-
         fun setTaxonomyText(viewId: Int, value: String) {
             val textView = taxonomyLayout.findViewById<TextView>(viewId)
             if (value.isNotEmpty()) {
-                textView.text = formatTaxonomyText(value)
+                // Sử dụng Markwon để render. ViewModel đã xử lý format (**) và (_)
+                markwon.setMarkdown(textView, value)
             } else {
                 textView.text = "N/A"
             }
@@ -228,7 +231,9 @@ class HistoryDetailFragment : Fragment() {
         }
 
         val contentView = TextView(context).apply {
-            text = fromHtml(content)
+            // Sử dụng Markwon để render nội dung có màu sắc và định dạng
+            markwon.setMarkdown(this, content)
+
             textSize = 15f
             setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
             setLineSpacing(0f, 1.4f)
@@ -237,21 +242,6 @@ class HistoryDetailFragment : Fragment() {
         container.addView(titleView)
         container.addView(divider)
         container.addView(contentView)
-    }
-
-    // Chuyển đổi HTML string sang Spanned
-    private fun fromHtml(html: String): Spanned {
-        val result = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT)
-        } else {
-            @Suppress("DEPRECATION")
-            Html.fromHtml(html)
-        }
-        return if (result.isNotEmpty() && result[result.length - 1] == '\n') {
-            result.subSequence(0, result.length - 1) as Spanned
-        } else {
-            result
-        }
     }
 
     // Chuyển đổi dp sang px
