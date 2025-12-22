@@ -42,7 +42,12 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
         if (newSize > oldSize) {
             notifyItemRangeInserted(oldSize, newSize - oldSize)
         } else if (newSize == oldSize && newSize > 0) {
-            notifyItemChanged(newSize - 1, "STREAMING")
+            val lastMsg = messages[newSize - 1]
+            if (lastMsg.isStreaming) {
+                notifyItemChanged(newSize - 1, "STREAMING")
+            } else {
+                notifyItemChanged(newSize - 1)
+            }
         } else {
             notifyDataSetChanged()
         }
@@ -63,29 +68,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
 
     override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
         val message = messages[position]
-        holder.bind(message, position)
-
-        if (!message.isLoading && !message.isStreaming) {
-            if (message.isUser) {
-                holder.cardView.setOnLongClickListener {
-                    actionListener.onCopy(message.content)
-                    true
-                }
-                holder.cardView.setOnClickListener(null)
-            } else {
-                holder.cardView.setOnLongClickListener(null)
-                val plainText = Html.fromHtml(message.content).toString()
-                holder.btnCopyAi.setOnClickListener { actionListener.onCopy(plainText) }
-                holder.btnShareAi.setOnClickListener { actionListener.onShare(plainText) }
-                holder.btnRenewAi.setOnClickListener { actionListener.onRenew(position, message) }
-            }
-        } else {
-            holder.cardView.setOnLongClickListener(null)
-            holder.cardView.setOnClickListener(null)
-            holder.btnCopyAi.setOnClickListener(null)
-            holder.btnShareAi.setOnClickListener(null)
-            holder.btnRenewAi.setOnClickListener(null)
-        }
+        holder.bind(holder, message, position)
     }
 
     override fun onViewRecycled(holder: ChatViewHolder) {
@@ -126,6 +109,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
             handler.removeCallbacks(loadingAnimateRunnable)
             cursorAnimator?.cancel()
             cursorAnimator = null
+            tvMessage.alpha = 1f
         }
 
         fun bindStreamingText(message: ChatMessage) {
@@ -134,10 +118,9 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
             }
         }
 
-        fun bind(message: ChatMessage, position: Int) {
+        fun bind(holder: ChatViewHolder, message: ChatMessage, position: Int) {
             stopAnimation()
             layoutAiActions.visibility = View.GONE
-            tvMessage.alpha = 1f
 
             when {
                 message.isLoading -> {
@@ -163,6 +146,12 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
                     container.gravity = Gravity.END
                     cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.green_primary))
                     tvMessage.setTextColor(ContextCompat.getColor(itemView.context, R.color.white))
+
+                    holder.cardView.setOnLongClickListener {
+                        actionListener.onCopy(message.content)
+                        true
+                    }
+                    holder.cardView.setOnClickListener(null)
                 }
                 else -> {
                     val formattedText = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -171,6 +160,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
                         @Suppress("DEPRECATION") Html.fromHtml(message.content)
                     }
                     tvMessage.text = formattedText
+
                     container.gravity = Gravity.START
                     cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.white))
                     tvMessage.setTextColor(ContextCompat.getColor(itemView.context, R.color.text_primary))
@@ -186,6 +176,11 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
 
                         btnCopyAi.visibility = View.VISIBLE
                         btnShareAi.visibility = View.VISIBLE
+
+                        val plainText = message.content
+                        btnCopyAi.setOnClickListener { actionListener.onCopy(plainText) }
+                        btnShareAi.setOnClickListener { actionListener.onShare(plainText) }
+                        btnRenewAi.setOnClickListener { actionListener.onRenew(position, message) }
                     }
                 }
             }
@@ -194,11 +189,11 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
         private fun startCursorAnimation() {
             if (cursorAnimator == null) {
                 cursorAnimator = ValueAnimator.ofFloat(1f, 0.4f).apply {
-                    duration = 500
+                    duration = 600
                     repeatCount = ValueAnimator.INFINITE
                     repeatMode = ValueAnimator.REVERSE
-                    addUpdateListener {
-                        // Empty listener to keep animator running if needed logic later
+                    addUpdateListener { animator ->
+                        tvMessage.alpha = animator.animatedValue as Float
                     }
                     start()
                 }

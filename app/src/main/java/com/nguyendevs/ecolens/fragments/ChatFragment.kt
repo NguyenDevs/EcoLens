@@ -180,7 +180,6 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.chatMessages.collectLatest { messages ->
                 val isNewMessageAdded = messages.size > adapter.itemCount
-
                 val layoutManager = rvChat.layoutManager as LinearLayoutManager
                 val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
                 val isAtBottom = lastVisibleItemPosition == adapter.itemCount - 1
