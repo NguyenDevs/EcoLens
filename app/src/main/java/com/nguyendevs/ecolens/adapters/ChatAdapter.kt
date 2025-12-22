@@ -21,12 +21,12 @@ import com.google.android.material.card.MaterialCardView
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.model.ChatMessage
 
-class ChatAdapter(private val listener: OnChatActionListener) : RecyclerView.Adapter<ChatAdapter.ChatViewHolder>() {
+class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerView.Adapter<ChatAdapter.ChatViewHolder>() {
 
     interface OnChatActionListener {
-        fun onCopyMessage(text: String)
-        fun onShareMessage(text: String)
-        fun onRenewMessage(position: Int, message: ChatMessage)
+        fun onCopy(text: String)
+        fun onShare(text: String)
+        fun onRenew(position: Int, message: ChatMessage)
     }
 
     private val messages = mutableListOf<ChatMessage>()
@@ -48,18 +48,21 @@ class ChatAdapter(private val listener: OnChatActionListener) : RecyclerView.Ada
 
         if (!message.isLoading) {
             if (message.isUser) {
-                // Nhấn giữ tin nhắn của mình để sao chép
                 holder.cardView.setOnLongClickListener {
-                    listener.onCopyMessage(message.content)
+                    actionListener.onCopy(message.content)
                     true
                 }
             } else {
-                // Click các biểu tượng chức năng của AI
-                holder.btnCopy.setOnClickListener { listener.onCopyMessage(message.content) }
-                holder.btnShare.setOnClickListener { listener.onShareMessage(message.content) }
-                holder.btnRenew.setOnClickListener { listener.onRenewMessage(position, message) }
+                holder.btnCopyAi.setOnClickListener { actionListener.onCopy(message.content) }
+                holder.btnShareAi.setOnClickListener { actionListener.onShare(message.content) }
+                holder.btnRenewAi.setOnClickListener { actionListener.onRenew(position, message) }
             }
         }
+    }
+
+    override fun onViewRecycled(holder: ChatViewHolder) {
+        super.onViewRecycled(holder)
+        holder.stopAnimation()
     }
 
     override fun getItemCount(): Int = messages.size
@@ -69,9 +72,9 @@ class ChatAdapter(private val listener: OnChatActionListener) : RecyclerView.Ada
         val cardView: MaterialCardView = itemView.findViewById(R.id.cardMessage)
         private val tvMessage: TextView = itemView.findViewById(R.id.tvMessage)
         private val layoutAiActions: LinearLayout = itemView.findViewById(R.id.layoutAiActions)
-        val btnCopy: ImageView = itemView.findViewById(R.id.btnCopyAi)
-        val btnShare: ImageView = itemView.findViewById(R.id.btnShareAi)
-        val btnRenew: ImageView = itemView.findViewById(R.id.btnRenewAi)
+        val btnCopyAi: ImageView = itemView.findViewById(R.id.btnCopyAi)
+        val btnShareAi: ImageView = itemView.findViewById(R.id.btnShareAi)
+        val btnRenewAi: ImageView = itemView.findViewById(R.id.btnRenewAi)
 
         private val handler = Handler(Looper.getMainLooper())
         private var loopCount = 0
@@ -98,25 +101,26 @@ class ChatAdapter(private val listener: OnChatActionListener) : RecyclerView.Ada
 
             if (message.isLoading) {
                 container.gravity = Gravity.START
-                cardView.setCardBackgroundColor(Color.WHITE)
+                cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.white))
                 tvMessage.setTextColor(ContextCompat.getColor(itemView.context, R.color.text_primary))
                 tvMessage.text = "..."
+                loopCount = 0
                 animateRunnable.run()
             } else {
                 if (message.isUser) {
                     tvMessage.text = message.content
                     container.gravity = Gravity.END
                     cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.green_primary))
-                    tvMessage.setTextColor(Color.WHITE)
+                    tvMessage.setTextColor(ContextCompat.getColor(itemView.context, R.color.white))
                 } else {
                     val formattedText = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         Html.fromHtml(message.content, Html.FROM_HTML_MODE_COMPACT)
                     } else {
-                        Html.fromHtml(message.content)
+                        @Suppress("DEPRECATION") Html.fromHtml(message.content)
                     }
                     tvMessage.text = formattedText
                     container.gravity = Gravity.START
-                    cardView.setCardBackgroundColor(Color.WHITE)
+                    cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.white))
                     tvMessage.setTextColor(ContextCompat.getColor(itemView.context, R.color.text_primary))
                     layoutAiActions.visibility = View.VISIBLE
                 }

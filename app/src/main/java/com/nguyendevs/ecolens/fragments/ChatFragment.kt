@@ -1,18 +1,10 @@
 package com.nguyendevs.ecolens.fragments
 
-import android.content.Context
-import android.os.Build
-import android.os.Bundle
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
+import android.content.*
+import android.os.*
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.PopupMenu
+import android.view.*
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -21,15 +13,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.adapters.ChatAdapter
+import com.nguyendevs.ecolens.model.ChatMessage
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import android.view.inputmethod.InputMethodManager
 
-class ChatFragment : Fragment() {
+class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
 
     private val viewModel: EcoLensViewModel by activityViewModels()
-    private val adapter = ChatAdapter()
+    private lateinit var adapter: ChatAdapter
 
     private lateinit var rvChat: RecyclerView
     private lateinit var etInput: EditText
@@ -41,12 +33,9 @@ class ChatFragment : Fragment() {
 
     companion object {
         private const val ARG_SESSION_ID = "session_id"
-
         fun newInstance(sessionId: Long? = null): ChatFragment {
             return ChatFragment().apply {
-                arguments = Bundle().apply {
-                    sessionId?.let { putLong(ARG_SESSION_ID, it) }
-                }
+                arguments = Bundle().apply { sessionId?.let { putLong(ARG_SESSION_ID, it) } }
             }
         }
     }
@@ -56,39 +45,25 @@ class ChatFragment : Fragment() {
         currentSessionId = arguments?.getLong(ARG_SESSION_ID, -1L)?.takeIf { it != -1L }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_chat, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        adapter = ChatAdapter(this)
         initViews(view)
         setupRecyclerView()
         setupListeners()
         observeViewModel()
 
-        // FIX: Kiểm tra xem có sessionId không
         if (currentSessionId != null) {
-            // Nếu có sessionId -> load chat cũ (KHÔNG tạo mới)
             viewModel.loadChatSession(currentSessionId!!)
         } else {
-            // Nếu không có sessionId -> tạo chat mới
-            viewModel.initNewChatSession(
-                getString(R.string.chat_welcome),
-                getString(R.string.new_chat)
-            )
+            viewModel.initNewChatSession(getString(R.string.chat_welcome), getString(R.string.new_chat))
         }
 
-        etInput.post {
-            etInput.requestFocus()
-            // val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            // imm.showSoftInput(etInput, InputMethodManager.SHOW_IMPLICIT)
-        }
+        etInput.post { etInput.requestFocus() }
     }
 
     private fun initViews(view: View) {
@@ -100,9 +75,7 @@ class ChatFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        rvChat.layoutManager = LinearLayoutManager(requireContext()).apply {
-            stackFromEnd = true
-        }
+        rvChat.layoutManager = LinearLayoutManager(requireContext()).apply { stackFromEnd = true }
         rvChat.adapter = adapter
     }
 
@@ -115,67 +88,69 @@ class ChatFragment : Fragment() {
                 etInput.text.clear()
             }
         }
+        btnBack.setOnClickListener { parentFragmentManager.popBackStack() }
+        btnMenu.setOnClickListener { showMenuPopup(it) }
+    }
 
-        btnBack.setOnClickListener {
-            parentFragmentManager.popBackStack()
+    // --- Triển khai OnChatActionListener ---
+    override fun onCopy(text: String) {
+        performHapticFeedback()
+        val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newPlainText("EcoLens", text)
+        clipboard.setPrimaryClip(clip)
+        Toast.makeText(requireContext(), "Đã sao chép tin nhắn", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onShare(text: String) {
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, text)
         }
+        startActivity(Intent.createChooser(intent, "Chia sẻ qua"))
+    }
 
-        // Menu 3 chấm
-        btnMenu.setOnClickListener {
-            showMenuPopup(it)
+    override fun onRenew(position: Int, message: ChatMessage) {
+        val messages = viewModel.chatMessages.value
+        if (position > 0) {
+            val userMsg = messages[position - 1]
+            if (userMsg.isUser) {
+                performHapticFeedback()
+                viewModel.renewAiResponse(message, userMsg.content)
+            }
         }
     }
 
+    // --- Giữ nguyên các hàm phụ trợ của bạn ---
     private fun showMenuPopup(anchor: View) {
         val popup = PopupMenu(requireContext(), anchor)
         popup.menuInflater.inflate(R.menu.menu_chat, popup.menu)
-
         try {
             val fieldMPopup = PopupMenu::class.java.getDeclaredField("mPopup")
             fieldMPopup.isAccessible = true
             val mPopup = fieldMPopup.get(popup)
-            mPopup.javaClass
-                .getDeclaredMethod("setForceShowIcon", Boolean::class.javaPrimitiveType)
-                .invoke(mPopup, true)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        
+            mPopup.javaClass.getDeclaredMethod("setForceShowIcon", Boolean::class.javaPrimitiveType).invoke(mPopup, true)
+        } catch (e: Exception) { e.printStackTrace() }
+
         popup.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.action_delete_chat -> {
-                    showDeleteConfirmDialog()
-                    true
-                }
-                else -> false
-            }
+            if (item.itemId == R.id.action_delete_chat) { showDeleteConfirmDialog(); true } else false
         }
         popup.show()
     }
 
     private fun showDeleteConfirmDialog() {
         AlertDialog.Builder(requireContext())
-            .setTitle(R.string.dialog_delete_chat_title)
-            .setMessage(R.string.dialog_delete_chat_message)
+            .setTitle(R.string.dialog_delete_chat_title).setMessage(R.string.dialog_delete_chat_message)
             .setPositiveButton(R.string.action_delete) { _, _ ->
-                currentSessionId?.let { sessionId ->
-                    viewModel.deleteChatSession(sessionId)
-                    parentFragmentManager.popBackStack()
-                }
+                currentSessionId?.let { viewModel.deleteChatSession(it); parentFragmentManager.popBackStack() }
             }
-            .setNegativeButton(R.string.action_cancel, null)
-            .show()
+            .setNegativeButton(R.string.action_cancel, null).show()
     }
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.chatMessages.collectLatest { messages ->
                 adapter.submitList(messages)
-                if (messages.isNotEmpty()) {
-                    rvChat.post {
-                        rvChat.smoothScrollToPosition(messages.size - 1)
-                    }
-                }
+                if (messages.isNotEmpty()) rvChat.post { rvChat.smoothScrollToPosition(messages.size - 1) }
             }
         }
     }
@@ -185,20 +160,11 @@ class ChatFragment : Fragment() {
             val context = requireContext()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-                val vibrator = vibratorManager.defaultVibrator
-                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+                vibratorManager.defaultVibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
             } else {
-                @Suppress("DEPRECATION")
-                val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
-                } else {
-                    @Suppress("DEPRECATION")
-                    vibrator.vibrate(50)
-                }
+                @Suppress("DEPRECATION") val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
             }
-        } catch (e: Exception) {
-            Log.e("ChatFragment", "Vibration failed: ${e.message}")
-        }
+        } catch (e: Exception) { Log.e("ChatFragment", "Vibration failed: ${e.message}") }
     }
 }

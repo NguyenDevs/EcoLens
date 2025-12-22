@@ -51,4 +51,7 @@ interface ChatDao {
     //Đếm số tin nhắn CỦA NGƯỜI DÙNG trong một phiên (dùng để check xem user đã chat chưa)
     @Query("SELECT COUNT(*) FROM chat_messages WHERE sessionId = :sessionId AND isUser = 1")
     suspend fun getUserMessageCount(sessionId: Long): Int
+
+    @Query("DELETE FROM chat_messages WHERE id = :msgId")
+    suspend fun deleteMessageById(msgId: Long)
 }

@@ -518,6 +518,23 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun renewAiResponse(aiMessage: ChatMessage, originalUserQuery: String) {
+        val sessionId = currentSessionId ?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // Lưu ý: Cần thêm hàm deleteMessageById vào ChatDao.kt
+                chatDao.deleteMessageById(aiMessage.id)
+
+                withContext(Dispatchers.Main) {
+                    // Tận dụng hàm sendChatMessage có sẵn của bạn để trả lời lại
+                    sendChatMessage(originalUserQuery, getApplication<com.nguyendevs.ecolens.EcoLensApplication>().getString(R.string.new_chat))
+                }
+            } catch (e: Exception) {
+                Log.e("EcoLensViewModel", "Renew failed: ${e.message}")
+            }
+        }
+    }
+
     fun deleteChatSession(sessionId: Long) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
