@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -485,68 +486,41 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             }
             chatDao.updateSession(currentSession!!.copy(title = newTitle, lastMessage = userMessage, timestamp = System.currentTimeMillis()))
 
-            val loadingMsg = ChatMessage(sessionId = -1, content = "...", isUser = false, isLoading = true)
-            _chatMessages.value = _chatMessages.value + loadingMsg
-
-            try {
-                val currentHistory = _chatMessages.value.filter { !it.isLoading && it.sessionId == sessionId }.toMutableList()
-                currentHistory.add(userChatMsg)
-
-                val geminiContents = currentHistory.map { msg ->
-                    val role = if (msg.isUser) "user" else "model"
-                    GeminiContent(role = role, parts = listOf(GeminiPart(msg.content)))
-                }
-
-                val cantreply = getApplication<Application>().getString(R.string.cant_reply)
-                val request = GeminiRequest(contents = geminiContents)
-                val response = apiService.askGemini(request)
-                val reply = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
-                    ?: cantreply
-
-                val formattedReply = parseToHtml(reply).replace("\n", "<br>")
-
-                val botChatMsg = ChatMessage(sessionId = sessionId, content = formattedReply, isUser = false, timestamp = System.currentTimeMillis())
-                chatDao.insertMessage(botChatMsg)
-
-                chatDao.updateSession(chatDao.getSessionById(sessionId)!!.copy(lastMessage = reply, timestamp = System.currentTimeMillis()))
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-                val errorMsg = ChatMessage(sessionId = sessionId, content = "Lỗi kết nối: ${e.message}", isUser = false)
-                chatDao.insertMessage(errorMsg)
-            }
+            executeGeminiFlow(sessionId)
         }
     }
 
-    fun renewAiResponse(aiMessage: ChatMessage, originalUserQuery: String) {
+    fun renewAiResponse(aiMessage: ChatMessage) {
         val sessionId = currentSessionId ?: return
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 chatDao.deleteMessageById(aiMessage.id)
-                executeGeminiFlow(sessionId, originalUserQuery)
+                executeGeminiFlow(sessionId)
             } catch (e: Exception) {
                 Log.e("EcoLensViewModel", "Renew failed: ${e.message}")
             }
         }
     }
 
-    private suspend fun executeGeminiFlow(sessionId: Long, userMessage: String) {
+    private suspend fun executeGeminiFlow(sessionId: Long) {
         val loadingMsg = ChatMessage(sessionId = -1, content = "...", isUser = false, isLoading = true)
-        _chatMessages.value = _chatMessages.value + loadingMsg
+
+        withContext(Dispatchers.Main) {
+            _chatMessages.value = _chatMessages.value + loadingMsg
+        }
 
         try {
-            val currentHistory = _chatMessages.value.filter { !it.isLoading && it.sessionId == sessionId }.toMutableList()
+            val currentHistory = chatDao.getMessagesBySession(sessionId).first()
 
             val geminiContents = currentHistory.map { msg ->
                 val role = if (msg.isUser) "user" else "model"
-                GeminiPart(msg.content)
-                com.nguyendevs.ecolens.api.GeminiContent(role = role, parts = listOf(com.nguyendevs.ecolens.api.GeminiPart(msg.content)))
+                GeminiContent(role = role, parts = listOf(GeminiPart(msg.content)))
             }
 
-            val request = com.nguyendevs.ecolens.api.GeminiRequest(contents = geminiContents)
+            val request = GeminiRequest(contents = geminiContents)
             val response = apiService.askGemini(request)
             val reply = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
-                ?: getApplication<com.nguyendevs.ecolens.EcoLensApplication>().getString(R.string.cant_reply)
+                ?: getApplication<Application>().getString(R.string.cant_reply)
 
             val formattedReply = parseToHtml(reply).replace("\n", "<br>")
             val botChatMsg = ChatMessage(sessionId = sessionId, content = formattedReply, isUser = false, timestamp = System.currentTimeMillis())
@@ -562,6 +536,10 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             e.printStackTrace()
             val errorMsg = ChatMessage(sessionId = sessionId, content = "Lỗi kết nối: ${e.message}", isUser = false)
             chatDao.insertMessage(errorMsg)
+        } finally {
+            withContext(Dispatchers.Main) {
+                _chatMessages.value = _chatMessages.value.filter { !it.isLoading }
+            }
         }
     }
 

@@ -129,14 +129,8 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
     }
 
     override fun onRenew(position: Int, message: ChatMessage) {
-        val chatList = viewModel.chatMessages.value
-        if (position > 0) {
-            val userMsg = chatList[position - 1]
-            if (userMsg.isUser) {
-                performHapticFeedback()
-                viewModel.renewAiResponse(message, userMsg.content)
-            }
-        }
+        performHapticFeedback()
+        viewModel.renewAiResponse(message)
     }
 
     private fun showMenuPopup(anchor: View) {
