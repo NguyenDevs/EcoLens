@@ -4,15 +4,15 @@
               android:id="@+id/chatContainer"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:orientation="horizontal"
+              android:orientation="vertical"
               android:paddingHorizontal="16dp"
-              android:paddingVertical="4dp">
+              android:paddingVertical="8dp">
 
     <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardMessage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:maxWidth="230dp"
+            android:maxWidth="260dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="0dp"
             app:strokeWidth="1dp"
@@ -24,8 +24,47 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="15sp"
+                android:textColor="@color/text_primary"
                 android:text="Hello" />
 
     </com.google.android.material.card.MaterialCardView>
+
+    <LinearLayout
+            android:id="@+id/layoutAiActions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="4dp"
+            android:visibility="gone">
+
+        <ImageView
+                android:id="@+id/btnCopyAi"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:padding="6dp"
+                android:src="@drawable/ic_copy"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="#808080" />
+
+        <ImageView
+                android:id="@+id/btnShareAi"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:padding="6dp"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/ic_share"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="#808080" />
+
+        <ImageView
+                android:id="@+id/btnRenewAi"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:padding="6dp"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/ic_rotate"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="#808080" />
+    </LinearLayout>
 
 </LinearLayout>
