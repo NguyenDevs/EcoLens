@@ -68,7 +68,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
 
     override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
         val message = messages[position]
-        holder.bind(holder, message, position)
+        holder.bind(message, position)
     }
 
     override fun onViewRecycled(holder: ChatViewHolder) {
@@ -118,9 +118,17 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
             }
         }
 
-        fun bind(holder: ChatViewHolder, message: ChatMessage, position: Int) {
+        fun bind(message: ChatMessage, position: Int) {
             stopAnimation()
             layoutAiActions.visibility = View.GONE
+            tvMessage.alpha = 1f
+
+            // Reset listener
+            cardView.setOnClickListener(null)
+            cardView.setOnLongClickListener(null)
+            btnCopyAi.setOnClickListener(null)
+            btnShareAi.setOnClickListener(null)
+            btnRenewAi.setOnClickListener(null)
 
             when {
                 message.isLoading -> {
@@ -147,13 +155,13 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
                     cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.green_primary))
                     tvMessage.setTextColor(ContextCompat.getColor(itemView.context, R.color.white))
 
-                    holder.cardView.setOnLongClickListener {
+                    cardView.setOnLongClickListener {
                         actionListener.onCopy(message.content)
                         true
                     }
-                    holder.cardView.setOnClickListener(null)
                 }
                 else -> {
+                    // Hiển thị nội dung
                     val formattedText = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         Html.fromHtml(message.content, Html.FROM_HTML_MODE_COMPACT)
                     } else {
@@ -177,9 +185,26 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
                         btnCopyAi.visibility = View.VISIBLE
                         btnShareAi.visibility = View.VISIBLE
 
-                        val plainText = message.content
-                        btnCopyAi.setOnClickListener { actionListener.onCopy(plainText) }
-                        btnShareAi.setOnClickListener { actionListener.onShare(plainText) }
+                        // --- LOGIC COPY/SHARE ĐÃ ĐƯỢC THÊM LẠI Ở ĐÂY ---
+                        // Chỉ convert HTML -> String khi người dùng thực sự bấm nút (tránh lag UI)
+                        btnCopyAi.setOnClickListener {
+                            val plainText = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                Html.fromHtml(message.content, Html.FROM_HTML_MODE_COMPACT).toString()
+                            } else {
+                                @Suppress("DEPRECATION") Html.fromHtml(message.content).toString()
+                            }
+                            actionListener.onCopy(plainText)
+                        }
+
+                        btnShareAi.setOnClickListener {
+                            val plainText = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                Html.fromHtml(message.content, Html.FROM_HTML_MODE_COMPACT).toString()
+                            } else {
+                                @Suppress("DEPRECATION") Html.fromHtml(message.content).toString()
+                            }
+                            actionListener.onShare(plainText)
+                        }
+
                         btnRenewAi.setOnClickListener { actionListener.onRenew(position, message) }
                     }
                 }
