@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.api.*
-import com.nguyendevs.ecolens.database.ChatDao
 import com.nguyendevs.ecolens.database.HistoryDatabase
 import com.nguyendevs.ecolens.model.*
 import com.nguyendevs.ecolens.network.RetrofitClient
@@ -46,21 +45,21 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     private val streamingMessageId = AtomicLong(-1L)
 
     private data class GeminiRawResponse(
-        val commonName: String = "",
-        val scientificName: String = "",
-        val kingdom: String = "",
-        val phylum: String = "",
-        val className: String = "",
-        val order: String = "",
-        val family: String = "",
-        val genus: String = "",
-        val species: String = "",
-        val rank: String = "",
-        val description: String = "",
+        val commonName: String? = null,
+        val scientificName: String? = null,
+        val kingdom: String? = null,
+        val phylum: String? = null,
+        val className: String? = null,
+        val order: String? = null,
+        val family: String? = null,
+        val genus: String? = null,
+        val species: String? = null,
+        val rank: String? = null,
+        val description: String? = null,
         val characteristics: Any? = null,
-        val distribution: String = "",
-        val habitat: String = "",
-        val conservationStatus: String = "",
+        val distribution: String? = null,
+        val habitat: String? = null,
+        val conservationStatus: String? = null,
         val confidence: Double = 0.0
     )
 
@@ -356,7 +355,15 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             val jsonString = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text ?: ""
             val cleanedJson = cleanJsonString(jsonString)
 
-            val rawInfo = Gson().fromJson(cleanedJson, GeminiRawResponse::class.java)
+            val rawInfo = try {
+                Gson().fromJson(cleanedJson, GeminiRawResponse::class.java)
+            } catch (e: Exception) {
+                null
+            }
+
+            if (rawInfo == null) {
+                throw Exception("Failed to parse Gemini response")
+            }
 
             val characteristicsText = when (val chars = rawInfo.characteristics) {
                 is String -> chars
@@ -365,23 +372,23 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             }
 
             SpeciesInfo(
-                kingdom = formatTaxonomyRank(removeRankPrefix(rawInfo.kingdom, if (isVietnamese) "Giới" else "Kingdom"), isVietnamese),
-                phylum = formatTaxonomyRank(removeRankPrefix(rawInfo.phylum, if (isVietnamese) "Ngành" else "Phylum"), isVietnamese),
-                className = formatTaxonomyRank(removeRankPrefix(rawInfo.className, if (isVietnamese) "Lớp" else "Class"), isVietnamese),
-                order = formatTaxonomyRank(removeRankPrefix(rawInfo.order, if (isVietnamese) "Bộ" else "Order"), isVietnamese),
-                family = formatTaxonomyRank(removeRankPrefix(rawInfo.family, if (isVietnamese) "Họ" else "Family"), isVietnamese),
-                genus = formatTaxonomyRank(removeRankPrefix(rawInfo.genus, if (isVietnamese) "Chi" else "Genus"), isVietnamese),
-                species = formatTaxonomyRank(removeRankPrefix(rawInfo.species, if (isVietnamese) "Loài" else "Species"), isVietnamese),
+                kingdom = formatTaxonomyRank(removeRankPrefix(rawInfo.kingdom ?: "", if (isVietnamese) "Giới" else "Kingdom"), isVietnamese),
+                phylum = formatTaxonomyRank(removeRankPrefix(rawInfo.phylum ?: "", if (isVietnamese) "Ngành" else "Phylum"), isVietnamese),
+                className = formatTaxonomyRank(removeRankPrefix(rawInfo.className ?: "", if (isVietnamese) "Lớp" else "Class"), isVietnamese),
+                order = formatTaxonomyRank(removeRankPrefix(rawInfo.order ?: "", if (isVietnamese) "Bộ" else "Order"), isVietnamese),
+                family = formatTaxonomyRank(removeRankPrefix(rawInfo.family ?: "", if (isVietnamese) "Họ" else "Family"), isVietnamese),
+                genus = formatTaxonomyRank(removeRankPrefix(rawInfo.genus ?: "", if (isVietnamese) "Chi" else "Genus"), isVietnamese),
+                species = formatTaxonomyRank(removeRankPrefix(rawInfo.species ?: "", if (isVietnamese) "Loài" else "Species"), isVietnamese),
 
-                commonName = rawInfo.commonName,
+                commonName = rawInfo.commonName ?: "",
                 scientificName = scientificName,
-                rank = rawInfo.rank,
+                rank = rawInfo.rank ?: "",
 
-                description = processMarkdown(rawInfo.description, isVietnamese = isVietnamese),
+                description = processMarkdown(rawInfo.description ?: "", isVietnamese = isVietnamese),
                 characteristics = processMarkdown(characteristicsText, isVietnamese = isVietnamese),
-                distribution = processMarkdown(rawInfo.distribution, isVietnamese = isVietnamese),
-                habitat = processMarkdown(rawInfo.habitat, isVietnamese = isVietnamese),
-                conservationStatus = processMarkdown(rawInfo.conservationStatus, isConservationStatus = true, isVietnamese = isVietnamese),
+                distribution = processMarkdown(rawInfo.distribution ?: "", isVietnamese = isVietnamese),
+                habitat = processMarkdown(rawInfo.habitat ?: "", isVietnamese = isVietnamese),
+                conservationStatus = processMarkdown(rawInfo.conservationStatus ?: "", isConservationStatus = true, isVietnamese = isVietnamese),
                 confidence = confidence
             )
 
@@ -494,7 +501,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     private fun buildGeminiPrompt(scientificName: String, isVietnamese: Boolean): String {
         val commonNameDesc = if (isVietnamese) "Tên thường gọi Tiếng Việt chuẩn nhất" else "Common name in English"
 
-        // Thay đổi: Yêu cầu Gemini dùng thẻ <font color="..."> thay vì <span style="...">
         return if (isVietnamese) {
             """
         Bạn là nhà sinh vật học. Cung cấp thông tin chi tiết về loài "$scientificName" bằng Tiếng Việt.
@@ -523,7 +529,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
           "conservationStatus": "Chỉ ghi một trong các trạng thái: Cực kỳ nguy cấp, Nguy cấp, Sách Đỏ Việt Nam, Sắp nguy cấp, Ít lo ngại, Chưa đánh giá. Thêm thông tin bổ sung từ IUCN nếu có."
         }
         
-        CHỈ TRẢ VỀ JSON, KHÔNG THÊM TEXT KHÁC.
+        CHỈ TRẢ VỀ JSON (KHÔNG có ```json), KHÔNG THÊM TEXT KHÁC.
         """.trimIndent()
         } else {
             """
@@ -553,7 +559,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
           "conservationStatus": "Only write one status: Critically Endangered, Endangered, Vulnerable (Vietnam Red Data Book), Near Threatened, Least Concern, Not Evaluated. Add IUCN info if available."
         }
         
-        RETURN ONLY JSON, NO ADDITIONAL TEXT.
+        RETURN ONLY JSON (NO ```json), NO ADDITIONAL TEXT.
         """.trimIndent()
         }
     }
@@ -630,14 +636,16 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     }
 
     private fun cleanJsonString(json: String): String {
-        return json.replace("```json", "", ignoreCase = true)
-            .replace("```", "", ignoreCase = true)
-            .trim()
-            .let { text ->
-                val start = text.indexOf('{')
-                val end = text.lastIndexOf('}')
-                if (start >= 0 && end > start) text.substring(start, end + 1) else text
-            }
+        val firstBrace = json.indexOf('{')
+        val lastBrace = json.lastIndexOf('}')
+
+        return if (firstBrace != -1 && lastBrace > firstBrace) {
+            json.substring(firstBrace, lastBrace + 1)
+        } else {
+            json.replace("```json", "", ignoreCase = true)
+                .replace("```", "", ignoreCase = true)
+                .trim()
+        }
     }
 
     private fun removeRankPrefix(text: String, prefix: String): String {
