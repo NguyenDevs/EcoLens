@@ -7,29 +7,20 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.nguyendevs.ecolens.R
-import com.nguyendevs.ecolens.api.GeminiContent
-import com.nguyendevs.ecolens.api.GeminiPart
-import com.nguyendevs.ecolens.api.GeminiRequest
+import com.nguyendevs.ecolens.api.*
 import com.nguyendevs.ecolens.database.HistoryDatabase
 import com.nguyendevs.ecolens.database.ChatDao
 import com.nguyendevs.ecolens.model.*
 import com.nguyendevs.ecolens.network.RetrofitClient
 import com.nguyendevs.ecolens.utils.ImageUtils
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 
 class EcoLensViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -37,6 +28,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     private val historyDao = HistoryDatabase.getDatabase(application).historyDao()
     private val chatDao = HistoryDatabase.getDatabase(application).chatDao()
     private var messageCollectionJob: Job? = null
+    private val gson = Gson()
 
     private val _uiState = MutableStateFlow(EcoLensUiState())
     private var currentSessionId: Long? = null
@@ -47,6 +39,11 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     val chatMessages: StateFlow<List<ChatMessage>> = _chatMessages.asStateFlow()
 
     private val isGenerating = AtomicBoolean(false)
+    private val streamingMessageId = AtomicLong(-1L)
+
+    // StateFlow để theo dõi trạng thái streaming
+    private val _isStreamingActive = MutableStateFlow(false)
+    val isStreamingActive: StateFlow<Boolean> = _isStreamingActive.asStateFlow()
 
     private data class GeminiRawResponse(
         val commonName: String = "",
@@ -67,6 +64,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         val confidence: Double = 0.0
     )
 
+    // Các hàm History giữ nguyên...
     fun getHistoryBySortOption(
         sortOption: HistorySortOption,
         startDate: Long? = null,
@@ -101,6 +99,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    // identifySpecies giữ nguyên...
     fun identifySpecies(imageUri: Uri, languageCode: String) {
         viewModelScope.launch {
             _uiState.value = EcoLensUiState(isLoading = true, speciesInfo = null, error = null, loadingStage = LoadingStage.NONE)
@@ -491,7 +490,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             }
             chatDao.updateSession(currentSession!!.copy(title = newTitle, lastMessage = userMessage, timestamp = System.currentTimeMillis()))
 
-            executeGeminiFlow(sessionId)
+            executeGeminiStreamingFlow(sessionId)
         }
     }
 
@@ -507,7 +506,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 chatDao.deleteMessageById(aiMessage.id)
-                executeGeminiFlow(sessionId)
+                executeGeminiStreamingFlow(sessionId)
             } catch (e: Exception) {
                 isGenerating.set(false)
                 Log.e("EcoLensViewModel", "Renew failed: ${e.message}")
@@ -515,15 +514,24 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    private suspend fun executeGeminiFlow(sessionId: Long) {
-        val loadingMsg = ChatMessage(sessionId = -1, content = "...", isUser = false, isLoading = true)
+    private suspend fun executeGeminiStreamingFlow(sessionId: Long) {
+        _isStreamingActive.value = true
 
-        withContext(Dispatchers.Main) {
-            _chatMessages.value = _chatMessages.value + loadingMsg
-        }
+        // Tạo message tạm với ID để có thể update
+        val tempMessage = ChatMessage(
+            sessionId = sessionId,
+            content = "",
+            isUser = false,
+            isStreaming = true,
+            timestamp = System.currentTimeMillis()
+        )
+
+        val messageId = chatDao.insertMessage(tempMessage)
+        streamingMessageId.set(messageId)
 
         try {
             val currentHistory = chatDao.getMessagesBySession(sessionId).first()
+                .filter { !it.isStreaming } // Loại bỏ message streaming cũ nếu có
 
             val geminiContents = currentHistory.map { msg ->
                 val role = if (msg.isUser) "user" else "model"
@@ -531,29 +539,93 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             }
 
             val request = GeminiRequest(contents = geminiContents)
-            val response = apiService.askGemini(request)
-            val reply = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
-                ?: getApplication<Application>().getString(R.string.cant_reply)
+            val response = apiService.streamGemini(request)
 
-            val formattedReply = parseToHtml(reply).replace("\n", "<br>")
-            val botChatMsg = ChatMessage(sessionId = sessionId, content = formattedReply, isUser = false, timestamp = System.currentTimeMillis())
+            if (response.isSuccessful) {
+                val responseBody = response.body()
+                if (responseBody != null) {
+                    var accumulatedText = ""
 
-            chatDao.insertMessage(botChatMsg)
+                    // Đọc stream từng dòng
+                    responseBody.byteStream().bufferedReader().use { reader ->
+                        var line: String?
+                        while (reader.readLine().also { line = it } != null) {
+                            val currentLine = line ?: continue
 
-            val updatedSession = chatDao.getSessionById(sessionId)
-            updatedSession?.let {
-                chatDao.updateSession(it.copy(lastMessage = reply, timestamp = System.currentTimeMillis()))
+                            // Parse SSE format: "data: {...}"
+                            if (currentLine.startsWith("data: ")) {
+                                val jsonData = currentLine.substring(6).trim()
+
+                                // Skip nếu là "[DONE]" marker
+                                if (jsonData == "[DONE]") {
+                                    break
+                                }
+
+                                try {
+                                    val streamResponse = gson.fromJson(jsonData, GeminiResponse::class.java)
+                                    val chunk = streamResponse.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
+
+                                    if (!chunk.isNullOrEmpty()) {
+                                        accumulatedText += chunk
+
+                                        // Format HTML cho từng chunk
+                                        val formattedText = parseToHtml(accumulatedText).replace("\n", "<br>")
+                                        chatDao.updateMessageContent(messageId, formattedText)
+
+                                        // Delay nhỏ để animation mượt
+                                        delay(50)
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e("Streaming", "Parse error: ${e.message}")
+                                    // Continue với chunk tiếp theo
+                                }
+                            }
+                        }
+                    }
+
+                    // Khi hoàn thành, cập nhật isStreaming = false
+                    val finalFormattedText = parseToHtml(accumulatedText).replace("\n", "<br>")
+                    chatDao.updateMessage(
+                        ChatMessage(
+                            id = messageId,
+                            sessionId = sessionId,
+                            content = finalFormattedText,
+                            isUser = false,
+                            isStreaming = false,
+                            timestamp = System.currentTimeMillis()
+                        )
+                    )
+
+                    // Update session
+                    val updatedSession = chatDao.getSessionById(sessionId)
+                    updatedSession?.let {
+                        chatDao.updateSession(it.copy(
+                            lastMessage = accumulatedText.take(100),
+                            timestamp = System.currentTimeMillis()
+                        ))
+                    }
+                }
+            } else {
+                throw Exception("API error: ${response.code()}")
             }
 
         } catch (e: Exception) {
             e.printStackTrace()
-            val errorMsg = ChatMessage(sessionId = sessionId, content = "Lỗi kết nối: ${e.message}", isUser = false)
-            chatDao.insertMessage(errorMsg)
+            val errorMsg = "Lỗi kết nối: ${e.message}"
+            chatDao.updateMessage(
+                ChatMessage(
+                    id = messageId,
+                    sessionId = sessionId,
+                    content = errorMsg,
+                    isUser = false,
+                    isStreaming = false,
+                    timestamp = System.currentTimeMillis()
+                )
+            )
         } finally {
-            withContext(Dispatchers.Main) {
-                _chatMessages.value = _chatMessages.value.filter { !it.isLoading }
-            }
+            _isStreamingActive.value = false
             isGenerating.set(false)
+            streamingMessageId.set(-1L)
         }
     }
 

@@ -6,7 +6,6 @@ import com.nguyendevs.ecolens.BuildConfig
 import com.nguyendevs.ecolens.api.INaturalistApi
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -49,8 +48,9 @@ object RetrofitClient {
         .addInterceptor(loggingInterceptor)
         .addInterceptor(authErrorInterceptor)
         .connectTimeout(60, TimeUnit.SECONDS)
-        .readTimeout(60, TimeUnit.SECONDS)
+        .readTimeout(120, TimeUnit.SECONDS)
         .writeTimeout(60, TimeUnit.SECONDS)
+        .callTimeout(0, TimeUnit.SECONDS)
         .build()
 
     private val iNaturalistRetrofit = Retrofit.Builder()

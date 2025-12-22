@@ -11,18 +11,19 @@ export default {
         }
 
         const url = new URL(request.url);
+        const apiKey = env.GEMINI_API_KEY;
 
-        if (url.pathname === '/gemini') {
+        if (!apiKey) {
+            return new Response(JSON.stringify({ error: "Missing GEMINI_API_KEY on server" }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 500
+            });
+        }
+
+        // ==================== GEMINI NON-STREAMING (/gemini) ====================
+        if (url.pathname === '/gemini' && request.method === 'POST') {
             try {
                 const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
-                const apiKey = env.GEMINI_API_KEY;
-
-                if (!apiKey) {
-                    return new Response(JSON.stringify({ error: "Missing GEMINI_API_KEY on server" }), {
-                        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                        status: 500
-                    });
-                }
 
                 const body = await request.json();
                 const response = await fetch(`${geminiUrl}?key=${apiKey}`, {
@@ -35,7 +36,6 @@ export default {
                     },
                     body: JSON.stringify(body),
                     cf: {
-                        // Route through US data centers
                         resolveOverride: 'generativelanguage.googleapis.com'
                     }
                 });
@@ -56,61 +56,100 @@ export default {
                 });
 
             } catch (error) {
-                return new Response(JSON.stringify({ error: error.message, stack: error.stack }), {
+                return new Response(JSON.stringify({ error: error.message }), {
                     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                     status: 500
                 });
             }
         }
 
-        // iNaturalist API Proxy
+        // ==================== GEMINI STREAMING (/gemini/stream) ====================
+        if (url.pathname === '/gemini/stream' && request.method === 'POST') {
+            try {
+                const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse&key=${apiKey}`;
+
+                const body = await request.json();
+                const geminiResponse = await fetch(geminiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-goog-api-client': 'genai-js/0.1.0',
+                        'X-Forwarded-For': '8.8.8.8',
+                        'CF-IPCountry': 'US'
+                    },
+                    body: JSON.stringify(body),
+                    cf: {
+                        resolveOverride: 'generativelanguage.googleapis.com'
+                    }
+                });
+
+                if (!geminiResponse.ok) {
+                    const errorText = await geminiResponse.text();
+                    console.error("Gemini Streaming API Error:", errorText);
+                    return new Response(JSON.stringify({ error: 'Gemini API error', details: errorText }), {
+                        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                        status: geminiResponse.status
+                    });
+                }
+
+                // Stream trực tiếp về client
+                return new Response(geminiResponse.body, {
+                    headers: {
+                        'Content-Type': 'text/event-stream',
+                        'Cache-Control': 'no-cache',
+                        'Connection': 'keep-alive',
+                        ...corsHeaders
+                    }
+                });
+
+            } catch (error) {
+                return new Response(JSON.stringify({ error: error.message }), {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                    status: 500
+                });
+            }
+        }
+
+        // ==================== iNaturalist API Proxy ====================
         if (url.pathname.startsWith('/inaturalist/')) {
             try {
                 const inaturalistPath = url.pathname.replace('/inaturalist', '');
                 const inaturalistUrl = `https://api.inaturalist.org${inaturalistPath}${url.search}`;
                 const token = env.INATURALIST_API_TOKEN;
 
-                // Clone request để forward
                 const headers = new Headers();
-                headers.set('Authorization', `Bearer ${token}`);
+                if (token) {
+                    headers.set('Authorization', `Bearer ${token}`);
+                }
 
-                let responseData;
+                let response;
 
                 if (request.method === 'POST') {
-                    // Forward multipart form data as-is
+                    // Forward form data (hỗ trợ upload file)
                     const formData = await request.formData();
-
-                    const response = await fetch(inaturalistUrl, {
+                    response = await fetch(inaturalistUrl, {
                         method: 'POST',
                         headers: headers,
                         body: formData
                     });
-
-                    responseData = await response.json();
-
-                    return new Response(JSON.stringify(responseData), {
-                        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                        status: response.status
-                    });
                 } else {
                     headers.set('Accept', 'application/json');
-
-                    const response = await fetch(inaturalistUrl, {
+                    response = await fetch(inaturalistUrl, {
                         method: request.method,
                         headers: headers
                     });
-
-                    responseData = await response.json();
-
-                    return new Response(JSON.stringify(responseData), {
-                        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                        status: response.status
-                    });
                 }
+
+                const responseData = await response.json();
+
+                return new Response(JSON.stringify(responseData), {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                    status: response.status
+                });
+
             } catch (error) {
                 return new Response(JSON.stringify({
-                    error: error.message,
-                    stack: error.stack
+                    error: error.message
                 }), {
                     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                     status: 500
@@ -118,6 +157,9 @@ export default {
             }
         }
 
-        return new Response('API Proxy Active', { headers: corsHeaders });
+        // ==================== Root / Default ====================
+        return new Response('API Proxy Active – /gemini, /gemini/stream, /inaturalist/*', {
+            headers: corsHeaders
+        });
     }
 }

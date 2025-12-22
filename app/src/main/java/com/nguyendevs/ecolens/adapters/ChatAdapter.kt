@@ -1,5 +1,6 @@
 package com.nguyendevs.ecolens.adapters
 
+import android.animation.ValueAnimator
 import android.graphics.Color
 import android.os.Build
 import android.os.Handler
@@ -46,7 +47,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
         val message = messages[position]
         holder.bind(message, position)
 
-        if (!message.isLoading) {
+        if (!message.isLoading && !message.isStreaming) {
             if (message.isUser) {
                 holder.cardView.setOnLongClickListener {
                     actionListener.onCopy(message.content)
@@ -60,6 +61,13 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
                 holder.btnShareAi.setOnClickListener { actionListener.onShare(plainText) }
                 holder.btnRenewAi.setOnClickListener { actionListener.onRenew(position, message) }
             }
+        } else {
+            // Disable interactions khi đang streaming
+            holder.cardView.setOnLongClickListener(null)
+            holder.cardView.setOnClickListener(null)
+            holder.btnCopyAi.setOnClickListener(null)
+            holder.btnShareAi.setOnClickListener(null)
+            holder.btnRenewAi.setOnClickListener(null)
         }
     }
 
@@ -81,8 +89,9 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
 
         private val handler = Handler(Looper.getMainLooper())
         private var loopCount = 0
+        private var cursorAnimator: ValueAnimator? = null
 
-        private val animateRunnable = object : Runnable {
+        private val loadingAnimateRunnable = object : Runnable {
             override fun run() {
                 loopCount++
                 val baseText = "..."
@@ -97,27 +106,53 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
         }
 
         fun stopAnimation() {
-            handler.removeCallbacks(animateRunnable)
+            handler.removeCallbacks(loadingAnimateRunnable)
+            cursorAnimator?.cancel()
+            cursorAnimator = null
         }
 
         fun bind(message: ChatMessage, position: Int) {
             stopAnimation()
             layoutAiActions.visibility = View.GONE
 
-            if (message.isLoading) {
-                container.gravity = Gravity.START
-                cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.white))
-                tvMessage.setTextColor(ContextCompat.getColor(itemView.context, R.color.text_primary))
-                tvMessage.text = "..."
-                loopCount = 0
-                animateRunnable.run()
-            } else {
-                if (message.isUser) {
+            when {
+                message.isLoading -> {
+                    // Loading state (chờ response)
+                    container.gravity = Gravity.START
+                    cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.white))
+                    tvMessage.setTextColor(ContextCompat.getColor(itemView.context, R.color.text_primary))
+                    tvMessage.text = "..."
+                    loopCount = 0
+                    loadingAnimateRunnable.run()
+                }
+                message.isStreaming -> {
+                    // Streaming state - hiển thị nội dung đang được streaming
+                    container.gravity = Gravity.START
+                    cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.white))
+                    tvMessage.setTextColor(ContextCompat.getColor(itemView.context, R.color.text_primary))
+
+                    val formattedText = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        Html.fromHtml(message.content + "▌", Html.FROM_HTML_MODE_COMPACT)
+                    } else {
+                        @Suppress("DEPRECATION") Html.fromHtml(message.content + "▌")
+                    }
+                    tvMessage.text = formattedText
+
+                    // Thêm hiệu ứng nhấp nháy cursor
+                    startCursorAnimation()
+
+                    // Không hiển thị actions khi đang streaming
+                    layoutAiActions.visibility = View.GONE
+                }
+                message.isUser -> {
+                    // User message
                     tvMessage.text = message.content
                     container.gravity = Gravity.END
                     cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.green_primary))
                     tvMessage.setTextColor(ContextCompat.getColor(itemView.context, R.color.white))
-                } else {
+                }
+                else -> {
+                    // AI message hoàn thành
                     val formattedText = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         Html.fromHtml(message.content, Html.FROM_HTML_MODE_COMPACT)
                     } else {
@@ -128,10 +163,24 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
                     cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.white))
                     tvMessage.setTextColor(ContextCompat.getColor(itemView.context, R.color.text_primary))
 
+                    // Hiển thị actions cho AI message (trừ message đầu tiên)
                     if (position > 0) {
                         layoutAiActions.visibility = View.VISIBLE
                     }
                 }
+            }
+        }
+
+        private fun startCursorAnimation() {
+            cursorAnimator = ValueAnimator.ofFloat(1f, 0f).apply {
+                duration = 530
+                repeatCount = ValueAnimator.INFINITE
+                repeatMode = ValueAnimator.REVERSE
+                addUpdateListener { animator ->
+                    val alpha = animator.animatedValue as Float
+                    tvMessage.alpha = 0.7f + (alpha * 0.3f) // Dao động từ 0.7 -> 1.0
+                }
+                start()
             }
         }
     }

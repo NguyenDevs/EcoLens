@@ -12,43 +12,40 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ChatDao {
-    // Thêm phiên chat mới
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSession(session: ChatSession): Long
 
-    // Cập nhật thông tin phiên chat
     @Update
     suspend fun updateSession(session: ChatSession)
 
-    // Lấy tất cả phiên chat sắp xếp theo thời gian mới nhất
     @Query("SELECT * FROM chat_sessions ORDER BY timestamp DESC")
     fun getAllSessions(): Flow<List<ChatSession>>
 
-    // Lấy phiên chat theo ID
     @Query("SELECT * FROM chat_sessions WHERE id = :id")
     suspend fun getSessionById(id: Long): ChatSession?
 
-    //Lấy phiên chat mới nhất
     @Query("SELECT * FROM chat_sessions ORDER BY timestamp DESC LIMIT 1")
     suspend fun getLatestSession(): ChatSession?
 
-    // Xóa phiên chat (CASCADE sẽ tự động xóa messages liên quan)
     @Query("DELETE FROM chat_sessions WHERE id = :id")
     suspend fun deleteSession(id: Long)
 
-    // Xóa tất cả tin nhắn của một phiên chat
     @Query("DELETE FROM chat_messages WHERE sessionId = :sessionId")
     suspend fun deleteMessagesBySession(sessionId: Long)
 
-    // Thêm tin nhắn mới
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertMessage(message: ChatMessage)
+    suspend fun insertMessage(message: ChatMessage): Long
 
-    // Lấy tất cả tin nhắn của một phiên chat
+    @Update
+    suspend fun updateMessage(message: ChatMessage)
+
+    // Thêm method để update content mà không cần load toàn bộ message
+    @Query("UPDATE chat_messages SET content = :content WHERE id = :messageId")
+    suspend fun updateMessageContent(messageId: Long, content: String)
+
     @Query("SELECT * FROM chat_messages WHERE sessionId = :sessionId ORDER BY timestamp ASC")
     fun getMessagesBySession(sessionId: Long): Flow<List<ChatMessage>>
 
-    //Đếm số tin nhắn CỦA NGƯỜI DÙNG trong một phiên (dùng để check xem user đã chat chưa)
     @Query("SELECT COUNT(*) FROM chat_messages WHERE sessionId = :sessionId AND isUser = 1")
     suspend fun getUserMessageCount(sessionId: Long): Int
 

@@ -175,6 +175,7 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
     }
 
     private fun observeViewModel() {
+        // Observe chat messages
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.chatMessages.collectLatest { messages ->
                 adapter.submitList(messages)
@@ -184,6 +185,40 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
                     }
                 }
             }
+        }
+
+        // Observe streaming state để disable/enable UI
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isStreamingActive.collectLatest { isStreaming ->
+                updateUIForStreamingState(isStreaming)
+            }
+        }
+    }
+
+    private fun updateUIForStreamingState(isStreaming: Boolean) {
+        if (isStreaming) {
+            // Disable send button và làm mờ
+            btnSend.isEnabled = false
+            btnSend.alpha = 0.5f
+            etInput.isEnabled = false
+            etInput.alpha = 0.7f
+
+            // Disable back và menu
+            btnBack.isEnabled = false
+            btnBack.alpha = 0.5f
+            btnMenu.isEnabled = false
+            btnMenu.alpha = 0.5f
+        } else {
+            // Enable lại tất cả
+            btnSend.isEnabled = true
+            btnSend.alpha = 1f
+            etInput.isEnabled = true
+            etInput.alpha = 1f
+
+            btnBack.isEnabled = true
+            btnBack.alpha = 1f
+            btnMenu.isEnabled = true
+            btnMenu.alpha = 1f
         }
     }
 

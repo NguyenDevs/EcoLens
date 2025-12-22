@@ -5,10 +5,6 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-/**
- * Entity đại diện cho một tin nhắn trong phiên chat
- * Có khóa ngoại liên kết với ChatSession
- */
 @Entity(
     tableName = "chat_messages",
     foreignKeys = [ForeignKey(
@@ -26,6 +22,6 @@ data class ChatMessage(
     val content: String,
     val isUser: Boolean,
     val timestamp: Long = System.currentTimeMillis(),
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val isStreaming: Boolean = false
 )
-
