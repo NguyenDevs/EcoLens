@@ -356,7 +356,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             val cleanedJson = cleanJsonString(jsonString)
 
             val rawInfo = try {
-                Gson().fromJson(cleanedJson, GeminiRawResponse::class.java)
+                gson.fromJson(cleanedJson, GeminiRawResponse::class.java)
             } catch (e: Exception) {
                 null
             }
@@ -522,14 +522,14 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
           "genus": "Tên khoa học <i>(tên thường)</i>",
           "species": "Tên khoa học <i>(tên thường)</i>",
           "rank": "Cấp phân loại",
-          "description": "Tổng quan 4 câu, dùng **in đậm** cho đặc điểm nổi bật và <font color='#00796B'><b>xanh đậm</b></font> cho địa danh, số đo.",
+          "description": "Tổng quan 4 câu, dùng **in đậm** cho đặc điểm nổi bật và <font color='#00796B'><b>xanh đậm</b></font> cho địa danh, các chỉ số.",
           "characteristics": "Danh sách gạch đầu dòng, mỗi dòng bắt đầu • và một ý về hình thái. Dùng **in đậm** và <font color='#00796B'><b>xanh</b></font>.",
           "distribution": "Ưu tiên Việt Nam trước (nếu có), sau đó toàn cầu. Dùng <font color='#00796B'><b>xanh</b></font> cho địa danh.",
           "habitat": "Mô tả chi tiết môi trường sống.",
           "conservationStatus": "Chỉ ghi một trong các trạng thái: Cực kỳ nguy cấp, Nguy cấp, Sách Đỏ Việt Nam, Sắp nguy cấp, Ít lo ngại, Chưa đánh giá. Thêm thông tin bổ sung từ IUCN nếu có."
         }
         
-        CHỈ TRẢ VỀ JSON (KHÔNG có ```json), KHÔNG THÊM TEXT KHÁC.
+        CHỈ TRẢ VỀ JSON (NHƯNG KHÔNG ĐƯỢC DÙNG ```json), KHÔNG THÊM TEXT KHÁC.
         """.trimIndent()
         } else {
             """
@@ -552,14 +552,14 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
           "genus": "Scientific name <i>(common name)</i>",
           "species": "Scientific name <i>(common name)</i>",
           "rank": "Rank",
-          "description": "4-sentence overview with **bold** for key features and <font color='#00796B'><b>green bold</b></font> for places/measurements.",
+          "description": "4-sentence overview with **bold** for key features and <font color='#00796B'><b>green bold</b></font> for places/indicators.",
           "characteristics": "Bullet list, each line starts with • covering morphology. Use **bold** and <font color='#00796B'><b>green</b></font>.",
           "distribution": "Vietnam first (if applicable), then worldwide. Use <font color='#00796B'><b>green</b></font> for locations.",
           "habitat": "Specific environment details.",
           "conservationStatus": "Only write one status: Critically Endangered, Endangered, Vulnerable (Vietnam Red Data Book), Near Threatened, Least Concern, Not Evaluated. Add IUCN info if available."
         }
         
-        RETURN ONLY JSON (NO ```json), NO ADDITIONAL TEXT.
+        RETURN ONLY JSON (BUT NO ```json), NO ADDITIONAL TEXT.
         """.trimIndent()
         }
     }
