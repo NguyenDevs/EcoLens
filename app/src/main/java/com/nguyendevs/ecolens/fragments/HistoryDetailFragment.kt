@@ -142,7 +142,7 @@ class HistoryDetailFragment : Fragment() {
         setTaxonomyText(R.id.tvKingdom, info.kingdom)
         setTaxonomyText(R.id.tvPhylum, info.phylum)
         setTaxonomyText(R.id.tvClass, info.className)
-        setTaxonomyText(R.id.tvOrder, info.order)
+        setTaxonomyText(R.id.tvOrder, info.taxorder)
         setTaxonomyText(R.id.tvFamily, info.family)
         setTaxonomyText(R.id.tvGenus, info.genus)
         setTaxonomyText(R.id.tvSpecies, info.species)
