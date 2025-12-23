@@ -159,4 +159,13 @@
     <string name="dialog_delete_chat_message">Bạn có chắc muốn xóa đoạn chat này không?</string>
     <string name="action_delete">Xóa</string>
     <string name="action_cancel">Hủy</string>
+
+    <!-- Error Messages -->
+    <string name="error_quota_exceeded">Đã vượt quá giới hạn API. Vui lòng thử lại sau.</string>
+    <string name="error_incomplete_data">Không thể lấy đủ thông tin về loài này. Vui lòng thử lại.</string>
+    <string name="error_general">Lỗi: %1$s</string>
+
+    <!-- Retry Button -->
+    <string name="btn_retry_identification">Thử nhận dạng lại</string>
+    <string name="retry_identification_hint">Độ tin cậy thấp. Nhấn để thử lại.</string>
 </resources>
