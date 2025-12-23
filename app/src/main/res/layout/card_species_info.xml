@@ -29,14 +29,19 @@
                     android:layout_weight="1"
                     android:orientation="vertical">
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/tvCommonName"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/label_common_name"
                         android:textColor="@color/green_primary"
-                        android:textSize="26sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold"
+                        android:maxLines="1"
+
+                        app:autoSizeTextType="uniform"
+                        app:autoSizeMaxTextSize="26sp"
+                        app:autoSizeMinTextSize="16sp"
+                        app:autoSizeStepGranularity="1sp" />
 
                 <LinearLayout
                         android:layout_width="wrap_content"
@@ -44,14 +49,20 @@
                         android:orientation="horizontal"
                         android:gravity="center_vertical">
 
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/tvScientificName"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:maxLines="1"
                             android:text="@string/label_scientific_name"
                             android:textColor="@color/text_secondary"
-                            android:textSize="18sp"
-                            android:textStyle="italic"/>
+                            android:textStyle="italic"
+
+                            app:autoSizeTextType="uniform"
+                            app:autoSizeMaxTextSize="18sp"
+                            app:autoSizeMinTextSize="13sp"
+                            app:autoSizeStepGranularity="1sp" />
 
                     <ImageView
                             android:id="@+id/btnCopyScientificName"
@@ -87,7 +98,6 @@
                         android:id="@+id/btnRetryIdentification"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:layout_marginTop="8dp"
                         android:background="@drawable/bg_white_rounded"
                         android:backgroundTint="#F5F7F6"
                         android:padding="10dp"
