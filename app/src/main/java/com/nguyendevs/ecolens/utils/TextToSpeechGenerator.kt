@@ -41,7 +41,7 @@ object TextToSpeechGenerator {
         if (info.kingdom.isNotEmpty()) taxonomyList.add("${context.getString(R.string.label_kingdom)} ${stripHtml(info.kingdom)}")
         if (info.phylum.isNotEmpty()) taxonomyList.add("${context.getString(R.string.label_phylum)} ${stripHtml(info.phylum)}")
         if (info.className.isNotEmpty()) taxonomyList.add("${context.getString(R.string.label_class)} ${stripHtml(info.className)}")
-        if (info.order.isNotEmpty()) taxonomyList.add("${context.getString(R.string.label_order)} ${stripHtml(info.order)}")
+        if (info.taxorder.isNotEmpty()) taxonomyList.add("${context.getString(R.string.label_order)} ${stripHtml(info.taxorder)}")
         if (info.family.isNotEmpty()) taxonomyList.add("${context.getString(R.string.label_family)} ${stripHtml(info.family)}")
         if (info.genus.isNotEmpty()) taxonomyList.add("${context.getString(R.string.label_genus)} ${stripHtml(info.genus)}")
         if (info.species.isNotEmpty()) taxonomyList.add("${context.getString(R.string.label_species)} ${stripHtml(info.species)}")
