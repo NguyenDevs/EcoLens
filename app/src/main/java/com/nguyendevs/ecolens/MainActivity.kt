@@ -172,9 +172,16 @@ class MainActivity : AppCompatActivity() {
     private fun initManagers() {
         permissionManager = PermissionManager(this, permissionLauncher)
 
-        speciesInfoHandler = SpeciesInfoHandler(this, speciesInfoCard) { copiedText ->
-            searchBarHandler.expandSearchBar(copiedText)
-        }
+        speciesInfoHandler = SpeciesInfoHandler(
+            this,
+            speciesInfoCard,
+            onCopySuccess = { copiedText ->
+                searchBarHandler.expandSearchBar(copiedText)
+            },
+            onRetryClick = {
+                viewModel.retryIdentification()
+            }
+        )
 
         speakerManager = SpeakerManager(this)
         speakerManager.onSpeechFinished = {
@@ -422,6 +429,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         speakerManager.shutdown()
+        speciesInfoHandler.onDestroy()
         super.onDestroy()
     }
 
