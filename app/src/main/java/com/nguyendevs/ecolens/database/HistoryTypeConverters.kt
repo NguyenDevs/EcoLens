@@ -9,17 +9,17 @@ class HistoryTypeConverters {
 
     private val gson = Gson()
 
-    // Chuyển đổi SpeciesInfo thành chuỗi JSON
     @TypeConverter
-    fun fromSpeciesInfo(info: SpeciesInfo): String {
-        return gson.toJson(info)
+    fun fromSpeciesInfo(info: SpeciesInfo?): String? {
+        return info?.let { gson.toJson(it) }
     }
 
-    // Chuyển đổi chuỗi JSON thành SpeciesInfo
     @TypeConverter
-    fun toSpeciesInfo(json: String): SpeciesInfo {
-        val type = object : TypeToken<SpeciesInfo>() {}.type
-        return gson.fromJson(json, type)
+    fun toSpeciesInfo(json: String?): SpeciesInfo? {
+        return json?.let {
+            if (it.isEmpty()) return@let null
+            val type = object : TypeToken<SpeciesInfo>() {}.type
+            gson.fromJson(it, type)
+        }
     }
-
 }
