@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
-import java.io.File
 import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
@@ -433,15 +432,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             val jsonString = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text ?: ""
             val cleanedJson = cleanJsonString(jsonString)
 
-            val rawInfo = try {
-                gson.fromJson(cleanedJson, GeminiRawResponse::class.java)
-            } catch (e: Exception) {
-                null
-            }
-
-            if (rawInfo == null) {
-                throw Exception("Failed to parse Gemini response")
-            }
+            val rawInfo = gson.fromJson(cleanedJson, GeminiRawResponse::class.java)
 
             val characteristicsText = when (val chars = rawInfo.characteristics) {
                 is String -> chars
@@ -450,23 +441,24 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             }
 
             SpeciesInfo(
-                kingdom = formatTaxonomyRank(removeRankPrefix(rawInfo.kingdom ?: "", if (isVietnamese) "Giới" else "Kingdom"), isVietnamese),
-                phylum = formatTaxonomyRank(removeRankPrefix(rawInfo.phylum ?: "", if (isVietnamese) "Ngành" else "Phylum"), isVietnamese),
-                className = formatTaxonomyRank(removeRankPrefix(rawInfo.className ?: "", if (isVietnamese) "Lớp" else "Class"), isVietnamese),
-                taxorder = formatTaxonomyRank(removeRankPrefix(rawInfo.taxorder ?: "", if (isVietnamese) "Bộ" else "Order"), isVietnamese),
-                family = formatTaxonomyRank(removeRankPrefix(rawInfo.family ?: "", if (isVietnamese) "Họ" else "Family"), isVietnamese),
-                genus = formatTaxonomyRank(removeRankPrefix(rawInfo.genus ?: "", if (isVietnamese) "Chi" else "Genus"), isVietnamese),
-                species = formatTaxonomyRank(removeRankPrefix(rawInfo.species ?: "", if (isVietnamese) "Loài" else "Species"), isVietnamese),
+                // Thay thế formatTaxonomyRank bằng thẻ <b> trực tiếp
+                kingdom = "<b>" + removeRankPrefix(rawInfo.kingdom, if (isVietnamese) "Giới" else "Kingdom") + "</b>",
+                phylum = "<b>" + removeRankPrefix(rawInfo.phylum, if (isVietnamese) "Ngành" else "Phylum") + "</b>",
+                className = "<b>" + removeRankPrefix(rawInfo.className, if (isVietnamese) "Lớp" else "Class") + "</b>",
+                taxorder = "<b>" + removeRankPrefix(rawInfo.taxorder, if (isVietnamese) "Bộ" else "Order") + "</b>",
+                family = "<b>" + removeRankPrefix(rawInfo.family, if (isVietnamese) "Họ" else "Family") + "</b>",
+                genus = "<b>" + removeRankPrefix(rawInfo.genus, if (isVietnamese) "Chi" else "Genus") + "</b>",
+                species = "<b>" + removeRankPrefix(rawInfo.species, if (isVietnamese) "Loài" else "Species") + "</b>",
 
-                commonName = rawInfo.commonName ?: "",
+                commonName = rawInfo.commonName,
                 scientificName = scientificName,
-                rank = rawInfo.rank ?: "",
+                rank = rawInfo.rank,
 
-                description = processMarkdown(rawInfo.description ?: "", isVietnamese = isVietnamese),
+                description = processMarkdown(rawInfo.description, isVietnamese = isVietnamese),
                 characteristics = processMarkdown(characteristicsText, isVietnamese = isVietnamese),
-                distribution = processMarkdown(rawInfo.distribution ?: "", isVietnamese = isVietnamese),
-                habitat = processMarkdown(rawInfo.habitat ?: "", isVietnamese = isVietnamese),
-                conservationStatus = processMarkdown(rawInfo.conservationStatus ?: "", isConservationStatus = true, isVietnamese = isVietnamese),
+                distribution = processMarkdown(rawInfo.distribution, isVietnamese = isVietnamese),
+                habitat = processMarkdown(rawInfo.habitat, isVietnamese = isVietnamese),
+                conservationStatus = processMarkdown(rawInfo.conservationStatus, isConservationStatus = true, isVietnamese = isVietnamese),
                 confidence = confidence
             )
 
@@ -581,93 +573,74 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
         return if (isVietnamese) {
             """
-        Bạn là nhà sinh vật học. Cung cấp thông tin chi tiết về loài "$scientificName" bằng Tiếng Việt.
-        
-        === QUY TẮC FORMAT ===
-        - Dùng **text** để in đậm
-        - Dùng <font color="#00796B"><b>text</b></font> để tô màu xanh và in đậm
-        - Dùng <i>text</i> để nghiêng
-        - Dùng • cho bullet points
-        
-        === ĐỊNH DẠNG JSON ===
-        {
-          "commonName": "$commonNameDesc",
-          "kingdom": "Chỉ tên Tiếng Việt",
-          "phylum": "Chỉ tên Tiếng Việt", 
-          "className": "Chỉ tên Tiếng Việt",
-          "taxorder": "Chỉ tên Tiếng Việt",
-          "family": "Tên khoa học",
-          "genus": "Tên khoa học",
-          "species": "Tên khoa học",
-          "rank": "Cấp phân loại",
-          "description": "Tổng quan 4 câu, dùng **in đậm** cho đặc điểm nổi bật và <font color='#00796B'><b>xanh đậm</b></font> cho địa danh, các chỉ số.",
-          "characteristics": "Danh sách gạch đầu dòng, mỗi dòng bắt đầu • và một ý về hình thái. Dùng **in đậm** và <font color='#00796B'><b>xanh</b></font>.",
-          "distribution": "Ưu tiên Việt Nam trước (nếu có), sau đó toàn cầu. Dùng <font color='#00796B'><b>xanh</b></font> cho địa danh.",
-          "habitat": "Mô tả chi tiết môi trường sống.",
-          "conservationStatus": "Chỉ ghi một trong các trạng thái: Cực kỳ nguy cấp, Nguy cấp, Sách Đỏ Việt Nam, Sắp nguy cấp, Ít lo ngại, Chưa đánh giá. Thêm thông tin bổ sung từ IUCN nếu có."
-        }
-        
-        CHỈ TRẢ VỀ JSON (NHƯNG KHÔNG ĐƯỢC DÙNG ```json), KHÔNG THÊM TEXT KHÁC.
-        """.trimIndent()
+            Bạn là nhà sinh vật học. Cung cấp thông tin chi tiết về loài "$scientificName" bằng Tiếng Việt.
+             
+            === QUY TẮC FORMAT ===
+            - Dùng ** để đánh dấu text cần in đậm (ví dụ: **từ khóa**)
+            - Dùng ## để đánh dấu text cần màu xanh highlight (ví dụ: ##Việt Nam##, ##50-60cm##)
+            - Dùng • cho bullet points, mỗi dòng một ý
+             
+            === ĐỊNH DẠNG JSON ===
+            {
+              "commonName": "$commonNameDesc",
+              "kingdom": "Chỉ tên Tiếng Việt",
+              "phylum": "Chỉ tên Tiếng Việt",
+              "className": "Chỉ tên Tiếng Việt",
+              "taxorder": "Chỉ tên Tiếng Việt",
+              "family": "Tên khoa học",
+              "genus": "Tên khoa học",
+              "species": "Tên khoa học",
+              "rank": "Cấp phân loại",
+              "description": "Tổng quan 4 câu ngắn gọn, dùng **in đậm** cho đặc điểm nổi bật và ##xanh đậm## cho địa danh, tên riêng, số đo.",
+              "characteristics": "Danh sách gạch đầu dòng, mỗi dòng bắt đầu với • và một ý về hình thái, kích thước, màu sắc. Dùng **in đậm** và ##xanh đậm##.",
+              "distribution": "Ưu tiên Việt Nam trước (nếu có), sau đó toàn cầu. Dùng ##xanh đậm## cho tên địa danh.",
+              "habitat": "Mô tả chi tiết môi trường sống.",
+              "conservationStatus": "Chỉ ghi một trong các trạng thái: Cực kỳ nguy cấp, Nguy cấp, Sách Đỏ Việt Nam, Sắp nguy cấp, Ít lo ngại, Chưa đánh giá. Thêm một chút thông tin bổ sung từ IUCN nếu có."
+            }
+             
+            CHỈ TRẢ VỀ JSON, KHÔNG THÊM TEXT KHÁC.
+            """.trimIndent()
         } else {
             """
-        You are a biologist. Provide details about "$scientificName" in English.
-        
-        === FORMAT RULES ===
-        - Use **text** for bold
-        - Use <font color="#00796B"><b>text</b></font> for green bold
-        - Use <i>text</i> for italic
-        - Use • for bullet points
-        
-        === JSON FORMAT ===
-        {
-          "commonName": "$commonNameDesc",
-          "kingdom": "Name only",
-          "phylum": "Name only",
-          "className": "Name only", 
-          "taxorder": "Name only",
-          "family": "Scientific name",
-          "genus": "Scientific name",
-          "species": "Scientific name",
-          "rank": "Rank",
-          "description": "4-sentence overview with **bold** for key features and <font color='#00796B'><b>green bold</b></font> for places/indicators.",
-          "characteristics": "Bullet list, each line starts with • covering morphology. Use **bold** and <font color='#00796B'><b>green</b></font>.",
-          "distribution": "Vietnam first (if applicable), then worldwide. Use <font color='#00796B'><b>green</b></font> for locations.",
-          "habitat": "Specific environment details.",
-          "conservationStatus": "Only write one status: Critically Endangered, Endangered, Vulnerable (Vietnam Red Data Book), Near Threatened, Least Concern, Not Evaluated. Add IUCN info if available."
-        }
-        
-        RETURN ONLY JSON (BUT NO ```json), NO ADDITIONAL TEXT.
-        """.trimIndent()
-        }
-    }
-
-    private fun formatTaxonomyRank(text: String, isVietnamese: Boolean): String {
-        if (text.isEmpty() || text == "...") return text
-
-        val parenthesesPattern = Regex("""\(([^)]+)\)""")
-        val match = parenthesesPattern.find(text)
-
-        return if (match != null) {
-            var beforeParentheses = text.substring(0, match.range.first)
-            beforeParentheses = beforeParentheses.replace("_", "").replace("*", "").trim()
-            var insideParentheses = match.groupValues[1]
-            insideParentheses = insideParentheses.replace("_", "").replace("*", "").trim()
-            "<b>$beforeParentheses</b> <i>($insideParentheses)</i>"
-        } else {
-            val cleanText = text.replace("_", "").replace("*", "").trim()
-            "<b>$cleanText</b>"
+            You are a biologist. Provide details about "$scientificName" in English.
+             
+            === FORMAT RULES ===
+            - Use ** for bold text (e.g., **keyword**)
+            - Use ## for green highlight (e.g., ##Vietnam##, ##50-60cm##)
+            - Use • for bullet points, one point per line
+             
+            === JSON FORMAT ===
+            {
+              "commonName": "$commonNameDesc",
+              "kingdom": "Name only",
+              "phylum": "Name only",
+              "className": "Name only",
+              "taxorder": "Name only",
+              "family": "Scientific name",
+              "genus": "Scientific name",
+              "species": "Scientific name",
+              "rank": "Rank",
+              "description": "4-sentence overview with **bold** for key features and ##green highlight## for places/names/measurements.",
+              "characteristics": "Bullet list, each line starts with • covering morphology, size, colors. Use **bold** and ##green highlight##.",
+              "distribution": "Vietnam first (if applicable), then worldwide. Use ##green highlight## for locations.",
+              "habitat": "Specific environment details.",
+              "conservationStatus": "Only write one of these statuses: Critically Endangered, Endangered, Vulnerable (Vietnam Red Data Book), Near Threatened, Least Concern, Not Evaluated. Add some additional IUCN info if available."
+            }
+             
+            RETURN ONLY JSON, NO ADDITIONAL TEXT.
+            """.trimIndent()
         }
     }
 
-    private fun processMarkdown(text: String, isConservationStatus: Boolean = false, isVietnamese: Boolean = true): String {
+
+
+    private fun processMarkdown(text: String?, isConservationStatus: Boolean = false, isVietnamese: Boolean = true): String {
         if (text.isBlank()) return ""
 
         var result = text
-            .replace(Regex("""\*\*(.+?)\*\*""")) { "<b>${it.groupValues[1]}</b>" }
-            .replace(Regex("""__(.+?)__""")) { "<b>${it.groupValues[1]}</b>" }
-            .replace(Regex("""\*(.+?)\*""")) { "<i>${it.groupValues[1]}</i>" }
-            .replace(Regex("""_(.+?)_""")) { "<i>${it.groupValues[1]}</i>" }
+            .replace(Regex("\\*\\*(.+?)\\*\\*")) { "<b>${it.groupValues[1]}</b>" }
+            .replace(Regex("##(.+?)##")) { "<font color='#00796B'><b>${it.groupValues[1]}</b></font>" }
+            .replace(Regex("~~(.+?)~~")) { "<i>${it.groupValues[1]}</i>" }
             .replace("\n", "<br>")
 
         if (isConservationStatus) {
@@ -725,7 +698,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    private fun removeRankPrefix(text: String, prefix: String): String {
+    private fun removeRankPrefix(text: String?, prefix: String): String {
         return text.trim().replaceFirst(Regex("^(?i)$prefix\\s*[:\\-\\s]+"), "")
             .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
             .trim()
