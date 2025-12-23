@@ -389,7 +389,17 @@ class MainActivity : AppCompatActivity() {
 
         if (isLoading) loadingAnimationHandler.start() else loadingAnimationHandler.stop()
 
-        if (loadingStage == LoadingStage.NONE && state.speciesInfo == null) {
+        if (error != null) {
+            errorText.text = error
+            errorCard.isVisible = true
+            speciesInfoCard.isVisible = false
+            fabSpeak.isVisible = false
+
+            if (::initialStateLayout.isInitialized && initialStateLayout.visibility == View.VISIBLE) {
+                initialStateLayout.visibility = View.GONE
+            }
+        }
+        else if (loadingStage == LoadingStage.NONE && state.speciesInfo == null) {
             speciesInfoCard.isVisible = false
             errorCard.isVisible = false
             fabSpeak.isVisible = false
@@ -398,12 +408,8 @@ class MainActivity : AppCompatActivity() {
                 null,
                 LoadingStage.NONE
             )
-        } else if (error != null) {
-            errorText.text = error
-            errorCard.isVisible = true
-            speciesInfoCard.isVisible = false
-            fabSpeak.isVisible = false
-        } else if (state.speciesInfo != null) {
+        }
+        else if (state.speciesInfo != null) {
             speciesInfoCard.isVisible = true
             errorCard.isVisible = false
 

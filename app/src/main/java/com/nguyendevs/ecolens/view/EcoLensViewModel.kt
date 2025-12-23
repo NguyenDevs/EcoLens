@@ -105,7 +105,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
                     val geminiInfo = fetchDetailsFromGemini(scientificName, confidence, languageCode)
 
-                    // Kiểm tra xem có dữ liệu đầy đủ không
                     val hasCompleteData = geminiInfo.commonName.isNotEmpty() &&
                             geminiInfo.description.isNotEmpty()
 
