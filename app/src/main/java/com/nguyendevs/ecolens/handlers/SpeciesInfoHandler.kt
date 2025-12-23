@@ -29,11 +29,16 @@ import kotlinx.coroutines.*
 class SpeciesInfoHandler(
     private val context: Context,
     private val speciesInfoCard: MaterialCardView,
-    private val onCopySuccess: (String) -> Unit
+    private val onCopySuccess: (String) -> Unit,
+    private val onRetryClick: () -> Unit
 ) {
     private val handlerScope = CoroutineScope(Dispatchers.Main + Job())
     private val viewCache = mutableMapOf<Int, View>()
     private val displayedRows = mutableSetOf<Int>()
+
+    // Tracking đã render sections để tránh scroll giật
+    private val renderedSections = mutableSetOf<Int>()
+    private var isInitialLoad = true
 
     private var confidenceRotationAnimator: ObjectAnimator? = null
     private var taxonomyShimmerAnimator: ValueAnimator? = null
@@ -56,9 +61,12 @@ class SpeciesInfoHandler(
             LoadingStage.NONE -> {
                 handlerScope.coroutineContext.cancelChildren()
                 clearAllViews()
+                isInitialLoad = true
+                renderedSections.clear()
             }
 
             LoadingStage.SCIENTIFIC_NAME -> {
+                isInitialLoad = true
                 displayCommonName(SpeciesInfo(commonName = "...", scientificName = ""))
                 displayScientificName(info)
                 displayConfidence(info, isWaiting = true)
@@ -78,28 +86,36 @@ class SpeciesInfoHandler(
             }
 
             LoadingStage.DESCRIPTION -> {
-                displaySection(R.id.sectionDescription, R.id.tvDescription, info.description)
+                displaySection(R.id.sectionDescription, R.id.tvDescription, info.description, shouldScroll = false)
             }
 
             LoadingStage.CHARACTERISTICS -> {
-                displaySection(R.id.sectionCharacteristics, R.id.tvCharacteristics, info.characteristics)
+                displaySection(R.id.sectionCharacteristics, R.id.tvCharacteristics, info.characteristics, shouldScroll = false)
             }
 
             LoadingStage.DISTRIBUTION -> {
-                displaySection(R.id.sectionDistribution, R.id.tvDistribution, info.distribution)
+                displaySection(R.id.sectionDistribution, R.id.tvDistribution, info.distribution, shouldScroll = false)
             }
 
             LoadingStage.HABITAT -> {
-                displaySection(R.id.sectionHabitat, R.id.tvHabitat, info.habitat)
+                displaySection(R.id.sectionHabitat, R.id.tvHabitat, info.habitat, shouldScroll = false)
             }
 
             LoadingStage.CONSERVATION -> {
-                displayConservationStatus(info.conservationStatus)
+                displayConservationStatus(info.conservationStatus, shouldScroll = false)
             }
 
             LoadingStage.COMPLETE -> {
+                isInitialLoad = false
                 setupShareButton(info, imageUri)
                 showShareButtonAnimation()
+
+                // Hiển thị nút retry nếu confidence < 50%
+                if (info.confidence < 50.0) {
+                    showRetryButtonAnimation()
+                } else {
+                    hideRetryButton()
+                }
             }
         }
     }
@@ -118,6 +134,7 @@ class SpeciesInfoHandler(
         viewCache[R.id.iconConfidence] = speciesInfoCard.findViewById(R.id.iconConfidence)
         viewCache[R.id.btnCopyScientificName] = speciesInfoCard.findViewById(R.id.btnCopyScientificName)
         viewCache[R.id.btnShareInfo] = speciesInfoCard.findViewById(R.id.btnShareInfo)
+        viewCache[R.id.btnRetryIdentification] = speciesInfoCard.findViewById(R.id.btnRetryIdentification)
         viewCache[R.id.taxonomyContainer] = speciesInfoCard.findViewById(R.id.taxonomyContainer)
 
         val rowIds = listOf(
@@ -151,6 +168,7 @@ class SpeciesInfoHandler(
 
     private fun clearAllViews() {
         displayedRows.clear()
+        renderedSections.clear()
         stopConfidenceAnimation()
         stopTaxonomyShimmer()
 
@@ -296,7 +314,7 @@ class SpeciesInfoHandler(
             Triple(R.id.rowKingdom, R.id.tvKingdom, info.kingdom),
             Triple(R.id.rowPhylum, R.id.tvPhylum, info.phylum),
             Triple(R.id.rowClass, R.id.tvClass, info.className),
-            Triple(R.id.rowOrder, R.id.tvOrder, info.order),
+            Triple(R.id.rowOrder, R.id.tvOrder, info.taxorder),
             Triple(R.id.rowFamily, R.id.tvFamily, info.family),
             Triple(R.id.rowGenus, R.id.tvGenus, info.genus),
             Triple(R.id.rowSpecies, R.id.tvSpecies, info.species)
@@ -420,8 +438,7 @@ class SpeciesInfoHandler(
         (viewCache[R.id.iconConfidence] as? ImageView)?.rotation = 0f
     }
 
-
-    private fun displaySection(sectionId: Int, textViewId: Int, text: String) {
+    private fun displaySection(sectionId: Int, textViewId: Int, text: String, shouldScroll: Boolean = true) {
         val section = viewCache[sectionId] as? LinearLayout
         val textView = viewCache[textViewId] as? TextView
 
@@ -432,6 +449,8 @@ class SpeciesInfoHandler(
             }
 
             section?.let { sectionView ->
+                val wasAlreadyRendered = renderedSections.contains(sectionId)
+
                 if (sectionView.visibility != View.VISIBLE) {
                     sectionView.visibility = View.VISIBLE
                     sectionView.alpha = 0f
@@ -443,7 +462,11 @@ class SpeciesInfoHandler(
                         .setDuration(450)
                         .setInterpolator(DecelerateInterpolator())
                         .withEndAction {
-                            smoothScrollToView(sectionView)
+                            // Chỉ scroll nếu đây là lần đầu render và shouldScroll = true
+                            if (!wasAlreadyRendered && shouldScroll && !isInitialLoad) {
+                                smoothScrollToView(sectionView)
+                            }
+                            renderedSections.add(sectionId)
                         }
                         .start()
                 }
@@ -453,7 +476,7 @@ class SpeciesInfoHandler(
         }
     }
 
-    private fun displayConservationStatus(status: String) {
+    private fun displayConservationStatus(status: String, shouldScroll: Boolean = true) {
         val section = viewCache[R.id.sectionConservation] as? LinearLayout
         val textView = viewCache[R.id.tvConservationStatus] as? TextView
 
@@ -463,6 +486,8 @@ class SpeciesInfoHandler(
             }
 
             section?.let { sectionView ->
+                val wasAlreadyRendered = renderedSections.contains(R.id.sectionConservation)
+
                 if (sectionView.visibility != View.VISIBLE) {
                     sectionView.visibility = View.VISIBLE
                     sectionView.alpha = 0f
@@ -472,7 +497,11 @@ class SpeciesInfoHandler(
                         .setDuration(400)
                         .setInterpolator(DecelerateInterpolator())
                         .withEndAction {
-                            smoothScrollToView(sectionView)
+                            // Chỉ scroll nếu đây là lần đầu render và shouldScroll = true
+                            if (!wasAlreadyRendered && shouldScroll && !isInitialLoad) {
+                                smoothScrollToView(sectionView)
+                            }
+                            renderedSections.add(R.id.sectionConservation)
                         }
                         .start()
                 }
@@ -507,7 +536,9 @@ class SpeciesInfoHandler(
 
     private fun hideButtons() {
         val btnShare = viewCache[R.id.btnShareInfo]
+        val btnRetry = viewCache[R.id.btnRetryIdentification]
         btnShare?.visibility = View.GONE
+        btnRetry?.visibility = View.GONE
     }
 
     private fun showShareButtonAnimation() {
@@ -527,9 +558,32 @@ class SpeciesInfoHandler(
         }
     }
 
+    private fun showRetryButtonAnimation() {
+        val btnRetry = viewCache[R.id.btnRetryIdentification]
+        btnRetry?.apply {
+            visibility = View.VISIBLE
+            alpha = 0f
+            scaleX = 0.8f
+            scaleY = 0.8f
+            animate()
+                .alpha(1f)
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(400)
+                .setStartDelay(100)
+                .setInterpolator(DecelerateInterpolator())
+                .start()
+        }
+        setupRetryButton()
+    }
+
+    private fun hideRetryButton() {
+        val btnRetry = viewCache[R.id.btnRetryIdentification]
+        btnRetry?.visibility = View.GONE
+    }
+
     private fun showCopyButtonAnimation(){
         val btnCopy = viewCache[R.id.btnCopyScientificName]
-
         btnCopy?.apply{
             visibility = View.VISIBLE
             alpha = 0f
@@ -552,6 +606,13 @@ class SpeciesInfoHandler(
             val cleanName = stripHtml(info.scientificName)
             clipboard.setPrimaryClip(ClipData.newPlainText("Scientific Name", cleanName))
             onCopySuccess(cleanName)
+        }
+    }
+
+    private fun setupRetryButton() {
+        viewCache[R.id.btnRetryIdentification]?.setOnClickListener {
+            it.visibility = View.GONE
+            onRetryClick()
         }
     }
 
@@ -581,7 +642,7 @@ class SpeciesInfoHandler(
             if (info.kingdom.isNotEmpty()) append("• ${context.getString(R.string.label_kingdom)} ${stripHtml(info.kingdom)}\n")
             if (info.phylum.isNotEmpty()) append("• ${context.getString(R.string.label_phylum)} ${stripHtml(info.phylum)}\n")
             if (info.className.isNotEmpty()) append("• ${context.getString(R.string.label_class)} ${stripHtml(info.className)}\n")
-            if (info.order.isNotEmpty()) append("• ${context.getString(R.string.label_order)} ${stripHtml(info.order)}\n")
+            if (info.taxorder.isNotEmpty()) append("• ${context.getString(R.string.label_order)} ${stripHtml(info.taxorder)}\n")
             if (info.family.isNotEmpty()) append("• ${context.getString(R.string.label_family)} ${stripHtml(info.family)}\n")
             if (info.genus.isNotEmpty()) append("• ${context.getString(R.string.label_genus)} ${stripHtml(info.genus)}\n")
             if (info.species.isNotEmpty()) append("• ${context.getString(R.string.label_species)} ${stripHtml(info.species)}\n")
