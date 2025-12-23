@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.File
 import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
@@ -44,13 +45,17 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     private val isGenerating = AtomicBoolean(false)
     private val streamingMessageId = AtomicLong(-1L)
 
+    // Lưu thông tin để retry
+    private var currentImageUri: Uri? = null
+    private var currentHistoryEntryId: Int? = null
+
     private data class GeminiRawResponse(
         val commonName: String? = null,
         val scientificName: String? = null,
         val kingdom: String? = null,
         val phylum: String? = null,
         val className: String? = null,
-        val order: String? = null,
+        val taxorder: String? = null,
         val family: String? = null,
         val genus: String? = null,
         val species: String? = null,
@@ -63,10 +68,13 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         val confidence: Double = 0.0
     )
 
-    fun identifySpecies(imageUri: Uri, languageCode: String) {
+    fun identifySpecies(imageUri: Uri, languageCode: String, existingHistoryId: Int? = null) {
         viewModelScope.launch {
             _uiState.value = EcoLensUiState(isLoading = true, speciesInfo = null, error = null, loadingStage = LoadingStage.NONE)
             delay(100)
+
+            currentImageUri = imageUri
+            currentHistoryEntryId = existingHistoryId
 
             try {
                 val context = getApplication<Application>()
@@ -98,6 +106,18 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
                     val geminiInfo = fetchDetailsFromGemini(scientificName, confidence, languageCode)
 
+                    // Kiểm tra xem có dữ liệu đầy đủ không
+                    val hasCompleteData = geminiInfo.commonName.isNotEmpty() &&
+                            geminiInfo.description.isNotEmpty()
+
+                    if (!hasCompleteData) {
+                        _uiState.value = EcoLensUiState(
+                            isLoading = false,
+                            error = context.getString(R.string.error_incomplete_data)
+                        )
+                        return@launch
+                    }
+
                     val finalCommonName = geminiInfo.commonName.ifEmpty {
                         taxon.preferred_common_name ?: scientificName
                     }
@@ -109,13 +129,13 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                         ),
                         loadingStage = LoadingStage.COMMON_NAME
                     )
-                    delay(500)
+                    delay(300)
 
                     val taxonomyStages = listOf(
                         { info: SpeciesInfo -> info.copy(kingdom = geminiInfo.kingdom) },
                         { info: SpeciesInfo -> info.copy(phylum = geminiInfo.phylum) },
                         { info: SpeciesInfo -> info.copy(className = geminiInfo.className) },
-                        { info: SpeciesInfo -> info.copy(order = geminiInfo.order) },
+                        { info: SpeciesInfo -> info.copy(taxorder = geminiInfo.taxorder) },
                         { info: SpeciesInfo -> info.copy(family = geminiInfo.family) },
                         { info: SpeciesInfo -> info.copy(genus = geminiInfo.genus) },
                         { info: SpeciesInfo -> info.copy(species = geminiInfo.species) }
@@ -127,7 +147,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                             speciesInfo = updatedInfo,
                             loadingStage = LoadingStage.TAXONOMY
                         )
-                        delay(300)
+                        delay(200)
                     }
 
                     val contentStages = listOf(
@@ -153,28 +173,76 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                                 speciesInfo = currentInfo,
                                 loadingStage = stage
                             )
-                            delay(400)
+                            delay(300)
                         }
                     }
 
                     _uiState.value = _uiState.value.copy(isLoading = false, loadingStage = LoadingStage.COMPLETE)
 
                     withContext(Dispatchers.IO) {
-                        val savedPath = ImageUtils.saveBitmapToInternalStorage(context, imageFile)
+                        val savedPath = if (existingHistoryId != null) {
+                            // Lấy path cũ từ DB
+                            historyDao.getHistoryById(existingHistoryId)?.imagePath
+                        } else {
+                            ImageUtils.saveBitmapToInternalStorage(context, imageFile)
+                        }
+
                         if (savedPath != null) {
-                            historyDao.insert(HistoryEntry(
-                                imagePath = savedPath,
-                                speciesInfo = currentInfo ?: geminiInfo,
-                                timestamp = System.currentTimeMillis()
-                            ))
+                            if (existingHistoryId != null) {
+                                val info = currentInfo ?: geminiInfo
+                                historyDao.updateSpeciesDetails(
+                                    id = existingHistoryId,
+                                    commonName = info.commonName,
+                                    scientificName = info.scientificName,
+                                    kingdom = info.kingdom,
+                                    phylum = info.phylum,
+                                    className = info.className,
+                                    taxorder = info.taxorder,
+                                    family = info.family,
+                                    genus = info.genus,
+                                    species = info.species,
+                                    rank = info.rank,
+                                    description = info.description,
+                                    characteristics = info.characteristics,
+                                    distribution = info.distribution,
+                                    habitat = info.habitat,
+                                    conservationStatus = info.conservationStatus,
+                                    confidence = info.confidence,
+                                    timestamp = System.currentTimeMillis()
+                                )
+                                currentHistoryEntryId = existingHistoryId
+                            } else {
+                                // Tạo entry mới
+                                val newId = historyDao.insert(HistoryEntry(
+                                    imagePath = savedPath,
+                                    speciesInfo = currentInfo ?: geminiInfo,
+                                    timestamp = System.currentTimeMillis()
+                                ))
+                                currentHistoryEntryId = newId.toInt()
+                            }
                         }
                     }
                 } else {
                     _uiState.value = EcoLensUiState(isLoading = false, error = context.getString(R.string.error_no_result))
                 }
             } catch (e: Exception) {
-                _uiState.value = EcoLensUiState(isLoading = false, error = "Lỗi: ${e.message}")
+                val context = getApplication<Application>()
+                val errorMsg = when {
+                    e.message?.contains("429") == true -> context.getString(R.string.error_quota_exceeded)
+                    else -> context.getString(R.string.error_general, e.message)
+                }
+                _uiState.value = EcoLensUiState(isLoading = false, error = errorMsg)
             }
+        }
+    }
+
+    fun retryIdentification() {
+        currentImageUri?.let { uri ->
+            identifySpecies(
+                imageUri = uri,
+                languageCode = getApplication<Application>().resources.configuration.locales[0].language,
+                existingHistoryId = currentHistoryEntryId
+            )
         }
     }
 
@@ -375,7 +443,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 kingdom = formatTaxonomyRank(removeRankPrefix(rawInfo.kingdom ?: "", if (isVietnamese) "Giới" else "Kingdom"), isVietnamese),
                 phylum = formatTaxonomyRank(removeRankPrefix(rawInfo.phylum ?: "", if (isVietnamese) "Ngành" else "Phylum"), isVietnamese),
                 className = formatTaxonomyRank(removeRankPrefix(rawInfo.className ?: "", if (isVietnamese) "Lớp" else "Class"), isVietnamese),
-                order = formatTaxonomyRank(removeRankPrefix(rawInfo.order ?: "", if (isVietnamese) "Bộ" else "Order"), isVietnamese),
+                taxorder = formatTaxonomyRank(removeRankPrefix(rawInfo.taxorder ?: "", if (isVietnamese) "Bộ" else "Order"), isVietnamese),
                 family = formatTaxonomyRank(removeRankPrefix(rawInfo.family ?: "", if (isVietnamese) "Họ" else "Family"), isVietnamese),
                 genus = formatTaxonomyRank(removeRankPrefix(rawInfo.genus ?: "", if (isVietnamese) "Chi" else "Genus"), isVietnamese),
                 species = formatTaxonomyRank(removeRankPrefix(rawInfo.species ?: "", if (isVietnamese) "Loài" else "Species"), isVietnamese),
@@ -517,7 +585,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
           "kingdom": "Chỉ tên Tiếng Việt",
           "phylum": "Chỉ tên Tiếng Việt", 
           "className": "Chỉ tên Tiếng Việt",
-          "order": "Chỉ tên Tiếng Việt",
+          "taxorder": "Chỉ tên Tiếng Việt",
           "family": "Tên khoa học <i>(tên thường)</i>",
           "genus": "Tên khoa học <i>(tên thường)</i>",
           "species": "Tên khoa học <i>(tên thường)</i>",
@@ -547,7 +615,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
           "kingdom": "Name only",
           "phylum": "Name only",
           "className": "Name only", 
-          "order": "Name only",
+          "taxorder": "Name only",
           "family": "Scientific name <i>(common name)</i>",
           "genus": "Scientific name <i>(common name)</i>",
           "species": "Scientific name <i>(common name)</i>",
@@ -572,13 +640,9 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
         return if (match != null) {
             var beforeParentheses = text.substring(0, match.range.first)
-
             beforeParentheses = beforeParentheses.replace("_", "").replace("*", "").trim()
-
             var insideParentheses = match.groupValues[1]
-
             insideParentheses = insideParentheses.replace("_", "").replace("*", "").trim()
-
             "<b>$beforeParentheses</b> <i>($insideParentheses)</i>"
         } else {
             val cleanText = text.replace("_", "").replace("*", "").trim()
