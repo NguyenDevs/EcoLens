@@ -441,7 +441,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             }
 
             SpeciesInfo(
-                // Thay thế formatTaxonomyRank bằng thẻ <b> trực tiếp
                 kingdom = "<b>" + removeRankPrefix(rawInfo.kingdom, if (isVietnamese) "Giới" else "Kingdom") + "</b>",
                 phylum = "<b>" + removeRankPrefix(rawInfo.phylum, if (isVietnamese) "Ngành" else "Phylum") + "</b>",
                 className = "<b>" + removeRankPrefix(rawInfo.className, if (isVietnamese) "Lớp" else "Class") + "</b>",
@@ -450,9 +449,9 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                 genus = "<b>" + removeRankPrefix(rawInfo.genus, if (isVietnamese) "Chi" else "Genus") + "</b>",
                 species = "<b>" + removeRankPrefix(rawInfo.species, if (isVietnamese) "Loài" else "Species") + "</b>",
 
-                commonName = rawInfo.commonName,
+                commonName = rawInfo.commonName ?: "...",
                 scientificName = scientificName,
-                rank = rawInfo.rank,
+                rank = rawInfo.rank ?: "",
 
                 description = processMarkdown(rawInfo.description, isVietnamese = isVietnamese),
                 characteristics = processMarkdown(characteristicsText, isVietnamese = isVietnamese),
@@ -634,10 +633,11 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
 
 
+    // SỬA: Chấp nhận String? và xử lý an toàn
     private fun processMarkdown(text: String?, isConservationStatus: Boolean = false, isVietnamese: Boolean = true): String {
-        if (text.isBlank()) return ""
+        if (text.isNullOrBlank()) return ""
 
-        var result = text
+        var result = text!!
             .replace(Regex("\\*\\*(.+?)\\*\\*")) { "<b>${it.groupValues[1]}</b>" }
             .replace(Regex("##(.+?)##")) { "<font color='#00796B'><b>${it.groupValues[1]}</b></font>" }
             .replace(Regex("~~(.+?)~~")) { "<i>${it.groupValues[1]}</i>" }
@@ -699,8 +699,8 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     }
 
     private fun removeRankPrefix(text: String?, prefix: String): String {
-        return text.trim().replaceFirst(Regex("^(?i)$prefix\\s*[:\\-\\s]+"), "")
-            .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
-            .trim()
+        return text?.trim()?.replaceFirst(Regex("^(?i)$prefix\\s*[:\\-\\s]+"), "")
+            ?.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+            ?.trim() ?: ""
     }
 }
