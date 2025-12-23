@@ -179,46 +179,56 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
                     _uiState.value = _uiState.value.copy(isLoading = false, loadingStage = LoadingStage.COMPLETE)
 
-                    withContext(Dispatchers.IO) {
-                        val savedPath = if (existingHistoryId != null) {
-                            // Lấy path cũ từ DB
-                            historyDao.getHistoryById(existingHistoryId)?.imagePath
-                        } else {
-                            ImageUtils.saveBitmapToInternalStorage(context, imageFile)
-                        }
+                    // Kiểm tra thông tin hợp lệ trước khi lưu
+                    val infoToSave = currentInfo ?: geminiInfo
+                    val isValidInfo = infoToSave.commonName.isNotEmpty() &&
+                            infoToSave.commonName != "..." &&
+                            infoToSave.commonName != "N/A" &&
+                            !infoToSave.description.contains("An error occurred", ignoreCase = true) &&
+                            !infoToSave.description.contains("Đã xảy ra lỗi", ignoreCase = true)
 
-                        if (savedPath != null) {
-                            if (existingHistoryId != null) {
-                                val info = currentInfo ?: geminiInfo
-                                historyDao.updateSpeciesDetails(
-                                    id = existingHistoryId,
-                                    commonName = info.commonName,
-                                    scientificName = info.scientificName,
-                                    kingdom = info.kingdom,
-                                    phylum = info.phylum,
-                                    className = info.className,
-                                    taxorder = info.taxorder,
-                                    family = info.family,
-                                    genus = info.genus,
-                                    species = info.species,
-                                    rank = info.rank,
-                                    description = info.description,
-                                    characteristics = info.characteristics,
-                                    distribution = info.distribution,
-                                    habitat = info.habitat,
-                                    conservationStatus = info.conservationStatus,
-                                    confidence = info.confidence,
-                                    timestamp = System.currentTimeMillis()
-                                )
-                                currentHistoryEntryId = existingHistoryId
+                    if (isValidInfo) {
+                        withContext(Dispatchers.IO) {
+                            val savedPath = if (existingHistoryId != null) {
+                                // Lấy path cũ từ DB
+                                historyDao.getHistoryById(existingHistoryId)?.imagePath
                             } else {
-                                // Tạo entry mới
-                                val newId = historyDao.insert(HistoryEntry(
-                                    imagePath = savedPath,
-                                    speciesInfo = currentInfo ?: geminiInfo,
-                                    timestamp = System.currentTimeMillis()
-                                ))
-                                currentHistoryEntryId = newId.toInt()
+                                ImageUtils.saveBitmapToInternalStorage(context, imageFile)
+                            }
+
+                            if (savedPath != null) {
+                                if (existingHistoryId != null) {
+                                    val info = currentInfo ?: geminiInfo
+                                    historyDao.updateSpeciesDetails(
+                                        id = existingHistoryId,
+                                        commonName = info.commonName,
+                                        scientificName = info.scientificName,
+                                        kingdom = info.kingdom,
+                                        phylum = info.phylum,
+                                        className = info.className,
+                                        taxorder = info.taxorder,
+                                        family = info.family,
+                                        genus = info.genus,
+                                        species = info.species,
+                                        rank = info.rank,
+                                        description = info.description,
+                                        characteristics = info.characteristics,
+                                        distribution = info.distribution,
+                                        habitat = info.habitat,
+                                        conservationStatus = info.conservationStatus,
+                                        confidence = info.confidence,
+                                        timestamp = System.currentTimeMillis()
+                                    )
+                                    currentHistoryEntryId = existingHistoryId
+                                } else {
+                                    // Tạo entry mới
+                                    val newId = historyDao.insert(HistoryEntry(
+                                        imagePath = savedPath,
+                                        speciesInfo = currentInfo ?: geminiInfo,
+                                        timestamp = System.currentTimeMillis()
+                                    ))
+                                    currentHistoryEntryId = newId.toInt()
+                                }
                             }
                         }
                     }
@@ -655,6 +665,9 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
         var result = text
             .replace(Regex("""\*\*(.+?)\*\*""")) { "<b>${it.groupValues[1]}</b>" }
+            .replace(Regex("""__(.+?)__""")) { "<b>${it.groupValues[1]}</b>" }
+            .replace(Regex("""\*(.+?)\*""")) { "<i>${it.groupValues[1]}</i>" }
+            .replace(Regex("""_(.+?)_""")) { "<i>${it.groupValues[1]}</i>" }
             .replace("\n", "<br>")
 
         if (isConservationStatus) {
