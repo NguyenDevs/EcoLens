@@ -30,7 +30,7 @@
                     android:text="@string/label_common_name"
                     android:textColor="@color/green_primary"
                     android:textSize="26sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"/>
 
             <ImageView
                     android:id="@+id/btnShareInfo"
@@ -43,14 +43,13 @@
                     android:contentDescription="@string/share_info"
                     android:padding="10dp"
                     android:src="@drawable/ic_share"
-                    app:tint="@color/green_primary" />
+                    app:tint="@color/green_primary"/>
         </LinearLayout>
 
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:gravity="center_vertical"
+                android:gravity="top"
                 android:orientation="horizontal">
 
             <TextView
@@ -60,11 +59,10 @@
                     android:text="@string/label_scientific_name"
                     android:textColor="@color/text_secondary"
                     android:textSize="18sp"
-                    android:textStyle="italic" />
-
+                    android:textStyle="italic"/>
             <ImageView
                     android:id="@+id/btnCopyScientificName"
-                    android:visibility="gone"
+                    android:visibility="v"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_marginStart="8dp"
@@ -73,7 +71,19 @@
                     android:contentDescription="@string/copy_scientific_name"
                     android:padding="4dp"
                     android:src="@drawable/ic_copy"
-                    app:tint="@color/text_secondary" />
+                    app:tint="@color/text_secondary"/>
+            <ImageView
+                    android:id="@+id/btnRetryIdentification"
+                    android:visibility="gone"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/bg_white_rounded"
+                    android:backgroundTint="#F5F7F6"
+                    android:contentDescription="@string/share_info"
+                    android:padding="10dp"
+                    android:src="@drawable/ic_rotate"
+                    app:tint="@color/green_primary"/>
         </LinearLayout>
 
         <com.google.android.material.card.MaterialCardView
@@ -102,7 +112,7 @@
                         android:layout_height="18dp"
                         android:contentDescription="@string/confidence"
                         android:src="@drawable/ic_check_circle"
-                        app:tint="@color/green_dark" />
+                        app:tint="@color/green_dark"/>
 
                 <TextView
                         android:id="@+id/tvConfidence"
@@ -112,7 +122,7 @@
                         android:text="@string/confidence_format"
                         android:textColor="@color/green_dark"
                         android:textSize="13sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -121,7 +131,7 @@
                 android:layout_height="1dp"
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="24dp"
-                android:background="#F0F0F0" />
+                android:background="#F0F0F0"/>
 
         <TextView
                 android:layout_width="wrap_content"
@@ -130,7 +140,7 @@
                 android:text="@string/taxonomy_title"
                 android:textColor="@color/text_primary"
                 android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"/>
 
         <LinearLayout
                 android:id="@+id/taxonomyContainer"
@@ -153,14 +163,14 @@
                         android:layout_weight="0.3"
                         android:text="@string/label_kingdom"
                         android:textColor="@color/text_secondary"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"/>
                 <TextView
                         android:id="@+id/tvKingdom"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"/>
             </LinearLayout>
 
             <LinearLayout
@@ -175,14 +185,14 @@
                         android:layout_weight="0.3"
                         android:text="@string/label_phylum"
                         android:textColor="@color/text_secondary"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"/>
                 <TextView
                         android:id="@+id/tvPhylum"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"/>
             </LinearLayout>
 
             <LinearLayout
@@ -197,14 +207,14 @@
                         android:layout_weight="0.3"
                         android:text="@string/label_class"
                         android:textColor="@color/text_secondary"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"/>
                 <TextView
                         android:id="@+id/tvClass"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"/>
             </LinearLayout>
 
             <LinearLayout
@@ -219,14 +229,14 @@
                         android:layout_weight="0.3"
                         android:text="@string/label_order"
                         android:textColor="@color/text_secondary"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"/>
                 <TextView
                         android:id="@+id/tvOrder"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"/>
             </LinearLayout>
 
             <LinearLayout
@@ -241,14 +251,14 @@
                         android:layout_weight="0.3"
                         android:text="@string/label_family"
                         android:textColor="@color/text_secondary"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"/>
                 <TextView
                         android:id="@+id/tvFamily"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"/>
             </LinearLayout>
 
             <LinearLayout
@@ -263,14 +273,14 @@
                         android:layout_weight="0.3"
                         android:text="@string/label_genus"
                         android:textColor="@color/text_secondary"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"/>
                 <TextView
                         android:id="@+id/tvGenus"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"/>
             </LinearLayout>
 
             <LinearLayout
@@ -284,14 +294,14 @@
                         android:layout_weight="0.3"
                         android:text="@string/label_species"
                         android:textColor="@color/text_secondary"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"/>
                 <TextView
                         android:id="@+id/tvSpecies"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"/>
             </LinearLayout>
 
         </LinearLayout>
@@ -310,7 +320,7 @@
                     android:text="@string/section_description"
                     android:textSize="20sp"
                     android:textColor="@color/text_primary"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"/>
 
             <View
                     android:layout_width="match_parent"
@@ -325,7 +335,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="15sp"
                     android:textColor="@color/text_secondary"
-                    android:lineSpacingExtra="6dp" />
+                    android:lineSpacingExtra="6dp"/>
         </LinearLayout>
 
         <LinearLayout
@@ -342,7 +352,7 @@
                     android:text="@string/section_characteristics"
                     android:textSize="20sp"
                     android:textColor="@color/text_primary"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"/>
 
             <View
                     android:layout_width="match_parent"
@@ -357,7 +367,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="15sp"
                     android:textColor="@color/text_secondary"
-                    android:lineSpacingExtra="6dp" />
+                    android:lineSpacingExtra="6dp"/>
         </LinearLayout>
 
         <LinearLayout
@@ -374,7 +384,7 @@
                     android:text="@string/section_distribution"
                     android:textSize="20sp"
                     android:textColor="@color/text_primary"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"/>
 
             <View
                     android:layout_width="match_parent"
@@ -389,7 +399,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="15sp"
                     android:textColor="@color/text_secondary"
-                    android:lineSpacingExtra="6dp" />
+                    android:lineSpacingExtra="6dp"/>
         </LinearLayout>
 
         <LinearLayout
@@ -406,7 +416,7 @@
                     android:text="@string/section_habitat"
                     android:textSize="20sp"
                     android:textColor="@color/text_primary"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"/>
 
             <View
                     android:layout_width="match_parent"
@@ -421,7 +431,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="15sp"
                     android:textColor="@color/text_secondary"
-                    android:lineSpacingExtra="6dp" />
+                    android:lineSpacingExtra="6dp"/>
         </LinearLayout>
 
         <LinearLayout
@@ -438,7 +448,7 @@
                     android:text="@string/section_conservation"
                     android:textSize="20sp"
                     android:textColor="@color/text_primary"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"/>
 
             <View
                     android:layout_width="match_parent"
@@ -453,7 +463,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="15sp"
                     android:textColor="@color/text_secondary"
-                    android:lineSpacingExtra="6dp" />
+                    android:lineSpacingExtra="6dp"/>
         </LinearLayout>
 
     </LinearLayout>
