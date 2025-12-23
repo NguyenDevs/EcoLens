@@ -10,7 +10,7 @@ data class SpeciesInfo(
     val kingdom: String = "",
     val phylum: String = "",
     val className: String = "",
-    val order: String = "",
+    val taxorder: String = "",
     val family: String = "",
     val genus: String = "",
     val species: String = "",
