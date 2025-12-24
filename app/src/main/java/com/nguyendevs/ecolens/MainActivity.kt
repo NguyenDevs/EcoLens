@@ -66,8 +66,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var speciesInfoHandler: SpeciesInfoHandler
     private lateinit var viewModel: EcoLensViewModel
 
-    private var historyFragment: HistoryFragment? = null
-    private var chatHistoryFragment: ChatHistoryFragment? = null
+    private val historyFragment = HistoryFragment()
+    private val chatHistoryFragment = ChatHistoryFragment()
     private var imageUri: Uri? = null
     private var isExpandedState = false
     private var stopLoadingJob: Job? = null
@@ -109,6 +109,7 @@ class MainActivity : AppCompatActivity() {
         setupObservers()
 
         updateNavigationState(R.id.nav_home)
+        preloadFragments()
     }
 
     private fun initViews() {
@@ -135,8 +136,25 @@ class MainActivity : AppCompatActivity() {
         errorCard = findViewById(R.id.errorCard)
         errorText = findViewById(R.id.errorText)
         speciesInfoCard = findViewById(R.id.speciesInfoCard)
+
     }
 
+    private fun preloadFragments() {
+        lifecycleScope.launch {
+            delay(500)
+
+            if (!isDestroyed) {
+                val transaction = supportFragmentManager.beginTransaction()
+                if (!historyFragment.isAdded) {
+                    transaction.add(R.id.historyContainer, historyFragment, "HISTORY")
+                }
+                if (!chatHistoryFragment.isAdded) {
+                    transaction.add(R.id.myGardenContainer, chatHistoryFragment, "CHAT_HISTORY")
+                }
+                transaction.commitAllowingStateLoss()
+            }
+        }
+    }
     private fun setupViewModel() {
         viewModel = ViewModelProvider(
             this,
@@ -287,7 +305,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val transition = Fade()
-        transition.duration = 100
+        transition.duration = 120
         TransitionManager.beginDelayedTransition(mainContent, transition)
 
         homeContainer.visibility = View.GONE
@@ -319,21 +337,35 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.nav_history -> {
                 fragmentContainer.visibility = View.VISIBLE
+                if (!historyFragment.isAdded) {
+                    supportFragmentManager.beginTransaction()
+                        .add(R.id.historyContainer, historyFragment, "HISTORY")
+                        .commitNowAllowingStateLoss()
+                }
+                /*
                 val transaction = supportFragmentManager.beginTransaction()
                 if (historyFragment == null) {
                     historyFragment = HistoryFragment()
                     transaction.add(R.id.historyContainer, historyFragment!!, "HISTORY")
                 }
                 transaction.commitNowAllowingStateLoss()
+                 */
             }
             R.id.nav_my_garden -> {
                 myGardenContainer.visibility = View.VISIBLE
+                if (!chatHistoryFragment.isAdded) {
+                    supportFragmentManager.beginTransaction()
+                        .add(R.id.myGardenContainer, chatHistoryFragment, "CHAT_HISTORY")
+                        .commitNowAllowingStateLoss()
+                }
+                /*
                 val transaction = supportFragmentManager.beginTransaction()
                 if (chatHistoryFragment == null) {
                     chatHistoryFragment = ChatHistoryFragment()
                     transaction.add(R.id.myGardenContainer, chatHistoryFragment!!, "CHAT_HISTORY")
                 }
                 transaction.commitNowAllowingStateLoss()
+                 */
             }
             R.id.nav_settings -> settingsContainer.visibility = View.VISIBLE
         }

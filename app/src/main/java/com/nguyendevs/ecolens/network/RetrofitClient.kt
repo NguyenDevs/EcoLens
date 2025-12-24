@@ -60,7 +60,7 @@ object RetrofitClient {
                                 Toast.LENGTH_LONG
                             ).show()
                         }
-
+/*
                         // Trường hợp 2: Có retry nhưng thành công
                         retryCount > 1 && successKey != null && successKey != "none" -> {
                             Toast.makeText(
@@ -78,6 +78,8 @@ object RetrofitClient {
                                 Toast.LENGTH_LONG
                             ).show()
                         }
+                        
+ */
                     }
                 }
             }
