@@ -85,8 +85,6 @@ class SpeciesInfoHandler(
             LoadingStage.SCIENTIFIC_NAME -> {
                 isInitialLoad = true
                 displayCommonName(SpeciesInfo(commonName = "...", scientificName = ""))
-               // displayScientificName(info)
-               // displayConfidence(info, isWaiting = true)
                 prepareTaxonomyContainer()
                 setupCopyButton(info)
                 showCopyButtonAnimation()
@@ -94,8 +92,6 @@ class SpeciesInfoHandler(
             }
 
             LoadingStage.COMMON_NAME -> {
-               // displayCommonName(info)
-               // displayConfidence(info, isWaiting = false)
             }
 
             LoadingStage.TAXONOMY -> {
@@ -103,11 +99,15 @@ class SpeciesInfoHandler(
             }
 
             LoadingStage.DESCRIPTION -> {
+                stopTaxonomyShimmer()
+                displayTaxonomyWaterfall(info)
                 displaySection(R.id.sectionDescription, R.id.tvDescription, info.description, shouldScroll = false)
                 checkIfAllSectionsRendered(info, imageUri)
             }
 
             LoadingStage.CHARACTERISTICS -> {
+                stopTaxonomyShimmer()
+                displayTaxonomyWaterfall(info)
                 displaySection(R.id.sectionCharacteristics, R.id.tvCharacteristics, info.characteristics, shouldScroll = false)
                 checkIfAllSectionsRendered(info, imageUri)
             }
@@ -129,6 +129,9 @@ class SpeciesInfoHandler(
 
             LoadingStage.COMPLETE -> {
                 isInitialLoad = false
+                stopTaxonomyShimmer()
+                displayTaxonomyWaterfall(info)
+
                 if (allSectionsRendered) {
                     setupShareButton(info, imageUri)
                     showShareButtonAnimation()
@@ -351,7 +354,6 @@ class SpeciesInfoHandler(
     }
 
     private fun displayTaxonomyWaterfall(info: SpeciesInfo) {
-        stopTaxonomyShimmer()
         val container = viewCache[R.id.taxonomyContainer]
         container?.visibility = View.VISIBLE
         container?.alpha = 1f
@@ -632,9 +634,9 @@ class SpeciesInfoHandler(
         btnRetry?.visibility = View.GONE
     }
 
-    private fun showCopyButtonAnimation(){
+    private fun showCopyButtonAnimation() {
         val btnCopy = viewCache[R.id.btnCopyScientificName]
-        btnCopy?.apply{
+        btnCopy?.apply {
             visibility = View.VISIBLE
             alpha = 0f
             scaleX = 0.8f

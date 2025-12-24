@@ -171,7 +171,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun initManagers() {
         permissionManager = PermissionManager(this, permissionLauncher)
-
+        speakerManager = SpeakerManager(this)
+        speakerManager.onSpeechFinished = {
+            runOnUiThread { toggleSpeakerUI(false) }
+        }
         speciesInfoHandler = SpeciesInfoHandler(
             this,
             speciesInfoCard,
@@ -179,14 +182,17 @@ class MainActivity : AppCompatActivity() {
                 searchBarHandler.expandSearchBar(copiedText)
             },
             onRetryClick = {
+                speakerManager.shutdown()
+                if(fabSpeak.isVisible){
+                    fabSpeak.hide()
+                } else {
+                    fabMute.hide()
+                }
                 viewModel.retryIdentification()
             }
         )
 
-        speakerManager = SpeakerManager(this)
-        speakerManager.onSpeechFinished = {
-            runOnUiThread { toggleSpeakerUI(false) }
-        }
+
 
         supportFragmentManager.addOnBackStackChangedListener {
             val count = supportFragmentManager.backStackEntryCount

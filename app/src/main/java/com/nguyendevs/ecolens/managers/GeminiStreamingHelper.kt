@@ -70,6 +70,19 @@ class GeminiStreamingHelper(
                         }
                     }
                 }
+
+                if (accumulatedJson.isNotBlank()) {
+                    try {
+                        val cleanedJson = cleanJsonString(accumulatedJson)
+                        val taxonomyInfo = gson.fromJson(
+                            cleanedJson,
+                            TaxonomyResponse::class.java
+                        )
+                        updateTaxonomyUISync(taxonomyInfo, scientificName, isVietnamese, confidence, onStateUpdate)
+                    } catch (e: Exception) {
+                        Log.e("StreamTaxonomy", "Final parse error: ${e.message}")
+                    }
+                }
             }
         } catch (e: Exception) {
             Log.e("StreamTaxonomy", "Error: ${e.message}")
@@ -136,6 +149,19 @@ class GeminiStreamingHelper(
                                 }
                             }
                         }
+
+                        if (accumulatedJson.isNotBlank()) {
+                            try {
+                                val cleanedJson = cleanJsonString(accumulatedJson)
+                                val detailsInfo = gson.fromJson(
+                                    cleanedJson,
+                                    DetailsResponse::class.java
+                                )
+                                updateDetailsUISync(detailsInfo, isVietnamese, currentInfo, onStateUpdate)
+                            } catch (e: Exception) {
+                                Log.e("StreamDetails", "Final parse error: ${e.message}")
+                            }
+                        }
                     }
                 }
             }
@@ -164,91 +190,66 @@ class GeminiStreamingHelper(
                 speciesInfo = updated,
                 loadingStage = LoadingStage.COMMON_NAME
             ))
-            delay(200)
+            delay(100)
         }
+
+        var hasUpdates = false
 
         taxonomy.kingdom?.let {
             updated = updated.copy(
                 kingdom = "<b>${markdownProcessor.removeRankPrefix(it, if (isVietnamese) "Giới" else "Kingdom")}</b>"
             )
-            onStateUpdate(EcoLensUiState(
-                isLoading = true,
-                speciesInfo = updated,
-                loadingStage = LoadingStage.TAXONOMY
-            ))
-            delay(150)
+            hasUpdates = true
         }
 
         taxonomy.phylum?.let {
             updated = updated.copy(
                 phylum = "<b>${markdownProcessor.removeRankPrefix(it, if (isVietnamese) "Ngành" else "Phylum")}</b>"
             )
-            onStateUpdate(EcoLensUiState(
-                isLoading = true,
-                speciesInfo = updated,
-                loadingStage = LoadingStage.TAXONOMY
-            ))
-            delay(150)
+            hasUpdates = true
         }
 
         taxonomy.className?.let {
             updated = updated.copy(
                 className = "<b>${markdownProcessor.removeRankPrefix(it, if (isVietnamese) "Lớp" else "Class")}</b>"
             )
-            onStateUpdate(EcoLensUiState(
-                isLoading = true,
-                speciesInfo = updated,
-                loadingStage = LoadingStage.TAXONOMY
-            ))
-            delay(150)
+            hasUpdates = true
         }
 
         taxonomy.taxorder?.let {
             updated = updated.copy(
                 taxorder = "<b>${markdownProcessor.removeRankPrefix(it, if (isVietnamese) "Bộ" else "Order")}</b>"
             )
-            onStateUpdate(EcoLensUiState(
-                isLoading = true,
-                speciesInfo = updated,
-                loadingStage = LoadingStage.TAXONOMY
-            ))
-            delay(150)
+            hasUpdates = true
         }
 
         taxonomy.family?.let {
             updated = updated.copy(
                 family = "<b>${markdownProcessor.removeRankPrefix(it, if (isVietnamese) "Họ" else "Family")}</b>"
             )
-            onStateUpdate(EcoLensUiState(
-                isLoading = true,
-                speciesInfo = updated,
-                loadingStage = LoadingStage.TAXONOMY
-            ))
-            delay(150)
+            hasUpdates = true
         }
 
         taxonomy.genus?.let {
             updated = updated.copy(
                 genus = "<b>${markdownProcessor.removeRankPrefix(it, if (isVietnamese) "Chi" else "Genus")}</b>"
             )
-            onStateUpdate(EcoLensUiState(
-                isLoading = true,
-                speciesInfo = updated,
-                loadingStage = LoadingStage.TAXONOMY
-            ))
-            delay(150)
+            hasUpdates = true
         }
 
         taxonomy.species?.let {
             updated = updated.copy(
                 species = "<b>${markdownProcessor.removeRankPrefix(it, if (isVietnamese) "Loài" else "Species")}</b>"
             )
+            hasUpdates = true
+        }
+
+        if (hasUpdates) {
             onStateUpdate(EcoLensUiState(
                 isLoading = true,
                 speciesInfo = updated,
                 loadingStage = LoadingStage.TAXONOMY
             ))
-            delay(150)
         }
     }
 
@@ -276,7 +277,6 @@ class GeminiStreamingHelper(
                     speciesInfo = updated,
                     loadingStage = LoadingStage.DESCRIPTION
                 ))
-                delay(200)
             }
         }
 
@@ -289,7 +289,6 @@ class GeminiStreamingHelper(
                 speciesInfo = updated,
                 loadingStage = LoadingStage.CHARACTERISTICS
             ))
-            delay(200)
         }
 
         details.distribution?.let { dist ->
@@ -302,7 +301,6 @@ class GeminiStreamingHelper(
                     speciesInfo = updated,
                     loadingStage = LoadingStage.DISTRIBUTION
                 ))
-                delay(200)
             }
         }
 
@@ -316,7 +314,6 @@ class GeminiStreamingHelper(
                     speciesInfo = updated,
                     loadingStage = LoadingStage.HABITAT
                 ))
-                delay(200)
             }
         }
 
@@ -334,7 +331,6 @@ class GeminiStreamingHelper(
                     speciesInfo = updated,
                     loadingStage = LoadingStage.CONSERVATION
                 ))
-                delay(200)
             }
         }
     }
