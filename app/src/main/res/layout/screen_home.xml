@@ -12,6 +12,7 @@
             android:layout_height="wrap_content"
             android:background="@color/background_soft"
             android:orientation="vertical"
+            android:animateLayoutChanges="true"
             android:paddingStart="20dp"
             android:paddingTop="24dp"
             android:paddingEnd="20dp"

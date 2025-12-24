@@ -11,6 +11,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:paddingStart="20dp"
+            android:animateLayoutChanges="true"
             android:paddingEnd="20dp"
             android:paddingTop="24dp"
             android:paddingBottom="10dp">
