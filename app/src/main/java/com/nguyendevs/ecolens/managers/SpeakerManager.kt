@@ -140,7 +140,10 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
         // 2. Loại bỏ ký tự Markdown (*, #, _, ~) nếu còn sót lại
         result = result.replace(Regex("[*#_~]"), "")
 
-        // 3. Chuẩn hóa khoảng trắng
+        // 3. Loại bỏ Emoji và các ký tự biểu tượng (Symbol, other)
+        result = result.replace(Regex("[\\p{So}]"), "")
+
+        // 4. Chuẩn hóa khoảng trắng
         return result.replace(Regex("\\s+"), " ").trim()
     }
 
