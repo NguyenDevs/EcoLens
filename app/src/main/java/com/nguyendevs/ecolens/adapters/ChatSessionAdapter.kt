@@ -31,7 +31,7 @@ class ChatSessionAdapter(
         if (!::markwon.isInitialized) {
             markwon = Markwon.create(parent.context)
         }
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat_session, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat_entry, parent, false)
         return ViewHolder(view)
     }
 

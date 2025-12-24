@@ -23,7 +23,6 @@
                 android:orientation="horizontal"
                 android:gravity="top">
 
-            <!-- Cột text -->
             <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -67,7 +66,6 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Cột icon -->
             <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

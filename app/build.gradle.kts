@@ -112,6 +112,9 @@ dependencies {
     // AI - Gemini SDK
     implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
 
+    // ML Kit Translate
+    implementation("com.google.mlkit:translate:17.0.2")
+
     // Utilities
     implementation("com.google.guava:guava:31.1-android")
 
