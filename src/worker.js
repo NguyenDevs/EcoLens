@@ -218,7 +218,7 @@ export default {
                 try {
                     console.log('[iNaturalist] Fetching token from renewer worker...');
                     const tokenResp = await fetch('https://inaturalist-token-renewer.tainguyen-devs.workers.dev/token', {
-                        signal: AbortSignal.timeout(5000)
+                        signal: AbortSignal.timeout(10000)  // Tăng lên 10s, hoặc comment out dòng này để remove timeout
                     });
 
                     if (tokenResp.ok) {
@@ -227,13 +227,23 @@ export default {
                         console.log('[iNaturalist] Token fetched:', token ? '✓ Found (' + token.substring(0, 20) + '...)' : '✗ Empty');
 
                         if (tokenData.lastUpdated) {
-                            const lastUpdate = new Date(tokenData.lastUpdated);
+                            const lastUpdate = new Date(tokenData.lastUpdated);  // Sửa 'lastUpdated' thành 'lastUpdated' nếu KV dùng key này
                             const hoursSince = (Date.now() - lastUpdate.getTime()) / 3600000;
                             console.log('[iNaturalist] Token age:', hoursSince.toFixed(1), 'hours');
+                            if (hoursSince > 20) {  // Nếu token cũ quá 20h, trigger renew tự động
+                                console.log('[iNaturalist] Token too old - triggering renew...');
+                                await fetch('https://inaturalist-token-renewer.tainguyen-devs.workers.dev/renew');
+                                // Fetch token lại sau renew
+                                const newTokenResp = await fetch('https://inaturalist-token-renewer.tainguyen-devs.workers.dev/token');
+                                if (newTokenResp.ok) {
+                                    const newData = await newTokenResp.json();
+                                    token = newData.token;
+                                }
+                            }
                         }
                     } else {
                         console.warn('[iNaturalist] Failed to fetch token from renewer, status:', tokenResp.status);
-                        // Fallback to env token
+                        // Fallback to env token (giữ tạm, nhưng sau này xóa nếu renewer ổn định)
                         token = env.INATURALIST_API_TOKEN;
                         console.log('[iNaturalist] Using fallback token from env');
                     }
@@ -302,7 +312,7 @@ export default {
         }
 
         // ==================== Root / Default ====================
-        return new Response('API Proxy Active – /gemini, /gemini/stream, /inaturalist/*', {
+        return new Response('API Proxy Active – /gemini, /gemini/stream', {
             headers: corsHeaders
         });
     }
