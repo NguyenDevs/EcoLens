@@ -212,7 +212,11 @@ export default {
             try {
                 const inaturalistPath = url.pathname.replace('/inaturalist', '');
                 const inaturalistUrl = `https://api.inaturalist.org${inaturalistPath}${url.search}`;
-                const token = env.INATURALIST_API_TOKEN;
+
+                // ĐỌC TOKEN TỪ KV (thay vì env)
+                const token = await env.INATURALIST_KV.get('API_TOKEN');
+
+                console.log('Using token from KV:', token ? token.substring(0, 20) + '...' : 'none');
 
                 const headers = new Headers();
                 if (token) {
