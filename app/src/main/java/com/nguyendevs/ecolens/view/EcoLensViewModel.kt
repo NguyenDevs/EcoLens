@@ -56,8 +56,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         val taxorder: String? = null,
         val family: String? = null,
         val genus: String? = null,
-        val species: String? = null,
-        val rank: String? = null
+        val species: String? = null
     )
 
     private data class DetailsResponse(
@@ -410,8 +409,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
               "taxorder": "Tên Tiếng Việt",
               "family": "Tên khoa học",
               "genus": "Tên khoa học",
-              "species": "Tên khoa học",
-              "rank": "Cấp phân loại"
+              "species": "Tên khoa học"
             }
             
             CHỈ TRẢ VỀ JSON, KHÔNG THÊM TEXT KHÁC.
@@ -429,8 +427,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
               "taxorder": "Order name",
               "family": "Family name",
               "genus": "Genus name",
-              "species": "Species name",
-              "rank": "Rank"
+              "species": "Species name"
             }
             
             RETURN ONLY JSON, NO ADDITIONAL TEXT.
@@ -450,11 +447,11 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             
             === JSON FORMAT ===
             {
-              "description": "Tổng quan 4 câu, dùng **in đậm** và ##xanh đậm##",
-              "characteristics": "Danh sách gạch đầu dòng, mỗi dòng bắt đầu với •",
-              "distribution": "Ưu tiên Việt Nam, dùng ##xanh đậm## cho địa danh",
-              "habitat": "Mô tả môi trường sống",
-              "conservationStatus": "Một trong: Cực kỳ nguy cấp, Nguy cấp, Sách Đỏ Việt Nam, Sắp nguy cấp, Ít lo ngại, Chưa đánh giá"
+              "description": "Tổng quan 4 câu ngắn gọn, dùng **in đậm** cho đặc điểm nổi bật và ##xanh đậm## cho địa danh, tên riêng, số đo.",
+              "characteristics": "Danh sách gạch đầu dòng, mỗi dòng bắt đầu với • và một ý về hình thái, kích thước, màu sắc. Dùng **in đậm** và ##xanh đậm##.",
+              "distribution": "Ưu tiên Việt Nam trước (nếu có), sau đó toàn cầu. Dùng ##xanh đậm## cho tên địa danh.",
+              "habitat": "Mô tả chi tiết môi trường sống.",
+              "conservationStatus": "Chỉ ghi một trong các trạng thái: Cực kỳ nguy cấp, Nguy cấp, Sách Đỏ Việt Nam, Sắp nguy cấp, Ít lo ngại, Chưa đánh giá. Thêm một chút thông tin bổ sung từ IUCN nếu có."
             }
             
             CHỈ TRẢ VỀ JSON.
@@ -470,11 +467,11 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             
             === JSON FORMAT ===
             {
-              "description": "4-sentence overview with **bold** and ##green##",
-              "characteristics": "Bullet list, each line starts with •",
-              "distribution": "Vietnam first if applicable, use ##green## for locations",
+              "description": "4-sentence overview with **bold** for key features and ##green highlight## for places/names/measurements.",
+              "characteristics": "Bullet list, each line starts with • covering morphology, size, colors. Use **bold** and ##green highlight##.",
+              "distribution": "Vietnam first if applicable, then worldwide. Use ##green highlight## for locations.",
               "habitat": "Environment details",
-              "conservationStatus": "One of: Critically Endangered, Endangered, Vulnerable, Near Threatened, Least Concern, Not Evaluated"
+              "conservationStatus": "Only write one of these statuses: Critically Endangered, Endangered, Vulnerable (Vietnam Red Data Book), Near Threatened, Least Concern, Not Evaluated. Add some additional IUCN info if available."
             }
             
             RETURN ONLY JSON.
@@ -512,7 +509,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
                             family = currentInfo.family,
                             genus = currentInfo.genus,
                             species = currentInfo.species,
-                            rank = currentInfo.rank,
                             description = currentInfo.description,
                             characteristics = currentInfo.characteristics,
                             distribution = currentInfo.distribution,

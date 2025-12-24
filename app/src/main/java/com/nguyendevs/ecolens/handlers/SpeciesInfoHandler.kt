@@ -35,11 +35,9 @@ class SpeciesInfoHandler(
     private val handlerScope = CoroutineScope(Dispatchers.Main + Job())
     private val viewCache = mutableMapOf<Int, View>()
     private val displayedRows = mutableSetOf<Int>()
-
-    // Tracking đã render sections để tránh scroll giật
     private val renderedSections = mutableSetOf<Int>()
     private var isInitialLoad = true
-
+    private var allSectionsRendered = false
     private var confidenceRotationAnimator: ObjectAnimator? = null
     private var taxonomyShimmerAnimator: ValueAnimator? = null
 
@@ -63,6 +61,7 @@ class SpeciesInfoHandler(
                 clearAllViews()
                 isInitialLoad = true
                 renderedSections.clear()
+                allSectionsRendered = false
             }
 
             LoadingStage.SCIENTIFIC_NAME -> {
@@ -87,30 +86,35 @@ class SpeciesInfoHandler(
 
             LoadingStage.DESCRIPTION -> {
                 displaySection(R.id.sectionDescription, R.id.tvDescription, info.description, shouldScroll = false)
+                checkIfAllSectionsRendered(info, imageUri)
             }
 
             LoadingStage.CHARACTERISTICS -> {
                 displaySection(R.id.sectionCharacteristics, R.id.tvCharacteristics, info.characteristics, shouldScroll = false)
+                checkIfAllSectionsRendered(info, imageUri)
             }
 
             LoadingStage.DISTRIBUTION -> {
                 displaySection(R.id.sectionDistribution, R.id.tvDistribution, info.distribution, shouldScroll = false)
+                checkIfAllSectionsRendered(info, imageUri)
             }
 
             LoadingStage.HABITAT -> {
                 displaySection(R.id.sectionHabitat, R.id.tvHabitat, info.habitat, shouldScroll = false)
+                checkIfAllSectionsRendered(info, imageUri)
             }
 
             LoadingStage.CONSERVATION -> {
                 displayConservationStatus(info.conservationStatus, shouldScroll = false)
+                checkIfAllSectionsRendered(info, imageUri)
             }
 
             LoadingStage.COMPLETE -> {
                 isInitialLoad = false
-                setupShareButton(info, imageUri)
-                showShareButtonAnimation()
-
-                // Hiển thị nút retry nếu confidence < 50%
+                if (allSectionsRendered) {
+                    setupShareButton(info, imageUri)
+                    showShareButtonAnimation()
+                }
                 if (info.confidence < 50.0) {
                     showRetryButtonAnimation()
                 } else {
@@ -169,6 +173,7 @@ class SpeciesInfoHandler(
     private fun clearAllViews() {
         displayedRows.clear()
         renderedSections.clear()
+        allSectionsRendered = false
         stopConfidenceAnimation()
         stopTaxonomyShimmer()
 
@@ -192,6 +197,29 @@ class SpeciesInfoHandler(
             R.id.tvFamily, R.id.tvGenus, R.id.tvSpecies
         )
         textViews.forEach { (viewCache[it] as? TextView)?.text = "" }
+    }
+
+    private fun checkIfAllSectionsRendered(info: SpeciesInfo, imageUri: Uri?) {
+        val sectionsWithContent = mutableSetOf<Int>()
+
+        if (info.description.isNotEmpty()) sectionsWithContent.add(R.id.sectionDescription)
+        if (info.characteristics.isNotEmpty()) sectionsWithContent.add(R.id.sectionCharacteristics)
+        if (info.distribution.isNotEmpty()) sectionsWithContent.add(R.id.sectionDistribution)
+        if (info.habitat.isNotEmpty()) sectionsWithContent.add(R.id.sectionHabitat)
+        if (info.conservationStatus.isNotEmpty()) sectionsWithContent.add(R.id.sectionConservation)
+
+        val allRendered = sectionsWithContent.all { sectionId ->
+            renderedSections.contains(sectionId)
+        }
+
+        if (allRendered && !allSectionsRendered) {
+            allSectionsRendered = true
+
+            if (!isInitialLoad) {
+                setupShareButton(info, imageUri)
+                showShareButtonAnimation()
+            }
+        }
     }
 
     private fun displayScientificName(info: SpeciesInfo) {
@@ -462,17 +490,19 @@ class SpeciesInfoHandler(
                         .setDuration(450)
                         .setInterpolator(DecelerateInterpolator())
                         .withEndAction {
-                            // Chỉ scroll nếu đây là lần đầu render và shouldScroll = true
                             if (!wasAlreadyRendered && shouldScroll && !isInitialLoad) {
                                 smoothScrollToView(sectionView)
                             }
                             renderedSections.add(sectionId)
                         }
                         .start()
+                } else {
+                    renderedSections.add(sectionId)
                 }
             }
         } else {
             section?.visibility = View.GONE
+            renderedSections.add(sectionId)
         }
     }
 
@@ -497,17 +527,19 @@ class SpeciesInfoHandler(
                         .setDuration(400)
                         .setInterpolator(DecelerateInterpolator())
                         .withEndAction {
-                            // Chỉ scroll nếu đây là lần đầu render và shouldScroll = true
                             if (!wasAlreadyRendered && shouldScroll && !isInitialLoad) {
                                 smoothScrollToView(sectionView)
                             }
                             renderedSections.add(R.id.sectionConservation)
                         }
                         .start()
+                } else {
+                    renderedSections.add(R.id.sectionConservation)
                 }
             }
         } else {
             section?.visibility = View.GONE
+            renderedSections.add(R.id.sectionConservation)
         }
     }
 

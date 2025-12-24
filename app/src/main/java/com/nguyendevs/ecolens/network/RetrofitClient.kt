@@ -29,6 +29,7 @@ object RetrofitClient {
         val request = chain.request()
         val response = chain.proceed(request)
 
+        // ==================== iNaturalist Error ====================
         if (response.code == 401 && request.url.toString().contains("inaturalist")) {
             appContext?.let { context ->
                 android.os.Handler(android.os.Looper.getMainLooper()).post {
@@ -40,15 +41,44 @@ object RetrofitClient {
                 }
             }
         }
-        // Thêm xử lý lỗi 429 cho Gemini
-        else if (response.code == 429) {
+
+        // ==================== Gemini Retry Info ====================
+        else if (request.url.toString().contains("gemini")) {
+            val retryCount = response.header("X-Gemini-Retry-Count")?.toIntOrNull() ?: 0
+            val failedKeys = response.header("X-Gemini-Failed-Keys")?.split(",")?.filter { it.isNotEmpty() } ?: emptyList()
+            val successKey = response.header("X-Gemini-Success-Key")
+            val allFailed = response.header("X-Gemini-All-Failed") == "true"
+
             appContext?.let { context ->
                 android.os.Handler(android.os.Looper.getMainLooper()).post {
-                    Toast.makeText(
-                        context,
-                        "Vượt hạn mức token Gemini. Vui lòng thử lại sau.",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    when {
+                        // Trường hợp 1: Tất cả keys đều hết quota
+                        allFailed -> {
+                            Toast.makeText(
+                                context,
+                                "⚠️ Tất cả ${failedKeys.size} API keys đều hết quota. Vui lòng thử lại sau.",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+
+                        // Trường hợp 2: Có retry nhưng thành công
+                        retryCount > 1 && successKey != null && successKey != "none" -> {
+                            Toast.makeText(
+                                context,
+                                "✓ Đã chuyển sang API key #${successKey.toInt() + 1} (${failedKeys.size} key hết quota)",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
+                        // Trường hợp 3: Lỗi 429 đơn lẻ (không phải từ retry logic)
+                        response.code == 429 && retryCount == 0 -> {
+                            Toast.makeText(
+                                context,
+                                "Vượt hạn mức token Gemini. Vui lòng thử lại sau.",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    }
                 }
             }
         }

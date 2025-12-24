@@ -14,7 +14,6 @@ data class SpeciesInfo(
     val family: String = "",
     val genus: String = "",
     val species: String = "",
-    val rank: String = "",
     val description: String = "",
     val characteristics: String = "",
     val distribution: String = "",
