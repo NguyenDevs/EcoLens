@@ -26,9 +26,6 @@
                 android:textSize="32sp"
                 android:textStyle="bold"/>
 
-        <!-- Thêm spacer để cân bằng với phần Options header của History -->
-
-
         <!-- Wrap RecyclerView và Empty State trong FrameLayout giống Layout 1 -->
         <FrameLayout
                 android:layout_width="match_parent"

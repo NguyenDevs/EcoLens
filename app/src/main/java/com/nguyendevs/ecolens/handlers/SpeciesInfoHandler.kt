@@ -95,6 +95,7 @@ class SpeciesInfoHandler(
             }
 
             LoadingStage.TAXONOMY -> {
+                stopTaxonomyShimmer()
                 displayTaxonomyWaterfall(info)
             }
 
@@ -132,10 +133,11 @@ class SpeciesInfoHandler(
                 stopTaxonomyShimmer()
                 displayTaxonomyWaterfall(info)
 
-                if (allSectionsRendered) {
-                    setupShareButton(info, imageUri)
-                    showShareButtonAnimation()
-                }
+                allSectionsRendered = true
+
+                setupShareButton(info, imageUri)
+                showShareButtonAnimation()
+
                 if (info.confidence < 50.0) {
                     showRetryButtonAnimation()
                 } else {

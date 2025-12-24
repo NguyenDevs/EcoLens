@@ -33,6 +33,7 @@ import com.nguyendevs.ecolens.utils.KeyboardUtils
 import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -69,6 +70,7 @@ class MainActivity : AppCompatActivity() {
     private var chatHistoryFragment: ChatHistoryFragment? = null
     private var imageUri: Uri? = null
     private var isExpandedState = false
+    private var stopLoadingJob: Job? = null
 
     private val cameraActivityLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -385,7 +387,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateHomeUI(state: com.nguyendevs.ecolens.model.EcoLensUiState) {
+    private suspend fun updateHomeUI(state: com.nguyendevs.ecolens.model.EcoLensUiState) {
         val isLoading = state.isLoading
         val error = state.error
         val loadingStage = state.loadingStage
@@ -394,7 +396,19 @@ class MainActivity : AppCompatActivity() {
         loadingOverlay.isVisible = isLoading
         loadingCard.isVisible = isLoading
 
-        if (isLoading) loadingAnimationHandler.start() else loadingAnimationHandler.stop()
+        if (isLoading){
+            stopLoadingJob?.cancel()
+            loadingAnimationHandler.start()
+        }
+        else {
+            stopLoadingJob?.cancel()
+            stopLoadingJob = coroutineScope {
+                launch {
+                    delay(500)
+                    loadingAnimationHandler.stop()
+                }
+            }
+        }
 
         if (error != null) {
             errorText.text = error
