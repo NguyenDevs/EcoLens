@@ -203,6 +203,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleCapturedImage(uri: Uri) {
+        fabCamera.isClickable = false
+        fabCamera.alpha = 0.5f
         if (speakerManager.isSpeaking()) {
             speakerManager.pause()
             toggleSpeakerUI(false)
@@ -383,7 +385,8 @@ class MainActivity : AppCompatActivity() {
         val isLoading = state.isLoading
         val error = state.error
         val loadingStage = state.loadingStage
-
+        fabCamera.isClickable = !isLoading
+        fabCamera.alpha = if (isLoading) 0.5f else 1.0f
         loadingOverlay.isVisible = isLoading
         loadingCard.isVisible = isLoading
 

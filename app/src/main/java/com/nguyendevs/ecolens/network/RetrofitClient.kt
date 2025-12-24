@@ -56,7 +56,7 @@ object RetrofitClient {
                         allFailed -> {
                             Toast.makeText(
                                 context,
-                                "⚠️ Tất cả ${failedKeys.size} API keys đều hết quota. Vui lòng thử lại sau.",
+                                "Tất cả ${failedKeys.size} API keys đều hết quota. Vui lòng thử lại sau.",
                                 Toast.LENGTH_LONG
                             ).show()
                         }
@@ -65,7 +65,7 @@ object RetrofitClient {
                         retryCount > 1 && successKey != null && successKey != "none" -> {
                             Toast.makeText(
                                 context,
-                                "✓ Đã chuyển sang API key #${successKey.toInt() + 1} (${failedKeys.size} key hết quota)",
+                                "Đã chuyển sang API key #${successKey.toInt() + 1} (${failedKeys.size} key hết quota)",
                                 Toast.LENGTH_SHORT
                             ).show()
                         }

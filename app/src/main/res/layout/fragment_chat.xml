@@ -64,9 +64,8 @@
             android:paddingBottom="8dp"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
-            android:scrollbars="vertical"
+            android:scrollbars="none"
             android:overScrollMode="ifContentScrolls"/>
-
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
