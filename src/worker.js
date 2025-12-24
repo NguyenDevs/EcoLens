@@ -211,7 +211,7 @@ export default {
         if (url.pathname.startsWith('/inaturalist/')) {
             try {
                 // URL của worker renewer - THAY ĐỔI NẾU DOMAIN KHÁC
-                const TOKEN_RENEWER_URL = 'https://inaturalist-token-renewer.tainguyen.dev/token';
+                const TOKEN_RENEWER_URL = 'https://inaturalist-token-renewer.tainguyen-devs.workers.dev/token';
 
                 // Lấy token từ renewer worker (có cache 5 phút để tránh gọi quá nhiều)
                 const tokenResponse = await fetch(TOKEN_RENEWER_URL, {
