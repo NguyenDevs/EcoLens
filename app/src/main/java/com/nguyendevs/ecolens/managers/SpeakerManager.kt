@@ -7,7 +7,7 @@ import android.speech.tts.UtteranceProgressListener
 import android.util.Log
 import java.util.Locale
 
-class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
+class SpeakerManager(private val context: Context) : TextToSpeech.OnInitListener {
 
     private val RATE_NORMAL = 1.0f
     private val RATE_VIETNAMESE = 1.05f
@@ -47,7 +47,9 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
     // Khởi tạo TextToSpeech engine
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
-            setLanguage("vi")
+            val languageManager = LanguageManager(context)
+            val currentLang = languageManager.getLanguage()
+            setLanguage(currentLang)
             isLoaded = true
         } else {
             Log.e("SpeakerManager", "Khởi tạo TTS thất bại")
