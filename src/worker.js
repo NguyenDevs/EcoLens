@@ -248,8 +248,8 @@ export default {
 
                 const headers = new Headers();
                 if (token) {
-                    headers.set('Authorization', token);
-                    console.log('[iNaturalist] Using token (no Bearer prefix)');
+                    headers.set('Authorization', `Bearer ${token}`);
+                    console.log('[iNaturalist] Using token with Bearer prefix');
                 } else {
                     console.warn('[iNaturalist] ⚠ No token available - request may fail');
                 }
