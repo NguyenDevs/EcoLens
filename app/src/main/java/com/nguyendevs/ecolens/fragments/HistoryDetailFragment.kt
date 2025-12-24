@@ -191,9 +191,10 @@ class HistoryDetailFragment : Fragment() {
             textSize = 15f
             setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
             setLineSpacing(0f, 1.4f)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 justificationMode = LineBreaker.JUSTIFICATION_MODE_INTER_WORD
             }
+             */
             setHtml(content)
         }
 
