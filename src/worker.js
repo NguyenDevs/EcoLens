@@ -138,7 +138,7 @@ export default {
 
             inatTokenPromise = (async () => {
                 const resp = await fetch(
-                    'https://inaturalist-token-renewer.tainguyen-devs.workers.dev/token',
+                    'https://inaturalist-token-renewer.tainguyen-devs.workers.dev',
                     { signal: AbortSignal.timeout(10000) }
                 );
 
