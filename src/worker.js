@@ -1,4 +1,3 @@
-// Counter toàn cục (reset khi worker restart, nhưng đủ dùng)
 let apiKeyIndex = 0;
 
 export default {
@@ -6,7 +5,7 @@ export default {
         const corsHeaders = {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Gemini-Retry-Count',
         };
 
         if (request.method === 'OPTIONS') {
@@ -15,7 +14,6 @@ export default {
 
         const url = new URL(request.url);
 
-        // ==================== Helper: Get All API Keys ====================
         function getAllGeminiKeys(env) {
             return [
                 env.GEMINI_API_KEY,
@@ -23,10 +21,9 @@ export default {
                 env.GEMINI_API_KEY_3,
                 env.GEMINI_API_KEY_4,
                 env.GEMINI_API_KEY_5
-            ].filter(k => k); // Lọc bỏ key undefined/null
+            ].filter(k => k);
         }
 
-        // ==================== Helper: Try API with Retry ====================
         async function callGeminiWithRetry(geminiUrl, body, env, isStreaming = false) {
             const keys = getAllGeminiKeys(env);
 
@@ -35,7 +32,7 @@ export default {
             }
 
             let lastError = null;
-            const maxAttempts = keys.length; // Thử tất cả keys
+            const maxAttempts = keys.length;
             let retryInfo = {
                 totalAttempts: 0,
                 failedKeys: [],
@@ -43,67 +40,49 @@ export default {
             };
 
             for (let attempt = 0; attempt < maxAttempts; attempt++) {
-                // Lấy key hiện tại và tăng index cho lần sau
                 const currentKey = keys[apiKeyIndex % keys.length];
                 const currentKeyIndex = apiKeyIndex % keys.length;
-                apiKeyIndex++; // Tăng index cho lần gọi tiếp theo
+                apiKeyIndex++;
 
                 retryInfo.totalAttempts++;
-                console.log(`Attempt ${attempt + 1}/${maxAttempts} - Using key index: ${currentKeyIndex}`);
 
                 try {
-                    // Build URL với key parameter
                     const urlWithKey = `${geminiUrl}${geminiUrl.includes('?') ? '&' : '?'}key=${currentKey}`;
 
                     const response = await fetch(urlWithKey, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'x-goog-api-client': 'genai-js/0.1.0',
-                            'X-Forwarded-For': '8.8.8.8',
-                            'CF-IPCountry': 'US'
+                            'x-goog-api-client': 'genai-js/0.1.0'
                         },
-                        body: JSON.stringify(body),
-                        cf: {
-                            resolveOverride: 'generativelanguage.googleapis.com'
-                        }
+                        body: JSON.stringify(body)
                     });
 
-                    // Nếu thành công (không phải 429), return luôn
                     if (response.ok) {
                         retryInfo.successKeyIndex = currentKeyIndex;
-                        console.log(`✓ Success with key index: ${currentKeyIndex}`);
                         return { response, retryInfo };
                     }
 
-                    // Nếu bị 429 (quota exceeded), thử key tiếp theo
                     if (response.status === 429) {
                         const errorText = await response.text();
                         retryInfo.failedKeys.push(currentKeyIndex);
-                        console.warn(`✗ Key ${currentKeyIndex} quota exceeded (429), trying next key...`);
                         lastError = { status: 429, text: errorText };
-                        continue; // Thử key tiếp theo
+                        continue;
                     }
 
-                    // Lỗi khác (không phải 429), return luôn (không retry)
-                    console.error(`✗ API error ${response.status} with key ${currentKeyIndex}`);
                     return { response, retryInfo };
 
                 } catch (error) {
-                    console.error(`✗ Network error with key ${currentKeyIndex}:`, error.message);
                     retryInfo.failedKeys.push(currentKeyIndex);
                     lastError = { status: 500, text: error.message };
-                    continue; // Thử key tiếp theo
+                    continue;
                 }
             }
 
-            // Nếu tất cả keys đều fail
-            console.error('✗ All API keys exhausted');
             retryInfo.allFailed = true;
             throw { error: lastError ? `All API keys failed. Last error: ${lastError.text}` : 'All API keys failed', retryInfo };
         }
 
-        // ==================== GEMINI NON-STREAMING (/gemini) ====================
         if (url.pathname === '/gemini' && request.method === 'POST') {
             try {
                 const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
@@ -111,7 +90,6 @@ export default {
 
                 const { response, retryInfo } = await callGeminiWithRetry(geminiUrl, body, env, false);
 
-                // Thêm custom headers để client biết trạng thái retry
                 const customHeaders = {
                     ...corsHeaders,
                     'Content-Type': 'application/json',
@@ -135,7 +113,6 @@ export default {
                 });
 
             } catch (error) {
-                // Trường hợp tất cả keys đều fail
                 const customHeaders = {
                     ...corsHeaders,
                     'Content-Type': 'application/json',
@@ -154,7 +131,6 @@ export default {
             }
         }
 
-        // ==================== GEMINI STREAMING (/gemini/stream) ====================
         if (url.pathname === '/gemini/stream' && request.method === 'POST') {
             try {
                 const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse';
@@ -174,21 +150,17 @@ export default {
 
                 if (!response.ok) {
                     const errorText = await response.text();
-                    console.error("Gemini Streaming API Error:", errorText);
-
                     return new Response(JSON.stringify({ error: 'Gemini API error', details: errorText }), {
                         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                         status: response.status
                     });
                 }
 
-                // Stream trực tiếp về client
                 return new Response(response.body, {
                     headers: customHeaders
                 });
 
             } catch (error) {
-                // Trường hợp tất cả keys đều fail
                 const customHeaders = {
                     ...corsHeaders,
                     'Content-Type': 'application/json',
@@ -207,40 +179,25 @@ export default {
             }
         }
 
-        // ==================== iNaturalist API Proxy (NEW: Fetch token from renewer worker) ====================
         if (url.pathname.startsWith('/inaturalist/')) {
             try {
-                // >>> QUAN TRỌNG: KIỂM TRA KỸ URL NÀY <<<
-                // Đây là URL của Worker 2 (Renewer). Đảm bảo Worker 2 đã deploy và URL chính xác.
-                const TOKEN_RENEWER_URL = 'https://inaturalist-token-renewer.tainguyen-devs.workers.dev/token';
-
-                // Bước 1: Gọi sang Worker 2 để xin Token
-                const tokenResponse = await fetch(TOKEN_RENEWER_URL, {
-                    headers: { 'Accept': 'application/json' },
-                    cf: { cacheTtl: 60, cacheEverything: true } // Cache ngắn 60s để đỡ gọi nhiều
-                });
-
-                if (!tokenResponse.ok) {
-                    // Nếu Worker 2 trả về 404, nghĩa là URL sai hoặc Route /token chưa được handle bên đó
-                    const debugText = await tokenResponse.text();
-                    throw new Error(`Renewer Worker returned ${tokenResponse.status}. Body: ${debugText.substring(0, 100)}`);
+                if (!env.INATURALIST_KV) {
+                    throw new Error("Missing INATURALIST_KV binding. Please configure it in Worker Settings.");
                 }
 
-                const tokenData = await tokenResponse.json();
-                const token = tokenData.token;
+                const token = await env.INATURALIST_KV.get('API_TOKEN');
 
-                if (!token || token.length < 20) {
-                    throw new Error('Invalid token received from Renewer Worker');
+                if (!token) {
+                    throw new Error("Token not found in KV. Please ensure the Renewer worker is running.");
                 }
 
-                // Bước 2: Dùng Token đó gọi sang iNaturalist thật
                 const targetPath = url.pathname.replace('/inaturalist', '');
                 const targetUrl = `https://api.inaturalist.org${targetPath}${url.search}`;
 
                 const proxyHeaders = new Headers(request.headers);
                 proxyHeaders.set('Authorization', `Bearer ${token}`);
                 proxyHeaders.set('Host', 'api.inaturalist.org');
-                // Xóa header có thể gây lỗi
+
                 ['cf-connecting-ip', 'cf-ipcountry', 'x-forwarded-proto', 'x-real-ip'].forEach(h => proxyHeaders.delete(h));
 
                 const response = await fetch(targetUrl, {
@@ -249,7 +206,6 @@ export default {
                     body: request.body
                 });
 
-                // Bước 3: Trả kết quả về cho App
                 const newResponse = new Response(response.body, response);
                 Object.keys(corsHeaders).forEach(key => newResponse.headers.set(key, corsHeaders[key]));
 
@@ -260,14 +216,13 @@ export default {
                     error: 'Proxy Error',
                     details: error.message
                 }), {
-                    status: 502,
+                    status: 500,
                     headers: { ...corsHeaders, 'Content-Type': 'application/json' }
                 });
             }
         }
 
-        // ==================== Root / Default ====================
-        return new Response('API Proxy Active – /gemini, /gemini/stream, /inaturalist/*', {
+        return new Response('API Proxy Active', {
             headers: corsHeaders
         });
     }
