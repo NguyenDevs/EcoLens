@@ -11,9 +11,13 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface HistoryDao {
 
+    // --- INSERT ---
+
     // Thêm một bản ghi lịch sử mới và trả về ID
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entry: HistoryEntry): Long
+
+    // --- GET (READ) ---
 
     // Lấy tất cả lịch sử sắp xếp từ mới nhất đến cũ nhất
     @Query("SELECT * FROM history_table ORDER BY timestamp DESC")
@@ -23,6 +27,10 @@ interface HistoryDao {
     @Query("SELECT * FROM history_table ORDER BY timestamp ASC")
     fun getAllHistoryOldestFirst(): Flow<List<HistoryEntry>>
 
+    // Lấy một entry theo ID
+    @Query("SELECT * FROM history_table WHERE id = :id LIMIT 1")
+    suspend fun getHistoryById(id: Int): HistoryEntry?
+
     // Lấy lịch sử theo khoảng thời gian, sắp xếp từ mới nhất
     @Query("SELECT * FROM history_table WHERE timestamp BETWEEN :startDate AND :endDate ORDER BY timestamp DESC")
     fun getHistoryByDateRangeNewest(startDate: Long, endDate: Long): Flow<List<HistoryEntry>>
@@ -31,35 +39,34 @@ interface HistoryDao {
     @Query("SELECT * FROM history_table WHERE timestamp BETWEEN :startDate AND :endDate ORDER BY timestamp ASC")
     fun getHistoryByDateRangeOldest(startDate: Long, endDate: Long): Flow<List<HistoryEntry>>
 
-    // Lấy một entry theo ID
-    @Query("SELECT * FROM history_table WHERE id = :id LIMIT 1")
-    suspend fun getHistoryById(id: Int): HistoryEntry?
+    // --- UPDATE ---
 
-    // Cập nhật một bản ghi lịch sử
+    // Cập nhật một bản ghi lịch sử (Generic)
     @Update
     suspend fun update(entry: HistoryEntry)
 
-    // Cập nhật thông tin loài và timestamp của một entry
+    // Cập nhật chi tiết thông tin loài, timestamp và ngôn ngữ gốc
     @Query("""
-    UPDATE history_table 
-    SET commonName = :commonName,
-        scientificName = :scientificName,
-        kingdom = :kingdom,
-        phylum = :phylum,
-        className = :className,
-        taxorder = :taxorder,
-        family = :family,
-        genus = :genus,
-        species = :species,
-        description = :description,
-        characteristics = :characteristics,
-        distribution = :distribution,
-        habitat = :habitat,
-        conservationStatus = :conservationStatus,
-        confidence = :confidence,
-        timestamp = :timestamp
-    WHERE id = :id
-""")
+        UPDATE history_table 
+        SET commonName = :commonName,
+            scientificName = :scientificName,
+            kingdom = :kingdom,
+            phylum = :phylum,
+            className = :className,
+            taxorder = :taxorder,
+            family = :family,
+            genus = :genus,
+            species = :species,
+            description = :description,
+            characteristics = :characteristics,
+            distribution = :distribution,
+            habitat = :habitat,
+            conservationStatus = :conservationStatus,
+            confidence = :confidence,
+            timestamp = :timestamp,
+            languageCode = :languageCode
+        WHERE id = :id
+    """)
     suspend fun updateSpeciesDetails(
         id: Int,
         commonName: String,
@@ -77,8 +84,11 @@ interface HistoryDao {
         habitat: String,
         conservationStatus: String,
         confidence: Double,
-        timestamp: Long
+        timestamp: Long,
+        languageCode: String
     )
+
+    // --- DELETE ---
 
     // Xóa tất cả lịch sử
     @Query("DELETE FROM history_table")

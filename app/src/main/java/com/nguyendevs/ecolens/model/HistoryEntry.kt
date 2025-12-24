@@ -5,8 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 /**
- * Entity đại diện cho một mục trong lịch sử tìm kiếm
- * Chứa thông tin về loài và ảnh đã quét
+ * Entity đại diện cho một mục trong lịch sử tìm kiếm.
  */
 @Entity(tableName = "history_table")
 data class HistoryEntry(
@@ -14,5 +13,6 @@ data class HistoryEntry(
     val imagePath: String,
     @Embedded val speciesInfo: SpeciesInfo,
     val timestamp: Long,
-    val isFavorite: Boolean = false
+    val isFavorite: Boolean = false,
+    val languageCode: String = "vi"
 )

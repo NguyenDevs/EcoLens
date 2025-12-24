@@ -114,6 +114,7 @@ dependencies {
 
     // ML Kit Translate
     implementation("com.google.mlkit:translate:17.0.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
 
     // Utilities
     implementation("com.google.guava:guava:31.1-android")

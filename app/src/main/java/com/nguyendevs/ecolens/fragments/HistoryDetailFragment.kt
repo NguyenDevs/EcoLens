@@ -2,7 +2,6 @@ package com.nguyendevs.ecolens.fragments
 
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.graphics.text.LineBreaker
 import android.os.Build
 import android.os.Bundle
 import android.text.Html
@@ -12,24 +11,35 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.gson.Gson
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.managers.SpeakerManager
+import com.nguyendevs.ecolens.managers.TranslationManager
 import com.nguyendevs.ecolens.model.HistoryEntry
 import com.nguyendevs.ecolens.model.SpeciesInfo
 import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
+import kotlinx.coroutines.launch
+import java.util.Locale
 
 class HistoryDetailFragment : Fragment() {
 
     private lateinit var speakerManager: SpeakerManager
+    private val translationManager = TranslationManager()
+
     private var historyEntry: HistoryEntry? = null
+    private var currentSpeciesInfo: SpeciesInfo? = null
     private var isSpeaking = false
+
+   // private var progressBar: ProgressBar? = null
 
     private fun TextView.setHtml(html: String) {
         text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -54,23 +64,68 @@ class HistoryDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+       // progressBar = view.findViewById(R.id.progressBar)
+
         if (speakerManager.isSpeaking()) {
             speakerManager.pause()
         }
 
         val entry = historyEntry ?: return
-        val info = entry.speciesInfo
+        currentSpeciesInfo = entry.speciesInfo
 
         setupBackButton(view)
-        bindHeader(view, entry, info)
-        bindTaxonomy(view, info)
-        bindContent(view, info)
-        setupFab(view, info)
+
+        // Bước 1: Hiển thị dữ liệu gốc trước để user không phải chờ
+        bindAllData(view, entry, currentSpeciesInfo!!)
+        setupFab(view)
+
+        // Bước 2: Kiểm tra và Dịch thuật
+        checkAndTranslateData(view, entry)
 
         view.findViewById<FloatingActionButton>(R.id.fab_speak)?.let { fab ->
             fab.show()
             fab.bringToFront()
         }
+    }
+
+    /**
+     * Logic kiểm tra ngôn ngữ và thực hiện dịch
+     */
+    private fun checkAndTranslateData(view: View, entry: HistoryEntry) {
+        val deviceLanguage = Locale.getDefault().language // "vi" hoặc "en"
+        val dataLanguage = entry.languageCode // Lấy từ DB, mặc định "vi" nếu cũ
+
+        // Nếu ngôn ngữ khác nhau, thực hiện dịch
+        if (!deviceLanguage.equals(dataLanguage, ignoreCase = true)) {
+            lifecycleScope.launch {
+                // Show loading indicator nhỏ nếu cần
+                // Toast.makeText(context, "Đang dịch sang ngôn ngữ máy...", Toast.LENGTH_SHORT).show()
+
+                val translatedInfo = translationManager.translateSpeciesInfo(
+                    entry.speciesInfo,
+                    dataLanguage,
+                    deviceLanguage
+                )
+
+                // Cập nhật biến dữ liệu hiện tại
+                currentSpeciesInfo = translatedInfo
+
+                // Cập nhật lại UI với dữ liệu đã dịch
+                if (isAdded) { // Kiểm tra Fragment còn gắn vào Activity không
+                    bindAllData(view, entry, translatedInfo)
+
+                    // Reset trạng thái nút nói để nó đọc văn bản mới
+                    setupFab(view)
+                }
+            }
+        }
+    }
+
+    private fun bindAllData(view: View, entry: HistoryEntry, info: SpeciesInfo) {
+        bindHeader(view, entry, info)
+        bindTaxonomy(view, info)
+        bindContent(view, info)
     }
 
     override fun onStop() {
@@ -109,6 +164,7 @@ class HistoryDetailFragment : Fragment() {
         val tagFamily = view.findViewById<TextView>(R.id.tagFamily)
         val tagSpecies = view.findViewById<TextView>(R.id.tagSpecies)
 
+        // Chỉ load ảnh 1 lần nếu chưa có, hoặc Glide tự cache
         Glide.with(this).load(entry.imagePath).centerCrop().into(ivImage)
 
         tvCommon.setHtml(info.commonName)
@@ -199,10 +255,6 @@ class HistoryDetailFragment : Fragment() {
             textSize = 15f
             setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
             setLineSpacing(0f, 1.4f)
-            /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                justificationMode = LineBreaker.JUSTIFICATION_MODE_INTER_WORD
-            }
-             */
             setHtml(content)
         }
 
@@ -211,8 +263,12 @@ class HistoryDetailFragment : Fragment() {
         container.addView(contentView)
     }
 
-    private fun setupFab(view: View, info: SpeciesInfo) {
-        val fab = view.findViewById<FloatingActionButton>(R.id.fab_speak)
+    private fun setupFab(view: View) {
+        val fab = view.findViewById<FloatingActionButton>(R.id.fab_speak) ?: return
+        val infoToSpeak = currentSpeciesInfo ?: return
+
+        // Xóa listener cũ để tránh leak hoặc logic sai khi update data
+        fab.setOnClickListener(null)
 
         speakerManager.onSpeechFinished = {
             activity?.runOnUiThread {
@@ -225,7 +281,9 @@ class HistoryDetailFragment : Fragment() {
                 speakerManager.pause()
                 updateFabUI(fab, false)
             } else {
-                speakerManager.speak(TextToSpeechGenerator.generateSpeechText(requireContext(), info))
+                // Tạo văn bản TTS từ thông tin (đã được dịch nếu có)
+                val textToRead = TextToSpeechGenerator.generateSpeechText(requireContext(), infoToSpeak)
+                speakerManager.speak(textToRead)
                 updateFabUI(fab, true)
             }
         }
