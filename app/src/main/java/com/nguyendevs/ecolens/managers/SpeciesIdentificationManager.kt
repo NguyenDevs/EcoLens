@@ -25,7 +25,6 @@ class SpeciesIdentificationManager(
     var currentHistoryEntryId: Int? = null
     var currentLanguageCode: String = "vi"
 
-    // Track current species info for saving
     private var currentSpeciesInfo: SpeciesInfo? = null
 
     suspend fun identifySpecies(
@@ -62,7 +61,6 @@ class SpeciesIdentificationManager(
                 val scientificName = topResult.taxon.name
                 val confidence = topResult.combined_score
 
-                // Show scientific name immediately
                 currentSpeciesInfo = SpeciesInfo(
                     scientificName = scientificName,
                     confidence = confidence,
@@ -75,7 +73,6 @@ class SpeciesIdentificationManager(
                     loadingStage = LoadingStage.SCIENTIFIC_NAME
                 ))
 
-                // Stream taxonomy and details
                 streamingHelper.streamTaxonomy(
                     scientificName,
                     confidence,
@@ -85,10 +82,13 @@ class SpeciesIdentificationManager(
                     onStateUpdate(state)
                 }
 
+                val infoForDetails = currentSpeciesInfo ?: SpeciesInfo(scientificName = scientificName, confidence = confidence)
+
                 streamingHelper.streamDetails(
                     scientificName,
                     confidence,
-                    languageCode
+                    languageCode,
+                    infoForDetails
                 ) { state ->
                     currentSpeciesInfo = state.speciesInfo
                     onStateUpdate(state)

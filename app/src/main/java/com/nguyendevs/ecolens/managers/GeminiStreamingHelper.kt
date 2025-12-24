@@ -61,10 +61,8 @@ class GeminiStreamingHelper(
                                         cleanedJson,
                                         TaxonomyResponse::class.java
                                     )
-                                    // Update UI
-                                    updateTaxonomyUISync(taxonomyInfo, isVietnamese, confidence, onStateUpdate)
+                                    updateTaxonomyUISync(taxonomyInfo, scientificName, isVietnamese, confidence, onStateUpdate)
                                 } catch (e: Exception) {
-                                    // Continue accumulating
                                 }
                             }
                         } catch (e: Exception) {
@@ -82,6 +80,7 @@ class GeminiStreamingHelper(
         scientificName: String,
         confidence: Double,
         languageCode: String,
+        currentInfo: SpeciesInfo,
         onStateUpdate: (EcoLensUiState) -> Unit
     ) = withContext(Dispatchers.IO) {
         val isVietnamese = languageCode != "en"
@@ -128,10 +127,8 @@ class GeminiStreamingHelper(
                                                 cleanedJson,
                                                 DetailsResponse::class.java
                                             )
-                                            // Update UI
-                                            updateDetailsUISync(detailsInfo, isVietnamese, onStateUpdate)
+                                            updateDetailsUISync(detailsInfo, isVietnamese, currentInfo, onStateUpdate)
                                         } catch (e: Exception) {
-                                            // Continue accumulating
                                         }
                                     }
                                 } catch (e: Exception) {
@@ -149,18 +146,17 @@ class GeminiStreamingHelper(
 
     private suspend fun updateTaxonomyUISync(
         taxonomy: TaxonomyResponse,
+        scientificName: String,
         isVietnamese: Boolean,
         confidence: Double,
         onStateUpdate: (EcoLensUiState) -> Unit
     ) = withContext(Dispatchers.Main) {
-        // Start with basic species info
         var updated = SpeciesInfo(
-            scientificName = "",
+            scientificName = scientificName,
             confidence = confidence,
             commonName = taxonomy.commonName ?: "..."
         )
 
-        // Update common name
         if (!taxonomy.commonName.isNullOrBlank() && taxonomy.commonName != "...") {
             updated = updated.copy(commonName = taxonomy.commonName)
             onStateUpdate(EcoLensUiState(
@@ -171,7 +167,6 @@ class GeminiStreamingHelper(
             delay(200)
         }
 
-        // Update taxonomy fields progressively
         taxonomy.kingdom?.let {
             updated = updated.copy(
                 kingdom = "<b>${markdownProcessor.removeRankPrefix(it, if (isVietnamese) "Giới" else "Kingdom")}</b>"
@@ -260,9 +255,10 @@ class GeminiStreamingHelper(
     private suspend fun updateDetailsUISync(
         details: DetailsResponse,
         isVietnamese: Boolean,
+        currentInfo: SpeciesInfo,
         onStateUpdate: (EcoLensUiState) -> Unit
     ) = withContext(Dispatchers.Main) {
-        var updated = SpeciesInfo(scientificName = "", confidence = 0.0)
+        var updated = currentInfo
 
         val characteristicsText = when (val chars = details.characteristics) {
             is String -> chars
@@ -270,7 +266,6 @@ class GeminiStreamingHelper(
             else -> ""
         }
 
-        // Update description
         details.description?.let { desc ->
             if (desc.isNotBlank()) {
                 updated = updated.copy(
@@ -285,7 +280,6 @@ class GeminiStreamingHelper(
             }
         }
 
-        // Update characteristics
         if (characteristicsText.isNotBlank()) {
             updated = updated.copy(
                 characteristics = markdownProcessor.process(characteristicsText, isVietnamese = isVietnamese)
@@ -298,7 +292,6 @@ class GeminiStreamingHelper(
             delay(200)
         }
 
-        // Update distribution
         details.distribution?.let { dist ->
             if (dist.isNotBlank()) {
                 updated = updated.copy(
@@ -313,7 +306,6 @@ class GeminiStreamingHelper(
             }
         }
 
-        // Update habitat
         details.habitat?.let { hab ->
             if (hab.isNotBlank()) {
                 updated = updated.copy(
@@ -328,7 +320,6 @@ class GeminiStreamingHelper(
             }
         }
 
-        // Update conservation status
         details.conservationStatus?.let { status ->
             if (status.isNotBlank()) {
                 updated = updated.copy(
