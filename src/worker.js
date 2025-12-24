@@ -210,77 +210,58 @@ export default {
         // ==================== iNaturalist API Proxy (NEW: Fetch token from renewer worker) ====================
         if (url.pathname.startsWith('/inaturalist/')) {
             try {
-                // URL của worker renewer - THAY ĐỔI NẾU DOMAIN KHÁC
+                // >>> QUAN TRỌNG: KIỂM TRA KỸ URL NÀY <<<
+                // Đây là URL của Worker 2 (Renewer). Đảm bảo Worker 2 đã deploy và URL chính xác.
                 const TOKEN_RENEWER_URL = 'https://inaturalist-token-renewer.tainguyen-devs.workers.dev/token';
-                // Lấy token từ renewer worker (có cache 5 phút để tránh gọi quá nhiều)
+
+                // Bước 1: Gọi sang Worker 2 để xin Token
                 const tokenResponse = await fetch(TOKEN_RENEWER_URL, {
-                    headers: {
-                        'Accept': 'application/json'
-                    },
-                    // Cache 300 giây (5 phút) ở edge Cloudflare
-                    cf: { cacheTtl: 300, cacheEverything: true }
+                    headers: { 'Accept': 'application/json' },
+                    cf: { cacheTtl: 60, cacheEverything: true } // Cache ngắn 60s để đỡ gọi nhiều
                 });
 
                 if (!tokenResponse.ok) {
-                    throw new Error(`Failed to fetch token: ${tokenResponse.status}`);
+                    // Nếu Worker 2 trả về 404, nghĩa là URL sai hoặc Route /token chưa được handle bên đó
+                    const debugText = await tokenResponse.text();
+                    throw new Error(`Renewer Worker returned ${tokenResponse.status}. Body: ${debugText.substring(0, 100)}`);
                 }
 
                 const tokenData = await tokenResponse.json();
                 const token = tokenData.token;
 
-                if (!token || typeof token !== 'string' || token.length < 20) {
-                    throw new Error('Invalid or empty token received from renewer');
+                if (!token || token.length < 20) {
+                    throw new Error('Invalid token received from Renewer Worker');
                 }
 
-                // Xây dựng URL gốc iNaturalist
-                const inaturalistPath = url.pathname.replace('/inaturalist', '');
-                const inaturalistUrl = `https://api.inaturalist.org${inaturalistPath}${url.search}`;
+                // Bước 2: Dùng Token đó gọi sang iNaturalist thật
+                const targetPath = url.pathname.replace('/inaturalist', '');
+                const targetUrl = `https://api.inaturalist.org${targetPath}${url.search}`;
 
-                const headers = new Headers();
-                headers.set('Authorization', `Bearer ${token}`);
-                headers.set('Accept', 'application/json');
+                const proxyHeaders = new Headers(request.headers);
+                proxyHeaders.set('Authorization', `Bearer ${token}`);
+                proxyHeaders.set('Host', 'api.inaturalist.org');
+                // Xóa header có thể gây lỗi
+                ['cf-connecting-ip', 'cf-ipcountry', 'x-forwarded-proto', 'x-real-ip'].forEach(h => proxyHeaders.delete(h));
 
-                let response;
-
-                if (request.method === 'POST' || request.method === 'PUT' || request.method === 'PATCH') {
-                    // Đối với POST/PUT thường là upload observation → forward body nguyên
-                    response = await fetch(inaturalistUrl, {
-                        method: request.method,
-                        headers: headers,
-                        body: request.body
-                    });
-                } else {
-                    response = await fetch(inaturalistUrl, {
-                        method: request.method,
-                        headers: headers
-                    });
-                }
-
-                // Forward response về client (giữ nguyên status, headers, body)
-                const responseHeaders = new Headers(corsHeaders);
-                responseHeaders.set('Content-Type', 'application/json');
-
-                // Copy một số header hữu ích từ iNaturalist (nếu có)
-                const contentType = response.headers.get('content-type');
-                if (contentType) {
-                    responseHeaders.set('Content-Type', contentType);
-                }
-
-                return new Response(response.body, {
-                    status: response.status,
-                    statusText: response.statusText,
-                    headers: responseHeaders
+                const response = await fetch(targetUrl, {
+                    method: request.method,
+                    headers: proxyHeaders,
+                    body: request.body
                 });
 
-            } catch (error) {
-                console.error('iNaturalist proxy error:', error);
+                // Bước 3: Trả kết quả về cho App
+                const newResponse = new Response(response.body, response);
+                Object.keys(corsHeaders).forEach(key => newResponse.headers.set(key, corsHeaders[key]));
 
+                return newResponse;
+
+            } catch (error) {
                 return new Response(JSON.stringify({
-                    error: 'Failed to proxy iNaturalist request',
+                    error: 'Proxy Error',
                     details: error.message
                 }), {
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                    status: 502  // Bad Gateway
+                    status: 502,
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' }
                 });
             }
         }
