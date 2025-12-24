@@ -76,7 +76,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/language_label"
-                        android:textColor="@color/text_primary"
+                        android:textColor="@color/green_primary_2"
                         android:textSize="16sp"
                         android:textStyle="bold"/>
 
@@ -150,7 +150,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/about_app_title"
-                        android:textColor="@color/text_primary"
+                        android:textColor="@color/green_primary_2"
                         android:textSize="16sp"
                         android:textStyle="bold"/>
 

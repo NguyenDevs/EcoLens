@@ -82,7 +82,7 @@
                     tools:text="Cây Hoa Hồng"
                     android:textSize="28sp"
                     android:textStyle="bold"
-                    android:textColor="@color/text_primary" />
+                    android:textColor="@color/green_primary_2" />
 
             <TextView
                     android:id="@+id/tvScientificName"
@@ -126,7 +126,22 @@
                         tools:text="Họ Hoa hồng"
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp"
+                        android:layout_marginEnd="8dp"
                         />
+
+                <TextView
+                        android:id="@+id/tagSpecies"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_tag_gray"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
+                        tools:text="Loài Hoa hồng"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp"
+                />
             </LinearLayout>
 
             <View

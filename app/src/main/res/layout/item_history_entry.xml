@@ -60,7 +60,7 @@
                     android:ellipsize="end"
                     android:maxLines="1"
                     android:text="@string/label_common_name"
-                    android:textColor="@color/green_primary"
+                    android:textColor="@color/green_primary_2"
                     android:textSize="17sp"
                     android:textStyle="bold" />
 

@@ -62,7 +62,7 @@
                         android:layout_height="wrap_content"
                         android:text="Hỏi về cây hoa hồng"
                         android:textStyle="bold"
-                        android:textColor="@color/text_primary"
+                        android:textColor="@color/green_primary_2"
                         android:textSize="16sp"
                         android:maxLines="1"
                         android:ellipsize="end"/>

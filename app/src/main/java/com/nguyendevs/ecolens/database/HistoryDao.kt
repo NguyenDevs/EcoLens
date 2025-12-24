@@ -6,7 +6,6 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.nguyendevs.ecolens.model.HistoryEntry
-import com.nguyendevs.ecolens.model.SpeciesInfo
 import kotlinx.coroutines.flow.Flow
 
 @Dao

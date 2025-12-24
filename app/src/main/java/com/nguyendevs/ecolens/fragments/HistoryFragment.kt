@@ -20,6 +20,8 @@ import com.nguyendevs.ecolens.adapters.HistoryAdapter
 import com.nguyendevs.ecolens.model.HistoryEntry
 import com.nguyendevs.ecolens.model.HistorySortOption
 import com.nguyendevs.ecolens.view.EcoLensViewModel
+import io.noties.markwon.Markwon
+import io.noties.markwon.html.HtmlPlugin
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -73,8 +75,13 @@ class HistoryFragment : Fragment(R.layout.screen_history) {
 
     // Thiết lập adapter cho RecyclerView
     private fun setupAdapter() {
+        val markwon = Markwon.builder(requireContext())
+            .usePlugin(HtmlPlugin.create())
+            .build()
+
         adapter = HistoryAdapter(
             historyList = emptyList(),
+            markwon = markwon,
             clickListener = { entry -> navigateToDetail(entry) },
             favoriteClickListener = { entry -> viewModel.toggleFavorite(entry) }
         )

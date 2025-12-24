@@ -107,6 +107,7 @@ class HistoryDetailFragment : Fragment() {
         val tvScientific = view.findViewById<TextView>(R.id.tvScientificName)
         val tagKingdom = view.findViewById<TextView>(R.id.tagKingdom)
         val tagFamily = view.findViewById<TextView>(R.id.tagFamily)
+        val tagSpecies = view.findViewById<TextView>(R.id.tagSpecies)
 
         Glide.with(this).load(entry.imagePath).centerCrop().into(ivImage)
 
@@ -125,6 +126,13 @@ class HistoryDetailFragment : Fragment() {
             tagFamily.visibility = View.VISIBLE
         } else {
             tagFamily.visibility = View.GONE
+        }
+
+        if (info.species.isNotEmpty()) {
+            tagSpecies.setHtml(info.species)
+            tagSpecies.visibility = View.VISIBLE
+        } else {
+            tagSpecies.visibility = View.GONE
         }
     }
 
