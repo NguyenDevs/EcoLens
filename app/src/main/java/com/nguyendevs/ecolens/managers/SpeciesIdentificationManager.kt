@@ -148,16 +148,14 @@ class SpeciesIdentificationManager(
                             habitat = currentInfo.habitat,
                             conservationStatus = currentInfo.conservationStatus,
                             confidence = currentInfo.confidence,
-                            timestamp = System.currentTimeMillis(),
-                            languageCode = currentLanguageCode
+                            timestamp = System.currentTimeMillis()
                         )
                         currentHistoryEntryId = existingHistoryId
                     } else {
                         val newId = historyDao.insert(HistoryEntry(
                             imagePath = savedPath,
                             speciesInfo = currentInfo,
-                            timestamp = System.currentTimeMillis(),
-                            languageCode = currentLanguageCode
+                            timestamp = System.currentTimeMillis()
                         ))
                         currentHistoryEntryId = newId.toInt()
                     }

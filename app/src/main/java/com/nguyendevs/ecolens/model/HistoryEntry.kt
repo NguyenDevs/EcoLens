@@ -13,6 +13,5 @@ data class HistoryEntry(
     val imagePath: String,
     @Embedded val speciesInfo: SpeciesInfo,
     val timestamp: Long,
-    val isFavorite: Boolean = false,
-    val languageCode: String = "vi"
+    val isFavorite: Boolean = false
 )

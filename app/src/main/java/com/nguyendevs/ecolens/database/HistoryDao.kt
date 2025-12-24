@@ -63,8 +63,7 @@ interface HistoryDao {
             habitat = :habitat,
             conservationStatus = :conservationStatus,
             confidence = :confidence,
-            timestamp = :timestamp,
-            languageCode = :languageCode
+            timestamp = :timestamp
         WHERE id = :id
     """)
     suspend fun updateSpeciesDetails(
@@ -84,8 +83,7 @@ interface HistoryDao {
         habitat: String,
         conservationStatus: String,
         confidence: Double,
-        timestamp: Long,
-        languageCode: String
+        timestamp: Long
     )
 
     // --- DELETE ---
