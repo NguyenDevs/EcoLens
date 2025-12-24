@@ -1,4 +1,4 @@
-// Counter toàn cục (reset khi worker restart, nhưng đủ dùng)
+// Counter toàn cục
 let apiKeyIndex = 0;
 
 export default {
@@ -23,7 +23,7 @@ export default {
                 env.GEMINI_API_KEY_3,
                 env.GEMINI_API_KEY_4,
                 env.GEMINI_API_KEY_5
-            ].filter(k => k); // Lọc bỏ key undefined/null
+            ].filter(k => k);
         }
 
         // ==================== Helper: Try API with Retry ====================
@@ -35,7 +35,7 @@ export default {
             }
 
             let lastError = null;
-            const maxAttempts = keys.length; // Thử tất cả keys
+            const maxAttempts = keys.length;
             let retryInfo = {
                 totalAttempts: 0,
                 failedKeys: [],
@@ -43,16 +43,14 @@ export default {
             };
 
             for (let attempt = 0; attempt < maxAttempts; attempt++) {
-                // Lấy key hiện tại và tăng index cho lần sau
                 const currentKey = keys[apiKeyIndex % keys.length];
                 const currentKeyIndex = apiKeyIndex % keys.length;
-                apiKeyIndex++; // Tăng index cho lần gọi tiếp theo
+                apiKeyIndex++;
 
                 retryInfo.totalAttempts++;
                 console.log(`Attempt ${attempt + 1}/${maxAttempts} - Using key index: ${currentKeyIndex}`);
 
                 try {
-                    // Build URL với key parameter
                     const urlWithKey = `${geminiUrl}${geminiUrl.includes('?') ? '&' : '?'}key=${currentKey}`;
 
                     const response = await fetch(urlWithKey, {
@@ -69,23 +67,20 @@ export default {
                         }
                     });
 
-                    // Nếu thành công (không phải 429), return luôn
                     if (response.ok) {
                         retryInfo.successKeyIndex = currentKeyIndex;
                         console.log(`✓ Success with key index: ${currentKeyIndex}`);
                         return { response, retryInfo };
                     }
 
-                    // Nếu bị 429 (quota exceeded), thử key tiếp theo
                     if (response.status === 429) {
                         const errorText = await response.text();
                         retryInfo.failedKeys.push(currentKeyIndex);
                         console.warn(`✗ Key ${currentKeyIndex} quota exceeded (429), trying next key...`);
                         lastError = { status: 429, text: errorText };
-                        continue; // Thử key tiếp theo
+                        continue;
                     }
 
-                    // Lỗi khác (không phải 429), return luôn (không retry)
                     console.error(`✗ API error ${response.status} with key ${currentKeyIndex}`);
                     return { response, retryInfo };
 
@@ -93,11 +88,10 @@ export default {
                     console.error(`✗ Network error with key ${currentKeyIndex}:`, error.message);
                     retryInfo.failedKeys.push(currentKeyIndex);
                     lastError = { status: 500, text: error.message };
-                    continue; // Thử key tiếp theo
+                    continue;
                 }
             }
 
-            // Nếu tất cả keys đều fail
             console.error('✗ All API keys exhausted');
             retryInfo.allFailed = true;
             throw { error: lastError ? `All API keys failed. Last error: ${lastError.text}` : 'All API keys failed', retryInfo };
@@ -111,7 +105,6 @@ export default {
 
                 const { response, retryInfo } = await callGeminiWithRetry(geminiUrl, body, env, false);
 
-                // Thêm custom headers để client biết trạng thái retry
                 const customHeaders = {
                     ...corsHeaders,
                     'Content-Type': 'application/json',
@@ -135,7 +128,6 @@ export default {
                 });
 
             } catch (error) {
-                // Trường hợp tất cả keys đều fail
                 const customHeaders = {
                     ...corsHeaders,
                     'Content-Type': 'application/json',
@@ -182,13 +174,11 @@ export default {
                     });
                 }
 
-                // Stream trực tiếp về client
                 return new Response(response.body, {
                     headers: customHeaders
                 });
 
             } catch (error) {
-                // Trường hợp tất cả keys đều fail
                 const customHeaders = {
                     ...corsHeaders,
                     'Content-Type': 'application/json',
@@ -213,14 +203,37 @@ export default {
                 const inaturalistPath = url.pathname.replace('/inaturalist', '');
                 const inaturalistUrl = `https://api.inaturalist.org${inaturalistPath}${url.search}`;
 
-                // ĐỌC TOKEN TỪ KV (thay vì env)
-                const token = await env.INATURALIST_KV.get('API_TOKEN');
+                // FETCH TOKEN TỪ WORKER RENEWER
+                let token = null;
+                try {
+                    console.log('[iNaturalist] Fetching token from renewer...');
+                    const tokenResp = await fetch('https://inaturalist-token-renewer.tainguyen-devs.workers.dev/token');
 
-                console.log('Using token from KV:', token ? token.substring(0, 20) + '...' : 'none');
+                    if (tokenResp.ok) {
+                        const tokenData = await tokenResp.json();
+                        token = tokenData.token;
+                        console.log('[iNaturalist] Token fetched:', token ? '✓ Found (' + token.substring(0, 20) + '...)' : '✗ Empty');
+
+                        if (tokenData.lastUpdated) {
+                            console.log('[iNaturalist] Token last updated:', tokenData.lastUpdated);
+                        }
+                    } else {
+                        console.warn('[iNaturalist] Failed to fetch token, status:', tokenResp.status);
+                    }
+                } catch (tokenError) {
+                    console.error('[iNaturalist] Error fetching token:', tokenError.message);
+                    // Fallback to env token if exists
+                    token = env.INATURALIST_API_TOKEN;
+                    console.log('[iNaturalist] Using fallback token from env');
+                }
+
+                console.log('[iNaturalist] Request path:', inaturalistPath);
 
                 const headers = new Headers();
                 if (token) {
                     headers.set('Authorization', `Bearer ${token}`);
+                } else {
+                    console.warn('[iNaturalist] ⚠ No token available');
                 }
 
                 let response;
@@ -240,6 +253,7 @@ export default {
                     });
                 }
 
+                console.log('[iNaturalist] Response status:', response.status);
                 const responseData = await response.json();
 
                 return new Response(JSON.stringify(responseData), {
@@ -248,6 +262,7 @@ export default {
                 });
 
             } catch (error) {
+                console.error('[iNaturalist] Error:', error.message);
                 return new Response(JSON.stringify({
                     error: error.message
                 }), {
