@@ -182,11 +182,9 @@ class MainActivity : AppCompatActivity() {
                 searchBarHandler.expandSearchBar(copiedText)
             },
             onRetryClick = {
-                speakerManager.shutdown()
-                if(fabSpeak.isVisible){
-                    fabSpeak.hide()
-                } else {
-                    fabMute.hide()
+                if (speakerManager.isSpeaking()) {
+                    speakerManager.pause()
+                    toggleSpeakerUI(false)
                 }
                 viewModel.retryIdentification()
             }
