@@ -52,7 +52,10 @@ export default {
                 console.log(`Attempt ${attempt + 1}/${maxAttempts} - Using key index: ${currentKeyIndex}`);
 
                 try {
-                    const response = await fetch(`${geminiUrl}?key=${currentKey}`, {
+                    // Build URL với key parameter
+                    const urlWithKey = `${geminiUrl}${geminiUrl.includes('?') ? '&' : '?'}key=${currentKey}`;
+
+                    const response = await fetch(urlWithKey, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
