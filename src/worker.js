@@ -213,101 +213,120 @@ export default {
                 const inaturalistPath = url.pathname.replace('/inaturalist', '');
                 const inaturalistUrl = `https://api.inaturalist.org${inaturalistPath}${url.search}`;
 
-                // FETCH TOKEN FROM RENEWER WORKER
+                // ==================== FETCH TOKEN FROM RENEWER WORKER ====================
                 let token = null;
+
                 try {
                     console.log('[iNaturalist] Fetching token from renewer worker...');
-                    const tokenResp = await fetch('https://inaturalist-token-renewer.tainguyen-devs.workers.dev/token', {
-                        signal: AbortSignal.timeout(10000)  // Tăng lên 10s, hoặc comment out dòng này để remove timeout
-                    });
+                    const tokenResp = await fetch(
+                        'https://inaturalist-token-renewer.tainguyen-devs.workers.dev/token',
+                        {
+                            signal: AbortSignal.timeout(15000)
+                        }
+                    );
 
                     if (tokenResp.ok) {
                         const tokenData = await tokenResp.json();
                         token = tokenData.token;
-                        console.log('[iNaturalist] Token fetched:', token ? '✓ Found (' + token.substring(0, 20) + '...)' : '✗ Empty');
+
+                        console.log(
+                            '[iNaturalist] Token fetched:',
+                            token ? `✓ Found (${token.substring(0, 20)}...)` : '✗ Empty'
+                        );
 
                         if (tokenData.lastUpdated) {
-                            const lastUpdate = new Date(tokenData.lastUpdated);  // Sửa 'lastUpdated' thành 'lastUpdated' nếu KV dùng key này
-                            const hoursSince = (Date.now() - lastUpdate.getTime()) / 3600000;
-                            console.log('[iNaturalist] Token age:', hoursSince.toFixed(1), 'hours');
-                            if (hoursSince > 20) {  // Nếu token cũ quá 20h, trigger renew tự động
+                            const lastUpdate = new Date(tokenData.lastUpdated);
+                            const hoursSince =
+                                (Date.now() - lastUpdate.getTime()) / 3600000;
+
+                            console.log(
+                                '[iNaturalist] Token age:',
+                                hoursSince.toFixed(1),
+                                'hours'
+                            );
+
+                            if (hoursSince > 20) {
                                 console.log('[iNaturalist] Token too old - triggering renew...');
-                                await fetch('https://inaturalist-token-renewer.tainguyen-devs.workers.dev/renew');
-                                // Fetch token lại sau renew
-                                const newTokenResp = await fetch('https://inaturalist-token-renewer.tainguyen-devs.workers.dev/token');
+                                await fetch(
+                                    'https://inaturalist-token-renewer.tainguyen-devs.workers.dev/renew'
+                                );
+
+                                // fetch lại token sau renew
+                                const newTokenResp = await fetch(
+                                    'https://inaturalist-token-renewer.tainguyen-devs.workers.dev/token'
+                                );
+
                                 if (newTokenResp.ok) {
                                     const newData = await newTokenResp.json();
                                     token = newData.token;
+                                    console.log('[iNaturalist] Token renewed successfully');
                                 }
                             }
                         }
                     } else {
-                        console.warn('[iNaturalist] Failed to fetch token from renewer, status:', tokenResp.status);
-                        // Fallback to env token (giữ tạm, nhưng sau này xóa nếu renewer ổn định)
-                        token = env.INATURALIST_API_TOKEN;
-                        console.log('[iNaturalist] Using fallback token from env');
+                        console.warn(
+                            '[iNaturalist] Failed to fetch token from renewer, status:',
+                            tokenResp.status
+                        );
                     }
                 } catch (tokenError) {
-                    console.error('[iNaturalist] Error fetching token from renewer:', tokenError.message);
-                    // Fallback to env token
-                    token = env.INATURALIST_API_TOKEN;
-                    console.log('[iNaturalist] Using fallback token from env');
+                    console.error(
+                        '[iNaturalist] Error fetching token from renewer:',
+                        tokenError.message
+                    );
                 }
 
-                console.log('[iNaturalist] Request path:', inaturalistPath);
-
+                // ==================== BUILD REQUEST ====================
                 const headers = new Headers();
+                headers.set('Accept', 'application/json');
+
                 if (token) {
                     headers.set('Authorization', `Bearer ${token}`);
-                    console.log('[iNaturalist] Using token with Bearer prefix');
+                    console.log('[iNaturalist] Using Bearer token from renewer');
                 } else {
-                    console.warn('[iNaturalist] ⚠ No token available - request may fail');
+                    console.warn('[iNaturalist] ⚠ No token available - unauthenticated request');
                 }
 
                 let response;
 
                 if (request.method === 'POST') {
                     const formData = await request.formData();
-                    console.log('[iNaturalist] POST request with form data');
+                    console.log('[iNaturalist] POST request');
                     response = await fetch(inaturalistUrl, {
                         method: 'POST',
-                        headers: headers,
+                        headers,
                         body: formData
                     });
                 } else {
-                    headers.set('Accept', 'application/json');
                     console.log('[iNaturalist] GET request');
                     response = await fetch(inaturalistUrl, {
                         method: request.method,
-                        headers: headers
+                        headers
                     });
                 }
 
                 console.log('[iNaturalist] Response status:', response.status);
 
-                if (response.status === 401) {
-                    console.error('[iNaturalist] 401 Unauthorized - token may be invalid or expired');
-                }
+                const responseText = await response.text();
 
-                const responseData = await response.json();
-
-                return new Response(JSON.stringify(responseData), {
+                return new Response(responseText, {
+                    status: response.status,
                     headers: {
                         ...corsHeaders,
                         'Content-Type': 'application/json',
-                        'X-Token-Source': token === env.INATURALIST_API_TOKEN ? 'env-fallback' : 'renewer'
-                    },
-                    status: response.status
+                        'X-Token-Source': token ? 'renewer' : 'none'
+                    }
                 });
 
             } catch (error) {
                 console.error('[iNaturalist] Error:', error.message);
-                return new Response(JSON.stringify({
-                    error: error.message
-                }), {
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                    status: 500
-                });
+                return new Response(
+                    JSON.stringify({ error: error.message }),
+                    {
+                        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                        status: 500
+                    }
+                );
             }
         }
 
