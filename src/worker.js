@@ -219,11 +219,10 @@ export default {
                 try {
                     console.log('[iNaturalist] Fetching token from renewer worker...');
                     const tokenResp = await fetch(
-                        'https://inaturalist-token-renewer.tainguyen-devs.workers.dev/token',
-                        {
-                            signal: AbortSignal.timeout(15000)
-                        }
+                        'https://inaturalist-token-renewer.tainguyen-devs.workers.dev/token/',
+                        { signal: AbortSignal.timeout(10000) }
                     );
+
 
                     if (tokenResp.ok) {
                         const tokenData = await tokenResp.json();
