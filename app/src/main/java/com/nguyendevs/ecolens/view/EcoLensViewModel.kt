@@ -47,6 +47,8 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     private var currentImageUri: Uri? = null
     private var currentHistoryEntryId: Int? = null
 
+    private var currentLanguageCode: String = "vi"
+
     // Response models for streaming
     private data class TaxonomyResponse(
         val commonName: String? = null,
@@ -70,6 +72,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     // ==================== SPECIES IDENTIFICATION ====================
 
     fun identifySpecies(imageUri: Uri, languageCode: String, existingHistoryId: Int? = null) {
+        currentLanguageCode = languageCode
         viewModelScope.launch {
             _uiState.value = EcoLensUiState(
                 isLoading = true,
@@ -546,7 +549,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         currentImageUri?.let { uri ->
             identifySpecies(
                 imageUri = uri,
-                languageCode = getApplication<Application>().resources.configuration.locales[0].language,
+                languageCode = currentLanguageCode,
                 existingHistoryId = currentHistoryEntryId
             )
         }

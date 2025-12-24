@@ -55,6 +55,24 @@ class SpeciesInfoHandler(
     }
 
     fun displaySpeciesInfo(info: SpeciesInfo, imageUri: Uri?, stage: LoadingStage) {
+        if (stage == LoadingStage.NONE) {
+            handlerScope.coroutineContext.cancelChildren()
+            clearAllViews()
+            isInitialLoad = true
+            renderedSections.clear()
+            allSectionsRendered = false
+            return
+        }
+
+        if (info.scientificName.isNotEmpty()) {
+            displayScientificName(info)
+        }
+        if (info.commonName.isNotEmpty() && info.commonName != "...") {
+            displayCommonName(info)
+        }
+        if (stage != LoadingStage.SCIENTIFIC_NAME) {
+            displayConfidence(info, isWaiting = false)
+        }
         when (stage) {
             LoadingStage.NONE -> {
                 handlerScope.coroutineContext.cancelChildren()
@@ -67,8 +85,8 @@ class SpeciesInfoHandler(
             LoadingStage.SCIENTIFIC_NAME -> {
                 isInitialLoad = true
                 displayCommonName(SpeciesInfo(commonName = "...", scientificName = ""))
-                displayScientificName(info)
-                displayConfidence(info, isWaiting = true)
+               // displayScientificName(info)
+               // displayConfidence(info, isWaiting = true)
                 prepareTaxonomyContainer()
                 setupCopyButton(info)
                 showCopyButtonAnimation()
@@ -76,8 +94,8 @@ class SpeciesInfoHandler(
             }
 
             LoadingStage.COMMON_NAME -> {
-                displayCommonName(info)
-                displayConfidence(info, isWaiting = false)
+               // displayCommonName(info)
+               // displayConfidence(info, isWaiting = false)
             }
 
             LoadingStage.TAXONOMY -> {
