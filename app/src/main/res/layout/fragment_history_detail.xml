@@ -158,7 +158,6 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- FAB được đặt ở cuối để có z-index cao nhất -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_speak"
             android:layout_width="wrap_content"

@@ -2,6 +2,7 @@ package com.nguyendevs.ecolens.fragments
 
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.text.LineBreaker
 import android.os.Build
 import android.os.Bundle
 import android.text.Html
@@ -190,6 +191,9 @@ class HistoryDetailFragment : Fragment() {
             textSize = 15f
             setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
             setLineSpacing(0f, 1.4f)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                justificationMode = LineBreaker.JUSTIFICATION_MODE_INTER_WORD
+            }
             setHtml(content)
         }
 
