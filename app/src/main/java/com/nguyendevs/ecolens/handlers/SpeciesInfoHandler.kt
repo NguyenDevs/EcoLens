@@ -18,6 +18,7 @@ import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.LinearInterpolator
+import android.view.animation.OvershootInterpolator
 import android.widget.*
 import androidx.core.content.ContextCompat
 import com.google.android.material.card.MaterialCardView
@@ -40,6 +41,8 @@ class SpeciesInfoHandler(
     private var allSectionsRendered = false
     private var confidenceRotationAnimator: ObjectAnimator? = null
     private var taxonomyShimmerAnimator: ValueAnimator? = null
+    private var lastDisplayedCommonName: String? = null
+    private var lastConfidenceValue: String? = null
 
     init {
         cacheViews()
@@ -195,6 +198,8 @@ class SpeciesInfoHandler(
     }
 
     private fun clearAllViews() {
+        lastDisplayedCommonName = null
+        lastConfidenceValue = null
         displayedRows.clear()
         renderedSections.clear()
         allSectionsRendered = false
@@ -248,25 +253,42 @@ class SpeciesInfoHandler(
 
     private fun displayScientificName(info: SpeciesInfo) {
         val tvScientificName = viewCache[R.id.tvScientificName] as? TextView
+        val btnCopy = viewCache[R.id.btnCopyScientificName]
+
         tvScientificName?.let {
             renderHtml(it, info.scientificName)
-            it.visibility = View.VISIBLE
-            fadeIn(it, 300)
+            slideAndFadeIn(it, duration = 500, delay = 100)
+        }
+        btnCopy?.let {
+            slideAndFadeIn(it, duration = 500, delay = 150)
         }
     }
 
     private fun displayCommonName(info: SpeciesInfo) {
         val tvCommonName = viewCache[R.id.tvCommonName] as? TextView
-        tvCommonName?.let {
+        tvCommonName?.let { view ->
+            if (lastDisplayedCommonName == info.commonName &&
+                view.visibility == View.VISIBLE &&
+                view.alpha == 1f) {
+                return
+            }
+
             if (info.commonName == "...") {
-                it.text = "..."
-                it.alpha = 0f
-                it.setTextColor(Color.TRANSPARENT)
+                view.text = "..."
+                view.alpha = 0f
+                view.setTextColor(Color.TRANSPARENT)
+                lastDisplayedCommonName = "..."
             } else {
-                it.setTextColor(ContextCompat.getColor(context, R.color.green_primary))
-                renderHtml(it, info.commonName)
-                it.visibility = View.VISIBLE
-                fadeIn(it, 300)
+                view.setTextColor(ContextCompat.getColor(context, R.color.green_primary))
+                renderHtml(view, info.commonName)
+
+                if (lastDisplayedCommonName != info.commonName) {
+                    slideAndFadeIn(view, duration = 600)
+                } else if (view.visibility != View.VISIBLE) {
+                    view.visibility = View.VISIBLE
+                    view.alpha = 1f
+                }
+                lastDisplayedCommonName = info.commonName
             }
         }
     }
@@ -278,12 +300,22 @@ class SpeciesInfoHandler(
         val iconConfidence = viewCache[R.id.iconConfidence] as? ImageView
 
         if (isWaiting) {
+            lastConfidenceValue = "loading"
+
             tvConfidence?.text = context.getString(R.string.confidence, "...%")
             tvConfidence?.textSize = 13f
+
             iconConfidence?.setImageResource(R.drawable.ic_rotate)
             iconConfidence?.imageTintList = ContextCompat.getColorStateList(context, R.color.text_secondary)
             confidenceCard?.setCardBackgroundColor(ContextCompat.getColor(context, R.color.gray_light))
             tvConfidence?.setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
+
+            confidenceCard?.let {
+                if (it.visibility != View.VISIBLE) {
+                    it.visibility = View.VISIBLE
+                    it.alpha = 1f
+                }
+            }
 
             if (confidenceRotationAnimator == null && iconConfidence != null) {
                 confidenceRotationAnimator = ObjectAnimator.ofFloat(iconConfidence, "rotation", 0f, 360f).apply {
@@ -298,7 +330,15 @@ class SpeciesInfoHandler(
 
             val confidenceValue = info.confidence.coerceIn(0.0, 100.0)
             val confidencePercent = String.format("%.2f", confidenceValue)
-            tvConfidence?.text = context.getString(R.string.confidence_format, confidencePercent)
+            val newText = context.getString(R.string.confidence_format, confidencePercent)
+
+            if (lastConfidenceValue == newText &&
+                confidenceCard?.visibility == View.VISIBLE &&
+                confidenceCard?.alpha == 1f) {
+                return
+            }
+
+            tvConfidence?.text = newText
 
             val (icon, tint, bg, text) = when {
                 confidenceValue >= 50f -> Quadruple(
@@ -307,14 +347,12 @@ class SpeciesInfoHandler(
                     R.color.confidence_high_bg,
                     R.color.confidence_high_text
                 )
-
                 confidenceValue >= 25f -> Quadruple(
                     R.drawable.ic_check_warning_circle,
                     R.color.confidence_medium,
                     R.color.confidence_medium_bg,
                     R.color.confidence_medium_text
                 )
-
                 else -> Quadruple(
                     R.drawable.ic_check_not_circle,
                     R.color.confidence_low,
@@ -327,13 +365,34 @@ class SpeciesInfoHandler(
             iconConfidence?.imageTintList = ContextCompat.getColorStateList(context, tint)
             confidenceCard?.setCardBackgroundColor(ContextCompat.getColor(context, bg))
             tvConfidence?.setTextColor(ContextCompat.getColor(context, text))
-        }
 
-        confidenceCard?.let {
-            if (it.visibility != View.VISIBLE) {
-                it.visibility = View.VISIBLE
-                fadeIn(it, 300)
+            confidenceCard?.let { card ->
+                if (lastConfidenceValue != newText) {
+                    card.visibility = View.VISIBLE
+
+                    card.alpha = 0f
+                    card.scaleX = 0.5f
+                    card.scaleY = 0.5f
+
+                    card.animate()
+                        .alpha(1f)
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(500)
+                        .setInterpolator(OvershootInterpolator(1.5f))
+                        .start()
+                } else {
+                    if (card.visibility != View.VISIBLE || card.alpha < 1f) {
+                        card.visibility = View.VISIBLE
+                        card.alpha = 1f
+                        card.scaleX = 1f
+                        card.scaleY = 1f
+                    }
+                }
             }
+
+            // 5. Lưu lại giá trị mới nhất
+            lastConfidenceValue = newText
         }
     }
 
@@ -759,4 +818,20 @@ class SpeciesInfoHandler(
     data class Quadruple<out A, out B, out C, out D>(
         val first: A, val second: B, val third: C, val fourth: D
     )
+
+    private fun slideAndFadeIn(view: View, duration: Long = 500, delay: Long = 0) {
+        if (view.visibility == View.VISIBLE && view.alpha == 1f) return
+
+        view.alpha = 0f
+        view.translationY = 50f
+        view.visibility = View.VISIBLE
+
+        view.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setDuration(duration)
+            .setStartDelay(delay)
+            .setInterpolator(DecelerateInterpolator(1.5f))
+            .start()
+    }
 }
