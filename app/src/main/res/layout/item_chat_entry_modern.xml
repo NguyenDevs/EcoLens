@@ -36,21 +36,33 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
+                android:animateLayoutChanges="true"
                 android:padding="@dimen/spacing_md"
                 android:gravity="center_vertical">
 
             <!-- ICON -->
             <FrameLayout
-                    android:layout_width="@dimen/icon_lg"
-                    android:layout_height="@dimen/icon_lg"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
                     android:background="@drawable/bg_flag_rounded"
                     android:backgroundTint="@color/transparent">
+
                 <ImageView
+                        android:id="@+id/ivLoadingRing"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="-10dp"
+                        android:src="@drawable/bg_gemini_ring_gradient"
+                        android:scaleType="fitXY"
+                        android:visibility="visible" />
+
+                <ImageView
+                        android:id="@+id/ivAiIcon"
                         android:layout_width="@dimen/icon_lg"
                         android:layout_height="@dimen/icon_lg"
-                        android:src="@drawable/ai_icon"
-                        android:layout_gravity="center"/>
-            </FrameLayout>
+                        android:src="@drawable/ic_gemini_sparkle"
+                        android:layout_gravity="center"
+                        android:padding="4dp"/> </FrameLayout>
 
             <!-- INFO SECTION -->
             <LinearLayout

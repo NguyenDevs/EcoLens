@@ -114,6 +114,7 @@ dependencies {
 
     // Utilities
     implementation("com.google.guava:guava:31.1-android")
+    implementation("com.google.android.material:material:1.12.0")
 
     // Testing
     testImplementation("junit:junit:4.13.2")

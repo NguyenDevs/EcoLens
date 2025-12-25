@@ -15,6 +15,8 @@ import android.view.ScaleGestureDetector
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -55,6 +57,9 @@ class CameraActivity : AppCompatActivity() {
     private lateinit var captureBorder: ImageView
     private lateinit var focusIndicator: ImageView
 
+    private lateinit var captureBorderAnimated: ImageView
+    private var rotateAnimation: Animation? = null
+
     private var camera: Camera? = null
     private var imageCapture: ImageCapture? = null
     private var lensFacing = CameraSelector.LENS_FACING_BACK
@@ -91,8 +96,9 @@ class CameraActivity : AppCompatActivity() {
         rotateButton = findViewById(R.id.refreshButton)
 
         startCamera()
+        captureBorderAnimated = findViewById(R.id.captureBorderAnimated)
         setupZoomAndFocus()
-
+        startBorderAnimation()
         captureButton.setOnClickListener {
             performHapticFeedback()
             animateCaptureButton()
@@ -109,6 +115,8 @@ class CameraActivity : AppCompatActivity() {
         }
 
         rotateButton.setOnClickListener {
+            val rotateOnce = AnimationUtils.loadAnimation(this, R.anim.rotate_once)
+            rotateButton.startAnimation(rotateOnce)
             lensFacing = if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
                 CameraSelector.LENS_FACING_BACK
             } else {
@@ -136,6 +144,7 @@ class CameraActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()
+        stopBorderAnimation()
     }
 
     private fun openGallery() {
@@ -353,5 +362,17 @@ class CameraActivity : AppCompatActivity() {
             File(it, resources.getString(R.string.app_name)).apply { mkdirs() }
         }
         return if (mediaDir != null && mediaDir.exists()) mediaDir else cacheDir
+    }
+
+    private fun startBorderAnimation() {
+        rotateAnimation = AnimationUtils.loadAnimation(this, R.anim.rotate_infinite)
+        captureBorderAnimated.visibility = View.VISIBLE
+        captureBorderAnimated.startAnimation(rotateAnimation)
+    }
+
+    private fun stopBorderAnimation() {
+        rotateAnimation?.cancel()
+        captureBorderAnimated.clearAnimation()
+        captureBorderAnimated.visibility = View.GONE
     }
 }

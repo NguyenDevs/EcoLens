@@ -152,11 +152,12 @@
                         android:background="@color/overlay_light"
                         android:visibility="gone">
 
-                    <ProgressBar
+                    <com.google.android.material.progressindicator.CircularProgressIndicator
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
-                            android:indeterminateTint="@color/primary"/>
+                            android:indeterminate="true"
+                            app:indicatorColor="@array/gemini_colors" />
                 </FrameLayout>
 
                 <!-- ZOOM BUTTON -->

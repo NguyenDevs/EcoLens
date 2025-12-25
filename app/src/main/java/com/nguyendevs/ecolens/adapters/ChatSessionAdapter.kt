@@ -3,6 +3,7 @@ package com.nguyendevs.ecolens.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.nguyendevs.ecolens.R
@@ -51,16 +52,40 @@ class ChatSessionAdapter(
         val tvTime: TextView = view.findViewById(R.id.tvTime)
         val card: View = view.findViewById(R.id.cardSession)
 
+        val ivLoadingRing: ImageView = view.findViewById(R.id.ivLoadingRing)
+
         fun bind(session: ChatSession, showHeader: Boolean) {
             tvDate.visibility = if (showHeader) View.VISIBLE else View.GONE
             tvDate.text = dateFormatter.format(Date(session.timestamp))
-
+            ivLoadingRing.visibility = View.INVISIBLE
+            ivLoadingRing.animate().cancel()
             tvTitle.text = session.title
             markwon.setMarkdown(tvLastMessage, session.lastMessage)
 
             tvTime.text = timeFormatter.format(Date(session.timestamp))
 
-            card.setOnClickListener { onClick(session) }
+            card.setOnClickListener {
+                ivLoadingRing.visibility = View.VISIBLE
+                ivLoadingRing.alpha = 1f
+
+                ivLoadingRing.animate()
+                    .rotationBy(360f)
+                    .setDuration(800)
+                    .setInterpolator(android.view.animation.LinearInterpolator())
+                    .withEndAction {
+                        ivLoadingRing.animate()
+                            .alpha(0f)
+                            .setDuration(200)
+                            .withEndAction {
+                                ivLoadingRing.visibility = View.INVISIBLE
+                                ivLoadingRing.rotation = 0f
+                            }
+                            .start()
+                    }
+                    .start()
+
+                onClick(session)
+            }
         }
     }
 }

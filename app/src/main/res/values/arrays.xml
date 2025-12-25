@@ -1,0 +1,9 @@
+<resources>
+    <array name="gemini_colors">
+        <item>#00A86B</item>
+        <item>#018367</item>
+        <item>#08B962</item>
+        <item>#033826</item>
+        <item>#00796B</item>
+    </array>
+</resources>
