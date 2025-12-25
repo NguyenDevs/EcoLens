@@ -18,6 +18,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.google.android.material.appbar.CollapsingToolbarLayout
@@ -28,6 +29,7 @@ import com.nguyendevs.ecolens.managers.SpeakerManager
 import com.nguyendevs.ecolens.model.HistoryEntry
 import com.nguyendevs.ecolens.model.SpeciesInfo
 import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
+import java.io.File
 
 class HistoryDetailFragment : Fragment() {
 
@@ -109,7 +111,22 @@ class HistoryDetailFragment : Fragment() {
         val btnShare = view.findViewById<ImageView>(R.id.btnShareInfo)
 
         btnShare.setOnClickListener {
-            val imageUri = if (!imagePath.isNullOrEmpty()) Uri.parse(imagePath) else null
+            var imageUri: Uri? = null
+            if (!imagePath.isNullOrEmpty()) {
+                val file = File(imagePath)
+                if (file.exists()) {
+                    try {
+                        imageUri = FileProvider.getUriForFile(
+                            requireContext(),
+                            "${requireContext().packageName}.provider",
+                            file
+                        )
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        imageUri = Uri.parse(imagePath)
+                    }
+                }
+            }
             shareSpeciesInfo(info, imageUri)
         }
     }
