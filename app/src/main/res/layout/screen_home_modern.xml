@@ -17,7 +17,7 @@
             android:animateLayoutChanges="true"
             android:paddingStart="@dimen/padding_screen_horizontal"
             android:paddingEnd="@dimen/padding_screen_horizontal"
-            android:paddingTop="@dimen/padding_screen_vertical"
+            android:paddingTop="10dp"
             android:paddingBottom="100dp">
 
         <!-- HEADER -->
@@ -25,6 +25,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/spacing_xs"
+
                 android:text="@string/app_title"
                 style="@style/TextAppearance.App.Display"
                 android:textColor="@color/primary"/>
@@ -33,7 +34,7 @@
                 android:id="@+id/tvAppSubtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/spacing_xxs"
+                android:paddingStart="4dp"
                 android:layout_marginBottom="@dimen/spacing_lg"
                 android:text="@string/app_subtitle_home"
                 style="@style/TextAppearance.App.Body2"/>
