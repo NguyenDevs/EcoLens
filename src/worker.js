@@ -2,8 +2,6 @@ let apiKeyIndex = 0;
 
 export default {
     async fetch(request, env) {
-        const clientIP = request.headers.get('CF-Connecting-IP');
-        const clientCountry = request.headers.get('CF-IPCountry');
         const corsHeaders = {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -15,7 +13,8 @@ export default {
         }
 
         const url = new URL(request.url);
-
+        const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
+        const clientCountry = request.headers.get('CF-IPCountry') || 'VN';
         function getAllGeminiKeys(env) {
             return [
                 env.GEMINI_API_KEY,
