@@ -60,7 +60,7 @@ export default {
                             'Content-Type': 'application/json',
                             'x-goog-api-client': 'genai-js/0.1.0',
                             'X-Forwarded-For': '8.8.8.8',
-                            'CF-IPCountry': 'VN'
+                            'CF-IPCountry': 'US'
                         },
                         body: JSON.stringify(body)
                     });

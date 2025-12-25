@@ -7,6 +7,9 @@ import com.nguyendevs.ecolens.model.*
 import com.nguyendevs.ecolens.utils.MarkdownProcessor
 import com.nguyendevs.ecolens.utils.PromptBuilder
 import kotlinx.coroutines.*
+import java.io.IOException
+
+class GeoBlockedException : IOException("Geo blocked")
 
 class GeminiStreamingHelper(
     private val apiService: INaturalistApi,
@@ -31,11 +34,16 @@ class GeminiStreamingHelper(
                 )
             )
         )
+        val response = apiService.streamGemini(request)
+        if (!response.isSuccessful) {
+            val errorBody = response.errorBody()?.string() ?: ""
+            if (errorBody.contains("User location is not supported", ignoreCase = true)) {
+                throw GeoBlockedException()
+            }
+            throw IOException("API Error: ${response.code()} - $errorBody")
+        }
 
         try {
-            val response = apiService.streamGemini(request)
-            if (!response.isSuccessful) return@withContext
-
             response.body()?.byteStream()?.bufferedReader()?.use { reader ->
                 var accumulatedJson = ""
                 var line: String?
@@ -72,7 +80,8 @@ class GeminiStreamingHelper(
                 }
             }
         } catch (e: Exception) {
-            Log.e("StreamTaxonomy", "Error: ${e.message}")
+            Log.e("StreamTaxonomy", "Stream processing error: ${e.message}")
+            throw e
         }
     }
 

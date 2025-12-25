@@ -73,34 +73,47 @@ class SpeciesIdentificationManager(
                     loadingStage = LoadingStage.SCIENTIFIC_NAME
                 ))
 
-                streamingHelper.streamTaxonomy(
-                    scientificName,
-                    confidence,
-                    languageCode
-                ) { state ->
-                    currentSpeciesInfo = state.speciesInfo
-                    onStateUpdate(state)
+                try {
+                    streamingHelper.streamTaxonomy(
+                        scientificName,
+                        confidence,
+                        languageCode
+                    ) { state ->
+                        currentSpeciesInfo = state.speciesInfo
+                        onStateUpdate(state)
+                    }
+
+                    val infoForDetails = currentSpeciesInfo ?: SpeciesInfo(scientificName = scientificName, confidence = confidence)
+
+                    streamingHelper.streamDetails(
+                        scientificName,
+                        confidence,
+                        languageCode,
+                        infoForDetails
+                    ) { state ->
+                        currentSpeciesInfo = state.speciesInfo
+                        onStateUpdate(state)
+                    }
+
+                    onStateUpdate(EcoLensUiState(
+                        isLoading = false,
+                        speciesInfo = currentSpeciesInfo,
+                        loadingStage = LoadingStage.COMPLETE
+                    ))
+
+                    saveToHistory(existingHistoryId, imageFile)
+
+                } catch (e: GeoBlockedException) {
+                    onStateUpdate(EcoLensUiState(
+                        isLoading = false,
+                        speciesInfo = null,
+                        error = application.getString(R.string.error_geo_block)
+                    ))
+                    return
+                } catch (e: Exception) {
+                    handleError(e, onStateUpdate)
+                    return
                 }
-
-                val infoForDetails = currentSpeciesInfo ?: SpeciesInfo(scientificName = scientificName, confidence = confidence)
-
-                streamingHelper.streamDetails(
-                    scientificName,
-                    confidence,
-                    languageCode,
-                    infoForDetails
-                ) { state ->
-                    currentSpeciesInfo = state.speciesInfo
-                    onStateUpdate(state)
-                }
-
-                onStateUpdate(EcoLensUiState(
-                    isLoading = false,
-                    speciesInfo = currentSpeciesInfo,
-                    loadingStage = LoadingStage.COMPLETE
-                ))
-
-                saveToHistory(existingHistoryId, imageFile)
             } else {
                 onStateUpdate(EcoLensUiState(
                     isLoading = false,

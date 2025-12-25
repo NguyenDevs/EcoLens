@@ -165,4 +165,6 @@
     <string name="btn_retry_identification">Retry identification</string>
     <string name="retry_identification_hint">Low confidence. Tap to try again.</string>
 
+    <string name="error_geo_block">API services is not available in your region. Please try again later.</string>
+
 </resources>

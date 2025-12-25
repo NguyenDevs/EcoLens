@@ -168,4 +168,6 @@
     <!-- Retry Button -->
     <string name="btn_retry_identification">Thử nhận dạng lại</string>
     <string name="retry_identification_hint">Độ tin cậy thấp. Nhấn để thử lại.</string>
+
+    <string name="error_geo_block">Dịch vụ API chưa hỗ trợ khu vực này. Vui lòng thử lại sau hoặc đổi mạng.</string>
 </resources>
