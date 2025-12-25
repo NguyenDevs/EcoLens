@@ -42,8 +42,8 @@
 
             <!-- ICON -->
             <FrameLayout
-                    android:layout_width="@dimen/touch_target_min"
-                    android:layout_height="@dimen/touch_target_min"
+                    android:layout_width="@dimen/touch_target_exmin"
+                    android:layout_height="@dimen/touch_target_exmin"
                     android:background="@drawable/bg_flag_rounded"
                     android:backgroundTint="@color/surface_tint">
                 <ImageView
@@ -81,7 +81,7 @@
                         style="@style/TextAppearance.App.Body2"
                         android:maxLines="1"
                         android:ellipsize="end"
-                        android:layout_marginTop="@dimen/spacing_xxs"/>
+                        android:layout_marginTop="@dimen/spacing_xxxs"/>
             </LinearLayout>
 
             <!-- TIME -->

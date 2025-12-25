@@ -42,6 +42,7 @@ object PromptBuilder {
         }
     }
 
+
     fun buildDetailsPrompt(scientificName: String, isVietnamese: Boolean): String {
         return if (isVietnamese) {
             """
