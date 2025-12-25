@@ -279,6 +279,7 @@ class SpeciesInfoHandler(
 
         if (isWaiting) {
             tvConfidence?.text = context.getString(R.string.confidence, "...%")
+            tvConfidence?.textSize = 13f
             iconConfidence?.setImageResource(R.drawable.ic_rotate)
             iconConfidence?.imageTintList = ContextCompat.getColorStateList(context, R.color.text_secondary)
             confidenceCard?.setCardBackgroundColor(ContextCompat.getColor(context, R.color.gray_light))

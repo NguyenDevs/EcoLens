@@ -16,6 +16,7 @@
             android:padding="@dimen/spacing_lg">
 
         <!-- HEADER SECTION -->
+        <!-- HEADER SECTION -->
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -64,6 +65,46 @@
                             android:contentDescription="@string/copy_scientific_name"
                             app:tint="@color/text_secondary"/>
                 </LinearLayout>
+
+                <!-- CONFIDENCE BADGE - Moved here -->
+                <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/confidenceCard"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        app:cardCornerRadius="@dimen/radius_full"
+                        app:cardElevation="@dimen/elevation_none"
+                        app:strokeWidth="0dp">
+
+                    <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:animateLayoutChanges="true"
+                            android:paddingStart="@dimen/spacing_sm"
+                            android:paddingTop="6dp"
+                            android:paddingEnd="@dimen/spacing_md"
+                            android:paddingBottom="6dp">
+
+                        <ImageView
+                                android:id="@+id/iconConfidence"
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:contentDescription="@string/confidence"
+                                android:src="@drawable/ic_check_circle"/>
+
+                        <TextView
+                                android:id="@+id/tvConfidence"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/spacing_xs"
+                                android:text="@string/confidence_format"
+                                style="@style/TextAppearance.App.Label"
+                                android:textAllCaps="false"
+                                android:textSize="@dimen/text_label"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
 
             <!-- RIGHT: ACTION BUTTONS -->
@@ -98,45 +139,6 @@
             </LinearLayout>
 
         </LinearLayout>
-
-        <!-- CONFIDENCE BADGE -->
-        <com.google.android.material.card.MaterialCardView
-                android:id="@+id/confidenceCard"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_md"
-                app:cardCornerRadius="@dimen/radius_full"
-                app:cardElevation="@dimen/elevation_none"
-                app:strokeWidth="0dp">
-
-            <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingStart="@dimen/spacing_sm"
-                    android:paddingTop="6dp"
-                    android:paddingEnd="@dimen/spacing_md"
-                    android:paddingBottom="6dp">
-
-                <ImageView
-                        android:id="@+id/iconConfidence"
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:contentDescription="@string/confidence"
-                        android:src="@drawable/ic_check_circle"/>
-
-                <TextView
-                        android:id="@+id/tvConfidence"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/spacing_xs"
-                        android:text="@string/confidence_format"
-                        style="@style/TextAppearance.App.Label"
-                        android:textAllCaps="false"
-                        android:textSize="@dimen/text_label"/>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
 
         <!-- DIVIDER -->
         <View
