@@ -20,7 +20,6 @@ class LanguageAdapter(
         val ivFlag: ImageView = view.findViewById(R.id.ivFlag)
         val tvLanguageName: TextView = view.findViewById(R.id.tvLanguageName)
 
-        // Gắn dữ liệu ngôn ngữ vào view
         fun bind(language: Language) {
             ivFlag.setImageResource(language.flagDrawable)
             tvLanguageName.text = language.name
@@ -40,22 +39,18 @@ class LanguageAdapter(
         }
     }
 
-    // Tạo ViewHolder mới
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LanguageViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_language_modern, parent, false)
         return LanguageViewHolder(view)
     }
 
-    // Gắn dữ liệu vào ViewHolder
     override fun onBindViewHolder(holder: LanguageViewHolder, position: Int) {
         holder.bind(languages[position])
     }
 
-    // Lấy số lượng ngôn ngữ
     override fun getItemCount() = languages.size
 
-    // Cập nhật danh sách ngôn ngữ
     fun updateList(newLanguages: List<Language>) {
         languages = newLanguages
         notifyDataSetChanged()

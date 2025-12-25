@@ -22,7 +22,6 @@ class HistoryAdapter(
     private val favoriteClickListener: (HistoryEntry) -> Unit
 ) : RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
 
-    // Khởi tạo các formatter dùng chung để tránh tạo lại nhiều lần
     companion object {
         private val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).apply {
             timeZone = TimeZone.getDefault()
@@ -32,20 +31,17 @@ class HistoryAdapter(
         }
     }
 
-    // Cập nhật danh sách lịch sử và refresh giao diện
     fun updateList(newList: List<HistoryEntry>) {
         historyList = newList
         notifyDataSetChanged()
     }
 
-    // Tạo ViewHolder mới (Markwon đã được inject nên không cần khởi tạo ở đây)
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_history_entry_modern, parent, false)
         return HistoryViewHolder(view)
     }
 
-    // Xác định vị trí item và gọi hàm bind dữ liệu
     override fun onBindViewHolder(holder: HistoryViewHolder, position: Int) {
         val entry = historyList[position]
 
@@ -55,10 +51,8 @@ class HistoryAdapter(
         holder.bind(entry, isFirstItemOfDay, isLastItemOfDay, clickListener)
     }
 
-    // Trả về tổng số lượng item trong danh sách
     override fun getItemCount(): Int = historyList.size
 
-    // Kiểm tra xem hai mốc thời gian có thuộc cùng một ngày không
     private fun isSameDay(timestamp1: Long, timestamp2: Long): Boolean {
         return dateFormatter.format(Date(timestamp1)) == dateFormatter.format(Date(timestamp2))
     }
@@ -71,7 +65,6 @@ class HistoryAdapter(
         private val tvScientificName: TextView = itemView.findViewById(R.id.tvHistoryScientificName)
         private val tvTime: TextView = itemView.findViewById(R.id.tvHistoryTime)
 
-        // Gắn dữ liệu vào các view component và xử lý giao diện nhóm theo ngày
         fun bind(
             entry: HistoryEntry,
             isFirstItemOfDay: Boolean,

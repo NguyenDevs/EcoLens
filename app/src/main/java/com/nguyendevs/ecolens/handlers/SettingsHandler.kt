@@ -20,7 +20,6 @@ class SettingsHandler(
     private lateinit var languageOption: View
     private lateinit var tvCurrentLanguage: TextView
 
-    // Thiết lập các tùy chọn trong Settings
     fun setup() {
         try {
             languageOption = settingsView.findViewById(R.id.languageOption)
@@ -41,7 +40,6 @@ class SettingsHandler(
         }
     }
 
-    // Cập nhật hiển thị ngôn ngữ hiện tại
     fun updateLanguageDisplay() {
         if (!::tvCurrentLanguage.isInitialized) {
             return
@@ -55,7 +53,6 @@ class SettingsHandler(
         }
     }
 
-    // Mở màn hình chọn ngôn ngữ
     private fun openLanguageSelection() {
         val fragmentContainer = (activity as AppCompatActivity)
             .findViewById<FrameLayout>(R.id.fragmentContainer)
@@ -75,7 +72,6 @@ class SettingsHandler(
             .commit()
     }
 
-    // Mở màn hình About
     private fun openAboutScreen() {
         val fragmentContainer = (activity as AppCompatActivity)
             .findViewById<FrameLayout>(R.id.fragmentContainer)

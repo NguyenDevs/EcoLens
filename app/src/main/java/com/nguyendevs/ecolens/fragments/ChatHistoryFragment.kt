@@ -48,7 +48,6 @@ class ChatHistoryFragment : Fragment(R.layout.screen_assistant_modern) {
         rv.adapter = adapter
     }
 
-    // Quan sát danh sách chat sessions từ ViewModel
     private fun observeChatSessions() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.allChatSessions.collectLatest { list ->
@@ -64,7 +63,6 @@ class ChatHistoryFragment : Fragment(R.layout.screen_assistant_modern) {
         }
     }
 
-    // Thiết lập listener cho nút tạo chat mới
     private fun setupFabListener(fab: ExtendedFloatingActionButton) {
         fab.setOnClickListener {
             performHapticFeedback()
@@ -72,7 +70,6 @@ class ChatHistoryFragment : Fragment(R.layout.screen_assistant_modern) {
         }
     }
 
-    // Mở màn hình chat
     private fun openChatScreen(sessionId: Long?) {
         val fragment = ChatFragment.newInstance(sessionId)
 
@@ -83,7 +80,6 @@ class ChatHistoryFragment : Fragment(R.layout.screen_assistant_modern) {
             .commit()
     }
 
-    // Hàm tạo hiệu ứng rung
     private fun performHapticFeedback() {
         try {
             val context = requireContext()

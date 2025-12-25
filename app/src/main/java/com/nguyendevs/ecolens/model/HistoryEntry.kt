@@ -4,9 +4,6 @@ import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-/**
- * Entity đại diện cho một mục trong lịch sử tìm kiếm.
- */
 @Entity(tableName = "history_table")
 data class HistoryEntry(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,

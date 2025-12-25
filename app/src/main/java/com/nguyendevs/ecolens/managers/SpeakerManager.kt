@@ -44,7 +44,6 @@ class SpeakerManager(private val context: Context) : TextToSpeech.OnInitListener
         })
     }
 
-    // Khởi tạo TextToSpeech engine
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
             val languageManager = LanguageManager(context)
@@ -56,7 +55,6 @@ class SpeakerManager(private val context: Context) : TextToSpeech.OnInitListener
         }
     }
 
-    // Thiết lập ngôn ngữ và tốc độ đọc
     fun setLanguage(langCode: String) {
         val locale = Locale(langCode)
         val result = textToSpeech?.setLanguage(locale)
@@ -74,7 +72,6 @@ class SpeakerManager(private val context: Context) : TextToSpeech.OnInitListener
         }
     }
 
-    // Đọc văn bản hoặc tiếp tục đọc nếu đang tạm dừng
     fun speak(text: String) {
         if (!isLoaded) return
         if (isPaused && text == currentRawText) {
@@ -86,7 +83,6 @@ class SpeakerManager(private val context: Context) : TextToSpeech.OnInitListener
         isPaused = false
         currentRawText = text
 
-        // UPDATED: Gọi hàm clean text đã được cập nhật
         val cleanedText = cleanupForSpeech(text)
         val newSentences = splitTextToSentences(cleanedText)
 
@@ -104,7 +100,6 @@ class SpeakerManager(private val context: Context) : TextToSpeech.OnInitListener
         speakCurrentSentence(TextToSpeech.QUEUE_ADD)
     }
 
-    // Tạm dừng đọc
     fun pause() {
         if (isSpeaking()) {
             isPaused = true
@@ -112,18 +107,15 @@ class SpeakerManager(private val context: Context) : TextToSpeech.OnInitListener
         }
     }
 
-    // Kiểm tra có đang đọc không
     fun isSpeaking(): Boolean {
         return textToSpeech?.isSpeaking == true
     }
 
-    // Dọn dẹp tài nguyên
     fun shutdown() {
         textToSpeech?.stop()
         textToSpeech?.shutdown()
     }
 
-    // Đọc câu hiện tại
     private fun speakCurrentSentence(queueMode: Int) {
         if (currentSentenceIndex < sentenceList.size) {
             val sentence = sentenceList[currentSentenceIndex]
@@ -131,25 +123,19 @@ class SpeakerManager(private val context: Context) : TextToSpeech.OnInitListener
         }
     }
 
-    // UPDATED: Đổi tên và cập nhật logic dọn dẹp
     private fun cleanupForSpeech(text: String): String {
         var result = text
 
-        // 1. Loại bỏ nội dung tiếng Việt trong ngoặc đơn (giữ nguyên logic cũ)
         result = result.replace(Regex("\\s*\\([^)]*[ạ-ỹĂăÂâĐđÊêÔôƠơƯư][^)]*\\)"), "")
             .replace(Regex("\\s*\\([^)]*[Họ|Chi|Loài][^)]*\\)"), "")
 
-        // 2. Loại bỏ ký tự Markdown (*, #, _, ~) nếu còn sót lại
         result = result.replace(Regex("[*#_~]"), "")
 
-        // 3. Loại bỏ Emoji và các ký tự biểu tượng (Symbol, other)
         result = result.replace(Regex("[\\p{So}]"), "")
 
-        // 4. Chuẩn hóa khoảng trắng
         return result.replace(Regex("\\s+"), " ").trim()
     }
 
-    // Tách văn bản thành các câu
     private fun splitTextToSentences(text: String): List<String> {
         return text.split(Regex("(?<=[.!?\\n])\\s+"))
             .filter { it.isNotBlank() }

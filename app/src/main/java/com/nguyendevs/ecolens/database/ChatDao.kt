@@ -39,7 +39,6 @@ interface ChatDao {
     @Update
     suspend fun updateMessage(message: ChatMessage)
 
-    // Thêm method để update content mà không cần load toàn bộ message
     @Query("UPDATE chat_messages SET content = :content WHERE id = :messageId")
     suspend fun updateMessageContent(messageId: Long, content: String)
 

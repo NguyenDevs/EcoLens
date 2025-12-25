@@ -20,13 +20,11 @@ class ChatSessionAdapter(
     private val timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault())
     private lateinit var markwon: Markwon
 
-    // Cập nhật danh sách phiên chat
     fun updateList(newList: List<ChatSession>) {
         sessions = newList
         notifyDataSetChanged()
     }
 
-    // UPDATED: Khởi tạo Markwon instance tại đây
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         if (!::markwon.isInitialized) {
             markwon = Markwon.create(parent.context)
@@ -35,7 +33,6 @@ class ChatSessionAdapter(
         return ViewHolder(view)
     }
 
-    // Gắn dữ liệu vào ViewHolder
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val session = sessions[position]
 
@@ -45,7 +42,6 @@ class ChatSessionAdapter(
         holder.bind(session, isFirstOfDay)
     }
 
-    // Lấy số lượng phiên chat
     override fun getItemCount() = sessions.size
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -55,14 +51,11 @@ class ChatSessionAdapter(
         val tvTime: TextView = view.findViewById(R.id.tvTime)
         val card: View = view.findViewById(R.id.cardSession)
 
-        // UPDATED: Sử dụng Markwon để render preview tin nhắn cuối cùng thay vì Html.fromHtml
         fun bind(session: ChatSession, showHeader: Boolean) {
             tvDate.visibility = if (showHeader) View.VISIBLE else View.GONE
             tvDate.text = dateFormatter.format(Date(session.timestamp))
 
             tvTitle.text = session.title
-
-            // Thay thế logic Html cũ bằng Markwon
             markwon.setMarkdown(tvLastMessage, session.lastMessage)
 
             tvTime.text = timeFormatter.format(Date(session.timestamp))

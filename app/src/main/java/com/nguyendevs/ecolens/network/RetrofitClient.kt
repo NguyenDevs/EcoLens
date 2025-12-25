@@ -52,7 +52,6 @@ object RetrofitClient {
             appContext?.let { context ->
                 android.os.Handler(android.os.Looper.getMainLooper()).post {
                     when {
-                        // Trường hợp 1: Tất cả keys đều hết quota
                         allFailed -> {
                             Toast.makeText(
                                 context,
@@ -61,7 +60,6 @@ object RetrofitClient {
                             ).show()
                         }
 /*
-                        // Trường hợp 2: Có retry nhưng thành công
                         retryCount > 1 && successKey != null && successKey != "none" -> {
                             Toast.makeText(
                                 context,
@@ -69,8 +67,6 @@ object RetrofitClient {
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
-
-                        // Trường hợp 3: Lỗi 429 đơn lẻ (không phải từ retry logic)
                         response.code == 429 && retryCount == 0 -> {
                             Toast.makeText(
                                 context,

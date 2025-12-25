@@ -21,13 +21,11 @@ interface INaturalistApi {
         @Query("locale") locale: String = "vi"
     ): TaxonDetailsResponse
 
-    // Endpoint gốc - giữ lại cho backward compatible
     @POST("gemini")
     suspend fun askGemini(
         @Body request: GeminiRequest
     ): GeminiResponse
 
-    // Endpoint mới cho streaming
     @Streaming
     @POST("gemini/stream")
     suspend fun streamGemini(

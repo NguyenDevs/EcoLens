@@ -14,7 +14,6 @@ class ImageZoomHandler(
 
     private var currentImageUri: Uri? = null
 
-    // Thiết lập các sự kiện zoom ảnh
     fun setup() {
         btnZoomIn.setOnClickListener {
             currentImageUri?.let { uri ->
@@ -34,16 +33,13 @@ class ImageZoomHandler(
         }
     }
 
-    // Đặt URI ảnh hiện tại
     fun setImageUri(uri: Uri?) {
         currentImageUri = uri
         btnZoomIn.visibility = if (uri != null) View.VISIBLE else View.GONE
     }
 
-    // Kiểm tra trạng thái fullscreen
     fun isFullScreenVisible() = fullScreenContainer.visibility == View.VISIBLE
 
-    // Ẩn chế độ fullscreen
     fun hideFullScreen() {
         fullScreenContainer.visibility = View.GONE
     }

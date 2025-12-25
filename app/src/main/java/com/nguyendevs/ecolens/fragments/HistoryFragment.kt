@@ -190,7 +190,6 @@ class HistoryFragment : Fragment(R.layout.screen_history_modern) {
         picker.show(parentFragmentManager, "DATE_RANGE_PICKER")
 
         picker.addOnPositiveButtonClickListener { selection ->
-            // FIX: Trừ offset TimeZone để chuyển UTC từ Picker về giờ địa phương
             val timeZone = TimeZone.getDefault()
             val offset = timeZone.getOffset(selection.first)
 

@@ -18,7 +18,6 @@ class LoadingAnimationHandler(
 
     private var loadingTextJob: Job? = null
 
-    // Bắt đầu animation loading
     fun start() {
         if (loadingTextJob?.isActive == true) return
         loadingTextJob = coroutineScope.launch {
@@ -51,7 +50,6 @@ class LoadingAnimationHandler(
         }
     }
 
-    // Dừng animation loading
     fun stop() {
         loadingTextJob?.cancel()
         loadingTextJob = null

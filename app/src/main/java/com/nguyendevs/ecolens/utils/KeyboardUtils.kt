@@ -7,14 +7,8 @@ import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 
-/**
- * Object chứa các utility functions xử lý bàn phím
- */
 object KeyboardUtils {
 
-    /**
-     * Xử lý sự kiện chạm để ẩn bàn phím khi người dùng chạm ra ngoài EditText
-     */
     fun handleTouchEvent(activity: Activity, event: MotionEvent): Boolean {
         if (event.action == MotionEvent.ACTION_DOWN) {
             val v = activity.currentFocus

@@ -39,7 +39,6 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
         if (!::markwon.isInitialized) {
             markwon = Markwon.builder(parent.context)
                 .usePlugin(HtmlPlugin.create())
-                // [THÊM ĐOẠN PLUGIN NÀY ĐỂ CẤU HÌNH H1-H6]
                 .usePlugin(object : AbstractMarkwonPlugin() {
                     override fun configureTheme(builder: MarkwonTheme.Builder) {
                         builder
