@@ -36,6 +36,13 @@
                 android:text="@string/language_label"
                 style="@style/TextAppearance.App.Headline3"/>
     </RelativeLayout>
+    <View
+            android:layout_width="match_parent"
+            android:background="#E0E0E0"
+            android:layout_marginTop="-4dp"
+            android:layout_marginStart="-20dp"
+            android:layout_marginEnd="-20dp"
+            android:layout_height="1.5dp"/>
 
     <!-- LANGUAGE LIST -->
     <androidx.recyclerview.widget.RecyclerView

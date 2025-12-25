@@ -145,7 +145,12 @@
     <string name="history_empty">Chưa có lịch sử</string>
 
     <string name="about_label">Thông tin</string>
+    <string name="support">Hỗ trợ</string>
     <string name="about_app_title">Về chúng tôi</string>
+    <string name="follow_on_tiktok">Theo dõi trên TikTok</string>
+    <string name="follow_on_instagram">Theo dõi trên Instagram</string>
+    <string name="follow_on_facebook">Theo dõi trên Facebook</string>
+    <string name="email_support">Gửi phản hồi</string>
     <string name="about_app_desc">Ứng dụng EcoLens, nhận diện động thực vật qua hình ảnh được phát triển bởi @NguyenDevs</string>
 
     <string name="chat_hint">Hỏi về động thực vật...</string>
@@ -170,4 +175,6 @@
     <string name="retry_identification_hint">Độ tin cậy thấp. Nhấn để thử lại.</string>
 
     <string name="error_geo_block">Dịch vụ API chưa hỗ trợ khu vực này. Vui lòng thử lại sau hoặc đổi mạng.</string>
+
+
 </resources>

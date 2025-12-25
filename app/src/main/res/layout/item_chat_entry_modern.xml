@@ -14,7 +14,6 @@
             android:id="@+id/tvDateHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="@dimen/spacing_md"
             android:paddingStart="4dp"
             android:paddingEnd="4dp"
             android:paddingBottom="@dimen/spacing_xs"
@@ -42,16 +41,15 @@
 
             <!-- ICON -->
             <FrameLayout
-                    android:layout_width="@dimen/touch_target_exmin"
-                    android:layout_height="@dimen/touch_target_exmin"
+                    android:layout_width="@dimen/icon_lg"
+                    android:layout_height="@dimen/icon_lg"
                     android:background="@drawable/bg_flag_rounded"
-                    android:backgroundTint="@color/surface_tint">
+                    android:backgroundTint="@color/transparent">
                 <ImageView
-                        android:layout_width="@dimen/icon_md"
-                        android:layout_height="@dimen/icon_md"
-                        android:src="@drawable/ic_chat_bot"
-                        android:layout_gravity="center"
-                        app:tint="@color/primary"/>
+                        android:layout_width="@dimen/icon_lg"
+                        android:layout_height="@dimen/icon_lg"
+                        android:src="@drawable/ai_icon"
+                        android:layout_gravity="center"/>
             </FrameLayout>
 
             <!-- INFO SECTION -->

@@ -142,6 +142,11 @@
 
     <string name="about_label">Info</string>
     <string name="about_app_title">About us</string>
+    <string name="support">Support</string>
+    <string name="follow_on_tiktok">Follow on TikTok</string>
+    <string name="follow_on_instagram">Follow on Instagram</string>
+    <string name="follow_on_facebook">Follow on Facebook</string>
+    <string name="email_support">Email Support</string>
     <string name="about_app_desc">EcoLens, identify species via images developed by @NguyenDevs</string>
 
     <string name="chat_hint">Ask about flora and fauna...</string>
