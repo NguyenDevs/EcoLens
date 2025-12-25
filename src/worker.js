@@ -2,6 +2,8 @@ let apiKeyIndex = 0;
 
 export default {
     async fetch(request, env) {
+        const clientIP = request.headers.get('CF-Connecting-IP');
+        const clientCountry = request.headers.get('CF-IPCountry');
         const corsHeaders = {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -47,6 +49,7 @@ export default {
             for (let attempt = 0; attempt < maxAttempts; attempt++) {
                 const currentKey = keys[apiKeyIndex % keys.length];
                 const currentKeyIndex = apiKeyIndex % keys.length;
+
                 apiKeyIndex++;
 
                 retryInfo.totalAttempts++;
@@ -59,8 +62,8 @@ export default {
                         headers: {
                             'Content-Type': 'application/json',
                             'x-goog-api-client': 'genai-js/0.1.0',
-                            'X-Forwarded-For': '8.8.8.8',
-                            'CF-IPCountry': 'US'
+                            'X-Forwarded-For': clientIP,
+                            'CF-IPCountry': clientCountry
                         },
                         body: JSON.stringify(body)
                     });
