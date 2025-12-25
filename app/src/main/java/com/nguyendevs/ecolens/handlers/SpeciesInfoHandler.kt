@@ -89,6 +89,7 @@ class SpeciesInfoHandler(
                 setupCopyButton(info)
                 showCopyButtonAnimation()
                 hideButtons()
+                displayConfidence(info, isWaiting = true)
             }
 
             LoadingStage.COMMON_NAME -> {
