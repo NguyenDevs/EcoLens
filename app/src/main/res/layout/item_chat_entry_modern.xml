@@ -15,6 +15,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="@dimen/spacing_md"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
             android:paddingBottom="@dimen/spacing_xs"
             android:text="Today"
             style="@style/TextAppearance.App.Body2"

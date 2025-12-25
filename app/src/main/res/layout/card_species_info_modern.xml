@@ -4,9 +4,8 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/spacing_md"
         style="@style/Widget.App.Card"
-        app:cardCornerRadius="@dimen/radius_xl">
+        app:cardCornerRadius="@dimen/radius_md">
 
     <!-- MODERN SPECIES INFO CARD -->
     <LinearLayout

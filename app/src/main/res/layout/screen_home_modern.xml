@@ -44,7 +44,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="170dp"
                 style="@style/Widget.App.Card"
-                app:cardCornerRadius="@dimen/radius_xl">
+                app:cardCornerRadius="@dimen/radius_md">
 
             <FrameLayout
                     android:layout_width="match_parent"

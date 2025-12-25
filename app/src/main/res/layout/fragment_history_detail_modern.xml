@@ -9,9 +9,6 @@
         android:clickable="true"
         android:focusable="true">
 
-    <!-- MODERN HISTORY DETAIL -->
-
-    <!-- APP BAR WITH IMAGE -->
     <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appBarLayout"
             android:layout_width="match_parent"
@@ -25,7 +22,6 @@
                 app:contentScrim="@android:color/transparent"
                 app:layout_scrollFlags="scroll|snap">
 
-            <!-- DETAIL IMAGE -->
             <ImageView
                     android:id="@+id/ivDetailImage"
                     android:layout_width="match_parent"
@@ -35,14 +31,12 @@
                     app:layout_collapseParallaxMultiplier="0.7"
                     tools:src="@drawable/ic_image"/>
 
-            <!-- GRADIENT OVERLAY -->
             <View
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
                     android:layout_gravity="bottom"
                     android:background="@drawable/gradient_shadow_bottom"/>
 
-            <!-- BACK BUTTON -->
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/btnBack"
                     android:layout_width="wrap_content"
@@ -61,7 +55,6 @@
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- SCROLLABLE CONTENT -->
     <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -83,26 +76,50 @@
                 android:paddingEnd="20dp"
                 android:paddingBottom="40dp">
 
-        <!-- NAME SECTION -->
-            <TextView
-                    android:id="@+id/tvCommonName"
-                    android:layout_width="wrap_content"
+            <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    tools:text="Cây Hoa Hồng"
-                    style="@style/TextAppearance.App.Headline1"
-                    android:textColor="@color/primary_dark"/>
+                    android:orientation="horizontal"
+                    android:gravity="top">
 
-            <TextView
-                    android:id="@+id/tvScientificName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_xxs"
-                    tools:text="Rosa sp."
-                    style="@style/TextAppearance.App.Body1"
-                    android:textStyle="italic"
-                    android:textColor="@color/text_secondary"/>
+                <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-            <!-- TAGS -->
+                    <TextView
+                            android:id="@+id/tvCommonName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            tools:text="Cây Hoa Hồng"
+                            style="@style/TextAppearance.App.Headline1"
+                            android:textColor="@color/primary_dark"/>
+
+                    <TextView
+                            android:id="@+id/tvScientificName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xxs"
+                            tools:text="Rosa sp."
+                            style="@style/TextAppearance.App.Body1"
+                            android:textStyle="italic"
+                            android:textColor="@color/text_secondary"/>
+                </LinearLayout>
+
+                <ImageView
+                        android:id="@+id/btnShareInfo"
+                        android:layout_width="@dimen/icon_xl"
+                        android:layout_height="@dimen/icon_xl"
+                        android:background="@drawable/bg_white_rounded"
+                        android:backgroundTint="@color/surface_tint"
+                        android:padding="10dp"
+                        android:src="@drawable/ic_share"
+                        android:contentDescription="@string/share_info"
+                        app:tint="@color/primary"/>
+
+            </LinearLayout>
+
             <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -151,13 +168,11 @@
                         android:textSize="@dimen/text_caption"/>
             </LinearLayout>
 
-            <!-- DIVIDER -->
             <View
                     style="@style/Widget.App.Divider"
                     android:layout_marginTop="@dimen/spacing_lg"
                     android:layout_marginBottom="@dimen/spacing_lg"/>
 
-            <!-- TAXONOMY SECTION -->
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -169,7 +184,6 @@
                     android:id="@+id/layoutTaxonomy"
                     layout="@layout/layout_taxonomy_grid_modern"/>
 
-            <!-- SECTIONS CONTAINER -->
             <LinearLayout
                     android:id="@+id/containerSections"
                     android:layout_width="match_parent"
@@ -180,7 +194,6 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- SPEAK FAB -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_speak"
             android:layout_width="wrap_content"

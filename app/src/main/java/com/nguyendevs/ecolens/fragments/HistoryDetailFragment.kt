@@ -3,6 +3,9 @@ package com.nguyendevs.ecolens.fragments
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.text.LineBreaker
+import android.content.ClipData
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.Html
@@ -13,6 +16,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
@@ -66,7 +70,7 @@ class HistoryDetailFragment : Fragment() {
         bindTaxonomy(view, info)
         bindContent(view, info)
         setupFab(view, info)
-
+        setupShareButton(view, info, entry.imagePath)
         view.findViewById<FloatingActionButton>(R.id.fab_speak)?.let { fab ->
             fab.show()
             fab.bringToFront()
@@ -99,6 +103,83 @@ class HistoryDetailFragment : Fragment() {
         val collapsingToolbar = view.findViewById<CollapsingToolbarLayout>(R.id.collapsingToolbar)
         collapsingToolbar.setContentScrimColor(Color.TRANSPARENT)
         collapsingToolbar.setStatusBarScrimColor(Color.TRANSPARENT)
+    }
+
+    private fun setupShareButton(view: View, info: SpeciesInfo, imagePath: String?) {
+        val btnShare = view.findViewById<ImageView>(R.id.btnShareInfo)
+
+        btnShare.setOnClickListener {
+            val imageUri = if (!imagePath.isNullOrEmpty()) Uri.parse(imagePath) else null
+            shareSpeciesInfo(info, imageUri)
+        }
+    }
+
+    private fun shareSpeciesInfo(info: SpeciesInfo, imageUri: Uri?) {
+        val confidencePercent =
+            String.format("%.2f", if (info.confidence > 1) info.confidence else info.confidence * 100)
+
+        val context = requireContext()
+        val shareText = buildString {
+            append(context.getString(R.string.share_title))
+            append("\n━━━━━━━━━━━━━━━━━━━━\n\n")
+            append("📌 ${stripHtml(info.commonName)}\n🔬 ${stripHtml(info.scientificName)}\n")
+            append("✅ ${context.getString(R.string.label_confidence_template, confidencePercent)}%\n\n")
+            append("━━━━━━━━━━━━━━━━━━━━\n${context.getString(R.string.share_taxonomy_title)}\n━━━━━━━━━━━━━━━━━━━━\n\n")
+            if (info.kingdom.isNotEmpty()) append("• ${context.getString(R.string.label_kingdom)} ${stripHtml(info.kingdom)}\n")
+            if (info.phylum.isNotEmpty()) append("• ${context.getString(R.string.label_phylum)} ${stripHtml(info.phylum)}\n")
+            if (info.className.isNotEmpty()) append("• ${context.getString(R.string.label_class)} ${stripHtml(info.className)}\n")
+            if (info.taxorder.isNotEmpty()) append("• ${context.getString(R.string.label_order)} ${stripHtml(info.taxorder)}\n")
+            if (info.family.isNotEmpty()) append("• ${context.getString(R.string.label_family)} ${stripHtml(info.family)}\n")
+            if (info.genus.isNotEmpty()) append("• ${context.getString(R.string.label_genus)} ${stripHtml(info.genus)}\n")
+            if (info.species.isNotEmpty()) append("• ${context.getString(R.string.label_species)} ${stripHtml(info.species)}\n")
+
+            val contentList = listOf(
+                info.description to R.string.share_desc_title,
+                info.characteristics to R.string.share_char_title,
+                info.distribution to R.string.share_dist_title,
+                info.habitat to R.string.share_hab_title,
+                info.conservationStatus to R.string.share_cons_title
+            )
+            contentList.forEach { (content, title) ->
+                if (content.isNotEmpty()) {
+                    append(
+                        "\n━━━━━━━━━━━━━━━━━━━━\n${context.getString(title)}\n━━━━━━━━━━━━━━━━━━━━\n\n${
+                            stripHtml(content)
+                        }\n"
+                    )
+                }
+            }
+            append("\n━━━━━━━━━━━━━━━━━━━━\n${context.getString(R.string.share_footer)}")
+        }
+
+        try {
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                if (imageUri != null) {
+                    type = "image/*"
+                    putExtra(Intent.EXTRA_STREAM, imageUri)
+                    clipData = ClipData.newRawUri(null, imageUri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                } else {
+                    type = "text/plain"
+                }
+                putExtra(Intent.EXTRA_TEXT, shareText)
+                putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.share_subject, stripHtml(info.commonName)))
+            }
+            startActivity(Intent.createChooser(intent, context.getString(R.string.share_chooser_title)))
+        } catch (e: Exception) {
+            Toast.makeText(context, "${context.getString(R.string.error)}: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun stripHtml(html: String): String {
+        var text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT).toString()
+        } else {
+            @Suppress("DEPRECATION") Html.fromHtml(html).toString()
+        }
+        text = text.replace(Regex("\\*\\*(.*?)\\*\\*"), "$1")
+        text = text.replace(Regex("\\*(.*?)\\*"), "$1")
+        return text.trim()
     }
 
     private fun bindHeader(view: View, entry: HistoryEntry, info: SpeciesInfo) {
