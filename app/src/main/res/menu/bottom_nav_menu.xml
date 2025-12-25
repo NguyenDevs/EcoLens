@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- bottom_nav_menu.xml -->
     <item
             android:id="@+id/nav_home"
             android:icon="@drawable/ic_home"
@@ -10,8 +11,6 @@
             android:id="@+id/nav_history"
             android:icon="@drawable/ic_history"
             android:title="@string/nav_history" />
-
-    <!-- Placeholder cho FAB -->
     <item
             android:id="@+id/nav_camera_placeholder"
             android:enabled="false"

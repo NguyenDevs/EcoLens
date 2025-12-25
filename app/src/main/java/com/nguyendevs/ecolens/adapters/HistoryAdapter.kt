@@ -41,7 +41,7 @@ class HistoryAdapter(
     // Tạo ViewHolder mới (Markwon đã được inject nên không cần khởi tạo ở đây)
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_history_entry, parent, false)
+            .inflate(R.layout.item_history_entry_modern, parent, false)
         return HistoryViewHolder(view)
     }
 

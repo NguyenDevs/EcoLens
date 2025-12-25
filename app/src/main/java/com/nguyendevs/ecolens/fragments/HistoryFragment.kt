@@ -28,7 +28,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
 
-class HistoryFragment : Fragment(R.layout.screen_history) {
+class HistoryFragment : Fragment(R.layout.screen_history_modern) {
 
     private val viewModel: EcoLensViewModel by activityViewModels()
     private val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())

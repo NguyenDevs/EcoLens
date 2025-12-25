@@ -44,8 +44,8 @@
 
     <!-- Bottom Navigation Style -->
     <style name="Widget.EcoLens.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">
-        <item name="itemIconTint">@color/bottom_nav_color</item>
-        <item name="itemTextColor">@color/bottom_nav_color</item>
+        <item name="itemIconTint">@color/bottom_nav_selector</item>
+        <item name="itemTextColor">@color/bottom_nav_selector</item>
         <item name="itemTextAppearanceActive">@style/TextAppearance.EcoLens.BottomNav.Active</item>
         <item name="itemTextAppearanceInactive">@style/TextAppearance.EcoLens.BottomNav.Inactive</item>
         <item name="labelVisibilityMode">labeled</item>

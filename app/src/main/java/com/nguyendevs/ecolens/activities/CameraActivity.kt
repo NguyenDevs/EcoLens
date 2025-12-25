@@ -51,7 +51,8 @@ class CameraActivity : AppCompatActivity() {
     private lateinit var rotateButton: ImageView
     private lateinit var uploadButton: ImageView
     private lateinit var viewFinder: PreviewView
-    private lateinit var captureButton: FloatingActionButton
+    private lateinit var captureButton: ImageView
+    private lateinit var captureBorder: ImageView
     private lateinit var focusIndicator: ImageView
 
     private var camera: Camera? = null
@@ -77,7 +78,7 @@ class CameraActivity : AppCompatActivity() {
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_camera)
+        setContentView(R.layout.activity_camera_modern)
 
         viewFinder = findViewById(R.id.viewFinder)
         closeButton = findViewById(R.id.closeButton)

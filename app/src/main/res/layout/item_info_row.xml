@@ -7,6 +7,7 @@
         android:paddingTop="8dp"
         android:paddingBottom="8dp">
 
+    <!-- item_info_row.xml -->
     <TextView
             android:id="@+id/tvLabel"
             android:layout_width="0dp"

@@ -55,7 +55,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
                 })
                 .build()
         }
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat_message, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat_message_modern, parent, false)
         return ChatViewHolder(view)
     }
 

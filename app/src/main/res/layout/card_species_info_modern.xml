@@ -1,28 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
-                                                   xmlns:app="http://schemas.android.com/apk/res-auto"
-                                                   android:layout_width="match_parent"
-                                                   android:layout_height="wrap_content"
-                                                   android:layout_margin="16dp"
-                                                   app:cardBackgroundColor="@color/white"
-                                                   app:cardCornerRadius="24dp"
-                                                   app:strokeColor="#E0E0E0"
-                                                   app:cardElevation="0dp"
-                                                   app:strokeWidth="1dp">
+<com.google.android.material.card.MaterialCardView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/spacing_md"
+        style="@style/Widget.App.Card"
+        app:cardCornerRadius="@dimen/radius_xl">
 
+    <!-- MODERN SPECIES INFO CARD -->
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:animateLayoutChanges="true"
             android:orientation="vertical"
-            android:padding="24dp">
+            android:padding="@dimen/spacing_lg">
 
+        <!-- HEADER SECTION -->
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="top">
 
+            <!-- LEFT: NAME SECTION -->
             <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -34,9 +35,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/label_common_name"
-                        android:textColor="@color/green_primary"
-                        android:textSize="26sp"
-                        android:textStyle="bold"/>
+                        style="@style/TextAppearance.App.Headline1"
+                        android:textColor="@color/primary"/>
 
                 <LinearLayout
                         android:layout_width="wrap_content"
@@ -49,23 +49,25 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/label_scientific_name"
+                            style="@style/TextAppearance.App.Body1"
                             android:textColor="@color/text_secondary"
-                            android:textSize="18sp"
                             android:textStyle="italic"/>
 
                     <ImageView
                             android:id="@+id/btnCopyScientificName"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_marginStart="8dp"
+                            android:layout_width="@dimen/icon_md"
+                            android:layout_height="@dimen/icon_md"
+                            android:layout_marginStart="@dimen/spacing_xs"
                             android:alpha="0.6"
                             android:background="?attr/selectableItemBackgroundBorderless"
-                            android:padding="4dp"
+                            android:padding="@dimen/spacing_xxs"
                             android:src="@drawable/ic_copy"
+                            android:contentDescription="@string/copy_scientific_name"
                             app:tint="@color/text_secondary"/>
                 </LinearLayout>
             </LinearLayout>
 
+            <!-- RIGHT: ACTION BUTTONS -->
             <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -74,37 +76,38 @@
 
                 <ImageView
                         android:id="@+id/btnShareInfo"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:layout_width="@dimen/icon_xl"
+                        android:layout_height="@dimen/icon_xl"
                         android:background="@drawable/bg_white_rounded"
-                        android:backgroundTint="#F5F7F6"
+                        android:backgroundTint="@color/surface_tint"
                         android:padding="10dp"
                         android:src="@drawable/ic_share"
-                        app:tint="@color/green_primary"/>
+                        android:contentDescription="@string/share_info"
+                        app:tint="@color/primary"/>
 
                 <ImageView
                         android:id="@+id/btnRetryIdentification"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:layout_marginTop="8dp"
+                        android:layout_width="@dimen/icon_xl"
+                        android:layout_height="@dimen/icon_xl"
+                        android:layout_marginTop="@dimen/spacing_xs"
                         android:background="@drawable/bg_white_rounded"
-                        android:backgroundTint="#F5F7F6"
+                        android:backgroundTint="@color/surface_tint"
                         android:padding="10dp"
                         android:src="@drawable/ic_rotate"
-                        app:tint="@color/confidence_medium"/>
+                        android:contentDescription="@string/btn_retry_identification"
+                        app:tint="@color/warning"/>
             </LinearLayout>
 
         </LinearLayout>
 
-
+        <!-- CONFIDENCE BADGE -->
         <com.google.android.material.card.MaterialCardView
                 android:id="@+id/confidenceCard"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardBackgroundColor="#E8F5E9"
-                app:cardCornerRadius="100dp"
-                app:cardElevation="0dp"
+                android:layout_marginTop="@dimen/spacing_md"
+                app:cardCornerRadius="@dimen/radius_full"
+                app:cardElevation="@dimen/elevation_none"
                 app:strokeWidth="0dp">
 
             <LinearLayout
@@ -112,9 +115,9 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:paddingStart="12dp"
+                    android:paddingStart="@dimen/spacing_sm"
                     android:paddingTop="6dp"
-                    android:paddingEnd="16dp"
+                    android:paddingEnd="@dimen/spacing_md"
                     android:paddingBottom="6dp">
 
                 <ImageView
@@ -122,66 +125,62 @@
                         android:layout_width="18dp"
                         android:layout_height="18dp"
                         android:contentDescription="@string/confidence"
-                        android:src="@drawable/ic_check_circle"
-                        app:tint="@color/green_dark"/>
+                        android:src="@drawable/ic_check_circle"/>
 
                 <TextView
                         android:id="@+id/tvConfidence"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
+                        android:layout_marginStart="@dimen/spacing_xs"
                         android:text="@string/confidence_format"
-                        android:textColor="@color/green_dark"
-                        android:textSize="13sp"
-                        android:textStyle="bold"/>
+                        style="@style/TextAppearance.App.Label"
+                        android:textAllCaps="false"
+                        android:textSize="@dimen/text_label"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- DIVIDER -->
         <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="24dp"
-                android:background="#F0F0F0"/>
+                style="@style/Widget.App.Divider"
+                android:layout_marginTop="@dimen/spacing_lg"
+                android:layout_marginBottom="@dimen/spacing_lg"/>
 
+        <!-- TAXONOMY SECTION -->
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="@dimen/spacing_md"
                 android:text="@string/taxonomy_title"
-                android:textColor="@color/text_primary"
-                android:textSize="18sp"
-                android:textStyle="bold"/>
+                style="@style/TextAppearance.App.Headline3"/>
 
         <LinearLayout
                 android:id="@+id/taxonomyContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_white_rounded"
-                android:backgroundTint="#F8F9FA"
+                android:backgroundTint="@color/surface_variant"
                 android:orientation="vertical"
                 android:padding="20dp">
 
+            <!-- TAXONOMY ROWS -->
             <LinearLayout
                     android:id="@+id/rowKingdom"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingBottom="8dp">
+                    android:paddingBottom="@dimen/spacing_xs">
                 <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
                         android:text="@string/label_kingdom"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="14sp"/>
+                        style="@style/Widget.App.Taxonomy.Label"/>
                 <TextView
                         android:id="@+id/tvKingdom"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
-                        android:textColor="@color/text_primary"
-                        android:textSize="14sp"/>
+                        style="@style/Widget.App.Taxonomy.Value"/>
             </LinearLayout>
 
             <LinearLayout
@@ -189,21 +188,19 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingBottom="8dp">
+                    android:paddingBottom="@dimen/spacing_xs">
                 <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
                         android:text="@string/label_phylum"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="14sp"/>
+                        style="@style/Widget.App.Taxonomy.Label"/>
                 <TextView
                         android:id="@+id/tvPhylum"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
-                        android:textColor="@color/text_primary"
-                        android:textSize="14sp"/>
+                        style="@style/Widget.App.Taxonomy.Value"/>
             </LinearLayout>
 
             <LinearLayout
@@ -211,21 +208,19 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingBottom="8dp">
+                    android:paddingBottom="@dimen/spacing_xs">
                 <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
                         android:text="@string/label_class"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="14sp"/>
+                        style="@style/Widget.App.Taxonomy.Label"/>
                 <TextView
                         android:id="@+id/tvClass"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
-                        android:textColor="@color/text_primary"
-                        android:textSize="14sp"/>
+                        style="@style/Widget.App.Taxonomy.Value"/>
             </LinearLayout>
 
             <LinearLayout
@@ -233,21 +228,19 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingBottom="8dp">
+                    android:paddingBottom="@dimen/spacing_xs">
                 <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
                         android:text="@string/label_order"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="14sp"/>
+                        style="@style/Widget.App.Taxonomy.Label"/>
                 <TextView
                         android:id="@+id/tvOrder"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
-                        android:textColor="@color/text_primary"
-                        android:textSize="14sp"/>
+                        style="@style/Widget.App.Taxonomy.Value"/>
             </LinearLayout>
 
             <LinearLayout
@@ -255,21 +248,19 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingBottom="8dp">
+                    android:paddingBottom="@dimen/spacing_xs">
                 <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
                         android:text="@string/label_family"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="14sp"/>
+                        style="@style/Widget.App.Taxonomy.Label"/>
                 <TextView
                         android:id="@+id/tvFamily"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
-                        android:textColor="@color/text_primary"
-                        android:textSize="14sp"/>
+                        style="@style/Widget.App.Taxonomy.Value"/>
             </LinearLayout>
 
             <LinearLayout
@@ -277,21 +268,19 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingBottom="8dp">
+                    android:paddingBottom="@dimen/spacing_xs">
                 <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
                         android:text="@string/label_genus"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="14sp"/>
+                        style="@style/Widget.App.Taxonomy.Label"/>
                 <TextView
                         android:id="@+id/tvGenus"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
-                        android:textColor="@color/text_primary"
-                        android:textSize="14sp"/>
+                        style="@style/Widget.App.Taxonomy.Value"/>
             </LinearLayout>
 
             <LinearLayout
@@ -304,175 +293,160 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.3"
                         android:text="@string/label_species"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="14sp"/>
+                        style="@style/Widget.App.Taxonomy.Label"
+                        android:layout_marginBottom="0dp"/>
                 <TextView
                         android:id="@+id/tvSpecies"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.7"
-                        android:textColor="@color/text_primary"
-                        android:textSize="14sp"/>
+                        style="@style/Widget.App.Taxonomy.Value"
+                        android:layout_marginBottom="0dp"/>
             </LinearLayout>
 
         </LinearLayout>
 
+        <!-- DESCRIPTION SECTION -->
         <LinearLayout
                 android:id="@+id/sectionDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="@dimen/spacing_lg"
                 android:visibility="visible">
 
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/section_description"
-                    android:textSize="20sp"
-                    android:textColor="@color/text_primary"
-                    android:textStyle="bold"/>
+                    style="@style/TextAppearance.App.Headline3"/>
 
             <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#E0E0E0"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"/>
+                    style="@style/Widget.App.Divider"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:layout_marginBottom="@dimen/spacing_xs"/>
 
             <TextView
                     android:id="@+id/tvDescription"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="15sp"
+                    style="@style/TextAppearance.App.Body1"
                     android:textColor="@color/text_secondary"
                     android:lineSpacingExtra="6dp"/>
         </LinearLayout>
 
+        <!-- CHARACTERISTICS SECTION -->
         <LinearLayout
                 android:id="@+id/sectionCharacteristics"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="@dimen/spacing_lg"
                 android:visibility="visible">
 
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/section_characteristics"
-                    android:textSize="20sp"
-                    android:textColor="@color/text_primary"
-                    android:textStyle="bold"/>
+                    style="@style/TextAppearance.App.Headline3"/>
 
             <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#E0E0E0"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"/>
+                    style="@style/Widget.App.Divider"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:layout_marginBottom="@dimen/spacing_xs"/>
 
             <TextView
                     android:id="@+id/tvCharacteristics"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="15sp"
+                    style="@style/TextAppearance.App.Body1"
                     android:textColor="@color/text_secondary"
                     android:lineSpacingExtra="6dp"/>
         </LinearLayout>
 
+        <!-- DISTRIBUTION SECTION -->
         <LinearLayout
                 android:id="@+id/sectionDistribution"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="@dimen/spacing_lg"
                 android:visibility="visible">
 
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/section_distribution"
-                    android:textSize="20sp"
-                    android:textColor="@color/text_primary"
-                    android:textStyle="bold"/>
+                    style="@style/TextAppearance.App.Headline3"/>
 
             <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#E0E0E0"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"/>
+                    style="@style/Widget.App.Divider"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:layout_marginBottom="@dimen/spacing_xs"/>
 
             <TextView
                     android:id="@+id/tvDistribution"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="15sp"
+                    style="@style/TextAppearance.App.Body1"
                     android:textColor="@color/text_secondary"
                     android:lineSpacingExtra="6dp"/>
         </LinearLayout>
 
+        <!-- HABITAT SECTION -->
         <LinearLayout
                 android:id="@+id/sectionHabitat"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="@dimen/spacing_lg"
                 android:visibility="visible">
 
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/section_habitat"
-                    android:textSize="20sp"
-                    android:textColor="@color/text_primary"
-                    android:textStyle="bold"/>
+                    style="@style/TextAppearance.App.Headline3"/>
 
             <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#E0E0E0"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"/>
+                    style="@style/Widget.App.Divider"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:layout_marginBottom="@dimen/spacing_xs"/>
 
             <TextView
                     android:id="@+id/tvHabitat"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="15sp"
+                    style="@style/TextAppearance.App.Body1"
                     android:textColor="@color/text_secondary"
                     android:lineSpacingExtra="6dp"/>
         </LinearLayout>
 
+        <!-- CONSERVATION SECTION -->
         <LinearLayout
                 android:id="@+id/sectionConservation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="@dimen/spacing_lg"
                 android:visibility="visible">
 
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/section_conservation"
-                    android:textSize="20sp"
-                    android:textColor="@color/text_primary"
-                    android:textStyle="bold"/>
+                    style="@style/TextAppearance.App.Headline3"/>
 
             <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#E0E0E0"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"/>
+                    style="@style/Widget.App.Divider"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:layout_marginBottom="@dimen/spacing_xs"/>
 
             <TextView
                     android:id="@+id/tvConservationStatus"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="15sp"
+                    style="@style/TextAppearance.App.Body1"
                     android:textColor="@color/text_secondary"
                     android:lineSpacingExtra="6dp"/>
         </LinearLayout>

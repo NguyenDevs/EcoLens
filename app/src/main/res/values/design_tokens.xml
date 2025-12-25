@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ============================================ -->
+    <!-- DESIGN TOKENS - Modern Design System -->
+    <!-- ============================================ -->
+
+    <!-- ==================== SPACING ==================== -->
+    <!-- Base unit: 8dp -->
+    <dimen name="spacing_xxs">4dp</dimen>      <!-- 0.5x -->
+    <dimen name="spacing_xs">8dp</dimen>       <!-- 1x - Base unit -->
+    <dimen name="spacing_sm">12dp</dimen>      <!-- 1.5x -->
+    <dimen name="spacing_md">16dp</dimen>      <!-- 2x -->
+    <dimen name="spacing_lg">24dp</dimen>      <!-- 3x -->
+    <dimen name="spacing_xl">32dp</dimen>      <!-- 4x -->
+    <dimen name="spacing_xxl">40dp</dimen>     <!-- 5x -->
+    <dimen name="spacing_xxxl">48dp</dimen>    <!-- 6x -->
+
+    <!-- Common padding values -->
+    <dimen name="padding_card">20dp</dimen>
+    <dimen name="padding_screen_horizontal">20dp</dimen>
+    <dimen name="padding_screen_vertical">24dp</dimen>
+    <dimen name="padding_button_horizontal">24dp</dimen>
+    <dimen name="padding_button_vertical">12dp</dimen>
+
+    <!-- ==================== CORNER RADIUS ==================== -->
+    <dimen name="radius_xxs">4dp</dimen>
+    <dimen name="radius_xs">8dp</dimen>
+    <dimen name="radius_sm">12dp</dimen>
+    <dimen name="radius_md">16dp</dimen>
+    <dimen name="radius_lg">20dp</dimen>
+    <dimen name="radius_xl">24dp</dimen>
+    <dimen name="radius_xxl">28dp</dimen>
+    <dimen name="radius_full">999dp</dimen>
+
+    <!-- Component specific -->
+    <dimen name="radius_card">20dp</dimen>
+    <dimen name="radius_button">999dp</dimen>
+    <dimen name="radius_input">22dp</dimen>
+    <dimen name="radius_chip">999dp</dimen>
+    <dimen name="radius_bottom_sheet">24dp</dimen>
+
+    <!-- ==================== ELEVATION ==================== -->
+    <dimen name="elevation_none">0dp</dimen>
+    <dimen name="elevation_xs">1dp</dimen>
+    <dimen name="elevation_sm">2dp</dimen>
+    <dimen name="elevation_md">4dp</dimen>
+    <dimen name="elevation_lg">8dp</dimen>
+    <dimen name="elevation_xl">12dp</dimen>
+
+    <!-- ==================== ICON SIZES ==================== -->
+    <dimen name="icon_xs">16dp</dimen>
+    <dimen name="icon_sm">20dp</dimen>
+    <dimen name="icon_md">24dp</dimen>
+    <dimen name="icon_lg">32dp</dimen>
+    <dimen name="icon_xl">40dp</dimen>
+    <dimen name="icon_xxl">48dp</dimen>
+
+    <!-- ==================== TOUCH TARGETS ==================== -->
+    <dimen name="touch_target_min">48dp</dimen>
+    <dimen name="touch_target_md">56dp</dimen>
+    <dimen name="touch_target_lg">64dp</dimen>
+
+    <!-- ==================== TYPOGRAPHY ==================== -->
+    <!-- Display -->
+    <dimen name="text_display">32sp</dimen>
+
+    <!-- Headings -->
+    <dimen name="text_h1">28sp</dimen>
+    <dimen name="text_h2">24sp</dimen>
+    <dimen name="text_h3">20sp</dimen>
+    <dimen name="text_h4">18sp</dimen>
+
+    <!-- Body -->
+    <dimen name="text_body_large">16sp</dimen>
+    <dimen name="text_body">15sp</dimen>
+    <dimen name="text_body_small">14sp</dimen>
+
+    <!-- Label -->
+    <dimen name="text_label">13sp</dimen>
+    <dimen name="text_caption">12sp</dimen>
+
+    <!-- Line heights (multipliers) -->
+    <item name="line_height_tight" type="dimen" format="float">1.2</item>
+    <item name="line_height_normal" type="dimen" format="float">1.5</item>
+    <item name="line_height_relaxed" type="dimen" format="float">1.75</item>
+
+    <!-- ==================== BORDERS ==================== -->
+    <dimen name="border_thin">0.5dp</dimen>
+    <dimen name="border_normal">1dp</dimen>
+    <dimen name="border_thick">2dp</dimen>
+
+    <!-- ==================== DIVIDERS ==================== -->
+    <dimen name="divider_thin">0.5dp</dimen>
+    <dimen name="divider_normal">1dp</dimen>
+
+    <!-- ==================== ANIMATION DURATIONS ==================== -->
+    <integer name="anim_duration_instant">0</integer>
+    <integer name="anim_duration_fast">150</integer>
+    <integer name="anim_duration_normal">250</integer>
+    <integer name="anim_duration_slow">400</integer>
+
+    <!-- ==================== FAB SIZES ==================== -->
+    <dimen name="fab_size_normal">56dp</dimen>
+    <dimen name="fab_size_large">70dp</dimen>
+    <dimen name="fab_icon_normal">24dp</dimen>
+    <dimen name="fab_icon_large">32dp</dimen>
+
+    <!-- ==================== BOTTOM NAV ==================== -->
+    <dimen name="bottom_nav_elevation">8dp</dimen>
+    <dimen name="bottom_nav_icon_size">24dp</dimen>
+
+    <dimen name="selected_stroke_width">3dp</dimen>
+</resources>

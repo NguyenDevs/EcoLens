@@ -1,52 +1,132 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Primary Colors -->
-    <color name="green_primary">#018367</color>
-    <color name="green_primary_2">#033826</color>
-    <color name="green_light">#4CAF50</color>
-    <color name="green_dark">#00796B</color>
+    <!-- ============================================ -->
+    <!-- MODERN COLOR PALETTE -->
+    <!-- ============================================ -->
 
-    <color name="background_soft">#F2F4F5</color>
-    <color name="surface_white">#FFFFFF</color>
-    <color name="divider_color">#EEFFE0E0</color>
+    <!-- ==================== BACKWARD COMPATIBILITY ==================== -->
+    <!-- Alias for old color names to prevent compile errors -->
 
-    <!-- Background Colors -->
-    <color name="background_color">#EBEBEB</color>
-    <color name="background_light">#F9F9F9</color>
-    <color name="white">#FFFFFF</color>
-    <color name="black">#000000</color>
-    <color name="transparent">#00FFFFFF</color>
+    <!-- Old green colors -->
+    <color name="green_primary">@color/primary</color>
+    <color name="green_primary_2">@color/primary_dark</color>
+    <color name="green_light">@color/primary_light</color>
+    <color name="green_dark">@color/success_text</color>
 
-    <!-- Text Colors -->
+    <!-- Old background colors -->
+    <color name="background_light">@color/surface_variant</color>
+    <color name="background_color">@color/background</color>
+    <color name="background_soft">@color/background</color>
+
+    <!-- Old surface / divider -->
+    <color name="surface_white">@color/surface</color>
+    <color name="divider_color">@color/border_normal</color>
+
+    <!-- Old bottom navigation -->
+    <color name="bottom_nav_selected">@color/nav_selected</color>
+    <color name="bottom_nav_unselected">@color/nav_unselected</color>
+
+    <!-- Old error colors -->
+    <color name="error_red">@color/error</color>
+    <color name="error_background">@color/error_bg</color>
+
+    <!-- Old gray utilities -->
+    <color name="gray">@color/text_secondary</color>
+    <color name="gray_light">@color/state_disabled</color>
+    <color name="gray_light_f8">@color/surface_variant</color>
+
+    <!-- ==================== PRIMARY COLORS ==================== -->
+    <color name="primary">#018367</color>
+    <color name="primary_dark">#033826</color>
+    <color name="primary_light">#4CAF50</color>
+    <color name="on_primary">#FFFFFF</color>
+
+    <!-- Primary variants for different opacity -->
+    <color name="primary_10">#1A018367</color>     <!-- 10% opacity -->
+    <color name="primary_20">#33018367</color>     <!-- 20% opacity -->
+    <color name="primary_30">#4D018367</color>     <!-- 30% opacity -->
+    <color name="primary_40">#66018367</color>     <!-- 40% opacity -->
+
+    <!-- ==================== SURFACE COLORS ==================== -->
+    <color name="surface">#FFFFFF</color>
+    <color name="surface_variant">#F8F9FA</color>
+    <color name="surface_tint">#F0F7F4</color>
+    <color name="background">#F2F4F5</color>
+    <color name="on_surface">#1A1C1E</color>
+
+    <!-- ==================== TEXT COLORS ==================== -->
     <color name="text_primary">#1A1C1E</color>
     <color name="text_secondary">#707070</color>
+    <color name="text_tertiary">#9E9E9E</color>
     <color name="text_disabled">#BDBDBD</color>
+    <color name="text_on_primary">#FFFFFF</color>
 
-    <!-- Bottom Navigation Colors -->
-    <color name="bottom_nav_selected">#033826</color>
-    <color name="bottom_nav_unselected">#CCD7D1</color>
+    <!-- ==================== BORDER COLORS ==================== -->
+    <color name="border_light">#F0F0F0</color>
+    <color name="border_normal">#E0E0E0</color>
+    <color name="border_strong">#D0D0D0</color>
 
-    <!-- Error Colors -->
-    <color name="error_red">#D32F2F</color>
-    <color name="error_background">#FFEBEE</color>
+    <!-- ==================== SEMANTIC COLORS ==================== -->
+    <!-- Success -->
+    <color name="success">#00A86B</color>
+    <color name="success_bg">#E8F5E9</color>
+    <color name="success_text">#00796B</color>
 
-    <!-- Confidence Level Colors -->
+    <!-- Warning -->
+    <color name="warning">#F57C00</color>
+    <color name="warning_bg">#FFF3E0</color>
+    <color name="warning_text">#E65100</color>
+
+    <!-- Error -->
+    <color name="error">#D32F2F</color>
+    <color name="error_bg">#FFEBEE</color>
+    <color name="error_text">#C62828</color>
+
+    <!-- Info -->
+    <color name="info">#2196F3</color>
+    <color name="info_bg">#E3F2FD</color>
+    <color name="info_text">#1976D2</color>
+
+    <!-- ==================== CONFIDENCE LEVELS ==================== -->
     <color name="confidence_high">#00A86B</color>
+    <color name="confidence_high_bg">#E8F5E9</color>
+    <color name="confidence_high_text">#00796B</color>
+
     <color name="confidence_medium">#F57C00</color>
+    <color name="confidence_medium_bg">#FFF3E0</color>
+    <color name="confidence_medium_text">#E65100</color>
+
     <color name="confidence_low">#D32F2F</color>
+    <color name="confidence_low_bg">#FFEBEE</color>
+    <color name="confidence_low_text">#C62828</color>
 
-    <!-- Confidence Background Colors -->
-    <color name="confidence_bg_high">#E8F5E9</color>
-    <color name="confidence_bg_medium">#FFF3E0</color>
-    <color name="confidence_bg_low">#FFEBEE</color>
+    <!-- ==================== INTERACTIVE STATES ==================== -->
+    <color name="state_hover">#F5F5F5</color>
+    <color name="state_pressed">#EEEEEE</color>
+    <color name="state_focus">#E3F2FD</color>
+    <color name="state_disabled">#F5F5F5</color>
 
-    <!-- Confidence Text Colors -->
-    <color name="confidence_text_high">#00796B</color>
-    <color name="confidence_text_medium">#E65100</color>
-    <color name="confidence_text_low">#C62828</color>
+    <!-- ==================== OVERLAY COLORS ==================== -->
+    <color name="overlay_dark">#80000000</color>        <!-- 50% black -->
+    <color name="overlay_light">#80FFFFFF</color>       <!-- 50% white -->
+    <color name="scrim">#99000000</color>               <!-- 60% black -->
 
-    <!-- Utility Colors -->
-    <color name="gray">#808080</color>
-    <color name="gray_light">#F5F5F5</color>
-    <color name="gray_light_f8">#F8F9FA</color>
+    <!-- ==================== NAVIGATION ==================== -->
+    <color name="nav_selected">#033826</color>
+    <color name="nav_unselected">#CCD7D1</color>
+    <color name="nav_background">#FFFFFF</color>
+
+    <!-- ==================== UTILS ==================== -->
+    <color name="transparent">#00FFFFFF</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+
+    <!-- ==================== GRADIENTS (for drawables) ==================== -->
+    <color name="gradient_start">#018367</color>
+    <color name="gradient_end">#4CAF50</color>
+
+    <!-- ==================== SHADOWS ==================== -->
+    <color name="shadow_light">#14000000</color>       <!-- 8% opacity -->
+    <color name="shadow_normal">#1F000000</color>      <!-- 12% opacity -->
+    <color name="shadow_strong">#29000000</color>      <!-- 16% opacity -->
 </resources>

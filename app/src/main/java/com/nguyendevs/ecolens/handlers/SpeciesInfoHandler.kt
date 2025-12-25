@@ -302,22 +302,22 @@ class SpeciesInfoHandler(
                 confidenceValue >= 50f -> Quadruple(
                     R.drawable.ic_check_circle,
                     R.color.confidence_high,
-                    R.color.confidence_bg_high,
-                    R.color.confidence_text_high
+                    R.color.confidence_high_bg,
+                    R.color.confidence_high_text
                 )
 
                 confidenceValue >= 25f -> Quadruple(
                     R.drawable.ic_check_warning_circle,
                     R.color.confidence_medium,
-                    R.color.confidence_bg_medium,
-                    R.color.confidence_text_medium
+                    R.color.confidence_medium_bg,
+                    R.color.confidence_medium_text
                 )
 
                 else -> Quadruple(
                     R.drawable.ic_check_not_circle,
                     R.color.confidence_low,
-                    R.color.confidence_bg_low,
-                    R.color.confidence_text_low
+                    R.color.confidence_low_bg,
+                    R.color.confidence_low_text
                 )
             }
 

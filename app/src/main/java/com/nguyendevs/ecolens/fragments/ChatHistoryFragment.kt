@@ -19,7 +19,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 
-class ChatHistoryFragment : Fragment(R.layout.screen_chat_history) {
+class ChatHistoryFragment : Fragment(R.layout.screen_chat_history_modern) {
 
     private val viewModel: EcoLensViewModel by activityViewModels()
     private lateinit var adapter: ChatSessionAdapter

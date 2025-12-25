@@ -49,7 +49,7 @@ class HistoryDetailFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_history_detail, container, false)
+        return inflater.inflate(R.layout.fragment_history_detail_modern, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

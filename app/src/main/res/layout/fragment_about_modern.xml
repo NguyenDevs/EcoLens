@@ -1,22 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical"
-              android:background="@color/background_soft">
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@color/background">
 
+    <!-- MODERN ABOUT FRAGMENT -->
+
+    <!-- HEADER -->
     <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp">
+            android:padding="@dimen/spacing_md">
 
         <ImageView
                 android:id="@+id/btnBack"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:padding="8dp"
+                android:layout_width="@dimen/icon_xl"
+                android:layout_height="@dimen/icon_xl"
+                android:padding="@dimen/spacing_xs"
                 android:src="@drawable/ic_back"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 app:tint="@color/text_primary"
                 android:contentDescription="@string/back"/>
 
@@ -25,76 +30,77 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:text="@string/about_label"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/text_primary"/>
+                style="@style/TextAppearance.App.Headline3"/>
     </RelativeLayout>
 
+    <!-- CONTENT -->
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical"
-            android:padding="32dp">
+            android:padding="@dimen/spacing_xl">
 
+        <!-- APP ICON -->
         <com.google.android.material.card.MaterialCardView
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 app:cardCornerRadius="30dp"
-                app:cardElevation="0dp"
+                app:cardElevation="@dimen/elevation_none"
                 app:strokeWidth="0dp"
-                app:cardBackgroundColor="@color/white">
+                app:cardBackgroundColor="@color/surface">
 
             <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:src="@mipmap/ic_launcher"
-                    android:scaleType="centerCrop" />
+                    android:scaleType="centerCrop"
+                    android:contentDescription="@string/app_name"/>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- APP NAME -->
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="@dimen/spacing_lg"
                 android:text="@string/app_name"
-                android:textSize="28sp"
-                android:textStyle="bold"
-                android:textColor="@color/green_primary"/>
+                style="@style/TextAppearance.App.Headline1"
+                android:textColor="@color/primary"/>
 
+        <!-- VERSION BADGE -->
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/spacing_xs"
                 android:text="Version 1.0.0"
-                android:textSize="14sp"
-                android:textColor="@color/text_secondary"
+                style="@style/TextAppearance.App.Body2"
                 android:background="@drawable/bg_flag_rounded"
-                android:backgroundTint="#E0E0E0"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp"/>
+                android:backgroundTint="@color/border_normal"
+                android:paddingStart="@dimen/spacing_sm"
+                android:paddingEnd="@dimen/spacing_sm"
+                android:paddingTop="@dimen/spacing_xxs"
+                android:paddingBottom="@dimen/spacing_xxs"/>
 
+        <!-- DESCRIPTION -->
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="@dimen/spacing_xl"
                 android:text="@string/about_app_desc"
                 android:gravity="center"
-                android:textSize="15sp"
-                android:textColor="@color/text_primary"
+                style="@style/TextAppearance.App.Body1"
                 android:lineSpacingExtra="4dp"/>
 
     </LinearLayout>
 
+    <!-- FOOTER -->
     <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="32dp"
+            android:layout_marginBottom="@dimen/spacing_xl"
             android:text="© 2024 NguyenDevs"
-            android:textSize="12sp"
-            android:textColor="@color/text_secondary"/>
+            style="@style/TextAppearance.App.Caption"/>
 
 </LinearLayout>

@@ -27,7 +27,7 @@ class LanguageSelectionFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_language_selection, container, false)
+        return inflater.inflate(R.layout.fragment_language_selection_modern, container, false)
     }
 
     // Thiết lập các thành phần sau khi view được tạo
