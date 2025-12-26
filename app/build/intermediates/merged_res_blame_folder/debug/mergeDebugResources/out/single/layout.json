@@ -1,0 +1,70 @@
+[
+    {
+        "merged": "com.nguyendevs.ecolens.app-mergeDebugResources-50:/layout/fragment_about_modern.xml",
+        "source": "com.nguyendevs.ecolens.app-main-53:/layout/fragment_about_modern.xml"
+    },
+    {
+        "merged": "com.nguyendevs.ecolens.app-mergeDebugResources-50:/layout/screen_history_modern.xml",
+        "source": "com.nguyendevs.ecolens.app-main-53:/layout/screen_history_modern.xml"
+    },
+    {
+        "merged": "com.nguyendevs.ecolens.app-mergeDebugResources-50:/layout/activity_camera_modern.xml",
+        "source": "com.nguyendevs.ecolens.app-main-53:/layout/activity_camera_modern.xml"
+    },
+    {
+        "merged": "com.nguyendevs.ecolens.app-mergeDebugResources-50:/layout/fragment_chat_modern.xml",
+        "source": "com.nguyendevs.ecolens.app-main-53:/layout/fragment_chat_modern.xml"
+    },
+    {
+        "merged": "com.nguyendevs.ecolens.app-mergeDebugResources-50:/layout/item_chat_message_modern.xml",
+        "source": "com.nguyendevs.ecolens.app-main-53:/layout/item_chat_message_modern.xml"
+    },
+    {
+        "merged": "com.nguyendevs.ecolens.app-mergeDebugResources-50:/layout/fragment_history_detail_modern.xml",
+        "source": "com.nguyendevs.ecolens.app-main-53:/layout/fragment_history_detail_modern.xml"
+    },
+    {
+        "merged": "com.nguyendevs.ecolens.app-mergeDebugResources-50:/layout/fragment_language_selection_modern.xml",
+        "source": "com.nguyendevs.ecolens.app-main-53:/layout/fragment_language_selection_modern.xml"
+    },
+    {
+        "merged": "com.nguyendevs.ecolens.app-mergeDebugResources-50:/layout/activity_main_modern.xml",
+        "source": "com.nguyendevs.ecolens.app-main-53:/layout/activity_main_modern.xml"
+    },
+    {
+        "merged": "com.nguyendevs.ecolens.app-mergeDebugResources-50:/layout/screen_settings_modern.xml",
+        "source": "com.nguyendevs.ecolens.app-main-53:/layout/screen_settings_modern.xml"
+    },
+    {
+        "merged": "com.nguyendevs.ecolens.app-mergeDebugResources-50:/layout/item_info_row.xml",
+        "source": "com.nguyendevs.ecolens.app-main-53:/layout/item_info_row.xml"
+    },
+    {
+        "merged": "com.nguyendevs.ecolens.app-mergeDebugResources-50:/layout/card_species_info_modern.xml",
+        "source": "com.nguyendevs.ecolens.app-main-53:/layout/card_species_info_modern.xml"
+    },
+    {
+        "merged": "com.nguyendevs.ecolens.app-mergeDebugResources-50:/layout/item_history_entry_modern.xml",
+        "source": "com.nguyendevs.ecolens.app-main-53:/layout/item_history_entry_modern.xml"
+    },
+    {
+        "merged": "com.nguyendevs.ecolens.app-mergeDebugResources-50:/layout/item_chat_entry_modern.xml",
+        "source": "com.nguyendevs.ecolens.app-main-53:/layout/item_chat_entry_modern.xml"
+    },
+    {
+        "merged": "com.nguyendevs.ecolens.app-mergeDebugResources-50:/layout/item_language_modern.xml",
+        "source": "com.nguyendevs.ecolens.app-main-53:/layout/item_language_modern.xml"
+    },
+    {
+        "merged": "com.nguyendevs.ecolens.app-mergeDebugResources-50:/layout/screen_assistant_modern.xml",
+        "source": "com.nguyendevs.ecolens.app-main-53:/layout/screen_assistant_modern.xml"
+    },
+    {
+        "merged": "com.nguyendevs.ecolens.app-mergeDebugResources-50:/layout/layout_taxonomy_grid_modern.xml",
+        "source": "com.nguyendevs.ecolens.app-main-53:/layout/layout_taxonomy_grid_modern.xml"
+    },
+    {
+        "merged": "com.nguyendevs.ecolens.app-mergeDebugResources-50:/layout/screen_home_modern.xml",
+        "source": "com.nguyendevs.ecolens.app-main-53:/layout/screen_home_modern.xml"
+    }
+]

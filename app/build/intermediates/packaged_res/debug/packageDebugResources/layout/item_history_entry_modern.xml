@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@android:color/transparent">
+
+    <!-- MODERN HISTORY ITEM -->
+
+    <!-- DATE HEADER -->
+    <TextView
+            android:id="@+id/tvDateHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/spacing_xxs"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:text="14 November 2025"
+            style="@style/TextAppearance.App.Body1"
+            android:textColor="@color/primary"
+            android:textStyle="bold"
+            android:visibility="visible"
+            tools:visibility="visible"/>
+
+    <!-- ITEM CARD -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/itemContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_history_item_border"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="@dimen/spacing_sm">
+
+        <!-- IMAGE -->
+        <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivHistoryImage"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:scaleType="centerCrop"
+                android:background="@color/background"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.SmallComponent"
+                android:src="@drawable/ic_image"/>
+
+        <!-- INFO SECTION -->
+        <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_md"
+                android:layout_marginEnd="@dimen/spacing_xs"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/ivArrow"
+                app:layout_constraintStart_toEndOf="@+id/ivHistoryImage"
+                app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                    android:id="@+id/tvHistoryCommonName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="@string/label_common_name"
+                    style="@style/TextAppearance.App.Body1"
+                    android:textColor="@color/primary_dark"
+                    android:textStyle="bold"/>
+
+            <TextView
+                    android:id="@+id/tvHistoryScientificName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_xxs"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="@string/label_scientific_name"
+                    style="@style/TextAppearance.App.Body2"
+                    android:textStyle="italic"/>
+
+            <TextView
+                    android:id="@+id/tvHistoryTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="14:30"
+                    style="@style/TextAppearance.App.Caption"
+                    android:textColor="@color/text_tertiary"/>
+        </LinearLayout>
+
+        <!-- ARROW -->
+        <ImageView
+                android:id="@+id/ivArrow"
+                android:layout_width="@dimen/icon_md"
+                android:layout_height="@dimen/icon_md"
+                android:src="@drawable/ic_arrow_right"
+                app:tint="@color/text_secondary"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:contentDescription="@string/view_detail"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</LinearLayout>

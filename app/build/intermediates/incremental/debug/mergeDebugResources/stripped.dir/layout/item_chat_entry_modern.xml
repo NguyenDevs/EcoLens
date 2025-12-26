@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
+        android:orientation="vertical">
+
+    <!-- MODERN CHAT SESSION ITEM -->
+
+    <!-- DATE HEADER -->
+    <TextView
+            android:id="@+id/tvDateHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:paddingBottom="@dimen/spacing_xs"
+            android:text="Today"
+            style="@style/TextAppearance.App.Body2"
+            android:textColor="@color/primary"
+            android:textStyle="bold"
+            android:visibility="visible"/>
+
+    <!-- SESSION CARD -->
+    <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardSession"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            style="@style/Widget.App.Card"
+            app:cardCornerRadius="@dimen/radius_md">
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:animateLayoutChanges="true"
+                android:padding="@dimen/spacing_md"
+                android:gravity="center_vertical">
+
+            <!-- ICON -->
+            <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_flag_rounded"
+                    android:backgroundTint="@color/transparent">
+
+                <ImageView
+                        android:id="@+id/ivLoadingRing"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="-10dp"
+                        android:src="@drawable/bg_gemini_ring_gradient"
+                        android:scaleType="fitXY"
+                        android:visibility="visible" />
+
+                <ImageView
+                        android:id="@+id/ivAiIcon"
+                        android:layout_width="@dimen/icon_lg"
+                        android:layout_height="@dimen/icon_lg"
+                        android:src="@drawable/ic_gemini_sparkle"
+                        android:layout_gravity="center"
+                        android:padding="4dp"/> </FrameLayout>
+
+            <!-- INFO SECTION -->
+            <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="@dimen/spacing_md"
+                    android:orientation="vertical">
+
+                <TextView
+                        android:id="@+id/tvTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Hỏi về cây hoa hồng"
+                        style="@style/TextAppearance.App.Body1"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary_dark"
+                        android:maxLines="1"
+                        android:ellipsize="end"/>
+
+                <TextView
+                        android:id="@+id/tvLastMessage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Nội dung tin nhắn cuối..."
+                        style="@style/TextAppearance.App.Body2"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:layout_marginTop="@dimen/spacing_xxxs"/>
+            </LinearLayout>
+
+            <!-- TIME -->
+            <TextView
+                    android:id="@+id/tvTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="14:30"
+                    style="@style/TextAppearance.App.Caption"
+                    android:textColor="@color/text_tertiary"/>
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+</LinearLayout>

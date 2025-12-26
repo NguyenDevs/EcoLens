@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="36dp"
+        android:height="36dp"
+        android:viewportWidth="36"
+        android:viewportHeight="36">
+
+    <!-- Background trắng với bo góc -->
+    <path
+            android:fillColor="#FFF"
+            android:pathData="M32,5 L4,5 A4,4,0,0,0,0,9 L0,27 A4,4,0,0,0,4,31 L32,31 A4,4,0,0,0,36,27 L36,9 A4,4,0,0,0,32,5 Z" />
+
+    <!-- 13 sọc xen kẽ đỏ-trắng (mỗi sọc cao 26/13 = 2dp) -->
+    <!-- Sọc đỏ 1 -->
+    <path
+            android:fillColor="#B22234"
+            android:pathData="M32,5 L4,5 A4,4,0,0,0,0,9 L0,7 L36,7 L36,9 A4,4,0,0,0,32,5 Z" />
+
+    <!-- Sọc đỏ 2 -->
+    <path
+            android:fillColor="#B22234"
+            android:pathData="M0,9 L36,9 L36,11 L0,11 Z" />
+
+    <!-- Sọc đỏ 3 -->
+    <path
+            android:fillColor="#B22234"
+            android:pathData="M0,13 L36,13 L36,15 L0,15 Z" />
+
+    <!-- Sọc đỏ 4 -->
+    <path
+            android:fillColor="#B22234"
+            android:pathData="M0,17 L36,17 L36,19 L0,19 Z" />
+
+    <!-- Sọc đỏ 5 -->
+    <path
+            android:fillColor="#B22234"
+            android:pathData="M0,21 L36,21 L36,23 L0,23 Z" />
+
+    <!-- Sọc đỏ 6 -->
+    <path
+            android:fillColor="#B22234"
+            android:pathData="M0,25 L36,25 L36,27 L0,27 Z" />
+
+    <!-- Sọc đỏ 7 (bottom) -->
+    <path
+            android:fillColor="#B22234"
+            android:pathData="M0,29 L36,29 L36,27 A4,4,0,0,1,32,31 L4,31 A4,4,0,0,1,0,27 Z" />
+
+    <!-- Canton (hình chữ nhật xanh) - cao 7 sọc = 14dp -->
+    <path
+            android:fillColor="#3C3B6E"
+            android:pathData="M4,5 A4,4,0,0,0,0,9 L0,19 L18,19 L18,5 Z" />
+
+    <!-- 50 ngôi sao - ĐÃ DỊCH TRÁI 0.7dp VÀ LÊN 0.2dp -->
+    <!-- Hàng 1: 6 sao (y từ 6.5 → 6.3) -->
+    <path android:fillColor="#FFF" android:pathData="M1.5,6.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M4.5,6.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M7.5,6.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M10.5,6.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M13.5,6.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M16.5,6.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+
+    <!-- Hàng 2: 5 sao (y từ 8 → 7.8) -->
+    <path android:fillColor="#FFF" android:pathData="M3,7.8 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M6,7.8 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M9,7.8 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M12,7.8 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M15,7.8 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+
+    <!-- Hàng 3: 6 sao (y từ 9.5 → 9.3) -->
+    <path android:fillColor="#FFF" android:pathData="M1.5,9.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M4.5,9.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M7.5,9.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M10.5,9.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M13.5,9.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M16.5,9.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+
+    <!-- Hàng 4: 5 sao (y từ 11 → 10.8) -->
+    <path android:fillColor="#FFF" android:pathData="M3,10.8 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M6,10.8 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M9,10.8 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M12,10.8 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M15,10.8 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+
+    <!-- Hàng 5: 6 sao (y từ 12.5 → 12.3) -->
+    <path android:fillColor="#FFF" android:pathData="M1.5,12.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M4.5,12.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M7.5,12.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M10.5,12.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M13.5,12.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M16.5,12.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+
+    <!-- Hàng 6: 5 sao (y từ 14 → 13.8) -->
+    <path android:fillColor="#FFF" android:pathData="M3,13.8 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M6,13.8 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M9,13.8 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M12,13.8 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M15,13.8 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+
+    <!-- Hàng 7: 6 sao (y từ 15.5 → 15.3) -->
+    <path android:fillColor="#FFF" android:pathData="M1.5,15.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M4.5,15.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M7.5,15.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M10.5,15.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M13.5,15.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M16.5,15.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+
+    <!-- Hàng 8: 5 sao (y từ 17 → 16.8) -->
+    <path android:fillColor="#FFF" android:pathData="M3,16.8 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M6,16.8 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M9,16.8 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M12,16.8 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M15,16.8 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+
+    <!-- Hàng 9: 6 sao (y từ 18.5 → 18.3) -->
+    <path android:fillColor="#FFF" android:pathData="M1.5,18.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M4.5,18.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M7.5,18.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M10.5,18.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M13.5,18.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+    <path android:fillColor="#FFF" android:pathData="M16.5,18.3 a0.45,0.45 0 1,0 0.9,0 a0.45,0.45 0 1,0 -0.9,0"/>
+
+</vector>
