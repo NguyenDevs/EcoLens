@@ -1,87 +1,81 @@
-####################################
-# Android build outputs
-####################################
-*.apk
-*.ap_
-*.aab
-*.dex
-*.class
-
-bin/
-gen/
-out/
-release/
-build/
-.gradle/
-
-####################################
-# Local configuration (NEVER COMMIT)
-####################################
-local.properties
-gradle.properties
-
-####################################
-# Android Studio / IntelliJ
-####################################
-.idea/
+# ========================
+# ANDROID & GRADLE STANDARD
+# ========================
 *.iml
-.navigation/
-captures/
-*.log
-
-####################################
-# Native / NDK / CMake
-####################################
-.externalNativeBuild/
+.gradle/
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
 .cxx/
-obj/
 app/.cxx/
 
-####################################
-# Secrets (ABSOLUTELY NO COMMIT)
-####################################
-app/src/main/cpp/secret.h
+# ========================
+# COMPILED CODE & OUTPUT
+# ========================
+# Java/Kotlin compiled class files
+*.class
 
-####################################
-# Proguard / Lint
-####################################
-proguard/
-lint/intermediates/
-lint/generated/
-lint/outputs/
-lint/tmp/
-*.lint
+# Android generated files
+/bin
+/gen
+/out
 
-####################################
-# Keystore
-####################################
+# APKs and Bundles
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# ========================
+# C++ / NATIVE BUILD
+# ========================
+# CMake generated files
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+cpp
+
+# Object files
+*.o
+*.obj
+*.so
+*.a
+*.dylib
+
+# ========================
+# SENSITIVE / SECURITY FILES
+# ========================
 *.jks
 *.keystore
+*.pem
+*.p12
+*.key
 
-####################################
-# Google Services
-####################################
+# Google Services config
 google-services.json
 
-####################################
-# Profiling / Dumps
-####################################
-*.hprof
+# Environment variables
+.env
+.env.local
 
-####################################
-# OS / Editor
-####################################
-.DS_Store
-*.swp
-*.bak
-*.orig
-*~
+# Gradle Properties
+gradle.properties
 
-####################################
-# Legacy / misc
-####################################
-.classpath
-.project
-.cproject
-.settings/
-.metadata/
+# ========================
+# NODEJS / CLOUDFLARE WORKER
+# ========================
+node_modules/
+.wrangler/
+dist/
+package-lock.json
+yarn.lock
