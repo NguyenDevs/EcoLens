@@ -22,12 +22,46 @@ object RetrofitClient {
     }
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
+        level = if (BuildConfig.DEBUG) {
+            HttpLoggingInterceptor.Level.BODY
+        } else {
+            HttpLoggingInterceptor.Level.NONE
+        }
     }
+
+    // HMAC Interceptor - ĐẶT TRƯỚC authErrorInterceptor
+    private val hmacInterceptor = HMACInterceptor()
 
     private val authErrorInterceptor = Interceptor { chain ->
         val request = chain.request()
         val response = chain.proceed(request)
+
+        // Xử lý 401 Unauthorized từ HMAC
+        if (response.code == 401) {
+            appContext?.let { context ->
+                android.os.Handler(android.os.Looper.getMainLooper()).post {
+                    Toast.makeText(
+                        context,
+                        "Xác thực thất bại. Vui lòng cập nhật ứng dụng",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
+
+        // Xử lý 429 Rate Limit
+        if (response.code == 429) {
+            val resetTime = response.header("X-RateLimit-Reset") ?: "unknown"
+            appContext?.let { context ->
+                android.os.Handler(android.os.Looper.getMainLooper()).post {
+                    Toast.makeText(
+                        context,
+                        "Quá nhiều yêu cầu. Vui lòng thử lại sau ${resetTime}s",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
 
         // ==================== iNaturalist Error ====================
         if (response.code == 401 && request.url.toString().contains("inaturalist")) {
@@ -44,38 +78,17 @@ object RetrofitClient {
 
         // ==================== Gemini Retry Info ====================
         else if (request.url.toString().contains("gemini")) {
-            val retryCount = response.header("X-Gemini-Retry-Count")?.toIntOrNull() ?: 0
-            val failedKeys = response.header("X-Gemini-Failed-Keys")?.split(",")?.filter { it.isNotEmpty() } ?: emptyList()
-            val successKey = response.header("X-Gemini-Success-Key")
             val allFailed = response.header("X-Gemini-All-Failed") == "true"
+            val failedKeys = response.header("X-Gemini-Failed-Keys")?.split(",")?.filter { it.isNotEmpty() } ?: emptyList()
 
-            appContext?.let { context ->
-                android.os.Handler(android.os.Looper.getMainLooper()).post {
-                    when {
-                        allFailed -> {
-                            Toast.makeText(
-                                context,
-                                "Tất cả ${failedKeys.size} API keys đều hết quota. Vui lòng thử lại sau.",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
-/*
-                        retryCount > 1 && successKey != null && successKey != "none" -> {
-                            Toast.makeText(
-                                context,
-                                "Đã chuyển sang API key #${successKey.toInt() + 1} (${failedKeys.size} key hết quota)",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                        response.code == 429 && retryCount == 0 -> {
-                            Toast.makeText(
-                                context,
-                                "Vượt hạn mức token Gemini. Vui lòng thử lại sau.",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
-
- */
+            if (allFailed) {
+                appContext?.let { context ->
+                    android.os.Handler(android.os.Looper.getMainLooper()).post {
+                        Toast.makeText(
+                            context,
+                            "Tất cả ${failedKeys.size} API keys đều hết quota. Vui lòng thử lại sau.",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 }
             }
@@ -85,6 +98,7 @@ object RetrofitClient {
     }
 
     private val okHttpClient = OkHttpClient.Builder()
+        .addInterceptor(hmacInterceptor)
         .addInterceptor(loggingInterceptor)
         .addInterceptor(authErrorInterceptor)
         .connectTimeout(60, TimeUnit.SECONDS)

@@ -1,12 +1,94 @@
-
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
 }
 
-
 android {
+    namespace = "com.nguyendevs.ecolens"
+    compileSdk = 34
+
+    defaultConfig {
+        applicationId = "com.nguyendevs.ecolens"
+        minSdk = 29
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val workerUrl =
+            project.findProperty("WORKER_URL") as? String
+                ?: "https://ecolens.tainguyen-devs.workers.dev/"
+
+        externalNativeBuild {
+            cmake {
+                arguments += listOf(
+                    "-DAPP_SECRET=${project.findProperty("APP_SECRET")}"
+                )
+            }
+        }
+
+        buildConfigField(
+            "String",
+            "WORKER_BASE_URL",
+            "\"$workerUrl\""
+        )
+
+        ndk {
+            abiFilters += listOf(
+                "armeabi-v7a",
+                "arm64-v8a"
+            )
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
+    }
+
+
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            isDebuggable = false
+
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+
+        debug {
+            isMinifyEnabled = false
+            isDebuggable = true
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+
+    buildFeatures {
+        viewBinding = true
+        buildConfig = true
+    }
+}
+
+configurations.all {
+    exclude(group = "com.intellij", module = "annotations")
+}
+
+/*android {
     namespace = "com.nguyendevs.ecolens"
     compileSdk = 34
 
@@ -31,6 +113,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
+
     }
 
     compileOptions {
@@ -48,9 +131,7 @@ android {
         buildConfig = true
     }
 }
-configurations.all {
-    exclude(group = "com.intellij", module = "annotations")
-}
+ */
 dependencies {
     // AndroidX Core
     implementation("androidx.core:core-ktx:1.13.0")
