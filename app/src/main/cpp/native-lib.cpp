@@ -1,6 +1,7 @@
 #include <jni.h>
 #include <string>
-#include <cstring>          // Thêm dòng này cho strlen, sprintf
+#include <cstring>
+#include <cstdio>
 #include <openssl/hmac.h>
 #include <openssl/sha.h>
 
@@ -10,6 +11,7 @@
 
 static const char* SECRET = APP_SECRET;
 
+// Hàm Native thực hiện tính toán HMAC-SHA256
 extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_nguyendevs_ecolens_network_NativeSecurityManager_calculateHMAC(
@@ -36,10 +38,9 @@ Java_com_nguyendevs_ecolens_network_NativeSecurityManager_calculateHMAC(
 
     env->ReleaseStringUTFChars(jMessage, message);
 
-    // Tạo hex string an toàn hơn (tránh sprintf không kiểm soát)
     char hex[SHA256_DIGEST_LENGTH * 2 + 1];
     for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
-        snprintf(hex + (i * 2), 3, "%02x", hash[i]);  // snprintf an toàn hơn
+        snprintf(hex + (i * 2), 3, "%02x", hash[i]);
     }
     hex[SHA256_DIGEST_LENGTH * 2] = '\0';
 

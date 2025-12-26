@@ -20,11 +20,14 @@ class HMACInterceptor : Interceptor {
 
         val timestamp = System.currentTimeMillis().toString()
         val requestId = UUID.randomUUID().toString()
+
+        // SỬA LẠI: Chỉ lấy encodedPath (tương đương url.pathname trong JS)
+        // Worker code: const message = `${request.method}:${url.pathname}:${timestamp}:${requestId}`;
         val path = url.encodedPath
 
         val message = "${request.method}:$path:$timestamp:$requestId"
 
-        // 🔐 HMAC tính hoàn toàn trong native
+        // Tính HMAC
         val signature = NativeSecurityManager.calculateHMAC(message)
 
         val newRequest = request.newBuilder()
