@@ -21,7 +21,6 @@ class HMACInterceptor : Interceptor {
         val timestamp = System.currentTimeMillis().toString()
         val requestId = UUID.randomUUID().toString()
 
-        // SỬA LẠI: Chỉ lấy encodedPath (tương đương url.pathname trong JS)
         // Worker code: const message = `${request.method}:${url.pathname}:${timestamp}:${requestId}`;
         val path = url.encodedPath
 
