@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/background"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+    <!-- MODERN HOME SCREEN -->
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:animateLayoutChanges="true"
+            android:paddingStart="@dimen/padding_screen_horizontal"
+            android:paddingEnd="@dimen/padding_screen_horizontal"
+            android:paddingTop="10dp"
+            android:paddingBottom="100dp">
+
+        <!-- HEADER -->
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_xs"
+
+                android:text="@string/app_title"
+                style="@style/TextAppearance.App.Display"
+                android:textColor="@color/primary"/>
+
+        <TextView
+                android:id="@+id/tvAppSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="4dp"
+                android:layout_marginBottom="@dimen/spacing_lg"
+                android:text="@string/app_subtitle_home"
+                style="@style/TextAppearance.App.Body2"/>
+
+        <!-- IMAGE PREVIEW CARD -->
+        <com.google.android.material.card.MaterialCardView
+                android:id="@+id/imagePreviewCard"
+                android:layout_width="match_parent"
+                android:layout_height="170dp"
+                style="@style/Widget.App.Card"
+                app:cardCornerRadius="@dimen/radius_md">
+
+            <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                <!-- INITIAL STATE -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/initialStateLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="@dimen/spacing_md"
+                        android:visibility="visible">
+
+                    <ImageView
+                            android:id="@+id/iconCamera"
+                            android:layout_width="@dimen/icon_xl"
+                            android:layout_height="@dimen/icon_xl"
+                            android:src="@drawable/ic_camera_home"
+                            app:tint="@color/primary"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            android:layout_marginTop="36dp"
+                            android:contentDescription="@string/camera"/>
+
+                    <TextView
+                            android:id="@+id/tvBannerTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/banner_title"
+                            style="@style/TextAppearance.App.Headline1"
+                            android:textSize="27sp"
+                            android:textStyle="normal"
+                            android:textColor="@color/primary_dark"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toEndOf="@+id/iconCamera"
+                            android:layout_marginTop="35dp"
+                            android:layout_marginStart="@dimen/spacing_xs"/>
+
+                    <TextView
+                            android:id="@+id/tvBannerSubtitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/banner_subtitle"
+                            style="@style/TextAppearance.App.Headline3"
+                            android:textSize="18sp"
+                            android:textStyle="normal"
+                            android:textColor="@color/primary"
+                            app:layout_constraintTop_toBottomOf="@id/tvBannerTitle"
+                            app:layout_constraintStart_toEndOf="@+id/iconCamera"
+                            android:layout_marginStart="@dimen/spacing_xs"/>
+
+                    <!-- DECORATIVE IMAGES -->
+                    <com.google.android.material.imageview.ShapeableImageView
+                            android:layout_width="95dp"
+                            android:layout_height="95dp"
+                            android:src="@drawable/home_tree_2"
+                            android:scaleType="centerCrop"
+                            android:alpha="0.3"
+                            android:rotation="-25"
+                            android:translationX="33dp"
+                            android:translationY="19dp"
+                            android:translationZ="-1dp"
+                            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.MediumComponent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintVertical_bias="0.109"
+                            android:layout_marginEnd="46dp"/>
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
+                            android:src="@drawable/home_tree"
+                            android:scaleType="centerCrop"
+                            android:alpha="0.8"
+                            android:rotation="-8"
+                            android:translationX="33dp"
+                            android:translationY="10dp"
+                            android:translationZ="1dp"
+                            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.MediumComponent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintVertical_bias="0.12"
+                            android:layout_marginEnd="30dp"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <!-- IMAGE PREVIEW -->
+                <ImageView
+                        android:id="@+id/imagePreview"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@string/image_preview"
+                        android:scaleType="centerCrop"
+                        android:visibility="invisible"
+                        android:alpha="0"/>
+
+                <!-- LOADING OVERLAY -->
+                <FrameLayout
+                        android:id="@+id/loadingOverlay"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@color/overlay_light"
+                        android:visibility="gone">
+
+                    <com.google.android.material.progressindicator.CircularProgressIndicator
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:indeterminate="true"
+                            app:indicatorColor="@array/gemini_colors" />
+                </FrameLayout>
+
+                <!-- ZOOM BUTTON -->
+                <ImageView
+                        android:id="@+id/btnZoomIn"
+                        android:layout_width="@dimen/touch_target_min"
+                        android:layout_height="@dimen/touch_target_min"
+                        android:layout_gravity="bottom|end"
+                        android:layout_margin="@dimen/spacing_md"
+                        android:background="@drawable/bg_black_rounded"
+                        android:contentDescription="@string/zoom_in"
+                        android:padding="@dimen/spacing_sm"
+                        android:src="@drawable/ic_zoomin"
+                        android:visibility="gone"
+                        app:tint="@color/white"/>
+
+            </FrameLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- LOADING INDICATOR -->
+        <LinearLayout
+                android:id="@+id/loadingCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_lg"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+            <TextView
+                    android:id="@+id/tvLoading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/loading_analyzing"
+                    style="@style/TextAppearance.App.Body1"
+                    android:textColor="@color/primary"
+                    android:textStyle="bold"/>
+        </LinearLayout>
+
+        <!-- ERROR CARD -->
+        <LinearLayout
+                android:id="@+id/errorCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_lg"
+                android:background="@drawable/bg_flag_rounded"
+                android:backgroundTint="@color/error_bg"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/spacing_md"
+                android:visibility="gone">
+
+            <ImageView
+                    android:layout_width="@dimen/icon_md"
+                    android:layout_height="@dimen/icon_md"
+                    android:contentDescription="@string/error"
+                    android:src="@drawable/ic_warning"
+                    app:tint="@color/error"/>
+
+            <TextView
+                    android:id="@+id/errorText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_sm"
+                    android:layout_weight="1"
+                    android:text="@string/error_default"
+                    style="@style/TextAppearance.App.Body2"
+                    android:textColor="@color/error_text"/>
+
+        </LinearLayout>
+
+        <!-- SPECIES INFO CARD -->
+        <include
+                android:id="@+id/speciesInfoCard"
+                layout="@layout/card_species_info_modern"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_lg"
+                android:visibility="gone"/>
+
+    </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>

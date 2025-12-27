@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:orientation="vertical"
+        android:background="@color/background">
+
+    <!-- MODERN HISTORY SCREEN -->
+
+    <!-- HEADER -->
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="10dp"
+            android:paddingBottom="1dp">
+
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/history_title_label"
+                android:paddingStart="@dimen/padding_screen_horizontal"
+                android:paddingEnd="@dimen/padding_screen_horizontal"
+
+                style="@style/TextAppearance.App.Display"
+                android:textColor="@color/primary"
+                android:layout_marginBottom="15dp"/>
+        <View
+                android:layout_width="match_parent"
+                android:background="#E0E0E0"
+                android:layout_marginStart="-20dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginEnd="-20dp"
+                android:layout_height="1.5dp"/>
+        <!-- OPTIONS TOGGLE -->
+        <FrameLayout
+                android:id="@+id/optionsHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="@dimen/padding_screen_horizontal"
+                android:paddingEnd="@dimen/padding_screen_horizontal"
+
+                android:clickable="true"
+                android:focusable="true"
+                >
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/options"
+                    style="@style/TextAppearance.App.Label"
+                    android:layout_marginStart="@dimen/spacing_xxs"/>
+
+            <ImageView
+                    android:id="@+id/ivExpandIcon"
+                    android:layout_width="@dimen/icon_md"
+                    android:layout_height="@dimen/icon_md"
+                    android:layout_gravity="end|center_vertical"
+                    android:src="@drawable/ic_arrow_down"
+                    app:tint="@color/text_secondary"/>
+        </FrameLayout>
+
+        <!-- OPTIONS CONTAINER -->
+        <LinearLayout
+                android:id="@+id/optionsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="@dimen/padding_screen_horizontal"
+                android:paddingEnd="@dimen/padding_screen_horizontal"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+            <!-- SORT OPTION -->
+            <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/btnSort"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/spacing_sm"
+                    style="@style/Widget.App.Card"
+                    app:cardCornerRadius="@dimen/radius_md"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
+
+                <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/spacing_md"
+                        android:gravity="center_vertical">
+
+                    <FrameLayout
+                            android:layout_width="@dimen/icon_xl"
+                            android:layout_height="@dimen/icon_xl"
+                            android:background="@drawable/bg_flag_rounded"
+                            android:backgroundTint="@color/transparent">
+                        <ImageView
+                                android:layout_width="@dimen/icon_md"
+                                android:layout_height="@dimen/icon_md"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_sort"
+                                app:tint="@color/primary"/>
+                    </FrameLayout>
+
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginStart="@dimen/spacing_md">
+
+                        <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/sort_by"
+                                style="@style/TextAppearance.App.Body1"
+                                android:textStyle="bold"/>
+
+                        <TextView
+                                android:id="@+id/tvCurrentSort"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/sort_newest_first"
+                                style="@style/TextAppearance.App.Body2"
+                                android:textColor="@color/green_dark"
+                                android:layout_marginTop="2dp"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- FILTER BY DATE OPTION -->
+            <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/btnFilterByDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/Widget.App.Card"
+                    android:layout_marginBottom="@dimen/spacing_sm"
+                    app:cardCornerRadius="@dimen/radius_md"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
+
+                <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/spacing_md"
+                        android:gravity="center_vertical">
+
+                    <FrameLayout
+                            android:layout_width="@dimen/icon_xl"
+                            android:layout_height="@dimen/icon_xl"
+                            android:background="@drawable/bg_flag_rounded"
+                            android:backgroundTint="@color/transparent">
+                        <ImageView
+                                android:layout_width="@dimen/icon_md"
+                                android:layout_height="@dimen/icon_md"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_calendar"
+                                app:tint="@color/primary"/>
+                    </FrameLayout>
+
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginStart="@dimen/spacing_md">
+
+                        <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/filter_by_date"
+                                style="@style/TextAppearance.App.Body1"
+                                android:textStyle="bold"/>
+
+                        <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical"
+                                android:layout_marginTop="2dp">
+
+                            <TextView
+                                    android:id="@+id/tvFilterSubtitle"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="@string/select_date"
+                                    style="@style/TextAppearance.App.Body2"/>
+
+                            <ImageView
+                                    android:id="@+id/btnClearFilter"
+                                    android:layout_width="@dimen/icon_sm"
+                                    android:layout_height="@dimen/icon_sm"
+                                    android:src="@drawable/ic_close"
+                                    android:background="?attr/selectableItemBackgroundBorderless"
+                                    android:padding="@dimen/spacing_xxs"
+                                    app:tint="@color/error"
+                                    android:visibility="gone"/>
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
+        <!-- DIVIDER -->
+        <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E0E0E0"
+                android:layout_marginStart="@dimen/padding_screen_horizontal"
+                android:layout_marginEnd="@dimen/padding_screen_horizontal"
+
+        />
+    </LinearLayout>
+
+    <!-- CONTENT -->
+    <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+        <!-- HISTORY LIST -->
+        <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvHistory"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:paddingTop="0dp"
+                android:paddingBottom="80dp"
+                android:clipToPadding="false"
+                android:scrollbars="none"
+                android:overScrollMode="ifContentScrolls"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
+        <!-- EMPTY STATE -->
+        <LinearLayout
+                android:id="@+id/emptyStateContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:padding="@dimen/spacing_xl">
+
+            <ImageView
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/ic_history"
+                    android:alpha="0.3"
+                    app:tint="@color/text_secondary"
+                    android:contentDescription="@string/history_empty"/>
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/history_empty"
+                    style="@style/TextAppearance.App.Headline3"
+                    android:textColor="@color/text_secondary"
+                    android:layout_marginTop="@dimen/spacing_md"/>
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/history_subtitle"
+                    style="@style/TextAppearance.App.Body2"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:textAlignment="center"/>
+        </LinearLayout>
+    </FrameLayout>
+
+</LinearLayout>

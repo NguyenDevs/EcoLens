@@ -1,0 +1,574 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="http://schemas.android.com/tools">
+    <array name="gemini_colors">
+        <item>#00A86B</item>
+        <item>#018367</item>
+        <item>#08B962</item>
+        <item>#033826</item>
+        <item>#00796B</item>
+    </array>
+    <color name="background">#F2F4F5</color>
+    <color name="background_color">@color/background</color>
+    <color name="background_light">@color/surface_variant</color>
+    <color name="background_soft">@color/background</color>
+    <color name="black">#000000</color>
+    <color name="border_light">#F0F0F0</color>
+    <color name="border_normal">#E0E0E0</color>
+    <color name="border_strong">#D0D0D0</color>
+    <color name="bottom_nav_selected">@color/nav_selected</color>
+    <color name="bottom_nav_unselected">@color/nav_unselected</color>
+    <color name="confidence_high">#00A86B</color>
+    <color name="confidence_high_bg">#E8F5E9</color>
+    <color name="confidence_high_text">#00796B</color>
+    <color name="confidence_low">#D32F2F</color>
+    <color name="confidence_low_bg">#FFEBEE</color>
+    <color name="confidence_low_text">#C62828</color>
+    <color name="confidence_medium">#F57C00</color>
+    <color name="confidence_medium_bg">#FFF3E0</color>
+    <color name="confidence_medium_text">#E65100</color>
+    <color name="divider_color">@color/border_normal</color>
+    <color name="error">#D32F2F</color>
+    <color name="error_background">@color/error_bg</color>
+    <color name="error_bg">#FFEBEE</color>
+    <color name="error_red">@color/error</color>
+    <color name="error_text">#C62828</color>
+    <color name="gradient_end">#4CAF50</color>
+    <color name="gradient_start">#018367</color>
+    <color name="gray">@color/text_secondary</color>
+    <color name="gray_light">@color/state_disabled</color>
+    <color name="gray_light_f8">@color/surface_variant</color>
+    <color name="green_dark">@color/success_text</color>
+    <color name="green_light">@color/primary_light</color>
+    <color name="green_primary">@color/primary</color>
+    <color name="green_primary_2">@color/primary_dark</color>
+    <color name="info">#2196F3</color>
+    <color name="info_bg">#E3F2FD</color>
+    <color name="info_text">#1976D2</color>
+    <color name="nav_background">#FFFFFF</color>
+    <color name="nav_selected">#033826</color>
+    <color name="nav_unselected">#CCD7D1</color>
+    <color name="on_primary">#FFFFFF</color>
+    <color name="on_surface">#1A1C1E</color>
+    <color name="overlay_dark">#80000000</color>
+    <color name="overlay_light">#80FFFFFF</color>
+    <color name="primary">#018367</color>
+    <color name="primary_10">#1A018367</color>
+    <color name="primary_20">#33018367</color>
+    <color name="primary_30">#4D018367</color>
+    <color name="primary_40">#66018367</color>
+    <color name="primary_dark">#033826</color>
+    <color name="primary_light">#4CAF50</color>
+    <color name="scrim">#99000000</color>
+    <color name="shadow_light">#14000000</color>
+    <color name="shadow_normal">#1F000000</color>
+    <color name="shadow_strong">#29000000</color>
+    <color name="state_disabled">#F5F5F5</color>
+    <color name="state_focus">#E3F2FD</color>
+    <color name="state_hover">#F5F5F5</color>
+    <color name="state_pressed">#EEEEEE</color>
+    <color name="success">#00A86B</color>
+    <color name="success_bg">#E8F5E9</color>
+    <color name="success_text">#00796B</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="surface_tint">#F0F7F4</color>
+    <color name="surface_variant">#F8F9FA</color>
+    <color name="surface_white">@color/surface</color>
+    <color name="text_disabled">#BDBDBD</color>
+    <color name="text_on_primary">#FFFFFF</color>
+    <color name="text_primary">#1A1C1E</color>
+    <color name="text_secondary">#707070</color>
+    <color name="text_tertiary">#9E9E9E</color>
+    <color name="transparent">#00FFFFFF</color>
+    <color name="warning">#F57C00</color>
+    <color name="warning_bg">#FFF3E0</color>
+    <color name="warning_text">#E65100</color>
+    <color name="white">#FFFFFF</color>
+    <dimen name="border_normal">1dp</dimen>
+    <dimen name="border_thick">2dp</dimen>
+    <dimen name="border_thin">0.5dp</dimen>
+    <dimen name="bottom_nav_elevation">8dp</dimen>
+    <dimen name="bottom_nav_icon_size">24dp</dimen>
+    <dimen name="divider_normal">1dp</dimen>
+    <dimen name="divider_thin">0.5dp</dimen>
+    <dimen name="elevation_lg">8dp</dimen>
+    <dimen name="elevation_md">4dp</dimen>
+    <dimen name="elevation_none">0dp</dimen>
+    <dimen name="elevation_sm">2dp</dimen>
+    <dimen name="elevation_xl">12dp</dimen>
+    <dimen name="elevation_xs">1dp</dimen>
+    <dimen name="fab_icon_large">32dp</dimen>
+    <dimen name="fab_icon_normal">24dp</dimen>
+    <dimen name="fab_size_large">70dp</dimen>
+    <dimen name="fab_size_normal">56dp</dimen>
+    <dimen name="icon_lg">32dp</dimen>
+    <dimen name="icon_md">24dp</dimen>
+    <dimen name="icon_sm">20dp</dimen>
+    <dimen name="icon_xl">40dp</dimen>
+    <dimen name="icon_xs">16dp</dimen>
+    <dimen name="icon_xxl">48dp</dimen>
+    <item format="float" name="line_height_normal" type="dimen">1.5</item>
+    <item format="float" name="line_height_relaxed" type="dimen">1.75</item>
+    <item format="float" name="line_height_tight" type="dimen">1.2</item>
+    <dimen name="padding_button_horizontal">24dp</dimen>
+    <dimen name="padding_button_vertical">12dp</dimen>
+    <dimen name="padding_card">20dp</dimen>
+    <dimen name="padding_screen_horizontal">20dp</dimen>
+    <dimen name="padding_screen_vertical">24dp</dimen>
+    <dimen name="radius_bottom_sheet">24dp</dimen>
+    <dimen name="radius_button">999dp</dimen>
+    <dimen name="radius_card">20dp</dimen>
+    <dimen name="radius_chip">999dp</dimen>
+    <dimen name="radius_full">999dp</dimen>
+    <dimen name="radius_input">22dp</dimen>
+    <dimen name="radius_lg">20dp</dimen>
+    <dimen name="radius_md">16dp</dimen>
+    <dimen name="radius_sm">12dp</dimen>
+    <dimen name="radius_xl">24dp</dimen>
+    <dimen name="radius_xs">8dp</dimen>
+    <dimen name="radius_xxl">28dp</dimen>
+    <dimen name="radius_xxs">4dp</dimen>
+    <dimen name="selected_stroke_width">3dp</dimen>
+    <dimen name="spacing_lg">24dp</dimen>
+    <dimen name="spacing_md">16dp</dimen>
+    <dimen name="spacing_sm">12dp</dimen>
+    <dimen name="spacing_xl">32dp</dimen>
+    <dimen name="spacing_xs">8dp</dimen>
+    <dimen name="spacing_xxl">40dp</dimen>
+    <dimen name="spacing_xxs">4dp</dimen>
+    <dimen name="spacing_xxxl">48dp</dimen>
+    <dimen name="spacing_xxxs">2dp</dimen>
+    <dimen name="text_body">15sp</dimen>
+    <dimen name="text_body_large">16sp</dimen>
+    <dimen name="text_body_small">14sp</dimen>
+    <dimen name="text_caption">12sp</dimen>
+    <dimen name="text_display">32sp</dimen>
+    <dimen name="text_h1">28sp</dimen>
+    <dimen name="text_h2">24sp</dimen>
+    <dimen name="text_h3">20sp</dimen>
+    <dimen name="text_h4">18sp</dimen>
+    <dimen name="text_label">13sp</dimen>
+    <dimen name="touch_target_exmin">40dp</dimen>
+    <dimen name="touch_target_lg">64dp</dimen>
+    <dimen name="touch_target_md">56dp</dimen>
+    <dimen name="touch_target_min">48dp</dimen>
+    <integer name="anim_duration_fast">150</integer>
+    <integer name="anim_duration_instant">0</integer>
+    <integer name="anim_duration_normal">250</integer>
+    <integer name="anim_duration_slow">400</integer>
+    <string name="about_app_desc">Ứng dụng EcoLens, nhận diện động thực vật qua hình ảnh được phát triển bởi @NguyenDevs</string>
+    <string name="about_app_title">Về chúng tôi</string>
+    <string name="about_label">Thông tin</string>
+    <string name="action_cancel">Hủy</string>
+    <string name="action_delete">Xóa</string>
+    <string name="analyzing">Đang phân tích hình ảnh…</string>
+    <string name="analyzing_text">Đang phân tích hình ảnh</string>
+    <string name="app_name">EcoLens</string>
+    <string name="app_subtitle">NHẬN DIỆN ĐỘNG THỰC VẬT QUA HÌNH ẢNH</string>
+    <string name="app_subtitle_home">NHẬN DIỆN ĐỘNG THỰC VẬT QUA HÌNH ẢNH</string>
+    <string name="app_title">EcoLens</string>
+    <string name="back">Quay lại</string>
+    <string name="background_color" translatable="false">background_color</string>
+    <string name="banner_action">Chạm để chụp</string>
+    <string name="banner_subtitle">Động - Thực vật</string>
+    <string name="banner_title">Nhận diện</string>
+    <string name="btn_retry_identification">Thử nhận dạng lại</string>
+    <string name="camera">Máy ảnh</string>
+    <string name="cancel">Hủy</string>
+    <string name="cant_reply">Xin lỗi, tôi không thể trả lời lúc này.</string>
+    <string name="capture">Chụp ảnh</string>
+    <string name="chat_hint">Hỏi về động thực vật...</string>
+    <string name="chat_thinking">Đang suy nghĩ...</string>
+    <string name="chat_welcome">Tôi là EcoLens. Tôi có thể giúp gì cho bạn?</string>
+    <string name="clear_filter">Xóa bộ lọc</string>
+    <string name="close">Đóng</string>
+    <string name="confidence">Độ tin cậy</string>
+    <string name="confidence_format">Độ tin cậy: %s%%</string>
+    <string name="copy_scientific_name">Sao chép tên khoa học</string>
+    <string name="delete_chat">Xóa đoạn chat</string>
+    <string name="detail_image">Ảnh chi tiết</string>
+    <string name="dialog_delete_chat_message">Bạn có chắc muốn xóa đoạn chat này không?</string>
+    <string name="dialog_delete_chat_title">Xóa đoạn chat</string>
+    <string name="email_support">Gửi phản hồi</string>
+    <string name="end_date_before_start_date_error">Ngày kết thúc phải sau ngày bắt đầu</string>
+    <string name="error">Lỗi</string>
+    <string name="error_browser">Không tìm thấy trình duyệt web</string>
+    <string name="error_camera_front">Không thể mở camera trước</string>
+    <string name="error_camera_open">Không thể mở camera: %s</string>
+    <string name="error_capture">Lỗi chụp ảnh: %s</string>
+    <string name="error_default">Đã xảy ra lỗi</string>
+    <string name="error_general">Lỗi: %1$s</string>
+    <string name="error_geo_block">Dịch vụ API chưa hỗ trợ khu vực này. Vui lòng thử lại sau hoặc đổi mạng.</string>
+    <string name="error_incomplete_data">Không thể lấy đủ thông tin về loài này. Vui lòng thử lại.</string>
+    <string name="error_no_result">Không thể nhận diện sinh vật trong ảnh. Vui lòng thử ảnh khác.</string>
+    <string name="error_occurred">Đã xảy ra lỗi</string>
+    <string name="error_prefix">Đã xảy ra lỗi: %s</string>
+    <string name="error_quota_exceeded">Đã vượt quá giới hạn API. Vui lòng thử lại sau.</string>
+    <string name="favorite">Trợ lý</string>
+    <string name="feature_developing">Chức năng đang được phát triển</string>
+    <string name="filter_by_date">Lọc theo ngày</string>
+    <string name="filter_date_range">Từ %1$s đến %2$s</string>
+    <string name="flash_toggle">Bật/Tắt Flash</string>
+    <string name="follow_on_facebook">Theo dõi trên Facebook</string>
+    <string name="follow_on_instagram">Theo dõi trên Instagram</string>
+    <string name="follow_on_tiktok">Theo dõi trên TikTok</string>
+    <string name="fullscreen_image">Ảnh toàn màn hình</string>
+    <string name="garden_placeholder">Trợ lý AI</string>
+    <string name="garden_subtitle">Hỏi đáp về sinh vật học với AI</string>
+    <string name="history">Lịch sử</string>
+    <string name="history_empty">Chưa có lịch sử</string>
+    <string name="history_image">Ảnh lịch sử</string>
+    <string name="history_placeholder">Lịch sử</string>
+    <string name="history_subtitle">Xem lịch sử các loài đã nhận diện</string>
+    <string name="history_title_label">Lịch sử</string>
+    <string name="ic_calendar">ic_calendar</string>
+    <string name="ic_sort">ic_sort</string>
+    <string name="image_preview">Xem trước ảnh</string>
+    <string name="label_class">Lớp:</string>
+    <string name="label_common_name">Tên thường gọi</string>
+    <string name="label_confidence_template">Độ tin cậy: %s</string>
+    <string name="label_family">Họ:</string>
+    <string name="label_genus">Chi:</string>
+    <string name="label_kingdom">Giới:</string>
+    <string name="label_order">Bộ:</string>
+    <string name="label_phylum">Ngành:</string>
+    <string name="label_scientific_name">Tên khoa học</string>
+    <string name="label_species">Loài:</string>
+    <string name="lang_english">English</string>
+    <string name="lang_vietnamese">Tiếng Việt</string>
+    <string name="language_label">Ngôn ngữ</string>
+    <string name="lists">DANH SÁCH</string>
+    <string name="loading_analyzing">Đang phân tích hình ảnh...</string>
+    <string name="mute">Dừng đọc</string>
+    <string name="my_garden">Trợ lý AI</string>
+    <string name="my_garden_desc">Hỏi đáp về sinh vật học với AI</string>
+    <string name="my_garden_title">Trợ lý AI</string>
+    <string name="nav_history">Lịch sử</string>
+    <string name="nav_home">Trang chủ</string>
+    <string name="nav_my_garden">Trợ lý AI</string>
+    <string name="nav_settings">Cài đặt</string>
+    <string name="new_chat">Đoạn chat mới</string>
+    <string name="no_image">Không có ảnh</string>
+    <string name="no_image_selected">Chưa chọn ảnh</string>
+    <string name="ok">OK</string>
+    <string name="options">TÙY CHỌN</string>
+    <string name="permission_message">Ứng dụng cần quyền camera và thư viện ảnh để hoạt động.</string>
+    <string name="permission_title">Cần quyền truy cập</string>
+    <string name="preferences">Giao diện</string>
+    <string name="retry_identification_hint">Độ tin cậy thấp. Nhấn để thử lại.</string>
+    <string name="rotate">Xoay</string>
+    <string name="search">Tìm kiếm</string>
+    <string name="search_hint">Tìm kiếm trên Google...</string>
+    <string name="section_characteristics">✨ Đặc điểm</string>
+    <string name="section_conservation">🛡️ Tình trạng bảo tồn</string>
+    <string name="section_description">📖 Mô tả</string>
+    <string name="section_distribution">🌍 Phân bố</string>
+    <string name="section_habitat">🏞️ Môi trường sống</string>
+    <string name="select_date">Chọn khoảng thời gian</string>
+    <string name="select_end_date">Chọn ngày kết thúc</string>
+    <string name="select_start_date">Chọn ngày bắt đầu</string>
+    <string name="settings">Cài đặt</string>
+    <string name="settings_placeholder">Cài đặt</string>
+    <string name="settings_subtitle">Các tùy chọn cài đặt</string>
+    <string name="settings_title">Cài đặt</string>
+    <string name="share_char_title">✨ ĐẶC ĐIỂM</string>
+    <string name="share_chooser_title">Chia sẻ thông tin loài qua</string>
+    <string name="share_cons_title">🛡️ TÌNH TRẠNG BẢO TỒN</string>
+    <string name="share_desc_title">📖 MÔ TẢ</string>
+    <string name="share_dist_title">🌍 PHÂN BỐ</string>
+    <string name="share_footer">📱 Chia sẻ từ EcoLens App</string>
+    <string name="share_hab_title">🏞️ MÔI TRƯỜNG SỐNG</string>
+    <string name="share_info">Chia sẻ thông tin</string>
+    <string name="share_subject">Thông tin về %s</string>
+    <string name="share_taxonomy_title">🔬 PHÂN LOẠI KHOA HỌC</string>
+    <string name="share_title">🌿 THÔNG TIN LOÀI</string>
+    <string name="sort">Sắp xếp</string>
+    <string name="sort_by">Sắp xếp theo</string>
+    <string name="sort_newest_first">Ngày mới nhất</string>
+    <string name="sort_oldest_first">Ngày cũ nhất</string>
+    <string name="speak">Đọc nội dung</string>
+    <string name="support">Hỗ trợ</string>
+    <string name="taxonomy_title">🔬 Phân loại khoa học</string>
+    <string name="text_secondary" translatable="false">text_secondary</string>
+    <string name="time_prefix">Thời gian: </string>
+    <string name="tts_scientific_name">Tên khoa học</string>
+    <string name="tts_taxonomy">Phân loại khoa học</string>
+    <string name="unknown_common_name">[Không rõ tên thường gọi]</string>
+    <string name="unknown_scientific_name">[Không rõ tên khoa học]</string>
+    <string name="upload">Tải lên</string>
+    <string name="view_detail">Xem chi tiết</string>
+    <string name="zoom_in">Phóng to</string>
+    <string name="zoom_out">Thu nhỏ</string>
+    <style name="Base.Theme.EcoLens" parent="Theme.Material3.Light.NoActionBar">
+        
+        <item name="colorPrimary">@color/green_primary</item>
+        <item name="colorPrimaryVariant">@color/green_dark</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+
+        
+        <item name="colorSecondary">@color/green_light</item>
+        <item name="colorSecondaryVariant">@color/green_dark</item>
+        <item name="colorOnSecondary">@android:color/white</item>
+
+        
+        <item name="android:colorBackground">@color/background_light</item>
+        <item name="colorSurface">@android:color/white</item>
+        <item name="colorOnBackground">@android:color/black</item>
+        <item name="colorOnSurface">@android:color/black</item>
+
+        
+        <item name="android:statusBarColor">@color/green_primary</item>
+        <item name="android:windowLightStatusBar" ns1:targetApi="m">false</item>
+
+        
+        <item name="android:navigationBarColor">@android:color/white</item>
+        <item name="android:windowLightNavigationBar" ns1:targetApi="o_mr1">true</item>
+
+        
+        <item name="floatingActionButtonStyle">@style/Widget.EcoLens.FloatingActionButton</item>
+
+        
+        <item name="bottomNavigationStyle">@style/Widget.EcoLens.BottomNavigationView</item>
+    </style>
+    <style name="BottomNavTextRegular">
+        <item name="android:textStyle">normal</item>
+    </style>
+    <style name="CustomMaterialDatePickerTheme" parent="ThemeOverlay.Material3.MaterialCalendar">
+        <item name="colorPrimary">@color/green_primary</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/black</item>
+
+        
+        <item name="materialCalendarHeaderLayout">@style/HeaderLayoutCustom</item>
+        <item name="materialCalendarHeaderTitle">@style/HeaderTitleCustom</item>
+        <item name="materialCalendarHeaderSelection">@style/HeaderSelectionCustom</item>
+        <item name="materialCalendarHeaderDivider">@style/HeaderDividerCustom</item>
+
+        
+        <item name="android:textColorPrimary">@color/black</item>
+    </style>
+    <style name="HeaderDividerCustom" parent="Widget.Material3.MaterialCalendar.HeaderDivider">
+        <item name="android:background">@color/white</item>
+        <item name="android:layout_height">1dp</item>
+    </style>
+    <style name="HeaderLayoutCustom" parent="Widget.Material3.MaterialCalendar.HeaderLayout">
+        <item name="android:background">@color/green_primary</item>
+        <item name="android:paddingTop">24dp</item>
+        <item name="android:paddingBottom">16dp</item>
+        <item name="android:paddingStart">24dp</item>
+        <item name="android:paddingEnd">24dp</item>
+    </style>
+    <style name="HeaderSelectionCustom" parent="Widget.Material3.MaterialCalendar.HeaderSelection">
+        <item name="android:textSize">32sp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:gravity">start</item>
+        <item name="android:textAlignment">textStart</item>
+        <item name="android:layout_width">match_parent</item>
+    </style>
+    <style name="HeaderTitleCustom" parent="Widget.Material3.MaterialCalendar.HeaderTitle">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:gravity">start</item>
+        <item name="android:textAlignment">textStart</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_marginBottom">8dp</item>
+    </style>
+    <style name="ShapeAppearance.App.LargeComponent" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/radius_xl</item>
+    </style>
+    <style name="ShapeAppearance.App.MediumComponent" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/radius_lg</item>
+    </style>
+    <style name="ShapeAppearance.App.SmallComponent" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">40%</item>
+    </style>
+    <style name="TaxonomyLabelStyle" parent="Widget.App.Taxonomy.Label"/>
+    <style name="TaxonomyValueStyle" parent="Widget.App.Taxonomy.Value"/>
+    <style name="TextAppearance.App" parent="TextAppearance.App.Body1"/>
+    <style name="TextAppearance.App.Body1">
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:lineSpacingExtra">6dp</item>
+    </style>
+    <style name="TextAppearance.App.Body2">
+        <item name="android:textSize">@dimen/text_body_small</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:lineSpacingExtra">4dp</item>
+    </style>
+    <style name="TextAppearance.App.BottomNav" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:textSize">@dimen/text_caption</item>
+    </style>
+    <style name="TextAppearance.App.BottomNav.Active">
+        <item name="android:textStyle">bold</item>
+        <item name="fontFamily">sans-serif-medium</item>
+    </style>
+    <style name="TextAppearance.App.Button" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:textStyle">bold</item>
+        <item name="fontFamily">sans-serif-medium</item>
+    </style>
+    <style name="TextAppearance.App.Caption">
+        <item name="android:textSize">@dimen/text_caption</item>
+        <item name="android:textColor">@color/text_tertiary</item>
+    </style>
+    <style name="TextAppearance.App.Display" parent="TextAppearance.Material3.DisplaySmall">
+        <item name="android:textSize">@dimen/text_display</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="fontFamily">sans-serif-medium</item>
+    </style>
+    <style name="TextAppearance.App.Headline1">
+        <item name="android:textSize">@dimen/text_h1</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="TextAppearance.App.Headline2">
+        <item name="android:textSize">@dimen/text_h2</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="TextAppearance.App.Headline3">
+        <item name="android:textSize">@dimen/text_h3</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="TextAppearance.App.Label">
+        <item name="android:textSize">@dimen/text_label</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+    <style name="TextAppearance.EcoLens.BottomNav.Active" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+    <style name="TextAppearance.EcoLens.BottomNav.Inactive" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+    <style name="Theme.EcoLens" parent="Base.Theme.EcoLens"/>
+    <style name="Widget.App" parent="@android:style/Widget"/>
+    <style name="Widget.App.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="itemIconTint">@color/bottom_nav_selector</item>
+        <item name="itemTextColor">@color/bottom_nav_selector</item>
+        <item name="labelVisibilityMode">labeled</item>
+        <item name="android:background">@color/nav_background</item>
+        <item name="android:textSize">10sp</item>
+        <item name="elevation">@dimen/bottom_nav_elevation</item>
+        <item name="itemIconSize">@dimen/bottom_nav_icon_size</item>
+        <item name="android:paddingTop">5dp</item>
+
+    </style>
+    <style name="Widget.App.Button" parent="Widget.Material3.Button">
+        <item name="cornerRadius">@dimen/radius_button</item>
+        <item name="android:paddingStart">@dimen/padding_button_horizontal</item>
+        <item name="android:paddingEnd">@dimen/padding_button_horizontal</item>
+        <item name="android:paddingTop">@dimen/padding_button_vertical</item>
+        <item name="android:paddingBottom">@dimen/padding_button_vertical</item>
+        <item name="android:textAppearance">@style/TextAppearance.App.Button</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="elevation">@dimen/elevation_none</item>
+    </style>
+    <style name="Widget.App.Button.Outlined" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="cornerRadius">@dimen/radius_button</item>
+        <item name="strokeWidth">@dimen/border_normal</item>
+        <item name="strokeColor">@color/primary</item>
+    </style>
+    <style name="Widget.App.Button.Text" parent="Widget.Material3.Button.TextButton">
+        <item name="cornerRadius">@dimen/radius_button</item>
+    </style>
+    <style name="Widget.App.Card" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">@dimen/radius_card</item>
+        <item name="cardElevation">@dimen/elevation_none</item>
+        <item name="strokeWidth">@dimen/border_normal</item>
+        <item name="strokeColor">@color/border_normal</item>
+        <item name="cardBackgroundColor">@color/surface</item>
+    </style>
+    <style name="Widget.App.Card.Elevated" parent="Widget.App.Card">
+        <item name="cardElevation">@dimen/elevation_sm</item>
+        <item name="strokeWidth">0dp</item>
+    </style>
+    <style name="Widget.App.Card.Outlined" parent="Widget.App.Card">
+        <item name="cardElevation">@dimen/elevation_none</item>
+    </style>
+    <style name="Widget.App.Chip" parent="Widget.Material3.Chip.Suggestion">
+        <item name="chipCornerRadius">@dimen/radius_chip</item>
+        <item name="chipBackgroundColor">@color/surface_variant</item>
+        <item name="chipStrokeWidth">0dp</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">@dimen/text_caption</item>
+    </style>
+    <style name="Widget.App.Chip.Primary" parent="Widget.App.Chip">
+        <item name="chipBackgroundColor">@color/success_bg</item>
+        <item name="android:textColor">@color/success_text</item>
+    </style>
+    <style name="Widget.App.Divider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/divider_normal</item>
+        <item name="android:background">@color/border_light</item>
+    </style>
+    <style name="Widget.App.FloatingActionButton" parent="Widget.Material3.FloatingActionButton.Primary">
+        <item name="elevation">@dimen/elevation_lg</item>
+        <item name="pressedTranslationZ">@dimen/elevation_xl</item>
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.App.SmallComponent</item>
+        <item name="tint">@color/on_primary</item>
+        <item name="backgroundTint">@color/primary</item>
+    </style>
+    <style name="Widget.App.Taxonomy">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+    <style name="Widget.App.Taxonomy.Label">
+        <item name="android:textSize">@dimen/text_body_small</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginBottom">@dimen/spacing_xs</item>
+    </style>
+    <style name="Widget.App.Taxonomy.Value">
+        <item name="android:textSize">@dimen/text_body_small</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginBottom">@dimen/spacing_xs</item>
+    </style>
+    <style name="Widget.App.TextInputEditText" parent="Widget.Material3.TextInputEditText.OutlinedBox">
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+    <style name="Widget.App.TextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusTopStart">@dimen/radius_input</item>
+        <item name="boxCornerRadiusTopEnd">@dimen/radius_input</item>
+        <item name="boxCornerRadiusBottomStart">@dimen/radius_input</item>
+        <item name="boxCornerRadiusBottomEnd">@dimen/radius_input</item>
+        <item name="boxStrokeWidth">@dimen/border_normal</item>
+        <item name="boxStrokeColor">@color/border_strong</item>
+        <item name="hintTextColor">@color/text_tertiary</item>
+    </style>
+    <style name="Widget.EcoLens.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">
+        <item name="itemIconTint">@color/bottom_nav_selector</item>
+        <item name="itemTextColor">@color/bottom_nav_selector</item>
+        <item name="itemTextAppearanceActive">@style/TextAppearance.EcoLens.BottomNav.Active</item>
+        <item name="itemTextAppearanceInactive">@style/TextAppearance.EcoLens.BottomNav.Inactive</item>
+        <item name="labelVisibilityMode">labeled</item>
+        <item name="android:background">@android:color/white</item>
+        <item name="elevation">8dp</item>
+    </style>
+    <style name="Widget.EcoLens.CardView" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">20dp</item>
+        <item name="cardElevation">4dp</item>
+        <item name="cardBackgroundColor">@android:color/white</item>
+    </style>
+    <style name="Widget.EcoLens.FloatingActionButton" parent="Widget.Material3.FloatingActionButton.Primary">
+        <item name="tint">@android:color/white</item>
+        <item name="elevation">6dp</item>
+    </style>
+</resources>
