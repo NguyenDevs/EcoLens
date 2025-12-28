@@ -2,9 +2,6 @@ package com.nguyendevs.ecolens.managers
 
 import android.app.Application
 import android.net.Uri
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
 import com.google.gson.Gson
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.database.HistoryDao
@@ -12,11 +9,9 @@ import com.nguyendevs.ecolens.model.*
 import com.nguyendevs.ecolens.network.RetrofitClient
 import com.nguyendevs.ecolens.utils.ImageUtils
 import kotlinx.coroutines.*
-import kotlinx.coroutines.tasks.await
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
-import java.io.File
 
 class SpeciesIdentificationManager(
     private val application: Application,
@@ -25,9 +20,6 @@ class SpeciesIdentificationManager(
     private val apiService = RetrofitClient.iNaturalistApi
     private val gson = Gson()
     private val streamingHelper = GeminiStreamingHelper(apiService, gson)
-    private val auth = FirebaseAuth.getInstance()
-    private val firestore = FirebaseFirestore.getInstance()
-    private val storage = FirebaseStorage.getInstance()
 
     var currentImageUri: Uri? = null
     var currentHistoryEntryId: Int? = null
@@ -151,10 +143,7 @@ class SpeciesIdentificationManager(
                 }
 
                 if (savedPath != null) {
-                    val timestamp = System.currentTimeMillis()
-                    val userId = auth.currentUser?.uid
-                    
-                    val entry = if (existingHistoryId != null) {
+                    if (existingHistoryId != null) {
                         historyDao.updateSpeciesDetails(
                             id = existingHistoryId,
                             commonName = currentInfo.commonName,
@@ -172,37 +161,16 @@ class SpeciesIdentificationManager(
                             habitat = currentInfo.habitat,
                             conservationStatus = currentInfo.conservationStatus,
                             confidence = currentInfo.confidence,
-                            timestamp = timestamp
+                            timestamp = System.currentTimeMillis()
                         )
                         currentHistoryEntryId = existingHistoryId
-                        historyDao.getHistoryById(existingHistoryId)
                     } else {
                         val newId = historyDao.insert(HistoryEntry(
                             imagePath = savedPath,
                             speciesInfo = currentInfo,
-                            timestamp = timestamp,
-                            userId = userId
+                            timestamp = System.currentTimeMillis()
                         ))
                         currentHistoryEntryId = newId.toInt()
-                        historyDao.getHistoryById(newId.toInt())
-                    }
-
-                    // Sync to Firebase if user is logged in
-                    if (userId != null && entry != null) {
-                        try {
-                            // Upload image to Firebase Storage
-                            val storageRef = storage.reference.child("users/$userId/history/${imageFile.name}")
-                            storageRef.putFile(Uri.fromFile(imageFile)).await()
-                            val downloadUrl = storageRef.downloadUrl.await().toString()
-
-                            // Save entry to Firestore
-                            val entryToSave = entry.copy(imagePath = downloadUrl)
-                            firestore.collection("users").document(userId)
-                                .collection("history").document(timestamp.toString())
-                                .set(entryToSave).await()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
                     }
                 }
             }

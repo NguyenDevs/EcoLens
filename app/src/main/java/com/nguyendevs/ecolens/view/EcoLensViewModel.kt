@@ -30,10 +30,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     val isStreamingActive: StateFlow<Boolean> = chatManager.isStreamingActive
     val allChatSessions: Flow<List<ChatSession>> = chatManager.allChatSessions
 
-    init {
-        syncHistory()
-    }
-
     // ==================== SPECIES IDENTIFICATION ====================
 
     fun identifySpecies(imageUri: Uri, languageCode: String, existingHistoryId: Int? = null) {
@@ -112,12 +108,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     fun deleteAllHistory() {
         viewModelScope.launch {
             historyManager.deleteAllHistory()
-        }
-    }
-
-    fun syncHistory() {
-        viewModelScope.launch {
-            historyManager.syncFromFirebase()
         }
     }
 }

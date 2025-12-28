@@ -20,28 +20,24 @@ interface HistoryDao {
     // --- GET (READ) ---
 
     // Lấy tất cả lịch sử sắp xếp từ mới nhất đến cũ nhất
-    @Query("SELECT * FROM history_table WHERE userId = :userId OR userId IS NULL ORDER BY timestamp DESC")
-    fun getAllHistoryNewestFirst(userId: String?): Flow<List<HistoryEntry>>
+    @Query("SELECT * FROM history_table ORDER BY timestamp DESC")
+    fun getAllHistoryNewestFirst(): Flow<List<HistoryEntry>>
 
     // Lấy tất cả lịch sử sắp xếp từ cũ nhất đến mới nhất
-    @Query("SELECT * FROM history_table WHERE userId = :userId OR userId IS NULL ORDER BY timestamp ASC")
-    fun getAllHistoryOldestFirst(userId: String?): Flow<List<HistoryEntry>>
+    @Query("SELECT * FROM history_table ORDER BY timestamp ASC")
+    fun getAllHistoryOldestFirst(): Flow<List<HistoryEntry>>
 
     // Lấy một entry theo ID
     @Query("SELECT * FROM history_table WHERE id = :id LIMIT 1")
     suspend fun getHistoryById(id: Int): HistoryEntry?
 
-    // Lấy một entry theo timestamp
-    @Query("SELECT * FROM history_table WHERE timestamp = :timestamp LIMIT 1")
-    suspend fun getHistoryByTimestamp(timestamp: Long): HistoryEntry?
-
     // Lấy lịch sử theo khoảng thời gian, sắp xếp từ mới nhất
-    @Query("SELECT * FROM history_table WHERE (userId = :userId OR userId IS NULL) AND timestamp BETWEEN :startDate AND :endDate ORDER BY timestamp DESC")
-    fun getHistoryByDateRangeNewest(userId: String?, startDate: Long, endDate: Long): Flow<List<HistoryEntry>>
+    @Query("SELECT * FROM history_table WHERE timestamp BETWEEN :startDate AND :endDate ORDER BY timestamp DESC")
+    fun getHistoryByDateRangeNewest(startDate: Long, endDate: Long): Flow<List<HistoryEntry>>
 
     // Lấy lịch sử theo khoảng thời gian, sắp xếp từ cũ nhất
-    @Query("SELECT * FROM history_table WHERE (userId = :userId OR userId IS NULL) AND timestamp BETWEEN :startDate AND :endDate ORDER BY timestamp ASC")
-    fun getHistoryByDateRangeOldest(userId: String?, startDate: Long, endDate: Long): Flow<List<HistoryEntry>>
+    @Query("SELECT * FROM history_table WHERE timestamp BETWEEN :startDate AND :endDate ORDER BY timestamp ASC")
+    fun getHistoryByDateRangeOldest(startDate: Long, endDate: Long): Flow<List<HistoryEntry>>
 
     // --- UPDATE ---
 
@@ -93,6 +89,6 @@ interface HistoryDao {
     // --- DELETE ---
 
     // Xóa tất cả lịch sử
-    @Query("DELETE FROM history_table WHERE userId = :userId OR userId IS NULL")
-    suspend fun deleteAll(userId: String?)
+    @Query("DELETE FROM history_table")
+    suspend fun deleteAll()
 }
