@@ -1,57 +1,41 @@
 package com.nguyendevs.ecolens.activities
 
-import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
+import android.media.MediaScannerConnection
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.util.Log
+import android.view.ScaleGestureDetector
+import android.view.MotionEvent
+import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
+import android.widget.ImageView
 import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageCapture
-import androidx.camera.core.ImageCaptureException
-import androidx.camera.core.Preview
+import androidx.appcompat.app.AppCompatActivity
+import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Cameraswitch
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.FlashOff
-import androidx.compose.material.icons.filled.FlashOn
-import androidx.compose.material.icons.filled.PhotoLibrary
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.nguyendevs.ecolens.R
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
-class CameraActivity : ComponentActivity() {
-
-    private lateinit var outputDirectory: File
-    private lateinit var cameraExecutor: ExecutorService
+class CameraActivity : AppCompatActivity() {
 
     companion object {
         private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
@@ -62,33 +46,315 @@ class CameraActivity : ComponentActivity() {
         }
     }
 
+    private lateinit var cameraExecutor: ExecutorService
+    private lateinit var closeButton: ImageView
+    private lateinit var flashToggle: ImageView
+    private lateinit var outputDirectory: File
+    private lateinit var rotateButton: ImageView
+    private lateinit var uploadButton: ImageView
+    private lateinit var viewFinder: PreviewView
+    private lateinit var captureButton: ImageView
+    private lateinit var captureBorder: ImageView
+    private lateinit var focusIndicator: ImageView
+
+    private lateinit var captureBorderAnimated: ImageView
+    private var rotateAnimation: Animation? = null
+
+    private var camera: Camera? = null
+    private var imageCapture: ImageCapture? = null
+    private var lensFacing = CameraSelector.LENS_FACING_BACK
+    private var cameraControl: CameraControl? = null
+    private var cameraInfo: CameraInfo? = null
+
+    private val selectImageFromGalleryResult = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            val resultIntent = Intent().apply {
+                data = it
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                putExtra(KEY_IMAGE_URI, it.toString())
+
+            }
+            setResult(RESULT_OK, resultIntent)
+            finish()
+            overridePendingTransition(R.anim.hold, R.anim.slide_out_bottom)
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        outputDirectory = getOutputDirectory()
-        cameraExecutor = Executors.newSingleThreadExecutor()
+        setContentView(R.layout.activity_camera_modern)
 
-        setContent {
-            CameraScreen(
-                outputDirectory = outputDirectory,
-                executor = cameraExecutor,
-                onImageCaptured = { uri ->
-                    val resultIntent = Intent().apply {
-                        putExtra(KEY_IMAGE_URI, uri.toString())
-                    }
-                    setResult(RESULT_OK, resultIntent)
-                    finish()
-                },
-                onError = { exc ->
-                    Log.e("CameraActivity", "Photo capture failed: ${exc.message}", exc)
-                },
-                onClose = { finish() }
-            )
+        viewFinder = findViewById(R.id.viewFinder)
+        closeButton = findViewById(R.id.closeButton)
+        captureButton = findViewById(R.id.captureButton)
+        focusIndicator = findViewById(R.id.focusIndicator)
+        cameraExecutor = Executors.newSingleThreadExecutor()
+        outputDirectory = getOutputDirectory()
+        uploadButton = findViewById(R.id.uploadButton)
+        flashToggle = findViewById(R.id.flashToggle)
+        rotateButton = findViewById(R.id.refreshButton)
+
+        startCamera()
+        captureBorderAnimated = findViewById(R.id.captureBorderAnimated)
+        setupZoomAndFocus()
+        startBorderAnimation()
+        captureButton.setOnClickListener {
+            performHapticFeedback()
+            animateCaptureButton()
+            takePhoto()
         }
+
+        closeButton.setOnClickListener {
+            finish()
+            overridePendingTransition(R.anim.hold, R.anim.slide_out_bottom)
+        }
+
+        uploadButton.setOnClickListener {
+            openGallery()
+        }
+
+        rotateButton.setOnClickListener {
+            val rotateOnce = AnimationUtils.loadAnimation(this, R.anim.rotate_once)
+            rotateButton.startAnimation(rotateOnce)
+            lensFacing = if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
+                CameraSelector.LENS_FACING_BACK
+            } else {
+                CameraSelector.LENS_FACING_FRONT
+            }
+            startCamera()
+        }
+
+        flashToggle.setOnClickListener {
+            toggleFlash()
+        }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        finish()
+        overridePendingTransition(R.anim.hold, R.anim.slide_out_bottom)
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        finish()
+        return true
     }
 
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()
+        stopBorderAnimation()
+    }
+
+    private fun openGallery() {
+        selectImageFromGalleryResult.launch("image/*")
+    }
+
+    private fun startCamera() {
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
+
+        cameraProviderFuture.addListener({
+            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+
+            val preview = Preview.Builder()
+                .build()
+                .also {
+                    it.setSurfaceProvider(viewFinder.surfaceProvider)
+                }
+
+            imageCapture = ImageCapture.Builder()
+                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                .setFlashMode(ImageCapture.FLASH_MODE_OFF)
+                .build()
+
+            updateFlashIcon(ImageCapture.FLASH_MODE_OFF)
+
+            val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
+
+            try {
+                cameraProvider.unbindAll()
+                camera = cameraProvider.bindToLifecycle(
+                    this, cameraSelector, preview, imageCapture
+                )
+                cameraControl = camera?.cameraControl
+                cameraInfo = camera?.cameraInfo
+
+                if (camera?.cameraInfo?.hasFlashUnit() == true) {
+                    flashToggle.visibility = View.VISIBLE
+                } else {
+                    flashToggle.visibility = View.GONE
+                }
+
+            } catch (exc: Exception) {
+                if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
+                    Toast.makeText(this, getString(R.string.error_camera_front), Toast.LENGTH_SHORT).show()
+                    lensFacing = CameraSelector.LENS_FACING_BACK
+                    startCamera()
+                } else {
+                    Toast.makeText(this, getString(R.string.error_camera_open, exc.message), Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+            }
+
+        }, ContextCompat.getMainExecutor(this))
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setupZoomAndFocus() {
+        val listener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            override fun onScale(detector: ScaleGestureDetector): Boolean {
+                val currentZoomRatio = cameraInfo?.zoomState?.value?.zoomRatio ?: 1f
+                val delta = detector.scaleFactor
+                cameraControl?.setZoomRatio(currentZoomRatio * delta)
+                return true
+            }
+        }
+
+        val scaleGestureDetector = ScaleGestureDetector(this, listener)
+
+        viewFinder.setOnTouchListener { _, event ->
+            scaleGestureDetector.onTouchEvent(event)
+            if (event.action == MotionEvent.ACTION_UP) {
+                val factory = viewFinder.meteringPointFactory
+                val point = factory.createPoint(event.x, event.y)
+                val action = FocusMeteringAction.Builder(point, FocusMeteringAction.FLAG_AF)
+                    .setAutoCancelDuration(3, TimeUnit.SECONDS)
+                    .build()
+                cameraControl?.startFocusAndMetering(action)
+
+                showFocusIndicator(event.x, event.y)
+            }
+            true
+        }
+    }
+
+    private fun showFocusIndicator(x: Float, y: Float) {
+        focusIndicator.animate().cancel()
+
+        focusIndicator.x = x - (focusIndicator.width / 2)
+        focusIndicator.y = y - (focusIndicator.height / 2) + viewFinder.top
+
+        focusIndicator.visibility = View.VISIBLE
+        focusIndicator.alpha = 1f
+        focusIndicator.scaleX = 1.3f
+        focusIndicator.scaleY = 1.3f
+
+        focusIndicator.animate()
+            .scaleX(1f)
+            .scaleY(1f)
+            .setDuration(300)
+            .setInterpolator(AccelerateDecelerateInterpolator())
+            .withEndAction {
+                focusIndicator.animate()
+                    .alpha(0f)
+                    .setStartDelay(500)
+                    .setDuration(300)
+                    .withEndAction {
+                        focusIndicator.visibility = View.INVISIBLE
+                    }
+                    .start()
+            }
+            .start()
+    }
+
+    private fun performHapticFeedback() {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                val vibrator = vibratorManager.defaultVibrator
+                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                @Suppress("DEPRECATION")
+                val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+                } else {
+                    @Suppress("DEPRECATION")
+                    vibrator.vibrate(50)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("CameraActivity", "Vibration failed: ${e.message}")
+        }
+    }
+
+    private fun animateCaptureButton() {
+        captureButton.animate()
+            .scaleX(0.85f)
+            .scaleY(0.85f)
+            .setDuration(100)
+            .withEndAction {
+                captureButton.animate()
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .setDuration(100)
+                    .start()
+            }
+            .start()
+    }
+
+    private fun toggleFlash() {
+        val imageCapture = imageCapture ?: return
+        val currentMode = imageCapture.flashMode
+        val newMode = when (currentMode) {
+            ImageCapture.FLASH_MODE_OFF -> ImageCapture.FLASH_MODE_ON
+            ImageCapture.FLASH_MODE_ON -> ImageCapture.FLASH_MODE_OFF
+            else -> ImageCapture.FLASH_MODE_OFF
+        }
+
+        imageCapture.flashMode = newMode
+        updateFlashIcon(newMode)
+    }
+
+    private fun updateFlashIcon(mode: Int) {
+        val iconRes = when (mode) {
+            ImageCapture.FLASH_MODE_ON -> R.drawable.ic_lightning
+            else -> R.drawable.ic_lightning_off
+        }
+        flashToggle.setImageResource(iconRes)
+    }
+
+    private fun takePhoto() {
+        val imageCapture = imageCapture ?: return
+
+        val photoFile = File(
+            outputDirectory,
+            SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis()) + ".jpg"
+        )
+
+        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+
+        imageCapture.takePicture(
+            outputOptions, ContextCompat.getMainExecutor(this), object : ImageCapture.OnImageSavedCallback {
+                override fun onError(exc: ImageCaptureException) {
+                    Log.e("CameraActivity", "Photo capture failed: ${exc.message}", exc)
+                    Toast.makeText(baseContext, getString(R.string.error_capture, exc.message), Toast.LENGTH_SHORT).show()
+                }
+
+                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                    MediaScannerConnection.scanFile(
+                        this@CameraActivity,
+                        arrayOf(photoFile.absolutePath),
+                        null,
+                        null
+                    )
+
+                    val savedUri = FileProvider.getUriForFile(
+                        this@CameraActivity,
+                        "${applicationContext.packageName}.provider",
+                        photoFile
+                    )
+
+                    val resultIntent = Intent().apply {
+                        putExtra(KEY_IMAGE_URI, savedUri.toString())
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+                    setResult(RESULT_OK, resultIntent)
+                    finish()
+                    overridePendingTransition(R.anim.hold, R.anim.slide_out_bottom)
+                }
+            })
     }
 
     private fun getOutputDirectory(): File {
@@ -97,139 +363,16 @@ class CameraActivity : ComponentActivity() {
         }
         return if (mediaDir != null && mediaDir.exists()) mediaDir else cacheDir
     }
-}
 
-@Composable
-fun CameraScreen(
-    outputDirectory: File,
-    executor: ExecutorService,
-    onImageCaptured: (Uri) -> Unit,
-    onError: (ImageCaptureException) -> Unit,
-    onClose: () -> Unit
-) {
-    val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-    
-    var lensFacing by remember { mutableStateOf(CameraSelector.LENS_FACING_BACK) }
-    var flashMode by remember { mutableStateOf(ImageCapture.FLASH_MODE_OFF) }
-    val imageCapture = remember { ImageCapture.Builder().build() }
-    val previewView = remember { PreviewView(context) }
-
-    val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        if (uri != null) {
-            onImageCaptured(uri)
-        }
+    private fun startBorderAnimation() {
+        rotateAnimation = AnimationUtils.loadAnimation(this, R.anim.rotate_infinite)
+        captureBorderAnimated.visibility = View.VISIBLE
+        captureBorderAnimated.startAnimation(rotateAnimation)
     }
 
-    LaunchedEffect(lensFacing, flashMode) {
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
-        cameraProviderFuture.addListener({
-            val cameraProvider = cameraProviderFuture.get()
-            val preview = Preview.Builder().build().also {
-                it.setSurfaceProvider(previewView.surfaceProvider)
-            }
-            
-            imageCapture.flashMode = flashMode
-
-            val cameraSelector = CameraSelector.Builder()
-                .requireLensFacing(lensFacing)
-                .build()
-
-            try {
-                cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(
-                    lifecycleOwner,
-                    cameraSelector,
-                    preview,
-                    imageCapture
-                )
-            } catch (exc: Exception) {
-                Log.e("CameraScreen", "Use case binding failed", exc)
-            }
-        }, ContextCompat.getMainExecutor(context))
-    }
-
-    Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-        AndroidView(
-            factory = { previewView },
-            modifier = Modifier.fillMaxSize()
-        )
-
-        // Top Controls
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .align(Alignment.TopCenter),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            IconButton(onClick = onClose) {
-                Icon(Icons.Filled.Close, contentDescription = "Close", tint = Color.White)
-            }
-            
-            IconButton(onClick = {
-                flashMode = if (flashMode == ImageCapture.FLASH_MODE_OFF) ImageCapture.FLASH_MODE_ON else ImageCapture.FLASH_MODE_OFF
-            }) {
-                Icon(
-                    if (flashMode == ImageCapture.FLASH_MODE_ON) Icons.Filled.FlashOn else Icons.Filled.FlashOff,
-                    contentDescription = "Flash",
-                    tint = Color.White
-                )
-            }
-        }
-
-        // Bottom Controls
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(32.dp)
-                .align(Alignment.BottomCenter),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = { galleryLauncher.launch("image/*") }) {
-                Icon(Icons.Filled.PhotoLibrary, contentDescription = "Gallery", tint = Color.White, modifier = Modifier.size(32.dp))
-            }
-
-            // Capture Button
-            Box(
-                modifier = Modifier
-                    .size(80.dp)
-                    .border(4.dp, Color.White, CircleShape)
-                    .padding(8.dp)
-                    .background(Color.White, CircleShape)
-                    .clickable {
-                        val photoFile = File(
-                            outputDirectory,
-                            SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US).format(System.currentTimeMillis()) + ".jpg"
-                        )
-
-                        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
-
-                        imageCapture.takePicture(
-                            outputOptions,
-                            executor,
-                            object : ImageCapture.OnImageSavedCallback {
-                                override fun onError(exc: ImageCaptureException) {
-                                    onError(exc)
-                                }
-
-                                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                                    val savedUri = Uri.fromFile(photoFile)
-                                    onImageCaptured(savedUri)
-                                }
-                            }
-                        )
-                    }
-            )
-
-            IconButton(onClick = {
-                lensFacing = if (lensFacing == CameraSelector.LENS_FACING_BACK) CameraSelector.LENS_FACING_FRONT else CameraSelector.LENS_FACING_BACK
-            }) {
-                Icon(Icons.Filled.Cameraswitch, contentDescription = "Switch Camera", tint = Color.White, modifier = Modifier.size(32.dp))
-            }
-        }
+    private fun stopBorderAnimation() {
+        rotateAnimation?.cancel()
+        captureBorderAnimated.clearAnimation()
+        captureBorderAnimated.visibility = View.GONE
     }
 }
