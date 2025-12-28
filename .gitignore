@@ -73,5 +73,3 @@ gradle.properties
 node_modules/
 .wrangler/
 dist/
-package-lock.json
-yarn.lock
