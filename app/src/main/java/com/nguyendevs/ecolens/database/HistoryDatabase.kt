@@ -9,7 +9,7 @@ import com.nguyendevs.ecolens.model.ChatMessage
 import com.nguyendevs.ecolens.model.ChatSession
 import com.nguyendevs.ecolens.model.HistoryEntry
 
-@Database(entities = [HistoryEntry::class, ChatSession::class, ChatMessage::class], version = 3, exportSchema = false)
+@Database(entities = [HistoryEntry::class, ChatSession::class, ChatMessage::class], version = 4, exportSchema = false)
 @TypeConverters(HistoryTypeConverters::class)
 abstract class HistoryDatabase : RoomDatabase() {
 

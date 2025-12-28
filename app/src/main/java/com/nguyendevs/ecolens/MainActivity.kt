@@ -2,6 +2,7 @@ package com.nguyendevs.ecolens
 
 import android.animation.ValueAnimator
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.MotionEvent
@@ -22,6 +23,8 @@ import com.bumptech.glide.Glide
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.auth.FirebaseAuth
+import com.nguyendevs.ecolens.activities.AuthActivity
 import com.nguyendevs.ecolens.activities.CameraActivity
 import com.nguyendevs.ecolens.fragments.ChatHistoryFragment
 import com.nguyendevs.ecolens.fragments.HistoryFragment
@@ -98,6 +101,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (FirebaseAuth.getInstance().currentUser == null) {
+            startActivity(Intent(this, AuthActivity::class.java))
+            finish()
+            return
+        }
+
         setContentView(R.layout.activity_main_modern)
 
         initViews()

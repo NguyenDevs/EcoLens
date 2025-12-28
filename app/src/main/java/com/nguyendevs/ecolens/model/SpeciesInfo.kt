@@ -16,4 +16,7 @@ data class SpeciesInfo(
     val habitat: String = "",
     val conservationStatus: String = "",
     val confidence: Double = 0.0
-)
+) {
+    // No-argument constructor for Firebase
+    constructor() : this("", "", "", "", "", "", "", "", "", "", "", "", "", "", 0.0)
+}

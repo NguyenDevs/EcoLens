@@ -36,6 +36,12 @@
                 android:name=".MainActivity"
                 android:exported="true"
                 android:theme="@style/Theme.EcoLens">
+        </activity>
+
+        <activity
+                android:name=".activities.AuthActivity"
+                android:exported="true"
+                android:theme="@style/Theme.EcoLens">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

@@ -7,8 +7,12 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "history_table")
 data class HistoryEntry(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val imagePath: String,
-    @Embedded val speciesInfo: SpeciesInfo,
-    val timestamp: Long,
-    val isFavorite: Boolean = false
-)
+    val imagePath: String = "",
+    @Embedded val speciesInfo: SpeciesInfo = SpeciesInfo(),
+    val timestamp: Long = 0,
+    val isFavorite: Boolean = false,
+    val userId: String? = null
+) {
+    // No-argument constructor for Firebase
+    constructor() : this(0, "", SpeciesInfo(), 0, false, null)
+}
