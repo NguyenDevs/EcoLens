@@ -17,11 +17,22 @@ class LoadingAnimationHandler(
 ) {
 
     private var loadingTextJob: Job? = null
+    private var currentTextResId: Int = com.nguyendevs.ecolens.R.string.analyzing_text
+
+    fun setText(resId: Int) {
+        if (currentTextResId != resId) {
+            currentTextResId = resId
+            if (loadingTextJob?.isActive == true) {
+                stop()
+                start()
+            }
+        }
+    }
 
     fun start() {
         if (loadingTextJob?.isActive == true) return
         loadingTextJob = coroutineScope.launch {
-            val baseText = tvLoading.context.getString(com.nguyendevs.ecolens.R.string.analyzing_text)
+            val baseText = tvLoading.context.getString(currentTextResId)
             val dots = "..."
             val fullText = "$baseText$dots"
 

@@ -430,7 +430,20 @@ class MainActivity : AppCompatActivity() {
 
         if (isLoading){
             stopLoadingJob?.cancel()
-            loadingAnimationHandler.start()
+
+            if (loadingStage == LoadingStage.TAXONOMY || loadingStage == LoadingStage.COMMON_NAME) {
+                loadingAnimationHandler.setText(R.string.analyzing_info)
+            } else if (loadingStage == LoadingStage.DESCRIPTION || loadingStage == LoadingStage.CHARACTERISTICS || loadingStage == LoadingStage.DISTRIBUTION || loadingStage == LoadingStage.HABITAT || loadingStage == LoadingStage.CONSERVATION) {
+                loadingAnimationHandler.stop()
+                loadingOverlay.isVisible = false
+                loadingCard.isVisible = false
+            } else {
+                loadingAnimationHandler.setText(R.string.analyzing_text)
+            }
+            
+            if (loadingOverlay.isVisible) {
+                loadingAnimationHandler.start()
+            }
         }
         else {
             stopLoadingJob?.cancel()
