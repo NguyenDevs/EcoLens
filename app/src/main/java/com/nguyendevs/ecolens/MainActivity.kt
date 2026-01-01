@@ -423,32 +423,39 @@ class MainActivity : AppCompatActivity() {
         val isLoading = state.isLoading
         val error = state.error
         val loadingStage = state.loadingStage
+
+        val isPhase2 = loadingStage == LoadingStage.DESCRIPTION ||
+                loadingStage == LoadingStage.CHARACTERISTICS ||
+                loadingStage == LoadingStage.DISTRIBUTION ||
+                loadingStage == LoadingStage.HABITAT ||
+                loadingStage == LoadingStage.CONSERVATION
+
+        val showOverlay = isLoading && !isPhase2
+
         fabCamera.isClickable = !isLoading
         fabCamera.alpha = if (isLoading) 0.5f else 1.0f
-        loadingOverlay.isVisible = isLoading
-        loadingCard.isVisible = isLoading
 
-        if (isLoading){
+        loadingOverlay.isVisible = showOverlay
+        loadingCard.isVisible = showOverlay
+
+        if (showOverlay){
             stopLoadingJob?.cancel()
 
             if (loadingStage == LoadingStage.TAXONOMY || loadingStage == LoadingStage.COMMON_NAME) {
                 loadingAnimationHandler.setText(R.string.analyzing_info)
-            } else if (loadingStage == LoadingStage.DESCRIPTION || loadingStage == LoadingStage.CHARACTERISTICS || loadingStage == LoadingStage.DISTRIBUTION || loadingStage == LoadingStage.HABITAT || loadingStage == LoadingStage.CONSERVATION) {
-                loadingAnimationHandler.stop()
-                loadingOverlay.isVisible = false
-                loadingCard.isVisible = false
             } else {
                 loadingAnimationHandler.setText(R.string.analyzing_text)
             }
-            
-            if (loadingOverlay.isVisible) {
-                loadingAnimationHandler.start()
-            }
+
+            loadingAnimationHandler.start()
         }
         else {
-            stopLoadingJob?.cancel()
-            stopLoadingJob = coroutineScope {
-                launch {
+            if (isPhase2) {
+                stopLoadingJob?.cancel()
+                loadingAnimationHandler.stop()
+            } else {
+                stopLoadingJob?.cancel()
+                stopLoadingJob = lifecycleScope.launch {
                     delay(500)
                     loadingAnimationHandler.stop()
                 }
