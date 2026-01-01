@@ -441,7 +441,9 @@ class MainActivity : AppCompatActivity() {
         if (showOverlay){
             stopLoadingJob?.cancel()
 
-            if (loadingStage == LoadingStage.TAXONOMY || loadingStage == LoadingStage.COMMON_NAME) {
+            if (loadingStage == LoadingStage.SCIENTIFIC_NAME ||
+                loadingStage == LoadingStage.COMMON_NAME ||
+                loadingStage == LoadingStage.TAXONOMY) {
                 loadingAnimationHandler.setText(R.string.analyzing_info)
             } else {
                 loadingAnimationHandler.setText(R.string.analyzing_text)
