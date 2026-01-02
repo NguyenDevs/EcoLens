@@ -8,8 +8,6 @@
         android:background="@color/background"
         tools:context=".MainActivity">
 
-    <!-- MODERN ACTIVITY MAIN -->
-
     <!-- MAIN CONTENT CONTAINER -->
     <FrameLayout
             android:id="@+id/mainContent"
@@ -38,15 +36,9 @@
                 android:id="@+id/settingsContainer"
                 layout="@layout/screen_settings_modern"
                 android:visibility="gone"/>
-
-        <FrameLayout
-                android:id="@+id/fragment_container"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:elevation="10dp"/>
     </FrameLayout>
 
-    <!-- SEARCH BAR -->
+    <!-- SEARCH BAR - Moved outside mainContent so it's always accessible -->
     <com.google.android.material.card.MaterialCardView
             android:id="@+id/searchBarContainer"
             android:layout_width="50dp"
@@ -56,7 +48,8 @@
             android:layout_gravity="top|end"
             app:cardCornerRadius="@dimen/radius_full"
             app:cardElevation="@dimen/elevation_md"
-            app:cardBackgroundColor="@color/surface">
+            app:cardBackgroundColor="@color/surface"
+            android:elevation="20dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -233,7 +226,7 @@
                 android:contentDescription="@string/zoom_out"/>
     </FrameLayout>
 
-    <!-- FRAGMENT CONTAINER -->
+    <!-- FRAGMENT CONTAINER FOR DETAIL SCREENS -->
     <FrameLayout
             android:id="@+id/fragmentContainer"
             android:layout_width="match_parent"

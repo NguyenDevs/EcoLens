@@ -88,14 +88,17 @@ class CameraActivity : AppCompatActivity() {
         }
 
         binding.closeButton.setOnClickListener {
+            binding.closeButton.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
             closeCamera()
         }
 
         binding.uploadButton.setOnClickListener {
+            binding.uploadButton.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
             openGallery()
         }
 
         binding.refreshButton.setOnClickListener {
+            binding.refreshButton.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
             val rotateOnce = AnimationUtils.loadAnimation(this, R.anim.rotate_once)
             binding.refreshButton.startAnimation(rotateOnce)
             lensFacing = if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
@@ -107,6 +110,7 @@ class CameraActivity : AppCompatActivity() {
         }
 
         binding.flashToggle.setOnClickListener {
+            binding.flashToggle.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
             toggleFlash()
         }
     }
@@ -201,6 +205,7 @@ class CameraActivity : AppCompatActivity() {
         binding.viewFinder.setOnTouchListener { _, event ->
             scaleGestureDetector.onTouchEvent(event)
             if (event.action == MotionEvent.ACTION_UP) {
+                binding.viewFinder.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
                 val factory = binding.viewFinder.meteringPointFactory
                 val point = factory.createPoint(event.x, event.y)
                 val action = FocusMeteringAction.Builder(point, FocusMeteringAction.FLAG_AF)

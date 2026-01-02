@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.text.Html
 import android.util.TypedValue
 import android.view.LayoutInflater
+import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -111,6 +112,7 @@ class HistoryDetailFragment : Fragment() {
 
     private fun setupShareButton(info: SpeciesInfo, imagePath: String?) {
         binding.btnShareInfo.setOnClickListener {
+            binding.btnShareInfo.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
             var imageUri: Uri? = null
             if (!imagePath.isNullOrEmpty()) {
                 val file = File(imagePath)

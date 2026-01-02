@@ -43,6 +43,7 @@ class ChatHistoryFragment : Fragment() {
 
     private fun setupRecyclerView() {
         adapter = ChatSessionAdapter(emptyList()) { session ->
+            binding.rvChatHistory.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
             openChatScreen(session.id)
         }
 
@@ -69,7 +70,7 @@ class ChatHistoryFragment : Fragment() {
 
     private fun setupFabListener() {
         binding.fabNewChat.setOnClickListener {
-            performHapticFeedback()
+            binding.fabNewChat.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
             openChatScreen(null)
         }
     }
@@ -82,10 +83,6 @@ class ChatHistoryFragment : Fragment() {
             .replace(R.id.fragmentContainer, fragment)
             .addToBackStack("chat_detail")
             .commit()
-    }
-
-    private fun performHapticFeedback() {
-        binding.root.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
     }
 
     override fun onDestroyView() {

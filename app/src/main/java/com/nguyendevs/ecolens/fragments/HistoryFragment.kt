@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.HapticFeedbackConstants
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -68,14 +69,20 @@ class HistoryFragment : Fragment() {
         adapter = HistoryAdapter(
             historyList = emptyList(),
             markwon = markwon,
-            clickListener = { entry -> navigateToDetail(entry) },
+            clickListener = { entry ->
+                binding.rvHistory.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+                navigateToDetail(entry)
+            },
             favoriteClickListener = { entry -> viewModel.toggleFavorite(entry) }
         )
         binding.rvHistory.adapter = adapter
     }
 
     private fun setupClickListeners() {
-        binding.optionsHeader.setOnClickListener { toggleOptionsExpansion() }
+        binding.optionsHeader.setOnClickListener {
+            binding.optionsHeader.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+            toggleOptionsExpansion()
+        }
         binding.btnSort.setOnClickListener { toggleSortOption() }
         binding.btnFilterByDate.setOnClickListener { showDateRangePickerDialog() }
         binding.btnClearFilter.setOnClickListener { clearDateFilter() }

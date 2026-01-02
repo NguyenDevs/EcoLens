@@ -122,15 +122,15 @@ class MainActivity : AppCompatActivity() {
 
         searchBarHandler = SearchBarHandler(
             this,
-            homeRoot.findViewById(R.id.searchBarContainer),
-            homeRoot.findViewById(R.id.textInputLayoutSearch),
-            homeRoot.findViewById(R.id.etSearchQuery),
-            homeRoot.findViewById(R.id.btnSearchAction)
+            binding.searchBarContainer,
+            binding.textInputLayoutSearch,
+            binding.etSearchQuery,
+            binding.btnSearchAction
         )
 
         imageZoomHandler = ImageZoomHandler(
             homeRoot.findViewById(R.id.btnZoomIn),
-            homeRoot.findViewById(R.id.btnZoomOut),
+            binding.btnZoomOut,
             binding.fullScreenContainer,
             binding.fullScreenImage
         )
@@ -194,7 +194,7 @@ class MainActivity : AppCompatActivity() {
         animateCardExpansion {
             val homeRoot = binding.homeContainer.root
             val imagePreview = homeRoot.findViewById<View>(R.id.imagePreview)
-            
+
             Glide.with(this).load(uri).centerCrop().into(imagePreview as android.widget.ImageView)
             imageZoomHandler.setImageUri(uri)
             viewModel.identifySpecies(uri, languageManager.getLanguage())
@@ -248,6 +248,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupBottomNavigation() {
         binding.bottomNavigation.setOnItemSelectedListener { item ->
+            binding.bottomNavigation.performHapticFeedback(android.view.HapticFeedbackConstants.CONFIRM)
             if (supportFragmentManager.backStackEntryCount > 0) {
                 supportFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
             }
@@ -272,9 +273,8 @@ class MainActivity : AppCompatActivity() {
         binding.myGardenContainer.visibility = View.GONE
         binding.settingsContainer.root.visibility = View.GONE
 
-        val homeRoot = binding.homeContainer.root
-        homeRoot.findViewById<View>(R.id.searchBarContainer).visibility = View.GONE
-        
+        binding.searchBarContainer.visibility = View.GONE
+
         binding.fabSpeak.visibility = View.GONE
         binding.fabMute.visibility = View.GONE
 
@@ -284,7 +284,7 @@ class MainActivity : AppCompatActivity() {
         when (itemId) {
             R.id.nav_home -> {
                 binding.homeContainer.root.visibility = View.VISIBLE
-                homeRoot.findViewById<View>(R.id.searchBarContainer).visibility = View.VISIBLE
+                binding.searchBarContainer.visibility = View.VISIBLE
 
                 val state = viewModel.uiState.value
                 val isComplete = state.loadingStage == LoadingStage.COMPLETE
@@ -318,6 +318,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupFAB() {
         binding.fabCamera.setOnClickListener {
+            binding.fabCamera.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
             if (speakerManager.isSpeaking()) {
                 speakerManager.pause()
                 toggleSpeakerUI(false)

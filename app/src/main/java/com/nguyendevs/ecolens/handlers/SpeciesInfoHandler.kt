@@ -14,6 +14,7 @@ import android.graphics.drawable.shapes.Shape
 import android.net.Uri
 import android.os.Build
 import android.text.Html
+import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.DecelerateInterpolator
@@ -693,6 +694,7 @@ class SpeciesInfoHandler(
 
     private fun setupShareButton(info: SpeciesInfo, imageUri: Uri?) {
         infoBinding.btnShareInfo.setOnClickListener {
+            infoBinding.btnShareInfo.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
             shareSpeciesInfo(info, imageUri)
         }
     }
