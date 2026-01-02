@@ -7,12 +7,12 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
+import androidx.fragment.app.Fragment
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.fragments.AboutFragment
 import com.nguyendevs.ecolens.fragments.LanguageSelectionFragment
 import com.nguyendevs.ecolens.managers.LanguageManager
-import androidx.fragment.app.Fragment
-import androidx.core.net.toUri
 
 class SettingsHandler(
     private val activity: AppCompatActivity,
@@ -34,9 +34,15 @@ class SettingsHandler(
         }
 
         settingsView.findViewById<View>(R.id.btnFeedback).setOnClickListener { sendEmail() }
-        settingsView.findViewById<View>(R.id.btnFacebook).setOnClickListener { openUrl("https://www.facebook.com/NguyenDevs") }
-        settingsView.findViewById<View>(R.id.btnInstagram).setOnClickListener { openUrl("https://www.instagram.com/nguyendevs/") }
-        settingsView.findViewById<View>(R.id.btnTiktok).setOnClickListener { openUrl("https://www.tiktok.com/@nguyendevs/") }
+        settingsView.findViewById<View>(R.id.btnFacebook).setOnClickListener {
+            openUrl("https://www.facebook.com/NguyenDevs")
+        }
+        settingsView.findViewById<View>(R.id.btnInstagram).setOnClickListener {
+            openUrl("https://www.instagram.com/nguyendevs/")
+        }
+        settingsView.findViewById<View>(R.id.btnTiktok).setOnClickListener {
+            openUrl("https://www.tiktok.com/@nguyendevs/")
+        }
     }
 
     fun updateLanguageDisplay() {
@@ -69,7 +75,11 @@ class SettingsHandler(
             val intent = Intent(Intent.ACTION_VIEW, url.toUri())
             activity.startActivity(intent)
         }.onFailure {
-            Toast.makeText(activity, "Không thể mở liên kết", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                activity,
+                activity.getString(R.string.error_open_link),
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
@@ -81,7 +91,11 @@ class SettingsHandler(
             }
             activity.startActivity(intent)
         }.onFailure {
-            Toast.makeText(activity, "Không tìm thấy ứng dụng Email", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                activity,
+                activity.getString(R.string.error_no_email_app),
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 }
