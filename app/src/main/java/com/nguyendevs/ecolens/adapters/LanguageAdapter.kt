@@ -3,49 +3,55 @@ package com.nguyendevs.ecolens.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.card.MaterialCardView
 import com.nguyendevs.ecolens.R
+import com.nguyendevs.ecolens.databinding.ItemLanguageModernBinding
 import com.nguyendevs.ecolens.model.Language
 
 class LanguageAdapter(
     private var languages: List<Language>,
     private val onLanguageClick: (Language) -> Unit
-) : RecyclerView.Adapter<LanguageAdapter.LanguageViewHolder>() {
+) : RecyclerView.Adapter<LanguageAdapter.LanguageViewHolderModern>() {
 
-    inner class LanguageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val card: MaterialCardView = view.findViewById(R.id.cardLanguage)
-        val ivFlag: ImageView = view.findViewById(R.id.ivFlag)
-        val tvLanguageName: TextView = view.findViewById(R.id.tvLanguageName)
+    inner class LanguageViewHolderModern(private val binding: ItemLanguageModernBinding) : RecyclerView.ViewHolder(binding.root) {
+        
+        private val colorGreenPrimary = ContextCompat.getColor(itemView.context, R.color.green_primary)
+        private val colorGreenDark = ContextCompat.getColor(itemView.context, R.color.green_dark)
+        private val colorTextPrimary = ContextCompat.getColor(itemView.context, R.color.text_primary)
+        // Chuyển đổi 2dp sang pixel để hiển thị đồng đều trên các màn hình
+        private val strokeWidthPx = (2 * itemView.resources.displayMetrics.density).toInt()
+
+        init {
+            binding.cardLanguage.setOnClickListener {
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onLanguageClick(languages[position])
+                }
+            }
+        }
 
         fun bind(language: Language) {
-            ivFlag.setImageResource(language.flagDrawable)
-            tvLanguageName.text = language.name
+            binding.ivFlag.setImageResource(language.flagDrawable)
+            binding.tvLanguageName.text = language.name
 
             if (language.isSelected) {
-                card.strokeWidth = 4
-                card.strokeColor = itemView.context.getColor(R.color.green_primary)
-                tvLanguageName.setTextColor(itemView.context.getColor(R.color.green_dark))
+                binding.cardLanguage.strokeWidth = strokeWidthPx
+                binding.cardLanguage.strokeColor = colorGreenPrimary
+                binding.tvLanguageName.setTextColor(colorGreenDark)
             } else {
-                card.strokeWidth = 0
-                tvLanguageName.setTextColor(itemView.context.getColor(R.color.text_primary))
-            }
-
-            card.setOnClickListener {
-                onLanguageClick(language)
+                binding.cardLanguage.strokeWidth = 0
+                binding.tvLanguageName.setTextColor(colorTextPrimary)
             }
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LanguageViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_language_modern, parent, false)
-        return LanguageViewHolder(view)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LanguageViewHolderModern {
+        val binding = ItemLanguageModernBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return LanguageViewHolderModern(binding)
     }
 
-    override fun onBindViewHolder(holder: LanguageViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: LanguageViewHolderModern, position: Int) {
         holder.bind(languages[position])
     }
 

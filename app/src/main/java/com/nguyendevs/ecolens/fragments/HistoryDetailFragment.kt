@@ -2,7 +2,7 @@ package com.nguyendevs.ecolens.fragments
 
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.graphics.text.LineBreaker
+import android.graphics.Typeface
 import android.content.ClipData
 import android.content.Intent
 import android.net.Uri
@@ -13,7 +13,6 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -21,10 +20,10 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
-import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.gson.Gson
 import com.nguyendevs.ecolens.R
+import com.nguyendevs.ecolens.databinding.FragmentHistoryDetailModernBinding
 import com.nguyendevs.ecolens.managers.SpeakerManager
 import com.nguyendevs.ecolens.model.HistoryEntry
 import com.nguyendevs.ecolens.model.SpeciesInfo
@@ -32,6 +31,9 @@ import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
 import java.io.File
 
 class HistoryDetailFragment : Fragment() {
+
+    private var _binding: FragmentHistoryDetailModernBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var speakerManager: SpeakerManager
     private var historyEntry: HistoryEntry? = null
@@ -46,6 +48,11 @@ class HistoryDetailFragment : Fragment() {
         }
     }
 
+    companion object {
+        private val REGEX_BOLD = Regex("\\*\\*(.*?)\\*\\*")
+        private val REGEX_ITALIC = Regex("\\*(.*?)\\*")
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.getString("HISTORY_ENTRY_JSON")?.let { json ->
@@ -55,7 +62,8 @@ class HistoryDetailFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_history_detail_modern, container, false)
+        _binding = FragmentHistoryDetailModernBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -67,16 +75,14 @@ class HistoryDetailFragment : Fragment() {
         val entry = historyEntry ?: return
         val info = entry.speciesInfo
 
-        setupBackButton(view)
-        bindHeader(view, entry, info)
-        bindTaxonomy(view, info)
-        bindContent(view, info)
-        setupFab(view, info)
-        setupShareButton(view, info, entry.imagePath)
-        view.findViewById<FloatingActionButton>(R.id.fab_speak)?.let { fab ->
-            fab.show()
-            fab.bringToFront()
-        }
+        setupBackButton()
+        bindHeader(entry, info)
+        bindTaxonomy(info)
+        bindContent(info)
+        setupFab(info)
+        setupShareButton(info, entry.imagePath)
+        binding.fabSpeak.show()
+        binding.fabSpeak.bringToFront()
     }
 
     override fun onStop() {
@@ -84,10 +90,8 @@ class HistoryDetailFragment : Fragment() {
         if (isSpeaking) {
             speakerManager.pause()
             isSpeaking = false
-            view?.findViewById<FloatingActionButton>(R.id.fab_speak)?.let { fab ->
-                fab.setImageResource(R.drawable.ic_speak)
-                fab.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green_primary))
-            }
+            binding.fabSpeak.setImageResource(R.drawable.ic_speak)
+            binding.fabSpeak.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green_primary))
         }
     }
 
@@ -96,21 +100,17 @@ class HistoryDetailFragment : Fragment() {
         super.onDestroy()
     }
 
-    private fun setupBackButton(view: View) {
-        val btnBack = view.findViewById<FloatingActionButton>(R.id.btnBack)
-        btnBack.setOnClickListener {
+    private fun setupBackButton() {
+        binding.btnBack.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
 
-        val collapsingToolbar = view.findViewById<CollapsingToolbarLayout>(R.id.collapsingToolbar)
-        collapsingToolbar.setContentScrimColor(Color.TRANSPARENT)
-        collapsingToolbar.setStatusBarScrimColor(Color.TRANSPARENT)
+        binding.collapsingToolbar.setContentScrimColor(Color.TRANSPARENT)
+        binding.collapsingToolbar.setStatusBarScrimColor(Color.TRANSPARENT)
     }
 
-    private fun setupShareButton(view: View, info: SpeciesInfo, imagePath: String?) {
-        val btnShare = view.findViewById<ImageView>(R.id.btnShareInfo)
-
-        btnShare.setOnClickListener {
+    private fun setupShareButton(info: SpeciesInfo, imagePath: String?) {
+        binding.btnShareInfo.setOnClickListener {
             var imageUri: Uri? = null
             if (!imagePath.isNullOrEmpty()) {
                 val file = File(imagePath)
@@ -194,113 +194,107 @@ class HistoryDetailFragment : Fragment() {
         } else {
             @Suppress("DEPRECATION") Html.fromHtml(html).toString()
         }
-        text = text.replace(Regex("\\*\\*(.*?)\\*\\*"), "$1")
-        text = text.replace(Regex("\\*(.*?)\\*"), "$1")
+        text = text.replace(REGEX_BOLD, "$1")
+        text = text.replace(REGEX_ITALIC, "$1")
         return text.trim()
     }
 
-    private fun bindHeader(view: View, entry: HistoryEntry, info: SpeciesInfo) {
-        val ivImage = view.findViewById<ImageView>(R.id.ivDetailImage)
-        val tvCommon = view.findViewById<TextView>(R.id.tvCommonName)
-        val tvScientific = view.findViewById<TextView>(R.id.tvScientificName)
-        val tagKingdom = view.findViewById<TextView>(R.id.tagKingdom)
-        val tagFamily = view.findViewById<TextView>(R.id.tagFamily)
-        val tagSpecies = view.findViewById<TextView>(R.id.tagSpecies)
+    private fun bindHeader(entry: HistoryEntry, info: SpeciesInfo) {
+        Glide.with(this).load(entry.imagePath).centerCrop().into(binding.ivDetailImage)
 
-        Glide.with(this).load(entry.imagePath).centerCrop().into(ivImage)
-
-        tvCommon.setHtml(info.commonName)
-        tvScientific.setHtml(info.scientificName)
+        binding.tvCommonName.setHtml(info.commonName)
+        binding.tvScientificName.setHtml(info.scientificName)
 
         if (info.kingdom.isNotEmpty()) {
-            tagKingdom.setHtml(info.kingdom)
-            tagKingdom.visibility = View.VISIBLE
+            binding.tagKingdom.setHtml(info.kingdom)
+            binding.tagKingdom.visibility = View.VISIBLE
         } else {
-            tagKingdom.visibility = View.GONE
+            binding.tagKingdom.visibility = View.GONE
         }
 
         if (info.family.isNotEmpty()) {
-            tagFamily.setHtml(info.family)
-            tagFamily.visibility = View.VISIBLE
+            binding.tagFamily.setHtml(info.family)
+            binding.tagFamily.visibility = View.VISIBLE
         } else {
-            tagFamily.visibility = View.GONE
+            binding.tagFamily.visibility = View.GONE
         }
 
         if (info.species.isNotEmpty()) {
-            tagSpecies.setHtml(info.species)
-            tagSpecies.visibility = View.VISIBLE
+            binding.tagSpecies.setHtml(info.species)
+            binding.tagSpecies.visibility = View.VISIBLE
         } else {
-            tagSpecies.visibility = View.GONE
+            binding.tagSpecies.visibility = View.GONE
         }
     }
 
-    private fun bindTaxonomy(view: View, info: SpeciesInfo) {
-        val taxonomyLayout = view.findViewById<View>(R.id.layoutTaxonomy) ?: return
-
-        fun setTaxonomyText(viewId: Int, value: String) {
-            val textView = taxonomyLayout.findViewById<TextView>(viewId)
+    private fun bindTaxonomy(info: SpeciesInfo) {
+        fun TextView.bindValue(value: String) {
             if (value.isNotEmpty()) {
-                textView.setHtml(value)
+                setHtml(value)
             } else {
-                textView.text = "N/A"
+                text = "N/A"
             }
         }
 
-        setTaxonomyText(R.id.tvKingdom, info.kingdom)
-        setTaxonomyText(R.id.tvPhylum, info.phylum)
-        setTaxonomyText(R.id.tvClass, info.className)
-        setTaxonomyText(R.id.tvOrder, info.taxorder)
-        setTaxonomyText(R.id.tvFamily, info.family)
-        setTaxonomyText(R.id.tvGenus, info.genus)
-        setTaxonomyText(R.id.tvSpecies, info.species)
+        binding.layoutTaxonomy.tvKingdom.bindValue(info.kingdom)
+        binding.layoutTaxonomy.tvPhylum.bindValue(info.phylum)
+        binding.layoutTaxonomy.tvClass.bindValue(info.className)
+        binding.layoutTaxonomy.tvOrder.bindValue(info.taxorder)
+        binding.layoutTaxonomy.tvFamily.bindValue(info.family)
+        binding.layoutTaxonomy.tvGenus.bindValue(info.genus)
+        binding.layoutTaxonomy.tvSpecies.bindValue(info.species)
     }
 
-    private fun bindContent(view: View, info: SpeciesInfo) {
-        val container = view.findViewById<LinearLayout>(R.id.containerSections)
-        container.removeAllViews()
+    private fun bindContent(info: SpeciesInfo) {
+        binding.containerSections.removeAllViews()
 
-        addSection(container, getString(R.string.section_description), info.description)
-        addSection(container, getString(R.string.section_characteristics), info.characteristics)
-        addSection(container, getString(R.string.section_distribution), info.distribution)
-        addSection(container, getString(R.string.section_habitat), info.habitat)
-        addSection(container, getString(R.string.section_conservation), info.conservationStatus)
+        addSection(binding.containerSections, getString(R.string.section_description), info.description)
+        addSection(binding.containerSections, getString(R.string.section_characteristics), info.characteristics)
+        addSection(binding.containerSections, getString(R.string.section_distribution), info.distribution)
+        addSection(binding.containerSections, getString(R.string.section_habitat), info.habitat)
+        addSection(binding.containerSections, getString(R.string.section_conservation), info.conservationStatus)
     }
 
     private fun addSection(container: LinearLayout, title: String, content: String) {
         if (content.isBlank()) return
 
+        val context = container.context
+        val titleColor = ContextCompat.getColor(context, R.color.text_primary)
+        val contentColor = ContextCompat.getColor(context, R.color.text_secondary)
+        val dividerColor = Color.parseColor("#F0F0F0")
+        val topMargin = 24.dpToPx()
+        val bottomMarginTitle = 10.dpToPx()
+        val bottomMarginDivider = 12.dpToPx()
+        val dividerHeight = 1.dpToPx()
+
         val titleView = TextView(context).apply {
             text = title
             textSize = 20f
-            setTextColor(ContextCompat.getColor(context, R.color.text_primary))
-            setTypeface(null, android.graphics.Typeface.BOLD)
+            setTextColor(titleColor)
+            setTypeface(null, Typeface.BOLD)
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
-                topMargin = 24.dpToPx()
-                bottomMargin = 10.dpToPx()
+                this.topMargin = topMargin
+                this.bottomMargin = bottomMarginTitle
             }
         }
 
         val divider = View(context).apply {
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                1.dpToPx()
+                dividerHeight
             ).apply {
-                bottomMargin = 12.dpToPx()
+                this.bottomMargin = bottomMarginDivider
             }
-            setBackgroundColor(Color.parseColor("#F0F0F0"))
+            setBackgroundColor(dividerColor)
         }
 
         val contentView = TextView(context).apply {
             textSize = 15f
-            setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
+            setTextColor(contentColor)
             setLineSpacing(0f, 1.4f)
-            /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                justificationMode = LineBreaker.JUSTIFICATION_MODE_INTER_WORD
-            }
-             */
             setHtml(content)
         }
 
@@ -309,34 +303,32 @@ class HistoryDetailFragment : Fragment() {
         container.addView(contentView)
     }
 
-    private fun setupFab(view: View, info: SpeciesInfo) {
-        val fab = view.findViewById<FloatingActionButton>(R.id.fab_speak)
-
+    private fun setupFab(info: SpeciesInfo) {
         speakerManager.onSpeechFinished = {
             activity?.runOnUiThread {
-                updateFabUI(fab, false)
+                updateFabUI(false)
             }
         }
 
-        fab.setOnClickListener {
+        binding.fabSpeak.setOnClickListener {
             if (isSpeaking) {
                 speakerManager.pause()
-                updateFabUI(fab, false)
+                updateFabUI(false)
             } else {
                 speakerManager.speak(TextToSpeechGenerator.generateSpeechText(requireContext(), info))
-                updateFabUI(fab, true)
+                updateFabUI(true)
             }
         }
     }
 
-    private fun updateFabUI(fab: FloatingActionButton, speaking: Boolean) {
+    private fun updateFabUI(speaking: Boolean) {
         isSpeaking = speaking
         if (speaking) {
-            fab.setImageResource(R.drawable.ic_mute)
-            fab.backgroundTintList = ColorStateList.valueOf(Color.RED)
+            binding.fabSpeak.setImageResource(R.drawable.ic_mute)
+            binding.fabSpeak.backgroundTintList = ColorStateList.valueOf(Color.RED)
         } else {
-            fab.setImageResource(R.drawable.ic_speak)
-            fab.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green_primary))
+            binding.fabSpeak.setImageResource(R.drawable.ic_speak)
+            binding.fabSpeak.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green_primary))
         }
     }
 
@@ -346,5 +338,10 @@ class HistoryDetailFragment : Fragment() {
             this.toFloat(),
             resources.displayMetrics
         ).toInt()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

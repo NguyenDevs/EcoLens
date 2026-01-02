@@ -1,19 +1,21 @@
 package com.nguyendevs.ecolens.adapters
 
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.nguyendevs.ecolens.R
+import com.nguyendevs.ecolens.databinding.ItemHistoryEntryModernBinding
 import com.nguyendevs.ecolens.model.HistoryEntry
 import io.noties.markwon.Markwon
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.*
 
 class HistoryAdapter(
     private var historyList: List<HistoryEntry>,
@@ -22,14 +24,8 @@ class HistoryAdapter(
     private val favoriteClickListener: (HistoryEntry) -> Unit
 ) : RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
 
-    companion object {
-        private val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).apply {
-            timeZone = TimeZone.getDefault()
-        }
-        private val timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault()).apply {
-            timeZone = TimeZone.getDefault()
-        }
-    }
+    private val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.getDefault())
+    private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault())
 
     fun updateList(newList: List<HistoryEntry>) {
         historyList = newList
@@ -37,9 +33,8 @@ class HistoryAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_history_entry_modern, parent, false)
-        return HistoryViewHolder(view)
+        val binding = ItemHistoryEntryModernBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return HistoryViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: HistoryViewHolder, position: Int) {
@@ -54,16 +49,17 @@ class HistoryAdapter(
     override fun getItemCount(): Int = historyList.size
 
     private fun isSameDay(timestamp1: Long, timestamp2: Long): Boolean {
-        return dateFormatter.format(Date(timestamp1)) == dateFormatter.format(Date(timestamp2))
+        val date1 = Instant.ofEpochMilli(timestamp1).atZone(ZoneId.systemDefault()).toLocalDate()
+        val date2 = Instant.ofEpochMilli(timestamp2).atZone(ZoneId.systemDefault()).toLocalDate()
+        return date1 == date2
     }
 
-    inner class HistoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val itemContainer: View = itemView.findViewById(R.id.itemContainer)
-        private val ivImage: ImageView = itemView.findViewById(R.id.ivHistoryImage)
-        private val tvCommonName: TextView = itemView.findViewById(R.id.tvHistoryCommonName)
-        private val tvDateHeader: TextView = itemView.findViewById(R.id.tvDateHeader)
-        private val tvScientificName: TextView = itemView.findViewById(R.id.tvHistoryScientificName)
-        private val tvTime: TextView = itemView.findViewById(R.id.tvHistoryTime)
+    inner class HistoryViewHolder(private val binding: ItemHistoryEntryModernBinding) : RecyclerView.ViewHolder(binding.root) {
+        
+        private val radius = itemView.resources.displayMetrics.density * 16
+        private val strokeWidth = (1 * itemView.resources.displayMetrics.density).toInt()
+        private val colorWhite = ContextCompat.getColor(itemView.context, R.color.white)
+        private val strokeColor = Color.parseColor("#E0E0E0")
 
         fun bind(
             entry: HistoryEntry,
@@ -71,58 +67,47 @@ class HistoryAdapter(
             isLastItemOfDay: Boolean,
             clickListener: (HistoryEntry) -> Unit
         ) {
-            val context = itemView.context
+            val currentDateTime = Instant.ofEpochMilli(entry.timestamp).atZone(ZoneId.systemDefault())
 
-            val commonText = entry.speciesInfo.commonName.ifEmpty { context.getString(R.string.unknown_common_name) }
-            val scientificText = entry.speciesInfo.scientificName.ifEmpty { context.getString(R.string.unknown_scientific_name) }
+            val commonText = entry.speciesInfo.commonName.ifEmpty { itemView.context.getString(R.string.unknown_common_name) }
+            val scientificText = entry.speciesInfo.scientificName.ifEmpty { itemView.context.getString(R.string.unknown_scientific_name) }
 
-            markwon.setMarkdown(tvCommonName, commonText)
-            markwon.setMarkdown(tvScientificName, scientificText)
+            markwon.setMarkdown(binding.tvHistoryCommonName, commonText)
+            markwon.setMarkdown(binding.tvHistoryScientificName, scientificText)
 
-            tvTime.text = timeFormatter.format(Date(entry.timestamp))
+            binding.tvHistoryTime.text = timeFormatter.format(currentDateTime)
 
-            Glide.with(context)
+            Glide.with(itemView)
                 .load(entry.imagePath)
                 .centerCrop()
-                .into(ivImage)
+                .into(binding.ivHistoryImage)
 
             if (isFirstItemOfDay) {
-                tvDateHeader.text = dateFormatter.format(Date(entry.timestamp))
-                tvDateHeader.visibility = View.VISIBLE
+                binding.tvDateHeader.text = dateFormatter.format(currentDateTime)
+                binding.tvDateHeader.visibility = View.VISIBLE
             } else {
-                tvDateHeader.visibility = View.GONE
+                binding.tvDateHeader.visibility = View.GONE
             }
 
-            val strokeWidth = (1 * context.resources.displayMetrics.density).toInt()
             val layoutParams = itemView.layoutParams as RecyclerView.LayoutParams
-
-            if (!isFirstItemOfDay) {
-                layoutParams.topMargin = -strokeWidth
-            } else {
-                layoutParams.topMargin = 0
-            }
+            layoutParams.topMargin = if (!isFirstItemOfDay) -strokeWidth else 0
             itemView.layoutParams = layoutParams
 
-            val bgDrawable = android.graphics.drawable.GradientDrawable()
-            bgDrawable.setColor(context.getColor(R.color.white))
-
-            val strokeColor = android.graphics.Color.parseColor("#E0E0E0")
-            bgDrawable.setStroke(strokeWidth, strokeColor)
-
-            val radius = context.resources.displayMetrics.density * 16
-
-            if (isFirstItemOfDay && isLastItemOfDay) {
-                bgDrawable.cornerRadii = floatArrayOf(radius, radius, radius, radius, radius, radius, radius, radius)
-            } else if (isFirstItemOfDay) {
-                bgDrawable.cornerRadii = floatArrayOf(radius, radius, radius, radius, 0f, 0f, 0f, 0f)
-            } else if (isLastItemOfDay) {
-                bgDrawable.cornerRadii = floatArrayOf(0f, 0f, 0f, 0f, radius, radius, radius, radius)
-            } else {
-                bgDrawable.cornerRadius = 0f
+            val bgDrawable = GradientDrawable().apply {
+                setColor(colorWhite)
+                setStroke(strokeWidth, strokeColor)
+                
+                cornerRadii = when {
+                    isFirstItemOfDay && isLastItemOfDay -> floatArrayOf(radius, radius, radius, radius, radius, radius, radius, radius)
+                    isFirstItemOfDay -> floatArrayOf(radius, radius, radius, radius, 0f, 0f, 0f, 0f)
+                    isLastItemOfDay -> floatArrayOf(0f, 0f, 0f, 0f, radius, radius, radius, radius)
+                    else -> floatArrayOf(0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f)
+                }
             }
-            itemContainer.background = bgDrawable
+            
+            binding.itemContainer.background = bgDrawable
 
-            itemContainer.setOnClickListener { clickListener(entry) }
+            binding.itemContainer.setOnClickListener { clickListener(entry) }
         }
     }
 }

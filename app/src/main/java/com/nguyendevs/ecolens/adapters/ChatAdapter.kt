@@ -9,15 +9,11 @@ import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.card.MaterialCardView
 import com.nguyendevs.ecolens.R
+import com.nguyendevs.ecolens.databinding.ItemChatMessageModernBinding
 import com.nguyendevs.ecolens.model.ChatMessage
 import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.Markwon
@@ -54,8 +50,8 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
                 })
                 .build()
         }
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat_message_modern, parent, false)
-        return ChatViewHolder(view)
+        val binding = ItemChatMessageModernBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ChatViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ChatViewHolder, position: Int, payloads: MutableList<Any>) {
@@ -99,14 +95,11 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
         }
     }
 
-    inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val container: LinearLayout = itemView.findViewById(R.id.chatContainer)
-        private val cardView: MaterialCardView = itemView.findViewById(R.id.cardMessage)
-        private val tvMessage: TextView = itemView.findViewById(R.id.tvMessage)
-        private val layoutAiActions: LinearLayout = itemView.findViewById(R.id.layoutAiActions)
-        private val btnCopyAi: ImageView = itemView.findViewById(R.id.btnCopyAi)
-        private val btnShareAi: ImageView = itemView.findViewById(R.id.btnShareAi)
-        private val btnRenewAi: ImageView = itemView.findViewById(R.id.btnRenewAi)
+    inner class ChatViewHolder(private val binding: ItemChatMessageModernBinding) : RecyclerView.ViewHolder(binding.root) {
+        
+        private val colorWhite = ContextCompat.getColor(itemView.context, R.color.white)
+        private val colorTextPrimary = ContextCompat.getColor(itemView.context, R.color.text_primary)
+        private val colorGreenPrimary = ContextCompat.getColor(itemView.context, R.color.green_primary)
 
         private val handler = Handler(Looper.getMainLooper())
         private var loopCount = 0
@@ -120,7 +113,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
                 if (visibleDots < 3) {
                     spannable.setSpan(ForegroundColorSpan(Color.TRANSPARENT), visibleDots, 3, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
                 }
-                tvMessage.text = spannable
+                binding.tvMessage.text = spannable
                 handler.postDelayed(this, 400)
             }
         }
@@ -129,70 +122,81 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
             handler.removeCallbacks(loadingAnimateRunnable)
             cursorAnimator?.cancel()
             cursorAnimator = null
-            tvMessage.alpha = 1f
+            binding.tvMessage.alpha = 1f
         }
 
         fun bindStreamingText(message: ChatMessage) {
             if (message.isStreaming) {
-                markwon.setMarkdown(tvMessage, message.content + " ▌")
+                markwon.setMarkdown(binding.tvMessage, message.content + " ▌")
             }
         }
 
         fun bind(message: ChatMessage, position: Int) {
             stopAnimation()
-            layoutAiActions.visibility = View.GONE
-            tvMessage.alpha = 1f
-
-            cardView.setOnClickListener(null)
-            cardView.setOnLongClickListener(null)
-            btnCopyAi.setOnClickListener(null)
-            btnShareAi.setOnClickListener(null)
-            btnRenewAi.setOnClickListener(null)
+            resetViews()
 
             when {
-                message.isLoading -> {
-                    container.gravity = Gravity.START
-                    cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.white))
-                    tvMessage.setTextColor(ContextCompat.getColor(itemView.context, R.color.text_primary))
-                    tvMessage.text = "..."
-                    loopCount = 0
-                    loadingAnimateRunnable.run()
-                }
-                message.isStreaming -> {
-                    container.gravity = Gravity.START
-                    cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.white))
-                    tvMessage.setTextColor(ContextCompat.getColor(itemView.context, R.color.text_primary))
-                    bindStreamingText(message)
-                    startCursorAnimation()
-                    layoutAiActions.visibility = View.GONE
-                }
-                message.isUser -> {
-                    markwon.setMarkdown(tvMessage, message.content)
-                    container.gravity = Gravity.END
-                    cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.green_primary))
-                    tvMessage.setTextColor(ContextCompat.getColor(itemView.context, R.color.white))
-                    cardView.setOnLongClickListener {
-                        actionListener.onCopy(message.content)
-                        true
-                    }
-                }
-                else -> {
-                    markwon.setMarkdown(tvMessage, message.content)
-                    container.gravity = Gravity.START
-                    cardView.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.white))
-                    tvMessage.setTextColor(ContextCompat.getColor(itemView.context, R.color.text_primary))
+                message.isLoading -> bindLoadingState()
+                message.isStreaming -> bindStreamingState(message)
+                message.isUser -> bindUserMessage(message)
+                else -> bindAiMessage(message, position)
+            }
+        }
 
-                    if (position > 0) {
-                        layoutAiActions.visibility = View.VISIBLE
-                        btnRenewAi.visibility = if (position == messages.size - 1) View.VISIBLE else View.GONE
-                        btnCopyAi.visibility = View.VISIBLE
-                        btnShareAi.visibility = View.VISIBLE
+        private fun resetViews() {
+            binding.layoutAiActions.visibility = android.view.View.GONE
+            binding.tvMessage.alpha = 1f
+            binding.cardMessage.setOnClickListener(null)
+            binding.cardMessage.setOnLongClickListener(null)
+            binding.btnCopyAi.setOnClickListener(null)
+            binding.btnShareAi.setOnClickListener(null)
+            binding.btnRenewAi.setOnClickListener(null)
+        }
 
-                        btnCopyAi.setOnClickListener { actionListener.onCopy(message.content) }
-                        btnShareAi.setOnClickListener { actionListener.onShare(message.content) }
-                        btnRenewAi.setOnClickListener { actionListener.onRenew(position, message) }
-                    }
-                }
+        private fun bindLoadingState() {
+            binding.chatContainer.gravity = Gravity.START
+            binding.cardMessage.setCardBackgroundColor(colorWhite)
+            binding.tvMessage.setTextColor(colorTextPrimary)
+            binding.tvMessage.text = "..."
+            loopCount = 0
+            loadingAnimateRunnable.run()
+        }
+
+        private fun bindStreamingState(message: ChatMessage) {
+            binding.chatContainer.gravity = Gravity.START
+            binding.cardMessage.setCardBackgroundColor(colorWhite)
+            binding.tvMessage.setTextColor(colorTextPrimary)
+            bindStreamingText(message)
+            startCursorAnimation()
+            binding.layoutAiActions.visibility = android.view.View.GONE
+        }
+
+        private fun bindUserMessage(message: ChatMessage) {
+            markwon.setMarkdown(binding.tvMessage, message.content)
+            binding.chatContainer.gravity = Gravity.END
+            binding.cardMessage.setCardBackgroundColor(colorGreenPrimary)
+            binding.tvMessage.setTextColor(colorWhite)
+            binding.cardMessage.setOnLongClickListener {
+                actionListener.onCopy(message.content)
+                true
+            }
+        }
+
+        private fun bindAiMessage(message: ChatMessage, position: Int) {
+            markwon.setMarkdown(binding.tvMessage, message.content)
+            binding.chatContainer.gravity = Gravity.START
+            binding.cardMessage.setCardBackgroundColor(colorWhite)
+            binding.tvMessage.setTextColor(colorTextPrimary)
+
+            if (position > 0) {
+                binding.layoutAiActions.visibility = android.view.View.VISIBLE
+                binding.btnRenewAi.visibility = if (position == messages.size - 1) android.view.View.VISIBLE else android.view.View.GONE
+                binding.btnCopyAi.visibility = android.view.View.VISIBLE
+                binding.btnShareAi.visibility = android.view.View.VISIBLE
+
+                binding.btnCopyAi.setOnClickListener { actionListener.onCopy(message.content) }
+                binding.btnShareAi.setOnClickListener { actionListener.onShare(message.content) }
+                binding.btnRenewAi.setOnClickListener { actionListener.onRenew(position, message) }
             }
         }
 
@@ -203,7 +207,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
                     repeatCount = ValueAnimator.INFINITE
                     repeatMode = ValueAnimator.REVERSE
                     addUpdateListener { animator ->
-                        tvMessage.alpha = animator.animatedValue as Float
+                        binding.tvMessage.alpha = animator.animatedValue as Float
                     }
                     start()
                 }

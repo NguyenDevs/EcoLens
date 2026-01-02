@@ -1,70 +1,74 @@
 package com.nguyendevs.ecolens.fragments
 
 import android.os.Bundle
+import android.view.HapticFeedbackConstants
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.adapters.ChatSessionAdapter
+import com.nguyendevs.ecolens.databinding.ScreenAssistantModernBinding
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import android.content.Context
-import android.os.Build
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
 
-class ChatHistoryFragment : Fragment(R.layout.screen_assistant_modern) {
+class ChatHistoryFragment : Fragment() {
 
     private val viewModel: EcoLensViewModel by activityViewModels()
+    private var _binding: ScreenAssistantModernBinding? = null
+    private val binding get() = _binding!!
+
     private lateinit var adapter: ChatSessionAdapter
 
-    private lateinit var rvChatHistory: RecyclerView
-    private lateinit var emptyStateContainer: View
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = ScreenAssistantModernBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        rvChatHistory = view.findViewById(R.id.rvChatHistory)
-        emptyStateContainer = view.findViewById(R.id.emptyStateContainer)
-        val fab = view.findViewById<ExtendedFloatingActionButton>(R.id.fabNewChat)
-
-        setupRecyclerView(rvChatHistory)
+        setupRecyclerView()
         observeChatSessions()
-        setupFabListener(fab)
+        setupFabListener()
     }
 
-    private fun setupRecyclerView(rv: RecyclerView) {
+    private fun setupRecyclerView() {
         adapter = ChatSessionAdapter(emptyList()) { session ->
             openChatScreen(session.id)
         }
 
-        rv.layoutManager = LinearLayoutManager(requireContext())
-        rv.adapter = adapter
+        binding.rvChatHistory.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = this@ChatHistoryFragment.adapter
+        }
     }
 
     private fun observeChatSessions() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.allChatSessions.collectLatest { list ->
                 if (list.isEmpty()) {
-                    rvChatHistory.visibility = View.GONE
-                    emptyStateContainer.visibility = View.VISIBLE
+                    binding.rvChatHistory.visibility = View.GONE
+                    binding.emptyStateContainer.visibility = View.VISIBLE
                 } else {
-                    rvChatHistory.visibility = View.VISIBLE
-                    emptyStateContainer.visibility = View.GONE
+                    binding.rvChatHistory.visibility = View.VISIBLE
+                    binding.emptyStateContainer.visibility = View.GONE
                 }
                 adapter.updateList(list)
             }
         }
     }
 
-    private fun setupFabListener(fab: ExtendedFloatingActionButton) {
-        fab.setOnClickListener {
+    private fun setupFabListener() {
+        binding.fabNewChat.setOnClickListener {
             performHapticFeedback()
             openChatScreen(null)
         }
@@ -81,24 +85,11 @@ class ChatHistoryFragment : Fragment(R.layout.screen_assistant_modern) {
     }
 
     private fun performHapticFeedback() {
-        try {
-            val context = requireContext()
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-                val vibrator = vibratorManager.defaultVibrator
-                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
-            } else {
-                @Suppress("DEPRECATION")
-                val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
-                } else {
-                    @Suppress("DEPRECATION")
-                    vibrator.vibrate(50)
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        binding.root.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

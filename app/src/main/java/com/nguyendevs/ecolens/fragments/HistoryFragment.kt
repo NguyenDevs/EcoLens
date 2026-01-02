@@ -2,21 +2,19 @@ package com.nguyendevs.ecolens.fragments
 
 import android.animation.ValueAnimator
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.card.MaterialCardView
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.gson.Gson
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.adapters.HistoryAdapter
+import com.nguyendevs.ecolens.databinding.ScreenHistoryModernBinding
 import com.nguyendevs.ecolens.model.HistoryEntry
 import com.nguyendevs.ecolens.model.HistorySortOption
 import com.nguyendevs.ecolens.view.EcoLensViewModel
@@ -24,52 +22,42 @@ import io.noties.markwon.Markwon
 import io.noties.markwon.html.HtmlPlugin
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.TimeZone
 
-class HistoryFragment : Fragment(R.layout.screen_history_modern) {
+class HistoryFragment : Fragment() {
 
     private val viewModel: EcoLensViewModel by activityViewModels()
-    private val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    private var _binding: ScreenHistoryModernBinding? = null
+    private val binding get() = _binding!!
+
+    private val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.getDefault())
 
     private lateinit var adapter: HistoryAdapter
-    private lateinit var btnClearFilter: ImageView
-    private lateinit var btnFilterByDate: MaterialCardView
-    private lateinit var btnSort: MaterialCardView
-    private lateinit var emptyStateContainer: View
-    private lateinit var ivExpandIcon: ImageView
-    private lateinit var optionsContainer: LinearLayout
-    private lateinit var optionsHeader: FrameLayout
-    private lateinit var rvHistory: RecyclerView
-    private lateinit var tvCurrentSort: TextView
-    private lateinit var tvFilterSubtitle: TextView
 
     private var currentSortOption = HistorySortOption.NEWEST_FIRST
     private var filterEndDate: Long? = null
     private var filterStartDate: Long? = null
     private var isOptionsExpanded = false
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = ScreenHistoryModernBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initViews(view)
         setupAdapter()
         setupClickListeners()
         observeHistory()
         updateSortUI()
-    }
-
-    private fun initViews(view: View) {
-        rvHistory = view.findViewById(R.id.rvHistory)
-        emptyStateContainer = view.findViewById(R.id.emptyStateContainer)
-        btnSort = view.findViewById(R.id.btnSort)
-        btnFilterByDate = view.findViewById(R.id.btnFilterByDate)
-        tvCurrentSort = view.findViewById(R.id.tvCurrentSort)
-        tvFilterSubtitle = view.findViewById(R.id.tvFilterSubtitle)
-        btnClearFilter = view.findViewById(R.id.btnClearFilter)
-        optionsHeader = view.findViewById(R.id.optionsHeader)
-        optionsContainer = view.findViewById(R.id.optionsContainer)
-        ivExpandIcon = view.findViewById(R.id.ivExpandIcon)
     }
 
     private fun setupAdapter() {
@@ -83,14 +71,14 @@ class HistoryFragment : Fragment(R.layout.screen_history_modern) {
             clickListener = { entry -> navigateToDetail(entry) },
             favoriteClickListener = { entry -> viewModel.toggleFavorite(entry) }
         )
-        rvHistory.adapter = adapter
+        binding.rvHistory.adapter = adapter
     }
 
     private fun setupClickListeners() {
-        optionsHeader.setOnClickListener { toggleOptionsExpansion() }
-        btnSort.setOnClickListener { toggleSortOption() }
-        btnFilterByDate.setOnClickListener { showDateRangePickerDialog() }
-        btnClearFilter.setOnClickListener { clearDateFilter() }
+        binding.optionsHeader.setOnClickListener { toggleOptionsExpansion() }
+        binding.btnSort.setOnClickListener { toggleSortOption() }
+        binding.btnFilterByDate.setOnClickListener { showDateRangePickerDialog() }
+        binding.btnClearFilter.setOnClickListener { clearDateFilter() }
     }
 
     private fun observeHistory() {
@@ -98,11 +86,11 @@ class HistoryFragment : Fragment(R.layout.screen_history_modern) {
             viewModel.getHistoryBySortOption(currentSortOption, filterStartDate, filterEndDate)
                 .collectLatest { list ->
                     if (list.isEmpty()) {
-                        rvHistory.visibility = View.GONE
-                        emptyStateContainer.visibility = View.VISIBLE
+                        binding.rvHistory.visibility = View.GONE
+                        binding.emptyStateContainer.visibility = View.VISIBLE
                     } else {
-                        rvHistory.visibility = View.VISIBLE
-                        emptyStateContainer.visibility = View.GONE
+                        binding.rvHistory.visibility = View.VISIBLE
+                        binding.emptyStateContainer.visibility = View.GONE
                         adapter.updateList(list)
                     }
                 }
@@ -135,7 +123,7 @@ class HistoryFragment : Fragment(R.layout.screen_history_modern) {
     }
 
     private fun updateSortUI() {
-        tvCurrentSort.text = if (currentSortOption == HistorySortOption.NEWEST_FIRST)
+        binding.tvCurrentSort.text = if (currentSortOption == HistorySortOption.NEWEST_FIRST)
             getString(R.string.sort_newest_first)
         else
             getString(R.string.sort_oldest_first)
@@ -147,25 +135,25 @@ class HistoryFragment : Fragment(R.layout.screen_history_modern) {
 
     private fun expandOptions() {
         isOptionsExpanded = true
-        ivExpandIcon.animate().rotation(180f).setDuration(300).start()
-        optionsContainer.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
-        val targetHeight = optionsContainer.measuredHeight
-        optionsContainer.layoutParams.height = 0
-        optionsContainer.visibility = View.VISIBLE
+        binding.ivExpandIcon.animate().rotation(180f).setDuration(300).start()
+        binding.optionsContainer.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+        val targetHeight = binding.optionsContainer.measuredHeight
+        binding.optionsContainer.layoutParams.height = 0
+        binding.optionsContainer.visibility = View.VISIBLE
         animateHeight(0, targetHeight)
     }
 
     private fun collapseOptions() {
         isOptionsExpanded = false
-        ivExpandIcon.animate().rotation(0f).setDuration(300).start()
-        animateHeight(optionsContainer.height, 0) { optionsContainer.visibility = View.GONE }
+        binding.ivExpandIcon.animate().rotation(0f).setDuration(300).start()
+        animateHeight(binding.optionsContainer.height, 0) { binding.optionsContainer.visibility = View.GONE }
     }
 
     private fun animateHeight(from: Int, to: Int, onEnd: (() -> Unit)? = null) {
         val animator = ValueAnimator.ofInt(from, to)
         animator.addUpdateListener { animation ->
-            optionsContainer.layoutParams.height = animation.animatedValue as Int
-            optionsContainer.requestLayout()
+            binding.optionsContainer.layoutParams.height = animation.animatedValue as Int
+            binding.optionsContainer.requestLayout()
         }
         animator.interpolator = AccelerateDecelerateInterpolator()
         animator.duration = 300
@@ -196,9 +184,12 @@ class HistoryFragment : Fragment(R.layout.screen_history_modern) {
             filterStartDate = selection.first - offset
             filterEndDate = (selection.second - offset) + 86400000L - 1L
 
-            tvFilterSubtitle.text = "${dateFormatter.format(filterStartDate)} - ${dateFormatter.format(filterEndDate)}"
-            tvFilterSubtitle.setTextColor(resources.getColor(R.color.green_primary, null))
-            btnClearFilter.visibility = View.VISIBLE
+            val startDate = Instant.ofEpochMilli(filterStartDate!!).atZone(ZoneId.systemDefault())
+            val endDate = Instant.ofEpochMilli(filterEndDate!!).atZone(ZoneId.systemDefault())
+
+            binding.tvFilterSubtitle.text = "${dateFormatter.format(startDate)} - ${dateFormatter.format(endDate)}"
+            binding.tvFilterSubtitle.setTextColor(ContextCompat.getColor(requireContext(), R.color.green_primary))
+            binding.btnClearFilter.visibility = View.VISIBLE
             observeHistory()
         }
     }
@@ -206,9 +197,14 @@ class HistoryFragment : Fragment(R.layout.screen_history_modern) {
     private fun clearDateFilter() {
         filterStartDate = null
         filterEndDate = null
-        tvFilterSubtitle.text = getString(R.string.select_date)
-        tvFilterSubtitle.setTextColor(resources.getColor(R.color.text_secondary, null))
-        btnClearFilter.visibility = View.GONE
+        binding.tvFilterSubtitle.text = getString(R.string.select_date)
+        binding.tvFilterSubtitle.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_secondary))
+        binding.btnClearFilter.visibility = View.GONE
         observeHistory()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

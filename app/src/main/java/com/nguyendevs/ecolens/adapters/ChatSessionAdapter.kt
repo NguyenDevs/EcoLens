@@ -3,22 +3,24 @@ package com.nguyendevs.ecolens.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
+import android.view.animation.LinearInterpolator
 import androidx.recyclerview.widget.RecyclerView
-import com.nguyendevs.ecolens.R
+import com.nguyendevs.ecolens.databinding.ItemChatEntryModernBinding
 import com.nguyendevs.ecolens.model.ChatSession
 import io.noties.markwon.Markwon
-import java.text.SimpleDateFormat
-import java.util.*
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class ChatSessionAdapter(
     private var sessions: List<ChatSession>,
     private val onClick: (ChatSession) -> Unit
-) : RecyclerView.Adapter<ChatSessionAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<ChatSessionAdapter.ChatSessionViewHolder>() {
 
-    private val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-    private val timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault())
+    private val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.getDefault())
+    private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault())
+    private val loadingInterpolator = LinearInterpolator()
     private lateinit var markwon: Markwon
 
     fun updateList(newList: List<ChatSession>) {
@@ -26,65 +28,69 @@ class ChatSessionAdapter(
         notifyDataSetChanged()
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatSessionViewHolder {
         if (!::markwon.isInitialized) {
             markwon = Markwon.create(parent.context)
         }
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat_entry_modern, parent, false)
-        return ViewHolder(view)
+        val binding = ItemChatEntryModernBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ChatSessionViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ChatSessionViewHolder, position: Int) {
         val session = sessions[position]
+        val currentDateTime = Instant.ofEpochMilli(session.timestamp).atZone(ZoneId.systemDefault())
 
-        val isFirstOfDay = position == 0 ||
-                dateFormatter.format(Date(session.timestamp)) != dateFormatter.format(Date(sessions[position - 1].timestamp))
+        val isFirstOfDay = if (position == 0) {
+            true
+        } else {
+            val prevDateTime = Instant.ofEpochMilli(sessions[position - 1].timestamp).atZone(ZoneId.systemDefault())
+            currentDateTime.toLocalDate() != prevDateTime.toLocalDate()
+        }
 
-        holder.bind(session, isFirstOfDay)
+        holder.bind(session, isFirstOfDay, currentDateTime)
     }
 
     override fun getItemCount() = sessions.size
 
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val tvDate: TextView = view.findViewById(R.id.tvDateHeader)
-        val tvTitle: TextView = view.findViewById(R.id.tvTitle)
-        val tvLastMessage: TextView = view.findViewById(R.id.tvLastMessage)
-        val tvTime: TextView = view.findViewById(R.id.tvTime)
-        val card: View = view.findViewById(R.id.cardSession)
+    inner class ChatSessionViewHolder(private val binding: ItemChatEntryModernBinding) : RecyclerView.ViewHolder(binding.root) {
+        
+        fun bind(session: ChatSession, showHeader: Boolean, dateTime: java.time.ZonedDateTime) {
+            binding.tvDateHeader.visibility = if (showHeader) View.VISIBLE else View.GONE
+            if (showHeader) {
+                binding.tvDateHeader.text = dateFormatter.format(dateTime)
+            }
+            
+            binding.ivLoadingRing.visibility = View.INVISIBLE
+            binding.ivLoadingRing.animate().cancel()
+            binding.tvTitle.text = session.title
+            markwon.setMarkdown(binding.tvLastMessage, session.lastMessage)
+            binding.tvTime.text = timeFormatter.format(dateTime)
 
-        val ivLoadingRing: ImageView = view.findViewById(R.id.ivLoadingRing)
+            binding.cardSession.setOnClickListener {
+                animateLoading()
+                onClick(session)
+            }
+        }
 
-        fun bind(session: ChatSession, showHeader: Boolean) {
-            tvDate.visibility = if (showHeader) View.VISIBLE else View.GONE
-            tvDate.text = dateFormatter.format(Date(session.timestamp))
-            ivLoadingRing.visibility = View.INVISIBLE
-            ivLoadingRing.animate().cancel()
-            tvTitle.text = session.title
-            markwon.setMarkdown(tvLastMessage, session.lastMessage)
-
-            tvTime.text = timeFormatter.format(Date(session.timestamp))
-
-            card.setOnClickListener {
-                ivLoadingRing.visibility = View.VISIBLE
-                ivLoadingRing.alpha = 1f
-
-                ivLoadingRing.animate()
+        private fun animateLoading() {
+            binding.ivLoadingRing.apply {
+                visibility = View.VISIBLE
+                alpha = 1f
+                animate()
                     .rotationBy(360f)
                     .setDuration(800)
-                    .setInterpolator(android.view.animation.LinearInterpolator())
+                    .setInterpolator(loadingInterpolator)
                     .withEndAction {
-                        ivLoadingRing.animate()
+                        animate()
                             .alpha(0f)
                             .setDuration(200)
                             .withEndAction {
-                                ivLoadingRing.visibility = View.INVISIBLE
-                                ivLoadingRing.rotation = 0f
+                                visibility = View.INVISIBLE
+                                rotation = 0f
                             }
                             .start()
                     }
                     .start()
-
-                onClick(session)
             }
         }
     }

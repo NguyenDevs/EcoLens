@@ -14,22 +14,19 @@ class ImageZoomHandler(
 
     private var currentImageUri: Uri? = null
 
-    fun setup() {
+    init {
         btnZoomIn.setOnClickListener {
             currentImageUri?.let { uri ->
-                fullScreenContainer.visibility = View.VISIBLE
-                Glide.with(fullScreenImage.context)
-                    .load(uri)
-                    .into(fullScreenImage)
+                showFullScreen(uri)
             }
         }
 
         btnZoomOut.setOnClickListener {
-            fullScreenContainer.visibility = View.GONE
+            hideFullScreen()
         }
 
         fullScreenContainer.setOnClickListener {
-            fullScreenContainer.visibility = View.GONE
+            hideFullScreen()
         }
     }
 
@@ -40,7 +37,23 @@ class ImageZoomHandler(
 
     fun isFullScreenVisible() = fullScreenContainer.visibility == View.VISIBLE
 
+    private fun showFullScreen(uri: Uri) {
+        fullScreenContainer.alpha = 0f
+        fullScreenContainer.visibility = View.VISIBLE
+        fullScreenContainer.animate().alpha(1f).setDuration(200).start()
+
+        Glide.with(fullScreenImage.context)
+            .load(uri)
+            .into(fullScreenImage)
+    }
+
     fun hideFullScreen() {
-        fullScreenContainer.visibility = View.GONE
+        if (isFullScreenVisible()) {
+            fullScreenContainer.animate()
+                .alpha(0f)
+                .setDuration(200)
+                .withEndAction { fullScreenContainer.visibility = View.GONE }
+                .start()
+        }
     }
 }

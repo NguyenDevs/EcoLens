@@ -5,43 +5,37 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.adapters.LanguageAdapter
+import com.nguyendevs.ecolens.databinding.FragmentLanguageSelectionModernBinding
 import com.nguyendevs.ecolens.managers.LanguageManager
 import com.nguyendevs.ecolens.model.Language
 
 class LanguageSelectionFragment : Fragment() {
 
-    private lateinit var btnBack: ImageView
+    private var _binding: FragmentLanguageSelectionModernBinding? = null
+    private val binding get() = _binding!!
+
     private lateinit var languageAdapter: LanguageAdapter
     private lateinit var languageManager: LanguageManager
-    private lateinit var rvLanguages: RecyclerView
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_language_selection_modern, container, false)
+    ): View {
+        _binding = FragmentLanguageSelectionModernBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         languageManager = LanguageManager(requireContext())
-
-        initViews(view)
         setupLanguageList()
         setupListeners()
-    }
-
-    private fun initViews(view: View) {
-        btnBack = view.findViewById(R.id.btnBack)
-        rvLanguages = view.findViewById(R.id.rvLanguages)
     }
 
     private fun setupLanguageList() {
@@ -66,14 +60,14 @@ class LanguageSelectionFragment : Fragment() {
             onLanguageSelected(selectedLanguage)
         }
 
-        rvLanguages.apply {
+        binding.rvLanguages.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = languageAdapter
         }
     }
 
     private fun setupListeners() {
-        btnBack.setOnClickListener {
+        binding.btnBack.setOnClickListener {
             closeFragment()
         }
     }
@@ -95,5 +89,10 @@ class LanguageSelectionFragment : Fragment() {
 
     private fun closeFragment() {
         parentFragmentManager.popBackStack()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

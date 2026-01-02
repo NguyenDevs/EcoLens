@@ -3,17 +3,17 @@ package com.nguyendevs.ecolens.fragments
 import android.content.*
 import android.os.*
 import android.text.Html
-import android.util.Log
 import android.view.*
-import android.widget.*
+import android.widget.PopupMenu
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.adapters.ChatAdapter
+import com.nguyendevs.ecolens.databinding.FragmentChatModernBinding
 import com.nguyendevs.ecolens.model.ChatMessage
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.flow.collectLatest
@@ -22,16 +22,18 @@ import kotlinx.coroutines.launch
 class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
 
     private val viewModel: EcoLensViewModel by activityViewModels()
+    private var _binding: FragmentChatModernBinding? = null
+    private val binding get() = _binding!!
+
     private lateinit var adapter: ChatAdapter
-    private lateinit var rvChat: RecyclerView
-    private lateinit var etInput: EditText
-    private lateinit var btnSend: ImageView
-    private lateinit var btnBack: ImageView
-    private lateinit var btnMenu: ImageView
     private var currentSessionId: Long? = null
 
     companion object {
         private const val ARG_SESSION_ID = "session_id"
+        private val REGEX_BOLD = Regex("\\*\\*(.*?)\\*\\*")
+        private val REGEX_HEADER = Regex("##(.*?)##")
+        private val REGEX_STRIKE = Regex("~~(.*?)~~")
+
         fun newInstance(sessionId: Long? = null): ChatFragment {
             return ChatFragment().apply {
                 arguments = Bundle().apply {
@@ -49,13 +51,13 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_chat_modern, container, false)
+        _binding = FragmentChatModernBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         adapter = ChatAdapter(this)
-        initViews(view)
         setupRecyclerView()
         setupListeners()
         observeViewModel()
@@ -69,7 +71,7 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
             )
         }
 
-        etInput.post { etInput.requestFocus() }
+        binding.etChatInput.post { binding.etChatInput.requestFocus() }
     }
 
     override fun onCopy(text: String) {
@@ -95,49 +97,41 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         viewModel.renewAiResponse(message)
     }
 
-    private fun initViews(view: View) {
-        rvChat = view.findViewById(R.id.rvChat)
-        etInput = view.findViewById(R.id.etChatInput)
-        btnSend = view.findViewById(R.id.btnSend)
-        btnBack = view.findViewById(R.id.btnBack)
-        btnMenu = view.findViewById(R.id.btnMenu)
-    }
-
     private fun setupRecyclerView() {
         val layoutManager = LinearLayoutManager(requireContext()).apply {
             stackFromEnd = true
         }
-        rvChat.layoutManager = layoutManager
-        rvChat.adapter = adapter
-        rvChat.itemAnimator = null
+        binding.rvChat.layoutManager = layoutManager
+        binding.rvChat.adapter = adapter
+        binding.rvChat.itemAnimator = null
     }
 
     private fun setupListeners() {
-        btnSend.setOnClickListener {
-            val text = etInput.text.toString().trim()
+        binding.btnSend.setOnClickListener {
+            val text = binding.etChatInput.text.toString().trim()
             if (text.isNotEmpty()) {
                 performHapticFeedback()
                 viewModel.sendChatMessage(text, getString(R.string.new_chat))
-                etInput.text.clear()
+                binding.etChatInput.text.clear()
             }
         }
-        btnBack.setOnClickListener { parentFragmentManager.popBackStack() }
-        btnMenu.setOnClickListener { showMenuPopup(it) }
+        binding.btnBack.setOnClickListener { parentFragmentManager.popBackStack() }
+        binding.btnMenu.setOnClickListener { showMenuPopup(it) }
     }
 
     private fun showMenuPopup(anchor: View) {
         val popup = PopupMenu(requireContext(), anchor)
         popup.menuInflater.inflate(R.menu.menu_chat, popup.menu)
-        try {
+        
+        runCatching {
             val fieldMPopup = PopupMenu::class.java.getDeclaredField("mPopup")
             fieldMPopup.isAccessible = true
             val mPopup = fieldMPopup.get(popup)
             mPopup.javaClass
                 .getDeclaredMethod("setForceShowIcon", Boolean::class.javaPrimitiveType)
                 .invoke(mPopup, true)
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
+
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_delete_chat -> {
@@ -168,7 +162,7 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.chatMessages.collectLatest { messages ->
                 val isNewMessageAdded = messages.size > adapter.itemCount
-                val layoutManager = rvChat.layoutManager as LinearLayoutManager
+                val layoutManager = binding.rvChat.layoutManager as LinearLayoutManager
                 val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
                 val isAtBottom = lastVisibleItemPosition == adapter.itemCount - 1
 
@@ -176,11 +170,11 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
 
                 if (messages.isNotEmpty()) {
                     if (isNewMessageAdded) {
-                        rvChat.scrollToPosition(messages.size - 1)
+                        binding.rvChat.scrollToPosition(messages.size - 1)
                     } else if (isAtBottom) {
                         val lastPos = messages.size - 1
                         if (layoutManager.findLastCompletelyVisibleItemPosition() < lastPos) {
-                            rvChat.scrollToPosition(lastPos)
+                            binding.rvChat.scrollToPosition(lastPos)
                         }
                     }
                 }
@@ -197,30 +191,18 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         val alpha = if (isStreaming) 0.5f else 1f
         val enabled = !isStreaming
 
-        btnSend.isEnabled = enabled
-        btnSend.alpha = alpha
-        etInput.isEnabled = enabled
-        etInput.alpha = if (isStreaming) 0.7f else 1f
-        btnBack.isEnabled = enabled
-        btnBack.alpha = alpha
-        btnMenu.isEnabled = enabled
-        btnMenu.alpha = alpha
+        binding.btnSend.isEnabled = enabled
+        binding.btnSend.alpha = alpha
+        binding.etChatInput.isEnabled = enabled
+        binding.etChatInput.alpha = if (isStreaming) 0.7f else 1f
+        binding.btnBack.isEnabled = enabled
+        binding.btnBack.alpha = alpha
+        binding.btnMenu.isEnabled = enabled
+        binding.btnMenu.alpha = alpha
     }
 
     private fun performHapticFeedback() {
-        try {
-            val context = requireContext()
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-                vibratorManager.defaultVibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
-            } else {
-                @Suppress("DEPRECATION")
-                val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
-            }
-        } catch (e: Exception) {
-            Log.e("ChatFragment", "Vibration failed: ${e.message}")
-        }
+        binding.root.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
     }
 
     private fun stripHtml(html: String): String {
@@ -229,9 +211,14 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         } else {
             @Suppress("DEPRECATION") Html.fromHtml(html).toString()
         }
-        text = text.replace(Regex("\\*\\*(.*?)\\*\\*"), "$1")
-        text = text.replace(Regex("##(.*?)##"), "$1")
-        text = text.replace(Regex("~~(.*?)~~"), "$1")
+        text = text.replace(REGEX_BOLD, "$1")
+        text = text.replace(REGEX_HEADER, "$1")
+        text = text.replace(REGEX_STRIKE, "$1")
         return text.trim()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

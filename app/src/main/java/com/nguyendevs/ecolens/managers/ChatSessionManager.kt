@@ -17,7 +17,7 @@ class ChatSessionManager(
     private val chatDao: ChatDao,
     private val scope: CoroutineScope
 ) {
-    private val gson = Gson()
+    private val gson by lazy { Gson() }
     private val markdownProcessor = MarkdownProcessor()
     private val apiService = RetrofitClient.iNaturalistApi
     var currentSessionId: Long? = null
@@ -32,6 +32,16 @@ class ChatSessionManager(
     val isStreamingActive: StateFlow<Boolean> = _isStreamingActive.asStateFlow()
 
     val allChatSessions: Flow<List<ChatSession>> = chatDao.getAllSessions()
+
+    companion object {
+        private const val TAG = "ChatSessionManager"
+        private const val PREFIX_DATA = "data: "
+        private const val STREAM_DONE = "[DONE]"
+        private const val DEFAULT_CHAT_TITLE = "Chat"
+        private const val TITLE_MAX_LENGTH = 30
+        private const val PREVIEW_MAX_LENGTH = 100
+        private const val STREAM_UPDATE_DELAY = 50L
+    }
 
     suspend fun initNewChatSession(welcomeMessage: String, defaultTitle: String) {
         currentSessionId = null
@@ -100,9 +110,9 @@ class ChatSessionManager(
 
             val currentSession = chatDao.getSessionById(sessionId)
             val newTitle = if (currentSession?.title == defaultTitle) {
-                userMessage.take(30) + "..."
+                userMessage.take(TITLE_MAX_LENGTH) + "..."
             } else {
-                currentSession?.title ?: "Chat"
+                currentSession?.title ?: DEFAULT_CHAT_TITLE
             }
             chatDao.updateSession(
                 currentSession!!.copy(
@@ -126,7 +136,7 @@ class ChatSessionManager(
                 executeGeminiStreamingFlow(sessionId)
             } catch (e: Exception) {
                 isGenerating.set(false)
-                Log.e("ChatSessionManager", "Renew failed: ${e.message}")
+                Log.e(TAG, "Renew failed: ${e.message}")
             }
         }
     }
@@ -144,7 +154,7 @@ class ChatSessionManager(
                     }
                 }
             } catch (e: Exception) {
-                Log.e("ChatSessionManager", "Delete failed: ${e.message}", e)
+                Log.e(TAG, "Delete failed: ${e.message}", e)
             }
         }
     }
@@ -158,7 +168,9 @@ class ChatSessionManager(
     private fun startMessageCollection(sessionId: Long) {
         messageCollectionJob?.cancel()
         messageCollectionJob = scope.launch {
-            chatDao.getMessagesBySession(sessionId).collect { messages ->
+            chatDao.getMessagesBySession(sessionId)
+                .flowOn(Dispatchers.IO)
+                .collect { messages ->
                 _chatMessages.value = messages
             }
         }
@@ -193,15 +205,15 @@ class ChatSessionManager(
             if (response.isSuccessful) {
                 val responseBody = response.body()
                 if (responseBody != null) {
-                    var accumulatedText = ""
+                    val accumulatedText = StringBuilder()
 
                     responseBody.byteStream().bufferedReader().use { reader ->
                         var line: String?
                         while (reader.readLine().also { line = it } != null) {
                             val currentLine = line ?: continue
-                            if (currentLine.startsWith("data: ")) {
-                                val jsonData = currentLine.substring(6).trim()
-                                if (jsonData == "[DONE]") break
+                            if (currentLine.startsWith(PREFIX_DATA)) {
+                                val jsonData = currentLine.substring(PREFIX_DATA.length).trim()
+                                if (jsonData == STREAM_DONE) break
 
                                 try {
                                     val streamResponse = gson.fromJson(jsonData, GeminiResponse::class.java)
@@ -209,19 +221,19 @@ class ChatSessionManager(
                                         ?.content?.parts?.firstOrNull()?.text
 
                                     if (!chunk.isNullOrEmpty()) {
-                                        accumulatedText += chunk
-                                        val formattedText = markdownProcessor.process(accumulatedText)
+                                        accumulatedText.append(chunk)
+                                        val formattedText = markdownProcessor.process(accumulatedText.toString())
                                         chatDao.updateMessageContent(messageId, formattedText)
-                                        delay(50)
+                                        delay(STREAM_UPDATE_DELAY)
                                     }
                                 } catch (e: Exception) {
-                                    Log.e("Streaming", "Parse error: ${e.message}")
+                                    Log.e(TAG, "Parse error: ${e.message}")
                                 }
                             }
                         }
                     }
 
-                    val finalFormattedText = markdownProcessor.process(accumulatedText)
+                    val finalFormattedText = markdownProcessor.process(accumulatedText.toString())
                     chatDao.updateMessage(
                         ChatMessage(
                             id = messageId,
@@ -236,7 +248,7 @@ class ChatSessionManager(
                     val updatedSession = chatDao.getSessionById(sessionId)
                     updatedSession?.let {
                         chatDao.updateSession(it.copy(
-                            lastMessage = accumulatedText.take(100),
+                            lastMessage = accumulatedText.take(PREVIEW_MAX_LENGTH).toString(),
                             timestamp = System.currentTimeMillis()
                         ))
                     }

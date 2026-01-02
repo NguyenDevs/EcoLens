@@ -6,23 +6,20 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
-import android.widget.FrameLayout
-import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.transition.Fade
 import androidx.transition.TransitionManager
 import com.bumptech.glide.Glide
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.card.MaterialCardView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.nguyendevs.ecolens.activities.CameraActivity
+import com.nguyendevs.ecolens.databinding.ActivityMainModernBinding
 import com.nguyendevs.ecolens.fragments.ChatHistoryFragment
 import com.nguyendevs.ecolens.fragments.HistoryFragment
 import com.nguyendevs.ecolens.handlers.*
@@ -32,39 +29,21 @@ import com.nguyendevs.ecolens.model.SpeciesInfo
 import com.nguyendevs.ecolens.utils.KeyboardUtils
 import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
 import com.nguyendevs.ecolens.view.EcoLensViewModel
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var errorCard: View
-    private lateinit var errorText: TextView
-    private lateinit var fabMute: FloatingActionButton
-    private lateinit var fabSpeak: FloatingActionButton
-    private lateinit var fabCamera: FloatingActionButton
-    private lateinit var bottomNav: BottomNavigationView
-    private lateinit var fragmentContainer: FrameLayout
-    private lateinit var homeContainer: View
-    private lateinit var myGardenContainer: FrameLayout
-    private lateinit var imagePreview: ImageView
-    private lateinit var imagePreviewCard: MaterialCardView
-    private lateinit var initialStateLayout: View
+    private lateinit var binding: ActivityMainModernBinding
+    private lateinit var viewModel: EcoLensViewModel
+
     private lateinit var imageZoomHandler: ImageZoomHandler
     private lateinit var languageManager: LanguageManager
     private lateinit var loadingAnimationHandler: LoadingAnimationHandler
-    private lateinit var loadingCard: View
-    private lateinit var loadingOverlay: View
-    private lateinit var mainContent: ViewGroup
-    private lateinit var overlayContainer: FrameLayout
     private lateinit var permissionManager: PermissionManager
-    private lateinit var searchBarContainer: View
     private lateinit var searchBarHandler: SearchBarHandler
-    private lateinit var settingsContainer: View
     private lateinit var settingsHandler: SettingsHandler
     private lateinit var speakerManager: SpeakerManager
-    private lateinit var speciesInfoCard: MaterialCardView
     private lateinit var speciesInfoHandler: SpeciesInfoHandler
-    private lateinit var viewModel: EcoLensViewModel
 
     private val historyFragment = HistoryFragment()
     private val chatHistoryFragment = ChatHistoryFragment()
@@ -78,7 +57,7 @@ class MainActivity : AppCompatActivity() {
         if (result.resultCode == RESULT_OK) {
             val uriString = result.data?.getStringExtra(CameraActivity.KEY_IMAGE_URI)
             if (uriString != null) {
-                handleCapturedImage(Uri.parse(uriString))
+                handleCapturedImage(uriString.toUri())
             }
         }
     }
@@ -98,51 +77,24 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main_modern)
+        binding = ActivityMainModernBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        initViews()
         setupViewModel()
         initHandlers()
         initManagers()
         setupBottomNavigation()
         setupFAB()
         setupObservers()
+        setupBackNavigation()
 
         updateNavigationState(R.id.nav_home)
         preloadFragments()
     }
 
-    private fun initViews() {
-        mainContent = findViewById(R.id.mainContent)
-        homeContainer = findViewById(R.id.homeContainer)
-        fragmentContainer = findViewById(R.id.historyContainer)
-        myGardenContainer = findViewById(R.id.myGardenContainer)
-        overlayContainer = findViewById(R.id.fragmentContainer)
-
-        settingsContainer = findViewById(R.id.settingsContainer)
-        searchBarContainer = findViewById(R.id.searchBarContainer)
-
-        fabSpeak = findViewById(R.id.fabSpeak)
-        fabMute = findViewById(R.id.fabMute)
-        fabCamera = findViewById(R.id.fabCamera)
-        bottomNav = findViewById(R.id.bottomNavigation)
-
-        imagePreviewCard = findViewById(R.id.imagePreviewCard)
-        imagePreview = findViewById(R.id.imagePreview)
-        initialStateLayout = findViewById(R.id.initialStateLayout)
-
-        loadingOverlay = findViewById(R.id.loadingOverlay)
-        loadingCard = findViewById(R.id.loadingCard)
-        errorCard = findViewById(R.id.errorCard)
-        errorText = findViewById(R.id.errorText)
-        speciesInfoCard = findViewById(R.id.speciesInfoCard)
-
-    }
-
     private fun preloadFragments() {
         lifecycleScope.launch {
             delay(500)
-
             if (!isDestroyed) {
                 val transaction = supportFragmentManager.beginTransaction()
                 if (!historyFragment.isAdded) {
@@ -155,6 +107,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
     private fun setupViewModel() {
         viewModel = ViewModelProvider(
             this,
@@ -163,41 +116,33 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initHandlers() {
-        settingsHandler = SettingsHandler(this, languageManager, settingsContainer)
-        settingsHandler.setup()
+        settingsHandler = SettingsHandler(this, languageManager, binding.settingsContainer.root)
+
+        val homeRoot = binding.homeContainer.root
 
         searchBarHandler = SearchBarHandler(
             this,
-            searchBarContainer as MaterialCardView,
-            findViewById(R.id.textInputLayoutSearch),
-            findViewById(R.id.etSearchQuery),
-            findViewById(R.id.btnSearchAction)
+            homeRoot.findViewById(R.id.searchBarContainer),
+            homeRoot.findViewById(R.id.textInputLayoutSearch),
+            homeRoot.findViewById(R.id.etSearchQuery),
+            homeRoot.findViewById(R.id.btnSearchAction)
         )
-        searchBarHandler.setup()
 
         imageZoomHandler = ImageZoomHandler(
-            findViewById(R.id.btnZoomIn),
-            findViewById(R.id.btnZoomOut),
-            findViewById(R.id.fullScreenContainer),
-            findViewById(R.id.fullScreenImage)
+            homeRoot.findViewById(R.id.btnZoomIn),
+            homeRoot.findViewById(R.id.btnZoomOut),
+            binding.fullScreenContainer,
+            binding.fullScreenImage
         )
-        imageZoomHandler.setup()
 
         loadingAnimationHandler = LoadingAnimationHandler(
-            loadingCard.findViewById(R.id.tvLoading),
+            homeRoot.findViewById(R.id.tvLoading),
             lifecycleScope
         )
-    }
 
-    private fun initManagers() {
-        permissionManager = PermissionManager(this, permissionLauncher)
-        speakerManager = SpeakerManager(this)
-        speakerManager.onSpeechFinished = {
-            runOnUiThread { toggleSpeakerUI(false) }
-        }
         speciesInfoHandler = SpeciesInfoHandler(
             this,
-            speciesInfoCard,
+            binding,
             onCopySuccess = { copiedText ->
                 searchBarHandler.expandSearchBar(copiedText)
             },
@@ -209,17 +154,23 @@ class MainActivity : AppCompatActivity() {
                 viewModel.retryIdentification()
             }
         )
+    }
 
-
+    private fun initManagers() {
+        permissionManager = PermissionManager(this, permissionLauncher)
+        speakerManager = SpeakerManager(this)
+        speakerManager.onSpeechFinished = {
+            runOnUiThread { toggleSpeakerUI(false) }
+        }
 
         supportFragmentManager.addOnBackStackChangedListener {
             val count = supportFragmentManager.backStackEntryCount
             if (count > 0) {
-                overlayContainer.visibility = View.VISIBLE
+                binding.fragmentContainer.visibility = View.VISIBLE
             } else {
-                overlayContainer.postDelayed({
+                binding.fragmentContainer.postDelayed({
                     if (supportFragmentManager.backStackEntryCount == 0) {
-                        overlayContainer.visibility = View.GONE
+                        binding.fragmentContainer.visibility = View.GONE
                     }
                 }, 400)
             }
@@ -227,8 +178,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleCapturedImage(uri: Uri) {
-        fabCamera.isClickable = false
-        fabCamera.alpha = 0.5f
+        binding.fabCamera.isClickable = false
+        binding.fabCamera.alpha = 0.5f
         if (speakerManager.isSpeaking()) {
             speakerManager.pause()
             toggleSpeakerUI(false)
@@ -236,12 +187,15 @@ class MainActivity : AppCompatActivity() {
 
         if (searchBarHandler.isExpanded()) searchBarHandler.collapseSearchBar()
 
-        bottomNav.selectedItemId = R.id.nav_home
+        binding.bottomNavigation.selectedItemId = R.id.nav_home
 
         imageUri = uri
 
         animateCardExpansion {
-            Glide.with(this).load(uri).centerCrop().into(imagePreview)
+            val homeRoot = binding.homeContainer.root
+            val imagePreview = homeRoot.findViewById<View>(R.id.imagePreview)
+            
+            Glide.with(this).load(uri).centerCrop().into(imagePreview as android.widget.ImageView)
             imageZoomHandler.setImageUri(uri)
             viewModel.identifySpecies(uri, languageManager.getLanguage())
         }
@@ -252,6 +206,11 @@ class MainActivity : AppCompatActivity() {
             onAnimationComplete()
             return
         }
+
+        val homeRoot = binding.homeContainer.root
+        val imagePreviewCard = homeRoot.findViewById<View>(R.id.imagePreviewCard)
+        val initialStateLayout = homeRoot.findViewById<View>(R.id.initialStateLayout)
+        val imagePreview = homeRoot.findViewById<View>(R.id.imagePreview)
 
         val startHeight = imagePreviewCard.height
         val targetHeight = (290 * resources.displayMetrics.density).toInt()
@@ -288,7 +247,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupBottomNavigation() {
-        bottomNav.setOnItemSelectedListener { item ->
+        binding.bottomNavigation.setOnItemSelectedListener { item ->
             if (supportFragmentManager.backStackEntryCount > 0) {
                 supportFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
             }
@@ -306,73 +265,59 @@ class MainActivity : AppCompatActivity() {
 
         val transition = Fade()
         transition.duration = 120
-        TransitionManager.beginDelayedTransition(mainContent, transition)
+        TransitionManager.beginDelayedTransition(binding.mainContent, transition)
 
-        homeContainer.visibility = View.GONE
-        fragmentContainer.visibility = View.GONE
-        myGardenContainer.visibility = View.GONE
-        settingsContainer.visibility = View.GONE
+        binding.homeContainer.root.visibility = View.GONE
+        binding.historyContainer.visibility = View.GONE
+        binding.myGardenContainer.visibility = View.GONE
+        binding.settingsContainer.root.visibility = View.GONE
 
-        searchBarContainer.visibility = View.GONE
-        fabSpeak.visibility = View.GONE
-        fabMute.visibility = View.GONE
+        val homeRoot = binding.homeContainer.root
+        homeRoot.findViewById<View>(R.id.searchBarContainer).visibility = View.GONE
+        
+        binding.fabSpeak.visibility = View.GONE
+        binding.fabMute.visibility = View.GONE
 
-        bottomNav.visibility = View.VISIBLE
-        fabCamera.visibility = View.VISIBLE
+        binding.bottomNavigation.visibility = View.VISIBLE
+        binding.fabCamera.visibility = View.VISIBLE
 
         when (itemId) {
             R.id.nav_home -> {
-                homeContainer.visibility = View.VISIBLE
-                searchBarContainer.visibility = View.VISIBLE
+                binding.homeContainer.root.visibility = View.VISIBLE
+                homeRoot.findViewById<View>(R.id.searchBarContainer).visibility = View.VISIBLE
 
                 val state = viewModel.uiState.value
                 val isComplete = state.loadingStage == LoadingStage.COMPLETE
                 val hasInfo = state.speciesInfo != null && !state.isLoading && state.error == null
 
                 if (isComplete && hasInfo && !speakerManager.isSpeaking()) {
-                    fabSpeak.visibility = View.VISIBLE
+                    binding.fabSpeak.visibility = View.VISIBLE
                 } else if (speakerManager.isSpeaking()) {
-                    fabMute.visibility = View.VISIBLE
+                    binding.fabMute.visibility = View.VISIBLE
                 }
             }
             R.id.nav_history -> {
-                fragmentContainer.visibility = View.VISIBLE
+                binding.historyContainer.visibility = View.VISIBLE
                 if (!historyFragment.isAdded) {
                     supportFragmentManager.beginTransaction()
                         .add(R.id.historyContainer, historyFragment, "HISTORY")
                         .commitNowAllowingStateLoss()
                 }
-                /*
-                val transaction = supportFragmentManager.beginTransaction()
-                if (historyFragment == null) {
-                    historyFragment = HistoryFragment()
-                    transaction.add(R.id.historyContainer, historyFragment!!, "HISTORY")
-                }
-                transaction.commitNowAllowingStateLoss()
-                 */
             }
             R.id.nav_my_garden -> {
-                myGardenContainer.visibility = View.VISIBLE
+                binding.myGardenContainer.visibility = View.VISIBLE
                 if (!chatHistoryFragment.isAdded) {
                     supportFragmentManager.beginTransaction()
                         .add(R.id.myGardenContainer, chatHistoryFragment, "CHAT_HISTORY")
                         .commitNowAllowingStateLoss()
                 }
-                /*
-                val transaction = supportFragmentManager.beginTransaction()
-                if (chatHistoryFragment == null) {
-                    chatHistoryFragment = ChatHistoryFragment()
-                    transaction.add(R.id.myGardenContainer, chatHistoryFragment!!, "CHAT_HISTORY")
-                }
-                transaction.commitNowAllowingStateLoss()
-                 */
             }
-            R.id.nav_settings -> settingsContainer.visibility = View.VISIBLE
+            R.id.nav_settings -> binding.settingsContainer.root.visibility = View.VISIBLE
         }
     }
 
     private fun setupFAB() {
-        fabCamera.setOnClickListener {
+        binding.fabCamera.setOnClickListener {
             if (speakerManager.isSpeaking()) {
                 speakerManager.pause()
                 toggleSpeakerUI(false)
@@ -386,7 +331,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        fabSpeak.setOnClickListener {
+        binding.fabSpeak.setOnClickListener {
             viewModel.uiState.value.speciesInfo?.let { info ->
                 val text = TextToSpeechGenerator.generateSpeechText(this, info)
                 if (text.isNotEmpty()) {
@@ -397,22 +342,22 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        fabMute.setOnClickListener {
+        binding.fabMute.setOnClickListener {
             speakerManager.pause()
             toggleSpeakerUI(false)
         }
     }
 
     private fun toggleSpeakerUI(isSpeaking: Boolean) {
-        if (homeContainer.visibility != View.VISIBLE) return
-        fabSpeak.visibility = if (!isSpeaking) View.VISIBLE else View.GONE
-        fabMute.visibility = if (isSpeaking) View.VISIBLE else View.GONE
+        if (!binding.homeContainer.root.isVisible) return
+        binding.fabSpeak.visibility = if (!isSpeaking) View.VISIBLE else View.GONE
+        binding.fabMute.visibility = if (isSpeaking) View.VISIBLE else View.GONE
     }
 
     private fun setupObservers() {
         lifecycleScope.launch {
             viewModel.uiState.collect { state ->
-                if (homeContainer.visibility == View.VISIBLE) {
+                if (binding.homeContainer.root.isVisible) {
                     updateHomeUI(state)
                 }
             }
@@ -432,11 +377,14 @@ class MainActivity : AppCompatActivity() {
 
         val showOverlay = isLoading && !isPhase2
 
-        fabCamera.isClickable = !isLoading
-        fabCamera.alpha = if (isLoading) 0.5f else 1.0f
+        binding.fabCamera.isClickable = !isLoading
+        binding.fabCamera.alpha = if (isLoading) 0.5f else 1.0f
 
+        val homeRoot = binding.homeContainer.root
+        val loadingOverlay = homeRoot.findViewById<View>(R.id.loadingOverlay)
         loadingOverlay.isVisible = showOverlay
-        loadingCard.isVisible = showOverlay
+
+        homeRoot.findViewById<View>(R.id.loadingCard).isVisible = showOverlay
 
         if (showOverlay){
             stopLoadingJob?.cancel()
@@ -465,19 +413,20 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (error != null) {
-            errorText.text = error
-            errorCard.isVisible = true
-            speciesInfoCard.isVisible = false
-            fabSpeak.isVisible = false
+            homeRoot.findViewById<TextView>(R.id.errorText).text = error
+            homeRoot.findViewById<View>(R.id.errorCard).isVisible = true
+            binding.homeContainer.speciesInfoCard.root.isVisible = false
+            binding.fabSpeak.isVisible = false
 
-            if (::initialStateLayout.isInitialized && initialStateLayout.visibility == View.VISIBLE) {
+            val initialStateLayout = homeRoot.findViewById<View>(R.id.initialStateLayout)
+            if (initialStateLayout.visibility == View.VISIBLE) {
                 initialStateLayout.visibility = View.GONE
             }
         }
         else if (loadingStage == LoadingStage.NONE && state.speciesInfo == null) {
-            speciesInfoCard.isVisible = false
-            errorCard.isVisible = false
-            fabSpeak.isVisible = false
+            binding.homeContainer.speciesInfoCard.root.isVisible = false
+            homeRoot.findViewById<View>(R.id.errorCard).isVisible = false
+            binding.fabSpeak.isVisible = false
             speciesInfoHandler.displaySpeciesInfo(
                 SpeciesInfo(scientificName = "", commonName = ""),
                 null,
@@ -485,15 +434,15 @@ class MainActivity : AppCompatActivity() {
             )
         }
         else if (state.speciesInfo != null) {
-            speciesInfoCard.isVisible = true
-            errorCard.isVisible = false
+            binding.homeContainer.speciesInfoCard.root.isVisible = true
+            homeRoot.findViewById<View>(R.id.errorCard).isVisible = false
 
             speciesInfoHandler.displaySpeciesInfo(state.speciesInfo, imageUri, loadingStage)
 
-            if (loadingStage == LoadingStage.COMPLETE && fabMute.visibility != View.VISIBLE) {
-                fabSpeak.isVisible = true
+            if (loadingStage == LoadingStage.COMPLETE && binding.fabMute.visibility != View.VISIBLE) {
+                binding.fabSpeak.isVisible = true
             } else {
-                fabSpeak.isVisible = false
+                binding.fabSpeak.isVisible = false
             }
         }
     }
@@ -514,21 +463,26 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    override fun onBackPressed() {
-        if (imageZoomHandler.isFullScreenVisible()) {
-            imageZoomHandler.hideFullScreen()
-            return
-        }
+    private fun setupBackNavigation() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (imageZoomHandler.isFullScreenVisible()) {
+                    imageZoomHandler.hideFullScreen()
+                    return
+                }
 
-        if (supportFragmentManager.backStackEntryCount > 0) {
-            supportFragmentManager.popBackStack()
-            return
-        }
+                if (supportFragmentManager.backStackEntryCount > 0) {
+                    supportFragmentManager.popBackStack()
+                    return
+                }
 
-        if (bottomNav.selectedItemId != R.id.nav_home) {
-            bottomNav.selectedItemId = R.id.nav_home
-        } else {
-            super.onBackPressed()
-        }
+                if (binding.bottomNavigation.selectedItemId != R.id.nav_home) {
+                    binding.bottomNavigation.selectedItemId = R.id.nav_home
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
     }
 }

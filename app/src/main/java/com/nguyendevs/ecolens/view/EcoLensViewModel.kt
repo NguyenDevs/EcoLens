@@ -13,13 +13,13 @@ import kotlinx.coroutines.launch
 
 class EcoLensViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val historyDao = HistoryDatabase.getDatabase(application).historyDao()
-    private val chatDao = HistoryDatabase.getDatabase(application).chatDao()
+    private val historyDao by lazy { HistoryDatabase.getDatabase(application).historyDao() }
+    private val chatDao by lazy { HistoryDatabase.getDatabase(application).chatDao() }
 
     // Managers
-    private val speciesManager = SpeciesIdentificationManager(application, historyDao)
-    private val historyManager = HistoryManager(historyDao)
-    private val chatManager = ChatSessionManager(chatDao, viewModelScope)
+    private val speciesManager by lazy { SpeciesIdentificationManager(application.applicationContext, historyDao) }
+    private val historyManager by lazy { HistoryManager(historyDao) }
+    private val chatManager by lazy { ChatSessionManager(chatDao, viewModelScope) }
 
     // UI State
     private val _uiState = MutableStateFlow(EcoLensUiState())
@@ -29,10 +29,13 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     val chatMessages: StateFlow<List<ChatMessage>> = chatManager.chatMessages
     val isStreamingActive: StateFlow<Boolean> = chatManager.isStreamingActive
     val allChatSessions: Flow<List<ChatSession>> = chatManager.allChatSessions
+    
+    private var lastLanguageCode: String = "en"
 
     // ==================== SPECIES IDENTIFICATION ====================
 
     fun identifySpecies(imageUri: Uri, languageCode: String, existingHistoryId: Int? = null) {
+        lastLanguageCode = languageCode
         viewModelScope.launch {
             speciesManager.identifySpecies(
                 imageUri = imageUri,
@@ -49,7 +52,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         speciesManager.currentImageUri?.let { uri ->
             identifySpecies(
                 imageUri = uri,
-                languageCode = speciesManager.currentLanguageCode,
+                languageCode = lastLanguageCode,
                 existingHistoryId = speciesManager.currentHistoryEntryId
             )
         }

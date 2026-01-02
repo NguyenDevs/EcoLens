@@ -5,11 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.media.MediaScannerConnection
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
 import android.util.Log
 import android.view.ScaleGestureDetector
 import android.view.MotionEvent
@@ -17,6 +13,7 @@ import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.view.HapticFeedbackConstants
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -27,9 +24,11 @@ import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.nguyendevs.ecolens.databinding.ActivityCameraModernBinding
 import com.nguyendevs.ecolens.R
 import java.io.File
-import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -46,18 +45,9 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
+    private lateinit var binding: ActivityCameraModernBinding
     private lateinit var cameraExecutor: ExecutorService
-    private lateinit var closeButton: ImageView
-    private lateinit var flashToggle: ImageView
     private lateinit var outputDirectory: File
-    private lateinit var rotateButton: ImageView
-    private lateinit var uploadButton: ImageView
-    private lateinit var viewFinder: PreviewView
-    private lateinit var captureButton: ImageView
-    private lateinit var captureBorder: ImageView
-    private lateinit var focusIndicator: ImageView
-
-    private lateinit var captureBorderAnimated: ImageView
     private var rotateAnimation: Animation? = null
 
     private var camera: Camera? = null
@@ -75,48 +65,39 @@ class CameraActivity : AppCompatActivity() {
 
             }
             setResult(RESULT_OK, resultIntent)
-            finish()
-            overridePendingTransition(R.anim.hold, R.anim.slide_out_bottom)
+            closeCamera()
         }
     }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_camera_modern)
+        binding = ActivityCameraModernBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        viewFinder = findViewById(R.id.viewFinder)
-        closeButton = findViewById(R.id.closeButton)
-        captureButton = findViewById(R.id.captureButton)
-        focusIndicator = findViewById(R.id.focusIndicator)
         cameraExecutor = Executors.newSingleThreadExecutor()
         outputDirectory = getOutputDirectory()
-        uploadButton = findViewById(R.id.uploadButton)
-        flashToggle = findViewById(R.id.flashToggle)
-        rotateButton = findViewById(R.id.refreshButton)
 
         startCamera()
-        captureBorderAnimated = findViewById(R.id.captureBorderAnimated)
         setupZoomAndFocus()
         startBorderAnimation()
-        captureButton.setOnClickListener {
+        binding.captureButton.setOnClickListener {
             performHapticFeedback()
             animateCaptureButton()
             takePhoto()
         }
 
-        closeButton.setOnClickListener {
-            finish()
-            overridePendingTransition(R.anim.hold, R.anim.slide_out_bottom)
+        binding.closeButton.setOnClickListener {
+            closeCamera()
         }
 
-        uploadButton.setOnClickListener {
+        binding.uploadButton.setOnClickListener {
             openGallery()
         }
 
-        rotateButton.setOnClickListener {
+        binding.refreshButton.setOnClickListener {
             val rotateOnce = AnimationUtils.loadAnimation(this, R.anim.rotate_once)
-            rotateButton.startAnimation(rotateOnce)
+            binding.refreshButton.startAnimation(rotateOnce)
             lensFacing = if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
                 CameraSelector.LENS_FACING_BACK
             } else {
@@ -125,19 +106,23 @@ class CameraActivity : AppCompatActivity() {
             startCamera()
         }
 
-        flashToggle.setOnClickListener {
+        binding.flashToggle.setOnClickListener {
             toggleFlash()
         }
     }
 
     override fun onBackPressed() {
         super.onBackPressed()
+        closeCamera()
+    }
+
+    private fun closeCamera() {
         finish()
         overridePendingTransition(R.anim.hold, R.anim.slide_out_bottom)
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        finish()
+        closeCamera()
         return true
     }
 
@@ -160,7 +145,7 @@ class CameraActivity : AppCompatActivity() {
             val preview = Preview.Builder()
                 .build()
                 .also {
-                    it.setSurfaceProvider(viewFinder.surfaceProvider)
+                    it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
                 }
 
             imageCapture = ImageCapture.Builder()
@@ -181,9 +166,9 @@ class CameraActivity : AppCompatActivity() {
                 cameraInfo = camera?.cameraInfo
 
                 if (camera?.cameraInfo?.hasFlashUnit() == true) {
-                    flashToggle.visibility = View.VISIBLE
+                    binding.flashToggle.visibility = View.VISIBLE
                 } else {
-                    flashToggle.visibility = View.GONE
+                    binding.flashToggle.visibility = View.GONE
                 }
 
             } catch (exc: Exception) {
@@ -193,7 +178,7 @@ class CameraActivity : AppCompatActivity() {
                     startCamera()
                 } else {
                     Toast.makeText(this, getString(R.string.error_camera_open, exc.message), Toast.LENGTH_SHORT).show()
-                    finish()
+                    closeCamera()
                 }
             }
 
@@ -213,10 +198,10 @@ class CameraActivity : AppCompatActivity() {
 
         val scaleGestureDetector = ScaleGestureDetector(this, listener)
 
-        viewFinder.setOnTouchListener { _, event ->
+        binding.viewFinder.setOnTouchListener { _, event ->
             scaleGestureDetector.onTouchEvent(event)
             if (event.action == MotionEvent.ACTION_UP) {
-                val factory = viewFinder.meteringPointFactory
+                val factory = binding.viewFinder.meteringPointFactory
                 val point = factory.createPoint(event.x, event.y)
                 val action = FocusMeteringAction.Builder(point, FocusMeteringAction.FLAG_AF)
                     .setAutoCancelDuration(3, TimeUnit.SECONDS)
@@ -230,62 +215,43 @@ class CameraActivity : AppCompatActivity() {
     }
 
     private fun showFocusIndicator(x: Float, y: Float) {
-        focusIndicator.animate().cancel()
+        binding.focusIndicator.apply {
+            animate().cancel()
+            this.x = x - (width / 2)
+            this.y = y - (height / 2) + binding.viewFinder.top
+            visibility = View.VISIBLE
+            alpha = 1f
+            scaleX = 1.3f
+            scaleY = 1.3f
 
-        focusIndicator.x = x - (focusIndicator.width / 2)
-        focusIndicator.y = y - (focusIndicator.height / 2) + viewFinder.top
-
-        focusIndicator.visibility = View.VISIBLE
-        focusIndicator.alpha = 1f
-        focusIndicator.scaleX = 1.3f
-        focusIndicator.scaleY = 1.3f
-
-        focusIndicator.animate()
-            .scaleX(1f)
-            .scaleY(1f)
-            .setDuration(300)
-            .setInterpolator(AccelerateDecelerateInterpolator())
-            .withEndAction {
-                focusIndicator.animate()
-                    .alpha(0f)
-                    .setStartDelay(500)
-                    .setDuration(300)
-                    .withEndAction {
-                        focusIndicator.visibility = View.INVISIBLE
-                    }
-                    .start()
-            }
-            .start()
-    }
-
-    private fun performHapticFeedback() {
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-                val vibrator = vibratorManager.defaultVibrator
-                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
-            } else {
-                @Suppress("DEPRECATION")
-                val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
-                } else {
-                    @Suppress("DEPRECATION")
-                    vibrator.vibrate(50)
+            animate()
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(300)
+                .setInterpolator(AccelerateDecelerateInterpolator())
+                .withEndAction {
+                    animate()
+                        .alpha(0f)
+                        .setStartDelay(500)
+                        .setDuration(300)
+                        .withEndAction { visibility = View.INVISIBLE }
+                        .start()
                 }
-            }
-        } catch (e: Exception) {
-            Log.e("CameraActivity", "Vibration failed: ${e.message}")
+                .start()
         }
     }
 
+    private fun performHapticFeedback() {
+        binding.captureButton.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+    }
+
     private fun animateCaptureButton() {
-        captureButton.animate()
+        binding.captureButton.animate()
             .scaleX(0.85f)
             .scaleY(0.85f)
             .setDuration(100)
             .withEndAction {
-                captureButton.animate()
+                binding.captureButton.animate()
                     .scaleX(1f)
                     .scaleY(1f)
                     .setDuration(100)
@@ -297,10 +263,10 @@ class CameraActivity : AppCompatActivity() {
     private fun toggleFlash() {
         val imageCapture = imageCapture ?: return
         val currentMode = imageCapture.flashMode
-        val newMode = when (currentMode) {
-            ImageCapture.FLASH_MODE_OFF -> ImageCapture.FLASH_MODE_ON
-            ImageCapture.FLASH_MODE_ON -> ImageCapture.FLASH_MODE_OFF
-            else -> ImageCapture.FLASH_MODE_OFF
+        val newMode = if (currentMode == ImageCapture.FLASH_MODE_ON) {
+            ImageCapture.FLASH_MODE_OFF
+        } else {
+            ImageCapture.FLASH_MODE_ON
         }
 
         imageCapture.flashMode = newMode
@@ -312,7 +278,7 @@ class CameraActivity : AppCompatActivity() {
             ImageCapture.FLASH_MODE_ON -> R.drawable.ic_lightning
             else -> R.drawable.ic_lightning_off
         }
-        flashToggle.setImageResource(iconRes)
+        binding.flashToggle.setImageResource(iconRes)
     }
 
     private fun takePhoto() {
@@ -320,16 +286,18 @@ class CameraActivity : AppCompatActivity() {
 
         val photoFile = File(
             outputDirectory,
-            SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis()) + ".jpg"
+            DateTimeFormatter.ofPattern(FILENAME_FORMAT, Locale.US).format(LocalDateTime.now()) + ".jpg"
         )
 
         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
         imageCapture.takePicture(
-            outputOptions, ContextCompat.getMainExecutor(this), object : ImageCapture.OnImageSavedCallback {
+            outputOptions, cameraExecutor, object : ImageCapture.OnImageSavedCallback {
                 override fun onError(exc: ImageCaptureException) {
                     Log.e("CameraActivity", "Photo capture failed: ${exc.message}", exc)
-                    Toast.makeText(baseContext, getString(R.string.error_capture, exc.message), Toast.LENGTH_SHORT).show()
+                    runOnUiThread {
+                        Toast.makeText(baseContext, getString(R.string.error_capture, exc.message), Toast.LENGTH_SHORT).show()
+                    }
                 }
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
@@ -346,13 +314,14 @@ class CameraActivity : AppCompatActivity() {
                         photoFile
                     )
 
-                    val resultIntent = Intent().apply {
-                        putExtra(KEY_IMAGE_URI, savedUri.toString())
-                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    runOnUiThread {
+                        val resultIntent = Intent().apply {
+                            putExtra(KEY_IMAGE_URI, savedUri.toString())
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }
+                        setResult(RESULT_OK, resultIntent)
+                        closeCamera()
                     }
-                    setResult(RESULT_OK, resultIntent)
-                    finish()
-                    overridePendingTransition(R.anim.hold, R.anim.slide_out_bottom)
                 }
             })
     }
@@ -366,13 +335,13 @@ class CameraActivity : AppCompatActivity() {
 
     private fun startBorderAnimation() {
         rotateAnimation = AnimationUtils.loadAnimation(this, R.anim.rotate_infinite)
-        captureBorderAnimated.visibility = View.VISIBLE
-        captureBorderAnimated.startAnimation(rotateAnimation)
+        binding.captureBorderAnimated.visibility = View.VISIBLE
+        binding.captureBorderAnimated.startAnimation(rotateAnimation)
     }
 
     private fun stopBorderAnimation() {
         rotateAnimation?.cancel()
-        captureBorderAnimated.clearAnimation()
-        captureBorderAnimated.visibility = View.GONE
+        binding.captureBorderAnimated.clearAnimation()
+        binding.captureBorderAnimated.visibility = View.GONE
     }
 }

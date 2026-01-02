@@ -23,18 +23,18 @@ import android.widget.*
 import androidx.core.content.ContextCompat
 import com.google.android.material.card.MaterialCardView
 import com.nguyendevs.ecolens.R
+import com.nguyendevs.ecolens.databinding.ActivityMainModernBinding
 import com.nguyendevs.ecolens.model.LoadingStage
 import com.nguyendevs.ecolens.model.SpeciesInfo
 import kotlinx.coroutines.*
 
 class SpeciesInfoHandler(
     private val context: Context,
-    private val speciesInfoCard: MaterialCardView,
+    private val binding: ActivityMainModernBinding,
     private val onCopySuccess: (String) -> Unit,
     private val onRetryClick: () -> Unit
 ) {
     private val handlerScope = CoroutineScope(Dispatchers.Main + Job())
-    private val viewCache = mutableMapOf<Int, View>()
     private val displayedRows = mutableSetOf<Int>()
     private val renderedSections = mutableSetOf<Int>()
     private var isInitialLoad = true
@@ -44,12 +44,16 @@ class SpeciesInfoHandler(
     private var lastDisplayedCommonName: String? = null
     private var lastConfidenceValue: String? = null
 
-    init {
-        cacheViews()
+    // Helper để truy cập nhanh vào card info từ binding chính
+    private val infoBinding get() = binding.homeContainer.speciesInfoCard
+
+    companion object {
+        private val REGEX_BOLD = Regex("\\*\\*(.*?)\\*\\*")
+        private val REGEX_ITALIC = Regex("\\*(.*?)\\*")
     }
 
-    private fun renderHtml(textView: TextView, htmlContent: String) {
-        textView.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+    private fun TextView.setHtml(htmlContent: String) {
+        text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Html.fromHtml(htmlContent, Html.FROM_HTML_MODE_COMPACT)
         } else {
             @Suppress("DEPRECATION")
@@ -157,46 +161,6 @@ class SpeciesInfoHandler(
         handlerScope.cancel()
     }
 
-    private fun cacheViews() {
-        viewCache[R.id.tvCommonName] = speciesInfoCard.findViewById(R.id.tvCommonName)
-        viewCache[R.id.tvScientificName] = speciesInfoCard.findViewById(R.id.tvScientificName)
-        viewCache[R.id.tvConfidence] = speciesInfoCard.findViewById(R.id.tvConfidence)
-        viewCache[R.id.confidenceCard] = speciesInfoCard.findViewById(R.id.confidenceCard)
-        viewCache[R.id.iconConfidence] = speciesInfoCard.findViewById(R.id.iconConfidence)
-        viewCache[R.id.btnCopyScientificName] = speciesInfoCard.findViewById(R.id.btnCopyScientificName)
-        viewCache[R.id.btnShareInfo] = speciesInfoCard.findViewById(R.id.btnShareInfo)
-        viewCache[R.id.btnRetryIdentification] = speciesInfoCard.findViewById(R.id.btnRetryIdentification)
-        viewCache[R.id.taxonomyContainer] = speciesInfoCard.findViewById(R.id.taxonomyContainer)
-
-        val rowIds = listOf(
-            R.id.rowKingdom, R.id.rowPhylum, R.id.rowClass,
-            R.id.rowOrder, R.id.rowFamily, R.id.rowGenus, R.id.rowSpecies
-        )
-        rowIds.forEach { id ->
-            speciesInfoCard.findViewById<View>(id)?.let { viewCache[id] = it }
-        }
-
-        viewCache[R.id.tvKingdom] = speciesInfoCard.findViewById(R.id.tvKingdom)
-        viewCache[R.id.tvPhylum] = speciesInfoCard.findViewById(R.id.tvPhylum)
-        viewCache[R.id.tvClass] = speciesInfoCard.findViewById(R.id.tvClass)
-        viewCache[R.id.tvOrder] = speciesInfoCard.findViewById(R.id.tvOrder)
-        viewCache[R.id.tvFamily] = speciesInfoCard.findViewById(R.id.tvFamily)
-        viewCache[R.id.tvGenus] = speciesInfoCard.findViewById(R.id.tvGenus)
-        viewCache[R.id.tvSpecies] = speciesInfoCard.findViewById(R.id.tvSpecies)
-
-        viewCache[R.id.sectionDescription] = speciesInfoCard.findViewById(R.id.sectionDescription)
-        viewCache[R.id.sectionCharacteristics] = speciesInfoCard.findViewById(R.id.sectionCharacteristics)
-        viewCache[R.id.sectionDistribution] = speciesInfoCard.findViewById(R.id.sectionDistribution)
-        viewCache[R.id.sectionHabitat] = speciesInfoCard.findViewById(R.id.sectionHabitat)
-        viewCache[R.id.sectionConservation] = speciesInfoCard.findViewById(R.id.sectionConservation)
-
-        viewCache[R.id.tvDescription] = speciesInfoCard.findViewById(R.id.tvDescription)
-        viewCache[R.id.tvCharacteristics] = speciesInfoCard.findViewById(R.id.tvCharacteristics)
-        viewCache[R.id.tvDistribution] = speciesInfoCard.findViewById(R.id.tvDistribution)
-        viewCache[R.id.tvHabitat] = speciesInfoCard.findViewById(R.id.tvHabitat)
-        viewCache[R.id.tvConservationStatus] = speciesInfoCard.findViewById(R.id.tvConservationStatus)
-    }
-
     private fun clearAllViews() {
         lastDisplayedCommonName = null
         lastConfidenceValue = null
@@ -206,26 +170,24 @@ class SpeciesInfoHandler(
         stopConfidenceAnimation()
         stopTaxonomyShimmer()
 
-        val viewsToHide = listOf(
-            R.id.tvCommonName, R.id.tvScientificName, R.id.confidenceCard,
-            R.id.taxonomyContainer, R.id.rowKingdom, R.id.rowPhylum, R.id.rowClass,
-            R.id.rowOrder, R.id.rowFamily, R.id.rowGenus, R.id.rowSpecies,
-            R.id.sectionDescription, R.id.sectionCharacteristics,
-            R.id.sectionDistribution, R.id.sectionHabitat, R.id.sectionConservation
+        val viewsToHide = listOf<View>(
+            infoBinding.tvCommonName, infoBinding.tvScientificName, infoBinding.confidenceCard,
+            infoBinding.taxonomyContainer, infoBinding.rowKingdom, infoBinding.rowPhylum, infoBinding.rowClass,
+            infoBinding.rowOrder, infoBinding.rowFamily, infoBinding.rowGenus, infoBinding.rowSpecies,
+            infoBinding.sectionDescription, infoBinding.sectionCharacteristics,
+            infoBinding.sectionDistribution, infoBinding.sectionHabitat, infoBinding.sectionConservation
         )
-        viewsToHide.forEach { id ->
-            viewCache[id]?.let {
-                it.visibility = View.GONE
-                it.alpha = 0f
-                it.translationY = 0f
-            }
+        viewsToHide.forEach { view ->
+            view.visibility = View.GONE
+            view.alpha = 0f
+            view.translationY = 0f
         }
 
         val textViews = listOf(
-            R.id.tvKingdom, R.id.tvPhylum, R.id.tvClass, R.id.tvOrder,
-            R.id.tvFamily, R.id.tvGenus, R.id.tvSpecies
+            infoBinding.tvKingdom, infoBinding.tvPhylum, infoBinding.tvClass, infoBinding.tvOrder,
+            infoBinding.tvFamily, infoBinding.tvGenus, infoBinding.tvSpecies
         )
-        textViews.forEach { (viewCache[it] as? TextView)?.text = "" }
+        textViews.forEach { it.text = "" }
     }
 
     private fun checkIfAllSectionsRendered(info: SpeciesInfo, imageUri: Uri?) {
@@ -252,21 +214,15 @@ class SpeciesInfoHandler(
     }
 
     private fun displayScientificName(info: SpeciesInfo) {
-        val tvScientificName = viewCache[R.id.tvScientificName] as? TextView
-        val btnCopy = viewCache[R.id.btnCopyScientificName]
-
-        tvScientificName?.let {
-            renderHtml(it, info.scientificName)
-            slideAndFadeIn(it, duration = 500, delay = 100)
+        infoBinding.tvScientificName.apply {
+            setHtml(info.scientificName)
+            slideAndFadeIn(this, duration = 500, delay = 100)
         }
-        btnCopy?.let {
-            slideAndFadeIn(it, duration = 500, delay = 150)
-        }
+        slideAndFadeIn(infoBinding.btnCopyScientificName, duration = 500, delay = 150)
     }
 
     private fun displayCommonName(info: SpeciesInfo) {
-        val tvCommonName = viewCache[R.id.tvCommonName] as? TextView
-        tvCommonName?.let { view ->
+        infoBinding.tvCommonName.let { view ->
             if (lastDisplayedCommonName == info.commonName &&
                 view.visibility == View.VISIBLE &&
                 view.alpha == 1f) {
@@ -280,7 +236,7 @@ class SpeciesInfoHandler(
                 lastDisplayedCommonName = "..."
             } else {
                 view.setTextColor(ContextCompat.getColor(context, R.color.green_primary))
-                renderHtml(view, info.commonName)
+                view.setHtml(info.commonName)
 
                 if (lastDisplayedCommonName != info.commonName) {
                     slideAndFadeIn(view, duration = 600)
@@ -295,29 +251,29 @@ class SpeciesInfoHandler(
 
     @SuppressLint("StringFormatInvalid")
     private fun displayConfidence(info: SpeciesInfo, isWaiting: Boolean) {
-        val tvConfidence = viewCache[R.id.tvConfidence] as? TextView
-        val confidenceCard = viewCache[R.id.confidenceCard] as? MaterialCardView
-        val iconConfidence = viewCache[R.id.iconConfidence] as? ImageView
+        val tvConfidence = infoBinding.tvConfidence
+        val confidenceCard = infoBinding.confidenceCard
+        val iconConfidence = infoBinding.iconConfidence
 
         if (isWaiting) {
             lastConfidenceValue = "loading"
 
-            tvConfidence?.text = context.getString(R.string.confidence, "...%")
-            tvConfidence?.textSize = 13f
+            tvConfidence.text = context.getString(R.string.confidence, "...%")
+            tvConfidence.textSize = 13f
 
-            iconConfidence?.setImageResource(R.drawable.ic_rotate)
-            iconConfidence?.imageTintList = ContextCompat.getColorStateList(context, R.color.text_secondary)
-            confidenceCard?.setCardBackgroundColor(ContextCompat.getColor(context, R.color.gray_light))
-            tvConfidence?.setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
+            iconConfidence.setImageResource(R.drawable.ic_rotate)
+            iconConfidence.imageTintList = ContextCompat.getColorStateList(context, R.color.text_secondary)
+            confidenceCard.setCardBackgroundColor(ContextCompat.getColor(context, R.color.gray_light))
+            tvConfidence.setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
 
-            confidenceCard?.let {
+            confidenceCard.let {
                 if (it.visibility != View.VISIBLE) {
                     it.visibility = View.VISIBLE
                     it.alpha = 1f
                 }
             }
 
-            if (confidenceRotationAnimator == null && iconConfidence != null) {
+            if (confidenceRotationAnimator == null) {
                 confidenceRotationAnimator = ObjectAnimator.ofFloat(iconConfidence, "rotation", 0f, 360f).apply {
                     duration = 1000
                     repeatCount = ObjectAnimator.INFINITE
@@ -333,12 +289,12 @@ class SpeciesInfoHandler(
             val newText = context.getString(R.string.confidence_format, confidencePercent)
 
             if (lastConfidenceValue == newText &&
-                confidenceCard?.visibility == View.VISIBLE &&
-                confidenceCard?.alpha == 1f) {
+                confidenceCard.visibility == View.VISIBLE &&
+                confidenceCard.alpha == 1f) {
                 return
             }
 
-            tvConfidence?.text = newText
+            tvConfidence.text = newText
 
             val (icon, tint, bg, text) = when {
                 confidenceValue >= 50f -> Quadruple(
@@ -361,12 +317,12 @@ class SpeciesInfoHandler(
                 )
             }
 
-            iconConfidence?.setImageResource(icon)
-            iconConfidence?.imageTintList = ContextCompat.getColorStateList(context, tint)
-            confidenceCard?.setCardBackgroundColor(ContextCompat.getColor(context, bg))
-            tvConfidence?.setTextColor(ContextCompat.getColor(context, text))
+            iconConfidence.setImageResource(icon)
+            iconConfidence.imageTintList = ContextCompat.getColorStateList(context, tint)
+            confidenceCard.setCardBackgroundColor(ContextCompat.getColor(context, bg))
+            tvConfidence.setTextColor(ContextCompat.getColor(context, text))
 
-            confidenceCard?.let { card ->
+            confidenceCard.let { card ->
                 if (lastConfidenceValue != newText) {
                     card.visibility = View.VISIBLE
 
@@ -397,18 +353,18 @@ class SpeciesInfoHandler(
     }
 
     private fun prepareTaxonomyContainer() {
-        val container = viewCache[R.id.taxonomyContainer]
-        container?.visibility = View.VISIBLE
-        container?.alpha = 1f
+        val container = infoBinding.taxonomyContainer
+        container.visibility = View.VISIBLE
+        container.alpha = 1f
 
         startTaxonomyShimmer(container)
 
-        val rowIds = listOf(
-            R.id.rowKingdom, R.id.rowPhylum, R.id.rowClass,
-            R.id.rowOrder, R.id.rowFamily, R.id.rowGenus, R.id.rowSpecies
+        val rows = listOf(
+            infoBinding.rowKingdom, infoBinding.rowPhylum, infoBinding.rowClass,
+            infoBinding.rowOrder, infoBinding.rowFamily, infoBinding.rowGenus, infoBinding.rowSpecies
         )
-        rowIds.forEach { id ->
-            viewCache[id]?.apply {
+        rows.forEach { row ->
+            row.apply {
                 visibility = View.INVISIBLE
                 alpha = 0f
                 translationY = 0f
@@ -417,49 +373,45 @@ class SpeciesInfoHandler(
     }
 
     private fun displayTaxonomyWaterfall(info: SpeciesInfo) {
-        val container = viewCache[R.id.taxonomyContainer]
-        container?.visibility = View.VISIBLE
-        container?.alpha = 1f
+        val container = infoBinding.taxonomyContainer
+        container.visibility = View.VISIBLE
+        container.alpha = 1f
 
         val rows = listOf(
-            Triple(R.id.rowKingdom, R.id.tvKingdom, info.kingdom),
-            Triple(R.id.rowPhylum, R.id.tvPhylum, info.phylum),
-            Triple(R.id.rowClass, R.id.tvClass, info.className),
-            Triple(R.id.rowOrder, R.id.tvOrder, info.taxorder),
-            Triple(R.id.rowFamily, R.id.tvFamily, info.family),
-            Triple(R.id.rowGenus, R.id.tvGenus, info.genus),
-            Triple(R.id.rowSpecies, R.id.tvSpecies, info.species)
+            Triple(infoBinding.rowKingdom, infoBinding.tvKingdom, info.kingdom),
+            Triple(infoBinding.rowPhylum, infoBinding.tvPhylum, info.phylum),
+            Triple(infoBinding.rowClass, infoBinding.tvClass, info.className),
+            Triple(infoBinding.rowOrder, infoBinding.tvOrder, info.taxorder),
+            Triple(infoBinding.rowFamily, infoBinding.tvFamily, info.family),
+            Triple(infoBinding.rowGenus, infoBinding.tvGenus, info.genus),
+            Triple(infoBinding.rowSpecies, infoBinding.tvSpecies, info.species)
         )
 
-        rows.forEach { (rowId, tvId, text) ->
-            val rowView = viewCache[rowId]
-            val textView = viewCache[tvId] as? TextView
+        rows.forEach { (rowView, textView, text) ->
+            val hasData = text.isNotEmpty() && text != "..." && text != "N/A"
+            val rowId = rowView.id
 
-            if (rowView != null && textView != null) {
-                val hasData = text.isNotEmpty() && text != "..." && text != "N/A"
+            if (hasData) {
+                if (!displayedRows.contains(rowId)) {
+                    textView.setHtml(text)
 
-                if (hasData) {
-                    if (!displayedRows.contains(rowId)) {
-                        renderHtml(textView, text)
+                    rowView.visibility = View.VISIBLE
+                    rowView.alpha = 0f
+                    rowView.translationY = -10f
 
-                        rowView.visibility = View.VISIBLE
-                        rowView.alpha = 0f
-                        rowView.translationY = -10f
+                    rowView.animate()
+                        .alpha(1f)
+                        .translationY(0f)
+                        .setDuration(300)
+                        .setInterpolator(DecelerateInterpolator())
+                        .start()
 
-                        rowView.animate()
-                            .alpha(1f)
-                            .translationY(0f)
-                            .setDuration(300)
-                            .setInterpolator(DecelerateInterpolator())
-                            .start()
-
-                        displayedRows.add(rowId)
-                    }
-                } else {
-                    if (!displayedRows.contains(rowId)) {
-                        rowView.visibility = View.INVISIBLE
-                        rowView.alpha = 0f
-                    }
+                    displayedRows.add(rowId)
+                }
+            } else {
+                if (!displayedRows.contains(rowId)) {
+                    rowView.visibility = View.INVISIBLE
+                    rowView.alpha = 0f
                 }
             }
         }
@@ -536,8 +488,7 @@ class SpeciesInfoHandler(
     private fun stopTaxonomyShimmer() {
         taxonomyShimmerAnimator?.cancel()
         taxonomyShimmerAnimator = null
-        val container = viewCache[R.id.taxonomyContainer]
-        container?.let {
+        infoBinding.taxonomyContainer.let {
             it.setBackgroundResource(R.drawable.bg_white_rounded)
             it.backgroundTintList = ContextCompat.getColorStateList(context, R.color.gray_light_f8)
         }
@@ -546,17 +497,32 @@ class SpeciesInfoHandler(
     private fun stopConfidenceAnimation() {
         confidenceRotationAnimator?.cancel()
         confidenceRotationAnimator = null
-        (viewCache[R.id.iconConfidence] as? ImageView)?.rotation = 0f
+        infoBinding.iconConfidence.rotation = 0f
     }
 
     private fun displaySection(sectionId: Int, textViewId: Int, text: String, shouldScroll: Boolean = true) {
-        val section = viewCache[sectionId] as? LinearLayout
-        val textView = viewCache[textViewId] as? TextView
+        // Map ID to View using Binding
+        val section = when(sectionId) {
+            R.id.sectionDescription -> infoBinding.sectionDescription
+            R.id.sectionCharacteristics -> infoBinding.sectionCharacteristics
+            R.id.sectionDistribution -> infoBinding.sectionDistribution
+            R.id.sectionHabitat -> infoBinding.sectionHabitat
+            R.id.sectionConservation -> infoBinding.sectionConservation
+            else -> null
+        }
+        val textView = when(textViewId) {
+            R.id.tvDescription -> infoBinding.tvDescription
+            R.id.tvCharacteristics -> infoBinding.tvCharacteristics
+            R.id.tvDistribution -> infoBinding.tvDistribution
+            R.id.tvHabitat -> infoBinding.tvHabitat
+            R.id.tvConservationStatus -> infoBinding.tvConservationStatus
+            else -> null
+        }
 
         if (text.isNotEmpty()) {
             val trimmedText = text.trim()
             textView?.let { tv ->
-                renderHtml(tv, trimmedText)
+                tv.setHtml(trimmedText)
             }
 
             section?.let { sectionView ->
@@ -590,15 +556,15 @@ class SpeciesInfoHandler(
     }
 
     private fun displayConservationStatus(status: String, shouldScroll: Boolean = true) {
-        val section = viewCache[R.id.sectionConservation] as? LinearLayout
-        val textView = viewCache[R.id.tvConservationStatus] as? TextView
+        val section = infoBinding.sectionConservation
+        val textView = infoBinding.tvConservationStatus
 
         if (status.isNotEmpty()) {
-            textView?.let { tv ->
-                renderHtml(tv, status)
+            textView.let { tv ->
+                tv.setHtml(status)
             }
 
-            section?.let { sectionView ->
+            section.let { sectionView ->
                 val wasAlreadyRendered = renderedSections.contains(R.id.sectionConservation)
 
                 if (sectionView.visibility != View.VISIBLE) {
@@ -621,7 +587,7 @@ class SpeciesInfoHandler(
                 }
             }
         } else {
-            section?.visibility = View.GONE
+            section.visibility = View.GONE
             renderedSections.add(R.id.sectionConservation)
         }
     }
@@ -650,15 +616,12 @@ class SpeciesInfoHandler(
     }
 
     private fun hideButtons() {
-        val btnShare = viewCache[R.id.btnShareInfo]
-        val btnRetry = viewCache[R.id.btnRetryIdentification]
-        btnShare?.visibility = View.GONE
-        btnRetry?.visibility = View.GONE
+        infoBinding.btnShareInfo.visibility = View.GONE
+        infoBinding.btnRetryIdentification.visibility = View.GONE
     }
 
     private fun showShareButtonAnimation() {
-        val btnShare = viewCache[R.id.btnShareInfo]
-        btnShare?.apply {
+        infoBinding.btnShareInfo.apply {
             visibility = View.VISIBLE
             alpha = 0f
             scaleX = 0.8f
@@ -674,8 +637,7 @@ class SpeciesInfoHandler(
     }
 
     private fun showRetryButtonAnimation() {
-        val btnRetry = viewCache[R.id.btnRetryIdentification]
-        btnRetry?.apply {
+        infoBinding.btnRetryIdentification.apply {
             visibility = View.VISIBLE
             alpha = 0f
             scaleX = 0.8f
@@ -693,13 +655,11 @@ class SpeciesInfoHandler(
     }
 
     private fun hideRetryButton() {
-        val btnRetry = viewCache[R.id.btnRetryIdentification]
-        btnRetry?.visibility = View.GONE
+        infoBinding.btnRetryIdentification.visibility = View.GONE
     }
 
     private fun showCopyButtonAnimation() {
-        val btnCopy = viewCache[R.id.btnCopyScientificName]
-        btnCopy?.apply {
+        infoBinding.btnCopyScientificName.apply {
             visibility = View.VISIBLE
             alpha = 0f
             scaleX = 0.8f
@@ -716,7 +676,7 @@ class SpeciesInfoHandler(
     }
 
     private fun setupCopyButton(info: SpeciesInfo) {
-        viewCache[R.id.btnCopyScientificName]?.setOnClickListener {
+        infoBinding.btnCopyScientificName.setOnClickListener {
             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val cleanName = stripHtml(info.scientificName)
             clipboard.setPrimaryClip(ClipData.newPlainText("Scientific Name", cleanName))
@@ -725,14 +685,14 @@ class SpeciesInfoHandler(
     }
 
     private fun setupRetryButton() {
-        viewCache[R.id.btnRetryIdentification]?.setOnClickListener {
+        infoBinding.btnRetryIdentification.setOnClickListener {
             it.visibility = View.GONE
             onRetryClick()
         }
     }
 
     private fun setupShareButton(info: SpeciesInfo, imageUri: Uri?) {
-        viewCache[R.id.btnShareInfo]?.setOnClickListener {
+        infoBinding.btnShareInfo.setOnClickListener {
             shareSpeciesInfo(info, imageUri)
         }
     }
@@ -808,8 +768,8 @@ class SpeciesInfoHandler(
         } else {
             @Suppress("DEPRECATION") Html.fromHtml(html).toString()
         }
-        text = text.replace(Regex("\\*\\*(.*?)\\*\\*"), "$1")
-        text = text.replace(Regex("\\*(.*?)\\*"), "$1")
+        text = text.replace(REGEX_BOLD, "$1")
+        text = text.replace(REGEX_ITALIC, "$1")
         return text.trim()
     }
 

@@ -7,6 +7,8 @@ import com.nguyendevs.ecolens.model.*
 import com.nguyendevs.ecolens.utils.MarkdownProcessor
 import com.nguyendevs.ecolens.utils.PromptBuilder
 import kotlinx.coroutines.*
+import okhttp3.ResponseBody
+import retrofit2.Response
 import java.io.IOException
 
 class GeoBlockedException : IOException("Geo blocked")
@@ -17,6 +19,13 @@ class GeminiStreamingHelper(
 ) {
     private val markdownProcessor = MarkdownProcessor()
 
+    companion object {
+        private const val TAG = "GeminiStreaming"
+        private const val PREFIX_DATA = "data: "
+        private const val STREAM_DONE = "[DONE]"
+        private const val UI_DELAY = 150L
+    }
+
     suspend fun streamTaxonomy(
         scientificName: String,
         confidence: Double,
@@ -25,15 +34,8 @@ class GeminiStreamingHelper(
     ) = withContext(Dispatchers.IO) {
         val isVietnamese = languageCode != "en"
         val prompt = PromptBuilder.buildTaxonomyPrompt(scientificName, isVietnamese)
+        val request = createGeminiRequest(prompt)
 
-        val request = GeminiRequest(
-            contents = listOf(
-                GeminiContent(
-                    role = "user",
-                    parts = listOf(GeminiPart(text = prompt))
-                )
-            )
-        )
         val response = apiService.streamGemini(request)
         if (!response.isSuccessful) {
             val errorBody = response.errorBody()?.string() ?: ""
@@ -43,45 +45,8 @@ class GeminiStreamingHelper(
             throw IOException("API Error: ${response.code()} - $errorBody")
         }
 
-        try {
-            response.body()?.byteStream()?.bufferedReader()?.use { reader ->
-                var accumulatedJson = ""
-                var line: String?
-
-                while (reader.readLine().also { line = it } != null) {
-                    val currentLine = line ?: continue
-
-                    if (currentLine.startsWith("data: ")) {
-                        val jsonData = currentLine.substring(6).trim()
-                        if (jsonData == "[DONE]") break
-
-                        try {
-                            val streamResponse = gson.fromJson(jsonData, GeminiResponse::class.java)
-                            val chunk = streamResponse.candidates?.firstOrNull()
-                                ?.content?.parts?.firstOrNull()?.text
-
-                            if (!chunk.isNullOrEmpty()) {
-                                accumulatedJson += chunk
-
-                                val cleanedJson = cleanJsonString(accumulatedJson)
-                                try {
-                                    val taxonomyInfo = gson.fromJson(
-                                        cleanedJson,
-                                        TaxonomyResponse::class.java
-                                    )
-                                    updateTaxonomyUISync(taxonomyInfo, scientificName, isVietnamese, confidence, onStateUpdate)
-                                } catch (e: Exception) {
-                                }
-                            }
-                        } catch (e: Exception) {
-                            Log.e("StreamTaxonomy", "Parse error: ${e.message}")
-                        }
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            Log.e("StreamTaxonomy", "Stream processing error: ${e.message}")
-            throw e
+        processStreamResponse(response, TaxonomyResponse::class.java) { taxonomy ->
+            updateTaxonomyUISync(taxonomy, scientificName, isVietnamese, confidence, onStateUpdate)
         }
     }
 
@@ -94,8 +59,22 @@ class GeminiStreamingHelper(
     ) = withContext(Dispatchers.IO) {
         val isVietnamese = languageCode != "en"
         val prompt = PromptBuilder.buildDetailsPrompt(scientificName, isVietnamese)
+        val request = createGeminiRequest(prompt)
 
-        val request = GeminiRequest(
+        try {
+            val response = apiService.streamGemini(request)
+            if (response.isSuccessful) {
+                processStreamResponse(response, DetailsResponse::class.java) { details ->
+                    updateDetailsUISync(details, isVietnamese, currentInfo, onStateUpdate)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "StreamDetails Error: ${e.message}")
+        }
+    }
+
+    private fun createGeminiRequest(prompt: String): GeminiRequest {
+        return GeminiRequest(
             contents = listOf(
                 GeminiContent(
                     role = "user",
@@ -103,53 +82,49 @@ class GeminiStreamingHelper(
                 )
             )
         )
+    }
 
+    private suspend fun <T> processStreamResponse(
+        response: Response<ResponseBody>,
+        type: Class<T>,
+        onUpdate: suspend (T) -> Unit
+    ) {
         try {
-            val response = apiService.streamGemini(request)
+            response.body()?.byteStream()?.bufferedReader()?.use { reader ->
+                val accumulatedJson = StringBuilder()
+                var line: String?
 
-            if (response.isSuccessful) {
-                val responseBody = response.body()
-                if (responseBody != null) {
-                    var accumulatedJson = ""
+                while (reader.readLine().also { line = it } != null) {
+                    val currentLine = line ?: continue
 
-                    responseBody.byteStream().bufferedReader().use { reader ->
-                        var line: String?
+                    if (currentLine.startsWith(PREFIX_DATA)) {
+                        val jsonData = currentLine.substring(PREFIX_DATA.length).trim()
+                        if (jsonData == STREAM_DONE) break
 
-                        while (reader.readLine().also { line = it } != null) {
-                            val currentLine = line ?: continue
+                        try {
+                            val streamResponse = gson.fromJson(jsonData, GeminiResponse::class.java)
+                            val chunk = streamResponse.candidates?.firstOrNull()
+                                ?.content?.parts?.firstOrNull()?.text
 
-                            if (currentLine.startsWith("data: ")) {
-                                val jsonData = currentLine.substring(6).trim()
-                                if (jsonData == "[DONE]") break
-
+                            if (!chunk.isNullOrEmpty()) {
+                                accumulatedJson.append(chunk)
+                                val cleanedJson = cleanJsonString(accumulatedJson.toString())
                                 try {
-                                    val streamResponse = gson.fromJson(jsonData, GeminiResponse::class.java)
-                                    val chunk = streamResponse.candidates?.firstOrNull()
-                                        ?.content?.parts?.firstOrNull()?.text
-
-                                    if (!chunk.isNullOrEmpty()) {
-                                        accumulatedJson += chunk
-
-                                        val cleanedJson = cleanJsonString(accumulatedJson)
-                                        try {
-                                            val detailsInfo = gson.fromJson(
-                                                cleanedJson,
-                                                DetailsResponse::class.java
-                                            )
-                                            updateDetailsUISync(detailsInfo, isVietnamese, currentInfo, onStateUpdate)
-                                        } catch (e: Exception) {
-                                        }
-                                    }
+                                    val result = gson.fromJson(cleanedJson, type)
+                                    onUpdate(result)
                                 } catch (e: Exception) {
-                                    Log.e("StreamDetails", "Parse error: ${e.message}")
+                                    // JSON incomplete, ignore
                                 }
                             }
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Parse error: ${e.message}")
                         }
                     }
                 }
             }
         } catch (e: Exception) {
-            Log.e("StreamDetails", "Error: ${e.message}")
+            Log.e(TAG, "Stream processing error: ${e.message}")
+            throw e
         }
     }
 
@@ -166,99 +141,26 @@ class GeminiStreamingHelper(
             commonName = taxonomy.commonName ?: "..."
         )
 
+        suspend fun updateState(stage: LoadingStage) {
+            onStateUpdate(EcoLensUiState(isLoading = true, speciesInfo = updated, loadingStage = stage))
+            delay(UI_DELAY)
+        }
+
         if (!taxonomy.commonName.isNullOrBlank() && taxonomy.commonName != "...") {
             updated = updated.copy(commonName = taxonomy.commonName)
-            onStateUpdate(EcoLensUiState(
-                isLoading = true,
-                speciesInfo = updated,
-                loadingStage = LoadingStage.COMMON_NAME
-            ))
-            delay(200)
+            updateState(LoadingStage.COMMON_NAME)
         }
 
-        taxonomy.kingdom?.let {
-            updated = updated.copy(
-                kingdom = "<b>${markdownProcessor.removeRankPrefix(it, if (isVietnamese) "Giới" else "Kingdom")}</b>"
-            )
-            onStateUpdate(EcoLensUiState(
-                isLoading = true,
-                speciesInfo = updated,
-                loadingStage = LoadingStage.TAXONOMY
-            ))
-            delay(150)
-        }
+        fun format(value: String, vi: String, en: String) =
+            "<b>${markdownProcessor.removeRankPrefix(value, if (isVietnamese) vi else en)}</b>"
 
-        taxonomy.phylum?.let {
-            updated = updated.copy(
-                phylum = "<b>${markdownProcessor.removeRankPrefix(it, if (isVietnamese) "Ngành" else "Phylum")}</b>"
-            )
-            onStateUpdate(EcoLensUiState(
-                isLoading = true,
-                speciesInfo = updated,
-                loadingStage = LoadingStage.TAXONOMY
-            ))
-            delay(150)
-        }
-
-        taxonomy.className?.let {
-            updated = updated.copy(
-                className = "<b>${markdownProcessor.removeRankPrefix(it, if (isVietnamese) "Lớp" else "Class")}</b>"
-            )
-            onStateUpdate(EcoLensUiState(
-                isLoading = true,
-                speciesInfo = updated,
-                loadingStage = LoadingStage.TAXONOMY
-            ))
-            delay(150)
-        }
-
-        taxonomy.taxorder?.let {
-            updated = updated.copy(
-                taxorder = "<b>${markdownProcessor.removeRankPrefix(it, if (isVietnamese) "Bộ" else "Order")}</b>"
-            )
-            onStateUpdate(EcoLensUiState(
-                isLoading = true,
-                speciesInfo = updated,
-                loadingStage = LoadingStage.TAXONOMY
-            ))
-            delay(150)
-        }
-
-        taxonomy.family?.let {
-            updated = updated.copy(
-                family = "<b>${markdownProcessor.removeRankPrefix(it, if (isVietnamese) "Họ" else "Family")}</b>"
-            )
-            onStateUpdate(EcoLensUiState(
-                isLoading = true,
-                speciesInfo = updated,
-                loadingStage = LoadingStage.TAXONOMY
-            ))
-            delay(150)
-        }
-
-        taxonomy.genus?.let {
-            updated = updated.copy(
-                genus = "<b>${markdownProcessor.removeRankPrefix(it, if (isVietnamese) "Chi" else "Genus")}</b>"
-            )
-            onStateUpdate(EcoLensUiState(
-                isLoading = true,
-                speciesInfo = updated,
-                loadingStage = LoadingStage.TAXONOMY
-            ))
-            delay(150)
-        }
-
-        taxonomy.species?.let {
-            updated = updated.copy(
-                species = "<b>${markdownProcessor.removeRankPrefix(it, if (isVietnamese) "Loài" else "Species")}</b>"
-            )
-            onStateUpdate(EcoLensUiState(
-                isLoading = true,
-                speciesInfo = updated,
-                loadingStage = LoadingStage.TAXONOMY
-            ))
-            delay(150)
-        }
+        taxonomy.kingdom?.let { updated = updated.copy(kingdom = format(it, "Giới", "Kingdom")); updateState(LoadingStage.TAXONOMY) }
+        taxonomy.phylum?.let { updated = updated.copy(phylum = format(it, "Ngành", "Phylum")); updateState(LoadingStage.TAXONOMY) }
+        taxonomy.className?.let { updated = updated.copy(className = format(it, "Lớp", "Class")); updateState(LoadingStage.TAXONOMY) }
+        taxonomy.taxorder?.let { updated = updated.copy(taxorder = format(it, "Bộ", "Order")); updateState(LoadingStage.TAXONOMY) }
+        taxonomy.family?.let { updated = updated.copy(family = format(it, "Họ", "Family")); updateState(LoadingStage.TAXONOMY) }
+        taxonomy.genus?.let { updated = updated.copy(genus = format(it, "Chi", "Genus")); updateState(LoadingStage.TAXONOMY) }
+        taxonomy.species?.let { updated = updated.copy(species = format(it, "Loài", "Species")); updateState(LoadingStage.TAXONOMY) }
     }
 
     private suspend fun updateDetailsUISync(
@@ -269,82 +171,39 @@ class GeminiStreamingHelper(
     ) = withContext(Dispatchers.Main) {
         var updated = currentInfo
 
+        suspend fun updateState(stage: LoadingStage) {
+            onStateUpdate(EcoLensUiState(isLoading = true, speciesInfo = updated, loadingStage = stage))
+            delay(200)
+        }
+
+        details.description?.takeIf { it.isNotBlank() }?.let {
+            updated = updated.copy(description = markdownProcessor.process(it, isVietnamese = isVietnamese))
+            updateState(LoadingStage.DESCRIPTION)
+        }
+
         val characteristicsText = when (val chars = details.characteristics) {
             is String -> chars
             is List<*> -> chars.joinToString("\n")
             else -> ""
         }
-
-        details.description?.let { desc ->
-            if (desc.isNotBlank()) {
-                updated = updated.copy(
-                    description = markdownProcessor.process(desc, isVietnamese = isVietnamese)
-                )
-                onStateUpdate(EcoLensUiState(
-                    isLoading = true,
-                    speciesInfo = updated,
-                    loadingStage = LoadingStage.DESCRIPTION
-                ))
-                delay(200)
-            }
-        }
-
         if (characteristicsText.isNotBlank()) {
-            updated = updated.copy(
-                characteristics = markdownProcessor.process(characteristicsText, isVietnamese = isVietnamese)
-            )
-            onStateUpdate(EcoLensUiState(
-                isLoading = true,
-                speciesInfo = updated,
-                loadingStage = LoadingStage.CHARACTERISTICS
-            ))
-            delay(200)
+            updated = updated.copy(characteristics = markdownProcessor.process(characteristicsText, isVietnamese = isVietnamese))
+            updateState(LoadingStage.CHARACTERISTICS)
         }
 
-        details.distribution?.let { dist ->
-            if (dist.isNotBlank()) {
-                updated = updated.copy(
-                    distribution = markdownProcessor.process(dist, isVietnamese = isVietnamese)
-                )
-                onStateUpdate(EcoLensUiState(
-                    isLoading = true,
-                    speciesInfo = updated,
-                    loadingStage = LoadingStage.DISTRIBUTION
-                ))
-                delay(200)
-            }
+        details.distribution?.takeIf { it.isNotBlank() }?.let {
+            updated = updated.copy(distribution = markdownProcessor.process(it, isVietnamese = isVietnamese))
+            updateState(LoadingStage.DISTRIBUTION)
         }
 
-        details.habitat?.let { hab ->
-            if (hab.isNotBlank()) {
-                updated = updated.copy(
-                    habitat = markdownProcessor.process(hab, isVietnamese = isVietnamese)
-                )
-                onStateUpdate(EcoLensUiState(
-                    isLoading = true,
-                    speciesInfo = updated,
-                    loadingStage = LoadingStage.HABITAT
-                ))
-                delay(200)
-            }
+        details.habitat?.takeIf { it.isNotBlank() }?.let {
+            updated = updated.copy(habitat = markdownProcessor.process(it, isVietnamese = isVietnamese))
+            updateState(LoadingStage.HABITAT)
         }
 
-        details.conservationStatus?.let { status ->
-            if (status.isNotBlank()) {
-                updated = updated.copy(
-                    conservationStatus = markdownProcessor.process(
-                        status,
-                        isConservationStatus = true,
-                        isVietnamese = isVietnamese
-                    )
-                )
-                onStateUpdate(EcoLensUiState(
-                    isLoading = true,
-                    speciesInfo = updated,
-                    loadingStage = LoadingStage.CONSERVATION
-                ))
-                delay(200)
-            }
+        details.conservationStatus?.takeIf { it.isNotBlank() }?.let {
+            updated = updated.copy(conservationStatus = markdownProcessor.process(it, isConservationStatus = true, isVietnamese = isVietnamese))
+            updateState(LoadingStage.CONSERVATION)
         }
     }
 

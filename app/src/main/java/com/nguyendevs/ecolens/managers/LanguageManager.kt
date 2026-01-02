@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.res.Configuration
 import java.util.Locale
 
-class LanguageManager(private val context: Context) {
+class LanguageManager(context: Context) {
 
     companion object {
         private const val PREF_NAME = "EcoLensParams"
@@ -13,7 +13,7 @@ class LanguageManager(private val context: Context) {
         const val LANG_EN = "en"
     }
 
-    private val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+    private val prefs = context.applicationContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 
     // Lấy ngôn ngữ hiện tại
     fun getLanguage(): String {
@@ -33,6 +33,7 @@ class LanguageManager(private val context: Context) {
 
         val config = Configuration(context.resources.configuration)
         config.setLocale(locale)
+        config.setLayoutDirection(locale)
         return context.createConfigurationContext(config)
     }
 }

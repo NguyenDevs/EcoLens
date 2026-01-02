@@ -1,7 +1,8 @@
 package com.nguyendevs.ecolens.managers
 
-import android.app.Application
+import android.content.Context
 import android.net.Uri
+import android.util.Log
 import com.google.gson.Gson
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.database.HistoryDao
@@ -12,14 +13,23 @@ import kotlinx.coroutines.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.File
 
 class SpeciesIdentificationManager(
-    private val application: Application,
+    private val context: Context,
     private val historyDao: HistoryDao
 ) {
     private val apiService = RetrofitClient.iNaturalistApi
-    private val gson = Gson()
-    private val streamingHelper = GeminiStreamingHelper(apiService, gson)
+    private val gson by lazy { Gson() }
+    private val streamingHelper by lazy { GeminiStreamingHelper(apiService, gson) }
+
+    companion object {
+        private const val TAG = "SpeciesIdManager"
+        private const val MIME_TYPE_JPEG = "image/jpeg"
+        private const val PART_NAME_IMAGE = "image"
+        private const val MAX_IMAGE_SIZE = 1024
+        private const val DELAY_INIT = 100L
+    }
 
     var currentImageUri: Uri? = null
     var currentHistoryEntryId: Int? = null
@@ -41,23 +51,22 @@ class SpeciesIdentificationManager(
             isLoading = true,
             loadingStage = LoadingStage.NONE
         ))
-        delay(100)
+        delay(DELAY_INIT)
 
         try {
             val imageFile = withContext(Dispatchers.Default) {
-                ImageUtils.uriToFile(application, imageUri, 1024)
+                ImageUtils.uriToFile(context, imageUri, MAX_IMAGE_SIZE)
             }
 
-            val requestFile = imageFile.asRequestBody("image/jpeg".toMediaTypeOrNull())
-            val imagePart = MultipartBody.Part.createFormData("image", imageFile.name, requestFile)
+            val imagePart = createImagePart(imageFile)
 
             val response = apiService.identifySpecies(
                 image = imagePart,
                 locale = languageCode
             )
 
-            if (response.results.isNotEmpty()) {
-                val topResult = response.results.first()
+            val topResult = response.results.firstOrNull()
+            if (topResult != null) {
                 val scientificName = topResult.taxon.name
                 val confidence = topResult.combined_score
 
@@ -107,39 +116,40 @@ class SpeciesIdentificationManager(
                     onStateUpdate(EcoLensUiState(
                         isLoading = false,
                         speciesInfo = null,
-                        error = application.getString(R.string.error_geo_block)
+                        error = context.getString(R.string.error_geo_block)
                     ))
                     return
                 } catch (e: Exception) {
+                    Log.e(TAG, "Streaming error: ${e.message}", e)
                     handleError(e, onStateUpdate)
                     return
                 }
             } else {
                 onStateUpdate(EcoLensUiState(
                     isLoading = false,
-                    error = application.getString(R.string.error_no_result)
+                    error = context.getString(R.string.error_no_result)
                 ))
             }
         } catch (e: Exception) {
+            Log.e(TAG, "Identification error: ${e.message}", e)
             handleError(e, onStateUpdate)
         }
     }
 
-    private suspend fun saveToHistory(existingHistoryId: Int?, imageFile: java.io.File) {
+    private fun createImagePart(file: File): MultipartBody.Part {
+        val requestFile = file.asRequestBody(MIME_TYPE_JPEG.toMediaTypeOrNull())
+        return MultipartBody.Part.createFormData(PART_NAME_IMAGE, file.name, requestFile)
+    }
+
+    private suspend fun saveToHistory(existingHistoryId: Int?, imageFile: File) {
         val currentInfo = currentSpeciesInfo ?: return
 
-        val isValidInfo = currentInfo.commonName.isNotEmpty() &&
-                currentInfo.commonName != "..." &&
-                currentInfo.commonName != "N/A" &&
-                !currentInfo.description.contains("An error occurred", ignoreCase = true) &&
-                !currentInfo.description.contains("Đã xảy ra lỗi", ignoreCase = true)
-
-        if (isValidInfo) {
+        if (isValidInfo(currentInfo)) {
             withContext(Dispatchers.IO) {
                 val savedPath = if (existingHistoryId != null) {
                     historyDao.getHistoryById(existingHistoryId)?.imagePath
                 } else {
-                    ImageUtils.saveBitmapToInternalStorage(application, imageFile)
+                    ImageUtils.saveBitmapToInternalStorage(context, imageFile)
                 }
 
                 if (savedPath != null) {
@@ -177,12 +187,20 @@ class SpeciesIdentificationManager(
         }
     }
 
+    private fun isValidInfo(info: SpeciesInfo): Boolean {
+        return info.commonName.isNotEmpty() &&
+                info.commonName != "..." &&
+                info.commonName != "N/A" &&
+                !info.description.contains("An error occurred", ignoreCase = true) &&
+                !info.description.contains("Đã xảy ra lỗi", ignoreCase = true)
+    }
+
     private fun handleError(e: Exception, onStateUpdate: (EcoLensUiState) -> Unit) {
         val errorMsg = when {
             e.message?.contains("429") == true ->
-                application.getString(R.string.error_quota_exceeded)
+                context.getString(R.string.error_quota_exceeded)
             else ->
-                application.getString(R.string.error_general, e.message)
+                context.getString(R.string.error_general, e.message)
         }
         onStateUpdate(EcoLensUiState(isLoading = false, error = errorMsg))
     }

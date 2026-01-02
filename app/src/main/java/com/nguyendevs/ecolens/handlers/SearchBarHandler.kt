@@ -29,7 +29,7 @@ class SearchBarHandler(
 
     private var isSearchBarExpanded = false
 
-    fun setup() {
+    init {
         btnSearchAction.setOnClickListener {
             if (!isSearchBarExpanded) {
                 expandSearchBar("")
@@ -50,56 +50,41 @@ class SearchBarHandler(
 
     fun expandSearchBar(text: String = "") {
         if (!isSearchBarExpanded) {
-            val animator = ValueAnimator.ofInt(collapsedWidthPx, expandedWidthPx)
-            animator.duration = 320
-            animator.addUpdateListener { animation ->
-                val params = searchBarContainer.layoutParams
-                params.width = animation.animatedValue as Int
-                searchBarContainer.layoutParams = params
-            }
-            animator.addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationStart(animation: Animator) {
+            animateWidth(
+                from = collapsedWidthPx,
+                to = expandedWidthPx,
+                onStart = {
                     textInputLayoutSearch.visibility = View.VISIBLE
                     etSearchQuery.setText(text)
-                }
-
-                override fun onAnimationEnd(animation: Animator) {
-                    super.onAnimationEnd(animation)
+                },
+                onEnd = {
                     etSearchQuery.requestFocus()
                     etSearchQuery.setSelection(etSearchQuery.text.length)
-                    val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                    imm.showSoftInput(etSearchQuery, InputMethodManager.SHOW_IMPLICIT)
+                    showKeyboard()
                 }
-            })
-            animator.start()
+            )
             isSearchBarExpanded = true
         } else {
             etSearchQuery.setText(text)
             etSearchQuery.post {
                 etSearchQuery.requestFocus()
                 etSearchQuery.setSelection(text.length)
-                val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.showSoftInput(etSearchQuery, InputMethodManager.SHOW_IMPLICIT)
+                showKeyboard()
             }
         }
     }
 
     fun collapseSearchBar() {
         if (isSearchBarExpanded) {
-            val animator = ValueAnimator.ofInt(expandedWidthPx, collapsedWidthPx)
-            animator.duration = 320
-            animator.addUpdateListener { animation ->
-                val params = searchBarContainer.layoutParams
-                params.width = animation.animatedValue as Int
-                searchBarContainer.layoutParams = params
-            }
-            animator.addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) {
+            animateWidth(
+                from = expandedWidthPx,
+                to = collapsedWidthPx,
+                onEnd = {
                     textInputLayoutSearch.visibility = View.GONE
                     etSearchQuery.text?.clear()
+                    hideKeyboard()
                 }
-            })
-            animator.start()
+            )
             isSearchBarExpanded = false
         }
     }
@@ -109,14 +94,44 @@ class SearchBarHandler(
     private fun performGoogleSearch() {
         val query = etSearchQuery.text.toString().trim()
         if (query.isNotEmpty()) {
-            try {
+            runCatching {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/search?q=$query"))
                 context.startActivity(intent)
-            } catch (e: Exception) {
+            }.onFailure {
                 Toast.makeText(context, context.getString(R.string.error_browser), Toast.LENGTH_SHORT).show()
             }
         } else {
             collapseSearchBar()
         }
+    }
+
+    private fun animateWidth(from: Int, to: Int, onStart: (() -> Unit)? = null, onEnd: (() -> Unit)? = null) {
+        ValueAnimator.ofInt(from, to).apply {
+            duration = 320
+            addUpdateListener { animation ->
+                val params = searchBarContainer.layoutParams
+                params.width = animation.animatedValue as Int
+                searchBarContainer.layoutParams = params
+            }
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationStart(animation: Animator) {
+                    onStart?.invoke()
+                }
+                override fun onAnimationEnd(animation: Animator) {
+                    onEnd?.invoke()
+                }
+            })
+            start()
+        }
+    }
+
+    private fun showKeyboard() {
+        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(etSearchQuery, InputMethodManager.SHOW_IMPLICIT)
+    }
+
+    private fun hideKeyboard() {
+        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(etSearchQuery.windowToken, 0)
     }
 }
