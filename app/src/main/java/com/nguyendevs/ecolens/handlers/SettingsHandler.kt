@@ -12,6 +12,7 @@ import com.nguyendevs.ecolens.fragments.AboutFragment
 import com.nguyendevs.ecolens.fragments.LanguageSelectionFragment
 import com.nguyendevs.ecolens.managers.LanguageManager
 import androidx.fragment.app.Fragment
+import androidx.core.net.toUri
 
 class SettingsHandler(
     private val activity: AppCompatActivity,
@@ -65,7 +66,7 @@ class SettingsHandler(
 
     private fun openUrl(url: String) {
         runCatching {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            val intent = Intent(Intent.ACTION_VIEW, url.toUri())
             activity.startActivity(intent)
         }.onFailure {
             Toast.makeText(activity, "Không thể mở liên kết", Toast.LENGTH_SHORT).show()
@@ -75,7 +76,7 @@ class SettingsHandler(
     private fun sendEmail() {
         runCatching {
             val intent = Intent(Intent.ACTION_SENDTO).apply {
-                data = Uri.parse("mailto:tainguyen.devs@gmail.com")
+                data = "mailto:tainguyen.devs@gmail.com".toUri()
                 putExtra(Intent.EXTRA_SUBJECT, "EcoLens Support")
             }
             activity.startActivity(intent)
