@@ -172,5 +172,7 @@
     <string name="retry_identification_hint">Low confidence. Tap to try again.</string>
 
     <string name="error_geo_block">API services is not available in your region. Please try again later.</string>
+    <string name="error_open_link">Unable to open the link</string>
+    <string name="error_no_email_app">Email application not found</string>
 
 </resources>
