@@ -176,6 +176,8 @@
     <string name="retry_identification_hint">Độ tin cậy thấp. Nhấn để thử lại.</string>
 
     <string name="error_geo_block">Dịch vụ API chưa hỗ trợ khu vực này. Vui lòng thử lại sau hoặc đổi mạng.</string>
+    <string name="error_open_link">Không thể mở liên kết</string>
+    <string name="error_no_email_app">Không tìm thấy ứng dụng Email</string>
 
 
 </resources>
