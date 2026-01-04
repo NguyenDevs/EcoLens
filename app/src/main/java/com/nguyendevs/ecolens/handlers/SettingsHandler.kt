@@ -112,7 +112,8 @@ class SettingsHandler(
 
     private fun createBitmapFromView(view: View): Bitmap? {
         return try {
-            val scale = 0.25f
+            val scale = 1.0f
+
             val width = (view.width * scale).toInt()
             val height = (view.height * scale).toInt()
 
@@ -121,7 +122,7 @@ class SettingsHandler(
             val bitmap = Bitmap.createBitmap(
                 width,
                 height,
-                Bitmap.Config.RGB_565
+                Bitmap.Config.ARGB_8888
             )
 
             val canvas = Canvas(bitmap)

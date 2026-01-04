@@ -95,7 +95,7 @@
                             android:layout_height="wrap_content"
                             tools:text="Cây Hoa Hồng"
                             style="@style/TextAppearance.App.Headline1"
-                            android:textColor="@color/text_primary"/>
+                            android:textColor="@color/primary_dark"/>
 
                     <TextView
                             android:id="@+id/tvScientificName"
