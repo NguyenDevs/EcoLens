@@ -70,54 +70,49 @@ class SettingsHandler(
         updateDarkModeIcon(isDarkMode, false)
 
         switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
-            // Prevent spam clicking
             if (isTransitioning) {
                 return@setOnCheckedChangeListener
             }
 
-            applyThemeSmoothly(isChecked)
+            isTransitioning = true
+            switchDarkMode.isEnabled = false
+
+            settingsView.postDelayed({
+                if (!activity.isFinishing && !activity.isDestroyed) {
+                    applyThemeSmoothly(isChecked)
+                }
+            }, 300)
         }
     }
 
     private fun applyThemeSmoothly(isDarkMode: Boolean) {
-        if (isTransitioning) return
-
-        isTransitioning = true
-        switchDarkMode.isEnabled = false
-
-        // Save preference
         saveDarkModePreference(isDarkMode)
-
-        // Update icon with animation
         updateDarkModeIcon(isDarkMode, true)
 
-        // Create transition bitmap
+        if (MainActivity.transitionBitmap != null && !MainActivity.transitionBitmap!!.isRecycled) {
+            MainActivity.transitionBitmap!!.recycle()
+            MainActivity.transitionBitmap = null
+        }
+
         val decorView = activity.window.decorView
         val bitmap = createBitmapFromView(decorView)
 
         if (bitmap != null && !bitmap.isRecycled) {
-            // Store bitmap for next activity creation
             MainActivity.transitionBitmap = bitmap
         }
 
-        // Apply theme change (will recreate activity)
         val nightMode = if (isDarkMode) {
             AppCompatDelegate.MODE_NIGHT_YES
         } else {
             AppCompatDelegate.MODE_NIGHT_NO
         }
 
-        // Small delay to let icon animation complete
-        settingsView.postDelayed({
-            AppCompatDelegate.setDefaultNightMode(nightMode)
-            // Activity will be recreated, no need to reset flags
-        }, 200)
+        AppCompatDelegate.setDefaultNightMode(nightMode)
     }
 
     private fun createBitmapFromView(view: View): Bitmap? {
         return try {
-            // Use lower quality and smaller size to reduce memory usage
-            val scale = 0.4f // Reduce scale further
+            val scale = 0.25f
             val width = (view.width * scale).toInt()
             val height = (view.height * scale).toInt()
 
@@ -126,7 +121,7 @@ class SettingsHandler(
             val bitmap = Bitmap.createBitmap(
                 width,
                 height,
-                Bitmap.Config.RGB_565 // Lower quality but less memory
+                Bitmap.Config.RGB_565
             )
 
             val canvas = Canvas(bitmap)
@@ -135,11 +130,9 @@ class SettingsHandler(
 
             bitmap
         } catch (e: OutOfMemoryError) {
-            e.printStackTrace()
-            System.gc() // Force garbage collection
+            System.gc()
             null
         } catch (e: Exception) {
-            e.printStackTrace()
             null
         }
     }
