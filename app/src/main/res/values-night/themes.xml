@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Base application theme for Dark Mode -->
+    <style name="Base.Theme.EcoLens" parent="Theme.Material3.Dark.NoActionBar">
+        <!-- Primary colors -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryVariant">@color/primary_dark</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
+
+        <!-- Secondary colors -->
+        <item name="colorSecondary">@color/primary_light</item>
+        <item name="colorSecondaryVariant">@color/primary_dark</item>
+        <item name="colorOnSecondary">@color/on_primary</item>
+
+        <!-- Background colors -->
+        <item name="android:colorBackground">@color/background</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnBackground">@color/on_surface</item>
+        <item name="colorOnSurface">@color/on_surface</item>
+
+        <!-- Status bar -->
+        <item name="android:statusBarColor">@color/surface</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+        <!-- Navigation bar -->
+        <item name="android:navigationBarColor">@color/surface</item>
+        <item name="android:windowLightNavigationBar">false</item>
+
+        <!-- FAB -->
+        <item name="floatingActionButtonStyle">@style/Widget.EcoLens.FloatingActionButton</item>
+
+        <!-- Bottom Navigation -->
+        <item name="bottomNavigationStyle">@style/Widget.EcoLens.BottomNavigationView</item>
+    </style>
+
+    <style name="Theme.EcoLens" parent="Base.Theme.EcoLens" />
+
+    <!-- FAB Style -->
+    <style name="Widget.EcoLens.FloatingActionButton" parent="Widget.Material3.FloatingActionButton.Primary">
+        <item name="tint">@color/on_primary</item>
+        <item name="elevation">6dp</item>
+        <item name="backgroundTint">@color/primary</item>
+    </style>
+
+    <!-- Bottom Navigation Style -->
+    <style name="Widget.EcoLens.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">
+        <item name="itemIconTint">@color/bottom_nav_selector</item>
+        <item name="itemTextColor">@color/bottom_nav_selector</item>
+        <item name="itemTextAppearanceActive">@style/TextAppearance.EcoLens.BottomNav.Active</item>
+        <item name="itemTextAppearanceInactive">@style/TextAppearance.EcoLens.BottomNav.Inactive</item>
+        <item name="labelVisibilityMode">labeled</item>
+        <item name="android:background">@color/surface</item>
+        <item name="elevation">8dp</item>
+    </style>
+
+    <!-- Bottom Nav Text Styles -->
+    <style name="TextAppearance.EcoLens.BottomNav.Active" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="TextAppearance.EcoLens.BottomNav.Inactive" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <!-- Card Style -->
+    <style name="Widget.EcoLens.CardView" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">20dp</item>
+        <item name="cardElevation">4dp</item>
+        <item name="cardBackgroundColor">@color/surface_variant</item>
+    </style>
+
+    <!-- Custom Material DatePicker Theme -->
+    <style name="CustomMaterialDatePickerTheme" parent="ThemeOverlay.Material3.MaterialCalendar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/on_surface</item>
+
+        <!-- Header customization -->
+        <item name="materialCalendarHeaderLayout">@style/HeaderLayoutCustom</item>
+        <item name="materialCalendarHeaderTitle">@style/HeaderTitleCustom</item>
+        <item name="materialCalendarHeaderSelection">@style/HeaderSelectionCustom</item>
+        <item name="materialCalendarHeaderDivider">@style/HeaderDividerCustom</item>
+
+        <!-- Text colors -->
+        <item name="android:textColorPrimary">@color/on_surface</item>
+    </style>
+
+    <!-- Custom Header Layout -->
+    <style name="HeaderLayoutCustom" parent="Widget.Material3.MaterialCalendar.HeaderLayout">
+        <item name="android:background">@color/surface_variant</item>
+        <item name="android:paddingTop">24dp</item>
+        <item name="android:paddingBottom">16dp</item>
+        <item name="android:paddingStart">24dp</item>
+        <item name="android:paddingEnd">24dp</item>
+    </style>
+
+    <!-- Custom Header Title - Align Left and Uppercase -->
+    <style name="HeaderTitleCustom" parent="Widget.Material3.MaterialCalendar.HeaderTitle">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:gravity">start</item>
+        <item name="android:textAlignment">textStart</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_marginBottom">8dp</item>
+    </style>
+
+    <!-- Custom Header Selection (Selected Date) -->
+    <style name="HeaderSelectionCustom" parent="Widget.Material3.MaterialCalendar.HeaderSelection">
+        <item name="android:textSize">32sp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/on_surface</item>
+        <item name="android:gravity">start</item>
+        <item name="android:textAlignment">textStart</item>
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
+    <!-- Custom Header Divider -->
+    <style name="HeaderDividerCustom" parent="Widget.Material3.MaterialCalendar.HeaderDivider">
+        <item name="android:background">@color/border_light</item>
+        <item name="android:layout_height">1dp</item>
+    </style>
+
+</resources>

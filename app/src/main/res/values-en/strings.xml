@@ -96,6 +96,7 @@
     <string name="preferences">Preferences</string>
     <string name="lang_vietnamese">Tiếng Việt</string>
     <string name="lang_english">English</string>
+    <string name="dark_mode">Dark Mode</string>
 
     <string name="share_title">🌿 SPECIES INFORMATION</string>
     <string name="share_taxonomy_title">🔬 SCIENTIFIC CLASSIFICATION</string>

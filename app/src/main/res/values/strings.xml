@@ -96,6 +96,7 @@
     <string name="preferences">Giao diện</string>
     <string name="lang_vietnamese">Tiếng Việt</string>
     <string name="lang_english">English</string>
+    <string name="dark_mode">Chế độ tối</string>
 
     <string name="share_title">🌿 THÔNG TIN LOÀI</string>
     <string name="share_taxonomy_title">🔬 PHÂN LOẠI KHOA HỌC</string>

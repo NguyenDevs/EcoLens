@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ==================== PRIMARY COLORS ==================== -->
+    <color name="primary">#4CAF50</color>
+    <color name="primary_dark">#018367</color>
+    <color name="primary_light">#81C784</color>
+    <color name="on_primary">#000000</color>
+
+    <color name="primary_10">#1A4CAF50</color>
+    <color name="primary_20">#334CAF50</color>
+    <color name="primary_30">#4D4CAF50</color>
+    <color name="primary_40">#664CAF50</color>
+
+    <!-- ==================== SURFACE COLORS ==================== -->
+    <color name="surface">#1E1E1E</color>
+    <color name="surface_variant">#2C2C2C</color>
+    <color name="surface_tint">#2C2C2C</color>
+    <color name="background">#121212</color>
+    <color name="on_surface">#E0E0E0</color>
+
+    <!-- ==================== TEXT COLORS ==================== -->
+    <color name="text_primary">#E0E0E0</color>
+    <color name="text_secondary">#B0B0B0</color>
+    <color name="text_tertiary">#808080</color>
+    <color name="text_disabled">#606060</color>
+    <color name="text_on_primary">#000000</color>
+
+    <!-- ==================== BORDER COLORS ==================== -->
+    <color name="border_light">#2C2C2C</color>
+    <color name="border_normal">#424242</color>
+    <color name="border_strong">#616161</color>
+
+    <!-- ==================== SEMANTIC COLORS ==================== -->
+    <color name="success">#66BB6A</color>
+    <color name="success_bg">#1B5E20</color>
+    <color name="success_text">#A5D6A7</color>
+
+    <color name="warning">#FFA726</color>
+    <color name="warning_bg">#E65100</color>
+    <color name="warning_text">#FFCC80</color>
+
+    <color name="error">#EF5350</color>
+    <color name="error_bg">#B71C1C</color>
+    <color name="error_text">#EF9A9A</color>
+
+    <color name="info">#42A5F5</color>
+    <color name="info_bg">#0D47A1</color>
+    <color name="info_text">#90CAF9</color>
+
+    <!-- ==================== CONFIDENCE LEVELS ==================== -->
+    <color name="confidence_high">#66BB6A</color>
+    <color name="confidence_high_bg">#1B5E20</color>
+    <color name="confidence_high_text">#A5D6A7</color>
+
+    <color name="confidence_medium">#FFA726</color>
+    <color name="confidence_medium_bg">#E65100</color>
+    <color name="confidence_medium_text">#FFCC80</color>
+
+    <color name="confidence_low">#EF5350</color>
+    <color name="confidence_low_bg">#B71C1C</color>
+    <color name="confidence_low_text">#EF9A9A</color>
+
+    <!-- ==================== INTERACTIVE STATES ==================== -->
+    <color name="state_hover">#2C2C2C</color>
+    <color name="state_pressed">#333333</color>
+    <color name="state_focus">#1A4CAF50</color>
+    <color name="state_disabled">#2C2C2C</color>
+
+    <!-- ==================== OVERLAY COLORS ==================== -->
+    <color name="overlay_dark">#80000000</color>
+    <color name="overlay_light">#80FFFFFF</color>
+    <color name="scrim">#99000000</color>
+
+    <!-- ==================== NAVIGATION ==================== -->
+    <color name="nav_selected">#81C784</color>
+    <color name="nav_unselected">#757575</color>
+    <color name="nav_background">#1E1E1E</color>
+
+    <!-- ==================== UTILS ==================== -->
+    <color name="transparent">#00000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+
+    <!-- ==================== GRADIENTS ==================== -->
+    <color name="gradient_start">#4CAF50</color>
+    <color name="gradient_end">#81C784</color>
+
+    <!-- ==================== SHADOWS ==================== -->
+    <color name="shadow_light">#14FFFFFF</color>
+    <color name="shadow_normal">#1FFFFFFF</color>
+    <color name="shadow_strong">#29FFFFFF</color>
+
+    <!-- ==================== BACKWARD COMPATIBILITY ==================== -->
+    <color name="green_primary">@color/primary</color>
+    <color name="green_primary_2">@color/primary_dark</color>
+    <color name="green_light">@color/primary_light</color>
+    <color name="green_dark">@color/success_text</color>
+
+    <color name="background_light">@color/surface_variant</color>
+    <color name="background_color">@color/background</color>
+    <color name="background_soft">@color/background</color>
+
+    <color name="surface_white">@color/surface</color>
+    <color name="divider_color">@color/border_normal</color>
+
+    <color name="bottom_nav_selected">@color/nav_selected</color>
+    <color name="bottom_nav_unselected">@color/nav_unselected</color>
+
+    <color name="error_red">@color/error</color>
+    <color name="error_background">@color/error_bg</color>
+
+    <color name="gray">@color/text_secondary</color>
+    <color name="gray_light">@color/state_disabled</color>
+    <color name="gray_light_f8">@color/surface_variant</color>
+</resources>

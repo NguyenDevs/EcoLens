@@ -105,6 +105,54 @@
                                 android:textColor="@color/primary"/>
                     </LinearLayout>
 
+                    <View
+                            android:layout_width="match_parent"
+                            android:background="#E0E0E0"
+                            android:layout_height="1dp"/>
+
+                    <LinearLayout
+                            android:id="@+id/darkModeOption"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/spacing_md"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:background="?attr/selectableItemBackground">
+
+                        <FrameLayout
+                                android:layout_width="@dimen/icon_lg"
+                                android:layout_height="@dimen/icon_lg"
+                                android:background="@drawable/bg_flag_rounded"
+                                android:backgroundTint="@color/transparent">
+                            <ImageView
+                                    android:id="@+id/ivDarkModeIcon"
+                                    android:layout_width="32dp"
+                                    android:layout_height="32dp"
+                                    android:layout_gravity="center"
+                                    android:src="@drawable/ic_moon"
+                                    app:tint="@color/primary_dark"/>
+                        </FrameLayout>
+
+                        <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/spacing_md"
+                                android:layout_weight="1"
+                                android:text="@string/dark_mode"
+                                style="@style/TextAppearance.App.Body1"
+                                android:textColor="@color/primary_dark"
+                                android:textStyle="bold"/>
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                                android:id="@+id/switchDarkMode"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:clickable="false"
+                                android:focusable="false"/>
+                    </LinearLayout>
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

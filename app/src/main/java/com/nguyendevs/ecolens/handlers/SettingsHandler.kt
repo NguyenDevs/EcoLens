@@ -1,13 +1,17 @@
 package com.nguyendevs.ecolens.handlers
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.view.View
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
+import com.google.android.material.switchmaterial.SwitchMaterial
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.fragments.AboutFragment
 import com.nguyendevs.ecolens.fragments.LanguageSelectionFragment
@@ -20,12 +24,19 @@ class SettingsHandler(
 ) {
 
     private val tvCurrentLanguage: TextView = settingsView.findViewById(R.id.tvCurrentLanguage)
+    private val switchDarkMode: SwitchMaterial = settingsView.findViewById(R.id.switchDarkMode)
+    private val ivDarkModeIcon: ImageView = settingsView.findViewById(R.id.ivDarkModeIcon)
 
     init {
         updateLanguageDisplay()
+        setupDarkModeSwitch()
 
         settingsView.findViewById<View>(R.id.languageOption).setOnClickListener {
             openFragment(LanguageSelectionFragment(), "language_selection")
+        }
+
+        settingsView.findViewById<View>(R.id.darkModeOption).setOnClickListener {
+            switchDarkMode.toggle()
         }
 
         settingsView.findViewById<View>(R.id.aboutOption).setOnClickListener {
@@ -41,6 +52,42 @@ class SettingsHandler(
         }
         settingsView.findViewById<View>(R.id.btnTiktok).setOnClickListener {
             openUrl("https://www.tiktok.com/@nguyendevs/")
+        }
+    }
+
+    private fun setupDarkModeSwitch() {
+        val currentNightMode = activity.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        val isDarkMode = currentNightMode == Configuration.UI_MODE_NIGHT_YES
+        switchDarkMode.isChecked = isDarkMode
+        updateDarkModeIcon(isDarkMode, false)
+
+        switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
+            updateDarkModeIcon(isChecked, true)
+            if (isChecked) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            }
+        }
+    }
+
+    private fun updateDarkModeIcon(isDarkMode: Boolean, animate: Boolean) {
+        val targetIcon = if (isDarkMode) R.drawable.ic_sun else R.drawable.ic_moon
+        
+        if (animate) {
+            ivDarkModeIcon.animate()
+                .alpha(0f)
+                .setDuration(150)
+                .withEndAction {
+                    ivDarkModeIcon.setImageResource(targetIcon)
+                    ivDarkModeIcon.animate()
+                        .alpha(1f)
+                        .setDuration(150)
+                        .start()
+                }
+                .start()
+        } else {
+            ivDarkModeIcon.setImageResource(targetIcon)
         }
     }
 
