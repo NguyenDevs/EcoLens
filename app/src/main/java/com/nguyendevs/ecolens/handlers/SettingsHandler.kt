@@ -63,8 +63,9 @@ class SettingsHandler(
     }
 
     private fun setupDarkModeSwitch() {
-        val currentNightMode = activity.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        val isDarkMode = currentNightMode == Configuration.UI_MODE_NIGHT_YES
+        val sharedPref = activity.getSharedPreferences("app_settings", AppCompatActivity.MODE_PRIVATE)
+        val isDarkMode = sharedPref.getBoolean("dark_mode", false)
+
         switchDarkMode.isChecked = isDarkMode
         switchDarkMode.jumpDrawablesToCurrentState()
         updateDarkModeIcon(isDarkMode, false)

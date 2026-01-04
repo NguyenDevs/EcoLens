@@ -7,6 +7,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.*
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.RectShape
@@ -436,13 +437,40 @@ class SpeciesInfoHandler(
                 val shimmerWidth = diagonal * 0.5f
                 val offset = diagonal * (progress - 0.3f)
 
-                val backgroundColor = Color.parseColor("#ECEFF1")
-                val transparent = Color.parseColor("#00ECEFF1")
-                val fadeIn1 = Color.parseColor("#40F5F7F9")
-                val fadeIn2 = Color.parseColor("#80F8F9FB")
-                val shimmerColor = Color.parseColor("#FFFAFBFC")
-                val fadeOut2 = Color.parseColor("#80F8F9FB")
-                val fadeOut1 = Color.parseColor("#40F5F7F9")
+                // KIỂM TRA DARK MODE
+                val isDarkMode = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+
+                val backgroundColor: Int
+                val transparent: Int
+                val fadeIn1: Int
+                val fadeIn2: Int
+                val shimmerColor: Int
+                val fadeOut2: Int
+                val fadeOut1: Int
+
+                if (isDarkMode) {
+                    // Cấu hình màu cho Dark Mode (Nền tối, vệt sáng xám nhẹ)
+                    // Nền: #2C2C2C (Surface Variant Dark)
+                    // Shimmer: #454545 (Lighter Gray)
+                    backgroundColor = Color.parseColor("#2C2C2C")
+                    transparent = Color.parseColor("#002C2C2C")
+
+                    // Vệt sáng (Alpha thay đổi dần)
+                    fadeIn1 = Color.parseColor("#20454545") // 12% opacity
+                    fadeIn2 = Color.parseColor("#60454545") // 37% opacity
+                    shimmerColor = Color.parseColor("#FF454545") // 100% opacity (Tâm vệt sáng)
+                    fadeOut2 = Color.parseColor("#60454545")
+                    fadeOut1 = Color.parseColor("#20454545")
+                } else {
+                    // Cấu hình màu cho Light Mode (Giữ nguyên như cũ)
+                    backgroundColor = Color.parseColor("#ECEFF1")
+                    transparent = Color.parseColor("#00ECEFF1")
+                    fadeIn1 = Color.parseColor("#40F5F7F9")
+                    fadeIn2 = Color.parseColor("#80F8F9FB")
+                    shimmerColor = Color.parseColor("#FFFAFBFC")
+                    fadeOut2 = Color.parseColor("#80F8F9FB")
+                    fadeOut1 = Color.parseColor("#40F5F7F9")
+                }
 
                 val gradient = LinearGradient(
                     offset, offset,
@@ -465,14 +493,15 @@ class SpeciesInfoHandler(
 
                 val shapeDrawable = object : ShapeDrawable(RectShape()) {
                     override fun onDraw(shape: Shape, canvas: Canvas, p: Paint) {
+                        // Bo góc (Corner Radius)
                         val cornerRadius = 20f.dpToPx()
                         val path = Path().apply {
                             addRoundRect(0f, 0f, width, height, cornerRadius, cornerRadius, Path.Direction.CW)
                         }
                         canvas.save()
                         canvas.clipPath(path)
-                        canvas.drawRect(0f, 0f, width, height, bgPaint)
-                        canvas.drawRect(0f, 0f, width, height, paint)
+                        canvas.drawRect(0f, 0f, width, height, bgPaint) // Vẽ nền
+                        canvas.drawRect(0f, 0f, width, height, paint)   // Vẽ hiệu ứng shimmer đè lên
                         canvas.restore()
                     }
                 }
@@ -489,7 +518,7 @@ class SpeciesInfoHandler(
         taxonomyShimmerAnimator = null
         infoBinding.taxonomyContainer.let {
             it.setBackgroundResource(R.drawable.bg_white_rounded)
-            it.backgroundTintList = ContextCompat.getColorStateList(context, R.color.gray_light_f8)
+            it.backgroundTintList = ContextCompat.getColorStateList(context, R.color.surface_variant)
         }
     }
 
