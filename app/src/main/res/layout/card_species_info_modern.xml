@@ -312,7 +312,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginTop="@dimen/spacing_lg"
-                android:visibility="visible">
+                android:visibility="gone">
 
             <TextView
                     android:layout_width="wrap_content"
@@ -341,7 +341,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginTop="@dimen/spacing_lg"
-                android:visibility="visible">
+                android:visibility="gone">
 
             <TextView
                     android:layout_width="wrap_content"
@@ -370,7 +370,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginTop="@dimen/spacing_lg"
-                android:visibility="visible">
+                android:visibility="gone">
 
             <TextView
                     android:layout_width="wrap_content"
@@ -399,7 +399,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginTop="@dimen/spacing_lg"
-                android:visibility="visible">
+                android:visibility="gone">
 
             <TextView
                     android:layout_width="wrap_content"
@@ -428,7 +428,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginTop="@dimen/spacing_lg"
-                android:visibility="visible">
+                android:visibility="gone">
 
             <TextView
                     android:layout_width="wrap_content"

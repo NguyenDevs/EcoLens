@@ -150,7 +150,7 @@ class SpeciesInfoHandler(
 
                 setupShareButton(info, imageUri)
                 showShareButtonAnimation()
-
+                setupCopyButton(info)
                 if (info.confidence < 50.0) {
                     showRetryButtonAnimation()
                 } else {

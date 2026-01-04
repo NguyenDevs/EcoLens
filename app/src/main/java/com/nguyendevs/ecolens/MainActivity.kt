@@ -274,7 +274,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun restoreExpandedState(uri: Uri) {
         isExpandedState = true
-        binding.bottomNavigation.selectedItemId = R.id.nav_home
+        //binding.bottomNavigation.selectedItemId = R.id.nav_home
 
         val homeRoot = binding.homeContainer.root
         val imagePreviewCard = homeRoot.findViewById<View>(R.id.imagePreviewCard)
@@ -295,7 +295,7 @@ class MainActivity : AppCompatActivity() {
 
         imageZoomHandler.setImageUri(uri)
 
-        binding.searchBarContainer.visibility = View.VISIBLE
+        //binding.searchBarContainer.visibility = View.VISIBLE
         if (searchBarHandler.isExpanded()) searchBarHandler.collapseSearchBar()
     }
 
@@ -458,9 +458,7 @@ class MainActivity : AppCompatActivity() {
     private fun setupObservers() {
         lifecycleScope.launch {
             viewModel.uiState.collect { state ->
-                if (binding.homeContainer.root.isVisible) {
-                    updateHomeUI(state)
-                }
+                updateHomeUI(state)
             }
         }
     }
