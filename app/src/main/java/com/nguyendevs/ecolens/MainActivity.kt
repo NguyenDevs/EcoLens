@@ -94,11 +94,13 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainModernBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
         if (transitionBitmap != null) {
             val rootView = window.decorView as ViewGroup
             val overlay = ImageView(this)
             overlay.setImageBitmap(transitionBitmap)
             overlay.scaleType = ImageView.ScaleType.FIT_XY
+            overlay.elevation = 100f
             overlay.layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
@@ -107,11 +109,13 @@ class MainActivity : AppCompatActivity() {
 
             overlay.animate()
                 .alpha(0f)
-                .setDuration(300)
+                .setDuration(400)
                 .setInterpolator(AccelerateDecelerateInterpolator())
                 .withEndAction {
                     rootView.removeView(overlay)
-                    transitionBitmap?.recycle()
+                    if (transitionBitmap != null && !transitionBitmap!!.isRecycled) {
+                        transitionBitmap!!.recycle()
+                    }
                     transitionBitmap = null
                 }
                 .start()
@@ -155,7 +159,6 @@ class MainActivity : AppCompatActivity() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
     }
-
 
     private fun loadThemePreference() {
         val themePref = getSharedPreferences("app_settings", Context.MODE_PRIVATE)
