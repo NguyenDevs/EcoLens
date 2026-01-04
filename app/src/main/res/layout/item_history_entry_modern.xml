@@ -68,7 +68,7 @@
                     android:maxLines="1"
                     android:text="@string/label_common_name"
                     style="@style/TextAppearance.App.Body1"
-                    android:textColor="@color/text_primary"
+                    android:textColor="@color/primary_dark"
                     android:textStyle="bold"/>
 
             <TextView

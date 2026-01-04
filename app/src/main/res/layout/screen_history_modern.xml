@@ -118,7 +118,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="@string/sort_by"
                                 style="@style/TextAppearance.App.Body1"
-                                android:textColor="@color/text_primary"
+                                android:textColor="@color/primary_dark"
                                 android:textStyle="bold"/>
 
                         <TextView
@@ -177,7 +177,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="@string/filter_by_date"
                                 style="@style/TextAppearance.App.Body1"
-                                android:textColor="@color/text_primary"
+                                android:textColor="@color/primary_dark"
                                 android:textStyle="bold"/>
 
                         <LinearLayout
