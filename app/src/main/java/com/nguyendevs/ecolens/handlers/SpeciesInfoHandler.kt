@@ -500,7 +500,6 @@ class SpeciesInfoHandler(
     }
 
     private fun displaySection(sectionId: Int, textViewId: Int, text: String, shouldScroll: Boolean = true) {
-        // Map ID to View using Binding
         val section = when(sectionId) {
             R.id.sectionDescription -> infoBinding.sectionDescription
             R.id.sectionCharacteristics -> infoBinding.sectionCharacteristics

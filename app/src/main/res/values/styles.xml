@@ -27,28 +27,28 @@
     <!-- Display -->
     <style name="TextAppearance.App.Display" parent="TextAppearance.Material3.DisplaySmall">
         <item name="android:textSize">@dimen/text_display</item>
-        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
         <item name="fontFamily">sans-serif-medium</item>
     </style>
 
     <!-- Headings -->
     <style name="TextAppearance.App.Headline1">
         <item name="android:textSize">@dimen/text_h1</item>
-        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textStyle">bold</item>
     </style>
 
     <style name="TextAppearance.App.Headline2">
         <item name="android:textSize">@dimen/text_h2</item>
-        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textStyle">bold</item>
     </style>
 
     <style name="TextAppearance.App.Headline3">
         <item name="android:textSize">@dimen/text_h3</item>
-        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textStyle">bold</item>
     </style>
@@ -56,27 +56,27 @@
     <!-- Body -->
     <style name="TextAppearance.App.Body1">
         <item name="android:textSize">@dimen/text_body</item>
-        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
         <item name="android:lineSpacingExtra">6dp</item>
     </style>
 
     <style name="TextAppearance.App.Body2">
         <item name="android:textSize">@dimen/text_body_small</item>
-        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
         <item name="android:lineSpacingExtra">4dp</item>
     </style>
 
     <!-- Labels -->
     <style name="TextAppearance.App.Label">
         <item name="android:textSize">@dimen/text_label</item>
-        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textAllCaps">true</item>
     </style>
 
     <style name="TextAppearance.App.Caption">
         <item name="android:textSize">@dimen/text_caption</item>
-        <item name="android:textColor">@color/text_tertiary</item>
+        <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
     </style>
 
     <!-- ==================== CARD STYLES ==================== -->
@@ -85,7 +85,7 @@
         <item name="cardElevation">@dimen/elevation_none</item>
         <item name="strokeWidth">@dimen/border_normal</item>
         <item name="strokeColor">@color/border_normal</item>
-        <item name="cardBackgroundColor">@color/surface</item>
+        <item name="cardBackgroundColor">?attr/colorSurface</item>
     </style>
 
     <style name="Widget.App.Card.Outlined" parent="Widget.App.Card">
@@ -165,7 +165,7 @@
         <item name="chipCornerRadius">@dimen/radius_chip</item>
         <item name="chipBackgroundColor">@color/surface_variant</item>
         <item name="chipStrokeWidth">0dp</item>
-        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
         <item name="android:textSize">@dimen/text_caption</item>
     </style>
 
@@ -182,12 +182,12 @@
         <item name="boxCornerRadiusBottomEnd">@dimen/radius_input</item>
         <item name="boxStrokeWidth">@dimen/border_normal</item>
         <item name="boxStrokeColor">@color/border_strong</item>
-        <item name="hintTextColor">@color/text_tertiary</item>
+        <item name="hintTextColor">?attr/colorOnSurfaceVariant</item>
     </style>
 
     <style name="Widget.App.TextInputEditText" parent="Widget.Material3.TextInputEditText.OutlinedBox">
         <item name="android:textSize">@dimen/text_body</item>
-        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
     </style>
 
     <!-- ==================== SHAPE APPEARANCES ==================== -->

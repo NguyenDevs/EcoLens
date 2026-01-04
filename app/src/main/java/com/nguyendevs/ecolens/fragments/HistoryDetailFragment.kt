@@ -262,7 +262,7 @@ class HistoryDetailFragment : Fragment() {
         val context = container.context
         val titleColor = ContextCompat.getColor(context, R.color.text_primary)
         val contentColor = ContextCompat.getColor(context, R.color.text_secondary)
-        val dividerColor = Color.parseColor("#F0F0F0")
+        val dividerColor = ContextCompat.getColor(context, R.color.border_light)
         val topMargin = 24.dpToPx()
         val bottomMarginTitle = 10.dpToPx()
         val bottomMarginDivider = 12.dpToPx()

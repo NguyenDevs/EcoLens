@@ -7,6 +7,7 @@ import android.os.Looper
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -98,12 +99,17 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
     inner class ChatViewHolder(private val binding: ItemChatMessageModernBinding) : RecyclerView.ViewHolder(binding.root) {
         
         private val colorWhite = ContextCompat.getColor(itemView.context, R.color.white)
-        private val colorTextPrimary = ContextCompat.getColor(itemView.context, R.color.text_primary)
         private val colorGreenPrimary = ContextCompat.getColor(itemView.context, R.color.green_primary)
 
         private val handler = Handler(Looper.getMainLooper())
         private var loopCount = 0
         private var cursorAnimator: ValueAnimator? = null
+
+        private fun getThemeColor(attr: Int): Int {
+            val typedValue = TypedValue()
+            itemView.context.theme.resolveAttribute(attr, typedValue, true)
+            return typedValue.data
+        }
 
         private val loadingAnimateRunnable = object : Runnable {
             override fun run() {
@@ -135,11 +141,15 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
             stopAnimation()
             resetViews()
 
+            // Resolve colors dynamically
+            val colorSurface = getThemeColor(com.google.android.material.R.attr.colorSurface)
+            val colorOnSurface = getThemeColor(com.google.android.material.R.attr.colorOnSurface)
+
             when {
-                message.isLoading -> bindLoadingState()
-                message.isStreaming -> bindStreamingState(message)
+                message.isLoading -> bindLoadingState(colorSurface, colorOnSurface)
+                message.isStreaming -> bindStreamingState(message, colorSurface, colorOnSurface)
                 message.isUser -> bindUserMessage(message)
-                else -> bindAiMessage(message, position)
+                else -> bindAiMessage(message, position, colorSurface, colorOnSurface)
             }
         }
 
@@ -153,19 +163,19 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
             binding.btnRenewAi.setOnClickListener(null)
         }
 
-        private fun bindLoadingState() {
+        private fun bindLoadingState(bgColor: Int, textColor: Int) {
             binding.chatContainer.gravity = Gravity.START
-            binding.cardMessage.setCardBackgroundColor(colorWhite)
-            binding.tvMessage.setTextColor(colorTextPrimary)
+            binding.cardMessage.setCardBackgroundColor(bgColor)
+            binding.tvMessage.setTextColor(textColor)
             binding.tvMessage.text = "..."
             loopCount = 0
             loadingAnimateRunnable.run()
         }
 
-        private fun bindStreamingState(message: ChatMessage) {
+        private fun bindStreamingState(message: ChatMessage, bgColor: Int, textColor: Int) {
             binding.chatContainer.gravity = Gravity.START
-            binding.cardMessage.setCardBackgroundColor(colorWhite)
-            binding.tvMessage.setTextColor(colorTextPrimary)
+            binding.cardMessage.setCardBackgroundColor(bgColor)
+            binding.tvMessage.setTextColor(textColor)
             bindStreamingText(message)
             startCursorAnimation()
             binding.layoutAiActions.visibility = android.view.View.GONE
@@ -182,11 +192,11 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
             }
         }
 
-        private fun bindAiMessage(message: ChatMessage, position: Int) {
+        private fun bindAiMessage(message: ChatMessage, position: Int, bgColor: Int, textColor: Int) {
             markwon.setMarkdown(binding.tvMessage, message.content)
             binding.chatContainer.gravity = Gravity.START
-            binding.cardMessage.setCardBackgroundColor(colorWhite)
-            binding.tvMessage.setTextColor(colorTextPrimary)
+            binding.cardMessage.setCardBackgroundColor(bgColor)
+            binding.tvMessage.setTextColor(textColor)
 
             if (position > 0) {
                 binding.layoutAiActions.visibility = android.view.View.VISIBLE
