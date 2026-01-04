@@ -124,6 +124,13 @@ class MainActivity : AppCompatActivity() {
         sharedPreferences = getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 
         setupViewModel()
+        viewModel.currentImageUri?.let { uri ->
+            this.imageUri = uri
+
+            binding.root.post {
+                restoreExpandedState(uri)
+            }
+        }
         initHandlers()
         initManagers()
         setupBottomNavigation()
@@ -253,7 +260,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.bottomNavigation.selectedItemId = R.id.nav_home
 
-        imageUri = uri
+        viewModel.currentImageUri = uri
 
         animateCardExpansion {
             val homeRoot = binding.homeContainer.root
@@ -263,6 +270,33 @@ class MainActivity : AppCompatActivity() {
             imageZoomHandler.setImageUri(uri)
             viewModel.identifySpecies(uri, languageManager.getLanguage())
         }
+    }
+
+    private fun restoreExpandedState(uri: Uri) {
+        isExpandedState = true
+        binding.bottomNavigation.selectedItemId = R.id.nav_home
+
+        val homeRoot = binding.homeContainer.root
+        val imagePreviewCard = homeRoot.findViewById<View>(R.id.imagePreviewCard)
+        val initialStateLayout = homeRoot.findViewById<View>(R.id.initialStateLayout)
+        val imagePreview = homeRoot.findViewById<View>(R.id.imagePreview)
+
+        initialStateLayout.visibility = View.GONE
+        initialStateLayout.alpha = 0f
+
+        val targetHeight = (290 * resources.displayMetrics.density).toInt()
+        val params = imagePreviewCard.layoutParams
+        params.height = targetHeight
+        imagePreviewCard.layoutParams = params
+
+        imagePreview.visibility = View.VISIBLE
+        imagePreview.alpha = 1f
+        Glide.with(this).load(uri).centerCrop().into(imagePreview as android.widget.ImageView)
+
+        imageZoomHandler.setImageUri(uri)
+
+        binding.searchBarContainer.visibility = View.VISIBLE
+        if (searchBarHandler.isExpanded()) searchBarHandler.collapseSearchBar()
     }
 
     private fun animateCardExpansion(onAnimationComplete: () -> Unit) {

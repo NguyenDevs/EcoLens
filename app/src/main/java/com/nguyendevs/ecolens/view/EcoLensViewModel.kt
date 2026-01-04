@@ -23,6 +23,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     // UI State
     private val _uiState = MutableStateFlow(EcoLensUiState())
     val uiState: StateFlow<EcoLensUiState> = _uiState.asStateFlow()
+    var currentImageUri: Uri? = null
 
     // Chat State
     val chatMessages: StateFlow<List<ChatMessage>> = chatManager.chatMessages
@@ -34,6 +35,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     // ==================== SPECIES IDENTIFICATION ====================
 
     fun identifySpecies(imageUri: Uri, languageCode: String, existingHistoryId: Int? = null) {
+        this.currentImageUri = imageUri
         lastLanguageCode = languageCode
         viewModelScope.launch {
             speciesManager.identifySpecies(

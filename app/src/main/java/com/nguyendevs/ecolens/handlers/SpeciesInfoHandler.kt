@@ -141,7 +141,11 @@ class SpeciesInfoHandler(
                 isInitialLoad = false
                 stopTaxonomyShimmer()
                 displayTaxonomyWaterfall(info)
-
+                displaySection(R.id.sectionDescription, R.id.tvDescription, info.description, shouldScroll = false)
+                displaySection(R.id.sectionCharacteristics, R.id.tvCharacteristics, info.characteristics, shouldScroll = false)
+                displaySection(R.id.sectionDistribution, R.id.tvDistribution, info.distribution, shouldScroll = false)
+                displaySection(R.id.sectionHabitat, R.id.tvHabitat, info.habitat, shouldScroll = false)
+                displayConservationStatus(info.conservationStatus, shouldScroll = false)
                 allSectionsRendered = true
 
                 setupShareButton(info, imageUri)
