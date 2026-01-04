@@ -151,6 +151,9 @@
                                 android:layout_height="wrap_content"
                                 android:minHeight="0dp"
                                 android:minWidth="0dp"
+                                app:thumbTint="@color/switch_thumb_selector"
+                                app:trackTint="@color/switch_track_selector"
+                                app:useMaterialThemeColors="false"
                                 android:clickable="false"
                                 android:focusable="false"/>
                     </LinearLayout>
