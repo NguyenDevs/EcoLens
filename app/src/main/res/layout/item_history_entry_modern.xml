@@ -68,7 +68,7 @@
                     android:maxLines="1"
                     android:text="@string/label_common_name"
                     style="@style/TextAppearance.App.Body1"
-                    android:textColor="@color/primary_dark"
+                    android:textColor="@color/text_primary"
                     android:textStyle="bold"/>
 
             <TextView
@@ -80,6 +80,7 @@
                     android:maxLines="1"
                     android:text="@string/label_scientific_name"
                     style="@style/TextAppearance.App.Body2"
+                    android:textColor="@color/text_secondary"
                     android:textStyle="italic"/>
         </LinearLayout>
 

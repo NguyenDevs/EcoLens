@@ -2,6 +2,8 @@ package com.nguyendevs.ecolens.handlers
 
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
@@ -12,6 +14,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import com.google.android.material.switchmaterial.SwitchMaterial
+import com.nguyendevs.ecolens.MainActivity
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.fragments.AboutFragment
 import com.nguyendevs.ecolens.fragments.LanguageSelectionFragment
@@ -27,6 +30,8 @@ class SettingsHandler(
     private val switchDarkMode: SwitchMaterial = settingsView.findViewById(R.id.switchDarkMode)
     private val ivDarkModeIcon: ImageView = settingsView.findViewById(R.id.ivDarkModeIcon)
 
+    private var isTransitioning = false
+
     init {
         updateLanguageDisplay()
         setupDarkModeSwitch()
@@ -36,7 +41,9 @@ class SettingsHandler(
         }
 
         settingsView.findViewById<View>(R.id.darkModeOption).setOnClickListener {
-            switchDarkMode.toggle()
+            if (!isTransitioning) {
+                switchDarkMode.toggle()
+            }
         }
 
         settingsView.findViewById<View>(R.id.aboutOption).setOnClickListener {
@@ -59,21 +66,92 @@ class SettingsHandler(
         val currentNightMode = activity.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
         val isDarkMode = currentNightMode == Configuration.UI_MODE_NIGHT_YES
         switchDarkMode.isChecked = isDarkMode
+        switchDarkMode.jumpDrawablesToCurrentState()
         updateDarkModeIcon(isDarkMode, false)
 
         switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
-            updateDarkModeIcon(isChecked, true)
-            if (isChecked) {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            } else {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            // Prevent spam clicking
+            if (isTransitioning) {
+                return@setOnCheckedChangeListener
             }
+
+            applyThemeSmoothly(isChecked)
         }
+    }
+
+    private fun applyThemeSmoothly(isDarkMode: Boolean) {
+        if (isTransitioning) return
+
+        isTransitioning = true
+        switchDarkMode.isEnabled = false
+
+        // Save preference
+        saveDarkModePreference(isDarkMode)
+
+        // Update icon with animation
+        updateDarkModeIcon(isDarkMode, true)
+
+        // Create transition bitmap
+        val decorView = activity.window.decorView
+        val bitmap = createBitmapFromView(decorView)
+
+        if (bitmap != null && !bitmap.isRecycled) {
+            // Store bitmap for next activity creation
+            MainActivity.transitionBitmap = bitmap
+        }
+
+        // Apply theme change (will recreate activity)
+        val nightMode = if (isDarkMode) {
+            AppCompatDelegate.MODE_NIGHT_YES
+        } else {
+            AppCompatDelegate.MODE_NIGHT_NO
+        }
+
+        // Small delay to let icon animation complete
+        settingsView.postDelayed({
+            AppCompatDelegate.setDefaultNightMode(nightMode)
+            // Activity will be recreated, no need to reset flags
+        }, 200)
+    }
+
+    private fun createBitmapFromView(view: View): Bitmap? {
+        return try {
+            // Use lower quality and smaller size to reduce memory usage
+            val scale = 0.4f // Reduce scale further
+            val width = (view.width * scale).toInt()
+            val height = (view.height * scale).toInt()
+
+            if (width <= 0 || height <= 0) return null
+
+            val bitmap = Bitmap.createBitmap(
+                width,
+                height,
+                Bitmap.Config.RGB_565 // Lower quality but less memory
+            )
+
+            val canvas = Canvas(bitmap)
+            canvas.scale(scale, scale)
+            view.draw(canvas)
+
+            bitmap
+        } catch (e: OutOfMemoryError) {
+            e.printStackTrace()
+            System.gc() // Force garbage collection
+            null
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    private fun saveDarkModePreference(isDarkMode: Boolean) {
+        val sharedPref = activity.getSharedPreferences("app_settings", AppCompatActivity.MODE_PRIVATE)
+        sharedPref.edit().putBoolean("dark_mode", isDarkMode).apply()
     }
 
     private fun updateDarkModeIcon(isDarkMode: Boolean, animate: Boolean) {
         val targetIcon = if (isDarkMode) R.drawable.ic_sun else R.drawable.ic_moon
-        
+
         if (animate) {
             ivDarkModeIcon.animate()
                 .alpha(0f)

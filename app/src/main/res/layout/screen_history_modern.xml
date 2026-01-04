@@ -30,7 +30,7 @@
                 android:layout_marginBottom="15dp"/>
         <View
                 android:layout_width="match_parent"
-                android:background="#E0E0E0"
+                android:background="@color/border_normal"
                 android:layout_marginStart="-20dp"
                 android:layout_marginBottom="10dp"
                 android:layout_marginEnd="-20dp"
@@ -52,6 +52,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/options"
                     style="@style/TextAppearance.App.Label"
+                    android:textColor="@color/text_secondary"
                     android:layout_marginStart="@dimen/spacing_xxs"/>
 
             <ImageView
@@ -96,7 +97,7 @@
                             android:layout_width="@dimen/icon_xl"
                             android:layout_height="@dimen/icon_xl"
                             android:background="@drawable/bg_flag_rounded"
-                            android:backgroundTint="@color/transparent">
+                            android:backgroundTint="@color/surface_tint">
                         <ImageView
                                 android:layout_width="@dimen/icon_md"
                                 android:layout_height="@dimen/icon_md"
@@ -117,6 +118,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="@string/sort_by"
                                 style="@style/TextAppearance.App.Body1"
+                                android:textColor="@color/text_primary"
                                 android:textStyle="bold"/>
 
                         <TextView
@@ -125,7 +127,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="@string/sort_newest_first"
                                 style="@style/TextAppearance.App.Body2"
-                                android:textColor="@color/green_dark"
+                                android:textColor="@color/success_text"
                                 android:layout_marginTop="2dp"/>
                     </LinearLayout>
                 </LinearLayout>
@@ -154,7 +156,7 @@
                             android:layout_width="@dimen/icon_xl"
                             android:layout_height="@dimen/icon_xl"
                             android:background="@drawable/bg_flag_rounded"
-                            android:backgroundTint="@color/transparent">
+                            android:backgroundTint="@color/surface_tint">
                         <ImageView
                                 android:layout_width="@dimen/icon_md"
                                 android:layout_height="@dimen/icon_md"
@@ -175,6 +177,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="@string/filter_by_date"
                                 style="@style/TextAppearance.App.Body1"
+                                android:textColor="@color/text_primary"
                                 android:textStyle="bold"/>
 
                         <LinearLayout
@@ -190,7 +193,8 @@
                                     android:layout_height="wrap_content"
                                     android:layout_weight="1"
                                     android:text="@string/select_date"
-                                    style="@style/TextAppearance.App.Body2"/>
+                                    style="@style/TextAppearance.App.Body2"
+                                    android:textColor="@color/text_secondary"/>
 
                             <ImageView
                                     android:id="@+id/btnClearFilter"
@@ -212,7 +216,7 @@
         <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#E0E0E0"
+                android:background="@color/border_normal"
                 android:layout_marginStart="@dimen/padding_screen_horizontal"
                 android:layout_marginEnd="@dimen/padding_screen_horizontal"
 
@@ -270,6 +274,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/history_subtitle"
                     style="@style/TextAppearance.App.Body2"
+                    android:textColor="@color/text_tertiary"
                     android:layout_marginTop="@dimen/spacing_xs"
                     android:textAlignment="center"/>
         </LinearLayout>

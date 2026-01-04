@@ -2,15 +2,21 @@ package com.nguyendevs.ecolens
 
 import android.animation.ValueAnimator
 import android.content.Context
+import android.content.SharedPreferences
+import android.content.res.Configuration
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.view.MotionEvent
+import android.view.ViewGroup
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
@@ -44,12 +50,19 @@ class MainActivity : AppCompatActivity() {
     private lateinit var settingsHandler: SettingsHandler
     private lateinit var speakerManager: SpeakerManager
     private lateinit var speciesInfoHandler: SpeciesInfoHandler
+    private lateinit var sharedPreferences: SharedPreferences
 
     private val historyFragment = HistoryFragment()
     private val chatHistoryFragment = ChatHistoryFragment()
     private var imageUri: Uri? = null
     private var isExpandedState = false
     private var stopLoadingJob: Job? = null
+
+    companion object {
+        private const val PREF_NAME = "EcoLensPrefs"
+        private const val KEY_LAST_NAV_ITEM = "last_nav_item"
+        var transitionBitmap: Bitmap? = null
+    }
 
     private val cameraActivityLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -76,9 +89,35 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        loadThemePreference()
         super.onCreate(savedInstanceState)
+
         binding = ActivityMainModernBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        if (transitionBitmap != null) {
+            val rootView = window.decorView as ViewGroup
+            val overlay = ImageView(this)
+            overlay.setImageBitmap(transitionBitmap)
+            overlay.scaleType = ImageView.ScaleType.FIT_XY
+            overlay.layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            rootView.addView(overlay)
+
+            overlay.animate()
+                .alpha(0f)
+                .setDuration(300)
+                .setInterpolator(AccelerateDecelerateInterpolator())
+                .withEndAction {
+                    rootView.removeView(overlay)
+                    transitionBitmap?.recycle()
+                    transitionBitmap = null
+                }
+                .start()
+        }
+
+        sharedPreferences = getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 
         setupViewModel()
         initHandlers()
@@ -88,7 +127,12 @@ class MainActivity : AppCompatActivity() {
         setupObservers()
         setupBackNavigation()
 
-        updateNavigationState(R.id.nav_home)
+        val lastNavItem = sharedPreferences.getInt(KEY_LAST_NAV_ITEM, R.id.nav_home)
+        binding.bottomNavigation.selectedItemId = lastNavItem
+        binding.root.post {
+            updateNavigationState(lastNavItem)
+        }
+
         preloadFragments()
     }
 
@@ -106,6 +150,23 @@ class MainActivity : AppCompatActivity() {
                 transaction.commitAllowingStateLoss()
             }
         }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+    }
+
+
+    private fun loadThemePreference() {
+        val themePref = getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+        val isDarkMode = themePref.getBoolean("dark_mode", false)
+
+        val nightMode = if (isDarkMode) {
+            AppCompatDelegate.MODE_NIGHT_YES
+        } else {
+            AppCompatDelegate.MODE_NIGHT_NO
+        }
+        AppCompatDelegate.setDefaultNightMode(nightMode)
     }
 
     private fun setupViewModel() {
@@ -252,6 +313,8 @@ class MainActivity : AppCompatActivity() {
             if (supportFragmentManager.backStackEntryCount > 0) {
                 supportFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
             }
+
+            sharedPreferences.edit().putInt(KEY_LAST_NAV_ITEM, item.itemId).apply()
 
             updateNavigationState(item.itemId)
             true

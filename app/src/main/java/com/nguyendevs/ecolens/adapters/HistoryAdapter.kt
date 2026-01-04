@@ -58,8 +58,9 @@ class HistoryAdapter(
         
         private val radius = itemView.resources.displayMetrics.density * 16
         private val strokeWidth = (1 * itemView.resources.displayMetrics.density).toInt()
-        private val colorWhite = ContextCompat.getColor(itemView.context, R.color.white)
-        private val strokeColor = Color.parseColor("#E0E0E0")
+
+        private val colorSurface = ContextCompat.getColor(itemView.context, R.color.surface)
+        private val strokeColor = ContextCompat.getColor(itemView.context, R.color.border_normal)
 
         fun bind(
             entry: HistoryEntry,
@@ -94,7 +95,7 @@ class HistoryAdapter(
             itemView.layoutParams = layoutParams
 
             val bgDrawable = GradientDrawable().apply {
-                setColor(colorWhite)
+                setColor(colorSurface)
                 setStroke(strokeWidth, strokeColor)
                 
                 cornerRadii = when {
