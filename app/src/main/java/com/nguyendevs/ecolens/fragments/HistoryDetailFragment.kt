@@ -21,7 +21,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.gson.Gson
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.FragmentHistoryDetailModernBinding

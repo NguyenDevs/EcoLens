@@ -1,7 +1,6 @@
 package com.nguyendevs.ecolens.handlers
 
 import android.content.Intent
-import android.net.Uri
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.TextView

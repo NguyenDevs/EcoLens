@@ -1,7 +1,6 @@
 package com.nguyendevs.ecolens.adapters
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -19,7 +18,6 @@ class LanguageAdapter(
         private val colorGreenPrimary = ContextCompat.getColor(itemView.context, R.color.green_primary)
         private val colorGreenDark = ContextCompat.getColor(itemView.context, R.color.green_dark)
         private val colorTextPrimary = ContextCompat.getColor(itemView.context, R.color.text_primary)
-        // Chuyển đổi 2dp sang pixel để hiển thị đồng đều trên các màn hình
         private val strokeWidthPx = (2 * itemView.resources.displayMetrics.density).toInt()
 
         init {

@@ -15,8 +15,7 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
         private const val TAG = "SpeakerManager"
         private const val RATE_NORMAL = 1.0f
         private const val RATE_VIETNAMESE = 1.05f
-        
-        // Regex patterns compiled once for performance
+
         private val REGEX_PARENTHESES_VN = Regex("\\s*\\([^)]*[ạ-ỹĂăÂâĐđÊêÔôƠơƯư][^)]*\\)")
         private val REGEX_TAXONOMY = Regex("\\s*\\([^)]*[Họ|Chi|Loài][^)]*\\)")
         private val REGEX_SYMBOLS = Regex("[*#_~]")

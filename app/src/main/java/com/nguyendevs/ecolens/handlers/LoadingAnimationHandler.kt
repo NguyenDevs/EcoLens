@@ -20,7 +20,6 @@ class LoadingAnimationHandler(
     private var loadingTextJob: Job? = null
     private var currentTextResId: Int = R.string.analyzing_text
 
-    // Tối ưu: Khởi tạo Span một lần để tái sử dụng
     private val transparentSpan = ForegroundColorSpan(Color.TRANSPARENT)
 
     fun setText(resId: Int) {
@@ -38,12 +37,10 @@ class LoadingAnimationHandler(
         loadingTextJob = coroutineScope.launch {
             val baseText = tvLoading.context.getString(currentTextResId)
             val fullText = "$baseText..."
-            // Tối ưu: Tạo SpannableString một lần duy nhất
             val spannable = SpannableString(fullText)
 
             var loopCount = 0
             while (isActive) {
-                // Reset span cũ trước khi set vị trí mới
                 spannable.removeSpan(transparentSpan)
 
                 val visibleDots = (loopCount % 3) + 1

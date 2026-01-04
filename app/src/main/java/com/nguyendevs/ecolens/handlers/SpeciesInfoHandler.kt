@@ -45,7 +45,6 @@ class SpeciesInfoHandler(
     private var lastDisplayedCommonName: String? = null
     private var lastConfidenceValue: String? = null
 
-    // Helper để truy cập nhanh vào card info từ binding chính
     private val infoBinding get() = binding.homeContainer.speciesInfoCard
 
     companion object {
@@ -348,7 +347,6 @@ class SpeciesInfoHandler(
                 }
             }
 
-            // 5. Lưu lại giá trị mới nhất
             lastConfidenceValue = newText
         }
     }

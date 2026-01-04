@@ -14,7 +14,6 @@ class PermissionManager(
     private val permissionLauncher: ActivityResultLauncher<Array<String>>
 ) {
 
-    // Xác định danh sách quyền một lần duy nhất để tái sử dụng
     private val requiredPermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         arrayOf(Manifest.permission.CAMERA, Manifest.permission.READ_MEDIA_IMAGES)
     } else {

@@ -4,7 +4,6 @@ import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.gson.Gson
 import com.nguyendevs.ecolens.database.HistoryDatabase
 import com.nguyendevs.ecolens.managers.*
 import com.nguyendevs.ecolens.model.*

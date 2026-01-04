@@ -14,16 +14,13 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.view.HapticFeedbackConstants
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.nguyendevs.ecolens.databinding.ActivityCameraModernBinding
 import com.nguyendevs.ecolens.R
 import java.io.File
