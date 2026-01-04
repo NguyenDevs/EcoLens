@@ -121,7 +121,8 @@
                         android:padding="10dp"
                         android:src="@drawable/ic_share"
                         android:contentDescription="@string/share_info"
-                        app:tint="@color/primary"/>
+                        app:tint="@color/primary"
+                android:visibility="gone"/>
 
                 <ImageView
                         android:id="@+id/btnRetryIdentification"
@@ -133,7 +134,8 @@
                         android:padding="10dp"
                         android:src="@drawable/ic_rotate"
                         android:contentDescription="@string/btn_retry_identification"
-                        app:tint="@color/warning"/>
+                        app:tint="@color/warning"
+                android:visibility="gone"/>
             </LinearLayout>
 
         </LinearLayout>
