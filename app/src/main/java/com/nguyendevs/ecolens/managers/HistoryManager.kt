@@ -10,10 +10,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
 
 class HistoryManager(
     private val context: Context,
@@ -23,6 +23,8 @@ class HistoryManager(
     companion object {
         private const val TAG = "HistoryManager"
     }
+
+    private val downloadingImages = ConcurrentHashMap<Int, Boolean>()
 
     fun getHistoryBySortOption(
         sortOption: HistorySortOption,
@@ -41,24 +43,45 @@ class HistoryManager(
             }
         }
 
-        return flow
-            .onEach { list ->
-                CoroutineScope(Dispatchers.IO).launch {
-                    checkAndRepairImages(list)
-                }
-            }
-            .flowOn(Dispatchers.IO)
+        return flow.flowOn(Dispatchers.IO)
     }
 
-    private suspend fun checkAndRepairImages(entries: List<HistoryEntry>) {
-        entries.forEach { entry ->
-            val localPath = entry.localImagePath
-            val remoteUrl = entry.imagePath
+    suspend fun repairMissingImagesOnce() = withContext(Dispatchers.IO) {
+        runCatching {
+            val allEntries = historyRepository.getAllHistoryNewestFirst()
 
-            val fileExists = if (localPath.isNotEmpty()) File(localPath).exists() else false
+            Log.d(TAG, "Starting one-time image repair check...")
 
-            if (!fileExists && remoteUrl.startsWith("http")) {
-                Log.d(TAG, "Missing local image for entry ${entry.id}. Downloading in background...")
+            val entries = mutableListOf<HistoryEntry>()
+            allEntries.collect { list ->
+                entries.addAll(list)
+                return@collect
+            }
+
+            entries.forEach { entry ->
+                launch {
+                    repairSingleImage(entry)
+                }
+            }
+        }.onFailure { e ->
+            Log.e(TAG, "Error in repair: ${e.message}", e)
+        }
+    }
+
+    private suspend fun repairSingleImage(entry: HistoryEntry) {
+        if (downloadingImages.containsKey(entry.id)) {
+            return
+        }
+
+        val localPath = entry.localImagePath
+        val remoteUrl = entry.imagePath
+
+        val fileExists = if (localPath.isNotEmpty()) File(localPath).exists() else false
+
+        if (!fileExists && remoteUrl.startsWith("http")) {
+            try {
+                downloadingImages[entry.id] = true
+                Log.d(TAG, "Downloading missing image for entry ${entry.id}...")
 
                 val newLocalPath = ImageUtils.downloadImageToInternalStorage(context, remoteUrl)
 
@@ -69,6 +92,8 @@ class HistoryManager(
                 } else {
                     Log.e(TAG, "Failed to restore image for entry ${entry.id}")
                 }
+            } finally {
+                downloadingImages.remove(entry.id)
             }
         }
     }

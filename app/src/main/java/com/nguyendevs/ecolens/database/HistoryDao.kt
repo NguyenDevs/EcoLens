@@ -17,11 +17,14 @@ import com.google.firebase.storage.FirebaseStorage
 import com.nguyendevs.ecolens.BuildConfig
 import com.nguyendevs.ecolens.model.HistoryEntry
 import com.nguyendevs.ecolens.utils.ImageUtils
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
 import java.net.URL
 
@@ -145,10 +148,27 @@ class HistoryRepository(private val historyDao: HistoryDao, private val context:
             try {
                 val fileUri = Uri.parse(entry.imagePath)
                 val imageRef = getStorageRef().child("${id}.jpg")
+                
+                // Tối ưu: Nén ảnh trước khi upload để tiết kiệm băng thông và dung lượng Storage
+                val uploadData = if (entry.imagePath.startsWith("/")) {
+                    // Nếu là file local, nén nó
+                    val bitmap = BitmapFactory.decodeFile(entry.imagePath)
+                    val baos = ByteArrayOutputStream()
+                    // Nén JPEG chất lượng 80% (giảm dung lượng đáng kể mà vẫn nét)
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos)
+                    baos.toByteArray()
+                } else {
+                    // Nếu là Uri content (ít gặp ở đây nhưng đề phòng), upload trực tiếp hoặc xử lý tương tự
+                    null
+                }
 
-                val uploadUri = if (entry.imagePath.startsWith("/")) Uri.fromFile(File(entry.imagePath)) else fileUri
-
-                imageRef.putFile(uploadUri).await()
+                if (uploadData != null) {
+                    imageRef.putBytes(uploadData).await()
+                } else {
+                    val uploadUri = if (entry.imagePath.startsWith("/")) Uri.fromFile(File(entry.imagePath)) else fileUri
+                    imageRef.putFile(uploadUri).await()
+                }
+                
                 val downloadUrl = imageRef.downloadUrl.await().toString()
                 
                 entryWithId = entryWithId.copy(
@@ -261,16 +281,26 @@ class HistoryRepository(private val historyDao: HistoryDao, private val context:
                                 }
                             }
                         }
-                        
-                        if (!hasLocalImage && remoteEntry.imagePath.startsWith("http")) {
-                            val downloadedPath = downloadImageToLocal(remoteEntry.imagePath, remoteEntry.id)
-                            if (downloadedPath != null) {
-                                finalEntry = finalEntry.copy(localImagePath = downloadedPath)
-                                getHistoryRef().child(remoteEntry.id.toString()).child("localImagePath").setValue(downloadedPath)
-                            }
-                        }
 
                         historyDao.insert(finalEntry)
+
+                        if (!hasLocalImage && remoteEntry.imagePath.startsWith("http")) {
+                            CoroutineScope(Dispatchers.IO).launch {
+                                val downloadedPath = downloadImageToLocal(remoteEntry.imagePath, remoteEntry.id)
+                                if (downloadedPath != null) {
+                                    val updatedEntry = finalEntry.copy(localImagePath = downloadedPath)
+                                    historyDao.update(updatedEntry)
+                                    try {
+                                        // Chỉ cập nhật lên Firebase nếu đường dẫn khác nhau để tránh nháy Realtime DB
+                                        if (remoteEntry.localImagePath != downloadedPath) {
+                                            getHistoryRef().child(remoteEntry.id.toString()).child("localImagePath").setValue(downloadedPath)
+                                        }
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -287,7 +317,17 @@ class HistoryRepository(private val historyDao: HistoryDao, private val context:
                     .load(url)
                     .submit()
                     .get()
-                val internalPath = ImageUtils.saveBitmapToInternalStorage(context, bitmap)
+                
+                // Tối ưu: Lưu ảnh đã nén vào bộ nhớ trong
+                // Lưu ý: Hàm saveBitmapToInternalStorage trong ImageUtils nên hỗ trợ nén.
+                // Nếu ImageUtils chưa nén, ta có thể tự xử lý ở đây hoặc giả định ImageUtils tốt.
+                // Ở đây tôi sẽ dùng cách thủ công để đảm bảo nén 80%
+                val filename = "species_${id}_${System.currentTimeMillis()}.jpg"
+                val file = File(context.filesDir, filename)
+                FileOutputStream(file).use { out ->
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out)
+                }
+                val internalPath = file.absolutePath
                 
                 internalPath
             } catch (e: Exception) {

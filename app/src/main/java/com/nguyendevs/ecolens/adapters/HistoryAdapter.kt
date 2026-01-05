@@ -5,8 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemHistoryEntryModernBinding
 import com.nguyendevs.ecolens.model.HistoryEntry
@@ -28,8 +31,29 @@ class HistoryAdapter(
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault())
 
     fun updateList(newList: List<HistoryEntry>) {
+        val diffCallback = object : DiffUtil.Callback() {
+            override fun getOldListSize(): Int = historyList.size
+            override fun getNewListSize(): Int = newList.size
+
+            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                return historyList[oldItemPosition].id == newList[newItemPosition].id
+            }
+
+            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                val oldItem = historyList[oldItemPosition]
+                val newItem = newList[newItemPosition]
+
+                return oldItem.id == newItem.id &&
+                        oldItem.timestamp == newItem.timestamp &&
+                        oldItem.speciesInfo.commonName == newItem.speciesInfo.commonName &&
+                        oldItem.speciesInfo.scientificName == newItem.speciesInfo.scientificName &&
+                        oldItem.isFavorite == newItem.isFavorite &&
+                        oldItem.imagePath == newItem.imagePath
+            }
+        }
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
         historyList = newList
-        notifyDataSetChanged()
+        diffResult.dispatchUpdatesTo(this)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryViewHolder {
@@ -88,15 +112,21 @@ class HistoryAdapter(
                 }
             }
 
-            if (loadModel == null && entry.imagePath.isNotEmpty() && !entry.imagePath.startsWith("http")) {
-                loadModel = entry.imagePath
+            if (loadModel == null && entry.imagePath.isNotEmpty()) {
+                loadModel = if (entry.imagePath.startsWith("http")) {
+                    entry.imagePath
+                } else {
+                    File(entry.imagePath)
+                }
             }
 
             Glide.with(itemView)
                 .load(loadModel)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .transition(DrawableTransitionOptions.withCrossFade(200))
                 .centerCrop()
                 .placeholder(R.mipmap.ic_launcher)
-                .error(R.drawable.ic_broken_image)
+                .error(R.mipmap.ic_launcher)
                 .into(binding.ivHistoryImage)
 
             if (isFirstItemOfDay) {

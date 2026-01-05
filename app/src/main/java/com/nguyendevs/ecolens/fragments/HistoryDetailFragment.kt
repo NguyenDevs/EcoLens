@@ -21,6 +21,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
+import com.bumptech.glide.GenericTransitionOptions
 import com.google.gson.Gson
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.FragmentHistoryDetailModernBinding
@@ -223,9 +224,10 @@ class HistoryDetailFragment : Fragment() {
 
         Glide.with(this)
             .load(loadModel)
+            .transition(GenericTransitionOptions.with(R.anim.fade_in_2))
             .centerCrop()
             .placeholder(R.mipmap.ic_launcher)
-            .error(R.drawable.ic_broken_image)
+            .error(R.mipmap.ic_launcher)
             .into(binding.ivDetailImage)
 
         binding.tvCommonName.setHtml(info.commonName)
