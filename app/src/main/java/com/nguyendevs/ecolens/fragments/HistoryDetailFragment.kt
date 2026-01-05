@@ -224,7 +224,7 @@ class HistoryDetailFragment : Fragment() {
         Glide.with(this)
             .load(loadModel)
             .centerCrop()
-            .placeholder(R.drawable.ic_image)
+            .placeholder(R.mipmap.ic_launcher)
             .error(R.drawable.ic_broken_image)
             .into(binding.ivDetailImage)
 

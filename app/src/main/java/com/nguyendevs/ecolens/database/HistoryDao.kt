@@ -220,8 +220,7 @@ class HistoryRepository(private val historyDao: HistoryDao, private val context:
                     val updatedEntry = entry.copy(id = newId)
                     updates[oldId.toString()] = null
                     updates[newId.toString()] = updatedEntry
-                    
-                    // Update local database
+
                     historyDao.deleteById(oldId)
                     historyDao.insert(updatedEntry)
                 }
@@ -247,14 +246,11 @@ class HistoryRepository(private val historyDao: HistoryDao, private val context:
                     if (remoteEntry != null) {
                         var finalEntry = remoteEntry
                         val localPath = remoteEntry.localImagePath
-                        
-                        // Check if local image exists
                         var hasLocalImage = false
                         if (localPath.isNotEmpty()) {
                             if (localPath.startsWith("/")) {
                                 hasLocalImage = File(localPath).exists()
                             } else {
-                                // It's a URI string
                                 try {
                                     val uri = Uri.parse(localPath)
                                     context.contentResolver.openInputStream(uri)?.close()
@@ -269,7 +265,6 @@ class HistoryRepository(private val historyDao: HistoryDao, private val context:
                             val downloadedPath = downloadImageToLocal(remoteEntry.imagePath, remoteEntry.id)
                             if (downloadedPath != null) {
                                 finalEntry = finalEntry.copy(localImagePath = downloadedPath)
-                                // Update Firebase with new local path
                                 getHistoryRef().child(remoteEntry.id.toString()).child("localImagePath").setValue(downloadedPath)
                             }
                         }
@@ -291,18 +286,7 @@ class HistoryRepository(private val historyDao: HistoryDao, private val context:
                     .load(url)
                     .submit()
                     .get()
-                
-                // Create a temp file first
-                //val tempFile = File(context.cacheDir, "temp_restore_${id}.jpg")
-                //FileOutputStream(tempFile).use { out ->
-                //    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
-                //}
-                
-                // Save to internal storage instead of public storage
                 val internalPath = ImageUtils.saveBitmapToInternalStorage(context, bitmap)
-                
-                // Clean up temp
-                //if (tempFile.exists()) tempFile.delete()
                 
                 internalPath
             } catch (e: Exception) {

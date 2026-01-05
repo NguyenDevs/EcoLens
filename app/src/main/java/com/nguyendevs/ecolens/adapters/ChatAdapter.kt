@@ -140,8 +140,6 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
         fun bind(message: ChatMessage, position: Int) {
             stopAnimation()
             resetViews()
-
-            // Resolve colors dynamically
             val colorSurface = getThemeColor(com.google.android.material.R.attr.colorSurface)
             val colorOnSurface = getThemeColor(com.google.android.material.R.attr.colorOnSurface)
 

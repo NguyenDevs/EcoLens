@@ -81,7 +81,6 @@ class HistoryAdapter(
             val localPath = entry.localImagePath
             var loadModel: Any? = null
 
-            // Ưu tiên hiển thị ảnh từ local nếu tồn tại
             if (!localPath.isNullOrEmpty()) {
                 val file = File(localPath)
                 if (file.exists()) {
@@ -89,17 +88,14 @@ class HistoryAdapter(
                 }
             }
 
-            // Nếu không có ảnh local, kiểm tra xem imagePath có phải là đường dẫn file không (không phải http)
-            // Nếu là http (Firebase), ta KHÔNG load ngay mà để HistoryManager tải ngầm và update DB sau.
-            // Điều này đáp ứng yêu cầu: "hiển thị hết nội dung chữ... rồi mới bắt đầu tải ảnh dưới nền"
             if (loadModel == null && entry.imagePath.isNotEmpty() && !entry.imagePath.startsWith("http")) {
                 loadModel = entry.imagePath
             }
 
             Glide.with(itemView)
-                .load(loadModel) // Nếu null, Glide sẽ hiện placeholder
+                .load(loadModel)
                 .centerCrop()
-                .placeholder(R.drawable.ic_image)
+                .placeholder(R.mipmap.ic_launcher)
                 .error(R.drawable.ic_broken_image)
                 .into(binding.ivHistoryImage)
 
