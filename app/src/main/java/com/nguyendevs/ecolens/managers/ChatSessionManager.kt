@@ -134,8 +134,9 @@ class ChatSessionManager(
 
         withContext(Dispatchers.IO) {
             try {
+                val reuseId = aiMessage.id
                 chatRepository.deleteMessage(aiMessage)
-                executeGeminiStreamingFlow(sessionId)
+                executeGeminiStreamingFlow(sessionId, reuseId)
             } catch (e: Exception) {
                 isGenerating.set(false)
                 Log.e(TAG, "Renew failed: ${e.message}")
@@ -177,10 +178,11 @@ class ChatSessionManager(
         }
     }
 
-    private suspend fun executeGeminiStreamingFlow(sessionId: Long) {
+    private suspend fun executeGeminiStreamingFlow(sessionId: Long, reuseMessageId: Long? = null) {
         _isStreamingActive.value = true
 
         val tempMessage = ChatMessage(
+            id = reuseMessageId ?: 0,
             sessionId = sessionId,
             content = "",
             isUser = false,

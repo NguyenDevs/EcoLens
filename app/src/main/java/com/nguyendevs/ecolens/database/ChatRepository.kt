@@ -147,13 +147,15 @@ class ChatRepository(private val chatDao: ChatDao, private val context: Context)
         }
     }
 
-    suspend fun deleteMessage(message: ChatMessage) {
+    suspend fun deleteMessage(message: ChatMessage, reorder: Boolean = true) {
         chatDao.deleteMessageById(message.id)
         try {
             getMessagesRef().child(message.sessionId.toString()).child(message.id.toString()).removeValue().await()
             
             // Reorder Message IDs within the session
-            reorderMessageIds(message.sessionId, message.id)
+            if (reorder) {
+                reorderMessageIds(message.sessionId, message.id)
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
