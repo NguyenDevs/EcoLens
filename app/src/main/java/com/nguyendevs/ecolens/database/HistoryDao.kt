@@ -97,7 +97,8 @@ interface HistoryDao {
 
 // Firebase implementation
 class HistoryRepository(private val historyDao: HistoryDao) {
-    private val database = FirebaseDatabase.getInstance()
+    // Sử dụng URL cụ thể do người dùng cung cấp để đảm bảo kết nối đúng region
+    private val database = FirebaseDatabase.getInstance("https://ecolens-658ae-default-rtdb.asia-southeast1.firebasedatabase.app/")
     private val historyRef = database.getReference("history")
 
     suspend fun insert(entry: HistoryEntry): Long {

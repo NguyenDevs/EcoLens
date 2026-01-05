@@ -6,7 +6,8 @@ import com.nguyendevs.ecolens.model.ChatSession
 import kotlinx.coroutines.tasks.await
 
 class ChatRepository(private val chatDao: ChatDao) {
-    private val database = FirebaseDatabase.getInstance()
+    // Sử dụng URL cụ thể do người dùng cung cấp để đảm bảo kết nối đúng region
+    private val database = FirebaseDatabase.getInstance("https://ecolens-658ae-default-rtdb.asia-southeast1.firebasedatabase.app/")
     private val sessionsRef = database.getReference("chat_sessions")
     private val messagesRef = database.getReference("chat_messages")
 
