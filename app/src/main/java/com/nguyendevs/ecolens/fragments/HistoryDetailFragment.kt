@@ -126,6 +126,12 @@ class HistoryDetailFragment : Fragment() {
                         e.printStackTrace()
                         imageUri = Uri.parse(imagePath)
                     }
+                } else {
+                    try {
+                        imageUri = Uri.parse(imagePath)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
             }
             shareSpeciesInfo(info, imageUri)
@@ -172,7 +178,7 @@ class HistoryDetailFragment : Fragment() {
 
         try {
             val intent = Intent(Intent.ACTION_SEND).apply {
-                if (imageUri != null) {
+                if (imageUri != null && (imageUri.scheme == "content" || imageUri.scheme == "file")) {
                     type = "image/*"
                     putExtra(Intent.EXTRA_STREAM, imageUri)
                     clipData = ClipData.newRawUri(null, imageUri)
@@ -201,7 +207,36 @@ class HistoryDetailFragment : Fragment() {
     }
 
     private fun bindHeader(entry: HistoryEntry, info: SpeciesInfo) {
-        Glide.with(this).load(entry.imagePath).centerCrop().into(binding.ivDetailImage)
+        val localPath = entry.localImagePath
+        var loadModel: Any = entry.imagePath
+
+        if (localPath.isNotEmpty()) {
+            if (localPath.startsWith("/")) {
+                val file = File(localPath)
+                if (file.exists()) {
+                    loadModel = file
+                }
+            } else {
+                try {
+                    val uri = Uri.parse(localPath)
+                    requireContext().contentResolver.openInputStream(uri)?.close()
+                    loadModel = uri
+                } catch (e: Exception) {
+                }
+            }
+        } else if (entry.imagePath.startsWith("/")) {
+            val file = File(entry.imagePath)
+            if (file.exists()) {
+                loadModel = file
+            }
+        }
+
+        Glide.with(this)
+            .load(loadModel)
+            .centerCrop()
+            .placeholder(R.mipmap.ic_launcher)
+            .error(R.drawable.ic_broken_image)
+            .into(binding.ivDetailImage)
 
         binding.tvCommonName.setHtml(info.commonName)
         binding.tvScientificName.setHtml(info.scientificName)

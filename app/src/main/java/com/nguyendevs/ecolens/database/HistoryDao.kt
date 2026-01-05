@@ -1,18 +1,28 @@
 package com.nguyendevs.ecolens.database
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
+import android.util.Log
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.bumptech.glide.Glide
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.nguyendevs.ecolens.model.HistoryEntry
+import com.nguyendevs.ecolens.utils.ImageUtils
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FileOutputStream
+import java.net.URL
 
 @Dao
 interface HistoryDao {
@@ -97,6 +107,9 @@ interface HistoryDao {
     // Xóa tất cả lịch sử
     @Query("DELETE FROM history_table")
     suspend fun deleteAll()
+
+    @Query("DELETE FROM history_table WHERE id = :id")
+    suspend fun deleteById(id: Int)
 }
 
 // Firebase implementation
@@ -104,14 +117,15 @@ class HistoryRepository(private val historyDao: HistoryDao, private val context:
     // Sử dụng URL cụ thể do người dùng cung cấp để đảm bảo kết nối đúng region
     private val database = FirebaseDatabase.getInstance("https://ecolens-658ae-default-rtdb.asia-southeast1.firebasedatabase.app/")
     private val storage = FirebaseStorage.getInstance()
+    private val auth = FirebaseAuth.getInstance()
 
-    private fun getUsername(): String {
-        val sharedPreferences = context.getSharedPreferences("EcoLensPrefs", Context.MODE_PRIVATE)
-        return sharedPreferences.getString("username", "default_user") ?: "default_user"
+    // Lấy UID từ Firebase Auth
+    private fun getUserId(): String {
+        return auth.currentUser?.uid ?: "anonymous"
     }
 
-    private fun getHistoryRef() = database.getReference("history").child(getUsername())
-    private fun getStorageRef() = storage.reference.child("images").child(getUsername())
+    private fun getHistoryRef() = database.getReference("history").child(getUserId())
+    private fun getStorageRef() = storage.reference.child("users").child(getUserId())
 
     fun getAllHistoryNewestFirst() = historyDao.getAllHistoryNewestFirst()
     fun getAllHistoryOldestFirst() = historyDao.getAllHistoryOldestFirst()
@@ -121,15 +135,22 @@ class HistoryRepository(private val historyDao: HistoryDao, private val context:
     suspend fun insert(entry: HistoryEntry): Long {
         val id = historyDao.insert(entry)
         var entryWithId = entry.copy(id = id.toInt())
-        
-        // Upload image to Firebase Storage
+
         if (entry.imagePath.isNotEmpty() && !entry.imagePath.startsWith("http")) {
             try {
-                val file = Uri.fromFile(File(entry.imagePath))
+                val fileUri = Uri.parse(entry.imagePath)
                 val imageRef = getStorageRef().child("${id}.jpg")
-                imageRef.putFile(file).await()
+
+                val uploadUri = if (entry.imagePath.startsWith("/")) Uri.fromFile(File(entry.imagePath)) else fileUri
+
+                imageRef.putFile(uploadUri).await()
                 val downloadUrl = imageRef.downloadUrl.await().toString()
-                entryWithId = entryWithId.copy(imagePath = downloadUrl)
+                
+                entryWithId = entryWithId.copy(
+                    imagePath = downloadUrl,
+                    localImagePath = entry.imagePath
+                )
+                historyDao.update(entryWithId)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -161,19 +182,129 @@ class HistoryRepository(private val historyDao: HistoryDao, private val context:
         }
     }
 
+    suspend fun delete(entry: HistoryEntry) {
+        val idToDelete = entry.id
+        historyDao.deleteById(idToDelete)
+        
+        try {
+            getHistoryRef().child(idToDelete.toString()).removeValue().await()
+            reorderIds(idToDelete)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private suspend fun reorderIds(deletedId: Int) {
+        try {
+            val snapshot = getHistoryRef().get().await()
+            if (snapshot.exists()) {
+                val updates = hashMapOf<String, Any?>()
+                val entriesToUpdate = mutableListOf<HistoryEntry>()
+
+                for (child in snapshot.children) {
+                    val entry = child.getValue(HistoryEntry::class.java)
+                    if (entry != null && entry.id > deletedId) {
+                        entriesToUpdate.add(entry)
+                    }
+                }
+
+                entriesToUpdate.sortBy { it.id }
+
+                for (entry in entriesToUpdate) {
+                    val oldId = entry.id
+                    val newId = oldId - 1
+                    val updatedEntry = entry.copy(id = newId)
+                    updates[oldId.toString()] = null
+                    updates[newId.toString()] = updatedEntry
+                    
+                    // Update local database
+                    historyDao.deleteById(oldId)
+                    historyDao.insert(updatedEntry)
+                }
+
+                if (updates.isNotEmpty()) {
+                    getHistoryRef().updateChildren(updates).await()
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     suspend fun fetchHistory() {
+        // Chỉ fetch nếu đã đăng nhập
+        if (auth.currentUser == null) return
+
         try {
             val snapshot = getHistoryRef().get().await()
             if (snapshot.exists()) {
                 for (child in snapshot.children) {
-                    val entry = child.getValue(HistoryEntry::class.java)
-                    if (entry != null) {
-                        historyDao.insert(entry)
+                    val remoteEntry = child.getValue(HistoryEntry::class.java)
+                    if (remoteEntry != null) {
+                        var finalEntry = remoteEntry
+                        val localPath = remoteEntry.localImagePath
+                        
+                        // Check if local image exists
+                        var hasLocalImage = false
+                        if (localPath.isNotEmpty()) {
+                            if (localPath.startsWith("/")) {
+                                hasLocalImage = File(localPath).exists()
+                            } else {
+                                // It's a URI string
+                                try {
+                                    val uri = Uri.parse(localPath)
+                                    context.contentResolver.openInputStream(uri)?.close()
+                                    hasLocalImage = true
+                                } catch (e: Exception) {
+                                    hasLocalImage = false
+                                }
+                            }
+                        }
+                        
+                        if (!hasLocalImage && remoteEntry.imagePath.startsWith("http")) {
+                            val downloadedPath = downloadImageToLocal(remoteEntry.imagePath, remoteEntry.id)
+                            if (downloadedPath != null) {
+                                finalEntry = finalEntry.copy(localImagePath = downloadedPath)
+                                // Update Firebase with new local path
+                                getHistoryRef().child(remoteEntry.id.toString()).child("localImagePath").setValue(downloadedPath)
+                            }
+                        }
+
+                        historyDao.insert(finalEntry)
                     }
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    private suspend fun downloadImageToLocal(url: String, id: Int): String? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val bitmap = Glide.with(context)
+                    .asBitmap()
+                    .load(url)
+                    .submit()
+                    .get()
+                
+                // Create a temp file first
+                val tempFile = File(context.cacheDir, "temp_restore_${id}.jpg")
+                FileOutputStream(tempFile).use { out ->
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+                }
+                
+                // Save to public storage
+                val publicPath = ImageUtils.saveImageToPublicStorage(context, tempFile)
+                
+                // Clean up temp
+                if (tempFile.exists()) tempFile.delete()
+                
+                publicPath
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
         }
     }
 }

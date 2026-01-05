@@ -212,6 +212,7 @@
     <string name="error_password_too_short">Password must be at least 6 characters</string>
     <string name="error_password_mismatch">Passwords do not match</string>
     <string name="error_terms_not_accepted">Please accept the terms of service</string>
+    <string name="error_fill_all_fields">Please fill all fields</string>
 
     <!-- Success Messages -->
     <string name="login_success">Login successful!</string>
@@ -229,5 +230,7 @@
     <string name="please_wait">Please wait…</string>
     <string name="account">ACCOUNT</string>
     <string name="logout">Logout</string>
+
+    <string name="default_web_client_id">99190004722-8d4rpmasasjflta1hp7vgdu98a649rin.apps.googleusercontent.com</string>
 
 </resources>

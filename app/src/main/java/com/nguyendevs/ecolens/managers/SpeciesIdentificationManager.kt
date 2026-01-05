@@ -146,38 +146,21 @@ class SpeciesIdentificationManager(
 
         if (isValidInfo(currentInfo)) {
             withContext(Dispatchers.IO) {
-                // For new entries, we save locally first then upload
-                // For existing, we might need to handle differently, but here we assume local path is valid or we use the existing one
+                val savedPath = ImageUtils.saveImageToPublicStorage(context, imageFile)
                 
-                // Note: HistoryRepository handles upload if imagePath is a local file path
-                
-                if (existingHistoryId != null) {
-                    // This part is tricky because we don't have direct access to DAO here easily without exposing it
-                    // But we can assume we are updating an existing entry.
-                    // However, HistoryRepository.update takes a HistoryEntry. We need to fetch it first.
-                    // Since we don't have getById in HistoryRepository (yet), let's add it or assume we can't update easily without it.
-                    // For now, let's just insert new if not existing, or update if we had the object.
-                    // But wait, we passed existingHistoryId.
+                if (savedPath != null) {
+                    val entry = HistoryEntry(
+                        id = existingHistoryId ?: 0,
+                        imagePath = savedPath,
+                        localImagePath = savedPath,
+                        speciesInfo = currentInfo,
+                        timestamp = System.currentTimeMillis()
+                    )
                     
-                    // Ideally HistoryRepository should have getById. Let's assume we can't update for now or we need to add getById to Repository.
-                    // Let's skip update for existing for a moment or just insert new one if we can't fetch.
-                    // Actually, let's just insert a new one if we can't update, or better, add getById to Repository.
-                    
-                    // Since I cannot modify HistoryRepository interface easily here without reading it again, 
-                    // I will assume for now we only insert new ones or I need to add getById to HistoryRepository.
-                    // I already added getHistoryById to HistoryDao, but not HistoryRepository.
-                    
-                    // Let's just save new for now to be safe, or rely on the fact that we might not need to update often in this flow.
-                    // But wait, the original code did: historyDao.getHistoryById(existingHistoryId)
-                    // I should probably add getById to HistoryRepository.
-                } else {
-                    val savedPath = ImageUtils.saveBitmapToInternalStorage(context, imageFile)
-                    if (savedPath != null) {
-                         val newId = historyRepository.insert(HistoryEntry(
-                            imagePath = savedPath,
-                            speciesInfo = currentInfo,
-                            timestamp = System.currentTimeMillis()
-                        ))
+                    if (existingHistoryId != null) {
+                        historyRepository.update(entry)
+                    } else {
+                        val newId = historyRepository.insert(entry)
                         currentHistoryEntryId = newId.toInt()
                     }
                 }

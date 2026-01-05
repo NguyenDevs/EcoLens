@@ -37,6 +37,7 @@ import com.nguyendevs.ecolens.utils.KeyboardUtils
 import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.*
+import java.io.File
 
 class MainActivity : AppCompatActivity() {
 
@@ -93,11 +94,9 @@ class MainActivity : AppCompatActivity() {
         loadThemePreference()
         super.onCreate(savedInstanceState)
 
-        // Enable Firebase persistence
         try {
             FirebaseDatabase.getInstance().setPersistenceEnabled(true)
         } catch (e: Exception) {
-            // Persistence might have been enabled already
         }
 
         binding = ActivityMainModernBinding.inflate(layoutInflater)
@@ -146,7 +145,14 @@ class MainActivity : AppCompatActivity() {
         setupObservers()
         setupBackNavigation()
 
-        val lastNavItem = sharedPreferences.getInt(KEY_LAST_NAV_ITEM, R.id.nav_home)
+        // Check if we need to navigate to settings (e.g. after language change)
+        val navigateToSettings = intent.getBooleanExtra("navigate_to_settings", false)
+        val lastNavItem = if (navigateToSettings) {
+            R.id.nav_settings
+        } else {
+            sharedPreferences.getInt(KEY_LAST_NAV_ITEM, R.id.nav_home)
+        }
+
         binding.bottomNavigation.selectedItemId = lastNavItem
         binding.root.post {
             updateNavigationState(lastNavItem)
@@ -282,7 +288,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun restoreExpandedState(uri: Uri) {
         isExpandedState = true
-        //binding.bottomNavigation.selectedItemId = R.id.nav_home
 
         val homeRoot = binding.homeContainer.root
         val imagePreviewCard = homeRoot.findViewById<View>(R.id.imagePreviewCard)
@@ -299,7 +304,15 @@ class MainActivity : AppCompatActivity() {
 
         imagePreview.visibility = View.VISIBLE
         imagePreview.alpha = 1f
-        Glide.with(this).load(uri).centerCrop().into(imagePreview as android.widget.ImageView)
+        val path = uri.path
+        val loadModel = if (path != null) {
+            val file = File(path)
+            if (file.exists()) file else uri
+        } else {
+            uri
+        }
+        
+        Glide.with(this).load(loadModel).centerCrop().into(imagePreview as android.widget.ImageView)
 
         imageZoomHandler.setImageUri(uri)
 

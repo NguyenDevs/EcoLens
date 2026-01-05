@@ -15,11 +15,15 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.material.switchmaterial.SwitchMaterial
+import com.google.firebase.auth.FirebaseAuth
 import com.nguyendevs.ecolens.MainActivity
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.activities.AuthActivity
 import com.nguyendevs.ecolens.database.HistoryDatabase
+import com.nguyendevs.ecolens.database.UserRepository
 import com.nguyendevs.ecolens.fragments.AboutFragment
 import com.nguyendevs.ecolens.fragments.LanguageSelectionFragment
 import com.nguyendevs.ecolens.managers.LanguageManager
@@ -36,6 +40,7 @@ class SettingsHandler(
     private val tvCurrentLanguage: TextView = settingsView.findViewById(R.id.tvCurrentLanguage)
     private val switchDarkMode: SwitchMaterial = settingsView.findViewById(R.id.switchDarkMode)
     private val ivDarkModeIcon: ImageView = settingsView.findViewById(R.id.ivDarkModeIcon)
+    private val userRepository = UserRepository()
 
     private var isTransitioning = false
 
@@ -78,13 +83,33 @@ class SettingsHandler(
             withContext(Dispatchers.IO) {
                 val db = HistoryDatabase.getDatabase(activity)
                 db.historyDao().deleteAll()
-                db.chatDao().deleteMessagesBySession(-1) // Just a placeholder, we might want to clear all local data
-                // Actually, we should clear all tables
+                db.chatDao().deleteMessagesBySession(-1)
                 db.clearAllTables()
             }
+
+            FirebaseAuth.getInstance().signOut()
+
+            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(activity.getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build()
+            val googleSignInClient = GoogleSignIn.getClient(activity, gso)
+            googleSignInClient.signOut()
             
             val sharedPreferences = activity.getSharedPreferences("EcoLensPrefs", Context.MODE_PRIVATE)
-            sharedPreferences.edit().remove("username").apply()
+            sharedPreferences.edit()
+                .remove("username")
+                .remove("last_nav_item")
+                .apply()
+
+            val appSettings = activity.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+            appSettings.edit().putBoolean("dark_mode", false).apply()
+
+            appSettings.edit().remove("remember_me").apply()
+
+            withContext(Dispatchers.Main) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            }
             
             val intent = Intent(activity, AuthActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -100,6 +125,13 @@ class SettingsHandler(
         switchDarkMode.isChecked = isDarkMode
         switchDarkMode.jumpDrawablesToCurrentState()
         updateDarkModeIcon(isDarkMode, false)
+
+        val nightMode = if (isDarkMode) {
+            AppCompatDelegate.MODE_NIGHT_YES
+        } else {
+            AppCompatDelegate.MODE_NIGHT_NO
+        }
+        AppCompatDelegate.setDefaultNightMode(nightMode)
 
         switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
             if (isTransitioning) {
@@ -120,6 +152,10 @@ class SettingsHandler(
     private fun applyThemeSmoothly(isDarkMode: Boolean) {
         saveDarkModePreference(isDarkMode)
         updateDarkModeIcon(isDarkMode, true)
+
+        activity.lifecycleScope.launch {
+            userRepository.updateDarkMode(isDarkMode)
+        }
 
         if (MainActivity.transitionBitmap != null && !MainActivity.transitionBitmap!!.isRecycled) {
             MainActivity.transitionBitmap!!.recycle()

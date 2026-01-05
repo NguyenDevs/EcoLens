@@ -1,22 +1,22 @@
 package com.nguyendevs.ecolens.database
 
 import android.content.Context
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.nguyendevs.ecolens.model.ChatMessage
 import com.nguyendevs.ecolens.model.ChatSession
 import kotlinx.coroutines.tasks.await
 
 class ChatRepository(private val chatDao: ChatDao, private val context: Context) {
-    // Sử dụng URL cụ thể do người dùng cung cấp để đảm bảo kết nối đúng region
     private val database = FirebaseDatabase.getInstance("https://ecolens-658ae-default-rtdb.asia-southeast1.firebasedatabase.app/")
-    
-    private fun getUsername(): String {
-        val sharedPreferences = context.getSharedPreferences("EcoLensPrefs", Context.MODE_PRIVATE)
-        return sharedPreferences.getString("username", "default_user") ?: "default_user"
+    private val auth = FirebaseAuth.getInstance()
+
+    private fun getUserId(): String {
+        return auth.currentUser?.uid ?: "anonymous"
     }
 
-    private fun getSessionsRef() = database.getReference("chat_sessions").child(getUsername())
-    private fun getMessagesRef() = database.getReference("chat_messages").child(getUsername())
+    private fun getSessionsRef() = database.getReference("chat_sessions").child(getUserId())
+    private fun getMessagesRef() = database.getReference("chat_messages").child(getUserId())
 
     suspend fun insertSession(session: ChatSession): Long {
         val id = chatDao.insertSession(session)
@@ -43,6 +43,76 @@ class ChatRepository(private val chatDao: ChatDao, private val context: Context)
         try {
             getSessionsRef().child(id.toString()).removeValue().await()
             getMessagesRef().child(id.toString()).removeValue().await()
+            
+            // Reorder Session IDs
+            reorderSessionIds(id)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private suspend fun reorderSessionIds(deletedId: Long) {
+        try {
+            val snapshot = getSessionsRef().get().await()
+            if (snapshot.exists()) {
+                val updates = hashMapOf<String, Any?>()
+                val sessionsToUpdate = mutableListOf<ChatSession>()
+
+                for (child in snapshot.children) {
+                    val session = child.getValue(ChatSession::class.java)
+                    if (session != null && session.id > deletedId) {
+                        sessionsToUpdate.add(session)
+                    }
+                }
+
+                sessionsToUpdate.sortBy { it.id }
+
+                for (session in sessionsToUpdate) {
+                    val oldId = session.id
+                    val newId = oldId - 1
+                    val updatedSession = session.copy(id = newId)
+                    
+                    updates[oldId.toString()] = null
+                    updates[newId.toString()] = updatedSession
+                    
+                    // Update local DB
+                    chatDao.deleteSession(oldId)
+                    chatDao.insertSession(updatedSession)
+                    
+                    // We also need to move messages for this session
+                    moveMessagesToNewSessionId(oldId, newId)
+                }
+
+                if (updates.isNotEmpty()) {
+                    getSessionsRef().updateChildren(updates).await()
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private suspend fun moveMessagesToNewSessionId(oldSessionId: Long, newSessionId: Long) {
+        try {
+            val messagesSnapshot = getMessagesRef().child(oldSessionId.toString()).get().await()
+            if (messagesSnapshot.exists()) {
+                // Remove old session messages node
+                getMessagesRef().child(oldSessionId.toString()).removeValue().await()
+
+                for (child in messagesSnapshot.children) {
+                    val message = child.getValue(ChatMessage::class.java)
+                    if (message != null) {
+                        val updatedMessage = message.copy(sessionId = newSessionId)
+                        
+                        // Add to new session messages node
+                        getMessagesRef().child(newSessionId.toString()).child(updatedMessage.id.toString()).setValue(updatedMessage).await()
+                        
+                        // Update local DB
+                        chatDao.deleteMessageById(message.id)
+                        chatDao.insertMessage(updatedMessage)
+                    }
+                }
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -81,12 +151,56 @@ class ChatRepository(private val chatDao: ChatDao, private val context: Context)
         chatDao.deleteMessageById(message.id)
         try {
             getMessagesRef().child(message.sessionId.toString()).child(message.id.toString()).removeValue().await()
+            
+            // Reorder Message IDs within the session
+            reorderMessageIds(message.sessionId, message.id)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private suspend fun reorderMessageIds(sessionId: Long, deletedMessageId: Long) {
+        try {
+            val snapshot = getMessagesRef().child(sessionId.toString()).get().await()
+            if (snapshot.exists()) {
+                val updates = hashMapOf<String, Any?>()
+                val messagesToUpdate = mutableListOf<ChatMessage>()
+
+                for (child in snapshot.children) {
+                    val message = child.getValue(ChatMessage::class.java)
+                    if (message != null && message.id > deletedMessageId) {
+                        messagesToUpdate.add(message)
+                    }
+                }
+
+                messagesToUpdate.sortBy { it.id }
+
+                for (message in messagesToUpdate) {
+                    val oldId = message.id
+                    val newId = oldId - 1
+                    val updatedMessage = message.copy(id = newId)
+                    
+                    updates[oldId.toString()] = null
+                    updates[newId.toString()] = updatedMessage
+                    
+                    // Update local DB
+                    chatDao.deleteMessageById(oldId)
+                    chatDao.insertMessage(updatedMessage)
+                }
+
+                if (updates.isNotEmpty()) {
+                    getMessagesRef().child(sessionId.toString()).updateChildren(updates).await()
+                }
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
     suspend fun fetchSessionsAndMessages() {
+        // Chỉ fetch nếu đã đăng nhập
+        if (auth.currentUser == null) return
+
         try {
             val sessionsSnapshot = getSessionsRef().get().await()
             if (sessionsSnapshot.exists()) {

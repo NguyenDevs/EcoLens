@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.nguyendevs.ecolens.MainActivity
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.adapters.LanguageAdapter
 import com.nguyendevs.ecolens.databinding.FragmentLanguageSelectionModernBinding
@@ -78,14 +79,11 @@ class LanguageSelectionFragment : Fragment() {
         if (language.code != languageManager.getLanguage()) {
             languageManager.setLanguage(language.code)
 
-            val intent: Intent? = requireActivity().packageManager
-                .getLaunchIntentForPackage(requireActivity().packageName)
-
-            intent?.let {
-                it.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-                startActivity(it)
-                requireActivity().finish()
-            }
+            val intent = Intent(requireContext(), MainActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+            intent.putExtra("navigate_to_settings", true)
+            startActivity(intent)
+            requireActivity().finish()
         }
     }
 

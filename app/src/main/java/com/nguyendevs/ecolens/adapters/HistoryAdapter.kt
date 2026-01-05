@@ -2,6 +2,7 @@ package com.nguyendevs.ecolens.adapters
 
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +13,7 @@ import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemHistoryEntryModernBinding
 import com.nguyendevs.ecolens.model.HistoryEntry
 import io.noties.markwon.Markwon
+import java.io.File
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -78,9 +80,36 @@ class HistoryAdapter(
 
             binding.tvHistoryTime.text = timeFormatter.format(currentDateTime)
 
+            val localPath = entry.localImagePath
+            var loadModel: Any = entry.imagePath
+
+            if (localPath.isNotEmpty()) {
+                if (localPath.startsWith("/")) {
+                    val file = File(localPath)
+                    if (file.exists()) {
+                        loadModel = file
+                    }
+                } else {
+                    try {
+                        val uri = Uri.parse(localPath)
+                        itemView.context.contentResolver.openInputStream(uri)?.close()
+                        loadModel = uri
+                    } catch (e: Exception) {
+                        // Fallback to imagePath (URL)
+                    }
+                }
+            } else if (entry.imagePath.startsWith("/")) {
+                 val file = File(entry.imagePath)
+                 if (file.exists()) {
+                     loadModel = file
+                 }
+            }
+
             Glide.with(itemView)
-                .load(entry.imagePath)
+                .load(loadModel)
                 .centerCrop()
+                .placeholder(R.mipmap.ic_launcher)
+                .error(R.drawable.ic_broken_image)
                 .into(binding.ivHistoryImage)
 
             if (isFirstItemOfDay) {

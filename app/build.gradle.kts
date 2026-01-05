@@ -159,6 +159,10 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
     implementation("com.google.firebase:firebase-database-ktx")
     implementation("com.google.firebase:firebase-storage-ktx")
+    implementation("com.google.firebase:firebase-auth-ktx")
+    
+    // Google Sign In
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
 
     // Testing
     testImplementation("junit:junit:4.13.2")

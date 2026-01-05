@@ -1,11 +1,14 @@
 package com.nguyendevs.ecolens.utils
 
+import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
-import androidx.exifinterface.media.ExifInterface
 import android.net.Uri
+import android.os.Environment
+import android.provider.MediaStore
+import androidx.exifinterface.media.ExifInterface
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -91,6 +94,39 @@ object ImageUtils {
             file.copyTo(destFile, overwrite = true)
             destFile.absolutePath
         } catch (e: Exception) {
+            null
+        }
+    }
+
+    fun saveImageToPublicStorage(context: Context, sourceFile: File): String? {
+        val filename = "species_${System.currentTimeMillis()}.jpg"
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/EcoLens")
+        }
+
+        val resolver = context.contentResolver
+        val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+
+        return if (uri != null) {
+            try {
+                resolver.openOutputStream(uri)?.use { outputStream ->
+                    sourceFile.inputStream().use { inputStream ->
+                        inputStream.copyTo(outputStream)
+                    }
+                }
+                uri.toString()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                try {
+                    resolver.delete(uri, null, null)
+                } catch (deleteEx: Exception) {
+                    deleteEx.printStackTrace()
+                }
+                null
+            }
+        } else {
             null
         }
     }

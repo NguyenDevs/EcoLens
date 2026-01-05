@@ -8,6 +8,7 @@ import androidx.room.PrimaryKey
 data class HistoryEntry(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val imagePath: String = "",
+    val localImagePath: String = "",
     @Embedded val speciesInfo: SpeciesInfo = SpeciesInfo(),
     val timestamp: Long = 0,
     val isFavorite: Boolean = false

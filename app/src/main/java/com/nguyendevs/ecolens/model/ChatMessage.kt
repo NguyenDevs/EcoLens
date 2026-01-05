@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.google.firebase.database.PropertyName
 
 @Entity(
     tableName = "chat_messages",
@@ -20,7 +21,8 @@ data class ChatMessage(
     val id: Long = 0,
     val sessionId: Long = 0,
     val content: String = "",
-    val isUser: Boolean = false,
+    @get:PropertyName("isUser") @set:PropertyName("isUser")
+    var isUser: Boolean = false,
     val timestamp: Long = System.currentTimeMillis(),
     val isLoading: Boolean = false,
     val isStreaming: Boolean = false
