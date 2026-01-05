@@ -293,18 +293,18 @@ class HistoryRepository(private val historyDao: HistoryDao, private val context:
                     .get()
                 
                 // Create a temp file first
-                val tempFile = File(context.cacheDir, "temp_restore_${id}.jpg")
-                FileOutputStream(tempFile).use { out ->
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
-                }
+                //val tempFile = File(context.cacheDir, "temp_restore_${id}.jpg")
+                //FileOutputStream(tempFile).use { out ->
+                //    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+                //}
                 
-                // Save to public storage
-                val publicPath = ImageUtils.saveImageToPublicStorage(context, tempFile)
+                // Save to internal storage instead of public storage
+                val internalPath = ImageUtils.saveBitmapToInternalStorage(context, bitmap)
                 
                 // Clean up temp
-                if (tempFile.exists()) tempFile.delete()
+                //if (tempFile.exists()) tempFile.delete()
                 
-                publicPath
+                internalPath
             } catch (e: Exception) {
                 e.printStackTrace()
                 null

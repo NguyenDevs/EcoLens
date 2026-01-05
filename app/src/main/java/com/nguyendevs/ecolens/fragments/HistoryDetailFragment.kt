@@ -114,7 +114,6 @@ class HistoryDetailFragment : Fragment() {
             binding.btnShareInfo.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
             var imageUri: Uri? = null
 
-            // 1. Try Local File
             if (!localImagePath.isNullOrEmpty()) {
                 val file = File(localImagePath)
                 if (file.exists()) {
@@ -130,7 +129,6 @@ class HistoryDetailFragment : Fragment() {
                 }
             }
 
-            // 2. Fallback to parsing remote URL as URI if local fails
             if (imageUri == null && !remoteUrl.isNullOrEmpty()) {
                 try {
                     imageUri = Uri.parse(remoteUrl)
@@ -226,7 +224,7 @@ class HistoryDetailFragment : Fragment() {
         Glide.with(this)
             .load(loadModel)
             .centerCrop()
-            .placeholder(R.mipmap.ic_launcher)
+            .placeholder(R.drawable.ic_image)
             .error(R.drawable.ic_broken_image)
             .into(binding.ivDetailImage)
 

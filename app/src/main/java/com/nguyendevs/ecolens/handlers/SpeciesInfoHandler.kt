@@ -442,7 +442,6 @@ class SpeciesInfoHandler(
                 val shimmerWidth = diagonal * 0.5f
                 val offset = diagonal * (progress - 0.3f)
 
-                // KIỂM TRA DARK MODE
                 val isDarkMode = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
 
                 val backgroundColor: Int
@@ -716,27 +715,28 @@ class SpeciesInfoHandler(
         }
     }
 
-    // FIX: Sửa lỗi không share được ảnh khi ảnh nằm trong bộ nhớ riêng (Internal Storage)
     private fun setupShareButton(info: SpeciesInfo, imageUri: Uri?) {
         infoBinding.btnShareInfo.setOnClickListener {
             infoBinding.btnShareInfo.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
 
             var shareableUri = imageUri
 
-            // Nếu URI là file scheme (file://) hoặc đường dẫn thô, cần chuyển sang Content URI (content://)
-            // thông qua FileProvider để các app khác có quyền đọc.
             if (shareableUri != null) {
-                if (shareableUri.scheme == "file") {
+                if (shareableUri.scheme == "file" || shareableUri.path?.startsWith("/") == true) {
                     try {
-                        val file = File(shareableUri.path!!)
-                        shareableUri = FileProvider.getUriForFile(
-                            context,
-                            "${context.packageName}.provider",
-                            file
-                        )
+                        val path = shareableUri.path
+                        if (path != null) {
+                            val file = File(path)
+                            if (file.exists()) {
+                                shareableUri = FileProvider.getUriForFile(
+                                    context,
+                                    "${context.packageName}.provider",
+                                    file
+                                )
+                            }
+                        }
                     } catch (e: Exception) {
                         e.printStackTrace()
-                        // Nếu lỗi thì giữ nguyên URI cũ hoặc gán null để share text
                     }
                 }
             }

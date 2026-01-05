@@ -51,6 +51,7 @@ class CameraActivity : AppCompatActivity() {
     private var cameraControl: CameraControl? = null
     private var cameraInfo: CameraInfo? = null
 
+    // Biến lưu giữ việc user chọn ảnh từ thư viện
     private val selectImageFromGalleryResult = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
             handleSelectedImage(it)
@@ -68,6 +69,8 @@ class CameraActivity : AppCompatActivity() {
         startCamera()
         setupZoomAndFocus()
         startBorderAnimation()
+
+        // Setup các nút bấm
         binding.captureButton.setOnClickListener {
             performHapticFeedback()
             animateCaptureButton()
@@ -130,10 +133,9 @@ class CameraActivity : AppCompatActivity() {
     }
 
     private fun handleSelectedImage(uri: Uri) {
-        // Create temp file from gallery URI
         try {
+            // Khi chọn từ Gallery, ta copy 1 bản vào Internal để app dùng ổn định
             val tempFile = ImageUtils.uriToFile(this, uri, 1080)
-            // Lưu vào bộ nhớ trong của ứng dụng
             val internalPath = ImageUtils.saveFileToInternalStorage(this, tempFile)
 
             val finalUriString = if (internalPath != null) {
@@ -143,7 +145,7 @@ class CameraActivity : AppCompatActivity() {
             }
 
             val resultIntent = Intent().apply {
-                data = uri
+                data = uri // Giữ nguyên data gốc nếu cần
                 flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
                 putExtra(KEY_IMAGE_URI, finalUriString)
             }
@@ -151,11 +153,12 @@ class CameraActivity : AppCompatActivity() {
             closeCamera()
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(this, "Error processing image: ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Lỗi xử lý ảnh: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun startCamera() {
+        // ... (Giữ nguyên phần khởi tạo Camera như cũ)
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
         cameraProviderFuture.addListener({
@@ -204,6 +207,7 @@ class CameraActivity : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
+    // ... (Các hàm setupZoomAndFocus, animation, flash giữ nguyên như cũ)
     @SuppressLint("ClickableViewAccessibility")
     private fun setupZoomAndFocus() {
         val listener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
@@ -301,11 +305,23 @@ class CameraActivity : AppCompatActivity() {
         binding.flashToggle.setImageResource(iconRes)
     }
 
+    private fun startBorderAnimation() {
+        rotateAnimation = AnimationUtils.loadAnimation(this, R.anim.rotate_infinite)
+        binding.captureBorderAnimated.visibility = View.VISIBLE
+        binding.captureBorderAnimated.startAnimation(rotateAnimation)
+    }
+
+    private fun stopBorderAnimation() {
+        rotateAnimation?.cancel()
+        binding.captureBorderAnimated.clearAnimation()
+        binding.captureBorderAnimated.visibility = View.GONE
+    }
+
+    // --- PHẦN QUAN TRỌNG ĐÃ SỬA ---
     private fun takePhoto() {
         val imageCapture = imageCapture ?: return
 
-        // FIX: Chỉ lưu vào Cache (tạm thời) thay vì Public Storage
-        // externalCacheDir giúp ẩn ảnh khỏi Gallery, cacheDir làm fallback
+        // 1. Tạo file tạm trong cache (để chụp cho nhanh, chưa lưu ngay)
         val photoFile = File(
             externalCacheDir ?: cacheDir,
             DateTimeFormatter.ofPattern(FILENAME_FORMAT, Locale.US).format(LocalDateTime.now()) + ".jpg"
@@ -323,21 +339,25 @@ class CameraActivity : AppCompatActivity() {
                 }
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    // FIX: Lưu bản copy vào bộ nhớ trong riêng của App (Internal Storage)
+                    // 2. LƯU BẢN 1: Vào Internal Storage (Cho App dùng)
                     val internalPath = ImageUtils.saveFileToInternalStorage(this@CameraActivity, photoFile)
 
-                    // Xóa file tạm trong cache để tiết kiệm bộ nhớ
+                    // 3. LƯU BẢN 2: Vào Public Storage (Cho User xem trong Gallery)
+                    // Hàm này trong ImageUtils.kt đã xử lý việc lưu vào MediaStore
+                    ImageUtils.saveImageToPublicStorage(this@CameraActivity, photoFile)
+
+                    // Xoá file tạm trong cache
                     if (photoFile.exists()) {
                         photoFile.delete()
                     }
 
                     runOnUiThread {
                         if (internalPath != null) {
+                            // Trả về đường dẫn Internal cho Activity khác dùng
                             val finalUriString = Uri.fromFile(File(internalPath)).toString()
 
                             val resultIntent = Intent().apply {
                                 putExtra(KEY_IMAGE_URI, finalUriString)
-                                // Không cần cờ Permission vì đây là file nội bộ
                             }
                             setResult(RESULT_OK, resultIntent)
                             closeCamera()
@@ -347,17 +367,5 @@ class CameraActivity : AppCompatActivity() {
                     }
                 }
             })
-    }
-
-    private fun startBorderAnimation() {
-        rotateAnimation = AnimationUtils.loadAnimation(this, R.anim.rotate_infinite)
-        binding.captureBorderAnimated.visibility = View.VISIBLE
-        binding.captureBorderAnimated.startAnimation(rotateAnimation)
-    }
-
-    private fun stopBorderAnimation() {
-        rotateAnimation?.cancel()
-        binding.captureBorderAnimated.clearAnimation()
-        binding.captureBorderAnimated.visibility = View.GONE
     }
 }

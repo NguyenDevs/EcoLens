@@ -275,6 +275,7 @@ class MainActivity : AppCompatActivity() {
         binding.bottomNavigation.selectedItemId = R.id.nav_home
 
         viewModel.currentImageUri = uri
+        this.imageUri = uri
 
         animateCardExpansion {
             val homeRoot = binding.homeContainer.root
