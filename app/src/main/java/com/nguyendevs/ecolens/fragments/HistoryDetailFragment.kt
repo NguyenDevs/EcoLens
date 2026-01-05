@@ -80,7 +80,7 @@ class HistoryDetailFragment : Fragment() {
         bindTaxonomy(info)
         bindContent(info)
         setupFab(info)
-        setupShareButton(info, entry.imagePath)
+        setupShareButton(info, entry.imagePath, entry.localImagePath)
         binding.fabSpeak.show()
         binding.fabSpeak.bringToFront()
     }
@@ -109,11 +109,36 @@ class HistoryDetailFragment : Fragment() {
         binding.collapsingToolbar.setStatusBarScrimColor(Color.TRANSPARENT)
     }
 
-    private fun setupShareButton(info: SpeciesInfo, imagePath: String?) {
+    private fun setupShareButton(info: SpeciesInfo, imagePath: String?, localImagePath: String?) {
         binding.btnShareInfo.setOnClickListener {
             binding.btnShareInfo.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
             var imageUri: Uri? = null
-            if (!imagePath.isNullOrEmpty()) {
+            
+            // Try local path first
+            if (!localImagePath.isNullOrEmpty()) {
+                val file = File(localImagePath)
+                if (file.exists()) {
+                    try {
+                        imageUri = FileProvider.getUriForFile(
+                            requireContext(),
+                            "${requireContext().packageName}.provider",
+                            file
+                        )
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                } else {
+                    // Try parsing as URI if it's not a file path
+                    try {
+                        imageUri = Uri.parse(localImagePath)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+            
+            // Fallback to imagePath if local failed
+            if (imageUri == null && !imagePath.isNullOrEmpty()) {
                 val file = File(imagePath)
                 if (file.exists()) {
                     try {
@@ -134,6 +159,7 @@ class HistoryDetailFragment : Fragment() {
                     }
                 }
             }
+
             shareSpeciesInfo(info, imageUri)
         }
     }

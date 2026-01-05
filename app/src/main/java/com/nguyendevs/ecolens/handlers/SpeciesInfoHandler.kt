@@ -23,12 +23,14 @@ import android.view.animation.LinearInterpolator
 import android.view.animation.OvershootInterpolator
 import android.widget.*
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import com.google.android.material.card.MaterialCardView
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ActivityMainModernBinding
 import com.nguyendevs.ecolens.model.LoadingStage
 import com.nguyendevs.ecolens.model.SpeciesInfo
 import kotlinx.coroutines.*
+import java.io.File
 
 class SpeciesInfoHandler(
     private val context: Context,
@@ -725,7 +727,25 @@ class SpeciesInfoHandler(
     private fun setupShareButton(info: SpeciesInfo, imageUri: Uri?) {
         infoBinding.btnShareInfo.setOnClickListener {
             infoBinding.btnShareInfo.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
-            shareSpeciesInfo(info, imageUri)
+            
+            // Try to resolve a shareable URI if the provided one is null or not shareable
+            var shareableUri = imageUri
+            
+            // If imageUri is a file URI, we might need to use FileProvider
+            if (shareableUri != null && shareableUri.scheme == "file") {
+                try {
+                    val file = File(shareableUri.path!!)
+                    shareableUri = FileProvider.getUriForFile(
+                        context,
+                        "${context.packageName}.provider",
+                        file
+                    )
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+
+            shareSpeciesInfo(info, shareableUri)
         }
     }
 

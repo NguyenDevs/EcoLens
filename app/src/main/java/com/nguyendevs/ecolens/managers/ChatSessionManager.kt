@@ -192,7 +192,14 @@ class ChatSessionManager(
         )
 
         // Insert initial empty message to both local and firebase
-        val messageId = chatRepository.insertMessage(tempMessage)
+        // If reusing ID, we need to make sure we are not creating a new ID if reuseMessageId is provided
+        val messageId = if (reuseMessageId != null) {
+             chatRepository.insertMessage(tempMessage) // This might insert with the provided ID if the DAO supports it or ignores 0
+             reuseMessageId
+        } else {
+             chatRepository.insertMessage(tempMessage)
+        }
+
         streamingMessageId.set(messageId)
 
         try {

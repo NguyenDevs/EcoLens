@@ -84,6 +84,7 @@ class LanguageSelectionFragment : Fragment() {
             intent.putExtra("navigate_to_settings", true)
             startActivity(intent)
             requireActivity().finish()
+            requireActivity().overridePendingTransition(R.anim.fade_in_2, R.anim.fade_out_2)
         }
     }
 

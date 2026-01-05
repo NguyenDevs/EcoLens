@@ -119,7 +119,13 @@ class ChatRepository(private val chatDao: ChatDao, private val context: Context)
     }
 
     suspend fun insertMessage(message: ChatMessage): Long {
-        val id = chatDao.insertMessage(message)
+        val id = if (message.id > 0) {
+             chatDao.insertMessage(message)
+             message.id
+        } else {
+             chatDao.insertMessage(message)
+        }
+
         val messageWithId = message.copy(id = id)
         try {
             getMessagesRef().child(message.sessionId.toString()).child(id.toString()).setValue(messageWithId).await()

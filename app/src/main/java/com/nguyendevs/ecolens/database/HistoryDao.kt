@@ -131,6 +131,10 @@ class HistoryRepository(private val historyDao: HistoryDao, private val context:
     fun getAllHistoryOldestFirst() = historyDao.getAllHistoryOldestFirst()
     fun getHistoryByDateRangeNewest(startDate: Long, endDate: Long) = historyDao.getHistoryByDateRangeNewest(startDate, endDate)
     fun getHistoryByDateRangeOldest(startDate: Long, endDate: Long) = historyDao.getHistoryByDateRangeOldest(startDate, endDate)
+    
+    suspend fun getHistoryById(id: Int): HistoryEntry? {
+        return historyDao.getHistoryById(id)
+    }
 
     suspend fun insert(entry: HistoryEntry): Long {
         val id = historyDao.insert(entry)

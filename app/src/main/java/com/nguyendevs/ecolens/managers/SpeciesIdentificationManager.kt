@@ -146,13 +146,42 @@ class SpeciesIdentificationManager(
 
         if (isValidInfo(currentInfo)) {
             withContext(Dispatchers.IO) {
-                val savedPath = ImageUtils.saveImageToPublicStorage(context, imageFile)
+                var imagePathToSave: String? = null
+                var localImagePathToSave: String? = null
                 
-                if (savedPath != null) {
+                if (existingHistoryId != null) {
+                    // Updating existing entry
+                    val existingEntry = historyRepository.getHistoryById(existingHistoryId)
+                    if (existingEntry != null) {
+                        // Preserve existing paths
+                        imagePathToSave = existingEntry.imagePath
+                        localImagePathToSave = existingEntry.localImagePath
+                        
+                        // If for some reason they are empty (shouldn't happen for valid entry), try to recover
+                        if (localImagePathToSave.isNullOrEmpty() && imagePathToSave.isNullOrEmpty()) {
+                             // Fallback to saving the current image
+                             localImagePathToSave = ImageUtils.saveBitmapToInternalStorage(context, imageFile)
+                             imagePathToSave = localImagePathToSave
+                        }
+                    }
+                } else {
+                    // New entry
+                    // Determine path based on source to avoid duplication
+                    if (currentImageUri != null && currentImageUri!!.scheme == "file") {
+                         // From Camera (likely)
+                         localImagePathToSave = currentImageUri!!.path
+                    } else {
+                         // From Gallery or Content Provider -> Save to internal storage to avoid public gallery duplication
+                         localImagePathToSave = ImageUtils.saveBitmapToInternalStorage(context, imageFile)
+                    }
+                    imagePathToSave = localImagePathToSave
+                }
+
+                if (imagePathToSave != null) {
                     val entry = HistoryEntry(
                         id = existingHistoryId ?: 0,
-                        imagePath = savedPath,
-                        localImagePath = savedPath,
+                        imagePath = imagePathToSave ?: "",
+                        localImagePath = localImagePathToSave ?: "",
                         speciesInfo = currentInfo,
                         timestamp = System.currentTimeMillis()
                     )
