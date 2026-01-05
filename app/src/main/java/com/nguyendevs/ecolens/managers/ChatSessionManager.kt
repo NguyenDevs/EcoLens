@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.gson.Gson
 import com.nguyendevs.ecolens.api.*
 import com.nguyendevs.ecolens.database.ChatDao
+import com.nguyendevs.ecolens.database.ChatRepository
 import com.nguyendevs.ecolens.model.ChatMessage
 import com.nguyendevs.ecolens.model.ChatSession
 import com.nguyendevs.ecolens.network.RetrofitClient
@@ -17,6 +18,7 @@ class ChatSessionManager(
     private val chatDao: ChatDao,
     private val scope: CoroutineScope
 ) {
+    private val chatRepository = ChatRepository(chatDao)
     private val gson by lazy { Gson() }
     private val markdownProcessor = MarkdownProcessor()
     private val apiService = RetrofitClient.iNaturalistApi
@@ -56,7 +58,7 @@ class ChatSessionManager(
                 val userMsgCount = chatDao.getUserMessageCount(latestSession.id)
                 if (userMsgCount == 0) {
                     sessionToReuseId = latestSession.id
-                    chatDao.updateSession(latestSession.copy(timestamp = System.currentTimeMillis()))
+                    chatRepository.updateSession(latestSession.copy(timestamp = System.currentTimeMillis()))
                 }
             }
 
@@ -71,7 +73,7 @@ class ChatSessionManager(
                     lastMessage = welcomeMessage,
                     timestamp = System.currentTimeMillis()
                 )
-                val newId = chatDao.insertSession(newSession)
+                val newId = chatRepository.insertSession(newSession)
                 currentSessionId = newId
 
                 val welcomeMsg = ChatMessage(
@@ -80,7 +82,7 @@ class ChatSessionManager(
                     isUser = false,
                     timestamp = System.currentTimeMillis()
                 )
-                chatDao.insertMessage(welcomeMsg)
+                chatRepository.insertMessage(welcomeMsg)
 
                 withContext(Dispatchers.Main) {
                     startMessageCollection(newId)
@@ -106,7 +108,7 @@ class ChatSessionManager(
                 isUser = true,
                 timestamp = System.currentTimeMillis()
             )
-            chatDao.insertMessage(userChatMsg)
+            chatRepository.insertMessage(userChatMsg)
 
             val currentSession = chatDao.getSessionById(sessionId)
             val newTitle = if (currentSession?.title == defaultTitle) {
@@ -114,7 +116,7 @@ class ChatSessionManager(
             } else {
                 currentSession?.title ?: DEFAULT_CHAT_TITLE
             }
-            chatDao.updateSession(
+            chatRepository.updateSession(
                 currentSession!!.copy(
                     title = newTitle,
                     lastMessage = userMessage,
@@ -132,7 +134,7 @@ class ChatSessionManager(
 
         withContext(Dispatchers.IO) {
             try {
-                chatDao.deleteMessageById(aiMessage.id)
+                chatRepository.deleteMessage(aiMessage)
                 executeGeminiStreamingFlow(sessionId)
             } catch (e: Exception) {
                 isGenerating.set(false)
@@ -144,8 +146,7 @@ class ChatSessionManager(
     suspend fun deleteChatSession(sessionId: Long) {
         withContext(Dispatchers.IO) {
             try {
-                chatDao.deleteMessagesBySession(sessionId)
-                chatDao.deleteSession(sessionId)
+                chatRepository.deleteSession(sessionId)
                 if (currentSessionId == sessionId) {
                     withContext(Dispatchers.Main) {
                         currentSessionId = null
@@ -187,7 +188,8 @@ class ChatSessionManager(
             timestamp = System.currentTimeMillis()
         )
 
-        val messageId = chatDao.insertMessage(tempMessage)
+        // Insert initial empty message to both local and firebase
+        val messageId = chatRepository.insertMessage(tempMessage)
         streamingMessageId.set(messageId)
 
         try {
@@ -223,6 +225,7 @@ class ChatSessionManager(
                                     if (!chunk.isNullOrEmpty()) {
                                         accumulatedText.append(chunk)
                                         val formattedText = markdownProcessor.process(accumulatedText.toString())
+                                        // Update ONLY local DB during streaming for performance
                                         chatDao.updateMessageContent(messageId, formattedText)
                                         delay(STREAM_UPDATE_DELAY)
                                     }
@@ -234,7 +237,8 @@ class ChatSessionManager(
                     }
 
                     val finalFormattedText = markdownProcessor.process(accumulatedText.toString())
-                    chatDao.updateMessage(
+                    // Update BOTH local and Firebase when streaming is complete
+                    chatRepository.updateMessage(
                         ChatMessage(
                             id = messageId,
                             sessionId = sessionId,
@@ -247,7 +251,7 @@ class ChatSessionManager(
 
                     val updatedSession = chatDao.getSessionById(sessionId)
                     updatedSession?.let {
-                        chatDao.updateSession(it.copy(
+                        chatRepository.updateSession(it.copy(
                             lastMessage = accumulatedText.take(PREVIEW_MAX_LENGTH).toString(),
                             timestamp = System.currentTimeMillis()
                         ))
@@ -260,7 +264,7 @@ class ChatSessionManager(
         } catch (e: Exception) {
             e.printStackTrace()
             val errorMsg = "Lỗi kết nối: ${e.message}"
-            chatDao.updateMessage(
+            chatRepository.updateMessage(
                 ChatMessage(
                     id = messageId,
                     sessionId = sessionId,

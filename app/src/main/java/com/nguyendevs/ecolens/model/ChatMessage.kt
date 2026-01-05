@@ -18,9 +18,9 @@ import androidx.room.PrimaryKey
 data class ChatMessage(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    val sessionId: Long,
-    val content: String,
-    val isUser: Boolean,
+    val sessionId: Long = 0,
+    val content: String = "",
+    val isUser: Boolean = false,
     val timestamp: Long = System.currentTimeMillis(),
     val isLoading: Boolean = false,
     val isStreaming: Boolean = false

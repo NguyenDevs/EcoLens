@@ -6,6 +6,7 @@ import android.util.Log
 import com.google.gson.Gson
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.database.HistoryDao
+import com.nguyendevs.ecolens.database.HistoryRepository
 import com.nguyendevs.ecolens.model.*
 import com.nguyendevs.ecolens.network.RetrofitClient
 import com.nguyendevs.ecolens.utils.ImageUtils
@@ -19,6 +20,7 @@ class SpeciesIdentificationManager(
     private val context: Context,
     private val historyDao: HistoryDao
 ) {
+    private val historyRepository = HistoryRepository(historyDao)
     private val apiService = RetrofitClient.iNaturalistApi
     private val gson by lazy { Gson() }
     private val streamingHelper by lazy { GeminiStreamingHelper(apiService, gson) }
@@ -154,28 +156,17 @@ class SpeciesIdentificationManager(
 
                 if (savedPath != null) {
                     if (existingHistoryId != null) {
-                        historyDao.updateSpeciesDetails(
-                            id = existingHistoryId,
-                            commonName = currentInfo.commonName,
-                            scientificName = currentInfo.scientificName,
-                            kingdom = currentInfo.kingdom,
-                            phylum = currentInfo.phylum,
-                            className = currentInfo.className,
-                            taxorder = currentInfo.taxorder,
-                            family = currentInfo.family,
-                            genus = currentInfo.genus,
-                            species = currentInfo.species,
-                            description = currentInfo.description,
-                            characteristics = currentInfo.characteristics,
-                            distribution = currentInfo.distribution,
-                            habitat = currentInfo.habitat,
-                            conservationStatus = currentInfo.conservationStatus,
-                            confidence = currentInfo.confidence,
-                            timestamp = System.currentTimeMillis()
-                        )
+                        val existingEntry = historyDao.getHistoryById(existingHistoryId)
+                        if (existingEntry != null) {
+                            val updatedEntry = existingEntry.copy(
+                                speciesInfo = currentInfo,
+                                timestamp = System.currentTimeMillis()
+                            )
+                            historyRepository.update(updatedEntry)
+                        }
                         currentHistoryEntryId = existingHistoryId
                     } else {
-                        val newId = historyDao.insert(HistoryEntry(
+                        val newId = historyRepository.insert(HistoryEntry(
                             imagePath = savedPath,
                             speciesInfo = currentInfo,
                             timestamp = System.currentTimeMillis()

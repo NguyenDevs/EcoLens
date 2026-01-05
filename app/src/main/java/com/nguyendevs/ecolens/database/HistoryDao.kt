@@ -5,8 +5,10 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.google.firebase.database.FirebaseDatabase
 import com.nguyendevs.ecolens.model.HistoryEntry
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.tasks.await
 
 @Dao
 interface HistoryDao {
@@ -91,4 +93,39 @@ interface HistoryDao {
     // Xóa tất cả lịch sử
     @Query("DELETE FROM history_table")
     suspend fun deleteAll()
+}
+
+// Firebase implementation
+class HistoryRepository(private val historyDao: HistoryDao) {
+    private val database = FirebaseDatabase.getInstance()
+    private val historyRef = database.getReference("history")
+
+    suspend fun insert(entry: HistoryEntry): Long {
+        val id = historyDao.insert(entry)
+        val entryWithId = entry.copy(id = id.toInt())
+        try {
+            historyRef.child(id.toString()).setValue(entryWithId).await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return id
+    }
+
+    suspend fun update(entry: HistoryEntry) {
+        historyDao.update(entry)
+        try {
+            historyRef.child(entry.id.toString()).setValue(entry).await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    suspend fun deleteAll() {
+        historyDao.deleteAll()
+        try {
+            historyRef.removeValue().await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 }

@@ -2,6 +2,7 @@ package com.nguyendevs.ecolens.managers
 
 import android.util.Log
 import com.nguyendevs.ecolens.database.HistoryDao
+import com.nguyendevs.ecolens.database.HistoryRepository
 import com.nguyendevs.ecolens.model.HistoryEntry
 import com.nguyendevs.ecolens.model.HistorySortOption
 import kotlinx.coroutines.Dispatchers
@@ -10,6 +11,8 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 
 class HistoryManager(private val historyDao: HistoryDao) {
+
+    private val historyRepository = HistoryRepository(historyDao)
 
     companion object {
         private const val TAG = "HistoryManager"
@@ -37,7 +40,7 @@ class HistoryManager(private val historyDao: HistoryDao) {
     suspend fun toggleFavorite(entry: HistoryEntry) {
         withContext(Dispatchers.IO) {
             runCatching {
-                historyDao.update(entry.copy(isFavorite = !entry.isFavorite))
+                historyRepository.update(entry.copy(isFavorite = !entry.isFavorite))
             }.onFailure { e ->
                 Log.e(TAG, "Error toggling favorite: ${e.message}", e)
             }
@@ -47,7 +50,7 @@ class HistoryManager(private val historyDao: HistoryDao) {
     suspend fun deleteAllHistory() {
         withContext(Dispatchers.IO) {
             runCatching {
-                historyDao.deleteAll()
+                historyRepository.deleteAll()
             }.onFailure { e ->
                 Log.e(TAG, "Error deleting history: ${e.message}", e)
             }

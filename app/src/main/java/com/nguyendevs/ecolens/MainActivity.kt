@@ -24,6 +24,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.transition.Fade
 import androidx.transition.TransitionManager
 import com.bumptech.glide.Glide
+import com.google.firebase.database.FirebaseDatabase
 import com.nguyendevs.ecolens.activities.CameraActivity
 import com.nguyendevs.ecolens.databinding.ActivityMainModernBinding
 import com.nguyendevs.ecolens.fragments.ChatHistoryFragment
@@ -91,6 +92,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         loadThemePreference()
         super.onCreate(savedInstanceState)
+
+        // Enable Firebase persistence
+        try {
+            FirebaseDatabase.getInstance().setPersistenceEnabled(true)
+        } catch (e: Exception) {
+            // Persistence might have been enabled already
+        }
 
         binding = ActivityMainModernBinding.inflate(layoutInflater)
         setContentView(binding.root)
