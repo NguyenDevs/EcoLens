@@ -135,7 +135,8 @@ class ChatSessionManager(
         withContext(Dispatchers.IO) {
             try {
                 val reuseId = aiMessage.id
-                chatRepository.deleteMessage(aiMessage)
+                // Delete the message but DO NOT reorder IDs yet, because we will reuse this ID
+                chatRepository.deleteMessage(aiMessage, reorder = false)
                 executeGeminiStreamingFlow(sessionId, reuseId)
             } catch (e: Exception) {
                 isGenerating.set(false)
