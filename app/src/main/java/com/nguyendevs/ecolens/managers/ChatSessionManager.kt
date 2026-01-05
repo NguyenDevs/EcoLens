@@ -135,7 +135,6 @@ class ChatSessionManager(
         withContext(Dispatchers.IO) {
             try {
                 val reuseId = aiMessage.id
-                // Delete the message but DO NOT reorder IDs yet, because we will reuse this ID
                 chatRepository.deleteMessage(aiMessage, reorder = false)
                 executeGeminiStreamingFlow(sessionId, reuseId)
             } catch (e: Exception) {
@@ -191,10 +190,8 @@ class ChatSessionManager(
             timestamp = System.currentTimeMillis()
         )
 
-        // Insert initial empty message to both local and firebase
-        // If reusing ID, we need to make sure we are not creating a new ID if reuseMessageId is provided
         val messageId = if (reuseMessageId != null) {
-             chatRepository.insertMessage(tempMessage) // This might insert with the provided ID if the DAO supports it or ignores 0
+             chatRepository.insertMessage(tempMessage)
              reuseMessageId
         } else {
              chatRepository.insertMessage(tempMessage)
@@ -235,7 +232,6 @@ class ChatSessionManager(
                                     if (!chunk.isNullOrEmpty()) {
                                         accumulatedText.append(chunk)
                                         val formattedText = markdownProcessor.process(accumulatedText.toString())
-                                        // Update ONLY local DB during streaming for performance
                                         chatDao.updateMessageContent(messageId, formattedText)
                                         delay(STREAM_UPDATE_DELAY)
                                     }
@@ -247,7 +243,6 @@ class ChatSessionManager(
                     }
 
                     val finalFormattedText = markdownProcessor.process(accumulatedText.toString())
-                    // Update BOTH local and Firebase when streaming is complete
                     chatRepository.updateMessage(
                         ChatMessage(
                             id = messageId,

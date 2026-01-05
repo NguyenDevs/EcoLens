@@ -95,7 +95,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         try {
-            FirebaseDatabase.getInstance().setPersistenceEnabled(true)
+            FirebaseDatabase.getInstance(BuildConfig.FIREBASE_DATABASE_URL).setPersistenceEnabled(true)
         } catch (e: Exception) {
         }
 

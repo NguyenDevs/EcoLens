@@ -22,6 +22,10 @@ android {
             project.findProperty("WORKER_URL") as? String
                 ?: "https://ecolens.tainguyen-devs.workers.dev/"
 
+        val firebaseUrl =
+            project.findProperty("FIREBASE_URL") as? String
+                ?: "https://ecolens-658ae-default-rtdb.asia-southeast1.firebasedatabase.app/"
+
         externalNativeBuild {
             cmake {
                 arguments += listOf(
@@ -34,6 +38,12 @@ android {
             "String",
             "WORKER_BASE_URL",
             "\"$workerUrl\""
+        )
+
+        buildConfigField(
+            "String",
+            "FIREBASE_DATABASE_URL",
+            "\"$firebaseUrl\""
         )
 
         ndk {

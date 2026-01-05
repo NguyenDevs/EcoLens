@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.Configuration
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import com.nguyendevs.ecolens.BuildConfig
 import java.util.Locale
 
 class LanguageManager(private val context: Context) {
@@ -16,7 +17,7 @@ class LanguageManager(private val context: Context) {
     }
 
     private val prefs = context.applicationContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-    private val database = FirebaseDatabase.getInstance("https://ecolens-658ae-default-rtdb.asia-southeast1.firebasedatabase.app/")
+    private val database = FirebaseDatabase.getInstance(BuildConfig.FIREBASE_DATABASE_URL)
     private val auth = FirebaseAuth.getInstance()
 
     fun getLanguage(): String {

@@ -3,12 +3,13 @@ package com.nguyendevs.ecolens.database
 import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import com.nguyendevs.ecolens.BuildConfig
 import com.nguyendevs.ecolens.model.ChatMessage
 import com.nguyendevs.ecolens.model.ChatSession
 import kotlinx.coroutines.tasks.await
 
 class ChatRepository(private val chatDao: ChatDao, private val context: Context) {
-    private val database = FirebaseDatabase.getInstance("https://ecolens-658ae-default-rtdb.asia-southeast1.firebasedatabase.app/")
+    private val database = FirebaseDatabase.getInstance(BuildConfig.FIREBASE_DATABASE_URL)
     private val auth = FirebaseAuth.getInstance()
 
     private fun getUserId(): String {
@@ -43,8 +44,6 @@ class ChatRepository(private val chatDao: ChatDao, private val context: Context)
         try {
             getSessionsRef().child(id.toString()).removeValue().await()
             getMessagesRef().child(id.toString()).removeValue().await()
-            
-            // Reorder Session IDs
             reorderSessionIds(id)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -74,12 +73,8 @@ class ChatRepository(private val chatDao: ChatDao, private val context: Context)
                     
                     updates[oldId.toString()] = null
                     updates[newId.toString()] = updatedSession
-                    
-                    // Update local DB
                     chatDao.deleteSession(oldId)
                     chatDao.insertSession(updatedSession)
-                    
-                    // We also need to move messages for this session
                     moveMessagesToNewSessionId(oldId, newId)
                 }
 
@@ -96,7 +91,6 @@ class ChatRepository(private val chatDao: ChatDao, private val context: Context)
         try {
             val messagesSnapshot = getMessagesRef().child(oldSessionId.toString()).get().await()
             if (messagesSnapshot.exists()) {
-                // Remove old session messages node
                 getMessagesRef().child(oldSessionId.toString()).removeValue().await()
 
                 for (child in messagesSnapshot.children) {

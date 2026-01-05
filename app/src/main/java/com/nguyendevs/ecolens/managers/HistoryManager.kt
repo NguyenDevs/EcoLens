@@ -29,7 +29,6 @@ class HistoryManager(
         startDate: Long? = null,
         endDate: Long? = null
     ): Flow<List<HistoryEntry>> {
-        // 1. Lấy Flow từ DB (Thao tác này rất nhanh vì chưa xử lý logic gì cả)
         val flow = if (startDate != null && endDate != null) {
             when (sortOption) {
                 HistorySortOption.NEWEST_FIRST -> historyRepository.getHistoryByDateRangeNewest(startDate, endDate)
@@ -42,11 +41,8 @@ class HistoryManager(
             }
         }
 
-        // 2. Trả về Flow ngay lập tức cho UI
         return flow
             .onEach { list ->
-                // 3. Khởi chạy Coroutine riêng để check ảnh ngầm (Fire-and-forget)
-                // Không dùng withContext hay chặn luồng ở đây để đảm bảo UI hiện ngay lập tức
                 CoroutineScope(Dispatchers.IO).launch {
                     checkAndRepairImages(list)
                 }
@@ -54,26 +50,19 @@ class HistoryManager(
             .flowOn(Dispatchers.IO)
     }
 
-    // Hàm này chạy ngầm hoàn toàn
     private suspend fun checkAndRepairImages(entries: List<HistoryEntry>) {
-        // Duyệt qua danh sách để kiểm tra tính toàn vẹn của file ảnh
         entries.forEach { entry ->
             val localPath = entry.localImagePath
             val remoteUrl = entry.imagePath
 
-            // Chỉ kiểm tra file nếu localPath có dữ liệu
             val fileExists = if (localPath.isNotEmpty()) File(localPath).exists() else false
 
-            // Nếu file local không tồn tại nhưng có link online (Firebase)
             if (!fileExists && remoteUrl.startsWith("http")) {
                 Log.d(TAG, "Missing local image for entry ${entry.id}. Downloading in background...")
 
-                // Tải về Internal Storage
                 val newLocalPath = ImageUtils.downloadImageToInternalStorage(context, remoteUrl)
 
                 if (newLocalPath != null) {
-                    // CẬP NHẬT DB: Khi update xong, Room sẽ tự trigger Flow ở trên emit lại danh sách mới
-                    // UI sẽ tự động thay placeholder bằng ảnh thật
                     val updatedEntry = entry.copy(localImagePath = newLocalPath)
                     historyRepository.update(updatedEntry)
                     Log.d(TAG, "Restored image: $newLocalPath")
@@ -98,7 +87,6 @@ class HistoryManager(
         withContext(Dispatchers.IO) {
             runCatching {
                 historyRepository.deleteAll()
-                // Xoá cả file vật lý để dọn dẹp bộ nhớ
                 val dir = context.filesDir
                 dir.listFiles()?.forEach { file ->
                     if (file.name.startsWith("species_")) {

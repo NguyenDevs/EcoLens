@@ -4,12 +4,13 @@ import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.FirebaseDatabase
+import com.nguyendevs.ecolens.BuildConfig
 import com.nguyendevs.ecolens.model.User
 import kotlinx.coroutines.tasks.await
 
 class UserRepository {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val database = FirebaseDatabase.getInstance("https://ecolens-658ae-default-rtdb.asia-southeast1.firebasedatabase.app/")
+    private val database = FirebaseDatabase.getInstance(BuildConfig.FIREBASE_DATABASE_URL)
     private val usersRef = database.getReference("users")
 
     suspend fun registerUser(email: String, password: String, username: String): Boolean {

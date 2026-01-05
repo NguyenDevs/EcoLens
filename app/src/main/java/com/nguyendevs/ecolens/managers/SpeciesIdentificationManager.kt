@@ -155,24 +155,20 @@ class SpeciesIdentificationManager(
                 var localImagePathToSave: String? = null
 
                 if (existingHistoryId != null) {
-                    // Updating existing entry
                     val existingEntry = historyRepository.getHistoryById(existingHistoryId)
                     if (existingEntry != null) {
                         imagePathToSave = existingEntry.imagePath
                         localImagePathToSave = existingEntry.localImagePath
 
-                        // Recovery
                         if (localImagePathToSave.isNullOrEmpty() && imagePathToSave.isNullOrEmpty()) {
                             localImagePathToSave = ImageUtils.saveFileToInternalStorage(context, imageFile)
                             imagePathToSave = localImagePathToSave
                         }
                     }
                 } else {
-                    // New entry
                     if (currentImageUri != null && currentImageUri!!.scheme == "file") {
                         localImagePathToSave = currentImageUri!!.path
                     } else {
-                        // Use saveFileToInternalStorage (not Bitmap)
                         localImagePathToSave = ImageUtils.saveFileToInternalStorage(context, imageFile)
                     }
                     imagePathToSave = localImagePathToSave

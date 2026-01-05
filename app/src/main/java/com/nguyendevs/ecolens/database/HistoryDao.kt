@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
+import com.nguyendevs.ecolens.BuildConfig
 import com.nguyendevs.ecolens.model.HistoryEntry
 import com.nguyendevs.ecolens.utils.ImageUtils
 import kotlinx.coroutines.Dispatchers
@@ -115,7 +116,7 @@ interface HistoryDao {
 // Firebase implementation
 class HistoryRepository(private val historyDao: HistoryDao, private val context: Context) {
     // Sử dụng URL cụ thể do người dùng cung cấp để đảm bảo kết nối đúng region
-    private val database = FirebaseDatabase.getInstance("https://ecolens-658ae-default-rtdb.asia-southeast1.firebasedatabase.app/")
+    private val database = FirebaseDatabase.getInstance(BuildConfig.FIREBASE_DATABASE_URL)
     private val storage = FirebaseStorage.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
