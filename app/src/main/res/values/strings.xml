@@ -180,5 +180,56 @@
     <string name="error_open_link">Không thể mở liên kết</string>
     <string name="error_no_email_app">Không tìm thấy ứng dụng Email</string>
 
+    <!-- Content Descriptions -->
+    <string name="app_logo_description">Logo ứng dụng EcoLens</string>
+    <string name="eco_illustration">Hình minh họa về môi trường</string>
+
+    <!-- Auth Screen -->
+    <string name="welcome_to_ecolens">Chào mừng đến với EcoLens</string>
+    <string name="auth_subtitle">Đăng nhập hoặc tạo tài khoản mới</string>
+
+    <!-- Tabs -->
+    <string name="login">Đăng nhập</string>
+    <string name="register">Đăng ký</string>
+
+    <!-- Form Fields -->
+    <string name="email">Email</string>
+    <string name="password">Mật khẩu</string>
+    <string name="confirm_password">Nhập lại mật khẩu</string>
+
+    <!-- Actions -->
+    <string name="remember_me">Nhớ đăng nhập</string>
+    <string name="forgot_password">Quên mật khẩu?</string>
+    <string name="agree_terms">Tôi đồng ý với <b>Điều khoản dịch vụ</b> và <b>Chính sách bảo mật</b></string>
+
+    <!-- Buttons -->
+    <string name="sign_in">Đăng nhập</string>
+    <string name="sign_up">Đăng ký</string>
+    <string name="or_continue_with">Hoặc tiếp tục với</string>
+    <string name="sign_in_with_google">Đăng nhập bằng Google</string>
+    <string name="sign_in_with_biometric">Đăng nhập bằng vân tay</string>
+
+    <!-- Validation Errors -->
+    <string name="error_email_empty">Vui lòng nhập email</string>
+    <string name="error_email_invalid">Email không hợp lệ</string>
+    <string name="error_password_empty">Vui lòng nhập mật khẩu</string>
+    <string name="error_password_too_short">Mật khẩu phải có ít nhất 6 ký tự</string>
+    <string name="error_password_mismatch">Mật khẩu không khớp</string>
+    <string name="error_terms_not_accepted">Vui lòng đồng ý với điều khoản dịch vụ</string>
+
+    <!-- Success Messages -->
+    <string name="login_success">Đăng nhập thành công!</string>
+    <string name="register_success">Đăng ký thành công!</string>
+
+    <!-- Error Messages -->
+    <string name="login_failed">Đăng nhập thất bại. Vui lòng thử lại.</string>
+    <string name="register_failed">Đăng ký thất bại. Vui lòng thử lại.</string>
+    <string name="network_error">Lỗi kết nối. Kiểm tra mạng của bạn.</string>
+    <string name="biometric_not_available">Thiết bị không hỗ trợ sinh trhọc học</string>
+    <string name="biometric_authentication_failed">Xác thực sinh trắc học thất bại</string>
+
+    <!-- Loading -->
+    <string name="loading">Đang tải…</string>
+    <string name="please_wait">Vui lòng đợi…</string>
 
 </resources>
