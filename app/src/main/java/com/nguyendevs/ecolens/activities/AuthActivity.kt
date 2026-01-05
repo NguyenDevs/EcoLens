@@ -56,7 +56,7 @@ class AuthActivity : AppCompatActivity() {
                 AppCompatDelegate.setDefaultNightMode(nightMode)
 
                 startActivity(Intent(this, MainActivity::class.java))
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                overridePendingTransition(R.anim.fade_in_3, R.anim.fade_out_3)
                 finish()
                 return
             } else {
@@ -103,7 +103,7 @@ class AuthActivity : AppCompatActivity() {
                 }
                 Toast.makeText(this@AuthActivity, getString(R.string.login_success), Toast.LENGTH_SHORT).show()
                 startActivity(Intent(this@AuthActivity, MainActivity::class.java))
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                overridePendingTransition(R.anim.fade_in_3, R.anim.fade_out_3)
                 finish()
             } else {
                 Toast.makeText(this@AuthActivity, getString(R.string.login_failed), Toast.LENGTH_SHORT).show()
@@ -164,7 +164,7 @@ class AuthActivity : AppCompatActivity() {
                         
                         Toast.makeText(this@AuthActivity, getString(R.string.login_success), Toast.LENGTH_SHORT).show()
                         startActivity(Intent(this@AuthActivity, MainActivity::class.java))
-                        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                        overridePendingTransition(R.anim.fade_in_3, R.anim.fade_out_3)
                         finish()
                     } else {
                         Toast.makeText(this@AuthActivity, getString(R.string.login_failed), Toast.LENGTH_SHORT).show()
@@ -192,7 +192,7 @@ class AuthActivity : AppCompatActivity() {
                         Toast.makeText(this@AuthActivity, getString(R.string.register_success), Toast.LENGTH_SHORT).show()
                         applyUserTheme(false) 
                         startActivity(Intent(this@AuthActivity, MainActivity::class.java))
-                        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                        overridePendingTransition(R.anim.fade_in_3, R.anim.fade_out_3)
                         finish()
                     } else {
                         Toast.makeText(this@AuthActivity, getString(R.string.register_failed), Toast.LENGTH_SHORT).show()
