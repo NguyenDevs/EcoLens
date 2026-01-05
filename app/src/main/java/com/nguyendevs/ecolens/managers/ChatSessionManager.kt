@@ -15,10 +15,10 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 
 class ChatSessionManager(
+    private val chatRepository: ChatRepository,
     private val chatDao: ChatDao,
     private val scope: CoroutineScope
 ) {
-    private val chatRepository = ChatRepository(chatDao)
     private val gson by lazy { Gson() }
     private val markdownProcessor = MarkdownProcessor()
     private val apiService = RetrofitClient.iNaturalistApi

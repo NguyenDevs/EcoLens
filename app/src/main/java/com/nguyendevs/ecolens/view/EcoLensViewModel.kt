@@ -4,7 +4,9 @@ import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.nguyendevs.ecolens.database.ChatRepository
 import com.nguyendevs.ecolens.database.HistoryDatabase
+import com.nguyendevs.ecolens.database.HistoryRepository
 import com.nguyendevs.ecolens.managers.*
 import com.nguyendevs.ecolens.model.*
 import kotlinx.coroutines.flow.*
@@ -14,11 +16,14 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
     private val historyDao by lazy { HistoryDatabase.getDatabase(application).historyDao() }
     private val chatDao by lazy { HistoryDatabase.getDatabase(application).chatDao() }
+    
+    private val historyRepository by lazy { HistoryRepository(historyDao, application.applicationContext) }
+    private val chatRepository by lazy { ChatRepository(chatDao, application.applicationContext) }
 
     // Managers
-    private val speciesManager by lazy { SpeciesIdentificationManager(application.applicationContext, historyDao) }
-    private val historyManager by lazy { HistoryManager(historyDao) }
-    private val chatManager by lazy { ChatSessionManager(chatDao, viewModelScope) }
+    private val speciesManager by lazy { SpeciesIdentificationManager(application.applicationContext, historyRepository) }
+    private val historyManager by lazy { HistoryManager(historyRepository) }
+    private val chatManager by lazy { ChatSessionManager(chatRepository, chatDao, viewModelScope) }
 
     // UI State
     private val _uiState = MutableStateFlow(EcoLensUiState())
@@ -31,6 +36,13 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     val allChatSessions: Flow<List<ChatSession>> = chatManager.allChatSessions
     
     private var lastLanguageCode: String = "en"
+
+    init {
+        viewModelScope.launch {
+            historyRepository.fetchHistory()
+            chatRepository.fetchSessionsAndMessages()
+        }
+    }
 
     // ==================== SPECIES IDENTIFICATION ====================
 

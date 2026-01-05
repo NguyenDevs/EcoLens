@@ -1,14 +1,18 @@
 package com.nguyendevs.ecolens.database
 
+import android.content.Context
+import android.net.Uri
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.storage.FirebaseStorage
 import com.nguyendevs.ecolens.model.HistoryEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
+import java.io.File
 
 @Dao
 interface HistoryDao {
@@ -96,16 +100,43 @@ interface HistoryDao {
 }
 
 // Firebase implementation
-class HistoryRepository(private val historyDao: HistoryDao) {
+class HistoryRepository(private val historyDao: HistoryDao, private val context: Context) {
     // Sử dụng URL cụ thể do người dùng cung cấp để đảm bảo kết nối đúng region
     private val database = FirebaseDatabase.getInstance("https://ecolens-658ae-default-rtdb.asia-southeast1.firebasedatabase.app/")
-    private val historyRef = database.getReference("history")
+    private val storage = FirebaseStorage.getInstance()
+
+    private fun getUsername(): String {
+        val sharedPreferences = context.getSharedPreferences("EcoLensPrefs", Context.MODE_PRIVATE)
+        return sharedPreferences.getString("username", "default_user") ?: "default_user"
+    }
+
+    private fun getHistoryRef() = database.getReference("history").child(getUsername())
+    private fun getStorageRef() = storage.reference.child("images").child(getUsername())
+
+    fun getAllHistoryNewestFirst() = historyDao.getAllHistoryNewestFirst()
+    fun getAllHistoryOldestFirst() = historyDao.getAllHistoryOldestFirst()
+    fun getHistoryByDateRangeNewest(startDate: Long, endDate: Long) = historyDao.getHistoryByDateRangeNewest(startDate, endDate)
+    fun getHistoryByDateRangeOldest(startDate: Long, endDate: Long) = historyDao.getHistoryByDateRangeOldest(startDate, endDate)
 
     suspend fun insert(entry: HistoryEntry): Long {
         val id = historyDao.insert(entry)
-        val entryWithId = entry.copy(id = id.toInt())
+        var entryWithId = entry.copy(id = id.toInt())
+        
+        // Upload image to Firebase Storage
+        if (entry.imagePath.isNotEmpty() && !entry.imagePath.startsWith("http")) {
+            try {
+                val file = Uri.fromFile(File(entry.imagePath))
+                val imageRef = getStorageRef().child("${id}.jpg")
+                imageRef.putFile(file).await()
+                val downloadUrl = imageRef.downloadUrl.await().toString()
+                entryWithId = entryWithId.copy(imagePath = downloadUrl)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
         try {
-            historyRef.child(id.toString()).setValue(entryWithId).await()
+            getHistoryRef().child(id.toString()).setValue(entryWithId).await()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -115,7 +146,7 @@ class HistoryRepository(private val historyDao: HistoryDao) {
     suspend fun update(entry: HistoryEntry) {
         historyDao.update(entry)
         try {
-            historyRef.child(entry.id.toString()).setValue(entry).await()
+            getHistoryRef().child(entry.id.toString()).setValue(entry).await()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -124,7 +155,23 @@ class HistoryRepository(private val historyDao: HistoryDao) {
     suspend fun deleteAll() {
         historyDao.deleteAll()
         try {
-            historyRef.removeValue().await()
+            getHistoryRef().removeValue().await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    suspend fun fetchHistory() {
+        try {
+            val snapshot = getHistoryRef().get().await()
+            if (snapshot.exists()) {
+                for (child in snapshot.children) {
+                    val entry = child.getValue(HistoryEntry::class.java)
+                    if (entry != null) {
+                        historyDao.insert(entry)
+                    }
+                }
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }

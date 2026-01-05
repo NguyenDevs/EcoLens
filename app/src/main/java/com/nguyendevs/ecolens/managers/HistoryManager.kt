@@ -1,7 +1,6 @@
 package com.nguyendevs.ecolens.managers
 
 import android.util.Log
-import com.nguyendevs.ecolens.database.HistoryDao
 import com.nguyendevs.ecolens.database.HistoryRepository
 import com.nguyendevs.ecolens.model.HistoryEntry
 import com.nguyendevs.ecolens.model.HistorySortOption
@@ -10,9 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 
-class HistoryManager(private val historyDao: HistoryDao) {
-
-    private val historyRepository = HistoryRepository(historyDao)
+class HistoryManager(private val historyRepository: HistoryRepository) {
 
     companion object {
         private const val TAG = "HistoryManager"
@@ -25,13 +22,13 @@ class HistoryManager(private val historyDao: HistoryDao) {
     ): Flow<List<HistoryEntry>> {
         val flow = if (startDate != null && endDate != null) {
             when (sortOption) {
-                HistorySortOption.NEWEST_FIRST -> historyDao.getHistoryByDateRangeNewest(startDate, endDate)
-                HistorySortOption.OLDEST_FIRST -> historyDao.getHistoryByDateRangeOldest(startDate, endDate)
+                HistorySortOption.NEWEST_FIRST -> historyRepository.getHistoryByDateRangeNewest(startDate, endDate)
+                HistorySortOption.OLDEST_FIRST -> historyRepository.getHistoryByDateRangeOldest(startDate, endDate)
             }
         } else {
             when (sortOption) {
-                HistorySortOption.NEWEST_FIRST -> historyDao.getAllHistoryNewestFirst()
-                HistorySortOption.OLDEST_FIRST -> historyDao.getAllHistoryOldestFirst()
+                HistorySortOption.NEWEST_FIRST -> historyRepository.getAllHistoryNewestFirst()
+                HistorySortOption.OLDEST_FIRST -> historyRepository.getAllHistoryOldestFirst()
             }
         }
         return flow.flowOn(Dispatchers.IO)

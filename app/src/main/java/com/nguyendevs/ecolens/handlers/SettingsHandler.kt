@@ -1,5 +1,6 @@
 package com.nguyendevs.ecolens.handlers
 
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Bitmap
@@ -13,12 +14,18 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.nguyendevs.ecolens.MainActivity
 import com.nguyendevs.ecolens.R
+import com.nguyendevs.ecolens.activities.AuthActivity
+import com.nguyendevs.ecolens.database.HistoryDatabase
 import com.nguyendevs.ecolens.fragments.AboutFragment
 import com.nguyendevs.ecolens.fragments.LanguageSelectionFragment
 import com.nguyendevs.ecolens.managers.LanguageManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class SettingsHandler(
     private val activity: AppCompatActivity,
@@ -46,6 +53,10 @@ class SettingsHandler(
             }
         }
 
+        settingsView.findViewById<View>(R.id.logoutOption).setOnClickListener {
+            logout()
+        }
+
         settingsView.findViewById<View>(R.id.aboutOption).setOnClickListener {
             openFragment(AboutFragment(), "about_screen")
         }
@@ -59,6 +70,26 @@ class SettingsHandler(
         }
         settingsView.findViewById<View>(R.id.btnTiktok).setOnClickListener {
             openUrl("https://www.tiktok.com/@nguyendevs/")
+        }
+    }
+
+    private fun logout() {
+        activity.lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                val db = HistoryDatabase.getDatabase(activity)
+                db.historyDao().deleteAll()
+                db.chatDao().deleteMessagesBySession(-1) // Just a placeholder, we might want to clear all local data
+                // Actually, we should clear all tables
+                db.clearAllTables()
+            }
+            
+            val sharedPreferences = activity.getSharedPreferences("EcoLensPrefs", Context.MODE_PRIVATE)
+            sharedPreferences.edit().remove("username").apply()
+            
+            val intent = Intent(activity, AuthActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            activity.startActivity(intent)
+            activity.finish()
         }
     }
 

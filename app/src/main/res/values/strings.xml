@@ -231,5 +231,7 @@
     <!-- Loading -->
     <string name="loading">Đang tải…</string>
     <string name="please_wait">Vui lòng đợi…</string>
+    <string name="account">TÀI KHOẢN</string>
+    <string name="logout">Đăng xuất</string>
 
 </resources>
