@@ -231,7 +231,7 @@
     <string name="please_wait">Please wait…</string>
     <string name="account">ACCOUNT</string>
     <string name="logout">Logout</string>
-
+    <string name="error_file_not_found">File not found</string>
     <string name="default_web_client_id">99190004722-8d4rpmasasjflta1hp7vgdu98a649rin.apps.googleusercontent.com</string>
 
 </resources>

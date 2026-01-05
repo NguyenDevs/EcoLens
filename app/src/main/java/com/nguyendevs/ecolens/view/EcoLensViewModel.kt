@@ -16,13 +16,16 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
     private val historyDao by lazy { HistoryDatabase.getDatabase(application).historyDao() }
     private val chatDao by lazy { HistoryDatabase.getDatabase(application).chatDao() }
-    
+
     private val historyRepository by lazy { HistoryRepository(historyDao, application.applicationContext) }
     private val chatRepository by lazy { ChatRepository(chatDao, application.applicationContext) }
 
     // Managers
     private val speciesManager by lazy { SpeciesIdentificationManager(application.applicationContext, historyRepository) }
-    private val historyManager by lazy { HistoryManager(historyRepository) }
+
+    // Fix: HistoryManager constructor now requires Context
+    private val historyManager by lazy { HistoryManager(application.applicationContext, historyRepository) }
+
     private val chatManager by lazy { ChatSessionManager(chatRepository, chatDao, viewModelScope) }
 
     // UI State
@@ -34,7 +37,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     val chatMessages: StateFlow<List<ChatMessage>> = chatManager.chatMessages
     val isStreamingActive: StateFlow<Boolean> = chatManager.isStreamingActive
     val allChatSessions: Flow<List<ChatSession>> = chatManager.allChatSessions
-    
+
     private var lastLanguageCode: String = "en"
 
     init {

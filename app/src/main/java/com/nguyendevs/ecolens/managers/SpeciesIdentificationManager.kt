@@ -14,6 +14,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
+import java.io.FileNotFoundException
 
 class SpeciesIdentificationManager(
     private val context: Context,
@@ -56,6 +57,10 @@ class SpeciesIdentificationManager(
         try {
             val imageFile = withContext(Dispatchers.Default) {
                 ImageUtils.uriToFile(context, imageUri, MAX_IMAGE_SIZE)
+            }
+
+            if (!imageFile.exists()) {
+                throw FileNotFoundException("Image file could not be created or found: ${imageFile.absolutePath}")
             }
 
             val imagePart = createImagePart(imageFile)
@@ -148,31 +153,27 @@ class SpeciesIdentificationManager(
             withContext(Dispatchers.IO) {
                 var imagePathToSave: String? = null
                 var localImagePathToSave: String? = null
-                
+
                 if (existingHistoryId != null) {
                     // Updating existing entry
                     val existingEntry = historyRepository.getHistoryById(existingHistoryId)
                     if (existingEntry != null) {
-                        // Preserve existing paths
                         imagePathToSave = existingEntry.imagePath
                         localImagePathToSave = existingEntry.localImagePath
-                        
-                        // If for some reason they are empty (shouldn't happen for valid entry), try to recover
+
+                        // Recovery
                         if (localImagePathToSave.isNullOrEmpty() && imagePathToSave.isNullOrEmpty()) {
-                             // Fallback to saving the current image
-                             localImagePathToSave = ImageUtils.saveBitmapToInternalStorage(context, imageFile)
-                             imagePathToSave = localImagePathToSave
+                            localImagePathToSave = ImageUtils.saveFileToInternalStorage(context, imageFile)
+                            imagePathToSave = localImagePathToSave
                         }
                     }
                 } else {
                     // New entry
-                    // Determine path based on source to avoid duplication
                     if (currentImageUri != null && currentImageUri!!.scheme == "file") {
-                         // From Camera (likely)
-                         localImagePathToSave = currentImageUri!!.path
+                        localImagePathToSave = currentImageUri!!.path
                     } else {
-                         // From Gallery or Content Provider -> Save to internal storage to avoid public gallery duplication
-                         localImagePathToSave = ImageUtils.saveBitmapToInternalStorage(context, imageFile)
+                        // Use saveFileToInternalStorage (not Bitmap)
+                        localImagePathToSave = ImageUtils.saveFileToInternalStorage(context, imageFile)
                     }
                     imagePathToSave = localImagePathToSave
                 }
@@ -185,7 +186,7 @@ class SpeciesIdentificationManager(
                         speciesInfo = currentInfo,
                         timestamp = System.currentTimeMillis()
                     )
-                    
+
                     if (existingHistoryId != null) {
                         historyRepository.update(entry)
                     } else {
@@ -209,6 +210,8 @@ class SpeciesIdentificationManager(
         val errorMsg = when {
             e.message?.contains("429") == true ->
                 context.getString(R.string.error_quota_exceeded)
+            e is FileNotFoundException ->
+                context.getString(R.string.error_file_not_found)
             else ->
                 context.getString(R.string.error_general, e.message)
         }

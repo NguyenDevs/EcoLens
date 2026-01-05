@@ -23,6 +23,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.nguyendevs.ecolens.databinding.ActivityCameraModernBinding
 import com.nguyendevs.ecolens.R
+import com.nguyendevs.ecolens.utils.ImageUtils
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -55,14 +56,7 @@ class CameraActivity : AppCompatActivity() {
 
     private val selectImageFromGalleryResult = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
-            val resultIntent = Intent().apply {
-                data = it
-                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                putExtra(KEY_IMAGE_URI, it.toString())
-
-            }
-            setResult(RESULT_OK, resultIntent)
-            closeCamera()
+            handleSelectedImage(it)
         }
     }
 
@@ -112,11 +106,13 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
+    @Suppress("DEPRECATION")
     override fun onBackPressed() {
         super.onBackPressed()
         closeCamera()
     }
 
+    @Suppress("DEPRECATION")
     private fun closeCamera() {
         finish()
         overridePendingTransition(R.anim.hold, R.anim.slide_out_bottom)
@@ -135,6 +131,31 @@ class CameraActivity : AppCompatActivity() {
 
     private fun openGallery() {
         selectImageFromGalleryResult.launch("image/*")
+    }
+
+    private fun handleSelectedImage(uri: Uri) {
+        // Create temp file from gallery URI
+        try {
+            val tempFile = ImageUtils.uriToFile(this, uri, 1080)
+            val internalPath = ImageUtils.saveFileToInternalStorage(this, tempFile)
+
+            val finalUriString = if (internalPath != null) {
+                Uri.fromFile(File(internalPath)).toString()
+            } else {
+                uri.toString()
+            }
+
+            val resultIntent = Intent().apply {
+                data = uri
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                putExtra(KEY_IMAGE_URI, finalUriString)
+            }
+            setResult(RESULT_OK, resultIntent)
+            closeCamera()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Error processing image: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun startCamera() {
@@ -303,6 +324,15 @@ class CameraActivity : AppCompatActivity() {
                 }
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                    val publicUri = FileProvider.getUriForFile(
+                        this@CameraActivity,
+                        "${applicationContext.packageName}.provider",
+                        photoFile
+                    )
+
+                    ImageUtils.saveImageToPublicStorage(this@CameraActivity, photoFile)
+                    val internalPath = ImageUtils.saveFileToInternalStorage(this@CameraActivity, photoFile)
+
                     MediaScannerConnection.scanFile(
                         this@CameraActivity,
                         arrayOf(photoFile.absolutePath),
@@ -310,15 +340,16 @@ class CameraActivity : AppCompatActivity() {
                         null
                     )
 
-                    val savedUri = FileProvider.getUriForFile(
-                        this@CameraActivity,
-                        "${applicationContext.packageName}.provider",
-                        photoFile
-                    )
-
                     runOnUiThread {
+                        // FIX: Check internalPath and create URI properly
+                        val finalUriString = if (internalPath != null) {
+                            Uri.fromFile(File(internalPath)).toString()
+                        } else {
+                            publicUri.toString()
+                        }
+
                         val resultIntent = Intent().apply {
-                            putExtra(KEY_IMAGE_URI, savedUri.toString())
+                            putExtra(KEY_IMAGE_URI, finalUriString)
                             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         }
                         setResult(RESULT_OK, resultIntent)

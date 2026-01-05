@@ -1,8 +1,6 @@
 package com.nguyendevs.ecolens.adapters
 
-import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
-import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -57,7 +55,7 @@ class HistoryAdapter(
     }
 
     inner class HistoryViewHolder(private val binding: ItemHistoryEntryModernBinding) : RecyclerView.ViewHolder(binding.root) {
-        
+
         private val radius = itemView.resources.displayMetrics.density * 16
         private val strokeWidth = (1 * itemView.resources.displayMetrics.density).toInt()
 
@@ -83,26 +81,11 @@ class HistoryAdapter(
             val localPath = entry.localImagePath
             var loadModel: Any = entry.imagePath
 
-            if (localPath.isNotEmpty()) {
-                if (localPath.startsWith("/")) {
-                    val file = File(localPath)
-                    if (file.exists()) {
-                        loadModel = file
-                    }
-                } else {
-                    try {
-                        val uri = Uri.parse(localPath)
-                        itemView.context.contentResolver.openInputStream(uri)?.close()
-                        loadModel = uri
-                    } catch (e: Exception) {
-                        // Fallback to imagePath (URL)
-                    }
+            if (!localPath.isNullOrEmpty()) {
+                val file = File(localPath)
+                if (file.exists()) {
+                    loadModel = file
                 }
-            } else if (entry.imagePath.startsWith("/")) {
-                 val file = File(entry.imagePath)
-                 if (file.exists()) {
-                     loadModel = file
-                 }
             }
 
             Glide.with(itemView)
@@ -126,7 +109,7 @@ class HistoryAdapter(
             val bgDrawable = GradientDrawable().apply {
                 setColor(colorSurface)
                 setStroke(strokeWidth, strokeColor)
-                
+
                 cornerRadii = when {
                     isFirstItemOfDay && isLastItemOfDay -> floatArrayOf(radius, radius, radius, radius, radius, radius, radius, radius)
                     isFirstItemOfDay -> floatArrayOf(radius, radius, radius, radius, 0f, 0f, 0f, 0f)
@@ -134,7 +117,7 @@ class HistoryAdapter(
                     else -> floatArrayOf(0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f)
                 }
             }
-            
+
             binding.itemContainer.background = bgDrawable
 
             binding.itemContainer.setOnClickListener { clickListener(entry) }

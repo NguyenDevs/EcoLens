@@ -10,11 +10,14 @@ import android.os.Environment
 import android.provider.MediaStore
 import androidx.exifinterface.media.ExifInterface
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.InputStream
+import java.net.URL
 
 object ImageUtils {
 
+    @Throws(Exception::class)
     fun uriToFile(context: Context, uri: Uri, maxDimension: Int): File {
         val cacheDir = context.cacheDir
         val file = File(cacheDir, "temp_image_${System.currentTimeMillis()}.jpg")
@@ -22,11 +25,13 @@ object ImageUtils {
         var inputStream: InputStream? = null
         try {
             inputStream = context.contentResolver.openInputStream(uri)
+                ?: throw FileNotFoundException("Cannot open input stream for URI: $uri")
+
             val options = BitmapFactory.Options().apply {
                 inJustDecodeBounds = true
             }
             BitmapFactory.decodeStream(inputStream, null, options)
-            inputStream?.close()
+            inputStream.close()
 
             var inSampleSize = 1
             if (options.outHeight > maxDimension || options.outWidth > maxDimension) {
@@ -52,9 +57,14 @@ object ImageUtils {
                 }
                 if (rotatedBitmap != bitmap) bitmap.recycle()
                 rotatedBitmap.recycle()
+            } else {
+                throw Exception("Failed to decode bitmap from URI: $uri")
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
+
+            if (!file.exists() || file.length() == 0L) {
+                throw Exception("Created file is empty or does not exist: ${file.absolutePath}")
+            }
+
         } finally {
             inputStream?.close()
         }
@@ -87,13 +97,39 @@ object ImageUtils {
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
 
-    fun saveBitmapToInternalStorage(context: Context, file: File): String? {
+    fun saveBitmapToInternalStorage(context: Context, bitmap: Bitmap): String? {
         return try {
             val filename = "species_${System.currentTimeMillis()}.jpg"
             val destFile = File(context.filesDir, filename)
-            file.copyTo(destFile, overwrite = true)
+            FileOutputStream(destFile).use { out ->
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+            }
             destFile.absolutePath
         } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    fun saveFileToInternalStorage(context: Context, sourceFile: File): String? {
+        return try {
+            val filename = "species_${System.currentTimeMillis()}.jpg"
+            val destFile = File(context.filesDir, filename)
+            sourceFile.copyTo(destFile, overwrite = true)
+            destFile.absolutePath
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    fun downloadImageToInternalStorage(context: Context, imageUrl: String): String? {
+        return try {
+            val url = URL(imageUrl)
+            val bitmap = BitmapFactory.decodeStream(url.openConnection().getInputStream())
+            saveBitmapToInternalStorage(context, bitmap)
+        } catch (e: Exception) {
+            e.printStackTrace()
             null
         }
     }

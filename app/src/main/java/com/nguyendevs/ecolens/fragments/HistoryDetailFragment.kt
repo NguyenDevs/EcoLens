@@ -1,17 +1,17 @@
 package com.nguyendevs.ecolens.fragments
 
+import android.content.ClipData
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Typeface
-import android.content.ClipData
-import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.Html
 import android.util.TypedValue
-import android.view.LayoutInflater
 import android.view.HapticFeedbackConstants
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -109,12 +109,12 @@ class HistoryDetailFragment : Fragment() {
         binding.collapsingToolbar.setStatusBarScrimColor(Color.TRANSPARENT)
     }
 
-    private fun setupShareButton(info: SpeciesInfo, imagePath: String?, localImagePath: String?) {
+    private fun setupShareButton(info: SpeciesInfo, remoteUrl: String?, localImagePath: String?) {
         binding.btnShareInfo.setOnClickListener {
             binding.btnShareInfo.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
             var imageUri: Uri? = null
-            
-            // Try local path first
+
+            // 1. Try Local File
             if (!localImagePath.isNullOrEmpty()) {
                 val file = File(localImagePath)
                 if (file.exists()) {
@@ -127,36 +127,15 @@ class HistoryDetailFragment : Fragment() {
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
-                } else {
-                    // Try parsing as URI if it's not a file path
-                    try {
-                        imageUri = Uri.parse(localImagePath)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
                 }
             }
-            
-            // Fallback to imagePath if local failed
-            if (imageUri == null && !imagePath.isNullOrEmpty()) {
-                val file = File(imagePath)
-                if (file.exists()) {
-                    try {
-                        imageUri = FileProvider.getUriForFile(
-                            requireContext(),
-                            "${requireContext().packageName}.provider",
-                            file
-                        )
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        imageUri = Uri.parse(imagePath)
-                    }
-                } else {
-                    try {
-                        imageUri = Uri.parse(imagePath)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
+
+            // 2. Fallback to parsing remote URL as URI if local fails
+            if (imageUri == null && !remoteUrl.isNullOrEmpty()) {
+                try {
+                    imageUri = Uri.parse(remoteUrl)
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
             }
 
@@ -204,7 +183,7 @@ class HistoryDetailFragment : Fragment() {
 
         try {
             val intent = Intent(Intent.ACTION_SEND).apply {
-                if (imageUri != null && (imageUri.scheme == "content" || imageUri.scheme == "file")) {
+                if (imageUri != null) {
                     type = "image/*"
                     putExtra(Intent.EXTRA_STREAM, imageUri)
                     clipData = ClipData.newRawUri(null, imageUri)
@@ -234,24 +213,11 @@ class HistoryDetailFragment : Fragment() {
 
     private fun bindHeader(entry: HistoryEntry, info: SpeciesInfo) {
         val localPath = entry.localImagePath
-        var loadModel: Any = entry.imagePath
+        val remoteUrl = entry.imagePath
+        var loadModel: Any = remoteUrl
 
-        if (localPath.isNotEmpty()) {
-            if (localPath.startsWith("/")) {
-                val file = File(localPath)
-                if (file.exists()) {
-                    loadModel = file
-                }
-            } else {
-                try {
-                    val uri = Uri.parse(localPath)
-                    requireContext().contentResolver.openInputStream(uri)?.close()
-                    loadModel = uri
-                } catch (e: Exception) {
-                }
-            }
-        } else if (entry.imagePath.startsWith("/")) {
-            val file = File(entry.imagePath)
+        if (!localPath.isNullOrEmpty()) {
+            val file = File(localPath)
             if (file.exists()) {
                 loadModel = file
             }
