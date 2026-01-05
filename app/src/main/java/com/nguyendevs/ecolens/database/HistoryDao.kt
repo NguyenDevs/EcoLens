@@ -114,6 +114,8 @@ interface HistoryDao {
 
     @Query("DELETE FROM history_table WHERE id = :id")
     suspend fun deleteById(id: Int)
+
+
 }
 
 // Firebase implementation
@@ -210,6 +212,14 @@ class HistoryRepository(private val historyDao: HistoryDao, private val context:
     suspend fun delete(entry: HistoryEntry) {
         val idToDelete = entry.id
         historyDao.deleteById(idToDelete)
+
+        if (entry.imagePath.startsWith("http")) {
+            try {
+                storage.getReferenceFromUrl(entry.imagePath).delete().await()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
         
         try {
             getHistoryRef().child(idToDelete.toString()).removeValue().await()

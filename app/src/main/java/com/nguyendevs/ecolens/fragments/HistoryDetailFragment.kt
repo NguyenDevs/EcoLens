@@ -14,12 +14,15 @@ import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
 import com.bumptech.glide.GenericTransitionOptions
 import com.google.gson.Gson
@@ -29,6 +32,7 @@ import com.nguyendevs.ecolens.managers.SpeakerManager
 import com.nguyendevs.ecolens.model.HistoryEntry
 import com.nguyendevs.ecolens.model.SpeciesInfo
 import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
+import com.nguyendevs.ecolens.view.EcoLensViewModel
 import java.io.File
 
 class HistoryDetailFragment : Fragment() {
@@ -36,6 +40,7 @@ class HistoryDetailFragment : Fragment() {
     private var _binding: FragmentHistoryDetailModernBinding? = null
     private val binding get() = _binding!!
 
+    private val viewModel: EcoLensViewModel by activityViewModels()
     private lateinit var speakerManager: SpeakerManager
     private var historyEntry: HistoryEntry? = null
     private var isSpeaking = false
@@ -82,6 +87,7 @@ class HistoryDetailFragment : Fragment() {
         bindContent(info)
         setupFab(info)
         setupShareButton(info, entry.imagePath, entry.localImagePath)
+        setupMoreOptionsButton()
         binding.fabSpeak.show()
         binding.fabSpeak.bringToFront()
     }
@@ -108,6 +114,53 @@ class HistoryDetailFragment : Fragment() {
 
         binding.collapsingToolbar.setContentScrimColor(Color.TRANSPARENT)
         binding.collapsingToolbar.setStatusBarScrimColor(Color.TRANSPARENT)
+    }
+
+    private fun setupMoreOptionsButton() {
+        binding.btnMoreOptions.setOnClickListener {
+            showMenuPopup(it)
+        }
+    }
+
+    private fun showMenuPopup(anchor: View) {
+        val popup = PopupMenu(requireContext(), anchor)
+        popup.menuInflater.inflate(R.menu.menu_history_detail, popup.menu)
+
+        // Force show icons via reflection (giống ChatFragment)
+        runCatching {
+            val fieldMPopup = PopupMenu::class.java.getDeclaredField("mPopup")
+            fieldMPopup.isAccessible = true
+            val mPopup = fieldMPopup.get(popup)
+            mPopup.javaClass
+                .getDeclaredMethod("setForceShowIcon", Boolean::class.javaPrimitiveType)
+                .invoke(mPopup, true)
+        }
+
+        popup.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.action_delete_history -> {
+                    showDeleteConfirmDialog()
+                    true
+                }
+                else -> false
+            }
+        }
+        popup.show()
+    }
+
+    private fun showDeleteConfirmDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.dialog_delete_history_title)
+            .setMessage(R.string.dialog_delete_history_message)
+            .setPositiveButton(R.string.action_delete) { _, _ ->
+                historyEntry?.let { entry ->
+                    viewModel.deleteHistory(entry)
+                    Toast.makeText(requireContext(), getString(R.string.delete_success), Toast.LENGTH_SHORT).show()
+                    parentFragmentManager.popBackStack()
+                }
+            }
+            .setNegativeButton(R.string.action_cancel, null)
+            .show()
     }
 
     private fun setupShareButton(info: SpeciesInfo, remoteUrl: String?, localImagePath: String?) {

@@ -167,6 +167,9 @@
     <string name="dialog_delete_chat_message">Bạn có chắc muốn xóa đoạn chat này không?</string>
     <string name="action_delete">Xóa</string>
     <string name="action_cancel">Hủy</string>
+    <string name="dialog_delete_history_title">Xóa lịch sử</string>
+    <string name="dialog_delete_history_message">Bạn có chắc muốn xóa lịch sử nhận diện này không?</string>
+    <string name="delete_success">Đã xóa lịch sử thành công</string>
 
     <!-- Error Messages -->
     <string name="error_quota_exceeded">Đã vượt quá giới hạn API. Vui lòng thử lại sau.</string>
@@ -239,6 +242,7 @@
     <!-- Google Sign In -->
     <string name="default_web_client_id">99190004722-8d4rpmasasjflta1hp7vgdu98a649rin.apps.googleusercontent.com</string>
     <string name="error_file_not_found">Không tìm thấy file</string>
+    <string name="account_details">Cài đặt &amp; Riêng tư</string>
 
 
 </resources>

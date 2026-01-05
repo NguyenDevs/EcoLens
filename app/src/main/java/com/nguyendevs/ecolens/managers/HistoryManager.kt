@@ -108,6 +108,24 @@ class HistoryManager(
         }
     }
 
+    suspend fun deleteHistory(entry: HistoryEntry) {
+        withContext(Dispatchers.IO) {
+            runCatching {
+                // Delete local image file if exists
+                if (entry.localImagePath.isNotEmpty()) {
+                    val file = File(entry.localImagePath)
+                    if (file.exists()) {
+                        file.delete()
+                    }
+                }
+                // Delete from repository (Local DB + Firebase)
+                historyRepository.delete(entry)
+            }.onFailure { e ->
+                Log.e(TAG, "Error deleting history entry: ${e.message}", e)
+            }
+        }
+    }
+
     suspend fun deleteAllHistory() {
         withContext(Dispatchers.IO) {
             runCatching {

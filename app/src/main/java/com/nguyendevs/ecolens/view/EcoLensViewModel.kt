@@ -124,6 +124,12 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun deleteHistory(entry: HistoryEntry) {
+        viewModelScope.launch {
+            historyManager.deleteHistory(entry)
+        }
+    }
+
     fun deleteAllHistory() {
         viewModelScope.launch {
             historyManager.deleteAllHistory()
