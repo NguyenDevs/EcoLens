@@ -1,29 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- ============================================ -->
-    <!-- MODERN COMPONENT STYLES -->
-    <!-- ============================================ -->
 
+    <!-- ========================================== -->
+    <!-- BASE STYLES                                -->
+    <!-- ========================================== -->
 
-    <!-- ==================== BACKWARD BASE TEXT APPEARANCE ==================== -->
+    <!-- Base Text Appearance -->
     <style name="TextAppearance.App" parent="TextAppearance.App.Body1" />
 
-    <!-- ==================== BACKWARD BASE WIDGETS ==================== -->
+    <!-- Base Widget -->
     <style name="Widget.App" parent="@android:style/Widget" />
 
 
-    <style name="Widget.App.Taxonomy">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-    </style>
+    <!-- ========================================== -->
+    <!-- TYPOGRAPHY STYLES                          -->
+    <!-- ========================================== -->
 
-    <!-- ==================== OLD TAXONOMY STYLE ALIAS ==================== -->
-    <style name="TaxonomyLabelStyle" parent="Widget.App.Taxonomy.Label" />
-
-    <style name="TaxonomyValueStyle" parent="Widget.App.Taxonomy.Value" />
-
-
-    <!-- ==================== TYPOGRAPHY STYLES ==================== -->
     <!-- Display -->
     <style name="TextAppearance.App.Display" parent="TextAppearance.Material3.DisplaySmall">
         <item name="android:textSize">@dimen/text_display</item>
@@ -31,7 +23,7 @@
         <item name="fontFamily">sans-serif-medium</item>
     </style>
 
-    <!-- Headings -->
+    <!-- Headline 1 -->
     <style name="TextAppearance.App.Headline1">
         <item name="android:textSize">@dimen/text_h1</item>
         <item name="android:textColor">?attr/colorOnSurface</item>
@@ -39,6 +31,7 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+    <!-- Headline 2 -->
     <style name="TextAppearance.App.Headline2">
         <item name="android:textSize">@dimen/text_h2</item>
         <item name="android:textColor">?attr/colorOnSurface</item>
@@ -46,6 +39,7 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+    <!-- Headline 3 -->
     <style name="TextAppearance.App.Headline3">
         <item name="android:textSize">@dimen/text_h3</item>
         <item name="android:textColor">?attr/colorOnSurface</item>
@@ -53,20 +47,21 @@
         <item name="android:textStyle">bold</item>
     </style>
 
-    <!-- Body -->
+    <!-- Body 1 -->
     <style name="TextAppearance.App.Body1">
         <item name="android:textSize">@dimen/text_body</item>
         <item name="android:textColor">?attr/colorOnSurface</item>
         <item name="android:lineSpacingExtra">6dp</item>
     </style>
 
+    <!-- Body 2 -->
     <style name="TextAppearance.App.Body2">
         <item name="android:textSize">@dimen/text_body_small</item>
         <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
         <item name="android:lineSpacingExtra">4dp</item>
     </style>
 
-    <!-- Labels -->
+    <!-- Label -->
     <style name="TextAppearance.App.Label">
         <item name="android:textSize">@dimen/text_label</item>
         <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
@@ -74,30 +69,25 @@
         <item name="android:textAllCaps">true</item>
     </style>
 
+    <!-- Caption -->
     <style name="TextAppearance.App.Caption">
         <item name="android:textSize">@dimen/text_caption</item>
         <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
     </style>
 
-    <!-- ==================== CARD STYLES ==================== -->
-    <style name="Widget.App.Card" parent="Widget.Material3.CardView.Elevated">
-        <item name="cardCornerRadius">@dimen/radius_card</item>
-        <item name="cardElevation">@dimen/elevation_none</item>
-        <item name="strokeWidth">@dimen/border_normal</item>
-        <item name="strokeColor">@color/border_normal</item>
-        <item name="cardBackgroundColor">?attr/colorSurface</item>
+    <!-- Button Text -->
+    <style name="TextAppearance.App.Button" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:textStyle">bold</item>
+        <item name="fontFamily">sans-serif-medium</item>
     </style>
 
-    <style name="Widget.App.Card.Outlined" parent="Widget.App.Card">
-        <item name="cardElevation">@dimen/elevation_none</item>
-    </style>
 
-    <style name="Widget.App.Card.Elevated" parent="Widget.App.Card">
-        <item name="cardElevation">@dimen/elevation_sm</item>
-        <item name="strokeWidth">0dp</item>
-    </style>
+    <!-- ========================================== -->
+    <!-- BUTTON STYLES                              -->
+    <!-- ========================================== -->
 
-    <!-- ==================== BUTTON STYLES ==================== -->
+    <!-- Base Button -->
     <style name="Widget.App.Button" parent="Widget.Material3.Button">
         <item name="cornerRadius">@dimen/radius_button</item>
         <item name="android:paddingStart">@dimen/padding_button_horizontal</item>
@@ -109,23 +99,48 @@
         <item name="elevation">@dimen/elevation_none</item>
     </style>
 
+    <!-- Outlined Button -->
     <style name="Widget.App.Button.Outlined" parent="Widget.Material3.Button.OutlinedButton">
         <item name="cornerRadius">@dimen/radius_button</item>
         <item name="strokeWidth">@dimen/border_normal</item>
         <item name="strokeColor">@color/primary</item>
     </style>
 
+    <!-- Text Button -->
     <style name="Widget.App.Button.Text" parent="Widget.Material3.Button.TextButton">
         <item name="cornerRadius">@dimen/radius_button</item>
     </style>
 
-    <style name="TextAppearance.App.Button" parent="TextAppearance.Material3.LabelLarge">
-        <item name="android:textSize">@dimen/text_body</item>
-        <item name="android:textStyle">bold</item>
-        <item name="fontFamily">sans-serif-medium</item>
+
+    <!-- ========================================== -->
+    <!-- CARD STYLES                                -->
+    <!-- ========================================== -->
+
+    <!-- Base Card -->
+    <style name="Widget.App.Card" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">@dimen/radius_card</item>
+        <item name="cardElevation">@dimen/elevation_none</item>
+        <item name="strokeWidth">@dimen/border_normal</item>
+        <item name="strokeColor">@color/border_normal</item>
+        <item name="cardBackgroundColor">?attr/colorSurface</item>
     </style>
 
-    <!-- ==================== FAB STYLES ==================== -->
+    <!-- Outlined Card -->
+    <style name="Widget.App.Card.Outlined" parent="Widget.App.Card">
+        <item name="cardElevation">@dimen/elevation_none</item>
+    </style>
+
+    <!-- Elevated Card -->
+    <style name="Widget.App.Card.Elevated" parent="Widget.App.Card">
+        <item name="cardElevation">@dimen/elevation_sm</item>
+        <item name="strokeWidth">0dp</item>
+    </style>
+
+
+    <!-- ========================================== -->
+    <!-- FLOATING ACTION BUTTON (FAB)               -->
+    <!-- ========================================== -->
+
     <style name="Widget.App.FloatingActionButton" parent="Widget.Material3.FloatingActionButton.Primary">
         <item name="elevation">@dimen/elevation_lg</item>
         <item name="pressedTranslationZ">@dimen/elevation_xl</item>
@@ -134,7 +149,11 @@
         <item name="backgroundTint">@color/primary</item>
     </style>
 
-    <!-- ==================== BOTTOM NAVIGATION ==================== -->
+
+    <!-- ========================================== -->
+    <!-- BOTTOM NAVIGATION                          -->
+    <!-- ========================================== -->
+
     <style name="Widget.App.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView">
         <item name="itemIconTint">@color/bottom_nav_selector</item>
         <item name="itemTextColor">@color/bottom_nav_selector</item>
@@ -144,23 +163,30 @@
         <item name="elevation">@dimen/bottom_nav_elevation</item>
         <item name="itemIconSize">@dimen/bottom_nav_icon_size</item>
         <item name="android:paddingTop">5dp</item>
-
     </style>
 
-    <style name="BottomNavTextRegular">
-        <item name="android:textStyle">normal</item>
-    </style>
-
+    <!-- Bottom Nav Text Base -->
     <style name="TextAppearance.App.BottomNav" parent="TextAppearance.Material3.LabelSmall">
         <item name="android:textSize">@dimen/text_caption</item>
     </style>
 
+    <!-- Bottom Nav Text Active -->
     <style name="TextAppearance.App.BottomNav.Active">
         <item name="android:textStyle">bold</item>
         <item name="fontFamily">sans-serif-medium</item>
     </style>
 
-    <!-- ==================== CHIP STYLES ==================== -->
+    <!-- Bottom Nav Text Regular (Legacy) -->
+    <style name="BottomNavTextRegular">
+        <item name="android:textStyle">normal</item>
+    </style>
+
+
+    <!-- ========================================== -->
+    <!-- CHIP STYLES                                -->
+    <!-- ========================================== -->
+
+    <!-- Base Chip -->
     <style name="Widget.App.Chip" parent="Widget.Material3.Chip.Suggestion">
         <item name="chipCornerRadius">@dimen/radius_chip</item>
         <item name="chipBackgroundColor">@color/surface_variant</item>
@@ -169,12 +195,18 @@
         <item name="android:textSize">@dimen/text_caption</item>
     </style>
 
+    <!-- Primary Chip -->
     <style name="Widget.App.Chip.Primary" parent="Widget.App.Chip">
         <item name="chipBackgroundColor">@color/success_bg</item>
         <item name="android:textColor">@color/success_text</item>
     </style>
 
-    <!-- ==================== INPUT STYLES ==================== -->
+
+    <!-- ========================================== -->
+    <!-- TEXT INPUT STYLES                          -->
+    <!-- ========================================== -->
+
+    <!-- Text Input Layout -->
     <style name="Widget.App.TextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
         <item name="boxCornerRadiusTopStart">@dimen/radius_input</item>
         <item name="boxCornerRadiusTopEnd">@dimen/radius_input</item>
@@ -185,35 +217,24 @@
         <item name="hintTextColor">?attr/colorOnSurfaceVariant</item>
     </style>
 
+    <!-- Text Input Edit Text -->
     <style name="Widget.App.TextInputEditText" parent="Widget.Material3.TextInputEditText.OutlinedBox">
         <item name="android:textSize">@dimen/text_body</item>
         <item name="android:textColor">?attr/colorOnSurface</item>
     </style>
 
-    <!-- ==================== SHAPE APPEARANCES ==================== -->
-    <style name="ShapeAppearance.App.SmallComponent" parent="">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">40%</item>
-    </style>
 
-    <style name="ShapeAppearance.App.MediumComponent" parent="">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">@dimen/radius_lg</item>
-    </style>
+    <!-- ========================================== -->
+    <!-- TAXONOMY STYLES                            -->
+    <!-- ========================================== -->
 
-    <style name="ShapeAppearance.App.LargeComponent" parent="">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">@dimen/radius_xl</item>
-    </style>
-
-    <!-- ==================== DIVIDER ==================== -->
-    <style name="Widget.App.Divider">
+    <!-- Base Taxonomy Widget -->
+    <style name="Widget.App.Taxonomy">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">@dimen/divider_normal</item>
-        <item name="android:background">@color/border_light</item>
+        <item name="android:layout_height">wrap_content</item>
     </style>
 
-    <!-- ==================== TAXONOMY STYLES ==================== -->
+    <!-- Taxonomy Label -->
     <style name="Widget.App.Taxonomy.Label">
         <item name="android:textSize">@dimen/text_body_small</item>
         <item name="android:textColor">@color/text_secondary</item>
@@ -222,6 +243,7 @@
         <item name="android:layout_marginBottom">@dimen/spacing_xs</item>
     </style>
 
+    <!-- Taxonomy Value -->
     <style name="Widget.App.Taxonomy.Value">
         <item name="android:textSize">@dimen/text_body_small</item>
         <item name="android:textColor">@color/text_primary</item>
@@ -230,8 +252,53 @@
         <item name="android:layout_marginBottom">@dimen/spacing_xs</item>
     </style>
 
+    <!-- Legacy Taxonomy Aliases -->
+    <style name="TaxonomyLabelStyle" parent="Widget.App.Taxonomy.Label" />
+    <style name="TaxonomyValueStyle" parent="Widget.App.Taxonomy.Value" />
+
+
+    <!-- ========================================== -->
+    <!-- DIVIDER                                    -->
+    <!-- ========================================== -->
+
+    <style name="Widget.App.Divider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/divider_normal</item>
+        <item name="android:background">@color/border_light</item>
+    </style>
+
+
+    <!-- ========================================== -->
+    <!-- SHAPE APPEARANCES                          -->
+    <!-- ========================================== -->
+
+    <!-- Small Component (40% rounded) -->
+    <style name="ShapeAppearance.App.SmallComponent" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">40%</item>
+    </style>
+
+    <!-- Medium Component -->
+    <style name="ShapeAppearance.App.MediumComponent" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/radius_lg</item>
+    </style>
+
+    <!-- Large Component -->
+    <style name="ShapeAppearance.App.LargeComponent" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/radius_xl</item>
+    </style>
+
+
+    <!-- ========================================== -->
+    <!-- IMAGE VIEW STYLES                          -->
+    <!-- ========================================== -->
+
+    <!-- Rounded Corner Image View -->
     <style name="RoundedCornerImageView">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">16dp</item>
     </style>
+
 </resources>

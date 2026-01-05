@@ -1,26 +1,34 @@
 <resources>
+    <!-- Thông tin ứng dụng -->
     <string name="app_name">EcoLens</string>
     <string name="app_title">EcoLens</string>
     <string name="app_subtitle">NHẬN DIỆN ĐỘNG THỰC VẬT QUA HÌNH ẢNH</string>
     <string name="app_subtitle_home">NHẬN DIỆN ĐỘNG THỰC VẬT QUA HÌNH ẢNH</string>
+    <string name="app_logo_description">Logo ứng dụng EcoLens</string>
+    <string name="eco_illustration">Hình minh họa về môi trường</string>
 
+    <!-- Banner -->
     <string name="banner_title">Nhận diện</string>
     <string name="banner_subtitle">Động - Thực vật</string>
     <string name="banner_action">Chạm để chụp</string>
 
+    <!-- Điều hướng -->
     <string name="nav_home">Trang chủ</string>
     <string name="nav_history">Lịch sử</string>
     <string name="nav_my_garden">Trợ lý AI</string>
     <string name="nav_settings">Cài đặt</string>
 
+    <!-- Hành động chung -->
     <string name="ok">OK</string>
-    <string name="camera">Máy ảnh</string>
-    <string name="search">Tìm kiếm</string>
-    <string name="speak">Đọc nội dung</string>
-    <string name="mute">Dừng đọc</string>
+    <string name="cancel">Hủy</string>
     <string name="close">Đóng</string>
     <string name="back">Quay lại</string>
-    <string name="more_options">Tuỳ chọn</string>
+    <string name="search">Tìm kiếm</string>
+    <string name="loading">Đang tải…</string>
+    <string name="please_wait">Vui lòng đợi…</string>
+
+    <!-- Máy ảnh & Hình ảnh -->
+    <string name="camera">Máy ảnh</string>
     <string name="capture">Chụp ảnh</string>
     <string name="upload">Tải lên</string>
     <string name="rotate">Xoay</string>
@@ -28,17 +36,30 @@
     <string name="zoom_in">Phóng to</string>
     <string name="zoom_out">Thu nhỏ</string>
     <string name="fullscreen_image">Ảnh toàn màn hình</string>
+    <string name="image_preview">Xem trước ảnh</string>
+    <string name="no_image">Không có ảnh</string>
+    <string name="no_image_selected">Chưa chọn ảnh</string>
+    <string name="detail_image">Ảnh chi tiết</string>
+    <string name="history_image">Ảnh lịch sử</string>
+
+    <!-- Hành động thông tin loài -->
     <string name="favorite">Trợ lý</string>
     <string name="view_detail">Xem chi tiết</string>
     <string name="copy_scientific_name">Sao chép tên khoa học</string>
     <string name="share_info">Chia sẻ thông tin</string>
-    <string name="detail_image">Ảnh chi tiết</string>
-    <string name="history_image">Ảnh lịch sử</string>
+    <string name="more_options">Tuỳ chọn</string>
+    <string name="speak">Đọc nội dung</string>
+    <string name="mute">Dừng đọc</string>
     <string name="search_hint">Tìm kiếm trên Google...</string>
 
+    <!-- Nhãn thông tin loài -->
     <string name="label_common_name">Tên thường gọi</string>
     <string name="label_scientific_name">Tên khoa học</string>
     <string name="label_confidence_template">Độ tin cậy: %s</string>
+    <string name="confidence">Độ tin cậy</string>
+    <string name="confidence_format">Độ tin cậy: %s%%</string>
+
+    <!-- Phân loại khoa học -->
     <string name="label_kingdom">Giới:</string>
     <string name="label_phylum">Ngành:</string>
     <string name="label_class">Lớp:</string>
@@ -46,59 +67,103 @@
     <string name="label_family">Họ:</string>
     <string name="label_genus">Chi:</string>
     <string name="label_species">Loài:</string>
-
-    <string name="tts_scientific_name">Tên khoa học</string>
-    <string name="tts_taxonomy">Phân loại khoa học</string>
-
-    <string name="unknown_common_name">[Không rõ tên thường gọi]</string>
-    <string name="unknown_scientific_name">[Không rõ tên khoa học]</string>
-
-    <string name="time_prefix">Thời gian: </string>
-
-    <string name="permission_title">Cần quyền truy cập</string>
-    <string name="permission_message">Ứng dụng cần quyền camera và thư viện ảnh để hoạt động.</string>
-
-    <string name="image_preview">Xem trước ảnh</string>
-    <string name="no_image">Không có ảnh</string>
-    <string name="no_image_selected">Chưa chọn ảnh</string>
-
-    <string name="analyzing">Đang phân tích hình ảnh…</string>
-    <string name="analyzing_text">Đang phân tích hình ảnh</string>
-    <string name="analyzing_info">Đang truy xuất thông tin loài</string>
-    <string name="loading_analyzing">Đang phân tích hình ảnh...</string>
-
-    <string name="confidence">Độ tin cậy</string>
-    <string name="confidence_format">Độ tin cậy: %s%%</string>
-
     <string name="taxonomy_title">🔬 Phân loại khoa học</string>
 
+    <!-- Các phần thông tin loài -->
     <string name="section_description">📖 Mô tả</string>
     <string name="section_characteristics">✨ Đặc điểm</string>
     <string name="section_distribution">🌍 Phân bố</string>
     <string name="section_habitat">🏞️ Môi trường sống</string>
     <string name="section_conservation">🛡️ Tình trạng bảo tồn</string>
 
+    <!-- Đọc văn bản -->
+    <string name="tts_scientific_name">Tên khoa học</string>
+    <string name="tts_taxonomy">Phân loại khoa học</string>
+
+    <!-- Giá trị không xác định -->
+    <string name="unknown_common_name">[Không rõ tên thường gọi]</string>
+    <string name="unknown_scientific_name">[Không rõ tên khoa học]</string>
+
+    <!-- Thời gian -->
+    <string name="time_prefix">Thời gian: </string>
+
+    <!-- Trạng thái phân tích -->
+    <string name="analyzing">Đang phân tích hình ảnh…</string>
+    <string name="analyzing_text">Đang phân tích hình ảnh</string>
+    <string name="analyzing_info">Đang truy xuất thông tin loài</string>
+    <string name="loading_analyzing">Đang phân tích hình ảnh...</string>
+
+    <!-- Màn hình Lịch sử -->
     <string name="history">Lịch sử</string>
     <string name="history_title_label">Lịch sử</string>
     <string name="history_placeholder">Lịch sử</string>
     <string name="history_subtitle">Xem lịch sử các loài đã nhận diện</string>
+    <string name="history_empty">Chưa có lịch sử</string>
+    <string name="lists">DANH SÁCH</string>
 
+    <!-- Sắp xếp & Lọc -->
+    <string name="sort_by">Sắp xếp theo</string>
+    <string name="sort_newest_first">Ngày mới nhất</string>
+    <string name="sort_oldest_first">Ngày cũ nhất</string>
+    <string name="sort">Sắp xếp</string>
+    <string name="filter_by_date">Lọc theo ngày</string>
+    <string name="select_start_date">Chọn ngày bắt đầu</string>
+    <string name="select_end_date">Chọn ngày kết thúc</string>
+    <string name="select_date">Chọn khoảng thời gian</string>
+    <string name="filter_date_range">Từ %1$s đến %2$s</string>
+    <string name="clear_filter">Xóa bộ lọc</string>
+    <string name="end_date_before_start_date_error">Ngày kết thúc phải sau ngày bắt đầu</string>
+    <string name="ic_calendar">ic_calendar</string>
+    <string name="ic_sort">ic_sort</string>
+    <string name="options">TÙY CHỌN</string>
+
+    <!-- Màn hình Trợ lý/Chat -->
     <string name="my_garden">Trợ lý AI</string>
     <string name="my_garden_title">Trợ lý AI</string>
     <string name="my_garden_desc">Hỏi đáp về sinh vật học với AI</string>
     <string name="garden_placeholder">Trợ lý AI</string>
     <string name="garden_subtitle">Hỏi đáp về sinh vật học với AI</string>
+    <string name="chat_hint">Hỏi về động thực vật...</string>
+    <string name="chat_welcome">Tôi là EcoLens. Tôi có thể giúp gì cho bạn?</string>
+    <string name="chat_thinking">Đang suy nghĩ...</string>
+    <string name="new_chat">Đoạn chat mới</string>
+    <string name="delete_chat">Xóa đoạn chat</string>
+    <string name="cant_reply">Xin lỗi, tôi không thể trả lời lúc này.</string>
+    <string name="dialog_delete_chat_title">Xóa đoạn chat</string>
+    <string name="dialog_delete_chat_message">Bạn có chắc muốn xóa đoạn chat này không?</string>
 
+    <!-- Màn hình Cài đặt -->
     <string name="settings">Cài đặt</string>
     <string name="settings_title">Cài đặt</string>
     <string name="settings_placeholder">Cài đặt</string>
     <string name="settings_subtitle">Các tùy chọn cài đặt</string>
-    <string name="language_label">Ngôn ngữ</string>
     <string name="preferences">Giao diện</string>
+    <string name="language_label">Ngôn ngữ</string>
     <string name="lang_vietnamese">Tiếng Việt</string>
     <string name="lang_english">English</string>
     <string name="dark_mode">Chế độ tối</string>
 
+    <!-- Tài khoản -->
+    <string name="account">TÀI KHOẢN</string>
+    <string name="account_details">Cài đặt &amp; Riêng tư</string>
+    <string name="logout">Đăng xuất</string>
+    <string name="dialog_logout_title">Đăng xuất</string>
+    <string name="dialog_logout_message">
+        Bạn có chắc chắn muốn đăng xuất không?
+    </string>
+    <string name="action_logout">Đăng xuất</string>
+
+    <!-- Thông tin & Hỗ trợ -->
+    <string name="about_label">Thông tin</string>
+    <string name="about_app_title">Về chúng tôi</string>
+    <string name="about_app_desc">Ứng dụng EcoLens, nhận diện động thực vật qua hình ảnh được phát triển bởi @NguyenDevs</string>
+    <string name="support">Hỗ trợ</string>
+    <string name="follow_on_tiktok">Theo dõi trên TikTok</string>
+    <string name="follow_on_instagram">Theo dõi trên Instagram</string>
+    <string name="follow_on_facebook">Theo dõi trên Facebook</string>
+    <string name="email_support">Gửi phản hồi</string>
+
+    <!-- Chia sẻ nội dung -->
     <string name="share_title">🌿 THÔNG TIN LOÀI</string>
     <string name="share_taxonomy_title">🔬 PHÂN LOẠI KHOA HỌC</string>
     <string name="share_desc_title">📖 MÔ TẢ</string>
@@ -110,110 +175,25 @@
     <string name="share_subject">Thông tin về %s</string>
     <string name="share_chooser_title">Chia sẻ thông tin loài qua</string>
 
-    <string name="error">Lỗi</string>
-    <string name="error_occurred">Đã xảy ra lỗi</string>
-    <string name="error_default">Đã xảy ra lỗi</string>
-    <string name="error_prefix">Đã xảy ra lỗi: %s</string>
-    <string name="error_no_result">Không thể nhận diện sinh vật trong ảnh. Vui lòng thử ảnh khác.</string>
-    <string name="error_camera_front">Không thể mở camera trước</string>
-    <string name="error_camera_open">Không thể mở camera: %s</string>
-    <string name="error_capture">Lỗi chụp ảnh: %s</string>
-    <string name="error_browser">Không tìm thấy trình duyệt web</string>
-
-    <string name="feature_developing">Chức năng đang được phát triển</string>
-
-    <string name="sort_by">Sắp xếp theo</string>
-    <string name="sort_newest_first">Ngày mới nhất</string>
-    <string name="sort_oldest_first">Ngày cũ nhất</string>
-    <string name="sort">Sắp xếp</string>
-
-    <string name="filter_by_date">Lọc theo ngày</string>
-    <string name="select_start_date">Chọn ngày bắt đầu</string>
-    <string name="select_end_date">Chọn ngày kết thúc</string>
-    <string name="filter_date_range">Từ %1$s đến %2$s</string>
-    <string name="clear_filter">Xóa bộ lọc</string>
-    <string name="end_date_before_start_date_error">Ngày kết thúc phải sau ngày bắt đầu</string>
-
-    <string name="ic_calendar">ic_calendar</string>
-    <string name="ic_sort">ic_sort</string>
-
-    <string name="cancel">Hủy</string>
-
-    <string name="text_secondary" translatable="false">text_secondary</string>
-    <string name="background_color" translatable="false">background_color</string>
-
-    <string name="options">TÙY CHỌN</string>
-    <string name="lists">DANH SÁCH</string>
-    <string name="select_date">Chọn khoảng thời gian</string>
-    <string name="history_empty">Chưa có lịch sử</string>
-
-    <string name="about_label">Thông tin</string>
-    <string name="support">Hỗ trợ</string>
-    <string name="about_app_title">Về chúng tôi</string>
-    <string name="follow_on_tiktok">Theo dõi trên TikTok</string>
-    <string name="follow_on_instagram">Theo dõi trên Instagram</string>
-    <string name="follow_on_facebook">Theo dõi trên Facebook</string>
-    <string name="email_support">Gửi phản hồi</string>
-    <string name="about_app_desc">Ứng dụng EcoLens, nhận diện động thực vật qua hình ảnh được phát triển bởi @NguyenDevs</string>
-
-    <string name="chat_hint">Hỏi về động thực vật...</string>
-    <string name="chat_welcome">Tôi là EcoLens. Tôi có thể giúp gì cho bạn?</string>
-    <string name="chat_thinking">Đang suy nghĩ...</string>
-    <string name="delete_chat">Xóa đoạn chat</string>
-
-    <string name="new_chat">Đoạn chat mới</string>
-    <string name="cant_reply">Xin lỗi, tôi không thể trả lời lúc này.</string>
-    <string name="dialog_delete_chat_title">Xóa đoạn chat</string>
-    <string name="dialog_delete_chat_message">Bạn có chắc muốn xóa đoạn chat này không?</string>
-    <string name="action_delete">Xóa</string>
-    <string name="action_cancel">Hủy</string>
-    <string name="dialog_delete_history_title">Xóa lịch sử</string>
-    <string name="dialog_delete_history_message">Bạn có chắc muốn xóa lịch sử nhận diện này không?</string>
-    <string name="delete_success">Đã xóa lịch sử thành công</string>
-
-    <!-- Error Messages -->
-    <string name="error_quota_exceeded">Đã vượt quá giới hạn API. Vui lòng thử lại sau.</string>
-    <string name="error_incomplete_data">Không thể lấy đủ thông tin về loài này. Vui lòng thử lại.</string>
-    <string name="error_general">Lỗi: %1$s</string>
-
-    <!-- Retry Button -->
-    <string name="btn_retry_identification">Thử nhận dạng lại</string>
-    <string name="retry_identification_hint">Độ tin cậy thấp. Nhấn để thử lại.</string>
-
-    <string name="error_geo_block">Dịch vụ API chưa hỗ trợ khu vực này. Vui lòng thử lại sau hoặc đổi mạng.</string>
-    <string name="error_open_link">Không thể mở liên kết</string>
-    <string name="error_no_email_app">Không tìm thấy ứng dụng Email</string>
-
-    <!-- Content Descriptions -->
-    <string name="app_logo_description">Logo ứng dụng EcoLens</string>
-    <string name="eco_illustration">Hình minh họa về môi trường</string>
-
-    <!-- Auth Screen -->
+    <!-- Xác thực -->
     <string name="welcome_to_ecolens">Chào mừng đến với EcoLens</string>
     <string name="auth_subtitle">Đăng nhập hoặc tạo tài khoản mới</string>
-
-    <!-- Tabs -->
     <string name="login">Đăng nhập</string>
     <string name="register">Đăng ký</string>
-
-    <!-- Form Fields -->
     <string name="email">Email</string>
     <string name="password">Mật khẩu</string>
     <string name="confirm_password">Nhập lại mật khẩu</string>
-
-    <!-- Actions -->
     <string name="remember_me">Nhớ đăng nhập</string>
     <string name="forgot_password">Quên mật khẩu?</string>
     <string name="agree_terms">Tôi đồng ý với <b>Điều khoản dịch vụ</b> và <b>Chính sách bảo mật</b></string>
-
-    <!-- Buttons -->
     <string name="sign_in">Đăng nhập</string>
     <string name="sign_up">Đăng ký</string>
     <string name="or_continue_with">Hoặc tiếp tục với</string>
     <string name="sign_in_with_google">Đăng nhập bằng Google</string>
     <string name="sign_in_with_biometric">Đăng nhập bằng vân tay</string>
+    <string name="default_web_client_id">99190004722-8d4rpmasasjflta1hp7vgdu98a649rin.apps.googleusercontent.com</string>
 
-    <!-- Validation Errors -->
+    <!-- Lỗi xác thực -->
     <string name="error_email_empty">Vui lòng nhập email</string>
     <string name="error_email_invalid">Email không hợp lệ</string>
     <string name="error_password_empty">Vui lòng nhập mật khẩu</string>
@@ -222,27 +202,53 @@
     <string name="error_terms_not_accepted">Vui lòng đồng ý với điều khoản dịch vụ</string>
     <string name="error_fill_all_fields">Vui lòng điền đầy đủ thông tin</string>
 
-    <!-- Success Messages -->
+    <!-- Thông báo thành công -->
     <string name="login_success">Đăng nhập thành công!</string>
     <string name="register_success">Đăng ký thành công!</string>
+    <string name="delete_success">Đã xóa lịch sử thành công</string>
 
-    <!-- Error Messages -->
+    <!-- Hành động hộp thoại -->
+    <string name="action_delete">Xóa</string>
+    <string name="action_cancel">Hủy</string>
+    <string name="dialog_delete_history_title">Xóa lịch sử</string>
+    <string name="dialog_delete_history_message">Bạn có chắc muốn xóa lịch sử nhận diện này không?</string>
+
+    <!-- Thông báo lỗi -->
+    <string name="error">Lỗi</string>
+    <string name="error_occurred">Đã xảy ra lỗi</string>
+    <string name="error_default">Đã xảy ra lỗi</string>
+    <string name="error_prefix">Đã xảy ra lỗi: %s</string>
+    <string name="error_general">Lỗi: %1$s</string>
+    <string name="error_no_result">Không thể nhận diện sinh vật trong ảnh. Vui lòng thử ảnh khác.</string>
+    <string name="error_camera_front">Không thể mở camera trước</string>
+    <string name="error_camera_open">Không thể mở camera: %s</string>
+    <string name="error_capture">Lỗi chụp ảnh: %s</string>
+    <string name="error_browser">Không tìm thấy trình duyệt web</string>
+    <string name="error_quota_exceeded">Đã vượt quá giới hạn API. Vui lòng thử lại sau.</string>
+    <string name="error_incomplete_data">Không thể lấy đủ thông tin về loài này. Vui lòng thử lại.</string>
+    <string name="error_geo_block">Dịch vụ API chưa hỗ trợ khu vực này. Vui lòng thử lại sau hoặc đổi mạng.</string>
+    <string name="error_open_link">Không thể mở liên kết</string>
+    <string name="error_no_email_app">Không tìm thấy ứng dụng Email</string>
+    <string name="error_file_not_found">Không tìm thấy file</string>
     <string name="login_failed">Đăng nhập thất bại. Vui lòng thử lại.</string>
     <string name="register_failed">Đăng ký thất bại. Vui lòng thử lại.</string>
     <string name="network_error">Lỗi kết nối. Kiểm tra mạng của bạn.</string>
     <string name="biometric_not_available">Thiết bị không hỗ trợ sinh trhọc học</string>
     <string name="biometric_authentication_failed">Xác thực sinh trắc học thất bại</string>
 
-    <!-- Loading -->
-    <string name="loading">Đang tải…</string>
-    <string name="please_wait">Vui lòng đợi…</string>
-    <string name="account">TÀI KHOẢN</string>
-    <string name="logout">Đăng xuất</string>
+    <!-- Thử lại -->
+    <string name="btn_retry_identification">Thử nhận dạng lại</string>
+    <string name="retry_identification_hint">Độ tin cậy thấp. Nhấn để thử lại.</string>
 
-    <!-- Google Sign In -->
-    <string name="default_web_client_id">99190004722-8d4rpmasasjflta1hp7vgdu98a649rin.apps.googleusercontent.com</string>
-    <string name="error_file_not_found">Không tìm thấy file</string>
-    <string name="account_details">Cài đặt &amp; Riêng tư</string>
+    <!-- Quyền truy cập -->
+    <string name="permission_title">Cần quyền truy cập</string>
+    <string name="permission_message">Ứng dụng cần quyền camera và thư viện ảnh để hoạt động.</string>
 
+    <!-- Khác -->
+    <string name="feature_developing">Chức năng đang được phát triển</string>
+
+    <!-- Không dịch -->
+    <string name="text_secondary" translatable="false">text_secondary</string>
+    <string name="background_color" translatable="false">background_color</string>
 
 </resources>

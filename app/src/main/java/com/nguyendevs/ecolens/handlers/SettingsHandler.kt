@@ -59,8 +59,9 @@ class SettingsHandler(
         }
 
         settingsView.findViewById<View>(R.id.logoutOption).setOnClickListener {
-            logout()
+            showLogoutConfirmDialog()
         }
+
 
         settingsView.findViewById<View>(R.id.aboutOption).setOnClickListener {
             openFragment(AboutFragment(), "about_screen")
@@ -77,6 +78,19 @@ class SettingsHandler(
             openUrl("https://www.tiktok.com/@nguyendevs/")
         }
     }
+
+
+    private fun showLogoutConfirmDialog() {
+        androidx.appcompat.app.AlertDialog.Builder(activity)
+            .setTitle(R.string.dialog_logout_title)
+            .setMessage(R.string.dialog_logout_message)
+            .setPositiveButton(R.string.action_logout) { _, _ ->
+                logout()
+            }
+            .setNegativeButton(R.string.action_cancel, null)
+            .show()
+    }
+
 
     private fun logout() {
         activity.lifecycleScope.launch {

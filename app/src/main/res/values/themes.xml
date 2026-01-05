@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Base application theme -->
+    <!-- ========================================== -->
+    <!-- BASE APPLICATION THEME                     -->
+    <!-- ========================================== -->
+
+    <!-- Base application theme for Light Mode -->
     <style name="Base.Theme.EcoLens" parent="Theme.Material3.Light.NoActionBar">
         <!-- Primary colors -->
         <item name="colorPrimary">@color/green_primary</item>
@@ -30,28 +34,39 @@
         <!-- Window Animation -->
         <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
 
-        <!-- FAB -->
+        <!-- Component Styles -->
         <item name="floatingActionButtonStyle">@style/Widget.EcoLens.FloatingActionButton</item>
-
-        <!-- Bottom Navigation -->
         <item name="bottomNavigationStyle">@style/Widget.EcoLens.BottomNavigationView</item>
     </style>
 
+    <!-- Main application theme -->
     <style name="Theme.EcoLens" parent="Base.Theme.EcoLens" />
 
-    <!-- Window Animation Style -->
+
+    <!-- ========================================== -->
+    <!-- WINDOW ANIMATIONS                          -->
+    <!-- ========================================== -->
+
     <style name="WindowAnimationTransition">
         <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
         <item name="android:windowExitAnimation">@android:anim/fade_out</item>
     </style>
 
-    <!-- FAB Style -->
+
+    <!-- ========================================== -->
+    <!-- FLOATING ACTION BUTTON (FAB)               -->
+    <!-- ========================================== -->
+
     <style name="Widget.EcoLens.FloatingActionButton" parent="Widget.Material3.FloatingActionButton.Primary">
         <item name="tint">@android:color/white</item>
         <item name="elevation">6dp</item>
     </style>
 
-    <!-- Bottom Navigation Style -->
+
+    <!-- ========================================== -->
+    <!-- BOTTOM NAVIGATION                          -->
+    <!-- ========================================== -->
+
     <style name="Widget.EcoLens.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">
         <item name="itemIconTint">@color/bottom_nav_selector</item>
         <item name="itemTextColor">@color/bottom_nav_selector</item>
@@ -62,25 +77,35 @@
         <item name="elevation">8dp</item>
     </style>
 
-    <!-- Bottom Nav Text Styles -->
+    <!-- Bottom Nav Active Text -->
     <style name="TextAppearance.EcoLens.BottomNav.Active" parent="TextAppearance.Material3.LabelSmall">
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">12sp</item>
     </style>
 
+    <!-- Bottom Nav Inactive Text -->
     <style name="TextAppearance.EcoLens.BottomNav.Inactive" parent="TextAppearance.Material3.LabelSmall">
         <item name="android:textStyle">normal</item>
         <item name="android:textSize">12sp</item>
     </style>
 
-    <!-- Card Style -->
+
+    <!-- ========================================== -->
+    <!-- CARD VIEW                                  -->
+    <!-- ========================================== -->
+
     <style name="Widget.EcoLens.CardView" parent="Widget.Material3.CardView.Elevated">
         <item name="cardCornerRadius">20dp</item>
         <item name="cardElevation">4dp</item>
         <item name="cardBackgroundColor">@android:color/white</item>
     </style>
 
-    <!-- Custom Material DatePicker Theme -->
+
+    <!-- ========================================== -->
+    <!-- MATERIAL DATE PICKER                       -->
+    <!-- ========================================== -->
+
+    <!-- Main DatePicker Theme -->
     <style name="CustomMaterialDatePickerTheme" parent="ThemeOverlay.Material3.MaterialCalendar">
         <item name="colorPrimary">@color/green_primary</item>
         <item name="colorOnPrimary">@color/white</item>
@@ -97,7 +122,7 @@
         <item name="android:textColorPrimary">@color/black</item>
     </style>
 
-    <!-- Custom Header Layout -->
+    <!-- DatePicker Header Layout -->
     <style name="HeaderLayoutCustom" parent="Widget.Material3.MaterialCalendar.HeaderLayout">
         <item name="android:background">@color/green_primary</item>
         <item name="android:paddingTop">24dp</item>
@@ -106,7 +131,7 @@
         <item name="android:paddingEnd">24dp</item>
     </style>
 
-    <!-- Custom Header Title - Align Left and Uppercase -->
+    <!-- DatePicker Header Title -->
     <style name="HeaderTitleCustom" parent="Widget.Material3.MaterialCalendar.HeaderTitle">
         <item name="android:textSize">14sp</item>
         <item name="android:textStyle">normal</item>
@@ -118,7 +143,7 @@
         <item name="android:layout_marginBottom">8dp</item>
     </style>
 
-    <!-- Custom Header Selection (Selected Date) -->
+    <!-- DatePicker Header Selection (Selected Date) -->
     <style name="HeaderSelectionCustom" parent="Widget.Material3.MaterialCalendar.HeaderSelection">
         <item name="android:textSize">32sp</item>
         <item name="android:textStyle">normal</item>
@@ -128,11 +153,10 @@
         <item name="android:layout_width">match_parent</item>
     </style>
 
-    <!-- Custom Header Divider -->
+    <!-- DatePicker Header Divider -->
     <style name="HeaderDividerCustom" parent="Widget.Material3.MaterialCalendar.HeaderDivider">
         <item name="android:background">@color/white</item>
         <item name="android:layout_height">1dp</item>
     </style>
-
 
 </resources>
