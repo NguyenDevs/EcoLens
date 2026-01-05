@@ -43,12 +43,22 @@ class HistoryAdapter(
                 val oldItem = historyList[oldItemPosition]
                 val newItem = newList[newItemPosition]
 
-                return oldItem.id == newItem.id &&
+                val isContentSame = oldItem.id == newItem.id &&
                         oldItem.timestamp == newItem.timestamp &&
                         oldItem.speciesInfo.commonName == newItem.speciesInfo.commonName &&
                         oldItem.speciesInfo.scientificName == newItem.speciesInfo.scientificName &&
                         oldItem.isFavorite == newItem.isFavorite &&
                         oldItem.imagePath == newItem.imagePath
+
+                if (!isContentSame) return false
+
+                val oldIsFirst = oldItemPosition == 0 || !isSameDay(oldItem.timestamp, historyList[oldItemPosition - 1].timestamp)
+                val oldIsLast = oldItemPosition == historyList.size - 1 || !isSameDay(oldItem.timestamp, historyList[oldItemPosition + 1].timestamp)
+
+                val newIsFirst = newItemPosition == 0 || !isSameDay(newItem.timestamp, newList[newItemPosition - 1].timestamp)
+                val newIsLast = newItemPosition == newList.size - 1 || !isSameDay(newItem.timestamp, newList[newItemPosition + 1].timestamp)
+
+                return oldIsFirst == newIsFirst && oldIsLast == newIsLast
             }
         }
         val diffResult = DiffUtil.calculateDiff(diffCallback)
