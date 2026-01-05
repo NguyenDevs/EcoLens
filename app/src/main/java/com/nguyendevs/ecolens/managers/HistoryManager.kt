@@ -6,10 +6,12 @@ import com.nguyendevs.ecolens.database.HistoryRepository
 import com.nguyendevs.ecolens.model.HistoryEntry
 import com.nguyendevs.ecolens.model.HistorySortOption
 import com.nguyendevs.ecolens.utils.ImageUtils
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
@@ -40,7 +42,11 @@ class HistoryManager(
         }
         return flow
             .onEach { list ->
-                checkAndRepairImages(list)
+                // FIX: Chạy việc check/tải ảnh ở background scope riêng
+                // Không chặn flow emit dữ liệu -> UI hiển thị ngay lập tức
+                CoroutineScope(Dispatchers.IO).launch {
+                    checkAndRepairImages(list)
+                }
             }
             .flowOn(Dispatchers.IO)
     }
@@ -54,6 +60,7 @@ class HistoryManager(
 
                 if (!fileExists && remoteUrl.startsWith("http")) {
                     Log.d(TAG, "Restoring image for entry ${entry.id} from Firebase")
+                    // Hàm này trong ImageUtils đã lưu vào context.filesDir (Internal Storage)
                     val newLocalPath = ImageUtils.downloadImageToInternalStorage(context, remoteUrl)
 
                     if (newLocalPath != null) {

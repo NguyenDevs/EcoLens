@@ -24,7 +24,6 @@ import android.view.animation.OvershootInterpolator
 import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import com.google.android.material.card.MaterialCardView
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ActivityMainModernBinding
 import com.nguyendevs.ecolens.model.LoadingStage
@@ -455,20 +454,14 @@ class SpeciesInfoHandler(
                 val fadeOut1: Int
 
                 if (isDarkMode) {
-                    // Cấu hình màu cho Dark Mode (Nền tối, vệt sáng xám nhẹ)
-                    // Nền: #2C2C2C (Surface Variant Dark)
-                    // Shimmer: #454545 (Lighter Gray)
                     backgroundColor = Color.parseColor("#2C2C2C")
                     transparent = Color.parseColor("#002C2C2C")
-
-                    // Vệt sáng (Alpha thay đổi dần)
-                    fadeIn1 = Color.parseColor("#20454545") // 12% opacity
-                    fadeIn2 = Color.parseColor("#60454545") // 37% opacity
-                    shimmerColor = Color.parseColor("#FF454545") // 100% opacity (Tâm vệt sáng)
+                    fadeIn1 = Color.parseColor("#20454545")
+                    fadeIn2 = Color.parseColor("#60454545")
+                    shimmerColor = Color.parseColor("#FF454545")
                     fadeOut2 = Color.parseColor("#60454545")
                     fadeOut1 = Color.parseColor("#20454545")
                 } else {
-                    // Cấu hình màu cho Light Mode (Giữ nguyên như cũ)
                     backgroundColor = Color.parseColor("#ECEFF1")
                     transparent = Color.parseColor("#00ECEFF1")
                     fadeIn1 = Color.parseColor("#40F5F7F9")
@@ -499,15 +492,14 @@ class SpeciesInfoHandler(
 
                 val shapeDrawable = object : ShapeDrawable(RectShape()) {
                     override fun onDraw(shape: Shape, canvas: Canvas, p: Paint) {
-                        // Bo góc (Corner Radius)
                         val cornerRadius = 20f.dpToPx()
                         val path = Path().apply {
                             addRoundRect(0f, 0f, width, height, cornerRadius, cornerRadius, Path.Direction.CW)
                         }
                         canvas.save()
                         canvas.clipPath(path)
-                        canvas.drawRect(0f, 0f, width, height, bgPaint) // Vẽ nền
-                        canvas.drawRect(0f, 0f, width, height, paint)   // Vẽ hiệu ứng shimmer đè lên
+                        canvas.drawRect(0f, 0f, width, height, bgPaint)
+                        canvas.drawRect(0f, 0f, width, height, paint)
                         canvas.restore()
                     }
                 }
@@ -724,24 +716,28 @@ class SpeciesInfoHandler(
         }
     }
 
+    // FIX: Sửa lỗi không share được ảnh khi ảnh nằm trong bộ nhớ riêng (Internal Storage)
     private fun setupShareButton(info: SpeciesInfo, imageUri: Uri?) {
         infoBinding.btnShareInfo.setOnClickListener {
             infoBinding.btnShareInfo.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
-            
-            // Try to resolve a shareable URI if the provided one is null or not shareable
+
             var shareableUri = imageUri
-            
-            // If imageUri is a file URI, we might need to use FileProvider
-            if (shareableUri != null && shareableUri.scheme == "file") {
-                try {
-                    val file = File(shareableUri.path!!)
-                    shareableUri = FileProvider.getUriForFile(
-                        context,
-                        "${context.packageName}.provider",
-                        file
-                    )
-                } catch (e: Exception) {
-                    e.printStackTrace()
+
+            // Nếu URI là file scheme (file://) hoặc đường dẫn thô, cần chuyển sang Content URI (content://)
+            // thông qua FileProvider để các app khác có quyền đọc.
+            if (shareableUri != null) {
+                if (shareableUri.scheme == "file") {
+                    try {
+                        val file = File(shareableUri.path!!)
+                        shareableUri = FileProvider.getUriForFile(
+                            context,
+                            "${context.packageName}.provider",
+                            file
+                        )
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        // Nếu lỗi thì giữ nguyên URI cũ hoặc gán null để share text
+                    }
                 }
             }
 

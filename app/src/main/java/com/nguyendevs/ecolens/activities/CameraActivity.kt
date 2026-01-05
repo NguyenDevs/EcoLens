@@ -3,26 +3,24 @@ package com.nguyendevs.ecolens.activities
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.view.ScaleGestureDetector
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
+import android.view.ScaleGestureDetector
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.view.HapticFeedbackConstants
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
-import com.nguyendevs.ecolens.databinding.ActivityCameraModernBinding
 import com.nguyendevs.ecolens.R
+import com.nguyendevs.ecolens.databinding.ActivityCameraModernBinding
 import com.nguyendevs.ecolens.utils.ImageUtils
 import java.io.File
 import java.time.LocalDateTime
@@ -45,7 +43,6 @@ class CameraActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityCameraModernBinding
     private lateinit var cameraExecutor: ExecutorService
-    private lateinit var outputDirectory: File
     private var rotateAnimation: Animation? = null
 
     private var camera: Camera? = null
@@ -67,7 +64,6 @@ class CameraActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         cameraExecutor = Executors.newSingleThreadExecutor()
-        outputDirectory = getOutputDirectory()
 
         startCamera()
         setupZoomAndFocus()
@@ -137,6 +133,7 @@ class CameraActivity : AppCompatActivity() {
         // Create temp file from gallery URI
         try {
             val tempFile = ImageUtils.uriToFile(this, uri, 1080)
+            // Lưu vào bộ nhớ trong của ứng dụng
             val internalPath = ImageUtils.saveFileToInternalStorage(this, tempFile)
 
             val finalUriString = if (internalPath != null) {
@@ -307,8 +304,10 @@ class CameraActivity : AppCompatActivity() {
     private fun takePhoto() {
         val imageCapture = imageCapture ?: return
 
+        // FIX: Chỉ lưu vào Cache (tạm thời) thay vì Public Storage
+        // externalCacheDir giúp ẩn ảnh khỏi Gallery, cacheDir làm fallback
         val photoFile = File(
-            outputDirectory,
+            externalCacheDir ?: cacheDir,
             DateTimeFormatter.ofPattern(FILENAME_FORMAT, Locale.US).format(LocalDateTime.now()) + ".jpg"
         )
 
@@ -324,46 +323,30 @@ class CameraActivity : AppCompatActivity() {
                 }
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    val publicUri = FileProvider.getUriForFile(
-                        this@CameraActivity,
-                        "${applicationContext.packageName}.provider",
-                        photoFile
-                    )
-
-                    ImageUtils.saveImageToPublicStorage(this@CameraActivity, photoFile)
+                    // FIX: Lưu bản copy vào bộ nhớ trong riêng của App (Internal Storage)
                     val internalPath = ImageUtils.saveFileToInternalStorage(this@CameraActivity, photoFile)
 
-                    MediaScannerConnection.scanFile(
-                        this@CameraActivity,
-                        arrayOf(photoFile.absolutePath),
-                        null,
-                        null
-                    )
+                    // Xóa file tạm trong cache để tiết kiệm bộ nhớ
+                    if (photoFile.exists()) {
+                        photoFile.delete()
+                    }
 
                     runOnUiThread {
-                        // FIX: Check internalPath and create URI properly
-                        val finalUriString = if (internalPath != null) {
-                            Uri.fromFile(File(internalPath)).toString()
-                        } else {
-                            publicUri.toString()
-                        }
+                        if (internalPath != null) {
+                            val finalUriString = Uri.fromFile(File(internalPath)).toString()
 
-                        val resultIntent = Intent().apply {
-                            putExtra(KEY_IMAGE_URI, finalUriString)
-                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            val resultIntent = Intent().apply {
+                                putExtra(KEY_IMAGE_URI, finalUriString)
+                                // Không cần cờ Permission vì đây là file nội bộ
+                            }
+                            setResult(RESULT_OK, resultIntent)
+                            closeCamera()
+                        } else {
+                            Toast.makeText(baseContext, "Lỗi lưu ảnh vào bộ nhớ ứng dụng", Toast.LENGTH_SHORT).show()
                         }
-                        setResult(RESULT_OK, resultIntent)
-                        closeCamera()
                     }
                 }
             })
-    }
-
-    private fun getOutputDirectory(): File {
-        val mediaDir = externalMediaDirs.firstOrNull()?.let {
-            File(it, resources.getString(R.string.app_name)).apply { mkdirs() }
-        }
-        return if (mediaDir != null && mediaDir.exists()) mediaDir else cacheDir
     }
 
     private fun startBorderAnimation() {
