@@ -388,8 +388,8 @@
                                 android:background="@drawable/bg_flag_rounded"
                                 android:backgroundTint="@color/transparent">
                             <ImageView
-                                    android:layout_width="30dp"
-                                    android:layout_height="30dp"
+                                    android:layout_width="31dp"
+                                    android:layout_height="31dp"
                                     android:layout_gravity="center"
                                     android:src="@drawable/ic_info"
                                     app:tint="@color/primary_dark"/>
@@ -453,8 +453,8 @@
                                 android:background="@drawable/bg_flag_rounded"
                                 android:backgroundTint="@color/transparent">
                             <ImageView
-                                    android:layout_width="32dp"
-                                    android:layout_height="32dp"
+                                    android:layout_width="31dp"
+                                    android:layout_height="31dp"
                                     android:layout_gravity="center"
                                     android:src="@drawable/ic_user"
                                     app:tint="@color/primary_dark"/>
