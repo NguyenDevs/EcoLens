@@ -59,9 +59,11 @@ class HistoryDetailFragment : Fragment() {
     }
 
     companion object {
-        private val REGEX_BOLD = Regex("\\*\\*(.*?)\\*\\*")
-        private val REGEX_ITALIC = Regex("\\*(.*?)\\*")
+        private val REGEX_BOLD = Regex("\\*\\*(.+?)\\*\\*")
+        private val REGEX_ITALIC = Regex("(?<!\\*)\\*(?!\\*)(.+?)(?<!\\*)\\*(?!\\*)")
+        private val REGEX_CODE = Regex("`(.+?)`")
     }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -265,12 +267,22 @@ class HistoryDetailFragment : Fragment() {
         var text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT).toString()
         } else {
-            @Suppress("DEPRECATION") Html.fromHtml(html).toString()
+            @Suppress("DEPRECATION")
+            Html.fromHtml(html).toString()
         }
+
+        // **bold**
         text = text.replace(REGEX_BOLD, "$1")
+
+        // *italic*
         text = text.replace(REGEX_ITALIC, "$1")
+
+        // `code` → italic (strip marker)
+        text = text.replace(REGEX_CODE, "$1")
+
         return text.trim()
     }
+
 
     private fun bindHeader(entry: HistoryEntry, info: SpeciesInfo) {
         val localPath = entry.localImagePath

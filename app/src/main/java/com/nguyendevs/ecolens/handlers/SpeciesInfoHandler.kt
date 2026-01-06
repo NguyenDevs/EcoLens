@@ -53,10 +53,17 @@ class SpeciesInfoHandler(
 
     private val infoBinding get() = binding.homeContainer.speciesInfoCard
 
-    companion object {
+    /*companion object {
         private val REGEX_BOLD = Regex("\\*\\*(.*?)\\*\\*")
         private val REGEX_ITALIC = Regex("\\*(.*?)\\*")
     }
+     */
+    companion object {
+        private val REGEX_BOLD = Regex("\\*\\*(.+?)\\*\\*")
+        private val REGEX_ITALIC = Regex("(?<!\\*)\\*(?!\\*)(.+?)(?<!\\*)\\*(?!\\*)")
+        private val REGEX_CODE = Regex("`(.+?)`")
+    }
+
 
     /**
      * Thiết lập HTML cho TextView
@@ -903,6 +910,7 @@ class SpeciesInfoHandler(
     /**
      * Loại bỏ HTML tags
      */
+    /*
     private fun stripHtml(html: String): String {
         var text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT).toString()
@@ -913,6 +921,23 @@ class SpeciesInfoHandler(
         text = text.replace(REGEX_ITALIC, "$1")
         return text.trim()
     }
+     */
+
+    private fun stripHtml(html: String): String {
+        var text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT).toString()
+        } else {
+            @Suppress("DEPRECATION")
+            Html.fromHtml(html).toString()
+        }
+
+        text = text.replace(REGEX_BOLD, "$1")
+        text = text.replace(REGEX_ITALIC, "$1")
+        text = text.replace(REGEX_CODE, "$1")
+
+        return text.trim()
+    }
+
 
     private fun Float.dpToPx(): Float = this * context.resources.displayMetrics.density
 

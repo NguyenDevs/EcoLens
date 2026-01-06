@@ -24,9 +24,31 @@ class MarkdownProcessor {
         if (text.isNullOrBlank()) return ""
 
         var result = text
-            .replace(Regex("\\*\\*(.+?)\\*\\*")) { "<b>${it.groupValues[1]}</b>" }
-            .replace(Regex("##(.+?)##")) { "<font color='#00796B'><b>${it.groupValues[1]}</b></font>" }
-            .replace(Regex("~~(.+?)~~")) { "<i>${it.groupValues[1]}</i>" }
+            // bold **text**
+            .replace(Regex("\\*\\*(.+?)\\*\\*")) {
+                "<b>${it.groupValues[1]}</b>"
+            }
+
+            // heading ##text##
+            .replace(Regex("##(.+?)##")) {
+                "<font color='#00796B'><b>${it.groupValues[1]}</b></font>"
+            }
+
+            // italic ~~text~~
+            .replace(Regex("~~(.+?)~~")) {
+                "<i>${it.groupValues[1]}</i>"
+            }
+
+            // italic *text* (không ăn **bold**)
+            .replace(Regex("(?<!\\*)\\*(?!\\*)(.+?)(?<!\\*)\\*(?!\\*)")) {
+                "<i>${it.groupValues[1]}</i>"
+            }
+
+            // italic `text`
+            .replace(Regex("`(.+?)`")) {
+                "<i>${it.groupValues[1]}</i>"
+            }
+
             .replace("\n", "<br>")
 
         if (isConservationStatus) {
