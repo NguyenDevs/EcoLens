@@ -31,41 +31,76 @@ import java.net.URL
 @Dao
 interface HistoryDao {
 
-    // --- INSERT ---
+    // ==================== INSERT ====================
 
-    // Thêm một bản ghi lịch sử mới và trả về ID
+    /**
+     * Thêm hoặc thay thế một bản ghi lịch sử mới
+     * @return ID của bản ghi vừa thêm
+     */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entry: HistoryEntry): Long
 
-    // --- GET (READ) ---
+    // ==================== QUERY - READ ====================
 
-    // Lấy tất cả lịch sử sắp xếp từ mới nhất đến cũ nhất
+    /**
+     * Lấy ID lớn nhất hiện có trong bảng lịch sử
+     */
+    @Query("SELECT MAX(id) FROM history_table")
+    suspend fun getMaxId(): Int?
+
+    /**
+     * Lấy tất cả lịch sử sắp xếp từ mới nhất đến cũ nhất
+     */
     @Query("SELECT * FROM history_table ORDER BY timestamp DESC")
     fun getAllHistoryNewestFirst(): Flow<List<HistoryEntry>>
 
-    // Lấy tất cả lịch sử sắp xếp từ cũ nhất đến mới nhất
+    /**
+     * Lấy tất cả lịch sử sắp xếp từ cũ nhất đến mới nhất
+     */
     @Query("SELECT * FROM history_table ORDER BY timestamp ASC")
     fun getAllHistoryOldestFirst(): Flow<List<HistoryEntry>>
 
-    // Lấy một entry theo ID
+    /**
+     * Lấy một bản ghi lịch sử theo ID
+     */
     @Query("SELECT * FROM history_table WHERE id = :id LIMIT 1")
     suspend fun getHistoryById(id: Int): HistoryEntry?
 
-    // Lấy lịch sử theo khoảng thời gian, sắp xếp từ mới nhất
+    /**
+     * Lấy một bản ghi lịch sử theo timestamp
+     */
+    @Query("SELECT * FROM history_table WHERE timestamp = :timestamp LIMIT 1")
+    suspend fun getHistoryByTimestamp(timestamp: Long): HistoryEntry?
+
+    /**
+     * Lấy các bản ghi có ID lớn hơn giá trị cho trước (dùng cho reorder)
+     */
+    @Query("SELECT * FROM history_table WHERE id > :id ORDER BY id ASC")
+    suspend fun getEntriesWithIdGreaterThan(id: Int): List<HistoryEntry>
+
+    /**
+     * Lấy lịch sử trong khoảng thời gian, sắp xếp từ mới đến cũ
+     */
     @Query("SELECT * FROM history_table WHERE timestamp BETWEEN :startDate AND :endDate ORDER BY timestamp DESC")
     fun getHistoryByDateRangeNewest(startDate: Long, endDate: Long): Flow<List<HistoryEntry>>
 
-    // Lấy lịch sử theo khoảng thời gian, sắp xếp từ cũ nhất
+    /**
+     * Lấy lịch sử trong khoảng thời gian, sắp xếp từ cũ đến mới
+     */
     @Query("SELECT * FROM history_table WHERE timestamp BETWEEN :startDate AND :endDate ORDER BY timestamp ASC")
     fun getHistoryByDateRangeOldest(startDate: Long, endDate: Long): Flow<List<HistoryEntry>>
 
-    // --- UPDATE ---
+    // ==================== UPDATE ====================
 
-    // Cập nhật một bản ghi lịch sử (Generic)
+    /**
+     * Cập nhật một bản ghi lịch sử
+     */
     @Update
     suspend fun update(entry: HistoryEntry)
 
-    // Cập nhật chi tiết thông tin loài, timestamp và ngôn ngữ gốc
+    /**
+     * Cập nhật chi tiết thông tin loài sinh học
+     */
     @Query("""
         UPDATE history_table 
         SET commonName = :commonName,
@@ -106,100 +141,179 @@ interface HistoryDao {
         timestamp: Long
     )
 
-    // --- DELETE ---
+    // ==================== DELETE ====================
 
-    // Xóa tất cả lịch sử
+    /**
+     * Xóa toàn bộ lịch sử
+     */
     @Query("DELETE FROM history_table")
     suspend fun deleteAll()
 
+    /**
+     * Xóa một bản ghi lịch sử theo ID
+     */
     @Query("DELETE FROM history_table WHERE id = :id")
     suspend fun deleteById(id: Int)
-
-
 }
 
-// Firebase implementation
-class HistoryRepository(private val historyDao: HistoryDao, private val context: Context) {
-    // Sử dụng URL cụ thể do người dùng cung cấp để đảm bảo kết nối đúng region
+/**
+ * Repository quản lý dữ liệu lịch sử với tích hợp Firebase
+ * Đồng bộ dữ liệu giữa local Room Database và Firebase Realtime Database/Storage
+ */
+class HistoryRepository(
+    private val historyDao: HistoryDao,
+    private val context: Context
+) {
+
     private val database = FirebaseDatabase.getInstance(BuildConfig.FIREBASE_DATABASE_URL)
     private val storage = FirebaseStorage.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
-    // Lấy UID từ Firebase Auth
+    // ==================== FIREBASE REFERENCES ====================
+
+    /**
+     * Lấy UID của người dùng hiện tại từ Firebase Auth
+     */
     private fun getUserId(): String {
         return auth.currentUser?.uid ?: "anonymous"
     }
 
+    /**
+     * Lấy reference đến node lịch sử của user trong Firebase Database
+     */
     private fun getHistoryRef() = database.getReference("history").child(getUserId())
+
+    /**
+     * Lấy reference đến thư mục lưu trữ của user trong Firebase Storage
+     */
     private fun getStorageRef() = storage.reference.child("users").child(getUserId())
 
+    // ==================== PUBLIC READ METHODS ====================
+
     fun getAllHistoryNewestFirst() = historyDao.getAllHistoryNewestFirst()
+
     fun getAllHistoryOldestFirst() = historyDao.getAllHistoryOldestFirst()
-    fun getHistoryByDateRangeNewest(startDate: Long, endDate: Long) = historyDao.getHistoryByDateRangeNewest(startDate, endDate)
-    fun getHistoryByDateRangeOldest(startDate: Long, endDate: Long) = historyDao.getHistoryByDateRangeOldest(startDate, endDate)
-    
+
+    fun getHistoryByDateRangeNewest(startDate: Long, endDate: Long) =
+        historyDao.getHistoryByDateRangeNewest(startDate, endDate)
+
+    fun getHistoryByDateRangeOldest(startDate: Long, endDate: Long) =
+        historyDao.getHistoryByDateRangeOldest(startDate, endDate)
+
     suspend fun getHistoryById(id: Int): HistoryEntry? {
         return historyDao.getHistoryById(id)
     }
 
-    suspend fun insert(entry: HistoryEntry): Long {
-        val id = historyDao.insert(entry)
-        var entryWithId = entry.copy(id = id.toInt())
+    // ==================== INSERT METHODS ====================
 
-        if (entry.imagePath.isNotEmpty() && !entry.imagePath.startsWith("http")) {
+    /**
+     * Thêm bản ghi mới vào local database
+     * Tự động tạo ID mới dựa trên ID lớn nhất hiện có
+     */
+    suspend fun insertLocal(entry: HistoryEntry): Long = withContext(Dispatchers.IO) {
+        val maxId = historyDao.getMaxId() ?: 0
+        val newId = maxId + 1
+        val entryWithId = entry.copy(id = newId)
+        historyDao.insert(entryWithId)
+        newId.toLong()
+    }
+
+    /**
+     * Thêm bản ghi mới vào cả local và đồng bộ lên Firebase
+     */
+    suspend fun insert(entry: HistoryEntry): Long {
+        val id = insertLocal(entry)
+        val entryWithId = entry.copy(id = id.toInt())
+        CoroutineScope(Dispatchers.IO).launch {
+            syncRemote(entryWithId)
+        }
+        return id
+    }
+
+    // ==================== UPDATE METHODS ====================
+
+    /**
+     * Cập nhật bản ghi trong local database
+     */
+    suspend fun updateLocal(entry: HistoryEntry) = withContext(Dispatchers.IO) {
+        historyDao.update(entry)
+    }
+
+    /**
+     * Cập nhật bản ghi vào cả local và đồng bộ lên Firebase
+     */
+    suspend fun update(entry: HistoryEntry) {
+        updateLocal(entry)
+        CoroutineScope(Dispatchers.IO).launch {
+            syncRemote(entry)
+        }
+    }
+
+    /**
+     * Đồng bộ một bản ghi lên Firebase (cả Database và Storage)
+     * Tự động upload ảnh lên Storage nếu là đường dẫn local
+     */
+    suspend fun syncRemote(entry: HistoryEntry) = withContext(Dispatchers.IO) {
+        var entryToSync = entry
+
+        val currentEntry = historyDao.getHistoryByTimestamp(entry.timestamp)
+        if (currentEntry != null) {
+            entryToSync = currentEntry
+        } else {
+            return@withContext
+        }
+
+        if (entryToSync.imagePath.isNotEmpty() && !entryToSync.imagePath.startsWith("http")) {
             try {
-                val fileUri = Uri.parse(entry.imagePath)
-                val imageRef = getStorageRef().child("${id}.jpg")
-                
-                // Tối ưu: Nén ảnh trước khi upload để tiết kiệm băng thông và dung lượng Storage
-                val uploadData = if (entry.imagePath.startsWith("/")) {
-                    // Nếu là file local, nén nó
-                    val bitmap = BitmapFactory.decodeFile(entry.imagePath)
+                val fileUri = Uri.parse(entryToSync.imagePath)
+                val imageRef = getStorageRef().child("${entryToSync.id}_${System.currentTimeMillis()}.jpg")
+
+                val uploadData = if (entryToSync.imagePath.startsWith("/")) {
+                    val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                    BitmapFactory.decodeFile(entryToSync.imagePath, options)
+                    options.inSampleSize = calculateInSampleSize(options, 1920, 1920)
+                    options.inJustDecodeBounds = false
+                    val bitmap = BitmapFactory.decodeFile(entryToSync.imagePath, options)
                     val baos = ByteArrayOutputStream()
-                    // Nén JPEG chất lượng 80% (giảm dung lượng đáng kể mà vẫn nét)
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos)
+                    bitmap?.compress(Bitmap.CompressFormat.JPEG, 80, baos)
+                    bitmap?.recycle()
                     baos.toByteArray()
                 } else {
-                    // Nếu là Uri content (ít gặp ở đây nhưng đề phòng), upload trực tiếp hoặc xử lý tương tự
                     null
                 }
 
                 if (uploadData != null) {
                     imageRef.putBytes(uploadData).await()
                 } else {
-                    val uploadUri = if (entry.imagePath.startsWith("/")) Uri.fromFile(File(entry.imagePath)) else fileUri
+                    val uploadUri = if (entryToSync.imagePath.startsWith("/"))
+                        Uri.fromFile(File(entryToSync.imagePath)) else fileUri
                     imageRef.putFile(uploadUri).await()
                 }
-                
+
                 val downloadUrl = imageRef.downloadUrl.await().toString()
-                
-                entryWithId = entryWithId.copy(
+
+                entryToSync = entryToSync.copy(
                     imagePath = downloadUrl,
-                    localImagePath = entry.imagePath
+                    localImagePath = entryToSync.imagePath
                 )
-                historyDao.update(entryWithId)
+                historyDao.update(entryToSync)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
 
         try {
-            getHistoryRef().child(id.toString()).setValue(entryWithId).await()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return id
-    }
-
-    suspend fun update(entry: HistoryEntry) {
-        historyDao.update(entry)
-        try {
-            getHistoryRef().child(entry.id.toString()).setValue(entry).await()
+            getHistoryRef().child(entryToSync.id.toString()).setValue(entryToSync).await()
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
+    // ==================== DELETE METHODS ====================
+
+    /**
+     * Xóa toàn bộ lịch sử khỏi cả local và Firebase
+     */
     suspend fun deleteAll() {
         historyDao.deleteAll()
         try {
@@ -209,55 +323,62 @@ class HistoryRepository(private val historyDao: HistoryDao, private val context:
         }
     }
 
+    /**
+     * Xóa một bản ghi khỏi cả local, Firebase Storage và Database
+     * Tự động sắp xếp lại ID sau khi xóa
+     */
     suspend fun delete(entry: HistoryEntry) {
         val idToDelete = entry.id
         historyDao.deleteById(idToDelete)
 
-        if (entry.imagePath.startsWith("http")) {
+        CoroutineScope(Dispatchers.IO).launch {
+            if (entry.imagePath.startsWith("http")) {
+                try {
+                    storage.getReferenceFromUrl(entry.imagePath).delete().await()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+
             try {
-                storage.getReferenceFromUrl(entry.imagePath).delete().await()
+                getHistoryRef().child(idToDelete.toString()).removeValue().await()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
-        
-        try {
-            getHistoryRef().child(idToDelete.toString()).removeValue().await()
-            reorderIds(idToDelete)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+
+        reorderIds(idToDelete)
     }
 
+    /**
+     * Sắp xếp lại ID sau khi xóa để giữ thứ tự liên tục
+     * Giảm ID của các bản ghi có ID lớn hơn ID đã xóa
+     */
     private suspend fun reorderIds(deletedId: Int) {
         try {
-            val snapshot = getHistoryRef().get().await()
-            if (snapshot.exists()) {
-                val updates = hashMapOf<String, Any?>()
-                val entriesToUpdate = mutableListOf<HistoryEntry>()
+            val entriesToUpdate = historyDao.getEntriesWithIdGreaterThan(deletedId)
 
-                for (child in snapshot.children) {
-                    val entry = child.getValue(HistoryEntry::class.java)
-                    if (entry != null && entry.id > deletedId) {
-                        entriesToUpdate.add(entry)
+            val updates = hashMapOf<String, Any?>()
+
+            for (entry in entriesToUpdate) {
+                val oldId = entry.id
+                val newId = oldId - 1
+                val updatedEntry = entry.copy(id = newId)
+
+                historyDao.deleteById(oldId)
+                historyDao.insert(updatedEntry)
+
+                updates[oldId.toString()] = null
+                updates[newId.toString()] = updatedEntry
+            }
+
+            if (updates.isNotEmpty()) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        getHistoryRef().updateChildren(updates).await()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
                     }
-                }
-
-                entriesToUpdate.sortBy { it.id }
-
-                for (entry in entriesToUpdate) {
-                    val oldId = entry.id
-                    val newId = oldId - 1
-                    val updatedEntry = entry.copy(id = newId)
-                    updates[oldId.toString()] = null
-                    updates[newId.toString()] = updatedEntry
-
-                    historyDao.deleteById(oldId)
-                    historyDao.insert(updatedEntry)
-                }
-
-                if (updates.isNotEmpty()) {
-                    getHistoryRef().updateChildren(updates).await()
                 }
             }
         } catch (e: Exception) {
@@ -265,8 +386,13 @@ class HistoryRepository(private val historyDao: HistoryDao, private val context:
         }
     }
 
+    // ==================== SYNC METHODS ====================
+
+    /**
+     * Tải toàn bộ lịch sử từ Firebase về local
+     * Tự động tải ảnh về local nếu chưa có
+     */
     suspend fun fetchHistory() {
-        // Chỉ fetch nếu đã đăng nhập
         if (auth.currentUser == null) return
 
         try {
@@ -278,6 +404,7 @@ class HistoryRepository(private val historyDao: HistoryDao, private val context:
                         var finalEntry = remoteEntry
                         val localPath = remoteEntry.localImagePath
                         var hasLocalImage = false
+
                         if (localPath.isNotEmpty()) {
                             if (localPath.startsWith("/")) {
                                 hasLocalImage = File(localPath).exists()
@@ -301,9 +428,11 @@ class HistoryRepository(private val historyDao: HistoryDao, private val context:
                                     val updatedEntry = finalEntry.copy(localImagePath = downloadedPath)
                                     historyDao.update(updatedEntry)
                                     try {
-                                        // Chỉ cập nhật lên Firebase nếu đường dẫn khác nhau để tránh nháy Realtime DB
                                         if (remoteEntry.localImagePath != downloadedPath) {
-                                            getHistoryRef().child(remoteEntry.id.toString()).child("localImagePath").setValue(downloadedPath)
+                                            getHistoryRef()
+                                                .child(remoteEntry.id.toString())
+                                                .child("localImagePath")
+                                                .setValue(downloadedPath)
                                         }
                                     } catch (e: Exception) {
                                         e.printStackTrace()
@@ -319,6 +448,34 @@ class HistoryRepository(private val historyDao: HistoryDao, private val context:
         }
     }
 
+    // ==================== UTILITY METHODS ====================
+
+    /**
+     * Tính toán inSampleSize để giảm kích thước ảnh khi decode
+     */
+    private fun calculateInSampleSize(
+        options: BitmapFactory.Options,
+        reqWidth: Int,
+        reqHeight: Int
+    ): Int {
+        val (height: Int, width: Int) = options.run { outHeight to outWidth }
+        var inSampleSize = 1
+
+        if (height > reqHeight || width > reqWidth) {
+            val halfHeight: Int = height / 2
+            val halfWidth: Int = width / 2
+
+            while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
+                inSampleSize *= 2
+            }
+        }
+
+        return inSampleSize
+    }
+
+    /**
+     * Tải ảnh từ URL về bộ nhớ local với nén JPEG 80%
+     */
     private suspend fun downloadImageToLocal(url: String, id: Int): String? {
         return withContext(Dispatchers.IO) {
             try {
@@ -327,19 +484,14 @@ class HistoryRepository(private val historyDao: HistoryDao, private val context:
                     .load(url)
                     .submit()
                     .get()
-                
-                // Tối ưu: Lưu ảnh đã nén vào bộ nhớ trong
-                // Lưu ý: Hàm saveBitmapToInternalStorage trong ImageUtils nên hỗ trợ nén.
-                // Nếu ImageUtils chưa nén, ta có thể tự xử lý ở đây hoặc giả định ImageUtils tốt.
-                // Ở đây tôi sẽ dùng cách thủ công để đảm bảo nén 80%
+
                 val filename = "species_${id}_${System.currentTimeMillis()}.jpg"
                 val file = File(context.filesDir, filename)
                 FileOutputStream(file).use { out ->
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out)
                 }
-                val internalPath = file.absolutePath
-                
-                internalPath
+
+                file.absolutePath
             } catch (e: Exception) {
                 e.printStackTrace()
                 null

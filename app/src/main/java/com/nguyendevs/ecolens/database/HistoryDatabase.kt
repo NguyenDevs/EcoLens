@@ -9,20 +9,36 @@ import com.nguyendevs.ecolens.model.ChatMessage
 import com.nguyendevs.ecolens.model.ChatSession
 import com.nguyendevs.ecolens.model.HistoryEntry
 
-@Database(entities = [HistoryEntry::class, ChatSession::class, ChatMessage::class], version = 4, exportSchema = false)
+/**
+ * Room Database chính của ứng dụng EcoLens
+ * Quản lý các bảng: HistoryEntry, ChatSession, ChatMessage
+ */
+@Database(
+    entities = [HistoryEntry::class, ChatSession::class, ChatMessage::class],
+    version = 4,
+    exportSchema = false
+)
 @TypeConverters(HistoryTypeConverters::class)
 abstract class HistoryDatabase : RoomDatabase() {
 
-    // Truy cập DAO cho lịch sử
+    /**
+     * Truy cập DAO để thao tác với bảng lịch sử nhận diện loài
+     */
     abstract fun historyDao(): HistoryDao
 
-    // Truy cập DAO cho chat
+    /**
+     * Truy cập DAO để thao tác với các bảng chat
+     */
     abstract fun chatDao(): ChatDao
 
     companion object {
         @Volatile
         private var INSTANCE: HistoryDatabase? = null
 
+        /**
+         * Lấy instance duy nhất của database (Singleton pattern)
+         * Sử dụng synchronized để đảm bảo thread-safe
+         */
         fun getDatabase(context: Context): HistoryDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(

@@ -2,7 +2,6 @@ package com.nguyendevs.ecolens.handlers
 
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.view.View
@@ -31,6 +30,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/**
+ * Handler quản lý các settings của ứng dụng
+ * Bao gồm: ngôn ngữ, dark mode, logout, social links
+ * Hỗ trợ smooth transition khi chuyển dark mode
+ */
 class SettingsHandler(
     private val activity: AppCompatActivity,
     private val languageManager: LanguageManager,
@@ -47,7 +51,15 @@ class SettingsHandler(
     init {
         updateLanguageDisplay()
         setupDarkModeSwitch()
+        setupClickListeners()
+    }
 
+    // ==================== SETUP ====================
+
+    /**
+     * Cấu hình tất cả click listeners cho settings options
+     */
+    private fun setupClickListeners() {
         settingsView.findViewById<View>(R.id.languageOption).setOnClickListener {
             openFragment(LanguageSelectionFragment(), "language_selection")
         }
@@ -62,76 +74,30 @@ class SettingsHandler(
             showLogoutConfirmDialog()
         }
 
-
         settingsView.findViewById<View>(R.id.aboutOption).setOnClickListener {
             openFragment(AboutFragment(), "about_screen")
         }
 
-        settingsView.findViewById<View>(R.id.btnFeedback).setOnClickListener { sendEmail() }
+        settingsView.findViewById<View>(R.id.btnFeedback).setOnClickListener {
+            sendEmail()
+        }
+
         settingsView.findViewById<View>(R.id.btnFacebook).setOnClickListener {
             openUrl("https://www.facebook.com/NguyenDevs")
         }
+
         settingsView.findViewById<View>(R.id.btnInstagram).setOnClickListener {
             openUrl("https://www.instagram.com/nguyendevs/")
         }
+
         settingsView.findViewById<View>(R.id.btnTiktok).setOnClickListener {
             openUrl("https://www.tiktok.com/@nguyendevs/")
         }
     }
 
-
-    private fun showLogoutConfirmDialog() {
-        androidx.appcompat.app.AlertDialog.Builder(activity)
-            .setTitle(R.string.dialog_logout_title)
-            .setMessage(R.string.dialog_logout_message)
-            .setPositiveButton(R.string.action_logout) { _, _ ->
-                logout()
-            }
-            .setNegativeButton(R.string.action_cancel, null)
-            .show()
-    }
-
-
-    private fun logout() {
-        activity.lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
-                val db = HistoryDatabase.getDatabase(activity)
-                db.historyDao().deleteAll()
-                db.chatDao().deleteMessagesBySession(-1)
-                db.clearAllTables()
-            }
-
-            FirebaseAuth.getInstance().signOut()
-
-            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(activity.getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build()
-            val googleSignInClient = GoogleSignIn.getClient(activity, gso)
-            googleSignInClient.signOut()
-            
-            val sharedPreferences = activity.getSharedPreferences("EcoLensPrefs", Context.MODE_PRIVATE)
-            sharedPreferences.edit()
-                .remove("username")
-                .remove("last_nav_item")
-                .apply()
-
-            val appSettings = activity.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
-            appSettings.edit().putBoolean("dark_mode", false).apply()
-
-            appSettings.edit().remove("remember_me").apply()
-
-            withContext(Dispatchers.Main) {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-            }
-            
-            val intent = Intent(activity, AuthActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            activity.startActivity(intent)
-            activity.finish()
-        }
-    }
-
+    /**
+     * Cấu hình dark mode switch với state từ SharedPreferences
+     */
     private fun setupDarkModeSwitch() {
         val sharedPref = activity.getSharedPreferences("app_settings", AppCompatActivity.MODE_PRIVATE)
         val isDarkMode = sharedPref.getBoolean("dark_mode", false)
@@ -163,6 +129,26 @@ class SettingsHandler(
         }
     }
 
+    // ==================== LANGUAGE ====================
+
+    /**
+     * Cập nhật hiển thị ngôn ngữ hiện tại
+     */
+    fun updateLanguageDisplay() {
+        val currentLang = languageManager.getLanguage()
+        tvCurrentLanguage.text = when (currentLang) {
+            LanguageManager.LANG_EN -> activity.getString(R.string.lang_english)
+            LanguageManager.LANG_VI -> activity.getString(R.string.lang_vietnamese)
+            else -> activity.getString(R.string.lang_english)
+        }
+    }
+
+    // ==================== DARK MODE ====================
+
+    /**
+     * Áp dụng dark mode với smooth transition
+     * Chụp bitmap của view hiện tại để tạo transition effect
+     */
     private fun applyThemeSmoothly(isDarkMode: Boolean) {
         saveDarkModePreference(isDarkMode)
         updateDarkModeIcon(isDarkMode, true)
@@ -192,6 +178,9 @@ class SettingsHandler(
         AppCompatDelegate.setDefaultNightMode(nightMode)
     }
 
+    /**
+     * Tạo bitmap từ view để dùng cho transition effect
+     */
     private fun createBitmapFromView(view: View): Bitmap? {
         return try {
             val scale = 1.0f
@@ -201,12 +190,7 @@ class SettingsHandler(
 
             if (width <= 0 || height <= 0) return null
 
-            val bitmap = Bitmap.createBitmap(
-                width,
-                height,
-                Bitmap.Config.ARGB_8888
-            )
-
+            val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
             canvas.scale(scale, scale)
             view.draw(canvas)
@@ -220,11 +204,17 @@ class SettingsHandler(
         }
     }
 
+    /**
+     * Lưu dark mode preference vào SharedPreferences
+     */
     private fun saveDarkModePreference(isDarkMode: Boolean) {
         val sharedPref = activity.getSharedPreferences("app_settings", AppCompatActivity.MODE_PRIVATE)
         sharedPref.edit().putBoolean("dark_mode", isDarkMode).apply()
     }
 
+    /**
+     * Cập nhật icon dark mode (sun/moon) với animation
+     */
     private fun updateDarkModeIcon(isDarkMode: Boolean, animate: Boolean) {
         val targetIcon = if (isDarkMode) R.drawable.ic_sun else R.drawable.ic_moon
 
@@ -245,15 +235,70 @@ class SettingsHandler(
         }
     }
 
-    fun updateLanguageDisplay() {
-        val currentLang = languageManager.getLanguage()
-        tvCurrentLanguage.text = when (currentLang) {
-            LanguageManager.LANG_EN -> activity.getString(R.string.lang_english)
-            LanguageManager.LANG_VI -> activity.getString(R.string.lang_vietnamese)
-            else -> activity.getString(R.string.lang_english)
+    // ==================== LOGOUT ====================
+
+    /**
+     * Hiển thị dialog xác nhận logout
+     */
+    private fun showLogoutConfirmDialog() {
+        androidx.appcompat.app.AlertDialog.Builder(activity)
+            .setTitle(R.string.dialog_logout_title)
+            .setMessage(R.string.dialog_logout_message)
+            .setPositiveButton(R.string.action_logout) { _, _ ->
+                logout()
+            }
+            .setNegativeButton(R.string.action_cancel, null)
+            .show()
+    }
+
+    /**
+     * Thực hiện logout
+     * Xóa toàn bộ dữ liệu local, Firebase, Google Sign-In và SharedPreferences
+     */
+    private fun logout() {
+        activity.lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                val db = HistoryDatabase.getDatabase(activity)
+                db.historyDao().deleteAll()
+                db.chatDao().deleteMessagesBySession(-1)
+                db.clearAllTables()
+            }
+
+            FirebaseAuth.getInstance().signOut()
+
+            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(activity.getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build()
+            val googleSignInClient = GoogleSignIn.getClient(activity, gso)
+            googleSignInClient.signOut()
+
+            val sharedPreferences = activity.getSharedPreferences("EcoLensPrefs", Context.MODE_PRIVATE)
+            sharedPreferences.edit()
+                .remove("username")
+                .remove("last_nav_item")
+                .apply()
+
+            val appSettings = activity.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+            appSettings.edit().putBoolean("dark_mode", false).apply()
+            appSettings.edit().remove("remember_me").apply()
+
+            withContext(Dispatchers.Main) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            }
+
+            val intent = Intent(activity, AuthActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            activity.startActivity(intent)
+            activity.finish()
         }
     }
 
+    // ==================== NAVIGATION & EXTERNAL LINKS ====================
+
+    /**
+     * Mở fragment mới
+     */
     private fun openFragment(fragment: Fragment, tag: String) {
         val fragmentContainer = activity.findViewById<FrameLayout>(R.id.fragmentContainer)
         fragmentContainer.visibility = View.VISIBLE
@@ -270,6 +315,9 @@ class SettingsHandler(
             .commit()
     }
 
+    /**
+     * Mở URL trong browser
+     */
     private fun openUrl(url: String) {
         runCatching {
             val intent = Intent(Intent.ACTION_VIEW, url.toUri())
@@ -283,6 +331,9 @@ class SettingsHandler(
         }
     }
 
+    /**
+     * Mở email app để gửi feedback
+     */
     private fun sendEmail() {
         runCatching {
             val intent = Intent(Intent.ACTION_SENDTO).apply {

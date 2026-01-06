@@ -13,6 +13,10 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+/**
+ * Adapter hiển thị danh sách các phiên chat
+ * Tự động nhóm theo ngày với date header và hiệu ứng loading khi click
+ */
 class ChatSessionAdapter(
     private var sessions: List<ChatSession>,
     private val onClick: (ChatSession) -> Unit
@@ -23,6 +27,11 @@ class ChatSessionAdapter(
     private val loadingInterpolator = LinearInterpolator()
     private lateinit var markwon: Markwon
 
+    // ==================== ADAPTER METHODS ====================
+
+    /**
+     * Cập nhật danh sách phiên chat
+     */
     fun updateList(newList: List<ChatSession>) {
         sessions = newList
         notifyDataSetChanged()
@@ -32,18 +41,24 @@ class ChatSessionAdapter(
         if (!::markwon.isInitialized) {
             markwon = Markwon.create(parent.context)
         }
-        val binding = ItemChatEntryModernBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding = ItemChatEntryModernBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
         return ChatSessionViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ChatSessionViewHolder, position: Int) {
         val session = sessions[position]
-        val currentDateTime = Instant.ofEpochMilli(session.timestamp).atZone(ZoneId.systemDefault())
+        val currentDateTime = Instant.ofEpochMilli(session.timestamp)
+            .atZone(ZoneId.systemDefault())
 
         val isFirstOfDay = if (position == 0) {
             true
         } else {
-            val prevDateTime = Instant.ofEpochMilli(sessions[position - 1].timestamp).atZone(ZoneId.systemDefault())
+            val prevDateTime = Instant.ofEpochMilli(sessions[position - 1].timestamp)
+                .atZone(ZoneId.systemDefault())
             currentDateTime.toLocalDate() != prevDateTime.toLocalDate()
         }
 
@@ -52,14 +67,22 @@ class ChatSessionAdapter(
 
     override fun getItemCount() = sessions.size
 
-    inner class ChatSessionViewHolder(private val binding: ItemChatEntryModernBinding) : RecyclerView.ViewHolder(binding.root) {
-        
+    // ==================== VIEW HOLDER ====================
+
+    inner class ChatSessionViewHolder(
+        private val binding: ItemChatEntryModernBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
+
+        /**
+         * Bind dữ liệu phiên chat vào view
+         * @param showHeader Hiển thị date header nếu là phiên đầu tiên trong ngày
+         */
         fun bind(session: ChatSession, showHeader: Boolean, dateTime: java.time.ZonedDateTime) {
             binding.tvDateHeader.visibility = if (showHeader) View.VISIBLE else View.GONE
             if (showHeader) {
                 binding.tvDateHeader.text = dateFormatter.format(dateTime)
             }
-            
+
             binding.ivLoadingRing.visibility = View.INVISIBLE
             binding.ivLoadingRing.animate().cancel()
             binding.tvTitle.text = session.title
@@ -72,6 +95,10 @@ class ChatSessionAdapter(
             }
         }
 
+        /**
+         * Hiệu ứng loading ring khi click vào phiên chat
+         * Animation xoay 360 độ rồi fade out
+         */
         private fun animateLoading() {
             binding.ivLoadingRing.apply {
                 visibility = View.VISIBLE

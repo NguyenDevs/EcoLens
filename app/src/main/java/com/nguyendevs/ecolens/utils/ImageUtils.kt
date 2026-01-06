@@ -15,8 +15,20 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.net.URL
 
+/**
+ * Tiện ích xử lý ảnh
+ * Bao gồm chuyển đổi, nén, xoay, và lưu trữ ảnh
+ */
 object ImageUtils {
 
+    /**
+     * Chuyển đổi URI thành File với kích thước tối đa
+     *
+     * @param context Context của ứng dụng
+     * @param uri URI của ảnh
+     * @param maxDimension Kích thước tối đa cho chiều rộng/cao
+     * @return File ảnh đã được xử lý
+     */
     @Throws(Exception::class)
     fun uriToFile(context: Context, uri: Uri, maxDimension: Int): File {
         val cacheDir = context.cacheDir
@@ -27,12 +39,14 @@ object ImageUtils {
             inputStream = context.contentResolver.openInputStream(uri)
                 ?: throw FileNotFoundException("Cannot open input stream for URI: $uri")
 
+            // Đọc kích thước ảnh mà không load toàn bộ vào bộ nhớ
             val options = BitmapFactory.Options().apply {
                 inJustDecodeBounds = true
             }
             BitmapFactory.decodeStream(inputStream, null, options)
             inputStream.close()
 
+            // Tính toán inSampleSize để giảm kích thước ảnh
             var inSampleSize = 1
             if (options.outHeight > maxDimension || options.outWidth > maxDimension) {
                 val halfHeight: Int = options.outHeight / 2
@@ -42,6 +56,7 @@ object ImageUtils {
                 }
             }
 
+            // Decode ảnh với kích thước đã giảm
             inputStream = context.contentResolver.openInputStream(uri)
             val scaledOptions = BitmapFactory.Options().apply {
                 inJustDecodeBounds = false
@@ -71,12 +86,18 @@ object ImageUtils {
         return file
     }
 
+    /**
+     * Xoay ảnh nếu cần dựa trên thông tin EXIF
+     */
     private fun rotateImageIfRequired(context: Context, bitmap: Bitmap, uri: Uri): Bitmap {
         var inputStream: InputStream? = null
         try {
             inputStream = context.contentResolver.openInputStream(uri) ?: return bitmap
             val exif = ExifInterface(inputStream)
-            val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+            val orientation = exif.getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL
+            )
 
             return when (orientation) {
                 ExifInterface.ORIENTATION_ROTATE_90 -> rotateBitmap(bitmap, 90f)
@@ -91,12 +112,20 @@ object ImageUtils {
         }
     }
 
+    /**
+     * Xoay bitmap theo góc độ
+     */
     private fun rotateBitmap(bitmap: Bitmap, degree: Float): Bitmap {
         val matrix = Matrix()
         matrix.postRotate(degree)
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
 
+    /**
+     * Lưu Bitmap vào bộ nhớ trong
+     *
+     * @return Đường dẫn tuyệt đối của file đã lưu, hoặc null nếu thất bại
+     */
     fun saveBitmapToInternalStorage(context: Context, bitmap: Bitmap): String? {
         return try {
             val filename = "species_${System.currentTimeMillis()}.jpg"
@@ -111,6 +140,11 @@ object ImageUtils {
         }
     }
 
+    /**
+     * Sao chép file vào bộ nhớ trong
+     *
+     * @return Đường dẫn tuyệt đối của file đã lưu, hoặc null nếu thất bại
+     */
     fun saveFileToInternalStorage(context: Context, sourceFile: File): String? {
         return try {
             val filename = "species_${System.currentTimeMillis()}.jpg"
@@ -123,6 +157,11 @@ object ImageUtils {
         }
     }
 
+    /**
+     * Tải ảnh từ URL và lưu vào bộ nhớ trong
+     *
+     * @return Đường dẫn tuyệt đối của file đã lưu, hoặc null nếu thất bại
+     */
     fun downloadImageToInternalStorage(context: Context, imageUrl: String): String? {
         return try {
             val url = URL(imageUrl)
@@ -134,6 +173,11 @@ object ImageUtils {
         }
     }
 
+    /**
+     * Lưu ảnh vào bộ nhớ ngoài (thư mục Pictures/EcoLens)
+     *
+     * @return URI string của ảnh đã lưu, hoặc null nếu thất bại
+     */
     fun saveImageToPublicStorage(context: Context, sourceFile: File): String? {
         val filename = "species_${System.currentTimeMillis()}.jpg"
         val contentValues = ContentValues().apply {

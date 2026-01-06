@@ -15,6 +15,10 @@ import com.nguyendevs.ecolens.databinding.FragmentLanguageSelectionModernBinding
 import com.nguyendevs.ecolens.managers.LanguageManager
 import com.nguyendevs.ecolens.model.Language
 
+/**
+ * Fragment cho phép người dùng chọn ngôn ngữ ứng dụng
+ * Khi chọn ngôn ngữ mới, app sẽ restart để áp dụng thay đổi
+ */
 class LanguageSelectionFragment : Fragment() {
 
     private var _binding: FragmentLanguageSelectionModernBinding? = null
@@ -22,6 +26,8 @@ class LanguageSelectionFragment : Fragment() {
 
     private lateinit var languageAdapter: LanguageAdapter
     private lateinit var languageManager: LanguageManager
+
+    // ==================== LIFECYCLE ====================
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -34,12 +40,22 @@ class LanguageSelectionFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         languageManager = LanguageManager(requireContext())
         setupLanguageList()
         setupListeners()
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    // ==================== UI SETUP ====================
+
+    /**
+     * Cấu hình danh sách ngôn ngữ với adapter
+     * Highlight ngôn ngữ hiện tại được chọn
+     */
     private fun setupLanguageList() {
         val currentLang = languageManager.getLanguage()
 
@@ -69,12 +85,21 @@ class LanguageSelectionFragment : Fragment() {
         }
     }
 
+    /**
+     * Cấu hình click listeners
+     */
     private fun setupListeners() {
         binding.btnBack.setOnClickListener {
             closeFragment()
         }
     }
 
+    // ==================== LANGUAGE SELECTION ====================
+
+    /**
+     * Xử lý khi người dùng chọn ngôn ngữ mới
+     * Restart app để áp dụng thay đổi và quay về Settings
+     */
     private fun onLanguageSelected(language: Language) {
         if (language.code != languageManager.getLanguage()) {
             languageManager.setLanguage(language.code)
@@ -88,12 +113,12 @@ class LanguageSelectionFragment : Fragment() {
         }
     }
 
+    // ==================== NAVIGATION ====================
+
+    /**
+     * Đóng fragment và quay lại màn hình trước
+     */
     private fun closeFragment() {
         parentFragmentManager.popBackStack()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

@@ -17,6 +17,10 @@ import com.google.android.material.card.MaterialCardView
 import com.google.android.material.textfield.TextInputLayout
 import com.nguyendevs.ecolens.R
 
+/**
+ * Handler quản lý search bar có thể expand/collapse
+ * Hỗ trợ Google search với animation mượt mà
+ */
 class SearchBarHandler(
     private val context: Context,
     private val searchBarContainer: MaterialCardView,
@@ -31,6 +35,15 @@ class SearchBarHandler(
     private var isSearchBarExpanded = false
 
     init {
+        setupClickListeners()
+    }
+
+    // ==================== SETUP ====================
+
+    /**
+     * Cấu hình click listeners cho search button và IME action
+     */
+    private fun setupClickListeners() {
         btnSearchAction.setOnClickListener {
             btnSearchAction.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
             if (!isSearchBarExpanded) {
@@ -50,6 +63,12 @@ class SearchBarHandler(
         }
     }
 
+    // ==================== PUBLIC METHODS ====================
+
+    /**
+     * Expand search bar với text tùy chọn
+     * Tự động focus và hiển thị bàn phím
+     */
     fun expandSearchBar(text: String = "") {
         if (!isSearchBarExpanded) {
             animateWidth(
@@ -76,6 +95,10 @@ class SearchBarHandler(
         }
     }
 
+    /**
+     * Collapse search bar
+     * Tự động clear text và ẩn bàn phím
+     */
     fun collapseSearchBar() {
         if (isSearchBarExpanded) {
             animateWidth(
@@ -91,23 +114,47 @@ class SearchBarHandler(
         }
     }
 
+    /**
+     * Kiểm tra xem search bar có đang expanded không
+     */
     fun isExpanded() = isSearchBarExpanded
 
+    // ==================== PRIVATE METHODS ====================
+
+    /**
+     * Thực hiện Google search với query từ EditText
+     * Collapse search bar nếu query rỗng
+     */
     private fun performGoogleSearch() {
         val query = etSearchQuery.text.toString().trim()
         if (query.isNotEmpty()) {
             runCatching {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/search?q=$query"))
+                val intent = Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://www.google.com/search?q=$query")
+                )
                 context.startActivity(intent)
             }.onFailure {
-                Toast.makeText(context, context.getString(R.string.error_browser), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.error_browser),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         } else {
             collapseSearchBar()
         }
     }
 
-    private fun animateWidth(from: Int, to: Int, onStart: (() -> Unit)? = null, onEnd: (() -> Unit)? = null) {
+    /**
+     * Animate width của search bar container
+     */
+    private fun animateWidth(
+        from: Int,
+        to: Int,
+        onStart: (() -> Unit)? = null,
+        onEnd: (() -> Unit)? = null
+    ) {
         ValueAnimator.ofInt(from, to).apply {
             duration = 320
             addUpdateListener { animation ->
@@ -127,11 +174,17 @@ class SearchBarHandler(
         }
     }
 
+    /**
+     * Hiển thị soft keyboard
+     */
     private fun showKeyboard() {
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.showSoftInput(etSearchQuery, InputMethodManager.SHOW_IMPLICIT)
     }
 
+    /**
+     * Ẩn soft keyboard
+     */
     private fun hideKeyboard() {
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(etSearchQuery.windowToken, 0)

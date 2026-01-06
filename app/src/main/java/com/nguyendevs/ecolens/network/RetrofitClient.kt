@@ -11,16 +11,26 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
+/**
+ * Client Retrofit cho các API requests
+ * Quản lý cấu hình HTTP client và xử lý các lỗi xác thực
+ */
 object RetrofitClient {
 
     private const val WORKER_BASE_URL = BuildConfig.WORKER_BASE_URL
 
     private var appContext: Context? = null
 
+    /**
+     * Khởi tạo context cho việc hiển thị thông báo
+     */
     fun initialize(context: Context) {
         appContext = context.applicationContext
     }
 
+    /**
+     * Logging interceptor cho debug
+     */
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = if (BuildConfig.DEBUG) {
             HttpLoggingInterceptor.Level.BODY
@@ -29,14 +39,20 @@ object RetrofitClient {
         }
     }
 
-    // HMAC Interceptor - ĐẶT TRƯỚC authErrorInterceptor
+    /**
+     * HMAC interceptor để xác thực requests
+     * Phải đặt trước authErrorInterceptor
+     */
     private val hmacInterceptor = HMACInterceptor()
 
+    /**
+     * Interceptor xử lý các lỗi xác thực và rate limit
+     */
     private val authErrorInterceptor = Interceptor { chain ->
         val request = chain.request()
         val response = chain.proceed(request)
 
-        // Xử lý 401 Unauthorized từ HMAC
+        // Xử lý lỗi 401 Unauthorized từ HMAC
         if (response.code == 401) {
             appContext?.let { context ->
                 android.os.Handler(android.os.Looper.getMainLooper()).post {
@@ -49,7 +65,7 @@ object RetrofitClient {
             }
         }
 
-        // Xử lý 429 Rate Limit
+        // Xử lý lỗi 429 Rate Limit
         if (response.code == 429) {
             val resetTime = response.header("X-RateLimit-Reset") ?: "unknown"
             appContext?.let { context ->
@@ -63,7 +79,7 @@ object RetrofitClient {
             }
         }
 
-        // ==================== iNaturalist Error ====================
+        // Xử lý lỗi iNaturalist Token hết hạn
         if (response.code == 401 && request.url.toString().contains("inaturalist")) {
             appContext?.let { context ->
                 android.os.Handler(android.os.Looper.getMainLooper()).post {
@@ -75,11 +91,12 @@ object RetrofitClient {
                 }
             }
         }
-
-        // ==================== Gemini Retry Info ====================
+        // Xử lý thông tin retry từ Gemini API
         else if (request.url.toString().contains("gemini")) {
             val allFailed = response.header("X-Gemini-All-Failed") == "true"
-            val failedKeys = response.header("X-Gemini-Failed-Keys")?.split(",")?.filter { it.isNotEmpty() } ?: emptyList()
+            val failedKeys = response.header("X-Gemini-Failed-Keys")
+                ?.split(",")
+                ?.filter { it.isNotEmpty() } ?: emptyList()
 
             if (allFailed) {
                 appContext?.let { context ->
@@ -97,6 +114,9 @@ object RetrofitClient {
         response
     }
 
+    /**
+     * OkHttp client với các interceptor và timeout cấu hình
+     */
     private val okHttpClient = OkHttpClient.Builder()
         .addInterceptor(hmacInterceptor)
         .addInterceptor(loggingInterceptor)
@@ -107,11 +127,17 @@ object RetrofitClient {
         .callTimeout(0, TimeUnit.SECONDS)
         .build()
 
+    /**
+     * Retrofit instance cho iNaturalist API
+     */
     private val iNaturalistRetrofit = Retrofit.Builder()
         .baseUrl(WORKER_BASE_URL)
         .client(okHttpClient)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
+    /**
+     * API service cho iNaturalist
+     */
     val iNaturalistApi: INaturalistApi = iNaturalistRetrofit.create(INaturalistApi::class.java)
 }

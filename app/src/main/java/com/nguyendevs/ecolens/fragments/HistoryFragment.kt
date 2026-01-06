@@ -29,6 +29,11 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.TimeZone
 
+/**
+ * Fragment hiển thị lịch sử nhận diện loài
+ * Hỗ trợ sort (mới nhất/cũ nhất) và filter theo khoảng thời gian
+ * Có expandable options panel với animation mượt mà
+ */
 class HistoryFragment : Fragment() {
 
     private val viewModel: EcoLensViewModel by activityViewModels()
@@ -43,6 +48,8 @@ class HistoryFragment : Fragment() {
     private var filterEndDate: Long? = null
     private var filterStartDate: Long? = null
     private var isOptionsExpanded = false
+
+    // ==================== LIFECYCLE ====================
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -61,6 +68,16 @@ class HistoryFragment : Fragment() {
         updateSortUI()
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    // ==================== UI SETUP ====================
+
+    /**
+     * Cấu hình adapter với Markwon để render HTML và click listeners
+     */
     private fun setupAdapter() {
         val markwon = Markwon.builder(requireContext())
             .usePlugin(HtmlPlugin.create())
@@ -78,6 +95,9 @@ class HistoryFragment : Fragment() {
         binding.rvHistory.adapter = adapter
     }
 
+    /**
+     * Cấu hình click listeners cho các buttons
+     */
     private fun setupClickListeners() {
         binding.optionsHeader.setOnClickListener {
             binding.optionsHeader.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
@@ -88,6 +108,12 @@ class HistoryFragment : Fragment() {
         binding.btnClearFilter.setOnClickListener { clearDateFilter() }
     }
 
+    // ==================== VIEWMODEL OBSERVERS ====================
+
+    /**
+     * Observe lịch sử từ ViewModel với sort và filter options
+     * Tự động toggle giữa RecyclerView và empty state
+     */
     private fun observeHistory() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.getHistoryBySortOption(currentSortOption, filterStartDate, filterEndDate)
@@ -104,21 +130,11 @@ class HistoryFragment : Fragment() {
         }
     }
 
-    private fun navigateToDetail(entry: HistoryEntry) {
-        val jsonEntry = Gson().toJson(entry)
-        val fragment = HistoryDetailFragment().apply {
-            arguments = Bundle().apply {
-                putString("HISTORY_ENTRY_JSON", jsonEntry)
-            }
-        }
+    // ==================== SORT OPERATIONS ====================
 
-        parentFragmentManager.beginTransaction()
-            .setCustomAnimations(R.anim.slide_in_bottom, R.anim.hold, R.anim.hold, R.anim.slide_out_bottom)
-            .add(R.id.fragmentContainer, fragment)
-            .addToBackStack("Detail")
-            .commit()
-    }
-
+    /**
+     * Toggle giữa sort mới nhất và cũ nhất
+     */
     private fun toggleSortOption() {
         currentSortOption = if (currentSortOption == HistorySortOption.NEWEST_FIRST) {
             HistorySortOption.OLDEST_FIRST
@@ -129,6 +145,9 @@ class HistoryFragment : Fragment() {
         observeHistory()
     }
 
+    /**
+     * Cập nhật UI hiển thị sort option hiện tại
+     */
     private fun updateSortUI() {
         binding.tvCurrentSort.text = if (currentSortOption == HistorySortOption.NEWEST_FIRST)
             getString(R.string.sort_newest_first)
@@ -136,10 +155,75 @@ class HistoryFragment : Fragment() {
             getString(R.string.sort_oldest_first)
     }
 
+    // ==================== FILTER OPERATIONS ====================
+
+    /**
+     * Hiển thị Material Date Picker để chọn khoảng thời gian
+     */
+    private fun showDateRangePickerDialog() {
+        val builder = MaterialDatePicker.Builder.dateRangePicker()
+            .setTitleText(R.string.select_date)
+            .setTheme(R.style.CustomMaterialDatePickerTheme)
+            .setSelection(androidx.core.util.Pair(
+                filterStartDate ?: MaterialDatePicker.todayInUtcMilliseconds(),
+                filterEndDate ?: MaterialDatePicker.todayInUtcMilliseconds()
+            ))
+        val picker = builder.build()
+
+        picker.show(parentFragmentManager, "DATE_RANGE_PICKER")
+
+        picker.addOnPositiveButtonClickListener { selection ->
+            applyDateFilter(selection)
+        }
+    }
+
+    /**
+     * Áp dụng filter theo khoảng thời gian được chọn
+     */
+    private fun applyDateFilter(selection: androidx.core.util.Pair<Long, Long>) {
+        val timeZone = TimeZone.getDefault()
+        val offset = timeZone.getOffset(selection.first)
+
+        filterStartDate = selection.first - offset
+        filterEndDate = (selection.second - offset) + 86400000L - 1L
+
+        val startDate = Instant.ofEpochMilli(filterStartDate!!).atZone(ZoneId.systemDefault())
+        val endDate = Instant.ofEpochMilli(filterEndDate!!).atZone(ZoneId.systemDefault())
+
+        binding.tvFilterSubtitle.text = "${dateFormatter.format(startDate)} - ${dateFormatter.format(endDate)}"
+        binding.tvFilterSubtitle.setTextColor(
+            ContextCompat.getColor(requireContext(), R.color.green_primary)
+        )
+        binding.btnClearFilter.visibility = View.VISIBLE
+        observeHistory()
+    }
+
+    /**
+     * Xóa filter thời gian và hiển thị lại toàn bộ lịch sử
+     */
+    private fun clearDateFilter() {
+        filterStartDate = null
+        filterEndDate = null
+        binding.tvFilterSubtitle.text = getString(R.string.select_date)
+        binding.tvFilterSubtitle.setTextColor(
+            ContextCompat.getColor(requireContext(), R.color.text_secondary)
+        )
+        binding.btnClearFilter.visibility = View.GONE
+        observeHistory()
+    }
+
+    // ==================== OPTIONS PANEL ANIMATION ====================
+
+    /**
+     * Toggle expand/collapse options panel
+     */
     private fun toggleOptionsExpansion() {
         if (isOptionsExpanded) collapseOptions() else expandOptions()
     }
 
+    /**
+     * Mở rộng options panel với animation mượt
+     */
     private fun expandOptions() {
         isOptionsExpanded = true
         binding.ivExpandIcon.animate().rotation(180f).setDuration(300).start()
@@ -150,12 +234,20 @@ class HistoryFragment : Fragment() {
         animateHeight(0, targetHeight)
     }
 
+    /**
+     * Thu gọn options panel với animation mượt
+     */
     private fun collapseOptions() {
         isOptionsExpanded = false
         binding.ivExpandIcon.animate().rotation(0f).setDuration(300).start()
-        animateHeight(binding.optionsContainer.height, 0) { binding.optionsContainer.visibility = View.GONE }
+        animateHeight(binding.optionsContainer.height, 0) {
+            binding.optionsContainer.visibility = View.GONE
+        }
     }
 
+    /**
+     * Animate height của options panel
+     */
     private fun animateHeight(from: Int, to: Int, onEnd: (() -> Unit)? = null) {
         val animator = ValueAnimator.ofInt(from, to)
         animator.addUpdateListener { animation ->
@@ -172,46 +264,28 @@ class HistoryFragment : Fragment() {
         animator.start()
     }
 
-    private fun showDateRangePickerDialog() {
-        val builder = MaterialDatePicker.Builder.dateRangePicker()
-            .setTitleText(R.string.select_date)
-            .setTheme(R.style.CustomMaterialDatePickerTheme)
-            .setSelection(androidx.core.util.Pair(
-                filterStartDate ?: MaterialDatePicker.todayInUtcMilliseconds(),
-                filterEndDate ?: MaterialDatePicker.todayInUtcMilliseconds()
-            ))
-        val picker = builder.build()
+    // ==================== NAVIGATION ====================
 
-        picker.show(parentFragmentManager, "DATE_RANGE_PICKER")
-
-        picker.addOnPositiveButtonClickListener { selection ->
-            val timeZone = TimeZone.getDefault()
-            val offset = timeZone.getOffset(selection.first)
-
-            filterStartDate = selection.first - offset
-            filterEndDate = (selection.second - offset) + 86400000L - 1L
-
-            val startDate = Instant.ofEpochMilli(filterStartDate!!).atZone(ZoneId.systemDefault())
-            val endDate = Instant.ofEpochMilli(filterEndDate!!).atZone(ZoneId.systemDefault())
-
-            binding.tvFilterSubtitle.text = "${dateFormatter.format(startDate)} - ${dateFormatter.format(endDate)}"
-            binding.tvFilterSubtitle.setTextColor(ContextCompat.getColor(requireContext(), R.color.green_primary))
-            binding.btnClearFilter.visibility = View.VISIBLE
-            observeHistory()
+    /**
+     * Navigate đến màn hình chi tiết của history entry
+     */
+    private fun navigateToDetail(entry: HistoryEntry) {
+        val jsonEntry = Gson().toJson(entry)
+        val fragment = HistoryDetailFragment().apply {
+            arguments = Bundle().apply {
+                putString("HISTORY_ENTRY_JSON", jsonEntry)
+            }
         }
-    }
 
-    private fun clearDateFilter() {
-        filterStartDate = null
-        filterEndDate = null
-        binding.tvFilterSubtitle.text = getString(R.string.select_date)
-        binding.tvFilterSubtitle.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_secondary))
-        binding.btnClearFilter.visibility = View.GONE
-        observeHistory()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+        parentFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                R.anim.slide_in_bottom,
+                R.anim.hold,
+                R.anim.hold,
+                R.anim.slide_out_bottom
+            )
+            .add(R.id.fragmentContainer, fragment)
+            .addToBackStack("Detail")
+            .commit()
     }
 }

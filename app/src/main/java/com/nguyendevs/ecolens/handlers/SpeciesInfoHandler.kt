@@ -31,6 +31,10 @@ import com.nguyendevs.ecolens.model.SpeciesInfo
 import kotlinx.coroutines.*
 import java.io.File
 
+/**
+ * Xử lý hiển thị thông tin loài sinh vật
+ * Quản lý animations, shimmer effects và tương tác người dùng
+ */
 class SpeciesInfoHandler(
     private val context: Context,
     private val binding: ActivityMainModernBinding,
@@ -54,6 +58,9 @@ class SpeciesInfoHandler(
         private val REGEX_ITALIC = Regex("\\*(.*?)\\*")
     }
 
+    /**
+     * Thiết lập HTML cho TextView
+     */
     private fun TextView.setHtml(htmlContent: String) {
         text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Html.fromHtml(htmlContent, Html.FROM_HTML_MODE_COMPACT)
@@ -63,6 +70,9 @@ class SpeciesInfoHandler(
         }
     }
 
+    /**
+     * Hiển thị thông tin loài theo từng giai đoạn loading
+     */
     fun displaySpeciesInfo(info: SpeciesInfo, imageUri: Uri?, stage: LoadingStage) {
         if (stage == LoadingStage.NONE) {
             handlerScope.coroutineContext.cancelChildren()
@@ -82,6 +92,7 @@ class SpeciesInfoHandler(
         if (stage != LoadingStage.SCIENTIFIC_NAME) {
             displayConfidence(info, isWaiting = false)
         }
+
         when (stage) {
             LoadingStage.NONE -> {
                 handlerScope.coroutineContext.cancelChildren()
@@ -101,8 +112,7 @@ class SpeciesInfoHandler(
                 displayConfidence(info, isWaiting = true)
             }
 
-            LoadingStage.COMMON_NAME -> {
-            }
+            LoadingStage.COMMON_NAME -> {}
 
             LoadingStage.TAXONOMY -> {
                 stopTaxonomyShimmer()
@@ -119,7 +129,12 @@ class SpeciesInfoHandler(
             LoadingStage.CHARACTERISTICS -> {
                 stopTaxonomyShimmer()
                 displayTaxonomyWaterfall(info)
-                displaySection(R.id.sectionCharacteristics, R.id.tvCharacteristics, info.characteristics, shouldScroll = false)
+                displaySection(
+                    R.id.sectionCharacteristics,
+                    R.id.tvCharacteristics,
+                    info.characteristics,
+                    shouldScroll = false
+                )
                 checkIfAllSectionsRendered(info, imageUri)
             }
 
@@ -143,7 +158,12 @@ class SpeciesInfoHandler(
                 stopTaxonomyShimmer()
                 displayTaxonomyWaterfall(info)
                 displaySection(R.id.sectionDescription, R.id.tvDescription, info.description, shouldScroll = false)
-                displaySection(R.id.sectionCharacteristics, R.id.tvCharacteristics, info.characteristics, shouldScroll = false)
+                displaySection(
+                    R.id.sectionCharacteristics,
+                    R.id.tvCharacteristics,
+                    info.characteristics,
+                    shouldScroll = false
+                )
                 displaySection(R.id.sectionDistribution, R.id.tvDistribution, info.distribution, shouldScroll = false)
                 displaySection(R.id.sectionHabitat, R.id.tvHabitat, info.habitat, shouldScroll = false)
                 displayConservationStatus(info.conservationStatus, shouldScroll = false)
@@ -152,6 +172,7 @@ class SpeciesInfoHandler(
                 setupShareButton(info, imageUri)
                 showShareButtonAnimation()
                 setupCopyButton(info)
+
                 if (info.confidence < 50.0) {
                     showRetryButtonAnimation()
                 } else {
@@ -167,6 +188,9 @@ class SpeciesInfoHandler(
         handlerScope.cancel()
     }
 
+    /**
+     * Xóa toàn bộ views và reset trạng thái
+     */
     private fun clearAllViews() {
         lastDisplayedCommonName = null
         lastConfidenceValue = null
@@ -196,6 +220,9 @@ class SpeciesInfoHandler(
         textViews.forEach { it.text = "" }
     }
 
+    /**
+     * Kiểm tra xem tất cả sections đã được render chưa
+     */
     private fun checkIfAllSectionsRendered(info: SpeciesInfo, imageUri: Uri?) {
         val sectionsWithContent = mutableSetOf<Int>()
 
@@ -219,6 +246,9 @@ class SpeciesInfoHandler(
         }
     }
 
+    /**
+     * Hiển thị tên khoa học
+     */
     private fun displayScientificName(info: SpeciesInfo) {
         infoBinding.tvScientificName.apply {
             setHtml(info.scientificName)
@@ -227,11 +257,15 @@ class SpeciesInfoHandler(
         slideAndFadeIn(infoBinding.btnCopyScientificName, duration = 500, delay = 150)
     }
 
+    /**
+     * Hiển thị tên thông thường
+     */
     private fun displayCommonName(info: SpeciesInfo) {
         infoBinding.tvCommonName.let { view ->
             if (lastDisplayedCommonName == info.commonName &&
                 view.visibility == View.VISIBLE &&
-                view.alpha == 1f) {
+                view.alpha == 1f
+            ) {
                 return
             }
 
@@ -255,6 +289,9 @@ class SpeciesInfoHandler(
         }
     }
 
+    /**
+     * Hiển thị độ tin cậy (confidence)
+     */
     @SuppressLint("StringFormatInvalid")
     private fun displayConfidence(info: SpeciesInfo, isWaiting: Boolean) {
         val tvConfidence = infoBinding.tvConfidence
@@ -296,12 +333,14 @@ class SpeciesInfoHandler(
 
             if (lastConfidenceValue == newText &&
                 confidenceCard.visibility == View.VISIBLE &&
-                confidenceCard.alpha == 1f) {
+                confidenceCard.alpha == 1f
+            ) {
                 return
             }
 
             tvConfidence.text = newText
 
+            // Chọn màu sắc dựa trên độ tin cậy
             val (icon, tint, bg, text) = when {
                 confidenceValue >= 50f -> Quadruple(
                     R.drawable.ic_check_circle,
@@ -309,12 +348,14 @@ class SpeciesInfoHandler(
                     R.color.confidence_high_bg,
                     R.color.confidence_high_text
                 )
+
                 confidenceValue >= 25f -> Quadruple(
                     R.drawable.ic_check_warning_circle,
                     R.color.confidence_medium,
                     R.color.confidence_medium_bg,
                     R.color.confidence_medium_text
                 )
+
                 else -> Quadruple(
                     R.drawable.ic_check_not_circle,
                     R.color.confidence_low,
@@ -331,7 +372,6 @@ class SpeciesInfoHandler(
             confidenceCard.let { card ->
                 if (lastConfidenceValue != newText) {
                     card.visibility = View.VISIBLE
-
                     card.alpha = 0f
                     card.scaleX = 0.5f
                     card.scaleY = 0.5f
@@ -357,6 +397,9 @@ class SpeciesInfoHandler(
         }
     }
 
+    /**
+     * Chuẩn bị container phân loại học với shimmer effect
+     */
     private fun prepareTaxonomyContainer() {
         val container = infoBinding.taxonomyContainer
         container.visibility = View.VISIBLE
@@ -377,6 +420,9 @@ class SpeciesInfoHandler(
         }
     }
 
+    /**
+     * Hiển thị phân loại học theo hiệu ứng waterfall
+     */
     private fun displayTaxonomyWaterfall(info: SpeciesInfo) {
         val container = infoBinding.taxonomyContainer
         container.visibility = View.VISIBLE
@@ -422,6 +468,9 @@ class SpeciesInfoHandler(
         }
     }
 
+    /**
+     * Bắt đầu hiệu ứng shimmer cho taxonomy
+     */
     private fun startTaxonomyShimmer(view: View?) {
         if (view == null || taxonomyShimmerAnimator != null) return
 
@@ -442,8 +491,10 @@ class SpeciesInfoHandler(
                 val shimmerWidth = diagonal * 0.5f
                 val offset = diagonal * (progress - 0.3f)
 
-                val isDarkMode = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+                val isDarkMode =
+                    (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
 
+                // Màu sắc cho shimmer effect
                 val backgroundColor: Int
                 val transparent: Int
                 val fadeIn1: Int
@@ -510,6 +561,9 @@ class SpeciesInfoHandler(
         }
     }
 
+    /**
+     * Dừng hiệu ứng shimmer
+     */
     private fun stopTaxonomyShimmer() {
         taxonomyShimmerAnimator?.cancel()
         taxonomyShimmerAnimator = null
@@ -519,14 +573,20 @@ class SpeciesInfoHandler(
         }
     }
 
+    /**
+     * Dừng animation xoay của confidence
+     */
     private fun stopConfidenceAnimation() {
         confidenceRotationAnimator?.cancel()
         confidenceRotationAnimator = null
         infoBinding.iconConfidence.rotation = 0f
     }
 
+    /**
+     * Hiển thị một section thông tin
+     */
     private fun displaySection(sectionId: Int, textViewId: Int, text: String, shouldScroll: Boolean = true) {
-        val section = when(sectionId) {
+        val section = when (sectionId) {
             R.id.sectionDescription -> infoBinding.sectionDescription
             R.id.sectionCharacteristics -> infoBinding.sectionCharacteristics
             R.id.sectionDistribution -> infoBinding.sectionDistribution
@@ -534,7 +594,7 @@ class SpeciesInfoHandler(
             R.id.sectionConservation -> infoBinding.sectionConservation
             else -> null
         }
-        val textView = when(textViewId) {
+        val textView = when (textViewId) {
             R.id.tvDescription -> infoBinding.tvDescription
             R.id.tvCharacteristics -> infoBinding.tvCharacteristics
             R.id.tvDistribution -> infoBinding.tvDistribution
@@ -579,6 +639,9 @@ class SpeciesInfoHandler(
         }
     }
 
+    /**
+     * Hiển thị trạng thái bảo tồn
+     */
     private fun displayConservationStatus(status: String, shouldScroll: Boolean = true) {
         val section = infoBinding.sectionConservation
         val textView = infoBinding.tvConservationStatus
@@ -616,6 +679,9 @@ class SpeciesInfoHandler(
         }
     }
 
+    /**
+     * Tìm ScrollView cha của view
+     */
     private fun findScrollView(view: View): ScrollView? {
         var parent = view.parent
         while (parent != null) {
@@ -627,6 +693,9 @@ class SpeciesInfoHandler(
         return null
     }
 
+    /**
+     * Cuộn mượt đến view
+     */
     private fun smoothScrollToView(view: View) {
         view.post {
             val scrollView = findScrollView(view)
@@ -645,37 +714,45 @@ class SpeciesInfoHandler(
     }
 
     private fun showShareButtonAnimation() {
-        infoBinding.btnShareInfo.apply {
-            visibility = View.VISIBLE
-            alpha = 0f
-            scaleX = 0.8f
-            scaleY = 0.8f
-            animate()
-                .alpha(1f)
-                .scaleX(1f)
-                .scaleY(1f)
-                .setDuration(400)
-                .setInterpolator(DecelerateInterpolator())
-                .start()
+        handlerScope.launch {
+            withContext(Dispatchers.Main) {
+                infoBinding.btnShareInfo.apply {
+                    visibility = View.VISIBLE
+                    alpha = 0f
+                    scaleX = 0.8f
+                    scaleY = 0.8f
+                    animate()
+                        .alpha(1f)
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(400)
+                        .setInterpolator(DecelerateInterpolator())
+                        .start()
+                }
+            }
         }
     }
 
     private fun showRetryButtonAnimation() {
-        infoBinding.btnRetryIdentification.apply {
-            visibility = View.VISIBLE
-            alpha = 0f
-            scaleX = 0.8f
-            scaleY = 0.8f
-            animate()
-                .alpha(1f)
-                .scaleX(1f)
-                .scaleY(1f)
-                .setDuration(400)
-                .setStartDelay(100)
-                .setInterpolator(DecelerateInterpolator())
-                .start()
+        handlerScope.launch {
+            withContext(Dispatchers.Main) {
+                infoBinding.btnRetryIdentification.apply {
+                    visibility = View.VISIBLE
+                    alpha = 0f
+                    scaleX = 0.8f
+                    scaleY = 0.8f
+                    animate()
+                        .alpha(1f)
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(400)
+                        .setStartDelay(100)
+                        .setInterpolator(DecelerateInterpolator())
+                        .start()
+                }
+                setupRetryButton()
+            }
         }
-        setupRetryButton()
     }
 
     private fun hideRetryButton() {
@@ -699,6 +776,9 @@ class SpeciesInfoHandler(
         }
     }
 
+    /**
+     * Thiết lập nút copy tên khoa học
+     */
     private fun setupCopyButton(info: SpeciesInfo) {
         infoBinding.btnCopyScientificName.setOnClickListener {
             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -708,6 +788,9 @@ class SpeciesInfoHandler(
         }
     }
 
+    /**
+     * Thiết lập nút thử lại
+     */
     private fun setupRetryButton() {
         infoBinding.btnRetryIdentification.setOnClickListener {
             it.visibility = View.GONE
@@ -715,33 +798,39 @@ class SpeciesInfoHandler(
         }
     }
 
+    /**
+     * Thiết lập nút chia sẻ
+     */
     private fun setupShareButton(info: SpeciesInfo, imageUri: Uri?) {
         infoBinding.btnShareInfo.setOnClickListener {
             infoBinding.btnShareInfo.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
 
-            var shareableUri = imageUri
+            handlerScope.launch(Dispatchers.IO) {
+                var shareableUri = imageUri
 
-            if (shareableUri != null) {
-                if (shareableUri.scheme == "file" || shareableUri.path?.startsWith("/") == true) {
-                    try {
-                        val path = shareableUri.path
-                        if (path != null) {
-                            val file = File(path)
-                            if (file.exists()) {
-                                shareableUri = FileProvider.getUriForFile(
-                                    context,
-                                    "${context.packageName}.provider",
-                                    file
-                                )
+                if (shareableUri != null) {
+                    if (shareableUri.scheme == "file" || shareableUri.path?.startsWith("/") == true) {
+                        try {
+                            val path = shareableUri.path
+                            if (path != null) {
+                                val file = File(path)
+                                if (file.exists()) {
+                                    shareableUri = FileProvider.getUriForFile(
+                                        context,
+                                        "${context.packageName}.provider",
+                                        file
+                                    )
+                                }
                             }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
                         }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
                     }
                 }
+                withContext(Dispatchers.Main) {
+                    shareSpeciesInfo(info, shareableUri)
+                }
             }
-
-            shareSpeciesInfo(info, shareableUri)
         }
     }
 
@@ -753,6 +842,9 @@ class SpeciesInfoHandler(
             .start()
     }
 
+    /**
+     * Chia sẻ thông tin loài
+     */
     private fun shareSpeciesInfo(info: SpeciesInfo, imageUri: Uri?) {
         val confidencePercent =
             String.format("%.2f", if (info.confidence > 1) info.confidence else info.confidence * 100)
@@ -781,9 +873,7 @@ class SpeciesInfoHandler(
                 if (content.isNotEmpty()) {
                     append(
                         "\n━━━━━━━━━━━━━━━━━━━━\n${context.getString(title)}\n━━━━━━━━━━━━━━━━━━━━\n\n${
-                            stripHtml(
-                                content
-                            )
+                            stripHtml(content)
                         }\n"
                     )
                 }
@@ -810,6 +900,9 @@ class SpeciesInfoHandler(
         }
     }
 
+    /**
+     * Loại bỏ HTML tags
+     */
     private fun stripHtml(html: String): String {
         var text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT).toString()
@@ -827,6 +920,9 @@ class SpeciesInfoHandler(
         val first: A, val second: B, val third: C, val fourth: D
     )
 
+    /**
+     * Animation trượt và fade in cho view
+     */
     private fun slideAndFadeIn(view: View, duration: Long = 500, delay: Long = 0) {
         if (view.visibility == View.VISIBLE && view.alpha == 1f) return
 

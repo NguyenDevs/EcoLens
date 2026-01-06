@@ -21,8 +21,17 @@ import io.noties.markwon.Markwon
 import io.noties.markwon.core.MarkwonTheme
 import io.noties.markwon.html.HtmlPlugin
 
-class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerView.Adapter<ChatAdapter.ChatViewHolder>() {
+/**
+ * Adapter hiển thị danh sách tin nhắn chat với hỗ trợ Markdown
+ * Hỗ trợ hiệu ứng loading, streaming text và các action (copy, share, renew)
+ */
+class ChatAdapter(
+    private val actionListener: OnChatActionListener
+) : RecyclerView.Adapter<ChatAdapter.ChatViewHolder>() {
 
+    /**
+     * Interface để xử lý các action trên tin nhắn
+     */
     interface OnChatActionListener {
         fun onCopy(text: String)
         fun onShare(text: String)
@@ -32,26 +41,31 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
     private val messages = mutableListOf<ChatMessage>()
     private lateinit var markwon: Markwon
 
+    // ==================== ADAPTER METHODS ====================
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
         if (!::markwon.isInitialized) {
             markwon = Markwon.builder(parent.context)
                 .usePlugin(HtmlPlugin.create())
                 .usePlugin(object : AbstractMarkwonPlugin() {
                     override fun configureTheme(builder: MarkwonTheme.Builder) {
-                        builder
-                            .headingTextSizeMultipliers(floatArrayOf(
-                                2.0f,   // h1 (#)
-                                1.5f,   // h2 (##)
-                                1.17f,  // h3 (###)
-                                1.0f,   // h4 (####)
-                                0.83f,  // h5 (#####)
-                                0.67f   // h6 (######)
-                            ))
+                        builder.headingTextSizeMultipliers(floatArrayOf(
+                            2.0f,   // h1 (#)
+                            1.5f,   // h2 (##)
+                            1.17f,  // h3 (###)
+                            1.0f,   // h4 (####)
+                            0.83f,  // h5 (#####)
+                            0.67f   // h6 (######)
+                        ))
                     }
                 })
                 .build()
         }
-        val binding = ItemChatMessageModernBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding = ItemChatMessageModernBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
         return ChatViewHolder(binding)
     }
 
@@ -74,6 +88,10 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
 
     override fun getItemCount(): Int = messages.size
 
+    /**
+     * Cập nhật danh sách tin nhắn với tối ưu hóa notify
+     * Chỉ notify các item thay đổi thay vì toàn bộ list
+     */
     fun submitList(newMessages: List<ChatMessage>) {
         val oldSize = messages.size
         val newSize = newMessages.size
@@ -96,8 +114,12 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
         }
     }
 
-    inner class ChatViewHolder(private val binding: ItemChatMessageModernBinding) : RecyclerView.ViewHolder(binding.root) {
-        
+    // ==================== VIEW HOLDER ====================
+
+    inner class ChatViewHolder(
+        private val binding: ItemChatMessageModernBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
+
         private val colorWhite = ContextCompat.getColor(itemView.context, R.color.white)
         private val colorGreenPrimary = ContextCompat.getColor(itemView.context, R.color.green_primary)
 
@@ -105,25 +127,39 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
         private var loopCount = 0
         private var cursorAnimator: ValueAnimator? = null
 
+        /**
+         * Lấy màu từ theme hiện tại
+         */
         private fun getThemeColor(attr: Int): Int {
             val typedValue = TypedValue()
             itemView.context.theme.resolveAttribute(attr, typedValue, true)
             return typedValue.data
         }
 
+        /**
+         * Runnable tạo hiệu ứng loading với dấu ba chấm
+         */
         private val loadingAnimateRunnable = object : Runnable {
             override fun run() {
                 loopCount++
                 val spannable = SpannableString("...")
                 val visibleDots = (loopCount % 3) + 1
                 if (visibleDots < 3) {
-                    spannable.setSpan(ForegroundColorSpan(Color.TRANSPARENT), visibleDots, 3, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    spannable.setSpan(
+                        ForegroundColorSpan(Color.TRANSPARENT),
+                        visibleDots,
+                        3,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
                 }
                 binding.tvMessage.text = spannable
                 handler.postDelayed(this, 400)
             }
         }
 
+        /**
+         * Dừng tất cả animation đang chạy
+         */
         fun stopAnimation() {
             handler.removeCallbacks(loadingAnimateRunnable)
             cursorAnimator?.cancel()
@@ -131,12 +167,18 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
             binding.tvMessage.alpha = 1f
         }
 
+        /**
+         * Bind text đang streaming với cursor nhấp nháy
+         */
         fun bindStreamingText(message: ChatMessage) {
             if (message.isStreaming) {
                 markwon.setMarkdown(binding.tvMessage, message.content + " ▌")
             }
         }
 
+        /**
+         * Bind tin nhắn vào view dựa trên trạng thái
+         */
         fun bind(message: ChatMessage, position: Int) {
             stopAnimation()
             resetViews()
@@ -151,6 +193,9 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
             }
         }
 
+        /**
+         * Reset views về trạng thái mặc định
+         */
         private fun resetViews() {
             binding.layoutAiActions.visibility = android.view.View.GONE
             binding.tvMessage.alpha = 1f
@@ -161,6 +206,9 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
             binding.btnRenewAi.setOnClickListener(null)
         }
 
+        /**
+         * Hiển thị trạng thái loading với animation ba chấm
+         */
         private fun bindLoadingState(bgColor: Int, textColor: Int) {
             binding.chatContainer.gravity = Gravity.START
             binding.cardMessage.setCardBackgroundColor(bgColor)
@@ -170,6 +218,9 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
             loadingAnimateRunnable.run()
         }
 
+        /**
+         * Hiển thị trạng thái streaming với cursor nhấp nháy
+         */
         private fun bindStreamingState(message: ChatMessage, bgColor: Int, textColor: Int) {
             binding.chatContainer.gravity = Gravity.START
             binding.cardMessage.setCardBackgroundColor(bgColor)
@@ -179,6 +230,9 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
             binding.layoutAiActions.visibility = android.view.View.GONE
         }
 
+        /**
+         * Hiển thị tin nhắn của người dùng
+         */
         private fun bindUserMessage(message: ChatMessage) {
             markwon.setMarkdown(binding.tvMessage, message.content)
             binding.chatContainer.gravity = Gravity.END
@@ -190,6 +244,9 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
             }
         }
 
+        /**
+         * Hiển thị tin nhắn của AI với các action buttons
+         */
         private fun bindAiMessage(message: ChatMessage, position: Int, bgColor: Int, textColor: Int) {
             markwon.setMarkdown(binding.tvMessage, message.content)
             binding.chatContainer.gravity = Gravity.START
@@ -198,7 +255,8 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
 
             if (position > 0) {
                 binding.layoutAiActions.visibility = android.view.View.VISIBLE
-                binding.btnRenewAi.visibility = if (position == messages.size - 1) android.view.View.VISIBLE else android.view.View.GONE
+                binding.btnRenewAi.visibility = if (position == messages.size - 1)
+                    android.view.View.VISIBLE else android.view.View.GONE
                 binding.btnCopyAi.visibility = android.view.View.VISIBLE
                 binding.btnShareAi.visibility = android.view.View.VISIBLE
 
@@ -208,6 +266,9 @@ class ChatAdapter(private val actionListener: OnChatActionListener) : RecyclerVi
             }
         }
 
+        /**
+         * Bắt đầu animation nhấp nháy cho cursor khi streaming
+         */
         private fun startCursorAnimation() {
             if (cursorAnimator == null) {
                 cursorAnimator = ValueAnimator.ofFloat(1f, 0.4f).apply {

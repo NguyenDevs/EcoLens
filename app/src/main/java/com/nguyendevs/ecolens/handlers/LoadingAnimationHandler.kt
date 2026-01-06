@@ -12,6 +12,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
+/**
+ * Handler tạo hiệu ứng loading với animated dots (...)
+ * Dots sẽ xuất hiện tuần tự: . .. ... . .. ...
+ */
 class LoadingAnimationHandler(
     private val tvLoading: TextView,
     private val coroutineScope: CoroutineScope
@@ -19,9 +23,14 @@ class LoadingAnimationHandler(
 
     private var loadingTextJob: Job? = null
     private var currentTextResId: Int = R.string.analyzing_text
-
     private val transparentSpan = ForegroundColorSpan(Color.TRANSPARENT)
 
+    // ==================== PUBLIC METHODS ====================
+
+    /**
+     * Set text resource ID cho loading message
+     * Tự động restart animation nếu đang chạy
+     */
     fun setText(resId: Int) {
         if (currentTextResId != resId) {
             currentTextResId = resId
@@ -32,8 +41,13 @@ class LoadingAnimationHandler(
         }
     }
 
+    /**
+     * Bắt đầu animation loading dots
+     * Sẽ loop vô hạn cho đến khi gọi stop()
+     */
     fun start() {
         if (loadingTextJob?.isActive == true) return
+
         loadingTextJob = coroutineScope.launch {
             val baseText = tvLoading.context.getString(currentTextResId)
             val fullText = "$baseText..."
@@ -41,31 +55,44 @@ class LoadingAnimationHandler(
 
             var loopCount = 0
             while (isActive) {
-                spannable.removeSpan(transparentSpan)
-
-                val visibleDots = (loopCount % 3) + 1
-                val hideCount = 3 - visibleDots
-
-                if (hideCount > 0) {
-                    val start = fullText.length - hideCount
-                    val end = fullText.length
-                    spannable.setSpan(
-                        transparentSpan,
-                        start,
-                        end,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                }
-
-                tvLoading.text = spannable
+                animateDots(spannable, fullText, loopCount)
                 loopCount++
                 delay(500)
             }
         }
     }
 
+    /**
+     * Dừng animation loading
+     */
     fun stop() {
         loadingTextJob?.cancel()
         loadingTextJob = null
+    }
+
+    // ==================== PRIVATE METHODS ====================
+
+    /**
+     * Animate số lượng dots hiển thị
+     * Sử dụng transparent span để ẩn dots
+     */
+    private fun animateDots(spannable: SpannableString, fullText: String, loopCount: Int) {
+        spannable.removeSpan(transparentSpan)
+
+        val visibleDots = (loopCount % 3) + 1
+        val hideCount = 3 - visibleDots
+
+        if (hideCount > 0) {
+            val start = fullText.length - hideCount
+            val end = fullText.length
+            spannable.setSpan(
+                transparentSpan,
+                start,
+                end,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
+
+        tvLoading.text = spannable
     }
 }

@@ -19,6 +19,11 @@ import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
+/**
+ * Fragment hiển thị giao diện chat với AI
+ * Hỗ trợ streaming response, copy, share và renew messages
+ * Tự động scroll và disable UI khi đang streaming
+ */
 class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
 
     private val viewModel: EcoLensViewModel by activityViewModels()
@@ -43,14 +48,18 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         }
     }
 
+    // ==================== LIFECYCLE ====================
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         currentSessionId = arguments?.getLong(ARG_SESSION_ID, -1L)?.takeIf { it != -1L }
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View? {
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentChatModernBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -61,7 +70,23 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         setupRecyclerView()
         setupListeners()
         observeViewModel()
+        initializeSession()
 
+        binding.etChatInput.post { binding.etChatInput.requestFocus() }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    // ==================== INITIALIZATION ====================
+
+    /**
+     * Khởi tạo hoặc load chat session
+     * Load session cũ nếu có sessionId, tạo mới nếu không
+     */
+    private fun initializeSession() {
         if (currentSessionId != null) {
             viewModel.loadChatSession(currentSessionId!!)
         } else {
@@ -70,33 +95,13 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
                 getString(R.string.new_chat)
             )
         }
-
-        binding.etChatInput.post { binding.etChatInput.requestFocus() }
     }
 
-    override fun onCopy(text: String) {
-        performHapticFeedback()
-        val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val cleanText = stripHtml(text)
-        val clip = ClipData.newPlainText("EcoLens", cleanText)
-        clipboard.setPrimaryClip(clip)
-        Toast.makeText(requireContext(), "Đã sao chép", Toast.LENGTH_SHORT).show()
-    }
+    // ==================== UI SETUP ====================
 
-    override fun onShare(text: String) {
-        val cleanText = stripHtml(text)
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, cleanText)
-        }
-        startActivity(Intent.createChooser(intent, "Chia sẻ tin nhắn"))
-    }
-
-    override fun onRenew(position: Int, message: ChatMessage) {
-        performHapticFeedback()
-        viewModel.renewAiResponse(message)
-    }
-
+    /**
+     * Cấu hình RecyclerView cho chat messages
+     */
     private fun setupRecyclerView() {
         val layoutManager = LinearLayoutManager(requireContext()).apply {
             stackFromEnd = true
@@ -106,6 +111,9 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         binding.rvChat.itemAnimator = null
     }
 
+    /**
+     * Cấu hình click listeners cho UI elements
+     */
     private fun setupListeners() {
         binding.btnSend.setOnClickListener {
             val text = binding.etChatInput.text.toString().trim()
@@ -115,14 +123,59 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
                 binding.etChatInput.text.clear()
             }
         }
-        binding.btnBack.setOnClickListener { parentFragmentManager.popBackStack() }
-        binding.btnMenu.setOnClickListener { showMenuPopup(it) }
+
+        binding.btnBack.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
+
+        binding.btnMenu.setOnClickListener {
+            showMenuPopup(it)
+        }
     }
 
+    // ==================== CHAT ADAPTER CALLBACKS ====================
+
+    /**
+     * Sao chép nội dung tin nhắn vào clipboard
+     */
+    override fun onCopy(text: String) {
+        performHapticFeedback()
+        val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val cleanText = stripHtml(text)
+        val clip = ClipData.newPlainText("EcoLens", cleanText)
+        clipboard.setPrimaryClip(clip)
+        Toast.makeText(requireContext(), "Đã sao chép", Toast.LENGTH_SHORT).show()
+    }
+
+    /**
+     * Chia sẻ nội dung tin nhắn
+     */
+    override fun onShare(text: String) {
+        val cleanText = stripHtml(text)
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, cleanText)
+        }
+        startActivity(Intent.createChooser(intent, "Chia sẻ tin nhắn"))
+    }
+
+    /**
+     * Tạo lại response từ AI cho tin nhắn này
+     */
+    override fun onRenew(position: Int, message: ChatMessage) {
+        performHapticFeedback()
+        viewModel.renewAiResponse(message)
+    }
+
+    // ==================== MENU & DIALOGS ====================
+
+    /**
+     * Hiển thị popup menu với các action cho chat
+     */
     private fun showMenuPopup(anchor: View) {
         val popup = PopupMenu(requireContext(), anchor)
         popup.menuInflater.inflate(R.menu.menu_chat, popup.menu)
-        
+
         runCatching {
             val fieldMPopup = PopupMenu::class.java.getDeclaredField("mPopup")
             fieldMPopup.isAccessible = true
@@ -144,6 +197,9 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         popup.show()
     }
 
+    /**
+     * Hiển thị dialog xác nhận xóa chat
+     */
     private fun showDeleteConfirmDialog() {
         AlertDialog.Builder(requireContext())
             .setTitle(R.string.dialog_delete_chat_title)
@@ -158,28 +214,19 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
             .show()
     }
 
+    // ==================== VIEWMODEL OBSERVERS ====================
+
+    /**
+     * Observe các state từ ViewModel
+     * Cập nhật UI khi có messages mới hoặc streaming state thay đổi
+     */
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.chatMessages.collectLatest { messages ->
-                val isNewMessageAdded = messages.size > adapter.itemCount
-                val layoutManager = binding.rvChat.layoutManager as LinearLayoutManager
-                val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
-                val isAtBottom = lastVisibleItemPosition == adapter.itemCount - 1
-
-                adapter.submitList(messages)
-
-                if (messages.isNotEmpty()) {
-                    if (isNewMessageAdded) {
-                        binding.rvChat.scrollToPosition(messages.size - 1)
-                    } else if (isAtBottom) {
-                        val lastPos = messages.size - 1
-                        if (layoutManager.findLastCompletelyVisibleItemPosition() < lastPos) {
-                            binding.rvChat.scrollToPosition(lastPos)
-                        }
-                    }
-                }
+                handleMessagesUpdate(messages)
             }
         }
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isStreamingActive.collectLatest { isStreaming ->
                 updateUIForStreamingState(isStreaming)
@@ -187,6 +234,34 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         }
     }
 
+    /**
+     * Xử lý cập nhật danh sách messages
+     * Tự động scroll xuống khi có message mới hoặc đang ở bottom
+     */
+    private fun handleMessagesUpdate(messages: List<ChatMessage>) {
+        val isNewMessageAdded = messages.size > adapter.itemCount
+        val layoutManager = binding.rvChat.layoutManager as LinearLayoutManager
+        val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
+        val isAtBottom = lastVisibleItemPosition == adapter.itemCount - 1
+
+        adapter.submitList(messages)
+
+        if (messages.isNotEmpty()) {
+            if (isNewMessageAdded) {
+                binding.rvChat.scrollToPosition(messages.size - 1)
+            } else if (isAtBottom) {
+                val lastPos = messages.size - 1
+                if (layoutManager.findLastCompletelyVisibleItemPosition() < lastPos) {
+                    binding.rvChat.scrollToPosition(lastPos)
+                }
+            }
+        }
+    }
+
+    /**
+     * Cập nhật UI dựa trên trạng thái streaming
+     * Disable input và buttons khi đang streaming
+     */
     private fun updateUIForStreamingState(isStreaming: Boolean) {
         val alpha = if (isStreaming) 0.5f else 1f
         val enabled = !isStreaming
@@ -201,10 +276,18 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         binding.btnMenu.alpha = alpha
     }
 
+    // ==================== HELPER METHODS ====================
+
+    /**
+     * Thực hiện haptic feedback
+     */
     private fun performHapticFeedback() {
         binding.root.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
     }
 
+    /**
+     * Loại bỏ HTML tags và markdown formatting khỏi text
+     */
     private fun stripHtml(html: String): String {
         var text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT).toString()
@@ -215,10 +298,5 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         text = text.replace(REGEX_HEADER, "$1")
         text = text.replace(REGEX_STRIKE, "$1")
         return text.trim()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

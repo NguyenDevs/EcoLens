@@ -5,7 +5,22 @@ import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
 
+/**
+ * Retrofit API interface cho các service backend
+ * Bao gồm iNaturalist species identification và Gemini AI chat
+ */
 interface INaturalistApi {
+
+    // ==================== INATURALIST - SPECIES IDENTIFICATION ====================
+
+    /**
+     * Nhận diện loài từ ảnh sử dụng iNaturalist Computer Vision
+     * @param image Ảnh cần nhận diện (MultipartBody)
+     * @param lat Latitude mặc định (Đà Nẵng, Vietnam)
+     * @param lng Longitude mặc định (Đà Nẵng, Vietnam)
+     * @param locale Ngôn ngữ cho kết quả (vi, en, etc.)
+     * @return Danh sách kết quả nhận diện với điểm số
+     */
     @Multipart
     @POST("inaturalist/v1/computervision/score_image")
     suspend fun identifySpecies(
@@ -15,17 +30,36 @@ interface INaturalistApi {
         @Query("locale") locale: String
     ): IdentificationResponse
 
+    /**
+     * Lấy thông tin chi tiết về một taxon (loài sinh học)
+     * @param taxonId ID của taxon cần lấy thông tin
+     * @param locale Ngôn ngữ cho kết quả
+     * @return Chi tiết taxon bao gồm Wikipedia summary
+     */
     @GET("inaturalist/v1/taxa/{id}")
     suspend fun getTaxonDetails(
         @Path("id") taxonId: Int,
         @Query("locale") locale: String = "vi"
     ): TaxonDetailsResponse
 
+    // ==================== GEMINI AI - CHAT ====================
+
+    /**
+     * Gửi câu hỏi đến Gemini AI và nhận response đầy đủ
+     * @param request Request chứa nội dung conversation
+     * @return Response từ Gemini với các candidates
+     */
     @POST("gemini")
     suspend fun askGemini(
         @Body request: GeminiRequest
     ): GeminiResponse
 
+    /**
+     * Stream response từ Gemini AI theo thời gian thực
+     * Sử dụng cho hiệu ứng "typing" khi AI trả lời
+     * @param request Request chứa nội dung conversation
+     * @return ResponseBody stream để đọc từng phần response
+     */
     @Streaming
     @POST("gemini/stream")
     suspend fun streamGemini(

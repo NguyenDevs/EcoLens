@@ -7,10 +7,16 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.nguyendevs.ecolens.databinding.FragmentAboutModernBinding
 
+/**
+ * Fragment hiển thị thông tin về ứng dụng
+ * Bao gồm version, mô tả và credits
+ */
 class AboutFragment : Fragment() {
 
     private var _binding: FragmentAboutModernBinding? = null
     private val binding get() = _binding!!
+
+    // ==================== LIFECYCLE ====================
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -23,13 +29,22 @@ class AboutFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.btnBack.setOnClickListener {
-            parentFragmentManager.popBackStack()
-        }
+        setupClickListeners()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    // ==================== UI SETUP ====================
+
+    /**
+     * Thiết lập click listeners cho UI elements
+     */
+    private fun setupClickListeners() {
+        binding.btnBack.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
     }
 }

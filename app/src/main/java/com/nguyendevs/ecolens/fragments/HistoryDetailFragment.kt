@@ -23,6 +23,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.bumptech.glide.GenericTransitionOptions
 import com.google.gson.Gson
@@ -33,6 +34,9 @@ import com.nguyendevs.ecolens.model.HistoryEntry
 import com.nguyendevs.ecolens.model.SpeciesInfo
 import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
 import com.nguyendevs.ecolens.view.EcoLensViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 class HistoryDetailFragment : Fragment() {
@@ -166,32 +170,37 @@ class HistoryDetailFragment : Fragment() {
     private fun setupShareButton(info: SpeciesInfo, remoteUrl: String?, localImagePath: String?) {
         binding.btnShareInfo.setOnClickListener {
             binding.btnShareInfo.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
-            var imageUri: Uri? = null
+            
+            lifecycleScope.launch(Dispatchers.IO) {
+                var imageUri: Uri? = null
 
-            if (!localImagePath.isNullOrEmpty()) {
-                val file = File(localImagePath)
-                if (file.exists()) {
+                if (!localImagePath.isNullOrEmpty()) {
+                    val file = File(localImagePath)
+                    if (file.exists()) {
+                        try {
+                            imageUri = FileProvider.getUriForFile(
+                                requireContext(),
+                                "${requireContext().packageName}.provider",
+                                file
+                            )
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+                }
+
+                if (imageUri == null && !remoteUrl.isNullOrEmpty()) {
                     try {
-                        imageUri = FileProvider.getUriForFile(
-                            requireContext(),
-                            "${requireContext().packageName}.provider",
-                            file
-                        )
+                        imageUri = Uri.parse(remoteUrl)
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
                 }
-            }
-
-            if (imageUri == null && !remoteUrl.isNullOrEmpty()) {
-                try {
-                    imageUri = Uri.parse(remoteUrl)
-                } catch (e: Exception) {
-                    e.printStackTrace()
+                
+                withContext(Dispatchers.Main) {
+                    shareSpeciesInfo(info, imageUri)
                 }
             }
-
-            shareSpeciesInfo(info, imageUri)
         }
     }
 
@@ -392,12 +401,19 @@ class HistoryDetailFragment : Fragment() {
         }
 
         binding.fabSpeak.setOnClickListener {
-            if (isSpeaking) {
-                speakerManager.pause()
-                updateFabUI(false)
-            } else {
-                speakerManager.speak(TextToSpeechGenerator.generateSpeechText(requireContext(), info))
-                updateFabUI(true)
+            lifecycleScope.launch(Dispatchers.IO) {
+                if (isSpeaking) {
+                    speakerManager.pause()
+                    withContext(Dispatchers.Main) {
+                        updateFabUI(false)
+                    }
+                } else {
+                    val speechText = TextToSpeechGenerator.generateSpeechText(requireContext(), info)
+                    withContext(Dispatchers.Main) {
+                        speakerManager.speak(speechText)
+                        updateFabUI(true)
+                    }
+                }
             }
         }
     }

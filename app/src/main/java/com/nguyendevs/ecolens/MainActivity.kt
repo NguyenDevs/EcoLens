@@ -39,6 +39,10 @@ import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.*
 import java.io.File
 
+/**
+ * Activity chính của ứng dụng EcoLens
+ * Quản lý navigation, nhận diện loài, và các tính năng chính
+ */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainModernBinding
@@ -66,6 +70,9 @@ class MainActivity : AppCompatActivity() {
         var transitionBitmap: Bitmap? = null
     }
 
+    /**
+     * Launcher cho CameraActivity
+     */
     private val cameraActivityLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -77,6 +84,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Launcher cho yêu cầu quyền
+     */
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -102,6 +112,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainModernBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Xử lý transition animation từ splash screen
         if (transitionBitmap != null) {
             val rootView = window.decorView as ViewGroup
             val overlay = ImageView(this)
@@ -131,13 +142,15 @@ class MainActivity : AppCompatActivity() {
         sharedPreferences = getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 
         setupViewModel()
+
+        // Khôi phục trạng thái ảnh nếu có
         viewModel.currentImageUri?.let { uri ->
             this.imageUri = uri
-
             binding.root.post {
                 restoreExpandedState(uri)
             }
         }
+
         initHandlers()
         initManagers()
         setupBottomNavigation()
@@ -145,7 +158,7 @@ class MainActivity : AppCompatActivity() {
         setupObservers()
         setupBackNavigation()
 
-        // Check if we need to navigate to settings (e.g. after language change)
+        // Điều hướng đến tab phù hợp
         val navigateToSettings = intent.getBooleanExtra("navigate_to_settings", false)
         val lastNavItem = if (navigateToSettings) {
             R.id.nav_settings
@@ -161,6 +174,9 @@ class MainActivity : AppCompatActivity() {
         preloadFragments()
     }
 
+    /**
+     * Preload các fragment để cải thiện hiệu suất
+     */
     private fun preloadFragments() {
         lifecycleScope.launch {
             delay(500)
@@ -181,6 +197,9 @@ class MainActivity : AppCompatActivity() {
         super.onConfigurationChanged(newConfig)
     }
 
+    /**
+     * Tải cài đặt theme từ SharedPreferences
+     */
     private fun loadThemePreference() {
         val themePref = getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         val isDarkMode = themePref.getBoolean("dark_mode", false)
@@ -193,6 +212,9 @@ class MainActivity : AppCompatActivity() {
         AppCompatDelegate.setDefaultNightMode(nightMode)
     }
 
+    /**
+     * Khởi tạo ViewModel
+     */
     private fun setupViewModel() {
         viewModel = ViewModelProvider(
             this,
@@ -200,6 +222,9 @@ class MainActivity : AppCompatActivity() {
         )[EcoLensViewModel::class.java]
     }
 
+    /**
+     * Khởi tạo các handler xử lý UI
+     */
     private fun initHandlers() {
         settingsHandler = SettingsHandler(this, languageManager, binding.settingsContainer.root)
 
@@ -241,6 +266,9 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    /**
+     * Khởi tạo các manager
+     */
     private fun initManagers() {
         permissionManager = PermissionManager(this, permissionLauncher)
         speakerManager = SpeakerManager(this)
@@ -262,9 +290,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Xử lý ảnh đã chụp từ camera
+     */
     private fun handleCapturedImage(uri: Uri) {
         binding.fabCamera.isClickable = false
         binding.fabCamera.alpha = 0.5f
+
         if (speakerManager.isSpeaking()) {
             speakerManager.pause()
             toggleSpeakerUI(false)
@@ -287,6 +319,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Khôi phục trạng thái đã mở rộng với ảnh
+     */
     private fun restoreExpandedState(uri: Uri) {
         isExpandedState = true
 
@@ -305,6 +340,7 @@ class MainActivity : AppCompatActivity() {
 
         imagePreview.visibility = View.VISIBLE
         imagePreview.alpha = 1f
+
         val path = uri.path
         val loadModel = if (path != null) {
             val file = File(path)
@@ -312,15 +348,17 @@ class MainActivity : AppCompatActivity() {
         } else {
             uri
         }
-        
+
         Glide.with(this).load(loadModel).centerCrop().into(imagePreview as android.widget.ImageView)
 
         imageZoomHandler.setImageUri(uri)
 
-        //binding.searchBarContainer.visibility = View.VISIBLE
         if (searchBarHandler.isExpanded()) searchBarHandler.collapseSearchBar()
     }
 
+    /**
+     * Animation mở rộng card hiển thị ảnh
+     */
     private fun animateCardExpansion(onAnimationComplete: () -> Unit) {
         if (isExpandedState) {
             onAnimationComplete()
@@ -366,6 +404,9 @@ class MainActivity : AppCompatActivity() {
             .start()
     }
 
+    /**
+     * Thiết lập bottom navigation
+     */
     private fun setupBottomNavigation() {
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             binding.bottomNavigation.performHapticFeedback(android.view.HapticFeedbackConstants.CONFIRM)
@@ -380,6 +421,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Cập nhật trạng thái navigation dựa trên tab được chọn
+     */
     private fun updateNavigationState(itemId: Int) {
         if (speakerManager.isSpeaking()) {
             speakerManager.pause()
@@ -394,9 +438,7 @@ class MainActivity : AppCompatActivity() {
         binding.historyContainer.visibility = View.GONE
         binding.myGardenContainer.visibility = View.GONE
         binding.settingsContainer.root.visibility = View.GONE
-
         binding.searchBarContainer.visibility = View.GONE
-
         binding.fabSpeak.visibility = View.GONE
         binding.fabMute.visibility = View.GONE
 
@@ -438,6 +480,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Thiết lập các Floating Action Button
+     */
     private fun setupFAB() {
         binding.fabCamera.setOnClickListener {
             binding.fabCamera.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
@@ -456,11 +501,15 @@ class MainActivity : AppCompatActivity() {
 
         binding.fabSpeak.setOnClickListener {
             viewModel.uiState.value.speciesInfo?.let { info ->
-                val text = TextToSpeechGenerator.generateSpeechText(this, info)
-                if (text.isNotEmpty()) {
-                    speakerManager.setLanguage(languageManager.getLanguage())
-                    speakerManager.speak(text)
-                    toggleSpeakerUI(true)
+                lifecycleScope.launch(Dispatchers.IO) {
+                    val text = TextToSpeechGenerator.generateSpeechText(this@MainActivity, info)
+                    if (text.isNotEmpty()) {
+                        withContext(Dispatchers.Main) {
+                            speakerManager.setLanguage(languageManager.getLanguage())
+                            speakerManager.speak(text)
+                            toggleSpeakerUI(true)
+                        }
+                    }
                 }
             }
         }
@@ -471,12 +520,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Chuyển đổi UI của speaker button
+     */
     private fun toggleSpeakerUI(isSpeaking: Boolean) {
         if (!binding.homeContainer.root.isVisible) return
         binding.fabSpeak.visibility = if (!isSpeaking) View.VISIBLE else View.GONE
         binding.fabMute.visibility = if (isSpeaking) View.VISIBLE else View.GONE
     }
 
+    /**
+     * Thiết lập observers cho UI state
+     */
     private fun setupObservers() {
         lifecycleScope.launch {
             viewModel.uiState.collect { state ->
@@ -485,6 +540,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Cập nhật UI màn hình Home dựa trên state
+     */
     private suspend fun updateHomeUI(state: com.nguyendevs.ecolens.model.EcoLensUiState) {
         val isLoading = state.isLoading
         val error = state.error
@@ -507,7 +565,7 @@ class MainActivity : AppCompatActivity() {
 
         homeRoot.findViewById<View>(R.id.loadingCard).isVisible = showOverlay
 
-        if (showOverlay){
+        if (showOverlay) {
             stopLoadingJob?.cancel()
 
             if (loadingStage == LoadingStage.SCIENTIFIC_NAME ||
@@ -519,8 +577,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             loadingAnimationHandler.start()
-        }
-        else {
+        } else {
             if (isPhase2) {
                 stopLoadingJob?.cancel()
                 loadingAnimationHandler.stop()
@@ -543,8 +600,7 @@ class MainActivity : AppCompatActivity() {
             if (initialStateLayout.visibility == View.VISIBLE) {
                 initialStateLayout.visibility = View.GONE
             }
-        }
-        else if (loadingStage == LoadingStage.NONE && state.speciesInfo == null) {
+        } else if (loadingStage == LoadingStage.NONE && state.speciesInfo == null) {
             binding.homeContainer.speciesInfoCard.root.isVisible = false
             homeRoot.findViewById<View>(R.id.errorCard).isVisible = false
             binding.fabSpeak.isVisible = false
@@ -553,8 +609,7 @@ class MainActivity : AppCompatActivity() {
                 null,
                 LoadingStage.NONE
             )
-        }
-        else if (state.speciesInfo != null) {
+        } else if (state.speciesInfo != null) {
             binding.homeContainer.speciesInfoCard.root.isVisible = true
             homeRoot.findViewById<View>(R.id.errorCard).isVisible = false
 
@@ -584,6 +639,9 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
+    /**
+     * Thiết lập xử lý nút Back
+     */
     private fun setupBackNavigation() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {

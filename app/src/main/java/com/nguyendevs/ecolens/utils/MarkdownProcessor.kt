@@ -2,8 +2,20 @@ package com.nguyendevs.ecolens.utils
 
 import java.util.Locale
 
+/**
+ * Xử lý và định dạng text Markdown
+ * Chuyển đổi cú pháp Markdown sang HTML và tô màu trạng thái bảo tồn
+ */
 class MarkdownProcessor {
 
+    /**
+     * Xử lý text Markdown thành HTML
+     *
+     * @param text Text cần xử lý
+     * @param isConservationStatus Có phải là trạng thái bảo tồn không
+     * @param isVietnamese Sử dụng tiếng Việt hay không
+     * @return Text đã được xử lý thành HTML
+     */
     fun process(
         text: String?,
         isConservationStatus: Boolean = false,
@@ -24,6 +36,9 @@ class MarkdownProcessor {
         return result
     }
 
+    /**
+     * Tô màu cho trạng thái bảo tồn dựa trên mức độ nguy cấp
+     */
     private fun colorizeConservationStatus(text: String, isVietnamese: Boolean): String {
         val statusMap = if (isVietnamese) {
             mapOf(
@@ -59,6 +74,10 @@ class MarkdownProcessor {
         return result
     }
 
+    /**
+     * Xóa prefix phân loại (rank) khỏi text
+     * Ví dụ: "Genus: Panthera" -> "Panthera"
+     */
     fun removeRankPrefix(text: String?, prefix: String): String {
         return text?.trim()?.replaceFirst(Regex("^(?i)$prefix\\s*[:\\-\\s]+"), "")
             ?.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
