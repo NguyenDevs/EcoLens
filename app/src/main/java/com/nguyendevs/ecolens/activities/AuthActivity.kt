@@ -2,6 +2,7 @@ package com.nguyendevs.ecolens.activities
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -31,6 +32,8 @@ class AuthActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAuthBinding
     private val userRepository = UserRepository()
     private lateinit var googleSignInClient: GoogleSignInClient
+    private var videoPrepared = false
+
 
     /**
      * Activity result launcher cho Google Sign-In
@@ -51,6 +54,7 @@ class AuthActivity : AppCompatActivity() {
 
     // ==================== LIFECYCLE ====================
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_EcoLens)
         super.onCreate(savedInstanceState)
@@ -62,9 +66,13 @@ class AuthActivity : AppCompatActivity() {
         binding = ActivityAuthBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setupGoogleSignIn()
-        setupTabs()
-        setupButtons()
+        setupVideoLogo()
+
+        binding.root.post {
+            setupGoogleSignIn()
+            setupTabs()
+            setupButtons()
+        }
     }
 
     // ==================== AUTO LOGIN ====================
@@ -327,5 +335,103 @@ class AuthActivity : AppCompatActivity() {
         startActivity(Intent(this@AuthActivity, MainActivity::class.java))
         overridePendingTransition(R.anim.fade_in_3, R.anim.fade_out_3)
         finish()
+    }
+
+    private fun setupVideoLogo() {
+        val videoUri = Uri.parse("android.resource://$packageName/${R.raw.auth_logo}")
+
+        binding.videoLogo.apply {
+            alpha = 0f // Làm trong suốt thay vì ẩn đi
+            visibility = View.VISIBLE // Phải là VISIBLE để VideoView bắt đầu load
+            videoPrepared = false
+
+            setVideoURI(videoUri)
+
+            setOnPreparedListener { mediaPlayer ->
+                try {
+                    videoPrepared = true
+                    mediaPlayer.isLooping = true
+                    mediaPlayer.setVolume(0f, 0f)
+
+                    binding.ivLogo.visibility = View.GONE
+
+                    animate()
+                        .alpha(1f)
+                        .setDuration(500)
+                        .start()
+
+                    start()
+                } catch (e: Exception) {
+                    showFallbackImage()
+                }
+            }
+
+            setOnErrorListener { _, what, extra ->
+                android.util.Log.e("AuthActivity", "Video error: $what / $extra")
+                showFallbackImage()
+                true
+            }
+        }
+        binding.videoLogo.postDelayed({
+            if (!videoPrepared) {
+                android.util.Log.w("AuthActivity", "Video timeout → fallback")
+                showFallbackImage()
+            }
+        }, 2000)
+    }
+
+
+    /**
+     * Hiển thị image fallback với fade-in animation
+     */
+    private fun showFallbackImage() {
+        binding.videoLogo.apply {
+            try {
+                stopPlayback()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            visibility = View.GONE
+        }
+
+        binding.ivLogo.apply {
+            visibility = View.VISIBLE
+            alpha = 0f
+            animate()
+                .alpha(1f)
+                .setDuration(500)
+                .start()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (::binding.isInitialized &&
+            binding.videoLogo.visibility == View.VISIBLE &&
+            binding.videoLogo.isPlaying) {
+            binding.videoLogo.pause()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (::binding.isInitialized &&
+            videoPrepared &&
+            binding.videoLogo.visibility == View.VISIBLE &&
+            !binding.videoLogo.isPlaying
+        ) {
+            binding.videoLogo.start()
+        }
+    }
+
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (::binding.isInitialized) {
+            binding.videoLogo.removeCallbacks(null)
+            if (binding.videoLogo.visibility == View.VISIBLE) {
+                binding.videoLogo.stopPlayback()
+            }
+        }
     }
 }

@@ -15,7 +15,6 @@
             android:clipToPadding="false"
             android:clipChildren="false">
 
-        <!-- Logo và Animation Container -->
         <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/logoContainer"
                 android:layout_width="wrap_content"
@@ -25,6 +24,24 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
+            <com.google.android.material.card.MaterialCardView
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="0dp"
+                    app:cardBackgroundColor="@android:color/transparent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+                <VideoView
+                        android:id="@+id/videoLogo"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@string/app_logo_description"
+                        android:visibility="invisible" />
+            </com.google.android.material.card.MaterialCardView>
+
             <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/ivLogo"
                     android:layout_width="80dp"
@@ -32,6 +49,7 @@
                     android:src="@mipmap/ic_launcher"
                     android:contentDescription="@string/app_logo_description"
                     android:scaleType="centerCrop"
+                    android:visibility="invisible"
                     app:shapeAppearanceOverlay="@style/RoundedCornerImageView"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"

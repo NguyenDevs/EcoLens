@@ -36,6 +36,7 @@
         <!-- Auth Activity (Launcher) -->
         <activity
                 android:name=".activities.AuthActivity"
+                android:hardwareAccelerated="true"
                 android:exported="true"
                 android:theme="@style/Theme.App.Starting">
             <intent-filter>

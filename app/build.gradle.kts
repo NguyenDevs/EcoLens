@@ -103,6 +103,7 @@ dependencies {
     // AndroidX Core
     implementation("androidx.core:core-ktx:1.13.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.airbnb.android:lottie:6.1.0")
 
     // Material Design
     implementation("com.google.android.material:material:1.12.0")
