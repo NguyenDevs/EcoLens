@@ -41,7 +41,8 @@
             android:background="@drawable/bg_history_item_single"
             android:clickable="true"
             android:focusable="true"
-            android:padding="10dp">
+            android:padding="10dp"
+    >
 
         <!-- IMAGE -->
         <com.google.android.material.imageview.ShapeableImageView
