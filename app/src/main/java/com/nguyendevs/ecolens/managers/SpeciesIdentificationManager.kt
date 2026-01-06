@@ -109,8 +109,6 @@ class SpeciesIdentificationManager(
                         onStateUpdate(state)
                     }
 
-                    // Save to history BEFORE updating UI to COMPLETE state
-                    // This ensures currentHistoryEntryId is updated before user can click Retry
                     saveToHistory(existingHistoryId, imageFile)
 
                     onStateUpdate(EcoLensUiState(
