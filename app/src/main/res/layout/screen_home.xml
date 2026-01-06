@@ -233,7 +233,7 @@
         <!-- SPECIES INFO CARD -->
         <include
                 android:id="@+id/speciesInfoCard"
-                layout="@layout/card_species_info_modern"
+                layout="@layout/item_card_species_info"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_lg"

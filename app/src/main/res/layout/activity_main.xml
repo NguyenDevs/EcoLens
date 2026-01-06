@@ -17,7 +17,7 @@
 
         <include
                 android:id="@+id/homeContainer"
-                layout="@layout/screen_home_modern"
+                layout="@layout/screen_home"
                 android:visibility="visible"/>
 
         <FrameLayout
@@ -34,7 +34,7 @@
 
         <include
                 android:id="@+id/settingsContainer"
-                layout="@layout/screen_settings_modern"
+                layout="@layout/screen_settings"
                 android:visibility="gone"/>
     </FrameLayout>
 

@@ -34,7 +34,7 @@
                 android:layout_marginStart="-20dp"
                 android:layout_marginBottom="10dp"
                 android:layout_marginEnd="-20dp"
-                android:layout_height="1.5dp"/>
+                android:layout_height="1.25dp"/>
         <!-- OPTIONS TOGGLE -->
         <FrameLayout
                 android:id="@+id/optionsHeader"
@@ -45,14 +45,13 @@
 
                 android:clickable="true"
                 android:focusable="true"
-                >
+        >
 
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/options"
                     style="@style/TextAppearance.App.Label"
-                    android:textColor="@color/text_secondary"
                     android:layout_marginStart="@dimen/spacing_xxs"/>
 
             <ImageView
@@ -74,139 +73,147 @@
                 android:orientation="vertical"
                 android:visibility="gone">
 
-            <!-- SORT OPTION -->
+            <!-- MERGED OPTIONS CARD -->
             <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/btnSort"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/spacing_sm"
                     style="@style/Widget.App.Card"
-                    app:cardCornerRadius="@dimen/radius_md"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground">
+                    app:cardCornerRadius="@dimen/radius_md">
 
                 <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:padding="@dimen/spacing_md"
-                        android:gravity="center_vertical">
+                        android:orientation="vertical">
 
-                    <FrameLayout
-                            android:layout_width="@dimen/icon_xl"
-                            android:layout_height="@dimen/icon_xl"
-                            android:background="@drawable/bg_flag_rounded"
-                            android:backgroundTint="@color/surface_tint">
-                        <ImageView
-                                android:layout_width="@dimen/icon_md"
-                                android:layout_height="@dimen/icon_md"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_sort"
-                                app:tint="@color/primary"/>
-                    </FrameLayout>
-
+                    <!-- SORT OPTION -->
                     <LinearLayout
-                            android:layout_width="0dp"
+                            android:id="@+id/btnSort"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:layout_marginStart="@dimen/spacing_md">
+                            android:orientation="horizontal"
+                            android:padding="@dimen/spacing_md"
+                            android:gravity="center_vertical"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:background="?attr/selectableItemBackground">
 
-                        <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/sort_by"
-                                style="@style/TextAppearance.App.Body1"
-                                android:textColor="@color/primary_dark"
-                                android:textStyle="bold"/>
-
-                        <TextView
-                                android:id="@+id/tvCurrentSort"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/sort_newest_first"
-                                style="@style/TextAppearance.App.Body2"
-                                android:textColor="@color/success_text"
-                                android:layout_marginTop="2dp"/>
-                    </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- FILTER BY DATE OPTION -->
-            <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/btnFilterByDate"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    style="@style/Widget.App.Card"
-                    android:layout_marginBottom="@dimen/spacing_sm"
-                    app:cardCornerRadius="@dimen/radius_md"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground">
-
-                <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:padding="@dimen/spacing_md"
-                        android:gravity="center_vertical">
-
-                    <FrameLayout
-                            android:layout_width="@dimen/icon_xl"
-                            android:layout_height="@dimen/icon_xl"
-                            android:background="@drawable/bg_flag_rounded"
-                            android:backgroundTint="@color/surface_tint">
-                        <ImageView
-                                android:layout_width="@dimen/icon_md"
-                                android:layout_height="@dimen/icon_md"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_calendar"
-                                app:tint="@color/primary"/>
-                    </FrameLayout>
-
-                    <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:layout_marginStart="@dimen/spacing_md">
-
-                        <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/filter_by_date"
-                                style="@style/TextAppearance.App.Body1"
-                                android:textColor="@color/primary_dark"
-                                android:textStyle="bold"/>
+                        <FrameLayout
+                                android:layout_width="@dimen/icon_xl"
+                                android:layout_height="@dimen/icon_xl"
+                                android:background="@drawable/bg_flag_rounded"
+                                android:backgroundTint="@color/surface_tint">
+                            <ImageView
+                                    android:layout_width="@dimen/icon_md"
+                                    android:layout_height="@dimen/icon_md"
+                                    android:layout_gravity="center"
+                                    android:src="@drawable/ic_sort"
+                                    app:tint="@color/primary"/>
+                        </FrameLayout>
 
                         <LinearLayout
-                                android:layout_width="match_parent"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:gravity="center_vertical"
-                                android:layout_marginTop="2dp">
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:layout_marginStart="@dimen/spacing_md">
 
                             <TextView
-                                    android:id="@+id/tvFilterSubtitle"
-                                    android:layout_width="0dp"
+                                    android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:text="@string/select_date"
-                                    style="@style/TextAppearance.App.Body2"
-                                    android:textColor="@color/text_secondary"/>
+                                    android:text="@string/sort_by"
+                                    style="@style/TextAppearance.App.Body1"
+                                    android:textColor="@color/primary_dark"
+                                    android:textStyle="bold"/>
 
-                            <ImageView
-                                    android:id="@+id/btnClearFilter"
-                                    android:layout_width="@dimen/icon_sm"
-                                    android:layout_height="@dimen/icon_sm"
-                                    android:src="@drawable/ic_close"
-                                    android:background="?attr/selectableItemBackgroundBorderless"
-                                    android:padding="@dimen/spacing_xxs"
-                                    app:tint="@color/error"
-                                    android:visibility="gone"/>
+                            <TextView
+                                    android:id="@+id/tvCurrentSort"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/sort_newest_first"
+                                    style="@style/TextAppearance.App.Body2"
+                                    android:textColor="@color/success_text"
+                                    android:layout_marginTop="2dp"/>
                         </LinearLayout>
                     </LinearLayout>
+
+                    <!-- DIVIDER -->
+                    <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="@color/border_normal"
+                            android:layout_marginStart="@dimen/spacing_xxs"
+                            android:layout_marginEnd="@dimen/spacing_xxs"/>
+
+                    <!-- FILTER BY DATE OPTION -->
+                    <LinearLayout
+                            android:id="@+id/btnFilterByDate"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/spacing_md"
+                            android:gravity="center_vertical"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:background="?attr/selectableItemBackground">
+
+                        <FrameLayout
+                                android:layout_width="@dimen/icon_xl"
+                                android:layout_height="@dimen/icon_xl"
+                                android:background="@drawable/bg_flag_rounded"
+                                android:backgroundTint="@color/surface_tint">
+                            <ImageView
+                                    android:layout_width="@dimen/icon_md"
+                                    android:layout_height="@dimen/icon_md"
+                                    android:layout_gravity="center"
+                                    android:src="@drawable/ic_calendar"
+                                    app:tint="@color/primary"/>
+                        </FrameLayout>
+
+                        <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:layout_marginStart="@dimen/spacing_md">
+
+                            <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/filter_by_date"
+                                    style="@style/TextAppearance.App.Body1"
+                                    android:textColor="@color/primary_dark"
+                                    android:textStyle="bold"/>
+
+                            <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:gravity="center_vertical"
+                                    android:layout_marginTop="2dp">
+
+                                <TextView
+                                        android:id="@+id/tvFilterSubtitle"
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:text="@string/select_date"
+                                        style="@style/TextAppearance.App.Body2"
+                                        android:textColor="@color/text_secondary"/>
+
+                                <ImageView
+                                        android:id="@+id/btnClearFilter"
+                                        android:layout_width="@dimen/icon_sm"
+                                        android:layout_height="@dimen/icon_sm"
+                                        android:src="@drawable/ic_close"
+                                        android:background="?attr/selectableItemBackgroundBorderless"
+                                        android:padding="@dimen/spacing_xxs"
+                                        app:tint="@color/error"
+                                        android:visibility="gone"/>
+                            </LinearLayout>
+                        </LinearLayout>
+                    </LinearLayout>
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
