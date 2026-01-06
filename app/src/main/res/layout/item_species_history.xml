@@ -8,8 +8,6 @@
         android:orientation="vertical"
         android:background="@android:color/transparent">
 
-    <!-- MODERN HISTORY ITEM -->
-
     <!-- DATE HEADER -->
     <TextView
             android:id="@+id/tvDateHeader"
@@ -22,15 +20,25 @@
             style="@style/TextAppearance.App.Body1"
             android:textColor="@color/primary"
             android:textStyle="bold"
-            android:visibility="visible"
+            android:visibility="gone"
             tools:visibility="visible"/>
+
+    <!-- DIVIDER (chỉ hiện cho items không phải đầu tiên) -->
+    <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="@dimen/spacing_xxs"
+            android:layout_marginEnd="@dimen/spacing_xxs"
+            android:background="@color/border_normal"
+            android:visibility="gone"/>
 
     <!-- ITEM CARD -->
     <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/itemContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_history_item_border"
+            android:background="@drawable/bg_history_item_single"
             android:clickable="true"
             android:focusable="true"
             android:padding="10dp">

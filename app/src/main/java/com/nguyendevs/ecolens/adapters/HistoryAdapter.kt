@@ -201,37 +201,25 @@ class HistoryAdapter(
         }
 
         /**
-         * Setup rounded corners và margins để tạo border liên tục giữa các items
-         * - Item đầu tiên: top corners bo tròn
-         * - Item cuối cùng: bottom corners bo tròn
-         * - Item giữa: không bo tròn, margin âm để border không bị gấp đôi
+         * Setup rounded corners và border selective
+         * - Item đầu tiên: border top/left/right, top corners bo tròn
+         * - Item cuối cùng: border bottom/left/right, bottom corners bo tròn
+         * - Item giữa: chỉ border left/right, không có top/bottom border
+         * - Divider với margin cho items không phải đầu tiên
          */
         private fun setupCardAppearance(isFirstItemOfDay: Boolean, isLastItemOfDay: Boolean) {
-            val layoutParams = itemView.layoutParams as RecyclerView.LayoutParams
-            layoutParams.topMargin = if (!isFirstItemOfDay) -strokeWidth else 0
-            itemView.layoutParams = layoutParams
+            // Hiển thị divider cho các items không phải đầu tiên trong ngày
+            binding.divider.visibility = if (!isFirstItemOfDay) View.VISIBLE else View.GONE
 
-            val bgDrawable = GradientDrawable().apply {
-                setColor(colorSurface)
-                setStroke(strokeWidth, strokeColor)
-
-                cornerRadii = when {
-                    isFirstItemOfDay && isLastItemOfDay -> floatArrayOf(
-                        radius, radius, radius, radius, radius, radius, radius, radius
-                    )
-                    isFirstItemOfDay -> floatArrayOf(
-                        radius, radius, radius, radius, 0f, 0f, 0f, 0f
-                    )
-                    isLastItemOfDay -> floatArrayOf(
-                        0f, 0f, 0f, 0f, radius, radius, radius, radius
-                    )
-                    else -> floatArrayOf(
-                        0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f
-                    )
-                }
+            // Set background drawable tùy theo vị trí
+            val backgroundRes = when {
+                isFirstItemOfDay && isLastItemOfDay -> R.drawable.bg_history_item_single
+                isFirstItemOfDay -> R.drawable.bg_history_item_top
+                isLastItemOfDay -> R.drawable.bg_history_item_bottom
+                else -> R.drawable.bg_history_item_middle
             }
 
-            binding.itemContainer.background = bgDrawable
+            binding.itemContainer.setBackgroundResource(backgroundRes)
         }
     }
 }
