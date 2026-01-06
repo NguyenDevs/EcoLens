@@ -32,7 +32,6 @@
                 android:layout_width="match_parent"
                 android:background="@color/border_normal"
                 android:layout_marginStart="-20dp"
-                android:layout_marginBottom="10dp"
                 android:layout_marginEnd="-20dp"
                 android:layout_height="1.25dp"/>
 
@@ -40,19 +39,21 @@
         <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"
-                android:paddingStart="@dimen/padding_screen_horizontal"
-                android:paddingEnd="@dimen/padding_screen_horizontal">
+                android:layout_weight="1">
 
             <!-- CHAT HISTORY LIST -->
             <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvChatHistory"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="36dp"
                     android:clipToPadding="false"
                     android:scrollbars="none"
                     android:overScrollMode="ifContentScrolls"
-                    android:paddingBottom="80dp"/>
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
             <!-- EMPTY STATE -->
             <LinearLayout

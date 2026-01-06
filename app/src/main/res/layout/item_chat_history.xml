@@ -28,7 +28,7 @@
             android:id="@+id/cardSession"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
+            android:layout_marginBottom="2dp"
             style="@style/Widget.App.Card"
             app:cardCornerRadius="@dimen/radius_md">
 
@@ -54,7 +54,7 @@
                         android:padding="-10dp"
                         android:src="@drawable/bg_gemini_ring_gradient"
                         android:scaleType="fitXY"
-                        android:visibility="visible" />
+                        android:visibility="visible"/>
 
                 <ImageView
                         android:id="@+id/ivAiIcon"
@@ -62,15 +62,17 @@
                         android:layout_height="@dimen/icon_lg"
                         android:src="@drawable/ic_gemini_sparkle"
                         android:layout_gravity="center"
-                        android:padding="4dp"/> </FrameLayout>
+                        android:padding="4dp"/>
+            </FrameLayout>
 
             <!-- INFO SECTION -->
             <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:orientation="vertical"
                     android:layout_marginStart="@dimen/spacing_md"
-                    android:orientation="vertical">
+                    android:layout_marginEnd="@dimen/spacing_xs">
 
                 <TextView
                         android:id="@+id/tvTitle"
@@ -101,7 +103,10 @@
                     android:layout_height="wrap_content"
                     android:text="14:30"
                     style="@style/TextAppearance.App.Caption"
-                    android:textColor="@color/text_tertiary"/>
+                    android:textColor="@color/text_tertiary"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
 
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

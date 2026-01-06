@@ -244,7 +244,7 @@
                 android:paddingStart="20dp"
                 android:paddingEnd="20dp"
                 android:paddingTop="0dp"
-                android:paddingBottom="80dp"
+                android:paddingBottom="48dp"
                 android:clipToPadding="false"
                 android:scrollbars="none"
                 android:overScrollMode="ifContentScrolls"
