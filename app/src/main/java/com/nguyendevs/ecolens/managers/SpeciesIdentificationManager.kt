@@ -153,19 +153,29 @@ class SpeciesIdentificationManager(
             withContext(Dispatchers.IO) {
                 var imagePathToSave: String? = null
                 var localImagePathToSave: String? = null
+                var timestamp = System.currentTimeMillis()
+                var isFavorite = false
 
-                if (existingHistoryId != null) {
-                    val existingEntry = historyRepository.getHistoryById(existingHistoryId)
+                var idToUpdate = existingHistoryId
+
+                if (idToUpdate != null) {
+                    val existingEntry = historyRepository.getHistoryById(idToUpdate)
                     if (existingEntry != null) {
                         imagePathToSave = existingEntry.imagePath
                         localImagePathToSave = existingEntry.localImagePath
+                        // timestamp = existingEntry.timestamp
+                        isFavorite = existingEntry.isFavorite
 
                         if (localImagePathToSave.isNullOrEmpty() && imagePathToSave.isNullOrEmpty()) {
                             localImagePathToSave = ImageUtils.saveFileToInternalStorage(context, imageFile)
                             imagePathToSave = localImagePathToSave
                         }
+                    } else {
+                        idToUpdate = null
                     }
-                } else {
+                }
+                
+                if (idToUpdate == null) {
                     if (currentImageUri != null && currentImageUri!!.scheme == "file") {
                         localImagePathToSave = currentImageUri!!.path
                     } else {
@@ -175,24 +185,20 @@ class SpeciesIdentificationManager(
                 }
 
                 if (imagePathToSave != null) {
-                    // Keep original timestamp if updating, or use current time if new
-                    val timestamp = if (existingHistoryId != null) {
-                        historyRepository.getHistoryById(existingHistoryId)?.timestamp ?: System.currentTimeMillis()
-                    } else {
-                        System.currentTimeMillis()
-                    }
-
                     val entry = HistoryEntry(
-                        id = existingHistoryId ?: 0,
+                        id = idToUpdate ?: 0,
                         imagePath = imagePathToSave ?: "",
                         localImagePath = localImagePathToSave ?: "",
                         speciesInfo = currentInfo,
-                        timestamp = timestamp
+                        timestamp = timestamp,
+                        isFavorite = isFavorite
                     )
 
-                    if (existingHistoryId != null) {
+                    if (idToUpdate != null) {
+                        Log.d(TAG, "Updating history entry: ${entry.id} - ${entry.speciesInfo.commonName}")
                         historyRepository.update(entry)
                     } else {
+                        Log.d(TAG, "Inserting new history entry")
                         val newId = historyRepository.insert(entry)
                         currentHistoryEntryId = newId.toInt()
                     }
