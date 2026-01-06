@@ -5,6 +5,14 @@
     <!-- BASE APPLICATION THEME                     -->
     <!-- ========================================== -->
 
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#F9F9F9</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:statusBarColor">#F9F9F9</item>
+    </style>
+
+
     <!-- Base application theme for Light Mode -->
     <style name="Base.Theme.EcoLens" parent="Theme.Material3.Light.NoActionBar">
         <!-- Primary colors -->

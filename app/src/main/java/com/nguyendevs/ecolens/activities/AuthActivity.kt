@@ -52,6 +52,7 @@ class AuthActivity : AppCompatActivity() {
     // ==================== LIFECYCLE ====================
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(R.style.Theme_EcoLens)
         super.onCreate(savedInstanceState)
 
         if (checkAutoLogin()) {
