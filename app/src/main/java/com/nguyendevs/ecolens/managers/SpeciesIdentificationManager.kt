@@ -109,13 +109,15 @@ class SpeciesIdentificationManager(
                         onStateUpdate(state)
                     }
 
+                    // Save to history BEFORE updating UI to COMPLETE state
+                    // This ensures currentHistoryEntryId is updated before user can click Retry
+                    saveToHistory(existingHistoryId, imageFile)
+
                     onStateUpdate(EcoLensUiState(
                         isLoading = false,
                         speciesInfo = currentSpeciesInfo,
                         loadingStage = LoadingStage.COMPLETE
                     ))
-
-                    saveToHistory(existingHistoryId, imageFile)
 
                 } catch (e: GeoBlockedException) {
                     onStateUpdate(EcoLensUiState(
@@ -175,12 +177,19 @@ class SpeciesIdentificationManager(
                 }
 
                 if (imagePathToSave != null) {
+                    // Keep original timestamp if updating, or use current time if new
+                    val timestamp = if (existingHistoryId != null) {
+                        historyRepository.getHistoryById(existingHistoryId)?.timestamp ?: System.currentTimeMillis()
+                    } else {
+                        System.currentTimeMillis()
+                    }
+
                     val entry = HistoryEntry(
                         id = existingHistoryId ?: 0,
                         imagePath = imagePathToSave ?: "",
                         localImagePath = localImagePathToSave ?: "",
                         speciesInfo = currentInfo,
-                        timestamp = System.currentTimeMillis()
+                        timestamp = timestamp
                     )
 
                     if (existingHistoryId != null) {
