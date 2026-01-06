@@ -14,14 +14,16 @@
             android:id="@+id/appBarLayout"
             android:layout_width="match_parent"
             android:layout_height="320dp"
-            android:background="@android:color/transparent">
+            android:background="@android:color/transparent"
+            app:liftOnScroll="true"
+            app:liftOnScrollTargetViewId="@id/scrollView">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
                 android:id="@+id/collapsingToolbar"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:contentScrim="@android:color/transparent"
-                app:layout_scrollFlags="scroll|snap">
+                app:layout_scrollFlags="scroll|exitUntilCollapsed|snap">
 
             <ImageView
                     android:id="@+id/ivDetailImage"
@@ -70,14 +72,15 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
+            android:id="@+id/scrollView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="-24dp"
             android:elevation="10dp"
             android:overScrollMode="never"
-            android:paddingBottom="80dp"
             android:clipToPadding="false"
             android:scrollbars="none"
+            android:fillViewport="true"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
@@ -100,6 +103,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:layout_marginTop="5dp"
                         android:orientation="vertical">
 
                     <TextView
@@ -128,6 +132,7 @@
                         android:background="@drawable/bg_white_rounded"
                         android:backgroundTint="@color/surface_tint"
                         android:padding="10dp"
+                        android:layout_marginTop="5dp"
                         android:src="@drawable/ic_share"
                         android:contentDescription="@string/share_info"
                         app:tint="@color/primary"/>
