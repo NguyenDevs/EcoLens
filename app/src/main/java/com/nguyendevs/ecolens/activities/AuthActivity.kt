@@ -167,9 +167,14 @@ class AuthActivity : AppCompatActivity() {
      * Cấu hình tabs Login/Register với UI thay đổi theo tab
      */
     private fun setupTabs() {
+        updateTabTypeface(binding.tabLayoutAuth.selectedTabPosition)
+
         binding.tabLayoutAuth.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
-                when (tab?.position) {
+                val position = tab?.position ?: 0
+                updateTabTypeface(position)
+
+                when (position) {
                     0 -> {
                         binding.tilConfirmPassword.visibility = View.GONE
                         binding.cbAgreeTerms.visibility = View.GONE
@@ -188,6 +193,26 @@ class AuthActivity : AppCompatActivity() {
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
             override fun onTabReselected(tab: TabLayout.Tab?) {}
         })
+    }
+
+    private fun updateTabTypeface(selectedPosition: Int) {
+        val slidingTabStrip = binding.tabLayoutAuth.getChildAt(0) as? android.view.ViewGroup ?: return
+
+        for (i in 0 until slidingTabStrip.childCount) {
+            val tabView = slidingTabStrip.getChildAt(i) as? android.view.ViewGroup
+            tabView?.let {
+                for (j in 0 until it.childCount) {
+                    val child = it.getChildAt(j)
+                    if (child is android.widget.TextView) {
+                        child.typeface = if (i == selectedPosition) {
+                            android.graphics.Typeface.DEFAULT_BOLD
+                        } else {
+                            android.graphics.Typeface.DEFAULT
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -341,8 +366,8 @@ class AuthActivity : AppCompatActivity() {
         val videoUri = Uri.parse("android.resource://$packageName/${R.raw.auth_logo}")
 
         binding.videoLogo.apply {
-            alpha = 0f // Làm trong suốt thay vì ẩn đi
-            visibility = View.VISIBLE // Phải là VISIBLE để VideoView bắt đầu load
+            alpha = 0f
+            visibility = View.VISIBLE
             videoPrepared = false
 
             setVideoURI(videoUri)
