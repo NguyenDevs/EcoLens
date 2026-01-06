@@ -11,7 +11,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.nguyendevs.ecolens.R
-import com.nguyendevs.ecolens.databinding.ItemHistoryEntryModernBinding
+import com.nguyendevs.ecolens.databinding.ItemSpeciesHistoryBinding
 import com.nguyendevs.ecolens.model.HistoryEntry
 import io.noties.markwon.Markwon
 import java.io.File
@@ -82,7 +82,7 @@ class HistoryAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryViewHolder {
-        val binding = ItemHistoryEntryModernBinding.inflate(
+        val binding = ItemSpeciesHistoryBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
@@ -115,7 +115,7 @@ class HistoryAdapter(
     // ==================== VIEW HOLDER ====================
 
     inner class HistoryViewHolder(
-        private val binding: ItemHistoryEntryModernBinding
+        private val binding: ItemSpeciesHistoryBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
         private val radius = itemView.resources.displayMetrics.density * 16

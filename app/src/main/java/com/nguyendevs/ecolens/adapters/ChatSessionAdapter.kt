@@ -5,7 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
 import androidx.recyclerview.widget.RecyclerView
-import com.nguyendevs.ecolens.databinding.ItemChatEntryModernBinding
+import com.nguyendevs.ecolens.databinding.ItemChatHistoryBinding
 import com.nguyendevs.ecolens.model.ChatSession
 import io.noties.markwon.Markwon
 import java.time.Instant
@@ -41,7 +41,7 @@ class ChatSessionAdapter(
         if (!::markwon.isInitialized) {
             markwon = Markwon.create(parent.context)
         }
-        val binding = ItemChatEntryModernBinding.inflate(
+        val binding = ItemChatHistoryBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
@@ -70,7 +70,7 @@ class ChatSessionAdapter(
     // ==================== VIEW HOLDER ====================
 
     inner class ChatSessionViewHolder(
-        private val binding: ItemChatEntryModernBinding
+        private val binding: ItemChatHistoryBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
         /**

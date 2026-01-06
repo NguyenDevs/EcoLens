@@ -26,7 +26,7 @@ import androidx.transition.TransitionManager
 import com.bumptech.glide.Glide
 import com.google.firebase.database.FirebaseDatabase
 import com.nguyendevs.ecolens.activities.CameraActivity
-import com.nguyendevs.ecolens.databinding.ActivityMainModernBinding
+import com.nguyendevs.ecolens.databinding.ActivityMainBinding
 import com.nguyendevs.ecolens.fragments.ChatHistoryFragment
 import com.nguyendevs.ecolens.fragments.HistoryFragment
 import com.nguyendevs.ecolens.handlers.*
@@ -45,7 +45,7 @@ import java.io.File
  */
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityMainModernBinding
+    private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: EcoLensViewModel
 
     private lateinit var imageZoomHandler: ImageZoomHandler
@@ -109,7 +109,7 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
         }
 
-        binding = ActivityMainModernBinding.inflate(layoutInflater)
+        binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         // Xử lý transition animation từ splash screen

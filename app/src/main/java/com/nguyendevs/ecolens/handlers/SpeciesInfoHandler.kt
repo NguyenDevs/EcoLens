@@ -25,7 +25,7 @@ import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.nguyendevs.ecolens.R
-import com.nguyendevs.ecolens.databinding.ActivityMainModernBinding
+import com.nguyendevs.ecolens.databinding.ActivityMainBinding
 import com.nguyendevs.ecolens.model.LoadingStage
 import com.nguyendevs.ecolens.model.SpeciesInfo
 import kotlinx.coroutines.*
@@ -37,7 +37,7 @@ import java.io.File
  */
 class SpeciesInfoHandler(
     private val context: Context,
-    private val binding: ActivityMainModernBinding,
+    private val binding: ActivityMainBinding,
     private val onCopySuccess: (String) -> Unit,
     private val onRetryClick: () -> Unit
 ) {

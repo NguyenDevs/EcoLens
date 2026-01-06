@@ -20,7 +20,7 @@ import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import com.nguyendevs.ecolens.R
-import com.nguyendevs.ecolens.databinding.ActivityCameraModernBinding
+import com.nguyendevs.ecolens.databinding.ActivityCameraBinding
 import com.nguyendevs.ecolens.utils.ImageUtils
 import java.io.File
 import java.time.LocalDateTime
@@ -46,7 +46,7 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
-    private lateinit var binding: ActivityCameraModernBinding
+    private lateinit var binding: ActivityCameraBinding
     private lateinit var cameraExecutor: ExecutorService
     private var rotateAnimation: Animation? = null
 
@@ -70,7 +70,7 @@ class CameraActivity : AppCompatActivity() {
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityCameraModernBinding.inflate(layoutInflater)
+        binding = ActivityCameraBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         cameraExecutor = Executors.newSingleThreadExecutor()

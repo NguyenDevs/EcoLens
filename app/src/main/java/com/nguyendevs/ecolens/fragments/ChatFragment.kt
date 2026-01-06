@@ -13,7 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.adapters.ChatAdapter
-import com.nguyendevs.ecolens.databinding.FragmentChatModernBinding
+import com.nguyendevs.ecolens.databinding.FragmentChatBinding
 import com.nguyendevs.ecolens.model.ChatMessage
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.flow.collectLatest
@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
 
     private val viewModel: EcoLensViewModel by activityViewModels()
-    private var _binding: FragmentChatModernBinding? = null
+    private var _binding: FragmentChatBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var adapter: ChatAdapter
@@ -60,7 +60,7 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentChatModernBinding.inflate(inflater, container, false)
+        _binding = FragmentChatBinding.inflate(inflater, container, false)
         return binding.root
     }
 

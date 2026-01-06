@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.nguyendevs.ecolens.R
-import com.nguyendevs.ecolens.databinding.ItemLanguageModernBinding
+import com.nguyendevs.ecolens.databinding.ItemLanguagesBinding
 import com.nguyendevs.ecolens.model.Language
 
 /**
@@ -20,7 +20,7 @@ class LanguageAdapter(
     // ==================== ADAPTER METHODS ====================
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LanguageViewHolderModern {
-        val binding = ItemLanguageModernBinding.inflate(
+        val binding = ItemLanguagesBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
@@ -45,7 +45,7 @@ class LanguageAdapter(
     // ==================== VIEW HOLDER ====================
 
     inner class LanguageViewHolderModern(
-        private val binding: ItemLanguageModernBinding
+        private val binding: ItemLanguagesBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
         private val colorGreenPrimary = ContextCompat.getColor(itemView.context, R.color.green_primary)

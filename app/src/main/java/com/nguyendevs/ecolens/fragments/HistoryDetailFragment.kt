@@ -28,7 +28,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.GenericTransitionOptions
 import com.google.gson.Gson
 import com.nguyendevs.ecolens.R
-import com.nguyendevs.ecolens.databinding.FragmentHistoryDetailModernBinding
+import com.nguyendevs.ecolens.databinding.FragmentSpeciesHistoryDetailBinding
 import com.nguyendevs.ecolens.managers.SpeakerManager
 import com.nguyendevs.ecolens.model.HistoryEntry
 import com.nguyendevs.ecolens.model.SpeciesInfo
@@ -41,7 +41,7 @@ import java.io.File
 
 class HistoryDetailFragment : Fragment() {
 
-    private var _binding: FragmentHistoryDetailModernBinding? = null
+    private var _binding: FragmentSpeciesHistoryDetailBinding? = null
     private val binding get() = _binding!!
 
     private val viewModel: EcoLensViewModel by activityViewModels()
@@ -74,7 +74,7 @@ class HistoryDetailFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        _binding = FragmentHistoryDetailModernBinding.inflate(inflater, container, false)
+        _binding = FragmentSpeciesHistoryDetailBinding.inflate(inflater, container, false)
         return binding.root
     }
 

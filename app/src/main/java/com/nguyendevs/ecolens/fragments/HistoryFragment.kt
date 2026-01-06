@@ -15,7 +15,7 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.gson.Gson
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.adapters.HistoryAdapter
-import com.nguyendevs.ecolens.databinding.ScreenHistoryModernBinding
+import com.nguyendevs.ecolens.databinding.ScreenSpeciesHistoryBinding
 import com.nguyendevs.ecolens.model.HistoryEntry
 import com.nguyendevs.ecolens.model.HistorySortOption
 import com.nguyendevs.ecolens.view.EcoLensViewModel
@@ -37,7 +37,7 @@ import java.util.TimeZone
 class HistoryFragment : Fragment() {
 
     private val viewModel: EcoLensViewModel by activityViewModels()
-    private var _binding: ScreenHistoryModernBinding? = null
+    private var _binding: ScreenSpeciesHistoryBinding? = null
     private val binding get() = _binding!!
 
     private val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.getDefault())
@@ -56,7 +56,7 @@ class HistoryFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = ScreenHistoryModernBinding.inflate(inflater, container, false)
+        _binding = ScreenSpeciesHistoryBinding.inflate(inflater, container, false)
         return binding.root
     }
 

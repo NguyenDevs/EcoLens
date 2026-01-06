@@ -11,7 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.adapters.ChatSessionAdapter
-import com.nguyendevs.ecolens.databinding.ScreenAssistantModernBinding
+import com.nguyendevs.ecolens.databinding.ScreenChatHistoryBinding
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 class ChatHistoryFragment : Fragment() {
 
     private val viewModel: EcoLensViewModel by activityViewModels()
-    private var _binding: ScreenAssistantModernBinding? = null
+    private var _binding: ScreenChatHistoryBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var adapter: ChatSessionAdapter
@@ -36,7 +36,7 @@ class ChatHistoryFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = ScreenAssistantModernBinding.inflate(inflater, container, false)
+        _binding = ScreenChatHistoryBinding.inflate(inflater, container, false)
         return binding.root
     }
 

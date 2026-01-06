@@ -14,7 +14,7 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.nguyendevs.ecolens.R
-import com.nguyendevs.ecolens.databinding.ItemChatMessageModernBinding
+import com.nguyendevs.ecolens.databinding.ItemChatMessageBinding
 import com.nguyendevs.ecolens.model.ChatMessage
 import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.Markwon
@@ -61,7 +61,7 @@ class ChatAdapter(
                 })
                 .build()
         }
-        val binding = ItemChatMessageModernBinding.inflate(
+        val binding = ItemChatMessageBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
@@ -117,7 +117,7 @@ class ChatAdapter(
     // ==================== VIEW HOLDER ====================
 
     inner class ChatViewHolder(
-        private val binding: ItemChatMessageModernBinding
+        private val binding: ItemChatMessageBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
         private val colorWhite = ContextCompat.getColor(itemView.context, R.color.white)
