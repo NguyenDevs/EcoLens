@@ -5,9 +5,8 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -16,13 +15,13 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.firebase.auth.FirebaseAuth
 import com.nguyendevs.ecolens.MainActivity
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.activities.AuthActivity
 import com.nguyendevs.ecolens.database.HistoryDatabase
 import com.nguyendevs.ecolens.database.UserRepository
+import com.nguyendevs.ecolens.databinding.ScreenSettingsBinding
 import com.nguyendevs.ecolens.fragments.AboutFragment
 import com.nguyendevs.ecolens.fragments.LanguageSelectionFragment
 import com.nguyendevs.ecolens.managers.LanguageManager
@@ -32,21 +31,19 @@ import kotlinx.coroutines.withContext
 
 /**
  * Handler quản lý các settings của ứng dụng
- * Bao gồm: ngôn ngữ, dark mode, logout, social links
+ * Bao gồm: ngôn ngữ, dark mode, logout, social links, account details expansion
  * Hỗ trợ smooth transition khi chuyển dark mode
  */
 class SettingsHandler(
     private val activity: AppCompatActivity,
     private val languageManager: LanguageManager,
-    private val settingsView: View
+    private val binding: ScreenSettingsBinding
 ) {
 
-    private val tvCurrentLanguage: TextView = settingsView.findViewById(R.id.tvCurrentLanguage)
-    private val switchDarkMode: SwitchMaterial = settingsView.findViewById(R.id.switchDarkMode)
-    private val ivDarkModeIcon: ImageView = settingsView.findViewById(R.id.ivDarkModeIcon)
     private val userRepository = UserRepository()
 
     private var isTransitioning = false
+    private var isAccountDetailsExpanded = false
 
     init {
         updateLanguageDisplay()
@@ -60,37 +57,59 @@ class SettingsHandler(
      * Cấu hình tất cả click listeners cho settings options
      */
     private fun setupClickListeners() {
-        settingsView.findViewById<View>(R.id.languageOption).setOnClickListener {
+        binding.languageOption.setOnClickListener {
             openFragment(LanguageSelectionFragment(), "language_selection")
         }
 
-        settingsView.findViewById<View>(R.id.darkModeOption).setOnClickListener {
+        binding.darkModeOption.setOnClickListener {
             if (!isTransitioning) {
-                switchDarkMode.toggle()
+                binding.switchDarkMode.toggle()
             }
         }
 
-        settingsView.findViewById<View>(R.id.logoutOption).setOnClickListener {
+        // Account Details Expansion
+        binding.accountDetailsOption.setOnClickListener {
+            toggleAccountDetails()
+        }
+
+        // Account Detail Options
+        binding.changeUsernameOption.setOnClickListener {
+            Toast.makeText(activity, "Change Username - Coming soon", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.changePasswordOption.setOnClickListener {
+            Toast.makeText(activity, "Change Password - Coming soon", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.linkGoogleOption.setOnClickListener {
+            Toast.makeText(activity, "Link Google Account - Coming soon", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.deleteAccountOption.setOnClickListener {
+            showDeleteAccountConfirmDialog()
+        }
+
+        binding.logoutOption.setOnClickListener {
             showLogoutConfirmDialog()
         }
 
-        settingsView.findViewById<View>(R.id.aboutOption).setOnClickListener {
+        binding.aboutOption.setOnClickListener {
             openFragment(AboutFragment(), "about_screen")
         }
 
-        settingsView.findViewById<View>(R.id.btnFeedback).setOnClickListener {
+        binding.btnFeedback.setOnClickListener {
             sendEmail()
         }
 
-        settingsView.findViewById<View>(R.id.btnFacebook).setOnClickListener {
+        binding.btnFacebook.setOnClickListener {
             openUrl("https://www.facebook.com/NguyenDevs")
         }
 
-        settingsView.findViewById<View>(R.id.btnInstagram).setOnClickListener {
+        binding.btnInstagram.setOnClickListener {
             openUrl("https://www.instagram.com/nguyendevs/")
         }
 
-        settingsView.findViewById<View>(R.id.btnTiktok).setOnClickListener {
+        binding.btnTiktok.setOnClickListener {
             openUrl("https://www.tiktok.com/@nguyendevs/")
         }
     }
@@ -102,8 +121,8 @@ class SettingsHandler(
         val sharedPref = activity.getSharedPreferences("app_settings", AppCompatActivity.MODE_PRIVATE)
         val isDarkMode = sharedPref.getBoolean("dark_mode", false)
 
-        switchDarkMode.isChecked = isDarkMode
-        switchDarkMode.jumpDrawablesToCurrentState()
+        binding.switchDarkMode.isChecked = isDarkMode
+        binding.switchDarkMode.jumpDrawablesToCurrentState()
         updateDarkModeIcon(isDarkMode, false)
 
         val nightMode = if (isDarkMode) {
@@ -113,20 +132,119 @@ class SettingsHandler(
         }
         AppCompatDelegate.setDefaultNightMode(nightMode)
 
-        switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
+        binding.switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
             if (isTransitioning) {
                 return@setOnCheckedChangeListener
             }
 
             isTransitioning = true
-            switchDarkMode.isEnabled = false
+            binding.switchDarkMode.isEnabled = false
 
-            settingsView.postDelayed({
+            binding.root.postDelayed({
                 if (!activity.isFinishing && !activity.isDestroyed) {
                     applyThemeSmoothly(isChecked)
                 }
             }, 300)
         }
+    }
+
+    // ==================== ACCOUNT DETAILS EXPANSION ====================
+
+    /**
+     * Toggle expand/collapse account details với smooth animation và staggered delay
+     */
+    private fun toggleAccountDetails() {
+        if (isTransitioning) return
+
+        isAccountDetailsExpanded = !isAccountDetailsExpanded
+        isTransitioning = true
+
+        if (isAccountDetailsExpanded) {
+            expandAccountDetails()
+        } else {
+            collapseAccountDetails()
+        }
+    }
+
+    /**
+     * Expand animation với staggered delay cho mỗi item
+     */
+    private fun expandAccountDetails() {
+        binding.dividerUsername.visibility = View.VISIBLE
+        binding.dividerChangepassword.visibility = View.VISIBLE
+        binding.dividerLinkgoogle.visibility = View.VISIBLE
+        binding.dividerDeleteaccount.visibility = View.VISIBLE
+
+        // Show container
+        binding.accountDetailsContainer.visibility = View.VISIBLE
+        binding.accountDetailsContainer.alpha = 1f
+
+        // Rotate chevron
+        binding.ivExpandIcon.animate()
+            .rotation(180f)
+            .setDuration(300)
+            .setInterpolator(AccelerateDecelerateInterpolator())
+            .start()
+
+        val options = listOf(
+            binding.changeUsernameOption,
+            binding.changePasswordOption,
+            binding.linkGoogleOption,
+            binding.deleteAccountOption
+        )
+
+        options.forEachIndexed { index, option ->
+            option.alpha = 0f
+            option.translationY = -20f
+            option.visibility = View.VISIBLE
+
+            option.animate()
+                .alpha(1f)
+                .translationY(0f)
+                .setStartDelay((index * 50L))
+                .setDuration(250)
+                .setInterpolator(AccelerateDecelerateInterpolator())
+                .withEndAction {
+                    if (index == options.size - 1) {
+                        isTransitioning = false
+                    }
+                }
+                .start()
+        }
+    }
+
+    /**
+     * Collapse animation - thu ngược lên cùng lúc không có delay
+     */
+    private fun collapseAccountDetails() {
+        binding.accountDetailsContainer.animate()
+            .alpha(0f)
+            .translationY(-30f)
+            .setDuration(250)
+            .setInterpolator(AccelerateDecelerateInterpolator())
+            .withEndAction {
+                binding.dividerDeleteaccount.visibility = View.GONE
+                binding.dividerLinkgoogle.visibility = View.GONE
+                binding.dividerChangepassword.visibility = View.GONE
+                binding.dividerUsername.visibility = View.GONE
+                // Hide container
+                binding.accountDetailsContainer.visibility = View.GONE
+                binding.accountDetailsContainer.translationY = 0f
+
+                binding.changeUsernameOption.visibility = View.GONE
+                binding.changePasswordOption.visibility = View.GONE
+                binding.linkGoogleOption.visibility = View.GONE
+                binding.deleteAccountOption.visibility = View.GONE
+
+                isTransitioning = false
+            }
+            .start()
+
+        binding.ivExpandIcon.animate()
+            .rotation(0f)
+            .setDuration(250)
+            .setInterpolator(AccelerateDecelerateInterpolator())
+            .start()
     }
 
     // ==================== LANGUAGE ====================
@@ -136,7 +254,7 @@ class SettingsHandler(
      */
     fun updateLanguageDisplay() {
         val currentLang = languageManager.getLanguage()
-        tvCurrentLanguage.text = when (currentLang) {
+        binding.tvCurrentLanguage.text = when (currentLang) {
             LanguageManager.LANG_EN -> activity.getString(R.string.lang_english)
             LanguageManager.LANG_VI -> activity.getString(R.string.lang_vietnamese)
             else -> activity.getString(R.string.lang_english)
@@ -184,7 +302,6 @@ class SettingsHandler(
     private fun createBitmapFromView(view: View): Bitmap? {
         return try {
             val scale = 1.0f
-
             val width = (view.width * scale).toInt()
             val height = (view.height * scale).toInt()
 
@@ -219,19 +336,68 @@ class SettingsHandler(
         val targetIcon = if (isDarkMode) R.drawable.ic_sun else R.drawable.ic_moon
 
         if (animate) {
-            ivDarkModeIcon.animate()
+            binding.ivDarkModeIcon.animate()
                 .alpha(0f)
                 .setDuration(150)
                 .withEndAction {
-                    ivDarkModeIcon.setImageResource(targetIcon)
-                    ivDarkModeIcon.animate()
+                    binding.ivDarkModeIcon.setImageResource(targetIcon)
+                    binding.ivDarkModeIcon.animate()
                         .alpha(1f)
                         .setDuration(150)
                         .start()
                 }
                 .start()
         } else {
-            ivDarkModeIcon.setImageResource(targetIcon)
+            binding.ivDarkModeIcon.setImageResource(targetIcon)
+        }
+    }
+
+    // ==================== DELETE ACCOUNT ====================
+
+    /**
+     * Hiển thị dialog xác nhận xóa tài khoản
+     */
+    private fun showDeleteAccountConfirmDialog() {
+        androidx.appcompat.app.AlertDialog.Builder(activity)
+            .setTitle(R.string.dialog_delete_account_title)
+            .setMessage(R.string.dialog_delete_account_message)
+            .setPositiveButton(R.string.action_delete) { _, _ ->
+                deleteAccount()
+            }
+            .setNegativeButton(R.string.action_cancel, null)
+            .show()
+    }
+
+    /**
+     * Thực hiện xóa tài khoản
+     */
+    private fun deleteAccount() {
+        activity.lifecycleScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    val db = HistoryDatabase.getDatabase(activity)
+                    db.clearAllTables()
+                }
+
+                val user = FirebaseAuth.getInstance().currentUser
+                user?.delete()?.addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        logout()
+                    } else {
+                        Toast.makeText(
+                            activity,
+                            activity.getString(R.string.error_delete_account),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            } catch (e: Exception) {
+                Toast.makeText(
+                    activity,
+                    activity.getString(R.string.error_delete_account),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
     }
 
