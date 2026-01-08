@@ -226,7 +226,7 @@ class MainActivity : AppCompatActivity() {
      * Khởi tạo các handler xử lý UI
      */
     private fun initHandlers() {
-        settingsHandler = SettingsHandler(this, languageManager, binding.settingsContainer.root)
+        settingsHandler = SettingsHandler(this, languageManager, binding.settingsContainer)
 
         val homeRoot = binding.homeContainer.root
 
