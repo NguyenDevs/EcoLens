@@ -152,6 +152,13 @@
         Bạn có chắc chắn muốn đăng xuất không?
     </string>
     <string name="action_logout">Đăng xuất</string>
+    <string name="change_username">Đổi tên người dùng</string>
+    <string name="change_password">Đổi mật khẩu</string>
+    <string name="link_google_account">Liên kết Google</string>
+    <string name="delete_account">Xoá tài khoản</string>
+    <string name="dialog_delete_account_title">Xoá tài khoản?</string>
+    <string name="dialog_delete_account_message">Bạn có chắc chắn muốn xoá tài khoản? Hành động này không thể hoàn tác.</string>
+    <string name="error_delete_account">Không thể xoá tài khoản. Vui lòng thử lại.</string>
 
     <!-- Thông tin & Hỗ trợ -->
     <string name="about_label">Thông tin</string>
@@ -250,5 +257,6 @@
     <!-- Không dịch -->
     <string name="text_secondary" translatable="false">text_secondary</string>
     <string name="background_color" translatable="false">background_color</string>
+
 
 </resources>
