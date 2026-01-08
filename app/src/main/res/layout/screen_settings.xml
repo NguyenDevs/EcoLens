@@ -6,7 +6,6 @@
         android:layout_height="match_parent"
         android:background="@color/background"
         android:orientation="vertical"
-
         android:paddingTop="10dp"
         android:paddingBottom="10dp">
 
@@ -19,6 +18,7 @@
             android:paddingStart="@dimen/padding_screen_horizontal"
             android:paddingEnd="@dimen/padding_screen_horizontal"
             android:textColor="@color/primary"/>
+
     <View
             android:layout_width="match_parent"
             android:background="@color/border_normal"
@@ -43,7 +43,7 @@
                 android:layout_marginTop="10dp"
                 android:paddingBottom="14dp">
 
-
+            <!-- Preferences Section -->
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -167,7 +167,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-
+            <!-- Support Section -->
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -226,7 +226,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-
+            <!-- About Section -->
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -322,7 +322,6 @@
                                 style="@style/TextAppearance.App.Body1"
                                 android:textColor="@color/primary_dark"
                                 android:textStyle="bold"/>
-
                     </LinearLayout>
 
                     <View
@@ -416,9 +415,9 @@
                     </LinearLayout>
 
                 </LinearLayout>
-
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Account Section -->
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -437,8 +436,10 @@
                 <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:animateLayoutChanges="true"
                         android:orientation="vertical">
 
+                    <!-- Account Details Option -->
                     <LinearLayout
                             android:id="@+id/accountDetailsOption"
                             android:layout_width="match_parent"
@@ -472,6 +473,145 @@
                                 style="@style/TextAppearance.App.Body1"
                                 android:textColor="@color/primary_dark"
                                 android:textStyle="bold"/>
+
+                        <ImageView
+                                android:id="@+id/ivExpandIcon"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/ic_arrow_down"
+                                app:tint="@color/primary_dark"/>
+                    </LinearLayout>
+
+                    <!-- Expandable Account Details Container -->
+                    <LinearLayout
+                            android:id="@+id/accountDetailsContainer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:visibility="gone"
+                            android:paddingStart="48dp"
+                            android:paddingEnd="@dimen/spacing_md">
+
+                        <View
+                                android:id="@+id/dividerUsername"
+                                android:layout_width="match_parent"
+                                android:background="@color/border_normal"
+                                android:layout_height="1dp"/>
+
+                        <!-- Change Username -->
+                        <LinearLayout
+                                android:id="@+id/changeUsernameOption"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:paddingTop="10dp"
+                                android:paddingBottom="10dp"
+                                android:paddingEnd="@dimen/spacing_sm"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:background="?attr/selectableItemBackground"
+                                android:visibility="gone">
+
+                            <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="@string/change_username"
+                                    style="@style/TextAppearance.App.Body2"
+                                    android:textColor="@color/primary_dark"/>
+                        </LinearLayout>
+
+                        <View
+                                android:id="@+id/dividerChangepassword"
+                                android:layout_width="match_parent"
+                                android:background="@color/border_normal"
+                                android:layout_height="1dp"/>
+
+                        <!-- Change Password -->
+                        <LinearLayout
+                                android:id="@+id/changePasswordOption"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:paddingTop="10dp"
+                                android:paddingBottom="10dp"
+                                android:paddingEnd="@dimen/spacing_sm"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:background="?attr/selectableItemBackground"
+                                android:visibility="gone">
+
+                            <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="@string/change_password"
+                                    style="@style/TextAppearance.App.Body2"
+                                    android:textColor="@color/primary_dark"/>
+                        </LinearLayout>
+
+                        <View
+                                android:id="@+id/dividerLinkgoogle"
+                                android:layout_width="match_parent"
+                                android:background="@color/border_normal"
+                                android:layout_height="1dp"/>
+
+                        <!-- Link Google Account -->
+                        <LinearLayout
+                                android:id="@+id/linkGoogleOption"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:paddingTop="10dp"
+                                android:paddingBottom="10dp"
+                                android:paddingEnd="@dimen/spacing_sm"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:background="?attr/selectableItemBackground"
+                                android:visibility="gone">
+
+                            <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="@string/link_google_account"
+                                    style="@style/TextAppearance.App.Body2"
+                                    android:textColor="@color/primary_dark"/>
+                        </LinearLayout>
+
+                        <View
+                                android:id="@+id/dividerDeleteaccount"
+                                android:layout_width="match_parent"
+                                android:background="@color/border_normal"
+                                android:layout_height="1dp"/>
+
+                        <!-- Delete Account -->
+                        <LinearLayout
+                                android:id="@+id/deleteAccountOption"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:paddingTop="10dp"
+                                android:paddingBottom="10dp"
+                                android:paddingEnd="@dimen/spacing_sm"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:background="?attr/selectableItemBackground"
+                                android:visibility="gone">
+
+                            <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="@string/delete_account"
+                                    style="@style/TextAppearance.App.Body2"
+                                    android:textColor="@color/error"/>
+                        </LinearLayout>
+
                     </LinearLayout>
 
                     <View
@@ -481,6 +621,7 @@
                             android:background="@color/border_normal"
                             android:layout_height="1dp"/>
 
+                    <!-- Logout Option -->
                     <LinearLayout
                             android:id="@+id/logoutOption"
                             android:layout_width="match_parent"
