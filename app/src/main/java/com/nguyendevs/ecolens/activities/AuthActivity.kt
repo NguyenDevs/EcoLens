@@ -129,8 +129,7 @@ class AuthActivity : AppCompatActivity() {
      * Xác thực với Firebase sử dụng Google ID token
      */
     private fun firebaseAuthWithGoogle(idToken: String) {
-        binding.progressIndicator.visibility = View.VISIBLE
-        binding.btnGoogle.isEnabled = false
+        setLoading(true)
 
         lifecycleScope.launch {
             val credential = GoogleAuthProvider.getCredential(idToken, null)
@@ -138,7 +137,6 @@ class AuthActivity : AppCompatActivity() {
 
             if (user != null) {
                 saveRememberMe(binding.cbRememberMe.isChecked)
-
                 val userDetails = userRepository.getCurrentUserDetails()
                 if (userDetails != null) {
                     applyUserTheme(userDetails.darkMode)
@@ -156,8 +154,7 @@ class AuthActivity : AppCompatActivity() {
                     Toast.LENGTH_SHORT
                 ).show()
             }
-            binding.progressIndicator.visibility = View.GONE
-            binding.btnGoogle.isEnabled = true
+            setLoading(false)
         }
     }
 
@@ -246,6 +243,8 @@ class AuthActivity : AppCompatActivity() {
             }
         }
     }
+
+
 
     // ==================== AUTHENTICATION LOGIC ====================
 
@@ -349,8 +348,14 @@ class AuthActivity : AppCompatActivity() {
      * Bật/tắt trạng thái loading
      */
     private fun setLoading(isLoading: Boolean) {
-        binding.progressIndicator.visibility = if (isLoading) View.VISIBLE else View.GONE
+        binding.loadingOverlay.visibility = if (isLoading) View.VISIBLE else View.GONE
         binding.btnAuthAction.isEnabled = !isLoading
+        binding.btnGoogle.isEnabled = !isLoading
+        binding.tabLayoutAuth.isEnabled = !isLoading
+
+        binding.etEmail.isEnabled = !isLoading
+        binding.etPassword.isEnabled = !isLoading
+        binding.etConfirmPassword.isEnabled = !isLoading
     }
 
     /**
