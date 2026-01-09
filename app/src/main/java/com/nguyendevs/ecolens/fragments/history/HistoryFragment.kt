@@ -1,5 +1,7 @@
-package com.nguyendevs.ecolens.fragments
+package com.nguyendevs.ecolens.fragments.history
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,6 +10,7 @@ import android.view.ViewGroup
 import android.view.HapticFeedbackConstants
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.core.content.ContextCompat
+import androidx.core.util.Pair
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -16,8 +19,8 @@ import com.google.gson.Gson
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.adapters.HistoryAdapter
 import com.nguyendevs.ecolens.databinding.ScreenSpeciesHistoryBinding
-import com.nguyendevs.ecolens.model.HistoryEntry
-import com.nguyendevs.ecolens.model.HistorySortOption
+import com.nguyendevs.ecolens.model.history.HistoryEntry
+import com.nguyendevs.ecolens.model.history.HistorySortOption
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import io.noties.markwon.Markwon
 import io.noties.markwon.html.HtmlPlugin
@@ -164,10 +167,12 @@ class HistoryFragment : Fragment() {
         val builder = MaterialDatePicker.Builder.dateRangePicker()
             .setTitleText(R.string.select_date)
             .setTheme(R.style.CustomMaterialDatePickerTheme)
-            .setSelection(androidx.core.util.Pair(
-                filterStartDate ?: MaterialDatePicker.todayInUtcMilliseconds(),
-                filterEndDate ?: MaterialDatePicker.todayInUtcMilliseconds()
-            ))
+            .setSelection(
+                Pair(
+                    filterStartDate ?: MaterialDatePicker.todayInUtcMilliseconds(),
+                    filterEndDate ?: MaterialDatePicker.todayInUtcMilliseconds()
+                )
+            )
         val picker = builder.build()
 
         picker.show(parentFragmentManager, "DATE_RANGE_PICKER")
@@ -180,7 +185,7 @@ class HistoryFragment : Fragment() {
     /**
      * Áp dụng filter theo khoảng thời gian được chọn
      */
-    private fun applyDateFilter(selection: androidx.core.util.Pair<Long, Long>) {
+    private fun applyDateFilter(selection: Pair<Long, Long>) {
         val timeZone = TimeZone.getDefault()
         val offset = timeZone.getOffset(selection.first)
 
@@ -257,8 +262,8 @@ class HistoryFragment : Fragment() {
         animator.interpolator = AccelerateDecelerateInterpolator()
         animator.duration = 300
         onEnd?.let {
-            animator.addListener(object : android.animation.AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: android.animation.Animator) { it() }
+            animator.addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) { it() }
             })
         }
         animator.start()

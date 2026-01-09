@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.fragments
+package com.nguyendevs.ecolens.fragments.history
 
 import android.content.ClipData
 import android.content.Intent
@@ -30,7 +30,7 @@ import com.google.gson.Gson
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.FragmentSpeciesHistoryDetailBinding
 import com.nguyendevs.ecolens.managers.SpeakerManager
-import com.nguyendevs.ecolens.model.HistoryEntry
+import com.nguyendevs.ecolens.model.history.HistoryEntry
 import com.nguyendevs.ecolens.model.SpeciesInfo
 import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
 import com.nguyendevs.ecolens.view.EcoLensViewModel
@@ -247,12 +247,12 @@ class HistoryDetailFragment : Fragment() {
         try {
             val intent = Intent(Intent.ACTION_SEND).apply {
                 if (imageUri != null) {
-                    type = "image/*"
+                    Intent.setType = "image/*"
                     putExtra(Intent.EXTRA_STREAM, imageUri)
                     clipData = ClipData.newRawUri(null, imageUri)
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 } else {
-                    type = "text/plain"
+                    Intent.setType = "text/plain"
                 }
                 putExtra(Intent.EXTRA_TEXT, shareText)
                 putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.share_subject, stripHtml(info.commonName)))

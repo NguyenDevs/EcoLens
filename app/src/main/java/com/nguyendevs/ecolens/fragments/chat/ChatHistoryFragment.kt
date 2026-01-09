@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.fragments
+package com.nguyendevs.ecolens.fragments.chat
 
 import android.os.Bundle
 import android.view.HapticFeedbackConstants

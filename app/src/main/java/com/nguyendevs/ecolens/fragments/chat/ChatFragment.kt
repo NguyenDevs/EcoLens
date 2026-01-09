@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.fragments
+package com.nguyendevs.ecolens.fragments.chat
 
 import android.content.*
 import android.os.*
@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.adapters.ChatAdapter
 import com.nguyendevs.ecolens.databinding.FragmentChatBinding
-import com.nguyendevs.ecolens.model.ChatMessage
+import com.nguyendevs.ecolens.model.chat.ChatMessage
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -153,7 +153,7 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
     override fun onShare(text: String) {
         val cleanText = stripHtml(text)
         val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
+            Intent.setType = "text/plain"
             putExtra(Intent.EXTRA_TEXT, cleanText)
         }
         startActivity(Intent.createChooser(intent, "Chia sẻ tin nhắn"))
