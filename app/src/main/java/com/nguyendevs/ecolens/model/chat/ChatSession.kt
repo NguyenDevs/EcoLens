@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.model
+package com.nguyendevs.ecolens.model.chat
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
