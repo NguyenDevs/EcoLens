@@ -1,6 +1,5 @@
 package com.nguyendevs.ecolens.adapters
 
-import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,7 +11,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemSpeciesHistoryBinding
-import com.nguyendevs.ecolens.model.HistoryEntry
+import com.nguyendevs.ecolens.model.history.HistoryEntry
 import io.noties.markwon.Markwon
 import java.io.File
 import java.time.Instant
