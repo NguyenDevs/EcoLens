@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
 import androidx.recyclerview.widget.RecyclerView
 import com.nguyendevs.ecolens.databinding.ItemChatHistoryBinding
-import com.nguyendevs.ecolens.model.ChatSession
+import com.nguyendevs.ecolens.model.chat.ChatSession
 import io.noties.markwon.Markwon
 import java.time.Instant
 import java.time.ZoneId
