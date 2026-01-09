@@ -27,8 +27,8 @@ import com.bumptech.glide.Glide
 import com.google.firebase.database.FirebaseDatabase
 import com.nguyendevs.ecolens.activities.CameraActivity
 import com.nguyendevs.ecolens.databinding.ActivityMainBinding
-import com.nguyendevs.ecolens.fragments.ChatHistoryFragment
-import com.nguyendevs.ecolens.fragments.HistoryFragment
+import com.nguyendevs.ecolens.fragments.chat.ChatHistoryFragment
+import com.nguyendevs.ecolens.fragments.history.HistoryFragment
 import com.nguyendevs.ecolens.handlers.*
 import com.nguyendevs.ecolens.managers.*
 import com.nguyendevs.ecolens.model.LoadingStage
