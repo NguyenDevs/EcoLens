@@ -1,16 +1,30 @@
-package com.nguyendevs.ecolens.managers
+package com.nguyendevs.ecolens.managers.chat
 
 import android.util.Log
 import com.google.gson.Gson
-import com.nguyendevs.ecolens.api.*
+import com.nguyendevs.ecolens.api.GeminiContent
+import com.nguyendevs.ecolens.api.GeminiPart
+import com.nguyendevs.ecolens.api.GeminiRequest
+import com.nguyendevs.ecolens.api.GeminiResponse
 import com.nguyendevs.ecolens.database.ChatDao
 import com.nguyendevs.ecolens.database.ChatRepository
-import com.nguyendevs.ecolens.model.ChatMessage
-import com.nguyendevs.ecolens.model.ChatSession
+import com.nguyendevs.ecolens.model.chat.ChatMessage
+import com.nguyendevs.ecolens.model.chat.ChatSession
 import com.nguyendevs.ecolens.network.RetrofitClient
 import com.nguyendevs.ecolens.utils.MarkdownProcessor
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.ResponseBody
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 
@@ -277,7 +291,7 @@ class ChatSessionManager(
      * Parse từng chunk và update message real-time
      */
     private suspend fun processStreamingResponse(
-        responseBody: okhttp3.ResponseBody,
+        responseBody: ResponseBody,
         sessionId: Long,
         messageId: Long
     ) {
