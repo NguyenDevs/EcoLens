@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.managers
+package com.nguyendevs.ecolens.managers.gemini
 
 import android.util.Log
 import com.google.gson.Gson

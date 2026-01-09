@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.managers
+package com.nguyendevs.ecolens.managers.gemini
 
 import android.content.Context
 import android.net.Uri
@@ -8,6 +8,7 @@ import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.api.IdentificationResult
 import com.nguyendevs.ecolens.database.HistoryRepository
 import com.nguyendevs.ecolens.model.*
+import com.nguyendevs.ecolens.model.history.HistoryEntry
 import com.nguyendevs.ecolens.network.RetrofitClient
 import com.nguyendevs.ecolens.utils.ImageUtils
 import kotlinx.coroutines.*

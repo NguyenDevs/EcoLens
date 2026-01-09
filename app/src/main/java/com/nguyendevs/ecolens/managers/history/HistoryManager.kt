@@ -1,10 +1,10 @@
-package com.nguyendevs.ecolens.managers
+package com.nguyendevs.ecolens.managers.history
 
 import android.content.Context
 import android.util.Log
 import com.nguyendevs.ecolens.database.HistoryRepository
-import com.nguyendevs.ecolens.model.HistoryEntry
-import com.nguyendevs.ecolens.model.HistorySortOption
+import com.nguyendevs.ecolens.model.history.HistoryEntry
+import com.nguyendevs.ecolens.model.history.HistorySortOption
 import com.nguyendevs.ecolens.utils.ImageUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.collections.forEach
 
 /**
  * Manager quản lý lịch sử nhận diện loài
