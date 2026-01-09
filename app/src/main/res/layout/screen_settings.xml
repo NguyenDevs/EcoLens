@@ -457,6 +457,7 @@
                                 android:background="@drawable/bg_flag_rounded"
                                 android:backgroundTint="@color/transparent">
                             <ImageView
+                                    android:id="@+id/ivAccountPicture"
                                     android:layout_width="31dp"
                                     android:layout_height="31dp"
                                     android:layout_gravity="center"
