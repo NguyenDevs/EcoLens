@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.util.Log
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -15,8 +14,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.nguyendevs.ecolens.BuildConfig
-import com.nguyendevs.ecolens.model.HistoryEntry
-import com.nguyendevs.ecolens.utils.ImageUtils
+import com.nguyendevs.ecolens.model.history.HistoryEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -26,7 +24,6 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
-import java.net.URL
 
 @Dao
 interface HistoryDao {
