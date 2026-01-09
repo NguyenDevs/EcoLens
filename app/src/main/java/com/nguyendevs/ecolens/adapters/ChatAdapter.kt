@@ -15,7 +15,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemChatMessageBinding
-import com.nguyendevs.ecolens.model.ChatMessage
+import com.nguyendevs.ecolens.model.chat.ChatMessage
 import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.Markwon
 import io.noties.markwon.core.MarkwonTheme
