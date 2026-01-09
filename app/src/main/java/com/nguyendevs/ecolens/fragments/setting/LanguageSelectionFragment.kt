@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.fragments
+package com.nguyendevs.ecolens.fragments.setting
 
 import android.content.Intent
 import android.os.Bundle
