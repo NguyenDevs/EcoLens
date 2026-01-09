@@ -22,8 +22,8 @@ import com.nguyendevs.ecolens.activities.AuthActivity
 import com.nguyendevs.ecolens.database.HistoryDatabase
 import com.nguyendevs.ecolens.database.UserRepository
 import com.nguyendevs.ecolens.databinding.ScreenSettingsBinding
-import com.nguyendevs.ecolens.fragments.AboutFragment
-import com.nguyendevs.ecolens.fragments.LanguageSelectionFragment
+import com.nguyendevs.ecolens.fragments.setting.AboutFragment
+import com.nguyendevs.ecolens.fragments.setting.LanguageSelectionFragment
 import com.nguyendevs.ecolens.managers.LanguageManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
