@@ -7,14 +7,14 @@ import android.view.ViewGroup
 import android.widget.TextView
 import com.google.android.material.tabs.TabLayout
 import com.nguyendevs.ecolens.R
-import com.nguyendevs.ecolens.databinding.ActivityAuthBinding
+import com.nguyendevs.ecolens.databinding.FragmentLoginBinding
 
 /**
- * Manager cho UI logic của AuthActivity
+ * Manager cho UI logic của LoginFragment
  * Quản lý tabs, button states, visibility
  */
 class AuthUIManager(
-    private val binding: ActivityAuthBinding,
+    private val binding: FragmentLoginBinding,
     private val context: Context
 ) {
 

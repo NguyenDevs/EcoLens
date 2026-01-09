@@ -258,5 +258,22 @@
     <string name="text_secondary" translatable="false">text_secondary</string>
     <string name="background_color" translatable="false">background_color</string>
 
+    <!-- Forgot Password -->
+    <string name="forgot_password_title">Quên mật khẩu</string>
+    <string name="forgot_password_description">Vui lòng nhập email của bạn để xác nhận.</string>
+    <string name="forgot_password_icon">Biểu tượng khôi phục mật khẩu</string>
+    <string name="send_reset_link">Xác nhận</string>
+    <string name="remember_password">Đã nhớ mật khẩu?</string>
+    <string name="back_to_login">Đăng nhập</string>
+
+    <!-- Success Messages -->
+    <string name="reset_email_sent">Email đặt lại mật khẩu đã được gửi! Vui lòng kiểm tra hộp thư của bạn.</string>
+
+    <!-- Error Messages -->
+    <string name="error_email_not_found">Email này không tồn tại trong hệ thống</string>
+    <string name="error_reset_password_failed">Không thể gửi email đặt lại mật khẩu. Vui lòng thử lại.</string>
+    <string name="error_network">Lỗi kết nối mạng. Vui lòng kiểm tra internet của bạn.</string>
+    <string name="error_too_many_requests">Quá nhiều yêu cầu. Vui lòng thử lại sau ít phút.</string>
+
 
 </resources>

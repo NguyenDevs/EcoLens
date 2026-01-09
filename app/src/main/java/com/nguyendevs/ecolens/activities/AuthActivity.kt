@@ -1,32 +1,25 @@
 package com.nguyendevs.ecolens.activities
 
 import android.os.Bundle
-import androidx.lifecycle.lifecycleScope
-import com.nguyendevs.ecolens.activities.auth.*
-import com.nguyendevs.ecolens.handlers.auth.GoogleSignInHandler
-import com.nguyendevs.ecolens.handlers.auth.LoginHandler
-import com.nguyendevs.ecolens.handlers.auth.RegisterHandler
-import com.nguyendevs.ecolens.managers.auth.AuthUIManager
+import androidx.fragment.app.Fragment
+import com.nguyendevs.ecolens.R
+import com.nguyendevs.ecolens.activities.auth.BaseAuthActivity
+import com.nguyendevs.ecolens.fragments.auth.ForgotPasswordFragment
+import com.nguyendevs.ecolens.fragments.auth.LoginFragment
 import com.nguyendevs.ecolens.managers.auth.AutoLoginManager
 
 /**
- * Activity xử lý đăng nhập và đăng ký người dùng
- * Hỗ trợ email/password và Google Sign-In
+ * Activity container cho authentication flow
+ * Quản lý LoginFragment và ForgotPasswordFragment
  *
- * - BaseAuthActivity: Xử lý video logo, theme, loading
+ * - BaseAuthActivity: Xử lý theme, loading
  * - AutoLoginManager: Quản lý auto login
- * - AuthUIManager: Quản lý UI (tabs, fields)
- * - LoginHandler: Xử lý login logic
- * - RegisterHandler: Xử lý register logic
- * - GoogleSignInHandler: Xử lý Google Sign-In
+ * - LoginFragment: UI cho login/register
+ * - ForgotPasswordFragment: UI cho forgot password
  */
 class AuthActivity : BaseAuthActivity() {
 
     private lateinit var autoLoginManager: AutoLoginManager
-    private lateinit var authUIManager: AuthUIManager
-    private lateinit var loginHandler: LoginHandler
-    private lateinit var registerHandler: RegisterHandler
-    private lateinit var googleSignInHandler: GoogleSignInHandler
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,61 +30,60 @@ class AuthActivity : BaseAuthActivity() {
             return
         }
 
-        // Initialize managers
-        authUIManager = AuthUIManager(binding, this)
-        loginHandler = LoginHandler(this, userRepository, lifecycleScope)
-        registerHandler = RegisterHandler(this, userRepository, lifecycleScope)
-        googleSignInHandler = GoogleSignInHandler(this, userRepository, lifecycleScope)
-
-        // Setup UI after layout is ready
-        binding.root.post {
-            setupUI()
+        // Load initial fragment
+        if (savedInstanceState == null) {
+            loadFragment(LoginFragment())
         }
     }
 
-    private fun setupUI() {
-        authUIManager.setupTabs()
-        setupGoogleSignIn()
-        setupAuthButton()
+    /**
+     * Load fragment vào container
+     */
+    private fun loadFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, fragment)
+            .commit()
     }
 
-    private fun setupGoogleSignIn() {
-        googleSignInHandler.setup(
-            rememberMe = authUIManager.isRememberMeChecked(),
-            onLoadingChange = { isLoading -> setLoading(isLoading) },
-            onSuccess = { LoginHandler.navigateToMain(this) }
-        )
-
-        binding.btnGoogle.setOnClickListener {
-            googleSignInHandler.signIn()
-        }
+    /**
+     * Navigate to ForgotPasswordFragment with animation
+     */
+    fun navigateToForgotPassword() {
+        supportFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                R.anim.forgotpass_slide_right,
+                0,
+                0,
+                R.anim.fade_out
+            )
+            .add(R.id.fragmentContainer, ForgotPasswordFragment())
+            .addToBackStack(null)
+            .commit()
     }
 
-    private fun setupAuthButton() {
-        binding.btnAuthAction.setOnClickListener {
-            val email = authUIManager.getEmail()
-            val password = authUIManager.getPassword()
+    /**
+     * Navigate back to LoginFragment
+     */
+    fun navigateBackToLogin() {
+        supportFragmentManager.popBackStack()
+    }
 
-            if (authUIManager.isLoginMode()) {
-                // Login mode
-                loginHandler.handleLogin(
-                    email = email,
-                    password = password,
-                    rememberMe = authUIManager.isRememberMeChecked(),
-                    onLoadingChange = { isLoading -> setLoading(isLoading) },
-                    onSuccess = { LoginHandler.navigateToMain(this) }
-                )
-            } else {
-                // Register mode
-                registerHandler.handleRegister(
-                    email = email,
-                    password = password,
-                    confirmPassword = authUIManager.getConfirmPassword(),
-                    agreeTerms = authUIManager.isAgreeTermsChecked(),
-                    onLoadingChange = { isLoading -> setLoading(isLoading) },
-                    onSuccess = { LoginHandler.navigateToMain(this) }
-                )
-            }
+    /**
+     * Set loading state - called from fragments
+     */
+    fun setFragmentLoading(isLoading: Boolean) {
+        setLoading(isLoading)
+    }
+
+    /**
+     * Handle back press
+     */
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        if (supportFragmentManager.backStackEntryCount > 0) {
+            supportFragmentManager.popBackStack()
+        } else {
+            super.onBackPressed()
         }
     }
 }

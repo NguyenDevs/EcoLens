@@ -153,7 +153,7 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
     override fun onShare(text: String) {
         val cleanText = stripHtml(text)
         val intent = Intent(Intent.ACTION_SEND).apply {
-            Intent.setType = "text/plain"
+            type = "text/plain"
             putExtra(Intent.EXTRA_TEXT, cleanText)
         }
         startActivity(Intent.createChooser(intent, "Chia sẻ tin nhắn"))

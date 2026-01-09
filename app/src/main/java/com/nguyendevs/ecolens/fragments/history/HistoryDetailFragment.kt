@@ -247,12 +247,12 @@ class HistoryDetailFragment : Fragment() {
         try {
             val intent = Intent(Intent.ACTION_SEND).apply {
                 if (imageUri != null) {
-                    Intent.setType = "image/*"
+                    type = "image/*"
                     putExtra(Intent.EXTRA_STREAM, imageUri)
                     clipData = ClipData.newRawUri(null, imageUri)
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 } else {
-                    Intent.setType = "text/plain"
+                    type = "text/plain"
                 }
                 putExtra(Intent.EXTRA_TEXT, shareText)
                 putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.share_subject, stripHtml(info.commonName)))

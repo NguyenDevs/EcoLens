@@ -1,11 +1,12 @@
 package com.nguyendevs.ecolens.handlers.auth
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -21,47 +22,59 @@ import kotlinx.coroutines.launch
  * Quản lý flow đăng nhập với Google
  */
 class GoogleSignInHandler(
-    private val activity: AppCompatActivity,
+    private val fragment: Fragment,
     private val userRepository: UserRepository,
     private val lifecycleScope: LifecycleCoroutineScope
 ) {
 
     private lateinit var googleSignInClient: GoogleSignInClient
-    private lateinit var googleSignInLauncher: ActivityResultLauncher<Intent>
+    private val googleSignInLauncher: ActivityResultLauncher<Intent>
 
-    fun setup(
-        rememberMe: Boolean,
-        onLoadingChange: (Boolean) -> Unit,
-        onSuccess: () -> Unit
-    ) {
-        // Setup Google Sign-In Options
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(activity.getString(R.string.default_web_client_id))
-            .requestEmail()
-            .build()
+    // Store callbacks to be used when result comes back
+    private var onLoadingChange: ((Boolean) -> Unit)? = null
+    private var onSuccess: (() -> Unit)? = null
+    private var rememberMe: Boolean = false
 
-        googleSignInClient = GoogleSignIn.getClient(activity, gso)
-
-        // Setup Activity Result Launcher
-        googleSignInLauncher = activity.registerForActivityResult(
+    init {
+        // Setup Activity Result Launcher TRONG INIT để register trước khi Activity start
+        googleSignInLauncher = fragment.registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
-            if (result.resultCode == AppCompatActivity.RESULT_OK) {
+            if (result.resultCode == Activity.RESULT_OK) {
                 val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
                 try {
                     val account = task.getResult(ApiException::class.java)
                     account.idToken?.let {
-                        firebaseAuthWithGoogle(it, rememberMe, onLoadingChange, onSuccess)
+                        firebaseAuthWithGoogle(it, rememberMe, onLoadingChange!!, onSuccess!!)
                     }
                 } catch (e: ApiException) {
                     Toast.makeText(
-                        activity,
+                        fragment.requireContext(),
                         "Google sign in failed: ${e.message}",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
             }
         }
+    }
+
+    fun setup(
+        rememberMe: Boolean,
+        onLoadingChange: (Boolean) -> Unit,
+        onSuccess: () -> Unit
+    ) {
+        // Store callbacks
+        this.rememberMe = rememberMe
+        this.onLoadingChange = onLoadingChange
+        this.onSuccess = onSuccess
+
+        // Setup Google Sign-In Options
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(fragment.getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+
+        googleSignInClient = GoogleSignIn.getClient(fragment.requireActivity(), gso)
     }
 
     fun signIn() {
@@ -90,16 +103,16 @@ class GoogleSignInHandler(
                 }
 
                 Toast.makeText(
-                    activity,
-                    activity.getString(R.string.login_success),
+                    fragment.requireContext(),
+                    fragment.getString(R.string.login_success),
                     Toast.LENGTH_SHORT
                 ).show()
 
                 onSuccess()
             } else {
                 Toast.makeText(
-                    activity,
-                    activity.getString(R.string.login_failed),
+                    fragment.requireContext(),
+                    fragment.getString(R.string.login_failed),
                     Toast.LENGTH_SHORT
                 ).show()
             }
@@ -109,12 +122,12 @@ class GoogleSignInHandler(
     }
 
     private fun saveRememberMe(isRemember: Boolean) {
-        val sharedPref = activity.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+        val sharedPref = fragment.requireActivity().getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         sharedPref.edit().putBoolean("remember_me", isRemember).apply()
     }
 
     private fun applyUserTheme(isDarkMode: Boolean) {
-        val sharedPref = activity.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+        val sharedPref = fragment.requireActivity().getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         sharedPref.edit().putBoolean("dark_mode", isDarkMode).apply()
     }
 }
