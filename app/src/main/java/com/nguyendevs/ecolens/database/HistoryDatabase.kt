@@ -5,9 +5,9 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.nguyendevs.ecolens.model.ChatMessage
-import com.nguyendevs.ecolens.model.ChatSession
-import com.nguyendevs.ecolens.model.HistoryEntry
+import com.nguyendevs.ecolens.model.chat.ChatMessage
+import com.nguyendevs.ecolens.model.chat.ChatSession
+import com.nguyendevs.ecolens.model.history.HistoryEntry
 
 /**
  * Room Database chính của ứng dụng EcoLens
