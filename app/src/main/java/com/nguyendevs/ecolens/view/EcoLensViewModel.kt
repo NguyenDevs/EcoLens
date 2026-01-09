@@ -7,8 +7,14 @@ import androidx.lifecycle.viewModelScope
 import com.nguyendevs.ecolens.database.ChatRepository
 import com.nguyendevs.ecolens.database.HistoryDatabase
 import com.nguyendevs.ecolens.database.HistoryRepository
-import com.nguyendevs.ecolens.managers.*
+import com.nguyendevs.ecolens.managers.chat.ChatSessionManager
+import com.nguyendevs.ecolens.managers.gemini.SpeciesIdentificationManager
+import com.nguyendevs.ecolens.managers.history.HistoryManager
 import com.nguyendevs.ecolens.model.*
+import com.nguyendevs.ecolens.model.chat.ChatMessage
+import com.nguyendevs.ecolens.model.chat.ChatSession
+import com.nguyendevs.ecolens.model.history.HistoryEntry
+import com.nguyendevs.ecolens.model.history.HistorySortOption
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -25,7 +31,12 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     private val chatRepository by lazy { ChatRepository(chatDao, application.applicationContext) }
 
     // Managers
-    private val speciesManager by lazy { SpeciesIdentificationManager(application.applicationContext, historyRepository) }
+    private val speciesManager by lazy {
+        SpeciesIdentificationManager(
+            application.applicationContext,
+            historyRepository
+        )
+    }
     private val historyManager by lazy { HistoryManager(application.applicationContext, historyRepository) }
     private val chatManager by lazy { ChatSessionManager(chatRepository, chatDao, viewModelScope) }
 
