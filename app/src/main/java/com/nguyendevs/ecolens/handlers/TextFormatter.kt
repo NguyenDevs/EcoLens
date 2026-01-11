@@ -1,0 +1,37 @@
+package com.nguyendevs.ecolens.handlers
+
+import android.os.Build
+import android.text.Html
+import android.widget.TextView
+
+class TextFormatter {
+    companion object {
+        private val REGEX_BOLD = Regex("\\*\\*(.+?)\\*\\*")
+        private val REGEX_ITALIC = Regex("(?<!\\*)\\*(?!\\*)(.+?)(?<!\\*)\\*(?!\\*)")
+        private val REGEX_CODE = Regex("`(.+?)`")
+    }
+
+    fun setHtml(textView: TextView, htmlContent: String) {
+        textView.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Html.fromHtml(htmlContent, Html.FROM_HTML_MODE_COMPACT)
+        } else {
+            @Suppress("DEPRECATION")
+            Html.fromHtml(htmlContent)
+        }
+    }
+
+    fun stripHtml(html: String): String {
+        var text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT).toString()
+        } else {
+            @Suppress("DEPRECATION")
+            Html.fromHtml(html).toString()
+        }
+
+        text = text.replace(REGEX_BOLD, "$1")
+        text = text.replace(REGEX_ITALIC, "$1")
+        text = text.replace(REGEX_CODE, "$1")
+
+        return text.trim()
+    }
+}
