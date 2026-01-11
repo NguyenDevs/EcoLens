@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.handlers
+package com.nguyendevs.ecolens.handlers.interaction
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
@@ -6,8 +6,8 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.view.View
 import android.view.HapticFeedbackConstants
+import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText

@@ -32,6 +32,7 @@ import com.nguyendevs.ecolens.fragments.history.HistoryFragment
 import com.nguyendevs.ecolens.handlers.*
 import com.nguyendevs.ecolens.handlers.animation.LoadingAnimationHandler
 import com.nguyendevs.ecolens.handlers.interaction.ImageZoomHandler
+import com.nguyendevs.ecolens.handlers.interaction.SearchBarHandler
 import com.nguyendevs.ecolens.managers.*
 import com.nguyendevs.ecolens.model.LoadingStage
 import com.nguyendevs.ecolens.model.SpeciesInfo
