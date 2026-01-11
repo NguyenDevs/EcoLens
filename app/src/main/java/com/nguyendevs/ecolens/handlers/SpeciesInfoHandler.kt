@@ -7,6 +7,13 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ActivityMainBinding
+import com.nguyendevs.ecolens.handlers.animation.AnimationHandler
+import com.nguyendevs.ecolens.handlers.animation.ShimmerEffectHandler
+import com.nguyendevs.ecolens.handlers.display.ConfidenceDisplayHandler
+import com.nguyendevs.ecolens.handlers.display.SectionDisplayHandler
+import com.nguyendevs.ecolens.handlers.display.TaxonomyDisplayHandler
+import com.nguyendevs.ecolens.handlers.interaction.ButtonHandler
+import com.nguyendevs.ecolens.handlers.util.TextFormatter
 import com.nguyendevs.ecolens.model.LoadingStage
 import com.nguyendevs.ecolens.model.SpeciesInfo
 import kotlinx.coroutines.*

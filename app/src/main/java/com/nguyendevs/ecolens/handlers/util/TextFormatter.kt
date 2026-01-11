@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.handlers
+package com.nguyendevs.ecolens.handlers.util
 
 import android.os.Build
 import android.text.Html

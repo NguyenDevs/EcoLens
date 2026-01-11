@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.handlers
+package com.nguyendevs.ecolens.handlers.animation
 
 import android.graphics.Color
 import android.text.Spannable

@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.handlers
+package com.nguyendevs.ecolens.handlers.interaction
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -11,6 +11,8 @@ import android.widget.Toast
 import androidx.core.content.FileProvider
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ActivityMainBinding
+import com.nguyendevs.ecolens.handlers.util.TextFormatter
+import com.nguyendevs.ecolens.handlers.animation.AnimationHandler
 import com.nguyendevs.ecolens.model.SpeciesInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

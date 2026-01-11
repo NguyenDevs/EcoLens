@@ -1,10 +1,11 @@
-package com.nguyendevs.ecolens.handlers
+package com.nguyendevs.ecolens.handlers.display
 
 import android.view.View
 import android.view.animation.DecelerateInterpolator
 import android.widget.ScrollView
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ActivityMainBinding
+import com.nguyendevs.ecolens.handlers.util.TextFormatter
 
 class SectionDisplayHandler(
     private val binding: ActivityMainBinding,

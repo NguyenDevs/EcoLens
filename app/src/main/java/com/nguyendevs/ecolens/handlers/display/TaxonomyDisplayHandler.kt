@@ -1,9 +1,11 @@
-package com.nguyendevs.ecolens.handlers
+package com.nguyendevs.ecolens.handlers.display
 
 import android.view.View
 import android.view.animation.DecelerateInterpolator
-import android.widget.TextView
 import com.nguyendevs.ecolens.databinding.ActivityMainBinding
+import com.nguyendevs.ecolens.handlers.util.TextFormatter
+import com.nguyendevs.ecolens.handlers.animation.AnimationHandler
+import com.nguyendevs.ecolens.handlers.animation.ShimmerEffectHandler
 import com.nguyendevs.ecolens.model.SpeciesInfo
 
 class TaxonomyDisplayHandler(

@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.handlers
+package com.nguyendevs.ecolens.handlers.display
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -6,6 +6,7 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ActivityMainBinding
+import com.nguyendevs.ecolens.handlers.animation.AnimationHandler
 import com.nguyendevs.ecolens.model.SpeciesInfo
 
 class ConfidenceDisplayHandler(
