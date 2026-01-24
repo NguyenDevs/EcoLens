@@ -58,6 +58,24 @@
                 android:theme="@style/Theme.AppCompat.NoActionBar"
                 android:exported="false" />
 
+        <!-- Compose Activities -->
+        <activity
+                android:name=".ComposeMainActivity"
+                android:configChanges="orientation|screenSize"
+                android:exported="false"
+                android:theme="@style/Theme.EcoLens" />
+
+        <activity
+                android:name=".activities.ComposeAuthActivity"
+                android:exported="false"
+                android:theme="@style/Theme.EcoLens" />
+
+        <activity
+                android:name=".activities.ComposeCameraActivity"
+                android:screenOrientation="portrait"
+                android:exported="false"
+                android:theme="@style/Theme.AppCompat.NoActionBar" />
+
         <provider
                 android:name="androidx.core.content.FileProvider"
                 android:authorities="${applicationId}.provider"
