@@ -39,7 +39,7 @@ object PromptBuilder {
     // ========== Private Helper Methods ==========
 
     private fun buildVietnameseTaxonomyPrompt(scientificName: String): String = """
-        Cung cấp phân loại khoa học về "$scientificName" bằng Tiếng Việt.
+        Cung cấp phân loại khoa học đầy đủ về "$scientificName" bằng Tiếng Việt.
         
         Trả về JSON:
         {
@@ -57,7 +57,7 @@ object PromptBuilder {
     """.trimIndent()
 
     private fun buildEnglishTaxonomyPrompt(scientificName: String): String = """
-        Provide taxonomic classification for "$scientificName" in English.
+        Provide complete taxonomic classification for "$scientificName" in English.
         
         Return JSON:
         {
