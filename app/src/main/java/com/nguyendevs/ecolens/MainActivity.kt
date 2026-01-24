@@ -7,6 +7,7 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
+import android.os.Looper
 import android.view.MotionEvent
 import android.view.ViewGroup
 import android.view.View
@@ -24,7 +25,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.transition.Fade
 import androidx.transition.TransitionManager
 import com.bumptech.glide.Glide
-import com.google.firebase.database.FirebaseDatabase
 import com.nguyendevs.ecolens.activities.CameraActivity
 import com.nguyendevs.ecolens.databinding.ActivityMainBinding
 import com.nguyendevs.ecolens.fragments.chat.ChatHistoryFragment
@@ -41,6 +41,7 @@ import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.*
 import java.io.File
+import java.lang.ref.WeakReference
 
 /**
  * Activity chính của ứng dụng EcoLens
@@ -70,7 +71,21 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val PREF_NAME = "EcoLensPrefs"
         private const val KEY_LAST_NAV_ITEM = "last_nav_item"
-        var transitionBitmap: Bitmap? = null
+        
+        // UI Constants
+        private const val IMAGE_PREVIEW_HEIGHT_DP = 290
+        private const val TRANSITION_ANIMATION_DURATION = 400L
+        private const val PRELOAD_DELAY_MS = 500L
+        private const val LOADING_STOP_DELAY_MS = 500L
+        
+        // Sử dụng WeakReference để tránh memory leak
+        private var transitionBitmapRef: WeakReference<Bitmap>? = null
+        
+        var transitionBitmap: Bitmap?
+            get() = transitionBitmapRef?.get()
+            set(value) {
+                transitionBitmapRef = value?.let { WeakReference(it) }
+            }
     }
 
     /**
@@ -106,41 +121,14 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         loadThemePreference()
         super.onCreate(savedInstanceState)
-
-        try {
-            FirebaseDatabase.getInstance(BuildConfig.FIREBASE_DATABASE_URL).setPersistenceEnabled(true)
-        } catch (e: Exception) {
-        }
+        
+        // Firebase persistence đã được khởi tạo trong EcoLensApplication
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         // Xử lý transition animation từ splash screen
-        if (transitionBitmap != null) {
-            val rootView = window.decorView as ViewGroup
-            val overlay = ImageView(this)
-            overlay.setImageBitmap(transitionBitmap)
-            overlay.scaleType = ImageView.ScaleType.FIT_XY
-            overlay.elevation = 100f
-            overlay.layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-            rootView.addView(overlay)
-
-            overlay.animate()
-                .alpha(0f)
-                .setDuration(400)
-                .setInterpolator(AccelerateDecelerateInterpolator())
-                .withEndAction {
-                    rootView.removeView(overlay)
-                    if (transitionBitmap != null && !transitionBitmap!!.isRecycled) {
-                        transitionBitmap!!.recycle()
-                    }
-                    transitionBitmap = null
-                }
-                .start()
-        }
+        handleTransitionAnimation()
 
         sharedPreferences = getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 
@@ -179,25 +167,67 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Preload các fragment để cải thiện hiệu suất
+     * Sử dụng IdleHandler để load khi UI thread rảnh
      */
     private fun preloadFragments() {
-        lifecycleScope.launch {
-            delay(500)
-            if (!isDestroyed) {
-                val transaction = supportFragmentManager.beginTransaction()
-                if (!historyFragment.isAdded) {
-                    transaction.add(R.id.historyContainer, historyFragment, "HISTORY")
+        Looper.myQueue().addIdleHandler {
+            if (!isDestroyed && !isFinishing) {
+                lifecycleScope.launch {
+                    delay(PRELOAD_DELAY_MS)
+                    if (!isDestroyed) {
+                        val transaction = supportFragmentManager.beginTransaction()
+                        if (!historyFragment.isAdded) {
+                            transaction.add(R.id.historyContainer, historyFragment, "HISTORY")
+                        }
+                        if (!chatHistoryFragment.isAdded) {
+                            transaction.add(R.id.myGardenContainer, chatHistoryFragment, "CHAT_HISTORY")
+                        }
+                        transaction.commitAllowingStateLoss()
+                    }
                 }
-                if (!chatHistoryFragment.isAdded) {
-                    transaction.add(R.id.myGardenContainer, chatHistoryFragment, "CHAT_HISTORY")
-                }
-                transaction.commitAllowingStateLoss()
             }
+            false // Remove handler sau khi thực thi
         }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
+    }
+    
+    /**
+     * Xử lý transition animation từ splash screen
+     * Sử dụng WeakReference để tránh memory leak
+     */
+    private fun handleTransitionAnimation() {
+        val bitmap = transitionBitmap ?: return
+        
+        val rootView = window.decorView as ViewGroup
+        val overlay = ImageView(this).apply {
+            setImageBitmap(bitmap)
+            scaleType = ImageView.ScaleType.FIT_XY
+            elevation = 100f
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        }
+        rootView.addView(overlay)
+
+        overlay.animate()
+            .alpha(0f)
+            .setDuration(TRANSITION_ANIMATION_DURATION)
+            .setInterpolator(AccelerateDecelerateInterpolator())
+            .withEndAction {
+                rootView.removeView(overlay)
+                // Recycle bitmap nếu còn available
+                transitionBitmap?.let { bmp ->
+                    if (!bmp.isRecycled) {
+                        bmp.recycle()
+                    }
+                }
+                transitionBitmap = null
+            }
+            .start()
     }
 
     /**

@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import com.google.firebase.FirebaseApp
+import com.google.firebase.database.FirebaseDatabase
 import com.nguyendevs.ecolens.network.RetrofitClient
 
 /**
@@ -11,6 +12,11 @@ import com.nguyendevs.ecolens.network.RetrofitClient
  * Khởi tạo các cấu hình và services toàn cục
  */
 class EcoLensApplication : Application() {
+
+    companion object {
+        @Volatile
+        private var firebaseInitialized = false
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -29,5 +35,29 @@ class EcoLensApplication : Application() {
         // Khởi tạo Retrofit client và Firebase
         RetrofitClient.initialize(this)
         FirebaseApp.initializeApp(this)
+        
+        // Khởi tạo Firebase persistence chỉ một lần
+        initFirebasePersistence()
+    }
+    
+    /**
+     * Khởi tạo Firebase Realtime Database persistence
+     * Chỉ được gọi một lần trong vòng đời app
+     */
+    private fun initFirebasePersistence() {
+        if (!firebaseInitialized) {
+            synchronized(this) {
+                if (!firebaseInitialized) {
+                    try {
+                        FirebaseDatabase.getInstance(BuildConfig.FIREBASE_DATABASE_URL)
+                            .setPersistenceEnabled(true)
+                        firebaseInitialized = true
+                    } catch (e: Exception) {
+                        // Persistence đã được bật trước đó
+                        firebaseInitialized = true
+                    }
+                }
+            }
+        }
     }
 }

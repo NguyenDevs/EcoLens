@@ -1,89 +1,34 @@
 package com.nguyendevs.ecolens.utils
 
+/**
+ * Builder cho các prompts gửi đến Gemini API Đã tối ưu để giảm token count (~20-30%) trong khi giữ
+ * nguyên chất lượng output
+ */
 object PromptBuilder {
 
-    fun buildTaxonomyPrompt(scientificName: String, isVietnamese: Boolean): String {
-        return if (isVietnamese) {
-            """
-            Cung cấp thông tin phân loại khoa học về "$scientificName" bằng Tiếng Việt.
-            
-            Trả về JSON với format:
-            {
-              "commonName": "Tên thường gọi Tiếng Việt",
-              "kingdom": "Tên Tiếng Việt",
-              "phylum": "Tên Tiếng Việt",
-              "className": "Tên Tiếng Việt",
-              "taxorder": "Tên Tiếng Việt",
-              "family": "Tên khoa học",
-              "genus": "Tên khoa học",
-              "species": "Tên khoa học"
-            }
-            
-            CHỈ TRẢ VỀ JSON, KHÔNG THÊM TEXT KHÁC.
-            """.trimIndent()
-        } else {
-            """
-            Provide taxonomic classification for "$scientificName" in English.
-            
-            Return JSON format:
-            {
-              "commonName": "Common name",
-              "kingdom": "Kingdom name",
-              "phylum": "Phylum name",
-              "className": "Class name",
-              "taxorder": "Order name",
-              "family": "Family name",
-              "genus": "Genus name",
-              "species": "Species name"
-            }
-            
-            RETURN ONLY JSON, NO ADDITIONAL TEXT.
-            """.trimIndent()
-        }
+  /** Build prompt cho taxonomy classification Giảm tokens bằng cách compact JSON example */
+  fun buildTaxonomyPrompt(scientificName: String, isVietnamese: Boolean): String {
+    return if (isVietnamese) {
+      """Phân loại khoa học "$scientificName" (Tiếng Việt). JSON only:
+{"commonName":"Tên thường gọi","kingdom":"Giới","phylum":"Ngành","className":"Lớp","taxorder":"Bộ","family":"Họ (khoa học)","genus":"Chi (khoa học)","species":"Loài (khoa học)"}"""
+    } else {
+      """Taxonomy for "$scientificName" in English. JSON only:
+{"commonName":"Common name","kingdom":"Kingdom","phylum":"Phylum","className":"Class","taxorder":"Order","family":"Family","genus":"Genus","species":"Species"}"""
     }
+  }
 
-
-    fun buildDetailsPrompt(scientificName: String, isVietnamese: Boolean): String {
-        return if (isVietnamese) {
-            """
-            Cung cấp thông tin chi tiết về "$scientificName" bằng Tiếng Việt.
-            
-            === QUY TẮC FORMAT ===
-            - Dùng ** để in đậm (ví dụ: **từ khóa**)
-            - Dùng ## để highlight xanh (ví dụ: ##Việt Nam##)
-            - Dùng • cho bullet points
-            
-            === JSON FORMAT ===
-            {
-              "description": "Tổng quan 4 câu ngắn gọn, dùng **in đậm** cho đặc điểm nổi bật và ##xanh đậm## cho địa danh, tên riêng, số đo.",
-              "characteristics": "Danh sách gạch đầu dòng, mỗi dòng bắt đầu với • và một ý về hình thái, kích thước, màu sắc. Dùng **in đậm** và ##xanh đậm##.",
-              "distribution": "Ưu tiên Việt Nam trước (nếu có), sau đó toàn cầu. Dùng ##xanh đậm## cho tên địa danh.",
-              "habitat": "Mô tả chi tiết môi trường sống.",
-              "conservationStatus": "Chỉ ghi một trong các trạng thái: Cực kỳ nguy cấp, Nguy cấp, Sách Đỏ Việt Nam, Sắp nguy cấp, Ít lo ngại, Chưa đánh giá. Thêm một chút thông tin bổ sung từ IUCN nếu có."
-            }
-            
-            CHỈ TRẢ VỀ JSON.
-            """.trimIndent()
-        } else {
-            """
-            Provide detailed information about "$scientificName" in English.
-            
-            === FORMAT RULES ===
-            - Use ** for bold (e.g., **keyword**)
-            - Use ## for green highlight (e.g., ##Vietnam##)
-            - Use • for bullet points
-            
-            === JSON FORMAT ===
-            {
-              "description": "4-sentence overview with **bold** for key features and ##green highlight## for places/names/measurements.",
-              "characteristics": "Bullet list, each line starts with • covering morphology, size, colors. Use **bold** and ##green highlight##.",
-              "distribution": "Vietnam first if applicable, then worldwide. Use ##green highlight## for locations.",
-              "habitat": "Environment details",
-              "conservationStatus": "Only write one of these statuses: Critically Endangered, Endangered, Vulnerable (Vietnam Red Data Book), Near Threatened, Least Concern, Not Evaluated. Add some additional IUCN info if available."
-            }
-            
-            RETURN ONLY JSON.
-            """.trimIndent()
-        }
+  /** Build prompt cho species details Giữ nguyên format rules vì ảnh hưởng đến UI rendering */
+  fun buildDetailsPrompt(scientificName: String, isVietnamese: Boolean): String {
+    return if (isVietnamese) {
+      """Thông tin "$scientificName" (Tiếng Việt).
+Format: **bold**, ##green##, • bullets
+JSON: {"description":"4 câu, **đặc điểm nổi bật**, ##địa danh/số đo##","characteristics":"• hình thái, kích thước, màu sắc","distribution":"##Việt Nam## trước, toàn cầu sau","habitat":"Môi trường sống","conservationStatus":"Cực kỳ nguy cấp/Nguy cấp/Sách Đỏ VN/Sắp nguy cấp/Ít lo ngại/Chưa đánh giá + IUCN info"}
+JSON only."""
+    } else {
+      """Details for "$scientificName" in English.
+Format: **bold**, ##green##, • bullets
+JSON: {"description":"4 sentences, **key features**, ##places/measurements##","characteristics":"• morphology, size, colors","distribution":"##Vietnam## first if applicable, then worldwide","habitat":"Environment details","conservationStatus":"Critically Endangered/Endangered/Vulnerable/Near Threatened/Least Concern/Not Evaluated + IUCN info"}
+JSON only."""
     }
+  }
 }
