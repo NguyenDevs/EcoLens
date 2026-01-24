@@ -7,42 +7,37 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.database.FirebaseDatabase
 import com.nguyendevs.ecolens.network.RetrofitClient
 
-/**
- * Class Application chính của EcoLens
- * Khởi tạo các cấu hình và services toàn cục
- */
+/** Application class chính của EcoLens. Khởi tạo các cấu hình toàn cục khi app start. */
 class EcoLensApplication : Application() {
 
     companion object {
-        @Volatile
-        private var firebaseInitialized = false
+        @Volatile private var firebaseInitialized = false
     }
 
+    /** Khởi tạo app: theme, Retrofit, Firebase. */
     override fun onCreate() {
         super.onCreate()
-
-        // Thiết lập chế độ giao diện (sáng/tối)
-        val themePref = getSharedPreferences("app_settings", Context.MODE_PRIVATE)
-        val isDarkMode = themePref.getBoolean("dark_mode", false)
-
-        val nightMode = if (isDarkMode) {
-            AppCompatDelegate.MODE_NIGHT_YES
-        } else {
-            AppCompatDelegate.MODE_NIGHT_NO
-        }
-        AppCompatDelegate.setDefaultNightMode(nightMode)
-
-        // Khởi tạo Retrofit client và Firebase
+        setupTheme()
         RetrofitClient.initialize(this)
         FirebaseApp.initializeApp(this)
-        
-        // Khởi tạo Firebase persistence chỉ một lần
         initFirebasePersistence()
     }
-    
+
+    /** Thiết lập theme sáng/tối từ preferences. */
+    private fun setupTheme() {
+        val themePref = getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+        val isDarkMode = themePref.getBoolean("dark_mode", false)
+        val nightMode =
+                if (isDarkMode) {
+                    AppCompatDelegate.MODE_NIGHT_YES
+                } else {
+                    AppCompatDelegate.MODE_NIGHT_NO
+                }
+        AppCompatDelegate.setDefaultNightMode(nightMode)
+    }
+
     /**
-     * Khởi tạo Firebase Realtime Database persistence
-     * Chỉ được gọi một lần trong vòng đời app
+     * Khởi tạo Firebase persistence với double-checked locking. Chỉ gọi một lần trong vòng đời app.
      */
     private fun initFirebasePersistence() {
         if (!firebaseInitialized) {
@@ -50,10 +45,9 @@ class EcoLensApplication : Application() {
                 if (!firebaseInitialized) {
                     try {
                         FirebaseDatabase.getInstance(BuildConfig.FIREBASE_DATABASE_URL)
-                            .setPersistenceEnabled(true)
+                                .setPersistenceEnabled(true)
                         firebaseInitialized = true
                     } catch (e: Exception) {
-                        // Persistence đã được bật trước đó
                         firebaseInitialized = true
                     }
                 }

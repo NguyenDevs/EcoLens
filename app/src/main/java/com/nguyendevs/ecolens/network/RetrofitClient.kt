@@ -13,29 +13,34 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-/** Client Retrofit cho các API requests Quản lý cấu hình HTTP client và xử lý các lỗi xác thực */
+/**
+ * Singleton Retrofit client cho API requests. Quản lý HTTP config, interceptors và error handling.
+ */
 object RetrofitClient {
 
     private const val WORKER_BASE_URL = BuildConfig.WORKER_BASE_URL
-
     private var appContext: Context? = null
-
-    // Shared main thread handler để tránh tạo mới mỗi lần
     private val mainHandler by lazy { Handler(Looper.getMainLooper()) }
 
-    /** Khởi tạo context cho việc hiển thị thông báo */
+    /**
+     * Khởi tạo context cho Toast messages.
+     * @param context Application context
+     */
     fun initialize(context: Context) {
         appContext = context.applicationContext
     }
 
-    /** Hiển thị toast message an toàn trên main thread */
+    /**
+     * Hiển thị Toast an toàn trên main thread.
+     * @param message Nội dung thông báo
+     */
     private fun showToast(message: String) {
         appContext?.let { context ->
             mainHandler.post { Toast.makeText(context, message, Toast.LENGTH_LONG).show() }
         }
     }
 
-    /** Logging interceptor cho debug */
+    /** Logging interceptor cho debug mode. */
     private val loggingInterceptor =
             HttpLoggingInterceptor().apply {
                 level =
@@ -46,28 +51,25 @@ object RetrofitClient {
                         }
             }
 
-    /** HMAC interceptor để xác thực requests Phải đặt trước authErrorInterceptor */
+    /** HMAC interceptor xác thực requests. */
     private val hmacInterceptor = HMACInterceptor()
 
-    /** Interceptor xử lý các lỗi xác thực và rate limit */
+    /** Error interceptor xử lý 401, 429 và Gemini errors. */
     private val authErrorInterceptor = Interceptor { chain ->
         val request = chain.request()
         val response = chain.proceed(request)
 
         when {
-            // Xử lý lỗi 401 Unauthorized từ HMAC
             response.code == 401 && request.url.toString().contains("inaturalist") -> {
                 showToast("iNaturalist Token hết hạn. Vui lòng làm mới")
             }
             response.code == 401 -> {
                 showToast("Xác thực thất bại. Vui lòng cập nhật ứng dụng")
             }
-            // Xử lý lỗi 429 Rate Limit
             response.code == 429 -> {
                 val resetTime = response.header("X-RateLimit-Reset") ?: "unknown"
                 showToast("Quá nhiều yêu cầu. Vui lòng thử lại sau ${resetTime}s")
             }
-            // Xử lý thông tin retry từ Gemini API
             request.url.toString().contains("gemini") -> {
                 val allFailed = response.header("X-Gemini-All-Failed") == "true"
                 if (allFailed) {
@@ -86,7 +88,7 @@ object RetrofitClient {
         response
     }
 
-    /** OkHttp client với các interceptor và timeout cấu hình */
+    /** OkHttp client với interceptors và timeout config. */
     private val okHttpClient =
             OkHttpClient.Builder()
                     .addInterceptor(hmacInterceptor)
@@ -98,7 +100,7 @@ object RetrofitClient {
                     .callTimeout(0, TimeUnit.SECONDS)
                     .build()
 
-    /** Retrofit instance cho iNaturalist API */
+    /** Retrofit instance cho Worker API. */
     private val iNaturalistRetrofit =
             Retrofit.Builder()
                     .baseUrl(WORKER_BASE_URL)
@@ -106,6 +108,6 @@ object RetrofitClient {
                     .addConverterFactory(GsonConverterFactory.create())
                     .build()
 
-    /** API service cho iNaturalist */
+    /** API service instance. */
     val iNaturalistApi: INaturalistApi = iNaturalistRetrofit.create(INaturalistApi::class.java)
 }

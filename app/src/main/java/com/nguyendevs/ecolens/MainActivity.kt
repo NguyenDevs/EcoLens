@@ -9,8 +9,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Looper
 import android.view.MotionEvent
-import android.view.ViewGroup
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
 import android.widget.TextView
@@ -39,14 +39,11 @@ import com.nguyendevs.ecolens.model.SpeciesInfo
 import com.nguyendevs.ecolens.utils.KeyboardUtils
 import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
 import com.nguyendevs.ecolens.view.EcoLensViewModel
-import kotlinx.coroutines.*
 import java.io.File
 import java.lang.ref.WeakReference
+import kotlinx.coroutines.*
 
-/**
- * Activity chính của ứng dụng EcoLens
- * Quản lý navigation, nhận diện loài, và các tính năng chính
- */
+/** Activity chính của ứng dụng EcoLens. Quản lý navigation, nhận diện loài, và UI chính. */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
@@ -71,16 +68,16 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val PREF_NAME = "EcoLensPrefs"
         private const val KEY_LAST_NAV_ITEM = "last_nav_item"
-        
+
         // UI Constants
         private const val IMAGE_PREVIEW_HEIGHT_DP = 290
         private const val TRANSITION_ANIMATION_DURATION = 400L
         private const val PRELOAD_DELAY_MS = 500L
         private const val LOADING_STOP_DELAY_MS = 500L
-        
-        // Sử dụng WeakReference để tránh memory leak
+
+        /** Bitmap dùng cho transition animation. Sử dụng WeakReference tránh memory leak. */
         private var transitionBitmapRef: WeakReference<Bitmap>? = null
-        
+
         var transitionBitmap: Bitmap?
             get() = transitionBitmapRef?.get()
             set(value) {
@@ -88,30 +85,25 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
-    /**
-     * Launcher cho CameraActivity
-     */
-    private val cameraActivityLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == RESULT_OK) {
-            val uriString = result.data?.getStringExtra(CameraActivity.KEY_IMAGE_URI)
-            if (uriString != null) {
-                handleCapturedImage(uriString.toUri())
+    /** Launcher cho CameraActivity */
+    private val cameraActivityLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == RESULT_OK) {
+                    val uriString = result.data?.getStringExtra(CameraActivity.KEY_IMAGE_URI)
+                    if (uriString != null) {
+                        handleCapturedImage(uriString.toUri())
+                    }
+                }
             }
-        }
-    }
 
-    /**
-     * Launcher cho yêu cầu quyền
-     */
-    private val permissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        if (!permissions.values.all { it }) {
-            permissionManager.showPermissionDeniedDialog()
-        }
-    }
+    /** Launcher cho yêu cầu quyền */
+    private val permissionLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+                    permissions ->
+                if (!permissions.values.all { it }) {
+                    permissionManager.showPermissionDeniedDialog()
+                }
+            }
 
     override fun attachBaseContext(newBase: Context) {
         languageManager = LanguageManager(newBase)
@@ -121,25 +113,21 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         loadThemePreference()
         super.onCreate(savedInstanceState)
-        
+
         // Firebase persistence đã được khởi tạo trong EcoLensApplication
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Xử lý transition animation từ splash screen
         handleTransitionAnimation()
 
         sharedPreferences = getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 
         setupViewModel()
 
-        // Khôi phục trạng thái ảnh nếu có
         viewModel.currentImageUri?.let { uri ->
             this.imageUri = uri
-            binding.root.post {
-                restoreExpandedState(uri)
-            }
+            binding.root.post { restoreExpandedState(uri) }
         }
 
         initHandlers()
@@ -149,25 +137,22 @@ class MainActivity : AppCompatActivity() {
         setupObservers()
         setupBackNavigation()
 
-        // Điều hướng đến tab phù hợp
         val navigateToSettings = intent.getBooleanExtra("navigate_to_settings", false)
-        val lastNavItem = if (navigateToSettings) {
-            R.id.nav_settings
-        } else {
-            sharedPreferences.getInt(KEY_LAST_NAV_ITEM, R.id.nav_home)
-        }
+        val lastNavItem =
+                if (navigateToSettings) {
+                    R.id.nav_settings
+                } else {
+                    sharedPreferences.getInt(KEY_LAST_NAV_ITEM, R.id.nav_home)
+                }
 
         binding.bottomNavigation.selectedItemId = lastNavItem
-        binding.root.post {
-            updateNavigationState(lastNavItem)
-        }
+        binding.root.post { updateNavigationState(lastNavItem) }
 
         preloadFragments()
     }
 
     /**
-     * Preload các fragment để cải thiện hiệu suất
-     * Sử dụng IdleHandler để load khi UI thread rảnh
+     * Preload các fragment để cải thiện hiệu suất Sử dụng IdleHandler để load khi UI thread rảnh
      */
     private fun preloadFragments() {
         Looper.myQueue().addIdleHandler {
@@ -180,7 +165,11 @@ class MainActivity : AppCompatActivity() {
                             transaction.add(R.id.historyContainer, historyFragment, "HISTORY")
                         }
                         if (!chatHistoryFragment.isAdded) {
-                            transaction.add(R.id.myGardenContainer, chatHistoryFragment, "CHAT_HISTORY")
+                            transaction.add(
+                                    R.id.myGardenContainer,
+                                    chatHistoryFragment,
+                                    "CHAT_HISTORY"
+                            )
                         }
                         transaction.commitAllowingStateLoss()
                     }
@@ -193,139 +182,132 @@ class MainActivity : AppCompatActivity() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
     }
-    
-    /**
-     * Xử lý transition animation từ splash screen
-     * Sử dụng WeakReference để tránh memory leak
-     */
+
+    /** Xử lý transition animation từ splash screen Sử dụng WeakReference để tránh memory leak */
     private fun handleTransitionAnimation() {
         val bitmap = transitionBitmap ?: return
-        
+
         val rootView = window.decorView as ViewGroup
-        val overlay = ImageView(this).apply {
-            setImageBitmap(bitmap)
-            scaleType = ImageView.ScaleType.FIT_XY
-            elevation = 100f
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-        }
+        val overlay =
+                ImageView(this).apply {
+                    setImageBitmap(bitmap)
+                    scaleType = ImageView.ScaleType.FIT_XY
+                    elevation = 100f
+                    layoutParams =
+                            ViewGroup.LayoutParams(
+                                    ViewGroup.LayoutParams.MATCH_PARENT,
+                                    ViewGroup.LayoutParams.MATCH_PARENT
+                            )
+                }
         rootView.addView(overlay)
 
         overlay.animate()
-            .alpha(0f)
-            .setDuration(TRANSITION_ANIMATION_DURATION)
-            .setInterpolator(AccelerateDecelerateInterpolator())
-            .withEndAction {
-                rootView.removeView(overlay)
-                // Recycle bitmap nếu còn available
-                transitionBitmap?.let { bmp ->
-                    if (!bmp.isRecycled) {
-                        bmp.recycle()
+                .alpha(0f)
+                .setDuration(TRANSITION_ANIMATION_DURATION)
+                .setInterpolator(AccelerateDecelerateInterpolator())
+                .withEndAction {
+                    rootView.removeView(overlay)
+                    // Recycle bitmap nếu còn available
+                    transitionBitmap?.let { bmp ->
+                        if (!bmp.isRecycled) {
+                            bmp.recycle()
+                        }
                     }
+                    transitionBitmap = null
                 }
-                transitionBitmap = null
-            }
-            .start()
+                .start()
     }
 
-    /**
-     * Tải cài đặt theme từ SharedPreferences
-     */
+    /** Tải cài đặt theme từ SharedPreferences */
     private fun loadThemePreference() {
         val themePref = getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         val isDarkMode = themePref.getBoolean("dark_mode", false)
 
-        val nightMode = if (isDarkMode) {
-            AppCompatDelegate.MODE_NIGHT_YES
-        } else {
-            AppCompatDelegate.MODE_NIGHT_NO
-        }
+        val nightMode =
+                if (isDarkMode) {
+                    AppCompatDelegate.MODE_NIGHT_YES
+                } else {
+                    AppCompatDelegate.MODE_NIGHT_NO
+                }
         AppCompatDelegate.setDefaultNightMode(nightMode)
     }
 
-    /**
-     * Khởi tạo ViewModel
-     */
+    /** Khởi tạo ViewModel */
     private fun setupViewModel() {
-        viewModel = ViewModelProvider(
-            this,
-            ViewModelProvider.AndroidViewModelFactory.getInstance(application)
-        )[EcoLensViewModel::class.java]
+        viewModel =
+                ViewModelProvider(
+                        this,
+                        ViewModelProvider.AndroidViewModelFactory.getInstance(application)
+                )[EcoLensViewModel::class.java]
     }
 
-    /**
-     * Khởi tạo các handler xử lý UI
-     */
+    /** Khởi tạo các handler xử lý UI */
     private fun initHandlers() {
         settingsHandler = SettingsHandler(this, languageManager, binding.settingsContainer)
 
         val homeRoot = binding.homeContainer.root
 
-        searchBarHandler = SearchBarHandler(
-            this,
-            binding.searchBarContainer,
-            binding.textInputLayoutSearch,
-            binding.etSearchQuery,
-            binding.btnSearchAction
-        )
+        searchBarHandler =
+                SearchBarHandler(
+                        this,
+                        binding.searchBarContainer,
+                        binding.textInputLayoutSearch,
+                        binding.etSearchQuery,
+                        binding.btnSearchAction
+                )
 
-        imageZoomHandler = ImageZoomHandler(
-            homeRoot.findViewById(R.id.btnZoomIn),
-            binding.btnZoomOut,
-            binding.fullScreenContainer,
-            binding.fullScreenImage
-        )
+        imageZoomHandler =
+                ImageZoomHandler(
+                        homeRoot.findViewById(R.id.btnZoomIn),
+                        binding.btnZoomOut,
+                        binding.fullScreenContainer,
+                        binding.fullScreenImage
+                )
 
-        loadingAnimationHandler = LoadingAnimationHandler(
-            homeRoot.findViewById(R.id.tvLoading),
-            lifecycleScope
-        )
+        loadingAnimationHandler =
+                LoadingAnimationHandler(homeRoot.findViewById(R.id.tvLoading), lifecycleScope)
 
-        speciesInfoHandler = SpeciesInfoHandler(
-            this,
-            binding,
-            onCopySuccess = { copiedText ->
-                searchBarHandler.expandSearchBar(copiedText)
-            },
-            onRetryClick = {
-                if (speakerManager.isSpeaking()) {
-                    speakerManager.pause()
-                    toggleSpeakerUI(false)
-                }
-                viewModel.retryIdentification()
-            }
-        )
+        speciesInfoHandler =
+                SpeciesInfoHandler(
+                        this,
+                        binding,
+                        onCopySuccess = { copiedText ->
+                            searchBarHandler.expandSearchBar(copiedText)
+                        },
+                        onRetryClick = {
+                            if (speakerManager.isSpeaking()) {
+                                speakerManager.pause()
+                                toggleSpeakerUI(false)
+                            }
+                            viewModel.retryIdentification()
+                        }
+                )
     }
 
-    /**
-     * Khởi tạo các manager
-     */
+    /** Khởi tạo các manager */
     private fun initManagers() {
         permissionManager = PermissionManager(this, permissionLauncher)
         speakerManager = SpeakerManager(this)
-        speakerManager.onSpeechFinished = {
-            runOnUiThread { toggleSpeakerUI(false) }
-        }
+        speakerManager.onSpeechFinished = { runOnUiThread { toggleSpeakerUI(false) } }
 
         supportFragmentManager.addOnBackStackChangedListener {
             val count = supportFragmentManager.backStackEntryCount
             if (count > 0) {
                 binding.fragmentContainer.visibility = View.VISIBLE
             } else {
-                binding.fragmentContainer.postDelayed({
-                    if (supportFragmentManager.backStackEntryCount == 0) {
-                        binding.fragmentContainer.visibility = View.GONE
-                    }
-                }, 400)
+                binding.fragmentContainer.postDelayed(
+                        {
+                            if (supportFragmentManager.backStackEntryCount == 0) {
+                                binding.fragmentContainer.visibility = View.GONE
+                            }
+                        },
+                        400
+                )
             }
         }
     }
 
-    /**
-     * Xử lý ảnh đã chụp từ camera
-     */
+    /** Xử lý ảnh đã chụp từ camera */
     private fun handleCapturedImage(uri: Uri) {
         binding.fabCamera.isClickable = false
         binding.fabCamera.alpha = 0.5f
@@ -352,9 +334,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Khôi phục trạng thái đã mở rộng với ảnh
-     */
+    /** Khôi phục trạng thái đã mở rộng với ảnh */
     private fun restoreExpandedState(uri: Uri) {
         isExpandedState = true
 
@@ -375,12 +355,13 @@ class MainActivity : AppCompatActivity() {
         imagePreview.alpha = 1f
 
         val path = uri.path
-        val loadModel = if (path != null) {
-            val file = File(path)
-            if (file.exists()) file else uri
-        } else {
-            uri
-        }
+        val loadModel =
+                if (path != null) {
+                    val file = File(path)
+                    if (file.exists()) file else uri
+                } else {
+                    uri
+                }
 
         Glide.with(this).load(loadModel).centerCrop().into(imagePreview as android.widget.ImageView)
 
@@ -389,9 +370,7 @@ class MainActivity : AppCompatActivity() {
         if (searchBarHandler.isExpanded()) searchBarHandler.collapseSearchBar()
     }
 
-    /**
-     * Animation mở rộng card hiển thị ảnh
-     */
+    /** Animation mở rộng card hiển thị ảnh */
     private fun animateCardExpansion(onAnimationComplete: () -> Unit) {
         if (isExpandedState) {
             onAnimationComplete()
@@ -406,45 +385,48 @@ class MainActivity : AppCompatActivity() {
         val startHeight = imagePreviewCard.height
         val targetHeight = (290 * resources.displayMetrics.density).toInt()
 
-        initialStateLayout.animate()
-            .alpha(0f)
-            .setDuration(200)
-            .withEndAction {
-                initialStateLayout.visibility = View.GONE
+        initialStateLayout
+                .animate()
+                .alpha(0f)
+                .setDuration(200)
+                .withEndAction {
+                    initialStateLayout.visibility = View.GONE
 
-                val heightAnimator = ValueAnimator.ofInt(startHeight, targetHeight)
-                heightAnimator.duration = 400
-                heightAnimator.interpolator = AccelerateDecelerateInterpolator()
-                heightAnimator.addUpdateListener { animator ->
-                    val params = imagePreviewCard.layoutParams
-                    params.height = animator.animatedValue as Int
-                    imagePreviewCard.layoutParams = params
-                }
-
-                heightAnimator.addListener(object : android.animation.AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: android.animation.Animator) {
-                        isExpandedState = true
-                        imagePreview.visibility = View.VISIBLE
-                        imagePreview.animate()
-                            .alpha(1f)
-                            .setDuration(300)
-                            .start()
-                        onAnimationComplete()
+                    val heightAnimator = ValueAnimator.ofInt(startHeight, targetHeight)
+                    heightAnimator.duration = 400
+                    heightAnimator.interpolator = AccelerateDecelerateInterpolator()
+                    heightAnimator.addUpdateListener { animator ->
+                        val params = imagePreviewCard.layoutParams
+                        params.height = animator.animatedValue as Int
+                        imagePreviewCard.layoutParams = params
                     }
-                })
-                heightAnimator.start()
-            }
-            .start()
+
+                    heightAnimator.addListener(
+                            object : android.animation.AnimatorListenerAdapter() {
+                                override fun onAnimationEnd(animation: android.animation.Animator) {
+                                    isExpandedState = true
+                                    imagePreview.visibility = View.VISIBLE
+                                    imagePreview.animate().alpha(1f).setDuration(300).start()
+                                    onAnimationComplete()
+                                }
+                            }
+                    )
+                    heightAnimator.start()
+                }
+                .start()
     }
 
-    /**
-     * Thiết lập bottom navigation
-     */
+    /** Thiết lập bottom navigation */
     private fun setupBottomNavigation() {
         binding.bottomNavigation.setOnItemSelectedListener { item ->
-            binding.bottomNavigation.performHapticFeedback(android.view.HapticFeedbackConstants.CONFIRM)
+            binding.bottomNavigation.performHapticFeedback(
+                    android.view.HapticFeedbackConstants.CONFIRM
+            )
             if (supportFragmentManager.backStackEntryCount > 0) {
-                supportFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                supportFragmentManager.popBackStack(
+                        null,
+                        androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE
+                )
             }
 
             sharedPreferences.edit().putInt(KEY_LAST_NAV_ITEM, item.itemId).apply()
@@ -454,9 +436,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Cập nhật trạng thái navigation dựa trên tab được chọn
-     */
+    /** Cập nhật trạng thái navigation dựa trên tab được chọn */
     private fun updateNavigationState(itemId: Int) {
         if (speakerManager.isSpeaking()) {
             speakerManager.pause()
@@ -496,26 +476,26 @@ class MainActivity : AppCompatActivity() {
             R.id.nav_history -> {
                 binding.historyContainer.visibility = View.VISIBLE
                 if (!historyFragment.isAdded) {
-                    supportFragmentManager.beginTransaction()
-                        .add(R.id.historyContainer, historyFragment, "HISTORY")
-                        .commitNowAllowingStateLoss()
+                    supportFragmentManager
+                            .beginTransaction()
+                            .add(R.id.historyContainer, historyFragment, "HISTORY")
+                            .commitNowAllowingStateLoss()
                 }
             }
             R.id.nav_my_garden -> {
                 binding.myGardenContainer.visibility = View.VISIBLE
                 if (!chatHistoryFragment.isAdded) {
-                    supportFragmentManager.beginTransaction()
-                        .add(R.id.myGardenContainer, chatHistoryFragment, "CHAT_HISTORY")
-                        .commitNowAllowingStateLoss()
+                    supportFragmentManager
+                            .beginTransaction()
+                            .add(R.id.myGardenContainer, chatHistoryFragment, "CHAT_HISTORY")
+                            .commitNowAllowingStateLoss()
                 }
             }
             R.id.nav_settings -> binding.settingsContainer.root.visibility = View.VISIBLE
         }
     }
 
-    /**
-     * Thiết lập các Floating Action Button
-     */
+    /** Thiết lập các Floating Action Button */
     private fun setupFAB() {
         binding.fabCamera.setOnClickListener {
             binding.fabCamera.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
@@ -553,39 +533,30 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Chuyển đổi UI của speaker button
-     */
+    /** Chuyển đổi UI của speaker button */
     private fun toggleSpeakerUI(isSpeaking: Boolean) {
         if (!binding.homeContainer.root.isVisible) return
         binding.fabSpeak.visibility = if (!isSpeaking) View.VISIBLE else View.GONE
         binding.fabMute.visibility = if (isSpeaking) View.VISIBLE else View.GONE
     }
 
-    /**
-     * Thiết lập observers cho UI state
-     */
+    /** Thiết lập observers cho UI state */
     private fun setupObservers() {
-        lifecycleScope.launch {
-            viewModel.uiState.collect { state ->
-                updateHomeUI(state)
-            }
-        }
+        lifecycleScope.launch { viewModel.uiState.collect { state -> updateHomeUI(state) } }
     }
 
-    /**
-     * Cập nhật UI màn hình Home dựa trên state
-     */
+    /** Cập nhật UI màn hình Home dựa trên state */
     private suspend fun updateHomeUI(state: com.nguyendevs.ecolens.model.EcoLensUiState) {
         val isLoading = state.isLoading
         val error = state.error
         val loadingStage = state.loadingStage
 
-        val isPhase2 = loadingStage == LoadingStage.DESCRIPTION ||
-                loadingStage == LoadingStage.CHARACTERISTICS ||
-                loadingStage == LoadingStage.DISTRIBUTION ||
-                loadingStage == LoadingStage.HABITAT ||
-                loadingStage == LoadingStage.CONSERVATION
+        val isPhase2 =
+                loadingStage == LoadingStage.DESCRIPTION ||
+                        loadingStage == LoadingStage.CHARACTERISTICS ||
+                        loadingStage == LoadingStage.DISTRIBUTION ||
+                        loadingStage == LoadingStage.HABITAT ||
+                        loadingStage == LoadingStage.CONSERVATION
 
         val showOverlay = isLoading && !isPhase2
 
@@ -602,8 +573,9 @@ class MainActivity : AppCompatActivity() {
             stopLoadingJob?.cancel()
 
             if (loadingStage == LoadingStage.SCIENTIFIC_NAME ||
-                loadingStage == LoadingStage.COMMON_NAME ||
-                loadingStage == LoadingStage.TAXONOMY) {
+                            loadingStage == LoadingStage.COMMON_NAME ||
+                            loadingStage == LoadingStage.TAXONOMY
+            ) {
                 loadingAnimationHandler.setText(R.string.analyzing_info)
             } else {
                 loadingAnimationHandler.setText(R.string.analyzing_text)
@@ -616,10 +588,11 @@ class MainActivity : AppCompatActivity() {
                 loadingAnimationHandler.stop()
             } else {
                 stopLoadingJob?.cancel()
-                stopLoadingJob = lifecycleScope.launch {
-                    delay(500)
-                    loadingAnimationHandler.stop()
-                }
+                stopLoadingJob =
+                        lifecycleScope.launch {
+                            delay(500)
+                            loadingAnimationHandler.stop()
+                        }
             }
         }
 
@@ -638,9 +611,9 @@ class MainActivity : AppCompatActivity() {
             homeRoot.findViewById<View>(R.id.errorCard).isVisible = false
             binding.fabSpeak.isVisible = false
             speciesInfoHandler.displaySpeciesInfo(
-                SpeciesInfo(scientificName = "", commonName = ""),
-                null,
-                LoadingStage.NONE
+                    SpeciesInfo(scientificName = "", commonName = ""),
+                    null,
+                    LoadingStage.NONE
             )
         } else if (state.speciesInfo != null) {
             binding.homeContainer.speciesInfoCard.root.isVisible = true
@@ -648,7 +621,8 @@ class MainActivity : AppCompatActivity() {
 
             speciesInfoHandler.displaySpeciesInfo(state.speciesInfo, imageUri, loadingStage)
 
-            if (loadingStage == LoadingStage.COMPLETE && binding.fabMute.visibility != View.VISIBLE) {
+            if (loadingStage == LoadingStage.COMPLETE && binding.fabMute.visibility != View.VISIBLE
+            ) {
                 binding.fabSpeak.isVisible = true
             } else {
                 binding.fabSpeak.isVisible = false
@@ -672,29 +646,30 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    /**
-     * Thiết lập xử lý nút Back
-     */
+    /** Thiết lập xử lý nút Back */
     private fun setupBackNavigation() {
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                if (imageZoomHandler.isFullScreenVisible()) {
-                    imageZoomHandler.hideFullScreen()
-                    return
-                }
+        onBackPressedDispatcher.addCallback(
+                this,
+                object : OnBackPressedCallback(true) {
+                    override fun handleOnBackPressed() {
+                        if (imageZoomHandler.isFullScreenVisible()) {
+                            imageZoomHandler.hideFullScreen()
+                            return
+                        }
 
-                if (supportFragmentManager.backStackEntryCount > 0) {
-                    supportFragmentManager.popBackStack()
-                    return
-                }
+                        if (supportFragmentManager.backStackEntryCount > 0) {
+                            supportFragmentManager.popBackStack()
+                            return
+                        }
 
-                if (binding.bottomNavigation.selectedItemId != R.id.nav_home) {
-                    binding.bottomNavigation.selectedItemId = R.id.nav_home
-                } else {
-                    isEnabled = false
-                    onBackPressedDispatcher.onBackPressed()
+                        if (binding.bottomNavigation.selectedItemId != R.id.nav_home) {
+                            binding.bottomNavigation.selectedItemId = R.id.nav_home
+                        } else {
+                            isEnabled = false
+                            onBackPressedDispatcher.onBackPressed()
+                        }
+                    }
                 }
-            }
-        })
+        )
     }
 }

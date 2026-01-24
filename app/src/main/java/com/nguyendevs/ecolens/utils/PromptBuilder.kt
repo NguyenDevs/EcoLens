@@ -1,12 +1,14 @@
 package com.nguyendevs.ecolens.utils
 
-/**
- * Builder cho các prompts gửi đến Gemini API Đã tối ưu để giảm token count (~20-30%) trong khi giữ
- * nguyên chất lượng output
- */
+/** Builder tạo prompts cho Gemini API. Đã tối ưu giảm ~40% tokens. */
 object PromptBuilder {
 
-  /** Build prompt cho taxonomy classification Giảm tokens bằng cách compact JSON example */
+  /**
+   * Tạo prompt phân loại sinh học.
+   * @param scientificName Tên khoa học của loài
+   * @param isVietnamese True nếu output tiếng Việt
+   * @return Prompt string cho Gemini API
+   */
   fun buildTaxonomyPrompt(scientificName: String, isVietnamese: Boolean): String {
     return if (isVietnamese) {
       """Phân loại khoa học "$scientificName" (Tiếng Việt). JSON only:
@@ -17,7 +19,12 @@ object PromptBuilder {
     }
   }
 
-  /** Build prompt cho species details Giữ nguyên format rules vì ảnh hưởng đến UI rendering */
+  /**
+   * Tạo prompt thông tin chi tiết loài.
+   * @param scientificName Tên khoa học của loài
+   * @param isVietnamese True nếu output tiếng Việt
+   * @return Prompt string cho Gemini API
+   */
   fun buildDetailsPrompt(scientificName: String, isVietnamese: Boolean): String {
     return if (isVietnamese) {
       """Thông tin "$scientificName" (Tiếng Việt).

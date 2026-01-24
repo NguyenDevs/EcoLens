@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -28,10 +30,9 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
+/** Room DAO cho history table. Định nghĩa các operations CRUD trên database. */
 @Dao
 interface HistoryDao {
-
-    // ==================== INSERT ====================
 
     /**
      * Thêm hoặc thay thế một bản ghi lịch sử mới
@@ -134,8 +135,12 @@ interface HistoryDao {
 }
 
 /**
- * Repository quản lý dữ liệu lịch sử với tích hợp Firebase Đồng bộ dữ liệu giữa local Room Database
- * và Firebase Realtime Database/Storage
+ * Repository quản lý lịch sử với Firebase sync. Đồng bộ Local Room DB với Firebase Realtime
+ * DB/Storage.
+ *
+ * @param historyDao DAO instance
+ * @param context Application context
+ * @param externalScope Coroutine scope cho background tasks
  */
 class HistoryRepository(
         private val historyDao: HistoryDao,
@@ -189,13 +194,13 @@ class HistoryRepository(
             }
 
     /**
-     * Thêm bản ghi mới vào cả local và đồng bộ lên Firebase Sử dụng externalScope để quản lý
-     * lifecycle của background sync
+     * Insert với Firebase sync.
+     * @param entry Bản ghi cần thêm
+     * @return ID của bản ghi mới
      */
     suspend fun insert(entry: HistoryEntry): Long {
         val id = insertLocal(entry)
         val entryWithId = entry.copy(id = id.toInt())
-        // Sử dụng externalScope thay vì tạo CoroutineScope mới
         externalScope.launch { syncRemote(entryWithId) }
         return id
     }
@@ -364,6 +369,7 @@ class HistoryRepository(
     // ==================== SYNC METHODS ====================
 
     /** Tải toàn bộ lịch sử từ Firebase về local Tự động tải ảnh về local nếu chưa có */
+    @RequiresApi(Build.VERSION_CODES.O)
     suspend fun fetchHistory() =
             withContext(Dispatchers.IO) {
                 if (auth.currentUser == null) return@withContext
