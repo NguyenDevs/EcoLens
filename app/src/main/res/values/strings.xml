@@ -17,6 +17,17 @@
     <string name="nav_history">Lịch sử</string>
     <string name="nav_my_garden">Trợ lý AI</string>
     <string name="nav_settings">Cài đặt</string>
+    <string name="nav_chat">Trợ lý</string>
+    
+    <!-- History/Chat screens -->
+    <string name="history_title">Lịch sử</string>
+    <string name="chat_title">Trợ lý AI</string>
+    <string name="delete">Xóa</string>
+    <string name="empty_history_title">Chưa có lịch sử</string>
+    <string name="empty_history_message">Hãy bắt đầu nhận diện loài để xem lịch sử</string>
+    <string name="empty_chat_title">Chưa có cuộc trò chuyện</string>
+    <string name="empty_chat_message">Bắt đầu một cuộc trò chuyện mới với EcoLens AI</string>
+    <string name="full_image">Ảnh toàn màn hình</string>
 
     <!-- Hành động chung -->
     <string name="ok">OK</string>

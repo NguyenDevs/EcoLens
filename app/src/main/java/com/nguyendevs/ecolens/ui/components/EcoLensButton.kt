@@ -1,5 +1,6 @@
 package com.nguyendevs.ecolens.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,31 +29,31 @@ fun EcoLensButton(
         containerColor: Color = Primary,
         contentColor: Color = Color.White
 ) {
-    Button(
-            onClick = onClick,
-            modifier = modifier.fillMaxWidth().height(56.dp),
-            enabled = enabled,
-            shape = EcoLensCorners.Button,
-            colors =
-                    ButtonDefaults.buttonColors(
-                            containerColor = containerColor,
-                            contentColor = contentColor,
-                            disabledContainerColor = containerColor.copy(alpha = 0.5f),
-                            disabledContentColor = contentColor.copy(alpha = 0.5f)
-                    ),
-            contentPadding =
-                    PaddingValues(
-                            horizontal = Dimens.PaddingButtonHorizontal,
-                            vertical = Dimens.PaddingButtonVertical
-                    ),
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = Dimens.ElevationSm)
-    ) {
-        Text(
-                text = text,
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold
-        )
-    }
+        Button(
+                onClick = onClick,
+                modifier = modifier.fillMaxWidth().height(56.dp),
+                enabled = enabled,
+                shape = EcoLensCorners.Button,
+                colors =
+                        ButtonDefaults.buttonColors(
+                                containerColor = containerColor,
+                                contentColor = contentColor,
+                                disabledContainerColor = containerColor.copy(alpha = 0.5f),
+                                disabledContentColor = contentColor.copy(alpha = 0.5f)
+                        ),
+                contentPadding =
+                        PaddingValues(
+                                horizontal = Dimens.PaddingButtonHorizontal,
+                                vertical = Dimens.PaddingButtonVertical
+                        ),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = Dimens.ElevationSm)
+        ) {
+                Text(
+                        text = text,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold
+                )
+        }
 }
 
 /** EcoLens outlined button. Matches Widget.App.Button.Outlined from styles.xml */
@@ -65,32 +66,32 @@ fun EcoLensOutlinedButton(
         contentColor: Color = Primary,
         leadingIcon: @Composable (() -> Unit)? = null
 ) {
-    OutlinedButton(
-            onClick = onClick,
-            modifier = modifier.fillMaxWidth().height(56.dp),
-            enabled = enabled,
-            shape = EcoLensCorners.Button,
-            colors =
-                    ButtonDefaults.outlinedButtonColors(
-                            contentColor = contentColor,
-                            disabledContentColor = contentColor.copy(alpha = 0.5f)
-                    ),
-            border = ButtonDefaults.outlinedButtonBorder(enabled = enabled),
-            contentPadding =
-                    PaddingValues(
-                            horizontal = Dimens.PaddingButtonHorizontal,
-                            vertical = Dimens.PaddingButtonVertical
-                    )
-    ) {
-        if (leadingIcon != null) {
-            leadingIcon()
+        OutlinedButton(
+                onClick = onClick,
+                modifier = modifier.fillMaxWidth().height(56.dp),
+                enabled = enabled,
+                shape = EcoLensCorners.Button,
+                colors =
+                        ButtonDefaults.outlinedButtonColors(
+                                contentColor = contentColor,
+                                disabledContentColor = contentColor.copy(alpha = 0.5f)
+                        ),
+                border = BorderStroke(1.dp, if (enabled) Primary else Primary.copy(alpha = 0.5f)),
+                contentPadding =
+                        PaddingValues(
+                                horizontal = Dimens.PaddingButtonHorizontal,
+                                vertical = Dimens.PaddingButtonVertical
+                        )
+        ) {
+                if (leadingIcon != null) {
+                        leadingIcon()
+                }
+                Text(
+                        text = text,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold
+                )
         }
-        Text(
-                text = text,
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold
-        )
-    }
 }
 
 /** EcoLens text button. Matches Widget.App.Button.Text from styles.xml */
@@ -102,21 +103,21 @@ fun EcoLensTextButton(
         enabled: Boolean = true,
         contentColor: Color = Primary
 ) {
-    TextButton(
-            onClick = onClick,
-            modifier = modifier,
-            enabled = enabled,
-            shape = EcoLensCorners.Button,
-            colors =
-                    ButtonDefaults.textButtonColors(
-                            contentColor = contentColor,
-                            disabledContentColor = contentColor.copy(alpha = 0.5f)
-                    )
-    ) {
-        Text(
-                text = text,
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold
-        )
-    }
+        TextButton(
+                onClick = onClick,
+                modifier = modifier,
+                enabled = enabled,
+                shape = EcoLensCorners.Button,
+                colors =
+                        ButtonDefaults.textButtonColors(
+                                contentColor = contentColor,
+                                disabledContentColor = contentColor.copy(alpha = 0.5f)
+                        )
+        ) {
+                Text(
+                        text = text,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold
+                )
+        }
 }
