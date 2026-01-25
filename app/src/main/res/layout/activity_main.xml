@@ -12,8 +12,7 @@
     <FrameLayout
             android:id="@+id/mainContent"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="60dp">
+            android:layout_height="match_parent">
 
         <include
                 android:id="@+id/homeContainer"
@@ -47,9 +46,10 @@
             android:layout_marginEnd="@dimen/spacing_md"
             android:layout_gravity="top|end"
             app:cardCornerRadius="@dimen/radius_full"
-            app:cardElevation="@dimen/elevation_md"
+            app:cardElevation="0dp"
             app:cardBackgroundColor="@color/surface"
-            android:elevation="20dp">
+            app:strokeWidth="@dimen/border_thin"
+            app:strokeColor="@color/border_light">
 
         <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -119,7 +119,7 @@
             app:maxImageSize="30dp"
             app:fabCustomSize="50dp"
             style="@style/Widget.App.FloatingActionButton"
-            app:elevation="@dimen/elevation_xs"
+            app:elevation="0dp"
             app:layout_anchorGravity="top|end"
             android:layout_gravity="top|end"
             android:visibility="gone"/>
@@ -137,64 +137,62 @@
             app:fabCustomSize="50dp"
             app:backgroundTint="@color/error"
             app:tint="@color/white"
-            app:elevation="@dimen/elevation_xs"
+            app:elevation="0dp"
             app:borderWidth="0dp"
             app:layout_anchorGravity="top|end"
             android:layout_gravity="top|end"
             android:visibility="gone"/>
-
-    <!-- CAMERA FAB BACKGROUND -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabCameraNav"
-            android:layout_width="90dp"
-            android:layout_height="90dp"
-            app:elevation="0dp"
-            android:layout_marginBottom="22dp"
-            android:scaleType="center"
-            app:fabCustomSize="90dp"
-            app:backgroundTint="@color/surface"
-            app:borderWidth="0dp"
-            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.SmallComponent"
-            app:layout_anchor="@id/bottomNavigation"
-            app:layout_anchorGravity="top|center_horizontal"
-            android:translationY="18dp"
-            android:clickable="false"
-            android:focusable="false"/>
-
-    <!-- BOTTOM NAVIGATION -->
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/bottomNavigation"
+    <!-- BOTTOM NAVIGATION - Floating Island Style with Integrated Camera -->
+    <com.google.android.material.card.MaterialCardView
+            android:id="@+id/bottomNavContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:background="@drawable/bottom_nav_background"
-            android:elevation="@dimen/bottom_nav_elevation"
-            style="@style/Widget.App.BottomNavigationView"
-            app:itemTextAppearanceActive="@style/BottomNavTextRegular"
-            app:itemTextAppearanceInactive="@style/BottomNavTextRegular"
-            app:menu="@menu/bottom_nav_menu"
-            app:itemRippleColor="@null"
-            android:paddingBottom="10dp"/>
+            android:layout_marginHorizontal="@dimen/spacing_md"
+            android:layout_marginBottom="@dimen/spacing_sm"
+            app:cardCornerRadius="@dimen/radius_3xl"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="@color/glass_nav"
+            app:strokeWidth="@dimen/border_thin"
+            app:strokeColor="@color/border_light">
 
-    <!-- CAMERA FAB -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabCamera"
-            android:layout_width="@dimen/fab_size_large"
-            android:layout_height="@dimen/fab_size_large"
-            android:layout_marginBottom="22dp"
-            android:src="@drawable/ic_camera"
-            android:contentDescription="@string/camera"
-            android:scaleType="center"
-            app:fabCustomSize="@dimen/fab_size_large"
-            app:maxImageSize="50dp"
-            style="@style/Widget.App.FloatingActionButton"
-            app:elevation="27dp"
-            app:pressedTranslationZ="20dp"
-            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.SmallComponent"
-            app:layout_anchor="@id/bottomNavigation"
-            app:layout_anchorGravity="top|center_horizontal"
-            android:translationY="18dp"
-            android:translationZ="12dp"/>
+        <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <com.google.android.material.bottomnavigation.BottomNavigationView
+                    android:id="@+id/bottomNavigation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:elevation="0dp"
+                    style="@style/Widget.App.BottomNavigationView"
+                    app:itemTextAppearanceActive="@style/BottomNavTextRegular"
+                    app:itemTextAppearanceInactive="@style/BottomNavTextRegular"
+                    app:menu="@menu/bottom_nav_menu"
+                    app:itemRippleColor="@null"
+                    android:paddingTop="@dimen/spacing_xxs"
+                    android:paddingBottom="@dimen/spacing_xs"/>
+
+            <!-- Camera FAB - Centered in Navigation -->
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/fabCamera"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_camera"
+                    android:contentDescription="@string/camera"
+                    android:scaleType="center"
+                    app:fabCustomSize="56dp"
+                    app:maxImageSize="28dp"
+                    style="@style/Widget.App.FloatingActionButton"
+                    app:elevation="0dp"
+                    app:pressedTranslationZ="4dp"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.App.FullRoundedComponent"/>
+
+        </FrameLayout>
+                
+    </com.google.android.material.card.MaterialCardView>
 
     <!-- FULLSCREEN IMAGE VIEWER -->
     <FrameLayout

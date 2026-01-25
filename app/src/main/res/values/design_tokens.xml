@@ -39,6 +39,16 @@
     <dimen name="radius_input">22dp</dimen>
     <dimen name="radius_chip">999dp</dimen>
     <dimen name="radius_bottom_sheet">24dp</dimen>
+    <dimen name="radius_2xl">32dp</dimen>            <!-- 2rem from HTML -->
+    <dimen name="radius_3xl">48dp</dimen>            <!-- 3rem -->
+
+    <!-- Hero Card -->
+    <dimen name="card_hero_height">280dp</dimen>
+    <dimen name="card_hero_padding">32dp</dimen>
+
+    <!-- Quick Explore Card -->
+    <dimen name="card_explore_width">160dp</dimen>
+    <dimen name="card_explore_image_height">128dp</dimen>
 
     <!-- ==================== ELEVATION ==================== -->
     <dimen name="elevation_none">0dp</dimen>

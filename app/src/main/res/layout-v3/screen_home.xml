@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+                name="viewModel"
+                type="com.nguyendevs.ecolens.view.EcoLensViewModel" />
+    </data>
+
+    <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/background"
+            android:fillViewport="true"
+            android:scrollbars="none">
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:animateLayoutChanges="true"
+                android:paddingBottom="70dp">
+
+            <!-- ==================== HEADER SECTION ==================== -->
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="@dimen/padding_screen_horizontal"
+                    android:paddingTop="@dimen/spacing_md">
+
+                <!-- Greeting and Title Row -->
+                <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginBottom="@dimen/spacing_lg">
+
+                    <!-- Greeting Text -->
+                    <TextView
+                            android:id="@+id/tvGreeting"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/greeting_morning"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_body"
+                            android:fontFamily="sans-serif-medium" />
+
+                    <!-- App Title -->
+                    <TextView
+                            android:id="@+id/tvAppTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/app_title"
+                            android:textColor="@color/primary"
+                            android:textSize="30sp"
+                            android:textStyle="bold"
+                            android:fontFamily="sans-serif-black"
+                            android:letterSpacing="-0.02" />
+
+                </LinearLayout>
+
+                <!-- Search Bar -->
+                <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/searchBarHome"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        app:cardCornerRadius="@dimen/radius_md"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/glass_light"
+                        app:strokeWidth="@dimen/border_thin"
+                        app:strokeColor="@color/border_light">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:paddingHorizontal="@dimen/spacing_md">
+
+                        <ImageView
+                                android:id="@+id/icSearchHome"
+                                android:layout_width="@dimen/icon_md"
+                                android:layout_height="@dimen/icon_md"
+                                android:src="@drawable/ic_search"
+                                app:tint="@color/text_tertiary"
+                                android:contentDescription="@string/search"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:layout_constraintBottom_toBottomOf="parent" />
+
+                        <EditText
+                                android:id="@+id/etSearchHome"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:background="@android:color/transparent"
+                                android:hint="@string/search_hint_home"
+                                android:textColorHint="@color/text_tertiary"
+                                android:textColor="@color/text_primary"
+                                android:textSize="@dimen/text_body"
+                                android:inputType="text"
+                                android:imeOptions="actionSearch"
+                                android:maxLines="1"
+                                android:paddingStart="@dimen/spacing_sm"
+                                app:layout_constraintStart_toEndOf="@id/icSearchHome"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                tools:ignore="Autofill" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+            <!-- ==================== HERO CARD ==================== -->
+            <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/heroCard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/padding_screen_horizontal"
+                    android:layout_marginTop="@dimen/spacing_lg"
+                    app:cardCornerRadius="@dimen/radius_2xl"
+                    app:cardElevation="0dp"
+                    app:cardBackgroundColor="@color/hero_bg"
+                    app:strokeWidth="0dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="@dimen/card_hero_height"
+                        android:padding="@dimen/card_hero_padding">
+
+                    <!-- Decorative Background Image -->
+                    <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/imgHeroDecor"
+                            android:layout_width="180dp"
+                            android:layout_height="180dp"
+                            android:src="@drawable/home_tree"
+                            android:scaleType="centerCrop"
+                            android:alpha="0.4"
+                            android:rotation="-8"
+                            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.MediumComponent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:translationX="40dp" />
+
+                    <!-- Badge -->
+                    <TextView
+                            android:id="@+id/tvHeroBadge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/hero_badge"
+                            android:textColor="@color/white"
+                            android:textSize="10sp"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.1"
+                            android:paddingHorizontal="@dimen/spacing_sm"
+                            android:paddingVertical="@dimen/spacing_xxs"
+                            android:background="@drawable/bg_hero_badge"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                    <!-- Title -->
+                    <TextView
+                            android:id="@+id/tvHeroTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/hero_title"
+                            android:textColor="@color/white"
+                            android:textSize="30sp"
+                            android:textStyle="bold"
+                            android:lineSpacingExtra="-4dp"
+                            android:fontFamily="sans-serif-black"
+                            android:layout_marginTop="@dimen/spacing_sm"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/tvHeroBadge" />
+
+                    <!-- Subtitle -->
+                    <TextView
+                            android:id="@+id/tvHeroSubtitle"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="@string/hero_subtitle"
+                            android:textColor="@color/hero_text_secondary"
+                            android:textSize="@dimen/text_body_small"
+                            android:maxWidth="180dp"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/tvHeroTitle"
+                            app:layout_constraintWidth_max="180dp" />
+
+                    <!-- CTA Button -->
+                    <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnStartNow"
+                            android:layout_width="wrap_content"
+                            android:layout_height="56dp"
+                            android:text="@string/action_start_now"
+                            android:textColor="@color/primary"
+                            android:textSize="@dimen/text_body"
+                            android:textStyle="bold"
+                            app:icon="@drawable/ic_camera"
+                            app:iconTint="@color/primary"
+                            app:iconGravity="textStart"
+                            app:iconPadding="@dimen/spacing_sm"
+                            app:backgroundTint="@color/white"
+                            app:cornerRadius="@dimen/radius_md"
+                            app:elevation="0dp"
+                            android:layout_marginTop="@dimen/spacing_xl"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/tvHeroSubtitle" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ==================== QUICK EXPLORE SECTION ==================== -->
+            <LinearLayout
+                    android:id="@+id/sectionQuickExplore"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:clipChildren="false"
+                    android:clipToPadding="false"
+                    android:layout_marginTop="@dimen/spacing_xxl">
+
+                <!-- Section Header -->
+                <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="@dimen/padding_screen_horizontal"
+                        android:layout_marginBottom="@dimen/spacing_md">
+
+                    <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/quick_explore"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_h3"
+                            android:textStyle="bold" />
+
+                    <TextView
+                            android:id="@+id/btnViewAll"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/view_all"
+                            android:textColor="@color/primary"
+                            android:textSize="@dimen/text_body_small"
+                            android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <!-- Horizontal Scroll of Cards (Hardcoded) -->
+                <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:scrollbars="none"
+                        android:clipChildren="false"
+                        android:clipToPadding="false"
+                        android:paddingHorizontal="@dimen/padding_screen_horizontal">
+
+                    <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:clipChildren="false"
+                            android:clipToPadding="false"
+                            android:paddingBottom="@dimen/spacing_xs">
+
+                        <!-- Card 1: Sen đá -->
+                        <include
+                                layout="@layout/item_quick_explore"
+                                android:id="@+id/exploreCard1"
+                                android:layout_width="@dimen/card_explore_width"
+                                android:layout_height="wrap_content" />
+
+                        <!-- Card 2: Bướm Monarch -->
+                        <include
+                                layout="@layout/item_quick_explore"
+                                android:id="@+id/exploreCard2"
+                                android:layout_width="@dimen/card_explore_width"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/spacing_md" />
+
+                        <!-- Card 3: Hoa Oải Hương -->
+                        <include
+                                layout="@layout/item_quick_explore"
+                                android:id="@+id/exploreCard3"
+                                android:layout_width="@dimen/card_explore_width"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/spacing_md" />
+
+                    </LinearLayout>
+
+                </HorizontalScrollView>
+
+            </LinearLayout>
+
+            <!-- ==================== RECENT HISTORY SECTION ==================== -->
+            <LinearLayout
+                    android:id="@+id/sectionRecent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="@dimen/spacing_xxl"
+                    android:clipChildren="false"
+                    android:clipToPadding="false"
+                    android:paddingHorizontal="@dimen/padding_screen_horizontal">
+
+                <!-- Section Header -->
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/recent"
+                        android:textColor="@color/text_primary"
+                        android:textSize="@dimen/text_h3"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="@dimen/spacing_md" />
+
+                <!-- Recent History RecyclerView -->
+                <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvRecentHistory"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false"
+                        android:clipChildren="false"
+                        android:clipToPadding="false"
+                        android:paddingHorizontal="@dimen/spacing_xxs"
+                        tools:listitem="@layout/item_recent_history"
+                        tools:itemCount="5" />
+
+                <!-- Empty State -->
+                <LinearLayout
+                        android:id="@+id/emptyRecentState"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:padding="@dimen/spacing_xl"
+                        android:visibility="gone">
+
+                    <ImageView
+                            android:layout_width="64dp"
+                            android:layout_height="64dp"
+                            android:src="@drawable/ic_history"
+                            app:tint="@color/text_tertiary"
+                            android:contentDescription="@null" />
+
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/history_empty"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_body"
+                            android:layout_marginTop="@dimen/spacing_sm" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- ==================== LEGACY: SPECIES INFO CARD (Hidden by default) ==================== -->
+            <!-- This is kept for backward compatibility when analyzing images -->
+            <include
+                    android:id="@+id/speciesInfoCard"
+                    layout="@layout/item_card_species_info"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/padding_screen_horizontal"
+                    android:layout_marginTop="@dimen/spacing_lg"
+                    android:visibility="gone" />
+
+            <!-- Loading Indicator (Legacy) -->
+            <LinearLayout
+                    android:id="@+id/loadingCard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_lg"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:indeterminate="true"
+                        app:indicatorColor="@color/primary"
+                        app:trackColor="@color/primary_20" />
+
+                <TextView
+                        android:id="@+id/tvLoading"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_sm"
+                        android:text="@string/loading_analyzing"
+                        style="@style/TextAppearance.App.Body1"
+                        android:textColor="@color/primary"
+                        android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Error Card (Legacy) -->
+            <LinearLayout
+                    android:id="@+id/errorCard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/padding_screen_horizontal"
+                    android:layout_marginTop="@dimen/spacing_lg"
+                    android:background="@drawable/bg_flag_rounded"
+                    android:backgroundTint="@color/error_bg"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/spacing_md"
+                    android:visibility="gone">
+
+                <ImageView
+                        android:layout_width="@dimen/icon_md"
+                        android:layout_height="@dimen/icon_md"
+                        android:contentDescription="@string/error"
+                        android:src="@drawable/ic_warning"
+                        app:tint="@color/error" />
+
+                <TextView
+                        android:id="@+id/errorText"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_sm"
+                        android:layout_weight="1"
+                        android:text="@string/error_default"
+                        style="@style/TextAppearance.App.Body2"
+                        android:textColor="@color/error_text" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</layout>

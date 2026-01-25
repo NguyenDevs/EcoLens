@@ -290,6 +290,12 @@
         <item name="cornerSize">@dimen/radius_xl</item>
     </style>
 
+    <!-- Full Rounded (Circle) Component -->
+    <style name="ShapeAppearance.App.FullRoundedComponent" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
 
     <!-- ========================================== -->
     <!-- IMAGE VIEW STYLES                          -->

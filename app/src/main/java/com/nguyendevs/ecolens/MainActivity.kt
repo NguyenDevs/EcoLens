@@ -1,6 +1,5 @@
 package com.nguyendevs.ecolens
 
-import android.animation.ValueAnimator
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Configuration
@@ -22,10 +21,13 @@ import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.Fade
 import androidx.transition.TransitionManager
-import com.bumptech.glide.Glide
 import com.nguyendevs.ecolens.activities.CameraActivity
+import com.nguyendevs.ecolens.adapters.RecentHistoryAdapter
+import com.nguyendevs.ecolens.database.HistoryDatabase
+import com.nguyendevs.ecolens.database.HistoryRepository
 import com.nguyendevs.ecolens.databinding.ActivityMainBinding
 import com.nguyendevs.ecolens.fragments.chat.ChatHistoryFragment
 import com.nguyendevs.ecolens.fragments.history.HistoryFragment
@@ -39,8 +41,8 @@ import com.nguyendevs.ecolens.model.SpeciesInfo
 import com.nguyendevs.ecolens.utils.KeyboardUtils
 import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
 import com.nguyendevs.ecolens.view.EcoLensViewModel
-import java.io.File
 import java.lang.ref.WeakReference
+import java.util.Calendar
 import kotlinx.coroutines.*
 
 /** Activity chính của ứng dụng EcoLens. Quản lý navigation, nhận diện loài, và UI chính. */
@@ -64,6 +66,15 @@ class MainActivity : AppCompatActivity() {
     private var imageUri: Uri? = null
     private var isExpandedState = false
     private var stopLoadingJob: Job? = null
+
+    // Recent History on Home Screen
+    private lateinit var recentHistoryAdapter: RecentHistoryAdapter
+    private val historyRepository by lazy {
+        HistoryRepository(
+                HistoryDatabase.getDatabase(applicationContext).historyDao(),
+                applicationContext
+        )
+    }
 
     companion object {
         private const val PREF_NAME = "EcoLensPrefs"
@@ -127,7 +138,7 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.currentImageUri?.let { uri ->
             this.imageUri = uri
-            binding.root.post { restoreExpandedState(uri) }
+            // binding.root.post { restoreExpandedState(uri) }
         }
 
         initHandlers()
@@ -136,6 +147,7 @@ class MainActivity : AppCompatActivity() {
         setupFAB()
         setupObservers()
         setupBackNavigation()
+        setupHomeScreen()
 
         val navigateToSettings = intent.getBooleanExtra("navigate_to_settings", false)
         val lastNavItem =
@@ -256,16 +268,21 @@ class MainActivity : AppCompatActivity() {
                         binding.btnSearchAction
                 )
 
-        imageZoomHandler =
-                ImageZoomHandler(
-                        homeRoot.findViewById(R.id.btnZoomIn),
-                        binding.btnZoomOut,
-                        binding.fullScreenContainer,
-                        binding.fullScreenImage
-                )
+        /*imageZoomHandler =
+               ImageZoomHandler(
+                       homeRoot.findViewById(R.id.btnZoomIn),
+                       binding.btnZoomOut,
+                       binding.fullScreenContainer,
+                       binding.fullScreenImage
+               )
 
+        */
+
+        // TODO: Re-enable when tvLoading view is added back to screen_home.xml
+        /*
         loadingAnimationHandler =
                 LoadingAnimationHandler(homeRoot.findViewById(R.id.tvLoading), lifecycleScope)
+        */
 
         speciesInfoHandler =
                 SpeciesInfoHandler(
@@ -324,7 +341,7 @@ class MainActivity : AppCompatActivity() {
         viewModel.currentImageUri = uri
         this.imageUri = uri
 
-        animateCardExpansion {
+        /*animateCardExpansion {
             val homeRoot = binding.homeContainer.root
             val imagePreview = homeRoot.findViewById<View>(R.id.imagePreview)
 
@@ -332,10 +349,11 @@ class MainActivity : AppCompatActivity() {
             imageZoomHandler.setImageUri(uri)
             viewModel.identifySpecies(uri, languageManager.getLanguage())
         }
+         */
     }
 
     /** Khôi phục trạng thái đã mở rộng với ảnh */
-    private fun restoreExpandedState(uri: Uri) {
+    /* private fun restoreExpandedState(uri: Uri) {
         isExpandedState = true
 
         val homeRoot = binding.homeContainer.root
@@ -370,7 +388,10 @@ class MainActivity : AppCompatActivity() {
         if (searchBarHandler.isExpanded()) searchBarHandler.collapseSearchBar()
     }
 
+    */
+
     /** Animation mở rộng card hiển thị ảnh */
+    /*
     private fun animateCardExpansion(onAnimationComplete: () -> Unit) {
         if (isExpandedState) {
             onAnimationComplete()
@@ -415,6 +436,8 @@ class MainActivity : AppCompatActivity() {
                 }
                 .start()
     }
+
+     */
 
     /** Thiết lập bottom navigation */
     private fun setupBottomNavigation() {
@@ -545,8 +568,10 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch { viewModel.uiState.collect { state -> updateHomeUI(state) } }
     }
 
-    /** Cập nhật UI màn hình Home dựa trên state */
+    /** Cập nhật UI màn hình Home dựa trên state - DISABLED: views không tồn tại trong layout mới */
     private suspend fun updateHomeUI(state: com.nguyendevs.ecolens.model.EcoLensUiState) {
+        // Body disabled - screen_home.xml mới không có các views cũ
+        return
         val isLoading = state.isLoading
         val error = state.error
         val loadingStage = state.loadingStage
@@ -602,10 +627,10 @@ class MainActivity : AppCompatActivity() {
             binding.homeContainer.speciesInfoCard.root.isVisible = false
             binding.fabSpeak.isVisible = false
 
-            val initialStateLayout = homeRoot.findViewById<View>(R.id.initialStateLayout)
-            if (initialStateLayout.visibility == View.VISIBLE) {
-                initialStateLayout.visibility = View.GONE
-            }
+            // val initialStateLayout = homeRoot.findViewById<View>(R.id.initialStateLayout)
+            // if (initialStateLayout.visibility == View.VISIBLE) {
+            //  initialStateLayout.visibility = View.GONE
+            /// }
         } else if (loadingStage == LoadingStage.NONE && state.speciesInfo == null) {
             binding.homeContainer.speciesInfoCard.root.isVisible = false
             homeRoot.findViewById<View>(R.id.errorCard).isVisible = false
@@ -652,10 +677,13 @@ class MainActivity : AppCompatActivity() {
                 this,
                 object : OnBackPressedCallback(true) {
                     override fun handleOnBackPressed() {
+                        // TODO: Re-enable when imageZoomHandler is re-initialized
+                        /*
                         if (imageZoomHandler.isFullScreenVisible()) {
                             imageZoomHandler.hideFullScreen()
                             return
                         }
+                        */
 
                         if (supportFragmentManager.backStackEntryCount > 0) {
                             supportFragmentManager.popBackStack()
@@ -672,4 +700,130 @@ class MainActivity : AppCompatActivity() {
                 }
         )
     }
+
+    // ==================== HOME SCREEN SETUP ====================
+
+    /**
+     * Thiết lập các components mới cho Home Screen Bao gồm: greeting động, hero card button, và
+     * Recent History
+     */
+    private fun setupHomeScreen() {
+        val homeRoot = binding.homeContainer.root
+
+        // Setup dynamic greeting based on time of day
+        setupGreeting()
+
+        // Setup Hero Card button click
+        homeRoot.findViewById<View>(R.id.btnStartNow)?.setOnClickListener {
+            binding.fabCamera.performClick()
+        }
+
+        // Setup Recent History RecyclerView
+        setupRecentHistory()
+
+        // Setup Quick Explore hardcoded data
+        setupQuickExplore()
+    }
+
+    /** Thiết lập lời chào động theo thời gian trong ngày */
+    private fun setupGreeting() {
+        val homeRoot = binding.homeContainer.root
+        val tvGreeting = homeRoot.findViewById<TextView>(R.id.tvGreeting) ?: return
+
+        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        val greetingResId =
+                when {
+                    hour < 12 -> R.string.greeting_morning
+                    hour < 18 -> R.string.greeting_afternoon
+                    else -> R.string.greeting_evening
+                }
+        tvGreeting.setText(greetingResId)
+    }
+
+    /** Thiết lập RecyclerView cho Recent History với 5 item gần nhất */
+    private fun setupRecentHistory() {
+        val homeRoot = binding.homeContainer.root
+        val rvRecentHistory =
+                homeRoot.findViewById<androidx.recyclerview.widget.RecyclerView>(
+                        R.id.rvRecentHistory
+                )
+                        ?: return
+        val emptyRecentState = homeRoot.findViewById<View>(R.id.emptyRecentState)
+
+        // Initialize adapter with click handler
+        recentHistoryAdapter = RecentHistoryAdapter { entry ->
+            // Navigate to History Detail when clicking on recent item
+            // navigateToHistoryDetail(entry)
+        }
+
+        rvRecentHistory.apply {
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            adapter = recentHistoryAdapter
+            isNestedScrollingEnabled = false
+        }
+
+        // Load 5 most recent items
+        loadRecentHistory(emptyRecentState)
+    }
+
+    /** Load 5 item lịch sử gần nhất từ database */
+    private fun loadRecentHistory(emptyState: View?) {
+        lifecycleScope.launch {
+            historyRepository.getAllHistoryNewestFirst().collect { allHistory ->
+                val recentItems = allHistory.take(5)
+                recentHistoryAdapter.submitList(recentItems)
+
+                // Toggle empty state
+                emptyState?.isVisible = recentItems.isEmpty()
+            }
+        }
+    }
+
+    /** Navigate to History Detail Fragment */
+    /*
+    private fun navigateToHistoryDetail(entry: HistoryEntry) {
+        val fragment = HistoryDetailFragment.newInstance(entry.id)
+        supportFragmentManager
+                .beginTransaction()
+                .setCustomAnimations(
+                        R.anim.slide_in_right,
+                        R.anim.slide_out_left
+                )
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack(null)
+                .commit()
+        binding.fragmentContainer.visibility = View.VISIBLE
+    }
+
+     */
+
+    /** Setup Quick Explore với dữ liệu hardcoded */
+    private fun setupQuickExplore() {
+        val homeRoot = binding.homeContainer.root
+
+        // Card 1: Sen đá
+        val card1 = homeRoot.findViewById<View>(R.id.exploreCard1)
+        card1?.findViewById<TextView>(R.id.tvExploreName)?.text =
+                getString(R.string.explore_item_1_name)
+        card1?.findViewById<TextView>(R.id.tvExploreDesc)?.text =
+                getString(R.string.explore_item_1_desc)
+        card1?.findViewById<ImageView>(R.id.imgExplore)?.setImageResource(R.drawable.home_tree)
+
+        // Card 2: Bướm Monarch
+        val card2 = homeRoot.findViewById<View>(R.id.exploreCard2)
+        card2?.findViewById<TextView>(R.id.tvExploreName)?.text =
+                getString(R.string.explore_item_2_name)
+        card2?.findViewById<TextView>(R.id.tvExploreDesc)?.text =
+                getString(R.string.explore_item_2_desc)
+        card2?.findViewById<ImageView>(R.id.imgExplore)?.setImageResource(R.drawable.home_tree_2)
+
+        // Card 3: Hoa Oải Hương
+        val card3 = homeRoot.findViewById<View>(R.id.exploreCard3)
+        card3?.findViewById<TextView>(R.id.tvExploreName)?.text =
+                getString(R.string.explore_item_3_name)
+        card3?.findViewById<TextView>(R.id.tvExploreDesc)?.text =
+                getString(R.string.explore_item_3_desc)
+        card3?.findViewById<ImageView>(R.id.imgExplore)?.setImageResource(R.drawable.home_tree)
+    }
+
 }
