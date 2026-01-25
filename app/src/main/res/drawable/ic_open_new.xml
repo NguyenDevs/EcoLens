@@ -1,0 +1,10 @@
+<!-- ic_open_new.xml - Material Symbols Rounded open_in_new icon -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="24dp"
+        android:height="24dp"
+        android:viewportWidth="24"
+        android:viewportHeight="24">
+    <path
+            android:fillColor="#000000"
+            android:pathData="M5,21q-0.825,0 -1.413,-0.587Q3,19.825 3,19V5q0,-0.825 0.587,-1.413Q4.175,3 5,3h7q0.425,0 0.713,0.287Q13,3.575 13,4t-0.287,0.712Q12.425,5 12,5H5v14h14v-7q0,-0.425 0.288,-0.713Q19.575,11 20,11t0.712,0.287Q21,11.575 21,12v7q0,0.825 -0.587,1.413Q19.825,21 19,21ZM19,6.4L10.4,15q-0.275,0.275 -0.7,0.275 -0.425,0 -0.7,-0.275 -0.275,-0.275 -0.275,-0.7 0,-0.425 0.275,-0.7L17.6,5H15q-0.425,0 -0.712,-0.288Q14,4.425 14,4t0.288,-0.713Q14.575,3 15,3h5q0.425,0 0.712,0.287Q21,3.575 21,4v5q0,0.425 -0.288,0.712Q20.425,10 20,10t-0.712,-0.288Q19,9.425 19,9Z"/>
+</vector>

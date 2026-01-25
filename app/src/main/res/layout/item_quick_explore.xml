@@ -24,7 +24,7 @@
             android:layout_height="@dimen/card_explore_image_height"
             android:scaleType="centerCrop"
             app:shapeAppearanceOverlay="@style/ShapeAppearance.App.MediumComponent"
-            tools:src="@drawable/home_tree" />
+            tools:src="@drawable/succulent" />
 
         <!-- Name -->
         <TextView

@@ -1,0 +1,10 @@
+<!-- ic_mail_new.xml - Material Symbols Rounded mail icon -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="24dp"
+        android:height="24dp"
+        android:viewportWidth="24"
+        android:viewportHeight="24">
+    <path
+            android:fillColor="#000000"
+            android:pathData="M4,20q-0.825,0 -1.412,-0.587Q2,18.825 2,18V6q0,-0.825 0.588,-1.412Q3.175,4 4,4h16q0.825,0 1.413,0.588Q22,5.175 22,6v12q0,0.825 -0.587,1.413Q20.825,20 20,20ZM20,8l-7.475,4.675q-0.125,0.075 -0.262,0.113 -0.138,0.037 -0.263,0.037 -0.125,0 -0.262,-0.037 -0.138,-0.038 -0.263,-0.113L4,8V18h16ZM12,11l8,-5H4ZM4,8.25V6.775 6.8 6v2Z"/>
+</vector>

@@ -115,6 +115,9 @@
     <color name="shadow_strong">#29000000</color>
     <color name="shadow_primary">#3310B981</color>
 
+    <!-- ==================== SETTINGS SCREEN COLORS (NEW) ==================== -->
+    <color name="indigo_600">#FF5722</color>
+
     <!-- ==================== BACKWARD COMPATIBILITY ==================== -->
     <color name="green_primary">@color/primary</color>
     <color name="green_primary_2">@color/primary_dark</color>

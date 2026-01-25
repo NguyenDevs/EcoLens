@@ -184,7 +184,7 @@
                     android:contentDescription="@string/camera"
                     android:scaleType="center"
                     app:fabCustomSize="56dp"
-                    app:maxImageSize="28dp"
+                    app:maxImageSize="34dp"
                     style="@style/Widget.App.FloatingActionButton"
                     app:elevation="10dp"
                     app:pressedTranslationZ="12dp"
