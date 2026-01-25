@@ -27,11 +27,11 @@
 
     <!-- Quick Explore Hardcoded Items -->
     <string name="explore_item_1_name">Succulent</string>
-    <string name="explore_item_1_desc">Succulent plant</string>
+    <string name="explore_item_1_desc">Echeveria</string>
     <string name="explore_item_2_name">Monarch Butterfly</string>
-    <string name="explore_item_2_desc">Lepidopteran insect</string>
+    <string name="explore_item_2_desc">Danaus plexippus</string>
     <string name="explore_item_3_name">Lavender</string>
-    <string name="explore_item_3_desc">Flowering plant</string>
+    <string name="explore_item_3_desc">Lavandula</string>
 
     <!-- Navigation -->
     <string name="nav_home">Home</string>

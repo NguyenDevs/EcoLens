@@ -26,14 +26,14 @@
     <string name="recent">Gần đây</string>
     <string name="today">Hôm nay</string>
     <string name="search_hint_home">Tìm kiếm thực vật, động vật…</string>
-    
+
     <!-- Quick Explore Hardcoded Items -->
     <string name="explore_item_1_name">Sen đá</string>
-    <string name="explore_item_1_desc">Thực vật mọng nước</string>
+    <string name="explore_item_1_desc">Echeveria</string>
     <string name="explore_item_2_name">Bướm Monarch</string>
-    <string name="explore_item_2_desc">Côn trùng cánh vảy</string>
+    <string name="explore_item_2_desc">Danaus plexippus</string>
     <string name="explore_item_3_name">Hoa Oải Hương</string>
-    <string name="explore_item_3_desc">Thực vật có hoa</string>
+    <string name="explore_item_3_desc">Lavandula</string>
 
     <!-- Điều hướng -->
     <string name="nav_home">Trang chủ</string>
