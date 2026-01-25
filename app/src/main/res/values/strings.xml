@@ -12,6 +12,29 @@
     <string name="banner_subtitle">Động - Thực vật</string>
     <string name="banner_action">Chạm để chụp</string>
 
+    <!-- Home Screen - New Design -->
+    <string name="greeting_title">Chào bạn,</string>
+    <string name="greeting_morning">Chào buổi sáng,</string>
+    <string name="greeting_afternoon">Chào buổi chiều,</string>
+    <string name="greeting_evening">Chào buổi tối,</string>
+    <string name="hero_badge">AI IDENTIFIER</string>
+    <string name="hero_title">Nhận diện\nTự nhiên</string>
+    <string name="hero_subtitle">Khám phá thế giới thực vật &amp; động vật quanh bạn.</string>
+    <string name="action_start_now">Bắt đầu ngay</string>
+    <string name="quick_explore">Khám phá nhanh</string>
+    <string name="view_all">Xem tất cả</string>
+    <string name="recent">Gần đây</string>
+    <string name="today">Hôm nay</string>
+    <string name="search_hint_home">Tìm kiếm thực vật, động vật…</string>
+
+    <!-- Quick Explore Hardcoded Items -->
+    <string name="explore_item_1_name">Sen đá</string>
+    <string name="explore_item_1_desc">Echeveria</string>
+    <string name="explore_item_2_name">Bướm Monarch</string>
+    <string name="explore_item_2_desc">Danaus plexippus</string>
+    <string name="explore_item_3_name">Hoa Oải Hương</string>
+    <string name="explore_item_3_desc">Lavandula</string>
+
     <!-- Điều hướng -->
     <string name="nav_home">Trang chủ</string>
     <string name="nav_history">Lịch sử</string>

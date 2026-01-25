@@ -28,7 +28,7 @@
             android:id="@+id/cardSession"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="2dp"
+            android:layout_marginBottom="@dimen/spacing_xs"
             style="@style/Widget.App.Card"
             app:cardCornerRadius="@dimen/radius_md">
 

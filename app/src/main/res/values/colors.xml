@@ -1,8 +1,151 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- ============================================ -->
-    <!-- MODERN COLOR PALETTE -->
+    <!-- MODERN ECOLENS COLOR PALETTE (2024)         -->
+    <!-- Based on Google Stitch HTML Design          -->
     <!-- ============================================ -->
+
+    <!-- ==================== PRIMARY COLORS ==================== -->
+    <!-- Main brand colors - Emerald green theme -->
+    <color name="primary">#065F46</color>    <!-- Dark emerald - HTML primary -->
+    <color name="primary_dark">#064E3B</color>    <!-- Darker emerald - emerald-900 -->
+    <color name="primary_light">#10B981</color>    <!-- Bright emerald - accent -->
+    <color name="accent">#10B981</color>    <!-- Accent color - emerald-500 -->
+    <color name="on_primary">#FFFFFF</color>
+
+    <!-- Primary variants for different opacity -->
+    <color name="primary_10">#1A065F46</color>    <!-- 10% opacity -->
+    <color name="primary_20">#33065F46</color>    <!-- 20% opacity -->
+    <color name="primary_30">#4D065F46</color>    <!-- 30% opacity -->
+    <color name="primary_40">#66065F46</color>    <!-- 40% opacity -->
+
+    <!-- ==================== SURFACE COLORS ==================== -->
+    <color name="surface">#FFFFFF</color>
+    <color name="surface_variant">#F9FAFB</color>    <!-- HTML background-light -->
+    <color name="surface_tint">#ECFDF5</color>    <!-- emerald-50 tint -->
+    <color name="background">#F9FAFB</color>    <!-- Match HTML bg-background-light -->
+    <color name="background_dark">#0F172A</color>    <!-- HTML bg-background-dark (slate-900) -->
+    <color name="on_surface">#0F172A</color>    <!-- slate-900 -->
+
+    <!-- Glass effect colors -->
+    <color name="glass_light">#E6FFFFFF</color>        <!-- rgba(255,255,255,0.9) -->
+    <color name="glass_dark">#E60F172A</color>         <!-- rgba(15,23,42,0.9) -->
+    <color name="glass_nav">#E8FFFFFF</color>          <!-- For floating nav bar -->
+
+    <!-- ==================== TEXT COLORS ==================== -->
+    <!-- Slate color palette from Tailwind -->
+    <color name="text_primary">#0F172A</color>    <!-- slate-900 -->
+    <color name="text_secondary">#64748B</color>    <!-- slate-500 -->
+    <color name="text_tertiary">#94A3B8</color>    <!-- slate-400 -->
+    <color name="text_disabled">#CBD5E1</color>    <!-- slate-300 -->
+    <color name="text_on_primary">#FFFFFF</color>
+
+    <!-- ==================== BORDER COLORS ==================== -->
+    <color name="border_light">#F1F5F9</color>    <!-- slate-100 -->
+    <color name="border_normal">#E2E8F0</color>    <!-- slate-200 -->
+    <color name="border_strong">#CBD5E1</color>    <!-- slate-300 -->
+
+    <!-- ==================== SEMANTIC COLORS ==================== -->
+    <!-- Success - Emerald -->
+    <color name="success">#10B981</color>    <!-- emerald-500 -->
+    <color name="success_bg">#ECFDF5</color>    <!-- emerald-50 -->
+    <color name="success_text">#065F46</color>    <!-- emerald-800 -->
+
+    <!-- Warning - Amber -->
+    <color name="warning">#F59E0B</color>    <!-- amber-500 -->
+    <color name="warning_bg">#FFFBEB</color>    <!-- amber-50 -->
+    <color name="warning_text">#B45309</color>    <!-- amber-700 -->
+
+    <!-- Error - Red -->
+    <color name="error">#EF4444</color>    <!-- red-500 -->
+    <color name="error_bg">#FEF2F2</color>    <!-- red-50 -->
+    <color name="error_text">#B91C1C</color>    <!-- red-700 -->
+
+    <!-- Info - Blue -->
+    <color name="info">#3B82F6</color>    <!-- blue-500 -->
+    <color name="info_bg">#EFF6FF</color>    <!-- blue-50 -->
+    <color name="info_text">#1D4ED8</color>    <!-- blue-700 -->
+
+    <!-- ==================== CONFIDENCE LEVELS ==================== -->
+    <color name="confidence_high">#10B981</color>
+    <color name="confidence_high_bg">#ECFDF5</color>
+    <color name="confidence_high_text">#065F46</color>
+
+    <color name="confidence_medium">#F59E0B</color>
+    <color name="confidence_medium_bg">#FFFBEB</color>
+    <color name="confidence_medium_text">#B45309</color>
+
+    <color name="confidence_low">#EF4444</color>
+    <color name="confidence_low_bg">#FEF2F2</color>
+    <color name="confidence_low_text">#B91C1C</color>
+
+    <!-- ==================== INTERACTIVE STATES ==================== -->
+    <color name="state_hover">#F8FAFC</color>    <!-- slate-50 -->
+    <color name="state_pressed">#F1F5F9</color>    <!-- slate-100 -->
+    <color name="state_focus">#DBEAFE</color>    <!-- blue-100 -->
+    <color name="state_disabled">#F1F5F9</color>    <!-- slate-100 -->
+
+    <!-- ==================== OVERLAY COLORS ==================== -->
+    <color name="overlay_dark">#80000000</color>    <!-- 50% black -->
+    <color name="overlay_light">#80FFFFFF</color>    <!-- 50% white -->
+    <color name="scrim">#99000000</color>    <!-- 60% black -->
+
+    <!-- ==================== NAVIGATION ==================== -->
+    <color name="nav_selected">#065F46</color>    <!-- primary dark emerald -->
+    <color name="nav_unselected">#94A3B8</color>    <!-- slate-400 -->
+    <color name="nav_background">#FFFFFF</color>
+
+    <!-- ==================== UTILS ==================== -->
+    <color name="transparent">#00FFFFFF</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+
+    <!-- ==================== HERO CARD COLORS ==================== -->
+    <color name="hero_bg">#065F46</color>    <!-- emerald-800 -->
+    <color name="hero_bg_dark">#064E3B</color>    <!-- emerald-900 for dark mode -->
+    <color name="hero_text">#FFFFFF</color>
+    <color name="hero_text_secondary">#A7F3D0</color>    <!-- emerald-100 with 80% opacity -->
+    <color name="hero_badge_bg">#33FFFFFF</color>    <!-- white 20% opacity -->
+
+    <!-- ==================== GRADIENTS (for drawables) ==================== -->
+    <color name="gradient_start">#065F46</color>
+    <color name="gradient_end">#10B981</color>
+
+    <!-- ==================== SHADOWS ==================== -->
+    <color name="shadow_light">#14000000</color>    <!-- 8% opacity -->
+    <color name="shadow_normal">#1F000000</color>    <!-- 12% opacity -->
+    <color name="shadow_strong">#29000000</color>    <!-- 16% opacity -->
+    <color name="shadow_primary">#33065F46</color>    <!-- primary 20% for hero shadow -->
+
+    <!-- ==================== SETTINGS SCREEN COLORS (NEW) ==================== -->
+    <!-- Complete Slate Palette -->
+    <color name="slate_50">#F8FAFC</color>
+    <color name="slate_200">#E2E8F0</color>
+    <color name="slate_500">#64748B</color>
+    <color name="slate_600">#475569</color>
+    <color name="slate_700">#334155</color>
+    <color name="slate_800">#1E293B</color>
+
+    <!-- Icon Background Colors -->
+    <color name="teal_50">#F0FDFA</color>
+    <color name="indigo_50">#EEF2FF</color>
+    <color name="indigo_600">#4F46E5</color>
+    <color name="orange_50">#FFF7ED</color>
+    <color name="orange_600">#EA580C</color>
+    <color name="blue_50">#EFF6FF</color>
+    <color name="pink_50">#FDF2F8</color>
+
+    <!-- Social Media Brand Colors -->
+    <color name="facebook_blue">#1877F2</color>
+    <color name="instagram_pink">#E4405F</color>
+    <color name="tiktok_black">#0F172A</color>"
+    <color name="user_blue">#24BFF0</color>
+    <color name="logout">#FF1742</color>
+
+
+
+    <!-- Switch Track Color -->
+    <color name="switch_track_unchecked">#E2E8F0</color>    <!-- slate-200 -->
 
     <!-- ==================== BACKWARD COMPATIBILITY ==================== -->
     <!-- Alias for old color names to prevent compile errors -->
@@ -35,98 +178,4 @@
     <color name="gray_light">@color/state_disabled</color>
     <color name="gray_light_f8">@color/surface_variant</color>
 
-    <!-- ==================== PRIMARY COLORS ==================== -->
-    <color name="primary">#018367</color>
-    <color name="primary_dark">#033826</color>
-    <color name="primary_light">#4CAF50</color>
-    <color name="on_primary">#FFFFFF</color>
-
-    <!-- Primary variants for different opacity -->
-    <color name="primary_10">#1A018367</color>     <!-- 10% opacity -->
-    <color name="primary_20">#33018367</color>     <!-- 20% opacity -->
-    <color name="primary_30">#4D018367</color>     <!-- 30% opacity -->
-    <color name="primary_40">#66018367</color>     <!-- 40% opacity -->
-
-    <!-- ==================== SURFACE COLORS ==================== -->
-    <color name="surface">#FFFFFF</color>
-    <color name="surface_variant">#F8F9FA</color>
-    <color name="surface_tint">#F0F7F4</color>
-    <color name="background">#F2F4F5</color>
-    <color name="on_surface">#1A1C1E</color>
-
-    <!-- ==================== TEXT COLORS ==================== -->
-    <color name="text_primary">#1A1C1E</color>
-    <color name="text_secondary">#707070</color>
-    <color name="text_tertiary">#9E9E9E</color>
-    <color name="text_disabled">#BDBDBD</color>
-    <color name="text_on_primary">#FFFFFF</color>
-
-    <!-- ==================== BORDER COLORS ==================== -->
-    <color name="border_light">#F0F0F0</color>
-    <color name="border_normal">#E0E0E0</color>
-    <color name="border_strong">#D0D0D0</color>
-
-    <!-- ==================== SEMANTIC COLORS ==================== -->
-    <!-- Success -->
-    <color name="success">#00A86B</color>
-    <color name="success_bg">#E8F5E9</color>
-    <color name="success_text">#00796B</color>
-
-    <!-- Warning -->
-    <color name="warning">#F57C00</color>
-    <color name="warning_bg">#FFF3E0</color>
-    <color name="warning_text">#E65100</color>
-
-    <!-- Error -->
-    <color name="error">#D32F2F</color>
-    <color name="error_bg">#FFEBEE</color>
-    <color name="error_text">#C62828</color>
-
-    <!-- Info -->
-    <color name="info">#2196F3</color>
-    <color name="info_bg">#E3F2FD</color>
-    <color name="info_text">#1976D2</color>
-
-    <!-- ==================== CONFIDENCE LEVELS ==================== -->
-    <color name="confidence_high">#00A86B</color>
-    <color name="confidence_high_bg">#E8F5E9</color>
-    <color name="confidence_high_text">#00796B</color>
-
-    <color name="confidence_medium">#F57C00</color>
-    <color name="confidence_medium_bg">#FFF3E0</color>
-    <color name="confidence_medium_text">#E65100</color>
-
-    <color name="confidence_low">#D32F2F</color>
-    <color name="confidence_low_bg">#FFEBEE</color>
-    <color name="confidence_low_text">#C62828</color>
-
-    <!-- ==================== INTERACTIVE STATES ==================== -->
-    <color name="state_hover">#F5F5F5</color>
-    <color name="state_pressed">#EEEEEE</color>
-    <color name="state_focus">#E3F2FD</color>
-    <color name="state_disabled">#F5F5F5</color>
-
-    <!-- ==================== OVERLAY COLORS ==================== -->
-    <color name="overlay_dark">#80000000</color>        <!-- 50% black -->
-    <color name="overlay_light">#80FFFFFF</color>       <!-- 50% white -->
-    <color name="scrim">#99000000</color>               <!-- 60% black -->
-
-    <!-- ==================== NAVIGATION ==================== -->
-    <color name="nav_selected">#033826</color>
-    <color name="nav_unselected">#CCD7D1</color>
-    <color name="nav_background">#FFFFFF</color>
-
-    <!-- ==================== UTILS ==================== -->
-    <color name="transparent">#00FFFFFF</color>
-    <color name="white">#FFFFFF</color>
-    <color name="black">#000000</color>
-
-    <!-- ==================== GRADIENTS (for drawables) ==================== -->
-    <color name="gradient_start">#018367</color>
-    <color name="gradient_end">#4CAF50</color>
-
-    <!-- ==================== SHADOWS ==================== -->
-    <color name="shadow_light">#14000000</color>       <!-- 8% opacity -->
-    <color name="shadow_normal">#1F000000</color>      <!-- 12% opacity -->
-    <color name="shadow_strong">#29000000</color>      <!-- 16% opacity -->
 </resources>

@@ -1,70 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- ==================== PRIMARY COLORS ==================== -->
-    <color name="primary">#2E8A39</color>
-    <color name="primary_dark">#018367</color>
-    <color name="primary_light">#81C784</color>
-    <color name="on_primary">#000000</color>
+    <!-- ============================================ -->
+    <!-- MODERN ECOLENS COLOR PALETTE - DARK MODE    -->
+    <!-- Based on Google Stitch HTML Design          -->
+    <!-- ============================================ -->
 
-    <color name="primary_10">#1A4CAF50</color>
-    <color name="primary_20">#334CAF50</color>
-    <color name="primary_30">#4D4CAF50</color>
-    <color name="primary_40">#664CAF50</color>
+    <!-- ==================== PRIMARY COLORS ==================== -->
+    <!-- Match HTML dark mode: uses accent (emerald-500) as primary -->
+    <color name="primary">#10B981</color>    <!-- accent/emerald-500 for dark mode -->
+    <color name="primary_dark">#064E3B</color>    <!-- emerald-900 -->
+    <color name="primary_light">#34D399</color>    <!-- emerald-400 -->
+    <color name="accent">#10B981</color>    <!-- emerald-500 -->
+    <color name="on_primary">#FFFFFF</color>
+
+    <color name="primary_10">#1A10B981</color>
+    <color name="primary_20">#3310B981</color>
+    <color name="primary_30">#4D10B981</color>
+    <color name="primary_40">#6610B981</color>
 
     <!-- ==================== SURFACE COLORS ==================== -->
-    <color name="surface">#1E1E1E</color>
-    <color name="surface_variant">#2C2C2C</color>
-    <color name="surface_tint">#2C2C2C</color>
-    <color name="background">#121212</color>
-    <color name="on_surface">#E0E0E0</color>
+    <!-- HTML: dark:bg-slate-800, dark:bg-background-dark (#0F172A) -->
+    <color name="surface">#1E293B</color>    <!-- slate-800 -->
+    <color name="surface_variant">#0F172A</color>    <!-- slate-900 / background-dark -->
+    <color name="surface_tint">#1E293B</color>
+    <color name="background">#0F172A</color>    <!-- HTML bg-background-dark -->
+    <color name="background_dark">#0F172A</color>
+    <color name="on_surface">#FFFFFF</color>
+
+    <!-- Glass effect colors for dark mode -->
+    <color name="glass_light">#B30F172A</color>    <!-- rgba(15,23,42,0.7) -->
+    <color name="glass_dark">#B30F172A</color>
+    <color name="glass_nav">#E61E293B</color>    <!-- For floating nav bar -->
 
     <!-- ==================== TEXT COLORS ==================== -->
-    <color name="text_primary">#E0E0E0</color>
-    <color name="text_secondary">#B0B0B0</color>
-    <color name="text_tertiary">#808080</color>
-    <color name="text_disabled">#606060</color>
-    <color name="text_on_primary">#000000</color>
+    <!-- Match HTML dark mode text colors -->
+    <color name="text_primary">#FFFFFF</color>    <!-- white for dark mode -->
+    <color name="text_secondary">#94A3B8</color>    <!-- slate-400 -->
+    <color name="text_tertiary">#64748B</color>    <!-- slate-500 -->
+    <color name="text_disabled">#475569</color>    <!-- slate-600 -->
+    <color name="text_on_primary">#FFFFFF</color>
 
     <!-- ==================== BORDER COLORS ==================== -->
-    <color name="border_light">#2C2C2C</color>
-    <color name="border_normal">#3E3E3E</color>
-    <color name="border_strong">#616161</color>
+    <!-- HTML: dark:border-slate-700 -->
+    <color name="border_light">#334155</color>    <!-- slate-700 -->
+    <color name="border_normal">#475569</color>    <!-- slate-600 -->
+    <color name="border_strong">#64748B</color>    <!-- slate-500 -->
 
     <!-- ==================== SEMANTIC COLORS ==================== -->
-    <color name="success">#66BB6A</color>
-    <color name="success_bg">#1B5E20</color>
-    <color name="success_text">#A5D6A7</color>
+    <color name="success">#10B981</color>    <!-- emerald-500 -->
+    <color name="success_bg">#064E3B</color>    <!-- emerald-900 -->
+    <color name="success_text">#6EE7B7</color>    <!-- emerald-300 -->
 
-    <color name="warning">#FFA726</color>
-    <color name="warning_bg">#E65100</color>
-    <color name="warning_text">#FFCC80</color>
+    <color name="warning">#F59E0B</color>    <!-- amber-500 -->
+    <color name="warning_bg">#78350F</color>    <!-- amber-900 -->
+    <color name="warning_text">#FCD34D</color>    <!-- amber-300 -->
 
-    <color name="error">#EF5350</color>
-    <color name="error_bg">#B71C1C</color>
-    <color name="error_text">#EF9A9A</color>
+    <color name="error">#EF4444</color>    <!-- red-500 -->
+    <color name="error_bg">#7F1D1D</color>    <!-- red-900 -->
+    <color name="error_text">#FCA5A5</color>    <!-- red-300 -->
 
-    <color name="info">#42A5F5</color>
-    <color name="info_bg">#0D47A1</color>
-    <color name="info_text">#90CAF9</color>
+    <color name="info">#3B82F6</color>    <!-- blue-500 -->
+    <color name="info_bg">#1E3A8A</color>    <!-- blue-900 -->
+    <color name="info_text">#93C5FD</color>    <!-- blue-300 -->
 
     <!-- ==================== CONFIDENCE LEVELS ==================== -->
-    <color name="confidence_high">#66BB6A</color>
-    <color name="confidence_high_bg">#1B5E20</color>
-    <color name="confidence_high_text">#A5D6A7</color>
+    <color name="confidence_high">#10B981</color>
+    <color name="confidence_high_bg">#064E3B</color>
+    <color name="confidence_high_text">#6EE7B7</color>
 
-    <color name="confidence_medium">#FFA726</color>
-    <color name="confidence_medium_bg">#E65100</color>
-    <color name="confidence_medium_text">#FFCC80</color>
+    <color name="confidence_medium">#F59E0B</color>
+    <color name="confidence_medium_bg">#78350F</color>
+    <color name="confidence_medium_text">#FCD34D</color>
 
-    <color name="confidence_low">#EF5350</color>
-    <color name="confidence_low_bg">#B71C1C</color>
-    <color name="confidence_low_text">#EF9A9A</color>
+    <color name="confidence_low">#EF4444</color>
+    <color name="confidence_low_bg">#7F1D1D</color>
+    <color name="confidence_low_text">#FCA5A5</color>
 
     <!-- ==================== INTERACTIVE STATES ==================== -->
-    <color name="state_hover">#2C2C2C</color>
-    <color name="state_pressed">#333333</color>
-    <color name="state_focus">#1A4CAF50</color>
-    <color name="state_disabled">#2C2C2C</color>
+    <color name="state_hover">#1E293B</color>    <!-- slate-800 -->
+    <color name="state_pressed">#334155</color>    <!-- slate-700 -->
+    <color name="state_focus">#1A10B981</color>
+    <color name="state_disabled">#1E293B</color>
 
     <!-- ==================== OVERLAY COLORS ==================== -->
     <color name="overlay_dark">#80000000</color>
@@ -72,23 +88,35 @@
     <color name="scrim">#99000000</color>
 
     <!-- ==================== NAVIGATION ==================== -->
-    <color name="nav_selected">#81C784</color>
-    <color name="nav_unselected">#757575</color>
-    <color name="nav_background">#1E1E1E</color>
+    <!-- HTML: dark:text-accent for selected -->
+    <color name="nav_selected">#10B981</color>    <!-- accent/emerald-500 -->
+    <color name="nav_unselected">#94A3B8</color>    <!-- slate-400 -->
+    <color name="nav_background">#1E293B</color>    <!-- slate-800 -->
 
     <!-- ==================== UTILS ==================== -->
     <color name="transparent">#00000000</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
 
+    <!-- ==================== HERO CARD COLORS ==================== -->
+    <color name="hero_bg">#064E3B</color>    <!-- emerald-900 for dark mode -->
+    <color name="hero_bg_dark">#022C22</color>    <!-- darker emerald -->
+    <color name="hero_text">#FFFFFF</color>
+    <color name="hero_text_secondary">#A7F3D0</color>    <!-- emerald-200 -->
+    <color name="hero_badge_bg">#33FFFFFF</color>
+
     <!-- ==================== GRADIENTS ==================== -->
-    <color name="gradient_start">#4CAF50</color>
-    <color name="gradient_end">#81C784</color>
+    <color name="gradient_start">#064E3B</color>
+    <color name="gradient_end">#10B981</color>
 
     <!-- ==================== SHADOWS ==================== -->
-    <color name="shadow_light">#14FFFFFF</color>
-    <color name="shadow_normal">#1FFFFFFF</color>
-    <color name="shadow_strong">#29FFFFFF</color>
+    <color name="shadow_light">#14000000</color>
+    <color name="shadow_normal">#1F000000</color>
+    <color name="shadow_strong">#29000000</color>
+    <color name="shadow_primary">#3310B981</color>
+
+    <!-- ==================== SETTINGS SCREEN COLORS (NEW) ==================== -->
+    <color name="indigo_600">#FF5722</color>
 
     <!-- ==================== BACKWARD COMPATIBILITY ==================== -->
     <color name="green_primary">@color/primary</color>
