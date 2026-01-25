@@ -7,6 +7,7 @@ import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemCardSpeciesInfoBinding
 import com.nguyendevs.ecolens.handlers.util.TextFormatter
 
+/** Xử lý hiển thị các section thông tin chi tiết (mô tả, đặc điểm, phân bố...). */
 class SectionDisplayHandler(
         private val binding: ItemCardSpeciesInfoBinding,
         private val textFormatter: TextFormatter
@@ -15,6 +16,7 @@ class SectionDisplayHandler(
     private val infoBinding
         get() = binding
 
+    /** Hiển thị một section với animation slide-up và tự động scroll đến section. */
     fun displaySection(
             sectionId: Int,
             textViewId: Int,
@@ -76,10 +78,12 @@ class SectionDisplayHandler(
         }
     }
 
+    /** Kiểm tra section đã được render chưa. */
     fun isSectionRendered(sectionId: Int): Boolean {
         return renderedSections.contains(sectionId)
     }
 
+    /** Xóa trạng thái và ẩn tất cả sections. */
     fun clearRenderedSections() {
         renderedSections.clear()
 
@@ -98,6 +102,7 @@ class SectionDisplayHandler(
         }
     }
 
+    /** Cuộn mượt đến view được chỉ định. */
     private fun smoothScrollToView(view: View) {
         view.post {
             val scrollView = findScrollView(view)
@@ -110,6 +115,7 @@ class SectionDisplayHandler(
         }
     }
 
+    /** Tìm ScrollView cha của view. */
     private fun findScrollView(view: View): ScrollView? {
         var parent = view.parent
         while (parent != null) {

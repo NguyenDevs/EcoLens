@@ -110,7 +110,7 @@
             android:id="@+id/fabSpeak"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_marginTop="100dp"
+            android:layout_marginTop="90dp"
             android:layout_marginEnd="@dimen/spacing_md"
             android:contentDescription="@string/speak"
             android:src="@drawable/ic_speak"

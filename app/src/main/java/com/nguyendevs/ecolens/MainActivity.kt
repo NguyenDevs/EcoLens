@@ -12,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
-import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -23,14 +22,9 @@ import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.transition.Fade
 import androidx.transition.TransitionManager
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.nguyendevs.ecolens.activities.CameraActivity
-import com.nguyendevs.ecolens.adapters.RecentHistoryAdapter
-import com.nguyendevs.ecolens.database.HistoryDatabase
-import com.nguyendevs.ecolens.database.HistoryRepository
 import com.nguyendevs.ecolens.databinding.ActivityMainBinding
 import com.nguyendevs.ecolens.fragments.chat.ChatHistoryFragment
 import com.nguyendevs.ecolens.fragments.history.HistoryFragment
@@ -38,6 +32,8 @@ import com.nguyendevs.ecolens.handlers.*
 import com.nguyendevs.ecolens.handlers.animation.LoadingAnimationHandler
 import com.nguyendevs.ecolens.handlers.interaction.ImageZoomHandler
 import com.nguyendevs.ecolens.handlers.interaction.SearchBarHandler
+import com.nguyendevs.ecolens.handlers.main.HomeScreenHandler
+import com.nguyendevs.ecolens.handlers.main.NavigationHandler
 import com.nguyendevs.ecolens.managers.*
 import com.nguyendevs.ecolens.model.LoadingStage
 import com.nguyendevs.ecolens.model.SpeciesInfo
@@ -45,7 +41,6 @@ import com.nguyendevs.ecolens.utils.KeyboardUtils
 import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import java.lang.ref.WeakReference
-import java.util.Calendar
 import kotlinx.coroutines.*
 
 /** Activity chính của ứng dụng EcoLens. Quản lý navigation, nhận diện loài, và UI chính. */
@@ -64,20 +59,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var speciesInfoHandler: SpeciesInfoHandler
     private lateinit var sharedPreferences: SharedPreferences
 
+    // New Handlers
+    private lateinit var homeScreenHandler: HomeScreenHandler
+    private lateinit var navigationHandler: NavigationHandler
+
     private val historyFragment = HistoryFragment()
     private val chatHistoryFragment = ChatHistoryFragment()
     private var imageUri: Uri? = null
     private var isExpandedState = false
     private var stopLoadingJob: Job? = null
-
-    // Recent History on Home Screen
-    private lateinit var recentHistoryAdapter: RecentHistoryAdapter
-    private val historyRepository by lazy {
-        HistoryRepository(
-                HistoryDatabase.getDatabase(applicationContext).historyDao(),
-                applicationContext
-        )
-    }
 
     companion object {
         private const val PREF_NAME = "EcoLensPrefs"
@@ -146,22 +136,32 @@ class MainActivity : AppCompatActivity() {
 
         initHandlers()
         initManagers()
-        setupBottomNavigation()
+
+        // Setup Main Handlers
+        homeScreenHandler.setup()
+        navigationHandler.setup()
+
         setupFAB()
         setupObservers()
         setupBackNavigation()
-        setupHomeScreen()
 
+        // Initialize Navigation State
         val navigateToSettings = intent.getBooleanExtra("navigate_to_settings", false)
-        val lastNavItem =
-                if (navigateToSettings) {
-                    R.id.nav_settings
-                } else {
-                    sharedPreferences.getInt(KEY_LAST_NAV_ITEM, R.id.nav_home)
-                }
+        val lastNavItem = navigationHandler.restoreLastTab(navigateToSettings)
 
         binding.bottomNavigation.selectedItemId = lastNavItem
-        binding.root.post { updateNavigationState(lastNavItem) }
+        binding.root.post {
+            navigationHandler.updateNavigationState(
+                    lastNavItem,
+                    uiStateChecker = {
+                        val state = viewModel.uiState.value
+                        val isComplete = state.loadingStage == LoadingStage.COMPLETE
+                        val hasInfo =
+                                state.speciesInfo != null && !state.isLoading && state.error == null
+                        Triple(state.loadingStage, speakerManager.isSpeaking(), hasInfo)
+                    }
+            )
+        }
 
         preloadFragments()
     }
@@ -295,9 +295,28 @@ class MainActivity : AppCompatActivity() {
                                             Toast.LENGTH_SHORT
                                     )
                                     .show()
+                            searchBarHandler.expandSearchBar(text)
                         },
                         { viewModel.retryIdentification() }
                 )
+
+        // Initialize Main Handlers
+        homeScreenHandler =
+                HomeScreenHandler(this, binding) { entry -> navigateToHistoryDetail(entry) }
+
+        navigationHandler =
+                NavigationHandler(
+                        this,
+                        binding,
+                        sharedPreferences,
+                        historyFragment,
+                        chatHistoryFragment
+                ) { _ ->
+                    if (speakerManager.isSpeaking()) {
+                        speakerManager.pause()
+                        toggleSpeakerUI(false)
+                    }
+                }
     }
 
     /** Khởi tạo các manager */
@@ -352,7 +371,7 @@ class MainActivity : AppCompatActivity() {
         val tvLoadingText = homeRoot.findViewById<View>(R.id.tvLoadingText)
         val speciesInfoCard = homeRoot.findViewById<View>(R.id.speciesInfoCard)
         val errorCard = homeRoot.findViewById<View>(R.id.errorCard)
-        val loadingCard = homeRoot.findViewById<View>(R.id.loadingCard) 
+        val loadingCard = homeRoot.findViewById<View>(R.id.loadingCard)
 
         // Hero Content Elements (to hide when showing result)
         val tvHeroBadge = homeRoot.findViewById<View>(R.id.tvHeroBadge)
@@ -378,7 +397,7 @@ class MainActivity : AppCompatActivity() {
             tvHeroSubtitle?.visibility = View.GONE
             btnStartNow?.visibility = View.GONE
             imgHeroDecor?.visibility = View.GONE
-            
+
             // Hide legacy loading card
             loadingCard?.visibility = View.GONE
 
@@ -392,10 +411,10 @@ class MainActivity : AppCompatActivity() {
 
                 // Use centerCrop to fill the card
                 com.bumptech.glide.Glide.with(this)
-                    .load(loadModel)
-                    .transition(DrawableTransitionOptions.withCrossFade())
-                    .centerCrop()
-                    .into(imgHeroFull)
+                        .load(loadModel)
+                        .transition(DrawableTransitionOptions.withCrossFade())
+                        .centerCrop()
+                        .into(imgHeroFull)
 
                 // Update Zoom Handler
                 imageZoomHandler.setImageUri(uri)
@@ -444,10 +463,11 @@ class MainActivity : AppCompatActivity() {
 
         if (searchBarHandler.isExpanded()) searchBarHandler.collapseSearchBar()
 
-        binding.bottomNavigation.selectedItemId = R.id.nav_home
+        navigationHandler.navigateTo(R.id.nav_home)
 
         viewModel.currentImageUri = uri
         this.imageUri = uri
+        speciesInfoHandler.setImageUri(uri)
 
         // SWITCH STATE: Hide Home content, show loading
         toggleHomeState(showResults = true)
@@ -456,25 +476,8 @@ class MainActivity : AppCompatActivity() {
         viewModel.identifySpecies(uri, languageManager.getLanguage())
     }
 
-    /** Thiết lập bottom navigation */
-    private fun setupBottomNavigation() {
-        binding.bottomNavigation.setOnItemSelectedListener { item ->
-            binding.bottomNavigation.performHapticFeedback(
-                    android.view.HapticFeedbackConstants.CONFIRM
-            )
-            if (supportFragmentManager.backStackEntryCount > 0) {
-                supportFragmentManager.popBackStack(
-                        null,
-                        androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE
-                )
-            }
-
-            sharedPreferences.edit().putInt(KEY_LAST_NAV_ITEM, item.itemId).apply()
-
-            updateNavigationState(item.itemId)
-            true
-        }
-        
+    /** Thiết lập các Floating Action Button và Camera setup */
+    private fun setupFAB() {
         binding.fabCamera.setOnClickListener {
             binding.fabCamera.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
             if (speakerManager.isSpeaking()) {
@@ -489,72 +492,6 @@ class MainActivity : AppCompatActivity() {
                 permissionManager.requestPermissions()
             }
         }
-    }
-
-    /** Cập nhật trạng thái navigation dựa trên tab được chọn */
-    private fun updateNavigationState(itemId: Int) {
-        if (speakerManager.isSpeaking()) {
-            speakerManager.pause()
-            toggleSpeakerUI(false)
-        }
-
-        val transition = Fade()
-        transition.duration = 120
-        TransitionManager.beginDelayedTransition(binding.mainContent, transition)
-
-        binding.homeContainer.root.visibility = View.GONE
-        binding.historyContainer.visibility = View.GONE
-        binding.myGardenContainer.visibility = View.GONE
-        binding.settingsContainer.root.visibility = View.GONE
-        binding.searchBarContainer.visibility = View.GONE
-        binding.fabSpeak.visibility = View.GONE
-        binding.fabMute.visibility = View.GONE
-
-        binding.bottomNavigation.visibility = View.VISIBLE
-        binding.fabCamera.visibility = View.VISIBLE
-
-        when (itemId) {
-            R.id.nav_home -> {
-                binding.homeContainer.root.visibility = View.VISIBLE
-                binding.searchBarContainer.visibility = View.VISIBLE
-
-                val state = viewModel.uiState.value
-                val isComplete = state.loadingStage == LoadingStage.COMPLETE
-                val hasInfo = state.speciesInfo != null && !state.isLoading && state.error == null
-
-                if (isComplete && hasInfo && !speakerManager.isSpeaking()) {
-                    binding.fabSpeak.visibility = View.VISIBLE
-                } else if (speakerManager.isSpeaking()) {
-                    binding.fabMute.visibility = View.VISIBLE
-                }
-            }
-            R.id.nav_history -> {
-                binding.historyContainer.visibility = View.VISIBLE
-                if (!historyFragment.isAdded) {
-                    supportFragmentManager
-                            .beginTransaction()
-                            .add(R.id.historyContainer, historyFragment, "HISTORY")
-                            .commitNowAllowingStateLoss()
-                }
-            }
-            R.id.nav_my_garden -> {
-                binding.myGardenContainer.visibility = View.VISIBLE
-                if (!chatHistoryFragment.isAdded) {
-                    supportFragmentManager
-                            .beginTransaction()
-                            .add(R.id.myGardenContainer, chatHistoryFragment, "CHAT_HISTORY")
-                            .commitNowAllowingStateLoss()
-                }
-            }
-            R.id.nav_settings -> binding.settingsContainer.root.visibility = View.VISIBLE
-        }
-    }
-
-    /** Thiết lập các Floating Action Button */
-    private fun setupFAB() {
-        // Camera FAB logic moved to setupBottomNavigation to ensure it works for both instances if needed
-        // But since we have one ID, we just need to make sure we set the listener correctly.
-        // The listener is set in setupBottomNavigation now.
 
         binding.fabSpeak.setOnClickListener {
             viewModel.uiState.value.speciesInfo?.let { info ->
@@ -609,7 +546,7 @@ class MainActivity : AppCompatActivity() {
         val progressBarHero = homeRoot.findViewById<View>(R.id.progressBarHero)
         val tvLoadingText = homeRoot.findViewById<TextView>(R.id.tvLoadingText)
         val loadingCard = homeRoot.findViewById<View>(R.id.loadingCard)
-        
+
         // Hide legacy loading card
         loadingCard?.isVisible = false
 
@@ -626,7 +563,7 @@ class MainActivity : AppCompatActivity() {
         if (isLoading) {
             progressBarHero?.isVisible = true
             tvLoadingText?.isVisible = true
-            
+
             stopLoadingJob?.cancel()
 
             if (loadingStage == LoadingStage.SCIENTIFIC_NAME ||
@@ -642,7 +579,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             // Not loading
             progressBarHero?.isVisible = false
-            
+
             if (isPhase2) {
                 stopLoadingJob?.cancel()
                 loadingAnimationHandler.stop()
@@ -662,7 +599,7 @@ class MainActivity : AppCompatActivity() {
             homeRoot.findViewById<TextView>(R.id.errorText).text = error
             val errorCard = homeRoot.findViewById<View>(R.id.errorCard)
             if (errorCard != null) errorCard.isVisible = true
-            
+
             progressBarHero?.isVisible = false
             tvLoadingText?.isVisible = false
 
@@ -740,92 +677,6 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    // ==================== HOME SCREEN SETUP ====================
-
-    /**
-     * Thiết lập các components mới cho Home Screen Bao gồm: greeting động, hero card button, và
-     * Recent History
-     */
-    private fun setupHomeScreen() {
-        val homeRoot = binding.homeContainer.root
-
-        // Setup dynamic greeting based on time of day
-        setupGreeting()
-
-        // Setup Hero Card button click
-        homeRoot.findViewById<View>(R.id.btnStartNow)?.setOnClickListener {
-            binding.fabCamera.performClick()
-        }
-
-        // Setup Recent History RecyclerView
-        setupRecentHistory()
-
-        // Setup Quick Explore hardcoded data
-        setupQuickExplore()
-    }
-
-    /** Thiết lập lời chào động theo thời gian trong ngày + Username */
-    private fun setupGreeting() {
-        val homeRoot = binding.homeContainer.root
-        val tvGreeting = homeRoot.findViewById<TextView>(R.id.tvGreeting) ?: return
-
-        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-        val greetingResId =
-                when {
-                    hour < 12 -> R.string.greeting_morning
-                    hour < 18 -> R.string.greeting_afternoon
-                    else -> R.string.greeting_evening
-                }
-
-        val username = sharedPreferences.getString("username", "")
-        if (username.isNullOrEmpty()) {
-            tvGreeting.setText(greetingResId)
-        } else {
-            // Combine resource string with username
-            val greetingBase = getString(greetingResId)
-            tvGreeting.text = "$greetingBase, $username"
-        }
-    }
-
-    /** Thiết lập RecyclerView cho Recent History với 5 item gần nhất */
-    private fun setupRecentHistory() {
-        val homeRoot = binding.homeContainer.root
-        val rvRecentHistory =
-                homeRoot.findViewById<androidx.recyclerview.widget.RecyclerView>(
-                        R.id.rvRecentHistory
-                )
-                        ?: return
-        val emptyRecentState = homeRoot.findViewById<View>(R.id.emptyRecentState)
-
-        // Initialize adapter with click handler
-        recentHistoryAdapter = RecentHistoryAdapter { entry ->
-            // Navigate to History Detail when clicking on recent item
-            navigateToHistoryDetail(entry)
-        }
-
-        rvRecentHistory.apply {
-            layoutManager = LinearLayoutManager(this@MainActivity)
-            adapter = recentHistoryAdapter
-            isNestedScrollingEnabled = false
-        }
-
-        // Load 5 most recent items
-        loadRecentHistory(emptyRecentState)
-    }
-
-    /** Load 5 item lịch sử gần nhất từ database */
-    private fun loadRecentHistory(emptyState: View?) {
-        lifecycleScope.launch {
-            historyRepository.getAllHistoryNewestFirst().collect { allHistory ->
-                val recentItems = allHistory.take(5)
-                recentHistoryAdapter.submitList(recentItems)
-
-                // Toggle empty state
-                emptyState?.isVisible = recentItems.isEmpty()
-            }
-        }
-    }
-
     /** Navigate to History Detail Fragment */
     private fun navigateToHistoryDetail(entry: com.nguyendevs.ecolens.model.history.HistoryEntry) {
         val jsonEntry = com.google.gson.Gson().toJson(entry)
@@ -846,34 +697,5 @@ class MainActivity : AppCompatActivity() {
                 .addToBackStack(null)
                 .commit()
         binding.fragmentContainer.visibility = View.VISIBLE
-    }
-
-    /** Setup Quick Explore với dữ liệu hardcoded */
-    private fun setupQuickExplore() {
-        val homeRoot = binding.homeContainer.root
-
-        // Card 1: Sen đá
-        val card1 = homeRoot.findViewById<View>(R.id.exploreCard1)
-        card1?.findViewById<TextView>(R.id.tvExploreName)?.text =
-                getString(R.string.explore_item_1_name)
-        card1?.findViewById<TextView>(R.id.tvExploreDesc)?.text =
-                getString(R.string.explore_item_1_desc)
-        card1?.findViewById<ImageView>(R.id.imgExplore)?.setImageResource(R.drawable.home_tree)
-
-        // Card 2: Bướm Monarch
-        val card2 = homeRoot.findViewById<View>(R.id.exploreCard2)
-        card2?.findViewById<TextView>(R.id.tvExploreName)?.text =
-                getString(R.string.explore_item_2_name)
-        card2?.findViewById<TextView>(R.id.tvExploreDesc)?.text =
-                getString(R.string.explore_item_2_desc)
-        card2?.findViewById<ImageView>(R.id.imgExplore)?.setImageResource(R.drawable.home_tree_2)
-
-        // Card 3: Hoa Oải Hương
-        val card3 = homeRoot.findViewById<View>(R.id.exploreCard3)
-        card3?.findViewById<TextView>(R.id.tvExploreName)?.text =
-                getString(R.string.explore_item_3_name)
-        card3?.findViewById<TextView>(R.id.tvExploreDesc)?.text =
-                getString(R.string.explore_item_3_desc)
-        card3?.findViewById<ImageView>(R.id.imgExplore)?.setImageResource(R.drawable.home_tree)
     }
 }

@@ -21,7 +21,7 @@
                 android:layout_height="wrap_content"
                 android:animateLayoutChanges="true"
                 android:orientation="vertical"
-                android:paddingBottom="72dp">
+                android:paddingBottom="76dp">
 
             <!-- ==================== HEADER SECTION ==================== -->
             <LinearLayout
@@ -38,16 +38,6 @@
                         android:layout_marginBottom="@dimen/spacing_lg"
                         android:orientation="vertical">
 
-                    <!-- Greeting Text -->
-                    <TextView
-                            android:id="@+id/tvGreeting"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif-medium"
-                            android:text="@string/greeting_morning"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="@dimen/text_body" />
-
                     <!-- App Title -->
                     <TextView
                             android:id="@+id/tvAppTitle"
@@ -59,6 +49,16 @@
                             android:textColor="@color/primary"
                             android:textSize="30sp"
                             android:textStyle="bold" />
+
+                    <!-- Greeting Text with Username -->
+                    <TextView
+                            android:id="@+id/tvGreeting"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif-medium"
+                            android:text="@string/greeting_morning"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_body" />
 
                 </LinearLayout>
 
@@ -181,39 +181,47 @@
                             app:layout_constraintTop_toTopOf="parent" />
 
                     <!-- Progress Bar (Centered) -->
-                    <ProgressBar
+                    <FrameLayout
                             android:id="@+id/progressBarHero"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:indeterminate="true"
-                            android:indeterminateTint="@color/white"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@color/overlay_light"
                             android:visibility="gone"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
+                            app:layout_constraintTop_toTopOf="parent">
+
+                        <com.google.android.material.progressindicator.CircularProgressIndicator
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:indeterminate="true"
+                                app:indicatorColor="@array/gemini_colors" />
+                    </FrameLayout>
 
                     <!-- Zoom Controls -->
                     <LinearLayout
                             android:id="@+id/zoomControls"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="16dp"
-                            android:layout_marginBottom="16dp"
                             android:orientation="vertical"
                             android:visibility="gone"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent">
 
-                        <com.google.android.material.floatingactionbutton.FloatingActionButton
+                        <ImageView
                                 android:id="@+id/btnZoomIn"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                android:layout_width="@dimen/touch_target_min"
+                                android:layout_height="@dimen/touch_target_min"
+                                android:layout_gravity="bottom|end"
+                                android:layout_margin="@dimen/spacing_md"
+                                android:background="@drawable/bg_black_rounded"
                                 android:contentDescription="@string/zoom_in"
+                                android:padding="@dimen/spacing_sm"
                                 android:src="@drawable/ic_zoomin"
-                                app:backgroundTint="@color/transparent"
-                                app:fabSize="mini"
-                                app:tint="@color/white" />
+                                android:visibility="gone"
+                                app:tint="@color/white"/>
 
                     </LinearLayout>
 
@@ -325,58 +333,84 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_xl"
+                    android:animateLayoutChanges="true"
                     android:clipChildren="false"
                     android:clipToPadding="false"
                     android:orientation="vertical"
                     android:paddingHorizontal="@dimen/padding_screen_horizontal">
 
-                <!-- Section Header -->
-                <TextView
-                        android:layout_width="wrap_content"
+                <!-- Section Header with Toggle -->
+                <FrameLayout
+                        android:id="@+id/recentHeader"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="@dimen/spacing_md"
-                        android:text="@string/recent"
-                        android:textColor="@color/text_primary"
-                        android:textSize="@dimen/text_h3"
-                        android:textStyle="bold" />
-
-                <!-- Recent History RecyclerView -->
-                <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rvRecentHistory"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:clipChildren="false"
-                        android:clipToPadding="false"
-                        android:nestedScrollingEnabled="false"
-                        android:paddingHorizontal="@dimen/spacing_xxs"
-                        tools:itemCount="5"
-                        tools:listitem="@layout/item_recent_history" />
-
-                <!-- Empty State -->
-                <LinearLayout
-                        android:id="@+id/emptyRecentState"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:padding="@dimen/spacing_xl"
-                        android:visibility="gone">
-
-                    <ImageView
-                            android:layout_width="64dp"
-                            android:layout_height="64dp"
-                            android:contentDescription="@null"
-                            android:src="@drawable/ic_history"
-                            app:tint="@color/text_tertiary" />
+                        android:clickable="true"
+                        android:focusable="true">
 
                     <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/spacing_sm"
-                            android:text="@string/history_empty"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="@dimen/text_body" />
+                            android:text="@string/recent"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_h3"
+                            android:textStyle="bold" />
 
+                    <ImageView
+                            android:id="@+id/ivRecentExpandIcon"
+                            android:layout_width="@dimen/icon_md"
+                            android:layout_height="@dimen/icon_md"
+                            android:layout_gravity="end|center_vertical"
+                            android:rotation="180"
+                            android:src="@drawable/ic_arrow_down"
+                            app:tint="@color/text_secondary" />
+                </FrameLayout>
+
+                <!-- Recent History Container (expandable) -->
+                <LinearLayout
+                        android:id="@+id/recentContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                    <!-- Recent History RecyclerView -->
+                    <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rvRecentHistory"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:clipChildren="false"
+                            android:clipToPadding="false"
+                            android:nestedScrollingEnabled="false"
+                            android:paddingHorizontal="@dimen/spacing_xxs"
+                            tools:itemCount="5"
+                            tools:listitem="@layout/item_recent_history" />
+
+                    <!-- Empty State -->
+                    <LinearLayout
+                            android:id="@+id/emptyRecentState"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="@dimen/spacing_xl"
+                            android:visibility="gone">
+
+                        <ImageView
+                                android:layout_width="64dp"
+                                android:layout_height="64dp"
+                                android:contentDescription="@null"
+                                android:src="@drawable/ic_history"
+                                app:tint="@color/text_tertiary" />
+
+                        <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/spacing_sm"
+                                android:text="@string/history_empty"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="@dimen/text_body" />
+
+                    </LinearLayout>
                 </LinearLayout>
 
             </LinearLayout>

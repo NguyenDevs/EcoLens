@@ -9,6 +9,7 @@ import com.nguyendevs.ecolens.databinding.ItemCardSpeciesInfoBinding
 import com.nguyendevs.ecolens.handlers.animation.AnimationHandler
 import com.nguyendevs.ecolens.model.SpeciesInfo
 
+/** Xử lý hiển thị độ tin cậy (confidence) của kết quả nhận dạng loài. */
 class ConfidenceDisplayHandler(
         private val context: Context,
         private val binding: ItemCardSpeciesInfoBinding,
@@ -18,6 +19,7 @@ class ConfidenceDisplayHandler(
     private val infoBinding
         get() = binding
 
+    /** Hiển thị độ tin cậy với màu sắc và icon tương ứng theo mức độ. */
     @SuppressLint("StringFormatInvalid")
     fun displayConfidence(info: SpeciesInfo, isWaiting: Boolean) {
         val tvConfidence = infoBinding.tvConfidence
@@ -109,10 +111,12 @@ class ConfidenceDisplayHandler(
         }
     }
 
+    /** Xóa trạng thái đã lưu để reset hiển thị. */
     fun clearState() {
         lastConfidenceValue = null
     }
 
+    /** Data class chứa 4 giá trị cho việc styling confidence card. */
     data class Quadruple<out A, out B, out C, out D>(
             val first: A,
             val second: B,

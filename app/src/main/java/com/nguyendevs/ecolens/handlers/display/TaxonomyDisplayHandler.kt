@@ -8,6 +8,7 @@ import com.nguyendevs.ecolens.handlers.animation.ShimmerEffectHandler
 import com.nguyendevs.ecolens.handlers.util.TextFormatter
 import com.nguyendevs.ecolens.model.SpeciesInfo
 
+/** Xử lý hiển thị thông tin phân loại học (taxonomy) với hiệu ứng waterfall. */
 class TaxonomyDisplayHandler(
         private val binding: ItemCardSpeciesInfoBinding,
         private val animationHandler: AnimationHandler,
@@ -18,6 +19,7 @@ class TaxonomyDisplayHandler(
     private val infoBinding
         get() = binding
 
+    /** Chuẩn bị container taxonomy với shimmer loading. */
     fun prepareTaxonomyContainer() {
         val container = infoBinding.taxonomyContainer
         container.visibility = View.VISIBLE
@@ -45,6 +47,7 @@ class TaxonomyDisplayHandler(
         shimmerEffectHandler.startTaxonomyShimmer(container)
     }
 
+    /** Hiển thị thông tin taxonomy với animation waterfall cascade. */
     fun displayTaxonomyWaterfall(info: SpeciesInfo) {
         val container = infoBinding.taxonomyContainer
         container.visibility = View.VISIBLE
@@ -84,10 +87,6 @@ class TaxonomyDisplayHandler(
                 }
             } else {
                 if (!displayedRows.contains(rowId)) {
-                    // Keep invisible to maintain layout if needed, or GONE if we want to collapse
-                    // For waterfall effect, usually we keep them invisible until data arrives
-                    // But if data is missing, we might want to hide it.
-                    // For now, let's keep consistent with prepareTaxonomyContainer
                     rowView.visibility = View.INVISIBLE
                     rowView.alpha = 0f
                 }
@@ -95,10 +94,12 @@ class TaxonomyDisplayHandler(
         }
     }
 
+    /** Dừng hiệu ứng shimmer loading. */
     fun stopShimmer() {
         shimmerEffectHandler.stopTaxonomyShimmer(infoBinding.taxonomyContainer)
     }
 
+    /** Xóa trạng thái và reset tất cả các hàng taxonomy. */
     fun clearDisplayedRows() {
         displayedRows.clear()
 

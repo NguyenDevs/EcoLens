@@ -2,6 +2,7 @@ package com.nguyendevs.ecolens.handlers
 
 import android.content.Context
 import android.graphics.Color
+import android.net.Uri
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.nguyendevs.ecolens.R
@@ -31,9 +32,15 @@ class SpeciesInfoHandler(
     private var isInitialLoad = true
     private var allSectionsRendered = false
     private var lastDisplayedCommonName: String? = null
+    private var currentImageUri: Uri? = null
 
     private val infoBinding
         get() = binding
+
+    /** Thiết lập URI hình ảnh để sử dụng khi chia sẻ */
+    fun setImageUri(uri: Uri?) {
+        currentImageUri = uri
+    }
 
     // Các handler con
     private val animationHandler = AnimationHandler()
@@ -179,7 +186,7 @@ class SpeciesInfoHandler(
                 displayConservationStatus(info.conservationStatus, shouldScroll = false)
                 allSectionsRendered = true
 
-                buttonHandler.setupShareButton(info, null)
+                buttonHandler.setupShareButton(info, currentImageUri)
                 buttonHandler.showShareButton()
                 buttonHandler.setupCopyButton(info)
 
@@ -239,7 +246,7 @@ class SpeciesInfoHandler(
             allSectionsRendered = true
 
             if (!isInitialLoad) {
-                buttonHandler.setupShareButton(info, null)
+                buttonHandler.setupShareButton(info, currentImageUri)
                 buttonHandler.showShareButton()
             }
         }
