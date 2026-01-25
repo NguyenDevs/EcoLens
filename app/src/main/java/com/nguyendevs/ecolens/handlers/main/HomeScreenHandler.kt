@@ -191,7 +191,7 @@ class HomeScreenHandler(
                 activity.getString(R.string.explore_item_1_name)
         card1?.findViewById<TextView>(R.id.tvExploreDesc)?.text =
                 activity.getString(R.string.explore_item_1_desc)
-        card1?.findViewById<ImageView>(R.id.imgExplore)?.setImageResource(R.drawable.home_tree)
+        card1?.findViewById<ImageView>(R.id.imgExplore)?.setImageResource(R.drawable.succulent)
 
         // Card 2: Bướm Monarch
         val card2 = homeRoot.findViewById<View>(R.id.exploreCard2)
@@ -199,7 +199,8 @@ class HomeScreenHandler(
                 activity.getString(R.string.explore_item_2_name)
         card2?.findViewById<TextView>(R.id.tvExploreDesc)?.text =
                 activity.getString(R.string.explore_item_2_desc)
-        card2?.findViewById<ImageView>(R.id.imgExplore)?.setImageResource(R.drawable.home_tree_2)
+        card2?.findViewById<ImageView>(R.id.imgExplore)
+                ?.setImageResource(R.drawable.monarch_butterfly)
 
         // Card 3: Hoa Oải Hương
         val card3 = homeRoot.findViewById<View>(R.id.exploreCard3)
@@ -207,6 +208,6 @@ class HomeScreenHandler(
                 activity.getString(R.string.explore_item_3_name)
         card3?.findViewById<TextView>(R.id.tvExploreDesc)?.text =
                 activity.getString(R.string.explore_item_3_desc)
-        card3?.findViewById<ImageView>(R.id.imgExplore)?.setImageResource(R.drawable.home_tree)
+        card3?.findViewById<ImageView>(R.id.imgExplore)?.setImageResource(R.drawable.lavender)
     }
 }
