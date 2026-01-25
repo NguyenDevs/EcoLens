@@ -93,11 +93,11 @@ class RecentHistoryAdapter(
                 Glide.with(context)
                     .load(loadModel)
                     .centerCrop()
-                    .placeholder(R.drawable.ic_image)
-                    .error(R.drawable.ic_broken_image)
+                    .placeholder(R.mipmap.ic_launcher)
+                    .error(R.mipmap.ic_launcher)
                     .into(binding.imgThumbnail)
             } else {
-                binding.imgThumbnail.setImageResource(R.drawable.ic_broken_image)
+                binding.imgThumbnail.setImageResource(R.mipmap.ic_launcher)
             }
         }
 

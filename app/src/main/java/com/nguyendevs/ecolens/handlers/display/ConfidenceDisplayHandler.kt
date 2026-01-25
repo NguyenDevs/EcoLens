@@ -5,17 +5,18 @@ import android.content.Context
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.nguyendevs.ecolens.R
-import com.nguyendevs.ecolens.databinding.ActivityMainBinding
+import com.nguyendevs.ecolens.databinding.ItemCardSpeciesInfoBinding
 import com.nguyendevs.ecolens.handlers.animation.AnimationHandler
 import com.nguyendevs.ecolens.model.SpeciesInfo
 
 class ConfidenceDisplayHandler(
-    private val context: Context,
-    private val binding: ActivityMainBinding,
-    private val animationHandler: AnimationHandler
+        private val context: Context,
+        private val binding: ItemCardSpeciesInfoBinding,
+        private val animationHandler: AnimationHandler
 ) {
     private var lastConfidenceValue: String? = null
-    private val infoBinding get() = binding.homeContainer.speciesInfoCard
+    private val infoBinding
+        get() = binding
 
     @SuppressLint("StringFormatInvalid")
     fun displayConfidence(info: SpeciesInfo, isWaiting: Boolean) {
@@ -30,8 +31,11 @@ class ConfidenceDisplayHandler(
             tvConfidence.textSize = 13f
 
             iconConfidence.setImageResource(R.drawable.ic_rotate)
-            iconConfidence.imageTintList = ContextCompat.getColorStateList(context, R.color.text_secondary)
-            confidenceCard.setCardBackgroundColor(ContextCompat.getColor(context, R.color.gray_light))
+            iconConfidence.imageTintList =
+                    ContextCompat.getColorStateList(context, R.color.text_secondary)
+            confidenceCard.setCardBackgroundColor(
+                    ContextCompat.getColor(context, R.color.gray_light)
+            )
             tvConfidence.setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
 
             confidenceCard.let {
@@ -50,36 +54,38 @@ class ConfidenceDisplayHandler(
             val newText = context.getString(R.string.confidence_format, confidencePercent)
 
             if (lastConfidenceValue == newText &&
-                confidenceCard.visibility == View.VISIBLE &&
-                confidenceCard.alpha == 1f
+                            confidenceCard.visibility == View.VISIBLE &&
+                            confidenceCard.alpha == 1f
             ) {
                 return
             }
 
             tvConfidence.text = newText
 
-            val (icon, tint, bg, text) = when {
-                confidenceValue >= 50f -> Quadruple(
-                    R.drawable.ic_check_circle,
-                    R.color.confidence_high,
-                    R.color.confidence_high_bg,
-                    R.color.confidence_high_text
-                )
-
-                confidenceValue >= 25f -> Quadruple(
-                    R.drawable.ic_check_warning_circle,
-                    R.color.confidence_medium,
-                    R.color.confidence_medium_bg,
-                    R.color.confidence_medium_text
-                )
-
-                else -> Quadruple(
-                    R.drawable.ic_check_not_circle,
-                    R.color.confidence_low,
-                    R.color.confidence_low_bg,
-                    R.color.confidence_low_text
-                )
-            }
+            val (icon, tint, bg, text) =
+                    when {
+                        confidenceValue >= 50f ->
+                                Quadruple(
+                                        R.drawable.ic_check_circle,
+                                        R.color.confidence_high,
+                                        R.color.confidence_high_bg,
+                                        R.color.confidence_high_text
+                                )
+                        confidenceValue >= 25f ->
+                                Quadruple(
+                                        R.drawable.ic_check_warning_circle,
+                                        R.color.confidence_medium,
+                                        R.color.confidence_medium_bg,
+                                        R.color.confidence_medium_text
+                                )
+                        else ->
+                                Quadruple(
+                                        R.drawable.ic_check_not_circle,
+                                        R.color.confidence_low,
+                                        R.color.confidence_low_bg,
+                                        R.color.confidence_low_text
+                                )
+                    }
 
             iconConfidence.setImageResource(icon)
             iconConfidence.imageTintList = ContextCompat.getColorStateList(context, tint)
@@ -108,6 +114,9 @@ class ConfidenceDisplayHandler(
     }
 
     data class Quadruple<out A, out B, out C, out D>(
-        val first: A, val second: B, val third: C, val fourth: D
+            val first: A,
+            val second: B,
+            val third: C,
+            val fourth: D
     )
 }

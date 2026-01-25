@@ -13,6 +13,7 @@
     <string name="banner_action">Chạm để chụp</string>
 
     <!-- Home Screen - New Design -->
+    <string name="greeting_title">Chào bạn,</string>
     <string name="greeting_morning">Chào buổi sáng,</string>
     <string name="greeting_afternoon">Chào buổi chiều,</string>
     <string name="greeting_evening">Chào buổi tối,</string>

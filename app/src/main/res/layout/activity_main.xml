@@ -122,7 +122,7 @@
             app:elevation="0dp"
             app:layout_anchorGravity="top|end"
             android:layout_gravity="top|end"
-            android:visibility="gone"/>
+            android:visibility="visible"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fabMute"
@@ -186,8 +186,8 @@
                     app:fabCustomSize="56dp"
                     app:maxImageSize="28dp"
                     style="@style/Widget.App.FloatingActionButton"
-                    app:elevation="0dp"
-                    app:pressedTranslationZ="4dp"
+                    app:elevation="10dp"
+                    app:pressedTranslationZ="12dp"
                     app:shapeAppearanceOverlay="@style/ShapeAppearance.App.FullRoundedComponent"/>
 
         </FrameLayout>

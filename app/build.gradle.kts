@@ -142,8 +142,8 @@ dependencies {
     ksp("androidx.room:room-compiler:$room_version")
 
     // Coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.9.0")
 
     // Networking (Retrofit + OkHttp)
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
@@ -170,9 +170,9 @@ dependencies {
 
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
-    implementation("com.google.firebase:firebase-database-ktx")
-    implementation("com.google.firebase:firebase-storage-ktx")
-    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-database")
+    implementation("com.google.firebase:firebase-storage")
+    implementation("com.google.firebase:firebase-auth")
     
     // Google Sign In
     implementation("com.google.android.gms:play-services-auth:21.0.0")

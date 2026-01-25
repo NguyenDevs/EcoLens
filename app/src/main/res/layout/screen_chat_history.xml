@@ -14,7 +14,7 @@
             android:orientation="vertical"
             android:animateLayoutChanges="true"
             android:paddingTop="10dp"
-            android:paddingBottom="10dp">
+            android:paddingBottom="46dp">
 
         <!-- HEADER -->
         <TextView
@@ -90,23 +90,23 @@
                         android:layout_marginTop="@dimen/spacing_xs"
                         android:textAlignment="center"/>
             </LinearLayout>
+            <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+                    android:id="@+id/fabNewChat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|end"
+                    android:layout_marginBottom="40dp"
+                    android:layout_marginEnd="24dp"
+                    android:textColor="@color/white"
+                    app:icon="@drawable/ic_chat_add"
+                    app:iconSize="@dimen/icon_lg"
+                    app:iconTint="@color/white"
+                    style="@style/Widget.App.FloatingActionButton"/>
 
         </FrameLayout>
 
     </LinearLayout>
 
     <!-- NEW CHAT FAB -->
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-            android:id="@+id/fabNewChat"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="@dimen/spacing_lg"
-            android:layout_marginBottom="100dp"
-            android:textColor="@color/white"
-            app:icon="@drawable/ic_chat_add"
-            app:iconSize="@dimen/icon_lg"
-            app:iconTint="@color/white"
-            style="@style/Widget.App.FloatingActionButton"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
