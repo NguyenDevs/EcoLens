@@ -71,7 +71,7 @@
                     <com.google.android.material.chip.Chip
                             android:id="@+id/chipAll"
                             android:layout_width="wrap_content"
-                            android:layout_height="40dp"
+                            android:layout_height="45dp"
                             android:text="@string/history_chipAll"
                             android:textColor="@color/white"
                             android:textSize="@dimen/text_body_small"
@@ -82,34 +82,35 @@
                             app:chipIcon="@drawable/ic_filter_first"
                             app:chipIconTint="@color/white"
                             app:chipIconSize="16dp"
+                            app:chipStrokeColor="@color/border_normal"
                             app:iconStartPadding="@dimen/spacing_xxs"/>
 
                     <!-- Animals Chip -->
                     <com.google.android.material.chip.Chip
                             android:id="@+id/chipAnimals"
                             android:layout_width="wrap_content"
-                            android:layout_height="40dp"
+                            android:layout_height="45dp"
                             android:text="@string/history_chipAnimals"
                             android:textColor="@color/text_secondary"
                             android:textSize="@dimen/text_body_small"
                             android:textStyle="bold"
                             app:chipBackgroundColor="@color/surface"
                             app:chipStrokeWidth="1dp"
-                            app:chipStrokeColor="@color/border_normal"
+                            app:chipStrokeColor="@color/border_light"
                             app:chipCornerRadius="@dimen/radius_full"/>
 
                     <!-- Plants Chip -->
                     <com.google.android.material.chip.Chip
                             android:id="@+id/chipPlants"
                             android:layout_width="wrap_content"
-                            android:layout_height="40dp"
+                            android:layout_height="45dp"
                             android:text="@string/history_chipPlants"
                             android:textColor="@color/text_secondary"
                             android:textSize="@dimen/text_body_small"
                             android:textStyle="bold"
                             app:chipBackgroundColor="@color/surface"
                             app:chipStrokeWidth="1dp"
-                            app:chipStrokeColor="@color/border_normal"
+                            app:chipStrokeColor="@color/border_light"
                             app:chipCornerRadius="@dimen/radius_full"/>
                 </com.google.android.material.chip.ChipGroup>
 
@@ -130,14 +131,14 @@
                     <com.google.android.material.chip.Chip
                             android:id="@+id/btnSort"
                             android:layout_width="wrap_content"
-                            android:layout_height="40dp"
+                            android:layout_height="45dp"
                             android:text="@string/sort_newest_first"
                             android:textColor="@color/text_secondary"
                             android:textSize="@dimen/text_body_small"
                             android:textStyle="bold"
                             app:chipBackgroundColor="@color/surface"
                             app:chipStrokeWidth="1dp"
-                            app:chipStrokeColor="@color/border_normal"
+                            app:chipStrokeColor="@color/border_light"
                             app:chipCornerRadius="@dimen/radius_full"
                             app:chipIcon="@drawable/ic_sort"
                             app:chipIconTint="@color/text_secondary"
@@ -148,7 +149,7 @@
                     <com.google.android.material.chip.Chip
                             android:id="@+id/btnFilterByDate"
                             android:layout_width="wrap_content"
-                            android:layout_height="40dp"
+                            android:layout_height="45dp"
                             android:layout_marginStart="@dimen/spacing_xs"
                             android:text="@string/select_date"
                             android:textColor="@color/text_secondary"
@@ -156,7 +157,7 @@
                             android:textStyle="bold"
                             app:chipBackgroundColor="@color/surface"
                             app:chipStrokeWidth="1dp"
-                            app:chipStrokeColor="@color/border_normal"
+                            app:chipStrokeColor="@color/border_light"
                             app:chipCornerRadius="@dimen/radius_full"
                             app:chipIcon="@drawable/ic_calendar"
                             app:chipIconTint="@color/text_secondary"
