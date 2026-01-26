@@ -297,6 +297,9 @@
     <string name="error_reset_password_failed">Không thể gửi email đặt lại mật khẩu. Vui lòng thử lại.</string>
     <string name="error_network">Lỗi kết nối mạng. Vui lòng kiểm tra internet của bạn.</string>
     <string name="error_too_many_requests">Quá nhiều yêu cầu. Vui lòng thử lại sau ít phút.</string>
+    <string name="history_chipAnimals">Động vật</string>
+    <string name="history_chipPlants">Thực vật</string>
+    <string name="history_chipAll">Tất cả</string>
 
 
 </resources>

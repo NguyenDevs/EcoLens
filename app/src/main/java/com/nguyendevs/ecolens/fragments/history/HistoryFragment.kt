@@ -1,14 +1,11 @@
 package com.nguyendevs.ecolens.fragments.history
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.animation.ValueAnimator
+import android.content.res.ColorStateList
 import android.os.Bundle
+import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.HapticFeedbackConstants
-import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.core.content.ContextCompat
 import androidx.core.util.Pair
 import androidx.fragment.app.Fragment
@@ -16,6 +13,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.gson.Gson
+import com.google.android.material.chip.Chip
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.adapters.HistoryAdapter
 import com.nguyendevs.ecolens.databinding.ScreenSpeciesHistoryBinding
@@ -24,40 +22,49 @@ import com.nguyendevs.ecolens.model.history.HistorySortOption
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import io.noties.markwon.Markwon
 import io.noties.markwon.html.HtmlPlugin
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.TimeZone
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 /**
  * Fragment hiển thị lịch sử nhận diện loài
- * Hỗ trợ sort (mới nhất/cũ nhất) và filter theo khoảng thời gian
- * Có expandable options panel với animation mượt mà
+ * - Filter theo category (All/Animals/Plants)
+ * - Sort (mới nhất/cũ nhất)
+ * - Filter theo khoảng thời gian
  */
 class HistoryFragment : Fragment() {
 
     private val viewModel: EcoLensViewModel by activityViewModels()
     private var _binding: ScreenSpeciesHistoryBinding? = null
-    private val binding get() = _binding!!
+    private val binding
+        get() = _binding!!
 
     private val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.getDefault())
 
     private lateinit var adapter: HistoryAdapter
 
+    // Filter & Sort states
+    private var currentCategory: CategoryFilter = CategoryFilter.ALL
     private var currentSortOption = HistorySortOption.NEWEST_FIRST
-    private var filterEndDate: Long? = null
     private var filterStartDate: Long? = null
-    private var isOptionsExpanded = false
+    private var filterEndDate: Long? = null
+
+    enum class CategoryFilter {
+        ALL,
+        ANIMALS,
+        PLANTS
+    }
 
     // ==================== LIFECYCLE ====================
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View {
         _binding = ScreenSpeciesHistoryBinding.inflate(inflater, container, false)
         return binding.root
@@ -69,6 +76,7 @@ class HistoryFragment : Fragment() {
         setupClickListeners()
         observeHistory()
         updateSortUI()
+        updateCategoryChipsUI(currentCategory)
     }
 
     override fun onDestroyView() {
@@ -78,56 +86,121 @@ class HistoryFragment : Fragment() {
 
     // ==================== UI SETUP ====================
 
-    /**
-     * Cấu hình adapter với Markwon để render HTML và click listeners
-     */
     private fun setupAdapter() {
-        val markwon = Markwon.builder(requireContext())
-            .usePlugin(HtmlPlugin.create())
-            .build()
+        val markwon = Markwon.builder(requireContext()).usePlugin(HtmlPlugin.create()).build()
 
-        adapter = HistoryAdapter(
-            historyList = emptyList(),
-            markwon = markwon,
-            clickListener = { entry ->
-                binding.rvHistory.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
-                navigateToDetail(entry)
-            },
-            favoriteClickListener = { entry -> viewModel.toggleFavorite(entry) }
-        )
+        adapter =
+                HistoryAdapter(
+                        historyList = emptyList(),
+                        markwon = markwon,
+                        clickListener = { entry ->
+                            binding.rvHistory.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+                            navigateToDetail(entry)
+                        }
+                )
         binding.rvHistory.adapter = adapter
     }
 
-    /**
-     * Cấu hình click listeners cho các buttons
-     */
     private fun setupClickListeners() {
-        binding.optionsHeader.setOnClickListener {
-            binding.optionsHeader.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
-            toggleOptionsExpansion()
+        // Category filter chips
+        binding.chipAll.setOnClickListener { updateCategoryFilter(CategoryFilter.ALL) }
+
+        binding.chipAnimals.setOnClickListener { updateCategoryFilter(CategoryFilter.ANIMALS) }
+
+        binding.chipPlants.setOnClickListener { updateCategoryFilter(CategoryFilter.PLANTS) }
+
+        // Sort button - toggle between newest/oldest
+        binding.btnSort.setOnClickListener {
+            binding.btnSort.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+            toggleSortOption()
         }
-        binding.btnSort.setOnClickListener { toggleSortOption() }
-        binding.btnFilterByDate.setOnClickListener { showDateRangePickerDialog() }
-        binding.btnClearFilter.setOnClickListener { clearDateFilter() }
+        
+        // Setup Sort Button States (Fade in Primary when clicked)
+        val context = requireContext()
+        val primary = ContextCompat.getColor(context, R.color.primary)
+        val surface = ContextCompat.getColor(context, R.color.surface)
+        val white = ContextCompat.getColor(context, R.color.white)
+        val secondary = ContextCompat.getColor(context, R.color.text_secondary)
+
+        val states = arrayOf(intArrayOf(android.R.attr.state_pressed), intArrayOf())
+        
+        binding.btnSort.chipBackgroundColor = ColorStateList(states, intArrayOf(primary, surface))
+        binding.btnSort.setTextColor(ColorStateList(states, intArrayOf(white, secondary)))
+        binding.btnSort.chipIconTint = ColorStateList(states, intArrayOf(white, secondary))
+        binding.btnSort.rippleColor = ColorStateList.valueOf(primary)
+
+        // Date filter button
+        binding.btnFilterByDate.setOnClickListener {
+            binding.btnFilterByDate.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+            showDateRangePickerDialog()
+        }
+
+        // Clear date filter when click on close icon
+        binding.btnFilterByDate.setOnCloseIconClickListener { clearDateFilter() }
+    }
+
+    // ==================== CATEGORY FILTER ====================
+
+    private fun updateCategoryFilter(category: CategoryFilter) {
+        currentCategory = category
+        updateCategoryChipsUI(category)
+        observeHistory()
+    }
+
+    private fun updateCategoryChipsUI(selectedCategory: CategoryFilter) {
+        updateChipStyle(binding.chipAll, selectedCategory == CategoryFilter.ALL)
+        updateChipStyle(binding.chipAnimals, selectedCategory == CategoryFilter.ANIMALS)
+        updateChipStyle(binding.chipPlants, selectedCategory == CategoryFilter.PLANTS)
+    }
+
+    private fun updateChipStyle(chip: Chip, isActive: Boolean) {
+        val context = requireContext()
+        if (isActive) {
+            chip.chipBackgroundColor = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.primary))
+            chip.setTextColor(ContextCompat.getColor(context, R.color.white))
+            chip.chipIconTint = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white))
+            chip.closeIconTint = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white))
+            chip.chipStrokeWidth = 0f
+        } else {
+            chip.chipBackgroundColor = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.surface))
+            chip.setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
+            chip.chipIconTint = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.text_secondary))
+            // Reset close icon tint to error/default if needed, though usually hidden when inactive
+            chip.closeIconTint = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.error))
+            chip.chipStrokeWidth = resources.displayMetrics.density * 1 // 1dp
+        }
     }
 
     // ==================== VIEWMODEL OBSERVERS ====================
 
-    /**
-     * Observe lịch sử từ ViewModel với sort và filter options
-     * Tự động toggle giữa RecyclerView và empty state
-     */
     private fun observeHistory() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.getHistoryBySortOption(currentSortOption, filterStartDate, filterEndDate)
-                .collectLatest { list ->
-                    if (list.isEmpty()) {
+                .collectLatest { allList ->
+                    // Apply category filter
+                    val filteredList =
+                        when (currentCategory) {
+                            CategoryFilter.ALL -> allList
+                            CategoryFilter.ANIMALS ->
+                                allList.filter {
+                                    val kingdom = it.speciesInfo.kingdom.lowercase()
+                                    kingdom.contains("animal") || kingdom.contains("động vật")
+                                }
+                            CategoryFilter.PLANTS ->
+                                allList.filter {
+                                    val kingdom = it.speciesInfo.kingdom.lowercase()
+                                    kingdom.contains("plant") || kingdom.contains("thực vật")
+                                }
+                        }
+
+                    // Update UI
+                    if (filteredList.isEmpty()) {
                         binding.rvHistory.visibility = View.GONE
                         binding.emptyStateContainer.visibility = View.VISIBLE
                     } else {
                         binding.rvHistory.visibility = View.VISIBLE
                         binding.emptyStateContainer.visibility = View.GONE
-                        adapter.updateList(list)
+                        adapter.updateList(filteredList)
                     }
                 }
         }
@@ -135,56 +208,48 @@ class HistoryFragment : Fragment() {
 
     // ==================== SORT OPERATIONS ====================
 
-    /**
-     * Toggle giữa sort mới nhất và cũ nhất
-     */
     private fun toggleSortOption() {
-        currentSortOption = if (currentSortOption == HistorySortOption.NEWEST_FIRST) {
-            HistorySortOption.OLDEST_FIRST
-        } else {
-            HistorySortOption.NEWEST_FIRST
-        }
+        currentSortOption =
+                if (currentSortOption == HistorySortOption.NEWEST_FIRST) {
+                    HistorySortOption.OLDEST_FIRST
+                } else {
+                    HistorySortOption.NEWEST_FIRST
+                }
         updateSortUI()
         observeHistory()
     }
 
-    /**
-     * Cập nhật UI hiển thị sort option hiện tại
-     */
     private fun updateSortUI() {
-        binding.tvCurrentSort.text = if (currentSortOption == HistorySortOption.NEWEST_FIRST)
-            getString(R.string.sort_newest_first)
-        else
-            getString(R.string.sort_oldest_first)
+        val sortText =
+                if (currentSortOption == HistorySortOption.NEWEST_FIRST) {
+                    getString(R.string.sort_newest_first)
+                } else {
+                    getString(R.string.sort_oldest_first)
+                }
+        binding.btnSort.text = sortText
     }
 
-    // ==================== FILTER OPERATIONS ====================
+    // ==================== DATE FILTER OPERATIONS ====================
 
-    /**
-     * Hiển thị Material Date Picker để chọn khoảng thời gian
-     */
     private fun showDateRangePickerDialog() {
-        val builder = MaterialDatePicker.Builder.dateRangePicker()
-            .setTitleText(R.string.select_date)
-            .setTheme(R.style.CustomMaterialDatePickerTheme)
-            .setSelection(
-                Pair(
-                    filterStartDate ?: MaterialDatePicker.todayInUtcMilliseconds(),
-                    filterEndDate ?: MaterialDatePicker.todayInUtcMilliseconds()
-                )
-            )
+        val builder =
+                MaterialDatePicker.Builder.dateRangePicker()
+                        .setTitleText(R.string.select_date)
+                        .setTheme(R.style.CustomMaterialDatePickerTheme)
+                        .setSelection(
+                                Pair(
+                                        filterStartDate
+                                                ?: MaterialDatePicker.todayInUtcMilliseconds(),
+                                        filterEndDate ?: MaterialDatePicker.todayInUtcMilliseconds()
+                                )
+                        )
         val picker = builder.build()
 
         picker.show(parentFragmentManager, "DATE_RANGE_PICKER")
 
-        picker.addOnPositiveButtonClickListener { selection ->
-            applyDateFilter(selection)
-        }
+        picker.addOnPositiveButtonClickListener { selection -> applyDateFilter(selection) }
     }
 
-    /**
-     * Áp dụng filter theo khoảng thời gian được chọn
-     */
     private fun applyDateFilter(selection: Pair<Long, Long>) {
         val timeZone = TimeZone.getDefault()
         val offset = timeZone.getOffset(selection.first)
@@ -195,102 +260,46 @@ class HistoryFragment : Fragment() {
         val startDate = Instant.ofEpochMilli(filterStartDate!!).atZone(ZoneId.systemDefault())
         val endDate = Instant.ofEpochMilli(filterEndDate!!).atZone(ZoneId.systemDefault())
 
-        binding.tvFilterSubtitle.text = "${dateFormatter.format(startDate)} - ${dateFormatter.format(endDate)}"
-        binding.tvFilterSubtitle.setTextColor(
-            ContextCompat.getColor(requireContext(), R.color.green_primary)
-        )
-        binding.btnClearFilter.visibility = View.VISIBLE
+        // Update chip text and show close icon
+        val dateRange = "${dateFormatter.format(startDate)} - ${dateFormatter.format(endDate)}"
+        binding.btnFilterByDate.text = dateRange
+        binding.btnFilterByDate.isCloseIconVisible = true
+
+        updateChipStyle(binding.btnFilterByDate, true)
         observeHistory()
     }
 
-    /**
-     * Xóa filter thời gian và hiển thị lại toàn bộ lịch sử
-     */
     private fun clearDateFilter() {
         filterStartDate = null
         filterEndDate = null
-        binding.tvFilterSubtitle.text = getString(R.string.select_date)
-        binding.tvFilterSubtitle.setTextColor(
-            ContextCompat.getColor(requireContext(), R.color.text_secondary)
-        )
-        binding.btnClearFilter.visibility = View.GONE
+
+        // Reset chip to default state
+        binding.btnFilterByDate.text = getString(R.string.select_date)
+        binding.btnFilterByDate.isCloseIconVisible = false
+
+        updateChipStyle(binding.btnFilterByDate, false)
         observeHistory()
-    }
-
-    // ==================== OPTIONS PANEL ANIMATION ====================
-
-    /**
-     * Toggle expand/collapse options panel
-     */
-    private fun toggleOptionsExpansion() {
-        if (isOptionsExpanded) collapseOptions() else expandOptions()
-    }
-
-    /**
-     * Mở rộng options panel với animation mượt
-     */
-    private fun expandOptions() {
-        isOptionsExpanded = true
-        binding.ivExpandIcon.animate().rotation(180f).setDuration(300).start()
-        binding.optionsContainer.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
-        val targetHeight = binding.optionsContainer.measuredHeight
-        binding.optionsContainer.layoutParams.height = 0
-        binding.optionsContainer.visibility = View.VISIBLE
-        animateHeight(0, targetHeight)
-    }
-
-    /**
-     * Thu gọn options panel với animation mượt
-     */
-    private fun collapseOptions() {
-        isOptionsExpanded = false
-        binding.ivExpandIcon.animate().rotation(0f).setDuration(300).start()
-        animateHeight(binding.optionsContainer.height, 0) {
-            binding.optionsContainer.visibility = View.GONE
-        }
-    }
-
-    /**
-     * Animate height của options panel
-     */
-    private fun animateHeight(from: Int, to: Int, onEnd: (() -> Unit)? = null) {
-        val animator = ValueAnimator.ofInt(from, to)
-        animator.addUpdateListener { animation ->
-            binding.optionsContainer.layoutParams.height = animation.animatedValue as Int
-            binding.optionsContainer.requestLayout()
-        }
-        animator.interpolator = AccelerateDecelerateInterpolator()
-        animator.duration = 300
-        onEnd?.let {
-            animator.addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) { it() }
-            })
-        }
-        animator.start()
     }
 
     // ==================== NAVIGATION ====================
 
-    /**
-     * Navigate đến màn hình chi tiết của history entry
-     */
     private fun navigateToDetail(entry: HistoryEntry) {
         val jsonEntry = Gson().toJson(entry)
-        val fragment = HistoryDetailFragment().apply {
-            arguments = Bundle().apply {
-                putString("HISTORY_ENTRY_JSON", jsonEntry)
-            }
-        }
+        val fragment =
+                HistoryDetailFragment().apply {
+                    arguments = Bundle().apply { putString("HISTORY_ENTRY_JSON", jsonEntry) }
+                }
 
-        parentFragmentManager.beginTransaction()
-            .setCustomAnimations(
-                R.anim.slide_in_bottom,
-                R.anim.hold,
-                R.anim.hold,
-                R.anim.slide_out_bottom
-            )
-            .add(R.id.fragmentContainer, fragment)
-            .addToBackStack("Detail")
-            .commit()
+        parentFragmentManager
+                .beginTransaction()
+                .setCustomAnimations(
+                        R.anim.slide_in_bottom,
+                        R.anim.hold,
+                        R.anim.hold,
+                        R.anim.slide_out_bottom
+                )
+                .add(R.id.fragmentContainer, fragment)
+                .addToBackStack("Detail")
+                .commit()
     }
 }

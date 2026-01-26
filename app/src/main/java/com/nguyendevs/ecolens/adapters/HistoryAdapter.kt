@@ -20,15 +20,13 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 /**
- * Adapter hiển thị danh sách lịch sử nhận diện loài
- * Tự động nhóm theo ngày với rounded corners và border liên tục
- * Sử dụng DiffUtil để tối ưu performance khi update list
+ * Adapter hiển thị danh sách lịch sử nhận diện loài Tự động nhóm theo ngày với rounded corners và
+ * border liên tục Sử dụng DiffUtil để tối ưu performance khi update list
  */
 class HistoryAdapter(
-    private var historyList: List<HistoryEntry>,
-    private val markwon: Markwon,
-    private val clickListener: (HistoryEntry) -> Unit,
-    private val favoriteClickListener: (HistoryEntry) -> Unit
+        private var historyList: List<HistoryEntry>,
+        private val markwon: Markwon,
+        private val clickListener: (HistoryEntry) -> Unit
 ) : RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
 
     private val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.getDefault())
@@ -37,74 +35,99 @@ class HistoryAdapter(
     // ==================== ADAPTER METHODS ====================
 
     /**
-     * Cập nhật danh sách với DiffUtil để tối ưu performance
-     * Tự động tính toán và chỉ update các item thay đổi
+     * Cập nhật danh sách với DiffUtil để tối ưu performance Tự động tính toán và chỉ update các
+     * item thay đổi
      */
     fun updateList(newList: List<HistoryEntry>) {
-        val diffCallback = object : DiffUtil.Callback() {
-            override fun getOldListSize(): Int = historyList.size
-            override fun getNewListSize(): Int = newList.size
+        val diffCallback =
+                object : DiffUtil.Callback() {
+                    override fun getOldListSize(): Int = historyList.size
+                    override fun getNewListSize(): Int = newList.size
 
-            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                return historyList[oldItemPosition].id == newList[newItemPosition].id
-            }
+                    override fun areItemsTheSame(
+                            oldItemPosition: Int,
+                            newItemPosition: Int
+                    ): Boolean {
+                        return historyList[oldItemPosition].id == newList[newItemPosition].id
+                    }
 
-            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                val oldItem = historyList[oldItemPosition]
-                val newItem = newList[newItemPosition]
+                    override fun areContentsTheSame(
+                            oldItemPosition: Int,
+                            newItemPosition: Int
+                    ): Boolean {
+                        val oldItem = historyList[oldItemPosition]
+                        val newItem = newList[newItemPosition]
 
-                val isContentSame = oldItem.id == newItem.id &&
-                        oldItem.timestamp == newItem.timestamp &&
-                        oldItem.speciesInfo.commonName == newItem.speciesInfo.commonName &&
-                        oldItem.speciesInfo.scientificName == newItem.speciesInfo.scientificName &&
-                        oldItem.isFavorite == newItem.isFavorite &&
-                        oldItem.imagePath == newItem.imagePath
+                        val isContentSame =
+                                oldItem.id == newItem.id &&
+                                        oldItem.timestamp == newItem.timestamp &&
+                                        oldItem.speciesInfo.commonName ==
+                                                newItem.speciesInfo.commonName &&
+                                        oldItem.speciesInfo.scientificName ==
+                                                newItem.speciesInfo.scientificName &&
+                                        oldItem.isFavorite == newItem.isFavorite &&
+                                        oldItem.imagePath == newItem.imagePath
 
-                if (!isContentSame) return false
+                        if (!isContentSame) return false
 
-                val oldIsFirst = oldItemPosition == 0 ||
-                        !isSameDay(oldItem.timestamp, historyList[oldItemPosition - 1].timestamp)
-                val oldIsLast = oldItemPosition == historyList.size - 1 ||
-                        !isSameDay(oldItem.timestamp, historyList[oldItemPosition + 1].timestamp)
+                        val oldIsFirst =
+                                oldItemPosition == 0 ||
+                                        !isSameDay(
+                                                oldItem.timestamp,
+                                                historyList[oldItemPosition - 1].timestamp
+                                        )
+                        val oldIsLast =
+                                oldItemPosition == historyList.size - 1 ||
+                                        !isSameDay(
+                                                oldItem.timestamp,
+                                                historyList[oldItemPosition + 1].timestamp
+                                        )
+                        val newIsFirst =
+                                newItemPosition == 0 ||
+                                        !isSameDay(
+                                                newItem.timestamp,
+                                                newList[newItemPosition - 1].timestamp
+                                        )
+                        val newIsLast =
+                                newItemPosition == newList.size - 1 ||
+                                        !isSameDay(
+                                                newItem.timestamp,
+                                                newList[newItemPosition + 1].timestamp
+                                        )
 
-                val newIsFirst = newItemPosition == 0 ||
-                        !isSameDay(newItem.timestamp, newList[newItemPosition - 1].timestamp)
-                val newIsLast = newItemPosition == newList.size - 1 ||
-                        !isSameDay(newItem.timestamp, newList[newItemPosition + 1].timestamp)
-
-                return oldIsFirst == newIsFirst && oldIsLast == newIsLast
-            }
-        }
+                        return oldIsFirst == newIsFirst && oldIsLast == newIsLast
+                    }
+                }
         val diffResult = DiffUtil.calculateDiff(diffCallback)
         historyList = newList
         diffResult.dispatchUpdatesTo(this)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryViewHolder {
-        val binding = ItemSpeciesHistoryBinding.inflate(
-            LayoutInflater.from(parent.context),
-            parent,
-            false
-        )
+        val binding =
+                ItemSpeciesHistoryBinding.inflate(
+                        LayoutInflater.from(parent.context),
+                        parent,
+                        false
+                )
         return HistoryViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: HistoryViewHolder, position: Int) {
         val entry = historyList[position]
 
-        val isFirstItemOfDay = position == 0 ||
-                !isSameDay(entry.timestamp, historyList[position - 1].timestamp)
-        val isLastItemOfDay = position == historyList.size - 1 ||
-                !isSameDay(entry.timestamp, historyList[position + 1].timestamp)
+        val isFirstItemOfDay =
+                position == 0 || !isSameDay(entry.timestamp, historyList[position - 1].timestamp)
+        val isLastItemOfDay =
+                position == historyList.size - 1 ||
+                        !isSameDay(entry.timestamp, historyList[position + 1].timestamp)
 
         holder.bind(entry, isFirstItemOfDay, isLastItemOfDay, clickListener)
     }
 
     override fun getItemCount(): Int = historyList.size
 
-    /**
-     * Kiểm tra hai timestamp có cùng ngày hay không
-     */
+    /** Kiểm tra hai timestamp có cùng ngày hay không */
     private fun isSameDay(timestamp1: Long, timestamp2: Long): Boolean {
         val date1 = Instant.ofEpochMilli(timestamp1).atZone(ZoneId.systemDefault()).toLocalDate()
         val date2 = Instant.ofEpochMilli(timestamp2).atZone(ZoneId.systemDefault()).toLocalDate()
@@ -113,35 +136,30 @@ class HistoryAdapter(
 
     // ==================== VIEW HOLDER ====================
 
-    inner class HistoryViewHolder(
-        private val binding: ItemSpeciesHistoryBinding
-    ) : RecyclerView.ViewHolder(binding.root) {
-
-        private val radius = itemView.resources.displayMetrics.density * 16
-        private val strokeWidth = (1 * itemView.resources.displayMetrics.density).toInt()
-
-        private val colorSurface = ContextCompat.getColor(itemView.context, R.color.surface)
-        private val strokeColor = ContextCompat.getColor(itemView.context, R.color.border_normal)
+    inner class HistoryViewHolder(private val binding: ItemSpeciesHistoryBinding) :
+            RecyclerView.ViewHolder(binding.root) {
 
         /**
-         * Bind dữ liệu lịch sử vào view
-         * Tự động xử lý rounded corners và border dựa vào vị trí trong ngày
+         * Bind dữ liệu lịch sử vào view Tự động xử lý rounded corners và border dựa vào vị trí
+         * trong ngày
          */
         fun bind(
-            entry: HistoryEntry,
-            isFirstItemOfDay: Boolean,
-            isLastItemOfDay: Boolean,
-            clickListener: (HistoryEntry) -> Unit
+                entry: HistoryEntry,
+                isFirstItemOfDay: Boolean,
+                isLastItemOfDay: Boolean,
+                clickListener: (HistoryEntry) -> Unit
         ) {
-            val currentDateTime = Instant.ofEpochMilli(entry.timestamp)
-                .atZone(ZoneId.systemDefault())
+            val currentDateTime =
+                    Instant.ofEpochMilli(entry.timestamp).atZone(ZoneId.systemDefault())
 
-            val commonText = entry.speciesInfo.commonName.ifEmpty {
-                itemView.context.getString(R.string.unknown_common_name)
-            }
-            val scientificText = entry.speciesInfo.scientificName.ifEmpty {
-                itemView.context.getString(R.string.unknown_scientific_name)
-            }
+            val commonText =
+                    entry.speciesInfo.commonName.ifEmpty {
+                        itemView.context.getString(R.string.unknown_common_name)
+                    }
+            val scientificText =
+                    entry.speciesInfo.scientificName.ifEmpty {
+                        itemView.context.getString(R.string.unknown_scientific_name)
+                    }
 
             markwon.setMarkdown(binding.tvHistoryCommonName, commonText)
             markwon.setMarkdown(binding.tvHistoryScientificName, scientificText)
@@ -150,13 +168,13 @@ class HistoryAdapter(
             loadImage(entry)
             setupDateHeader(isFirstItemOfDay, currentDateTime)
             setupCardAppearance(isFirstItemOfDay, isLastItemOfDay)
+            setupConfidenceBadge(entry)
 
             binding.itemContainer.setOnClickListener { clickListener(entry) }
         }
 
         /**
-         * Load ảnh từ local hoặc remote với Glide
-         * Ưu tiên local path trước, fallback về remote path
+         * Load ảnh từ local hoặc remote với Glide Ưu tiên local path trước, fallback về remote path
          */
         private fun loadImage(entry: HistoryEntry) {
             val localPath = entry.localImagePath
@@ -170,26 +188,25 @@ class HistoryAdapter(
             }
 
             if (loadModel == null && entry.imagePath.isNotEmpty()) {
-                loadModel = if (entry.imagePath.startsWith("http")) {
-                    entry.imagePath
-                } else {
-                    File(entry.imagePath)
-                }
+                loadModel =
+                        if (entry.imagePath.startsWith("http")) {
+                            entry.imagePath
+                        } else {
+                            File(entry.imagePath)
+                        }
             }
 
             Glide.with(itemView)
-                .load(loadModel)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .transition(DrawableTransitionOptions.withCrossFade(200))
-                .centerCrop()
-                .placeholder(R.mipmap.ic_launcher)
-                .error(R.mipmap.ic_launcher)
-                .into(binding.ivHistoryImage)
+                    .load(loadModel)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .transition(DrawableTransitionOptions.withCrossFade(200))
+                    .centerCrop()
+                    .placeholder(R.mipmap.ic_launcher)
+                    .error(R.mipmap.ic_launcher)
+                    .into(binding.ivHistoryImage)
         }
 
-        /**
-         * Setup date header nếu là item đầu tiên trong ngày
-         */
+        /** Setup date header nếu là item đầu tiên trong ngày */
         private fun setupDateHeader(isFirstItemOfDay: Boolean, dateTime: java.time.ZonedDateTime) {
             if (isFirstItemOfDay) {
                 binding.tvDateHeader.text = dateFormatter.format(dateTime)
@@ -199,26 +216,38 @@ class HistoryAdapter(
             }
         }
 
-        /**
-         * Setup rounded corners và border selective
-         * - Item đầu tiên: border top/left/right, top corners bo tròn
-         * - Item cuối cùng: border bottom/left/right, bottom corners bo tròn
-         * - Item giữa: chỉ border left/right, không có top/bottom border
-         * - Divider với margin cho items không phải đầu tiên
-         */
         private fun setupCardAppearance(isFirstItemOfDay: Boolean, isLastItemOfDay: Boolean) {
             // Hiển thị divider cho các items không phải đầu tiên trong ngày
             binding.divider.visibility = if (!isFirstItemOfDay) View.VISIBLE else View.GONE
 
             // Set background drawable tùy theo vị trí
-            val backgroundRes = when {
-                isFirstItemOfDay && isLastItemOfDay -> R.drawable.bg_history_item_single
-                isFirstItemOfDay -> R.drawable.bg_history_item_top
-                isLastItemOfDay -> R.drawable.bg_history_item_bottom
-                else -> R.drawable.bg_history_item_middle
-            }
+            val backgroundRes =
+                    when {
+                        isFirstItemOfDay && isLastItemOfDay -> R.drawable.bg_history_item_single
+                        isFirstItemOfDay -> R.drawable.bg_history_item_top
+                        isLastItemOfDay -> R.drawable.bg_history_item_bottom
+                        else -> R.drawable.bg_history_item_middle
+                    }
 
             binding.itemContainer.setBackgroundResource(backgroundRes)
+        }
+
+        private fun setupConfidenceBadge(entry: HistoryEntry) {
+            val confidence = entry.speciesInfo.confidence
+            val context = itemView.context
+
+            val (colorRes, iconRes) =
+                    when {
+                        confidence >= 50 ->
+                                Pair(R.color.confidence_high, R.drawable.ic_check_circle)
+                        confidence >= 25 ->
+                                Pair(R.color.confidence_medium, R.drawable.ic_check_warning_circle)
+                        else -> Pair(R.color.confidence_low, R.drawable.ic_info)
+                    }
+
+            val color = ContextCompat.getColor(context, colorRes)
+            binding.badgeSuccess.setCardBackgroundColor(color)
+            binding.ivBadgeIcon.setImageResource(iconRes)
         }
     }
 }

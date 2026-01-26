@@ -16,21 +16,23 @@
             android:paddingStart="@dimen/spacing_xxs"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
-            android:text="14 November 2025"
-            style="@style/TextAppearance.App.Body1"
-            android:textColor="@color/primary"
+            android:text="Hôm nay, 22/01/2026"
+            android:textSize="10sp"
+            android:textColor="@color/text_tertiary"
             android:textStyle="bold"
+            android:letterSpacing="0.15"
+            android:textAllCaps="true"
             android:visibility="gone"
             tools:visibility="visible"/>
 
-    <!-- DIVIDER (chỉ hiện cho items không phải đầu tiên) -->
+    <!-- DIVIDER -->
     <View
             android:id="@+id/divider"
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginStart="@dimen/spacing_xxs"
             android:layout_marginEnd="@dimen/spacing_xxs"
-            android:background="@color/border_normal"
+            android:background="@color/border_light"
             android:visibility="gone"/>
 
     <!-- ITEM CARD -->
@@ -38,24 +40,52 @@
             android:id="@+id/itemContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_history_item_single"
             android:clickable="true"
             android:focusable="true"
-            android:padding="10dp"
-    >
+            android:padding="10dp">
 
-        <!-- IMAGE -->
-        <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/ivHistoryImage"
+        <!-- Avatar with Badge -->
+        <FrameLayout
+                android:id="@+id/avatarContainer"
                 android:layout_width="54dp"
                 android:layout_height="54dp"
-                android:scaleType="centerCrop"
-                android:background="@color/background"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.SmallComponent"
-                android:src="@drawable/ic_image"/>
+                app:layout_constraintBottom_toBottomOf="parent">
+
+            <!-- IMAGE -->
+            <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivHistoryImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitCenter"
+                    android:padding="2dp"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.App.SmallComponent"
+                    app:strokeWidth="1.5dp"
+                    app:strokeColor="@color/primary_20"
+                    android:src="@mipmap/ic_launcher"/>
+
+            <!-- Success Badge -->
+            <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/badgeSuccess"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_gravity="bottom|end"
+                    android:layout_marginEnd="2dp"
+                    android:layout_marginBottom="2dp"
+                    app:cardBackgroundColor="@color/primary"
+                    app:cardElevation="0dp"
+                    app:cardCornerRadius="@dimen/radius_full">
+
+                <ImageView
+                        android:id="@+id/ivBadgeIcon"
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_check_circle"
+                        app:tint="@color/white"/>
+            </com.google.android.material.card.MaterialCardView>
+        </FrameLayout>
 
         <!-- INFO SECTION -->
         <LinearLayout
@@ -66,7 +96,7 @@
                 android:orientation="vertical"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/tvHistoryTime"
-                app:layout_constraintStart_toEndOf="@+id/ivHistoryImage"
+                app:layout_constraintStart_toEndOf="@+id/avatarContainer"
                 app:layout_constraintTop_toTopOf="parent">
 
             <TextView
@@ -76,33 +106,36 @@
                     android:ellipsize="end"
                     android:maxLines="1"
                     android:text="@string/label_common_name"
-                    style="@style/TextAppearance.App.Body1"
-                    android:textColor="@color/primary_dark"
-                    android:textStyle="bold"/>
+                    android:textSize="16sp"
+                    android:textColor="@color/text_primary"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium"/>
 
             <TextView
                     android:id="@+id/tvHistoryScientificName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_xxs"
+                    android:layout_marginTop="2dp"
                     android:ellipsize="end"
                     android:maxLines="1"
                     android:text="@string/label_scientific_name"
-                    style="@style/TextAppearance.App.Body2"
+                    android:textSize="13sp"
                     android:textColor="@color/text_secondary"
+                    android:fontFamily="serif"
                     android:textStyle="italic"/>
         </LinearLayout>
 
+        <!-- Time -->
         <TextView
                 android:id="@+id/tvHistoryTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="14:30"
-                style="@style/TextAppearance.App.Caption"
+                android:text="10:09"
+                android:textSize="12sp"
                 android:textColor="@color/text_tertiary"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

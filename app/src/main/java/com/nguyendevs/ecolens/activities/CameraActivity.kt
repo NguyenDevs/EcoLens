@@ -65,8 +65,6 @@ class CameraActivity : AppCompatActivity() {
         uri?.let { handleSelectedImage(it) }
     }
 
-    // ==================== LIFECYCLE ====================
-
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,8 +95,6 @@ class CameraActivity : AppCompatActivity() {
         cameraExecutor.shutdown()
         stopBorderAnimation()
     }
-
-    // ==================== UI SETUP ====================
 
     /**
      * Thiết lập các click listeners cho buttons
@@ -158,8 +154,6 @@ class CameraActivity : AppCompatActivity() {
             true
         }
     }
-
-    // ==================== CAMERA OPERATIONS ====================
 
     /**
      * Khởi động camera với cấu hình preview và image capture
@@ -295,8 +289,6 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
-    // ==================== GALLERY OPERATIONS ====================
-
     /**
      * Mở thư viện để chọn ảnh
      */
@@ -331,8 +323,6 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
-    // ==================== FLASH OPERATIONS ====================
-
     /**
      * Bật/tắt flash
      */
@@ -359,8 +349,6 @@ class CameraActivity : AppCompatActivity() {
         }
         binding.flashToggle.setImageResource(iconRes)
     }
-
-    // ==================== UI ANIMATIONS ====================
 
     /**
      * Hiển thị focus indicator tại vị trí được tap
@@ -435,8 +423,6 @@ class CameraActivity : AppCompatActivity() {
         binding.captureBorderAnimated.visibility = View.GONE
     }
 
-    // ==================== ERROR HANDLING ====================
-
     /**
      * Xử lý lỗi khi khởi động camera
      */
@@ -459,7 +445,6 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
-    // ==================== NAVIGATION ====================
 
     /**
      * Đóng camera và quay lại màn hình trước
