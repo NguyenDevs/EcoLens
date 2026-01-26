@@ -48,7 +48,7 @@
             app:cardElevation="0dp"
             app:cardBackgroundColor="@color/surface"
             app:strokeWidth="@dimen/border_thin"
-            app:strokeColor="@color/border_light">
+            app:strokeColor="@color/border_normal">
 
         <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"

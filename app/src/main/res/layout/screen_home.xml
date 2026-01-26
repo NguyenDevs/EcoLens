@@ -367,7 +367,6 @@
                             android:clipChildren="false"
                             android:clipToPadding="false"
                             android:nestedScrollingEnabled="false"
-                            android:paddingHorizontal="@dimen/spacing_xxs"
                             tools:itemCount="5"
                             tools:listitem="@layout/item_recent_history" />
 
