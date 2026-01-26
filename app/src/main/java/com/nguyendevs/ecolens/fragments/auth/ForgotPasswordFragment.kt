@@ -33,7 +33,6 @@ class ForgotPasswordFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Initialize handler
         forgotPasswordHandler = ForgotPasswordHandler(requireContext(), lifecycleScope)
 
         setupUI()
@@ -42,17 +41,14 @@ class ForgotPasswordFragment : Fragment() {
     // ==================== UI SETUP ====================
 
     private fun setupUI() {
-        // Back button
         binding.btnBack.setOnClickListener {
             (activity as? AuthActivity)?.navigateBackToLogin()
         }
 
-        // Back to login text
         binding.tvBackToLogin.setOnClickListener {
             (activity as? AuthActivity)?.navigateBackToLogin()
         }
 
-        // Send reset link button
         binding.btnSendResetLink.setOnClickListener {
             val email = binding.etEmail.text.toString().trim()
 
@@ -60,7 +56,6 @@ class ForgotPasswordFragment : Fragment() {
                 email = email,
                 onLoadingChange = { isLoading -> setLoading(isLoading) },
                 onSuccess = {
-                    // Delay để user đọc message, sau đó quay lại login
                     binding.root.postDelayed({
                         (activity as? AuthActivity)?.navigateBackToLogin()
                     }, 2000)
@@ -68,16 +63,12 @@ class ForgotPasswordFragment : Fragment() {
             )
         }
 
-        // Enter key trên keyboard
         binding.etEmail.setOnEditorActionListener { _, _, _ ->
             binding.btnSendResetLink.performClick()
             true
         }
     }
 
-    /**
-     * Bật/tắt trạng thái loading
-     */
     private fun setLoading(isLoading: Boolean) {
         (activity as? AuthActivity)?.setFragmentLoading(isLoading)
         binding.btnSendResetLink.isEnabled = !isLoading

@@ -52,10 +52,6 @@ class LanguageSelectionFragment : Fragment() {
 
     // ==================== UI SETUP ====================
 
-    /**
-     * Cấu hình danh sách ngôn ngữ với adapter
-     * Highlight ngôn ngữ hiện tại được chọn
-     */
     private fun setupLanguageList() {
         val currentLang = languageManager.getLanguage()
 
@@ -85,9 +81,6 @@ class LanguageSelectionFragment : Fragment() {
         }
     }
 
-    /**
-     * Cấu hình click listeners
-     */
     private fun setupListeners() {
         binding.btnBack.setOnClickListener {
             closeFragment()
@@ -115,9 +108,6 @@ class LanguageSelectionFragment : Fragment() {
 
     // ==================== NAVIGATION ====================
 
-    /**
-     * Đóng fragment và quay lại màn hình trước
-     */
     private fun closeFragment() {
         parentFragmentManager.popBackStack()
     }

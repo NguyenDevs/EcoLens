@@ -47,7 +47,6 @@ class HistoryFragment : Fragment() {
 
     private lateinit var adapter: HistoryAdapter
 
-    // Filter & Sort states
     private var currentCategory: CategoryFilter = CategoryFilter.ALL
     private var currentSortOption = HistorySortOption.NEWEST_FIRST
     private var filterStartDate: Long? = null
@@ -102,20 +101,17 @@ class HistoryFragment : Fragment() {
     }
 
     private fun setupClickListeners() {
-        // Category filter chips
         binding.chipAll.setOnClickListener { updateCategoryFilter(CategoryFilter.ALL) }
 
         binding.chipAnimals.setOnClickListener { updateCategoryFilter(CategoryFilter.ANIMALS) }
 
         binding.chipPlants.setOnClickListener { updateCategoryFilter(CategoryFilter.PLANTS) }
 
-        // Sort button - toggle between newest/oldest
         binding.btnSort.setOnClickListener {
             binding.btnSort.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
             toggleSortOption()
         }
-        
-        // Setup Sort Button States (Fade in Primary when clicked)
+
         val context = requireContext()
         val primary = ContextCompat.getColor(context, R.color.primary)
         val surface = ContextCompat.getColor(context, R.color.surface)
@@ -129,13 +125,11 @@ class HistoryFragment : Fragment() {
         binding.btnSort.chipIconTint = ColorStateList(states, intArrayOf(white, secondary))
         binding.btnSort.rippleColor = ColorStateList.valueOf(primary)
 
-        // Date filter button
         binding.btnFilterByDate.setOnClickListener {
             binding.btnFilterByDate.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
             showDateRangePickerDialog()
         }
 
-        // Clear date filter when click on close icon
         binding.btnFilterByDate.setOnCloseIconClickListener { clearDateFilter() }
     }
 
@@ -165,7 +159,6 @@ class HistoryFragment : Fragment() {
             chip.chipBackgroundColor = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.surface))
             chip.setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
             chip.chipIconTint = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.text_secondary))
-            // Reset close icon tint to error/default if needed, though usually hidden when inactive
             chip.closeIconTint = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.error))
             chip.chipStrokeWidth = resources.displayMetrics.density * 1 // 1dp
         }
@@ -177,7 +170,6 @@ class HistoryFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.getHistoryBySortOption(currentSortOption, filterStartDate, filterEndDate)
                 .collectLatest { allList ->
-                    // Apply category filter
                     val filteredList =
                         when (currentCategory) {
                             CategoryFilter.ALL -> allList
@@ -193,7 +185,6 @@ class HistoryFragment : Fragment() {
                                 }
                         }
 
-                    // Update UI
                     if (filteredList.isEmpty()) {
                         binding.rvHistory.visibility = View.GONE
                         binding.emptyStateContainer.visibility = View.VISIBLE
@@ -260,7 +251,6 @@ class HistoryFragment : Fragment() {
         val startDate = Instant.ofEpochMilli(filterStartDate!!).atZone(ZoneId.systemDefault())
         val endDate = Instant.ofEpochMilli(filterEndDate!!).atZone(ZoneId.systemDefault())
 
-        // Update chip text and show close icon
         val dateRange = "${dateFormatter.format(startDate)} - ${dateFormatter.format(endDate)}"
         binding.btnFilterByDate.text = dateRange
         binding.btnFilterByDate.isCloseIconVisible = true
@@ -272,8 +262,6 @@ class HistoryFragment : Fragment() {
     private fun clearDateFilter() {
         filterStartDate = null
         filterEndDate = null
-
-        // Reset chip to default state
         binding.btnFilterByDate.text = getString(R.string.select_date)
         binding.btnFilterByDate.isCloseIconVisible = false
 

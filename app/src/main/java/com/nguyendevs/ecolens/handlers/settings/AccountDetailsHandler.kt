@@ -16,7 +16,6 @@ class AccountDetailsHandler(
 
     private var isAccountDetailsExpanded = false
 
-    /** Toggle expand/collapse account details với smooth animation và staggered delay */
     fun toggleAccountDetails() {
         if (isTransitioning()) return
 
@@ -30,18 +29,15 @@ class AccountDetailsHandler(
         }
     }
 
-    /** Expand animation với staggered delay cho mỗi item */
     private fun expandAccountDetails() {
         binding.dividerUsername.visibility = View.VISIBLE
         binding.dividerChangepassword.visibility = View.VISIBLE
         binding.dividerLinkgoogle.visibility = View.VISIBLE
         binding.dividerDeleteaccount.visibility = View.VISIBLE
 
-        // Show container
         binding.accountDetailsContainer.visibility = View.VISIBLE
         binding.accountDetailsContainer.alpha = 1f
 
-        // Rotate chevron
         binding.ivExpandIcon
                 .animate()
                 .rotation(180f)
@@ -77,7 +73,6 @@ class AccountDetailsHandler(
         }
     }
 
-    /** Collapse animation - thu ngược lên cùng lúc không có delay */
     private fun collapseAccountDetails() {
         binding.accountDetailsContainer
                 .animate()
@@ -90,7 +85,7 @@ class AccountDetailsHandler(
                     binding.dividerLinkgoogle.visibility = View.GONE
                     binding.dividerChangepassword.visibility = View.GONE
                     binding.dividerUsername.visibility = View.GONE
-                    // Hide container
+
                     binding.accountDetailsContainer.visibility = View.GONE
                     binding.accountDetailsContainer.translationY = 0f
 

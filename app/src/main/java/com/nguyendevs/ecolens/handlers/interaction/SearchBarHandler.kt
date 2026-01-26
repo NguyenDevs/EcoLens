@@ -174,17 +174,11 @@ class SearchBarHandler(
         }
     }
 
-    /**
-     * Hiển thị soft keyboard
-     */
     private fun showKeyboard() {
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.showSoftInput(etSearchQuery, InputMethodManager.SHOW_IMPLICIT)
     }
 
-    /**
-     * Ẩn soft keyboard
-     */
     private fun hideKeyboard() {
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(etSearchQuery.windowToken, 0)

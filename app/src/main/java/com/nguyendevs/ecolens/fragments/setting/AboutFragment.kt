@@ -39,9 +39,6 @@ class AboutFragment : Fragment() {
 
     // ==================== UI SETUP ====================
 
-    /**
-     * Thiết lập click listeners cho UI elements
-     */
     private fun setupClickListeners() {
         binding.btnBack.setOnClickListener {
             parentFragmentManager.popBackStack()

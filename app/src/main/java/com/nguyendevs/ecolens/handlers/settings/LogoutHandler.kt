@@ -23,7 +23,6 @@ import kotlinx.coroutines.withContext
  */
 class LogoutHandler(private val activity: AppCompatActivity) {
 
-    /** Hiển thị dialog xác nhận logout */
     fun showLogoutConfirmDialog() {
         AlertDialog.Builder(activity)
                 .setTitle(R.string.dialog_logout_title)
@@ -33,7 +32,6 @@ class LogoutHandler(private val activity: AppCompatActivity) {
                 .show()
     }
 
-    /** Hiển thị dialog xác nhận xóa tài khoản */
     fun showDeleteAccountConfirmDialog() {
         AlertDialog.Builder(activity)
                 .setTitle(R.string.dialog_delete_account_title)
@@ -43,7 +41,6 @@ class LogoutHandler(private val activity: AppCompatActivity) {
                 .show()
     }
 
-    /** Thực hiện xóa tài khoản */
     private fun deleteAccount() {
         activity.lifecycleScope.launch {
             try {
@@ -76,7 +73,6 @@ class LogoutHandler(private val activity: AppCompatActivity) {
         }
     }
 
-    /** Thực hiện logout Xóa toàn bộ dữ liệu local, Firebase, Google Sign-In và SharedPreferences */
     private fun logout() {
         activity.lifecycleScope.launch {
             withContext(Dispatchers.IO) {

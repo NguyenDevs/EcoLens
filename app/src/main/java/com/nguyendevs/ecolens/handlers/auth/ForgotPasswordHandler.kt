@@ -31,7 +31,6 @@ class ForgotPasswordHandler(
         onLoadingChange: (Boolean) -> Unit,
         onSuccess: () -> Unit
     ) {
-        // Validation
         if (email.isBlank()) {
             Toast.makeText(
                 context,
@@ -72,16 +71,10 @@ class ForgotPasswordHandler(
         }
     }
 
-    /**
-     * Kiểm tra email có đúng format không
-     */
     private fun isValidEmail(email: String): Boolean {
         return Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 
-    /**
-     * Xử lý các lỗi từ Firebase
-     */
     private fun handleError(exception: Exception) {
         val errorMessage = when {
             exception.message?.contains("network", ignoreCase = true) == true -> {

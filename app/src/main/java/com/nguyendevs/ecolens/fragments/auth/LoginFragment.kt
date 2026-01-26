@@ -46,23 +46,19 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Initialize repository and managers
         userRepository = UserRepository()
         authUIManager = AuthUIManager(binding, requireContext())
         loginHandler = LoginHandler(requireContext(), userRepository, lifecycleScope)
         registerHandler = RegisterHandler(requireContext(), userRepository, lifecycleScope)
 
-        // Cast requireActivity() to AppCompatActivity
         googleSignInHandler = GoogleSignInHandler(
             this,
             userRepository,
             lifecycleScope
         )
 
-        // Setup video logo first
         setupVideoLogo()
 
-        // Setup UI
         binding.root.post {
             setupUI()
         }

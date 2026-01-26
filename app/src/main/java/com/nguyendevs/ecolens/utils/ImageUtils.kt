@@ -39,14 +39,12 @@ object ImageUtils {
             inputStream = context.contentResolver.openInputStream(uri)
                 ?: throw FileNotFoundException("Cannot open input stream for URI: $uri")
 
-            // Đọc kích thước ảnh mà không load toàn bộ vào bộ nhớ
             val options = BitmapFactory.Options().apply {
                 inJustDecodeBounds = true
             }
             BitmapFactory.decodeStream(inputStream, null, options)
             inputStream.close()
 
-            // Tính toán inSampleSize để giảm kích thước ảnh
             var inSampleSize = 1
             if (options.outHeight > maxDimension || options.outWidth > maxDimension) {
                 val halfHeight: Int = options.outHeight / 2
@@ -56,7 +54,6 @@ object ImageUtils {
                 }
             }
 
-            // Decode ảnh với kích thước đã giảm
             inputStream = context.contentResolver.openInputStream(uri)
             val scaledOptions = BitmapFactory.Options().apply {
                 inJustDecodeBounds = false

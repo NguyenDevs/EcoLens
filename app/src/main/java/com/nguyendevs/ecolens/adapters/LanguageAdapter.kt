@@ -34,9 +34,6 @@ class LanguageAdapter(
 
     override fun getItemCount() = languages.size
 
-    /**
-     * Cập nhật danh sách ngôn ngữ
-     */
     fun updateList(newLanguages: List<Language>) {
         languages = newLanguages
         notifyDataSetChanged()
@@ -62,10 +59,6 @@ class LanguageAdapter(
             }
         }
 
-        /**
-         * Bind dữ liệu ngôn ngữ vào view
-         * Tự động thay đổi màu stroke và text dựa vào trạng thái selected
-         */
         fun bind(language: Language) {
             binding.ivFlag.setImageResource(language.flagDrawable)
             binding.tvLanguageName.text = language.name

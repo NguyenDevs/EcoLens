@@ -132,7 +132,6 @@ class HistoryDetailFragment : Fragment() {
         val popup = PopupMenu(requireContext(), anchor)
         popup.menuInflater.inflate(R.menu.menu_history_detail, popup.menu)
 
-        // Force show icons via reflection (giống ChatFragment)
         runCatching {
             val fieldMPopup = PopupMenu::class.java.getDeclaredField("mPopup")
             fieldMPopup.isAccessible = true

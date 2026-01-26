@@ -24,9 +24,6 @@ class ImageZoomHandler(
 
     // ==================== SETUP ====================
 
-    /**
-     * Cấu hình click listeners cho zoom buttons và fullscreen container
-     */
     private fun setupClickListeners() {
         btnZoomIn.setOnClickListener {
             currentImageUri?.let { uri ->

@@ -43,9 +43,6 @@ abstract class BaseAuthActivity : AppCompatActivity() {
         sharedPref.edit().putBoolean("remember_me", isRemember).apply()
     }
 
-    /**
-     * Set loading state - chỉ điều khiển loading overlay
-     */
     protected fun setLoading(isLoading: Boolean) {
         binding.loadingOverlay.visibility = if (isLoading) View.VISIBLE else View.GONE
     }

@@ -58,9 +58,6 @@ class MarkdownProcessor {
         return result
     }
 
-    /**
-     * Tô màu cho trạng thái bảo tồn dựa trên mức độ nguy cấp
-     */
     private fun colorizeConservationStatus(text: String, isVietnamese: Boolean): String {
         val statusMap = if (isVietnamese) {
             mapOf(

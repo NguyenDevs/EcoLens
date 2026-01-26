@@ -14,7 +14,6 @@ import kotlinx.coroutines.launch
 
 /**
  * Handler tạo hiệu ứng loading với animated dots (...)
- * Dots sẽ xuất hiện tuần tự: . .. ... . .. ...
  */
 class LoadingAnimationHandler(
     private val tvLoading: TextView,
@@ -27,10 +26,6 @@ class LoadingAnimationHandler(
 
     // ==================== PUBLIC METHODS ====================
 
-    /**
-     * Set text resource ID cho loading message
-     * Tự động restart animation nếu đang chạy
-     */
     fun setText(resId: Int) {
         if (currentTextResId != resId) {
             currentTextResId = resId
@@ -41,10 +36,6 @@ class LoadingAnimationHandler(
         }
     }
 
-    /**
-     * Bắt đầu animation loading dots
-     * Sẽ loop vô hạn cho đến khi gọi stop()
-     */
     fun start() {
         if (loadingTextJob?.isActive == true) return
 
@@ -62,9 +53,6 @@ class LoadingAnimationHandler(
         }
     }
 
-    /**
-     * Dừng animation loading
-     */
     fun stop() {
         loadingTextJob?.cancel()
         loadingTextJob = null
@@ -72,10 +60,6 @@ class LoadingAnimationHandler(
 
     // ==================== PRIVATE METHODS ====================
 
-    /**
-     * Animate số lượng dots hiển thị
-     * Sử dụng transparent span để ẩn dots
-     */
     private fun animateDots(spannable: SpannableString, fullText: String, loopCount: Int) {
         spannable.removeSpan(transparentSpan)
 

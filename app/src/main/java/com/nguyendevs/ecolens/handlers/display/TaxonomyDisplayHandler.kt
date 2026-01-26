@@ -19,13 +19,11 @@ class TaxonomyDisplayHandler(
     private val infoBinding
         get() = binding
 
-    /** Chuẩn bị container taxonomy với shimmer loading. */
     fun prepareTaxonomyContainer() {
         val container = infoBinding.taxonomyContainer
         container.visibility = View.VISIBLE
         container.alpha = 1f
 
-        // Ensure rows are invisible but take up space so container has height for shimmer
         val rows =
                 listOf(
                         infoBinding.rowKingdom,
@@ -47,7 +45,6 @@ class TaxonomyDisplayHandler(
         shimmerEffectHandler.startTaxonomyShimmer(container)
     }
 
-    /** Hiển thị thông tin taxonomy với animation waterfall cascade. */
     fun displayTaxonomyWaterfall(info: SpeciesInfo) {
         val container = infoBinding.taxonomyContainer
         container.visibility = View.VISIBLE
@@ -94,12 +91,10 @@ class TaxonomyDisplayHandler(
         }
     }
 
-    /** Dừng hiệu ứng shimmer loading. */
     fun stopShimmer() {
         shimmerEffectHandler.stopTaxonomyShimmer(infoBinding.taxonomyContainer)
     }
 
-    /** Xóa trạng thái và reset tất cả các hàng taxonomy. */
     fun clearDisplayedRows() {
         displayedRows.clear()
 

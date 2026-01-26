@@ -8,10 +8,6 @@ import android.view.animation.OvershootInterpolator
 
 /**
  * Handler quản lý các hiệu ứng animation cho Views trong ứng dụng.
- *
- * Class này cung cấp các phương thức để tạo các hiệu ứng animation phổ biến như slide, fade, scale
- * và rotation. Được thiết kế để tái sử dụng và dễ dàng áp dụng các animation nhất quán trong toàn
- * bộ ứng dụng.
  */
 class AnimationHandler {
     private var confidenceRotationAnimator: ObjectAnimator? = null
@@ -43,7 +39,7 @@ class AnimationHandler {
     }
 
     /**
-     * Animation fade in đơn giản.
+     * Animation fade in.
      *
      * Tăng dần độ trong suốt của view từ trạng thái hiện tại đến 1.
      *

@@ -42,7 +42,6 @@ class SpeciesInfoHandler(
         currentImageUri = uri
     }
 
-    // Các handler con
     private val animationHandler = AnimationHandler()
     private val shimmerEffectHandler = ShimmerEffectHandler(context)
     private val textFormatter = TextFormatter()

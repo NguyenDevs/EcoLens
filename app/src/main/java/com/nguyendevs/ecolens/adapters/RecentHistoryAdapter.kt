@@ -108,7 +108,7 @@ class RecentHistoryAdapter(private val onItemClick: (HistoryEntry) -> Unit) :
             binding.tvDateLabel.text =
                     when {
                         isToday -> context.getString(R.string.today).uppercase()
-                        isYesterday -> "HÔM QUA"
+                        isYesterday -> context.getString(R.string.yesterday).uppercase()
                         ChronoUnit.DAYS.between(dateTime.toLocalDate(), now.toLocalDate()) < 7 -> {
                             dateTime.format(DateTimeFormatter.ofPattern("EEEE"))
                         }

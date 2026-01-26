@@ -79,7 +79,6 @@ class NavigationHandler(
         transition.duration = TRANSITION_DURATION_MS
         TransitionManager.beginDelayedTransition(binding.mainContent, transition)
 
-        // Hide all containers
         binding.homeContainer.root.visibility = View.GONE
         binding.historyContainer.visibility = View.GONE
         binding.myGardenContainer.visibility = View.GONE
@@ -88,7 +87,6 @@ class NavigationHandler(
         binding.fabSpeak.visibility = View.GONE
         binding.fabMute.visibility = View.GONE
 
-        // Show bottom nav and camera FAB
         binding.bottomNavigation.visibility = View.VISIBLE
         binding.fabCamera.visibility = View.VISIBLE
 
@@ -97,7 +95,6 @@ class NavigationHandler(
                 binding.homeContainer.root.visibility = View.VISIBLE
                 binding.searchBarContainer.visibility = View.VISIBLE
 
-                // Check UI state for speaker FAB visibility
                 uiStateChecker?.let { checker ->
                     val (loadingStage, isSpeaking, hasInfo) = checker()
                     val isComplete = loadingStage == LoadingStage.COMPLETE
@@ -133,6 +130,5 @@ class NavigationHandler(
         }
     }
 
-    /** Check if current tab is Home */
     fun isHomeTab(): Boolean = binding.bottomNavigation.selectedItemId == R.id.nav_home
 }

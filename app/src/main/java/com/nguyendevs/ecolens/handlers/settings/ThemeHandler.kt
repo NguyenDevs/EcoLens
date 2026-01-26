@@ -68,7 +68,7 @@ class ThemeHandler(
         }
     }
 
-    /** Toggle dark mode từ bên ngoài (click vào option row) */
+    /** Toggle dark mode từ bên ngoài*/
     fun toggleDarkMode() {
         if (!isTransitioning) {
             binding.switchDarkMode.toggle()

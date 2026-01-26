@@ -37,7 +37,7 @@ class EcoLensApplication : Application() {
     }
 
     /**
-     * Khởi tạo Firebase persistence với double-checked locking. Chỉ gọi một lần trong vòng đời app.
+     * Khởi tạo Firebase persistence với double-checked locking.
      */
     private fun initFirebasePersistence() {
         if (!firebaseInitialized) {
