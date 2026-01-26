@@ -9,8 +9,6 @@
         android:background="@color/black"
         tools:context=".activities.CameraActivity">
 
-    <!-- MODERN CAMERA ACTIVITY -->
-
     <!-- CAMERA PREVIEW -->
     <androidx.camera.view.PreviewView
             android:id="@+id/viewFinder"

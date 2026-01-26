@@ -8,7 +8,6 @@
         android:background="@color/background"
         tools:context=".MainActivity">
 
-    <!-- MAIN CONTENT CONTAINER -->
     <FrameLayout
             android:id="@+id/mainContent"
             android:layout_width="match_parent"
@@ -37,7 +36,7 @@
                 android:visibility="gone"/>
     </FrameLayout>
 
-    <!-- SEARCH BAR - Moved outside mainContent so it's always accessible -->
+    <!-- SEARCH BAR -->
     <com.google.android.material.card.MaterialCardView
             android:id="@+id/searchBarContainer"
             android:layout_width="50dp"
@@ -142,7 +141,8 @@
             app:layout_anchorGravity="top|end"
             android:layout_gravity="top|end"
             android:visibility="gone"/>
-    <!-- BOTTOM NAVIGATION - Floating Island Style with Integrated Camera -->
+
+    <!-- BOTTOM NAVIGATION -->
     <com.google.android.material.card.MaterialCardView
             android:id="@+id/bottomNavContainer"
             android:layout_width="match_parent"
@@ -174,7 +174,7 @@
                     android:paddingTop="@dimen/spacing_xxs"
                     android:paddingBottom="@dimen/spacing_xs"/>
 
-            <!-- Camera FAB - Centered in Navigation -->
+            <!-- Camera FAB -->
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/fabCamera"
                     android:layout_width="56dp"
@@ -217,7 +217,7 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_gravity="bottom|end"
-                android:layout_margin="@dimen/spacing_xl"
+                android:layout_margin="@dimen/spacing_md"
                 android:src="@drawable/ic_zoomout"
                 android:background="@drawable/rounded_dark_bg"
                 android:padding="@dimen/spacing_sm"
