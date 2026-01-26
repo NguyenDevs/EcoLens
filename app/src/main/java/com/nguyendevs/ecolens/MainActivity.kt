@@ -59,7 +59,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var speciesInfoHandler: SpeciesInfoHandler
     private lateinit var sharedPreferences: SharedPreferences
 
-    // New Handlers
     private lateinit var homeScreenHandler: HomeScreenHandler
     private lateinit var navigationHandler: NavigationHandler
 
@@ -71,15 +70,9 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val PREF_NAME = "EcoLensPrefs"
-        private const val KEY_LAST_NAV_ITEM = "last_nav_item"
-
-        // UI Constants
-        private const val IMAGE_PREVIEW_HEIGHT_DP = 290
         private const val TRANSITION_ANIMATION_DURATION = 400L
         private const val PRELOAD_DELAY_MS = 500L
-        private const val LOADING_STOP_DELAY_MS = 500L
 
-        /** Bitmap dùng cho transition animation. Sử dụng WeakReference tránh memory leak. */
         private var transitionBitmapRef: WeakReference<Bitmap>? = null
 
         var transitionBitmap: Bitmap?
@@ -118,8 +111,6 @@ class MainActivity : AppCompatActivity() {
         loadThemePreference()
         super.onCreate(savedInstanceState)
 
-        // Firebase persistence đã được khởi tạo trong EcoLensApplication
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -137,7 +128,6 @@ class MainActivity : AppCompatActivity() {
         initHandlers()
         initManagers()
 
-        // Setup Main Handlers
         homeScreenHandler.setup()
         navigationHandler.setup()
 
@@ -145,7 +135,6 @@ class MainActivity : AppCompatActivity() {
         setupObservers()
         setupBackNavigation()
 
-        // Initialize Navigation State
         val navigateToSettings = intent.getBooleanExtra("navigate_to_settings", false)
         val lastNavItem = navigationHandler.restoreLastTab(navigateToSettings)
 
@@ -166,9 +155,6 @@ class MainActivity : AppCompatActivity() {
         preloadFragments()
     }
 
-    /**
-     * Preload các fragment để cải thiện hiệu suất Sử dụng IdleHandler để load khi UI thread rảnh
-     */
     private fun preloadFragments() {
         Looper.myQueue().addIdleHandler {
             if (!isDestroyed && !isFinishing) {
@@ -190,7 +176,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
-            false // Remove handler sau khi thực thi
+            false
         }
     }
 
@@ -198,7 +184,6 @@ class MainActivity : AppCompatActivity() {
         super.onConfigurationChanged(newConfig)
     }
 
-    /** Xử lý transition animation từ splash screen Sử dụng WeakReference để tránh memory leak */
     private fun handleTransitionAnimation() {
         val bitmap = transitionBitmap ?: return
 
@@ -222,7 +207,6 @@ class MainActivity : AppCompatActivity() {
                 .setInterpolator(AccelerateDecelerateInterpolator())
                 .withEndAction {
                     rootView.removeView(overlay)
-                    // Recycle bitmap nếu còn available
                     transitionBitmap?.let { bmp ->
                         if (!bmp.isRecycled) {
                             bmp.recycle()
@@ -300,7 +284,6 @@ class MainActivity : AppCompatActivity() {
                         { viewModel.retryIdentification() }
                 )
 
-        // Initialize Main Handlers
         homeScreenHandler =
                 HomeScreenHandler(this, binding) { entry -> navigateToHistoryDetail(entry) }
 
@@ -352,13 +335,10 @@ class MainActivity : AppCompatActivity() {
     private fun toggleHomeState(showResults: Boolean) {
         val homeRoot = binding.homeContainer.root as ViewGroup
 
-        // Chỉ chạy animation khi quay lại màn hình Home (showResults = false).
-        // Khi hiển thị kết quả (showResults = true), ẩn ngay lập tức để tránh delay.
         if (!showResults) {
             androidx.transition.TransitionManager.beginDelayedTransition(homeRoot)
         }
 
-        // Home Screen Elements
         val heroCard = homeRoot.findViewById<View>(R.id.heroCard)
         val imgHeroFull = homeRoot.findViewById<android.widget.ImageView>(R.id.imgHeroFull)
         val sectionQuickExplore = homeRoot.findViewById<View>(R.id.sectionQuickExplore)
@@ -366,14 +346,12 @@ class MainActivity : AppCompatActivity() {
         val tvGreeting = homeRoot.findViewById<TextView>(R.id.tvGreeting)
         val tvAppTitle = homeRoot.findViewById<TextView>(R.id.tvAppTitle)
 
-        // Result/Loading Elements
         val progressBarHero = homeRoot.findViewById<View>(R.id.progressBarHero)
         val tvLoadingText = homeRoot.findViewById<View>(R.id.tvLoadingText)
         val speciesInfoCard = homeRoot.findViewById<View>(R.id.speciesInfoCard)
         val errorCard = homeRoot.findViewById<View>(R.id.errorCard)
         val loadingCard = homeRoot.findViewById<View>(R.id.loadingCard)
 
-        // Hero Content Elements (to hide when showing result)
         val tvHeroBadge = homeRoot.findViewById<View>(R.id.tvHeroBadge)
         val tvHeroTitle = homeRoot.findViewById<View>(R.id.tvHeroTitle)
         val tvHeroSubtitle = homeRoot.findViewById<View>(R.id.tvHeroSubtitle)
@@ -382,26 +360,21 @@ class MainActivity : AppCompatActivity() {
         val zoomControls = homeRoot.findViewById<View>(R.id.zoomControls)
 
         if (showResults) {
-            // HIDE Standard Home Sections
             sectionQuickExplore?.visibility = View.GONE
             sectionRecent?.visibility = View.GONE
 
-            // MODIFY Hero Card
             heroCard?.visibility = View.VISIBLE
             imgHeroFull?.visibility = View.VISIBLE
             zoomControls?.visibility = View.VISIBLE
 
-            // Hide Hero Default Content
             tvHeroBadge?.visibility = View.GONE
             tvHeroTitle?.visibility = View.GONE
             tvHeroSubtitle?.visibility = View.GONE
             btnStartNow?.visibility = View.GONE
             imgHeroDecor?.visibility = View.GONE
 
-            // Hide legacy loading card
             loadingCard?.visibility = View.GONE
 
-            // Load Image if URI exists
             this.imageUri?.let { uri ->
                 val path = uri.path
                 val loadModel =
@@ -409,24 +382,20 @@ class MainActivity : AppCompatActivity() {
                             java.io.File(path).takeIf { it.exists() } ?: uri
                         } else uri
 
-                // Use centerCrop to fill the card
                 com.bumptech.glide.Glide.with(this)
                         .load(loadModel)
                         .transition(DrawableTransitionOptions.withCrossFade())
                         .centerCrop()
                         .into(imgHeroFull)
 
-                // Update Zoom Handler
                 imageZoomHandler.setImageUri(uri)
             }
         } else {
-            // RESTORE Home Content
             sectionQuickExplore?.visibility = View.VISIBLE
             sectionRecent?.visibility = View.VISIBLE
             tvGreeting?.visibility = View.VISIBLE
             tvAppTitle?.visibility = View.VISIBLE
 
-            // RESTORE Hero Card
             heroCard?.visibility = View.VISIBLE
             imgHeroFull?.visibility = View.GONE
             zoomControls?.visibility = View.GONE
@@ -437,14 +406,12 @@ class MainActivity : AppCompatActivity() {
             btnStartNow?.visibility = View.VISIBLE
             imgHeroDecor?.visibility = View.VISIBLE
 
-            // Hide result stuff
             progressBarHero?.visibility = View.GONE
             tvLoadingText?.visibility = View.GONE
             speciesInfoCard?.visibility = View.GONE
             errorCard?.visibility = View.GONE
             loadingCard?.visibility = View.GONE
 
-            // Reset FAB state
             binding.fabCamera.isClickable = true
             binding.fabCamera.alpha = 1.0f
         }
@@ -469,10 +436,8 @@ class MainActivity : AppCompatActivity() {
         this.imageUri = uri
         speciesInfoHandler.setImageUri(uri)
 
-        // SWITCH STATE: Hide Home content, show loading
         toggleHomeState(showResults = true)
 
-        // Trigger identification
         viewModel.identifySpecies(uri, languageManager.getLanguage())
     }
 
@@ -547,19 +512,15 @@ class MainActivity : AppCompatActivity() {
         val tvLoadingText = homeRoot.findViewById<TextView>(R.id.tvLoadingText)
         val loadingCard = homeRoot.findViewById<View>(R.id.loadingCard)
 
-        // Hide legacy loading card
         loadingCard?.isVisible = false
 
-        // Ensure we are in the correct state
         if (isLoading || state.speciesInfo != null || error != null) {
             toggleHomeState(showResults = true)
         } else if (loadingStage == LoadingStage.NONE && state.speciesInfo == null && error == null
         ) {
-            // Reset to home if nothing is happening
             toggleHomeState(showResults = false)
         }
 
-        // Manage Progress Bar and Loading Text
         if (isLoading) {
             progressBarHero?.isVisible = true
             tvLoadingText?.isVisible = true
@@ -577,7 +538,6 @@ class MainActivity : AppCompatActivity() {
 
             loadingAnimationHandler.start()
         } else {
-            // Not loading
             progressBarHero?.isVisible = false
 
             if (isPhase2) {
@@ -606,7 +566,6 @@ class MainActivity : AppCompatActivity() {
             binding.homeContainer.speciesInfoCard.root.isVisible = false
             binding.fabSpeak.isVisible = false
 
-            // Allow retry or reset
             binding.fabCamera.isClickable = true
             binding.fabCamera.alpha = 1.0f
         } else if (loadingStage == LoadingStage.NONE && state.speciesInfo == null) {
@@ -622,7 +581,6 @@ class MainActivity : AppCompatActivity() {
             val errorCard = homeRoot.findViewById<View>(R.id.errorCard)
             if (errorCard != null) errorCard.isVisible = false
 
-            // Pass imageUri to display it in the card if feasible
             speciesInfoHandler.displaySpeciesInfo(state.speciesInfo, loadingStage)
 
             if (loadingStage == LoadingStage.COMPLETE && binding.fabMute.visibility != View.VISIBLE

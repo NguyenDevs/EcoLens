@@ -25,7 +25,6 @@ class RegisterHandler(
         onLoadingChange: (Boolean) -> Unit,
         onSuccess: () -> Unit
     ) {
-        // Validation
         if (email.isBlank() || password.isBlank()) {
             Toast.makeText(
                 context,

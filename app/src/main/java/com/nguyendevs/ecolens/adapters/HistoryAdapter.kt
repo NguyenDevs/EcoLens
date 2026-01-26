@@ -34,10 +34,6 @@ class HistoryAdapter(
 
     // ==================== ADAPTER METHODS ====================
 
-    /**
-     * Cập nhật danh sách với DiffUtil để tối ưu performance Tự động tính toán và chỉ update các
-     * item thay đổi
-     */
     fun updateList(newList: List<HistoryEntry>) {
         val diffCallback =
                 object : DiffUtil.Callback() {
@@ -127,7 +123,6 @@ class HistoryAdapter(
 
     override fun getItemCount(): Int = historyList.size
 
-    /** Kiểm tra hai timestamp có cùng ngày hay không */
     private fun isSameDay(timestamp1: Long, timestamp2: Long): Boolean {
         val date1 = Instant.ofEpochMilli(timestamp1).atZone(ZoneId.systemDefault()).toLocalDate()
         val date2 = Instant.ofEpochMilli(timestamp2).atZone(ZoneId.systemDefault()).toLocalDate()
@@ -139,10 +134,6 @@ class HistoryAdapter(
     inner class HistoryViewHolder(private val binding: ItemSpeciesHistoryBinding) :
             RecyclerView.ViewHolder(binding.root) {
 
-        /**
-         * Bind dữ liệu lịch sử vào view Tự động xử lý rounded corners và border dựa vào vị trí
-         * trong ngày
-         */
         fun bind(
                 entry: HistoryEntry,
                 isFirstItemOfDay: Boolean,
@@ -173,9 +164,6 @@ class HistoryAdapter(
             binding.itemContainer.setOnClickListener { clickListener(entry) }
         }
 
-        /**
-         * Load ảnh từ local hoặc remote với Glide Ưu tiên local path trước, fallback về remote path
-         */
         private fun loadImage(entry: HistoryEntry) {
             val localPath = entry.localImagePath
             var loadModel: Any? = null
@@ -206,7 +194,6 @@ class HistoryAdapter(
                     .into(binding.ivHistoryImage)
         }
 
-        /** Setup date header nếu là item đầu tiên trong ngày */
         private fun setupDateHeader(isFirstItemOfDay: Boolean, dateTime: java.time.ZonedDateTime) {
             if (isFirstItemOfDay) {
                 binding.tvDateHeader.text = dateFormatter.format(dateTime)
@@ -217,10 +204,7 @@ class HistoryAdapter(
         }
 
         private fun setupCardAppearance(isFirstItemOfDay: Boolean, isLastItemOfDay: Boolean) {
-            // Hiển thị divider cho các items không phải đầu tiên trong ngày
             binding.divider.visibility = if (!isFirstItemOfDay) View.VISIBLE else View.GONE
-
-            // Set background drawable tùy theo vị trí
             val backgroundRes =
                     when {
                         isFirstItemOfDay && isLastItemOfDay -> R.drawable.bg_history_item_single

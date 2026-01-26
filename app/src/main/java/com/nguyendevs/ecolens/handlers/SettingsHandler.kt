@@ -24,14 +24,12 @@ class SettingsHandler(
 
     private var isTransitioning = false
 
-    // Sub-handlers
     private val themeHandler: ThemeHandler
     private val accountDetailsHandler: AccountDetailsHandler
     private val logoutHandler: LogoutHandler
     private val socialLinksHandler: SocialLinksHandler
 
     init {
-        // Initialize sub-handlers
         themeHandler =
                 ThemeHandler(
                         activity = activity,
@@ -63,18 +61,14 @@ class SettingsHandler(
 
     /** Cấu hình tất cả click listeners cho settings options */
     private fun setupClickListeners() {
-        // Social links and navigation (handled by SocialLinksHandler)
         socialLinksHandler.setupClickListeners()
 
-        // Dark mode toggle
         binding.darkModeOption.setOnClickListener { themeHandler.toggleDarkMode() }
 
-        // Account Details Expansion
         binding.accountDetailsOption.setOnClickListener {
             accountDetailsHandler.toggleAccountDetails()
         }
 
-        // Account Detail Options (Coming soon features)
         binding.changeUsernameOption.setOnClickListener {
             Toast.makeText(activity, "Change Username - Coming soon", Toast.LENGTH_SHORT).show()
         }
@@ -87,7 +81,6 @@ class SettingsHandler(
             Toast.makeText(activity, "Link Google Account - Coming soon", Toast.LENGTH_SHORT).show()
         }
 
-        // Delete account and logout (handled by LogoutHandler)
         binding.deleteAccountOption.setOnClickListener {
             logoutHandler.showDeleteAccountConfirmDialog()
         }
@@ -97,7 +90,6 @@ class SettingsHandler(
 
     // ==================== PUBLIC METHODS ====================
 
-    /** Cập nhật hiển thị ngôn ngữ hiện tại */
     fun updateLanguageDisplay() {
         socialLinksHandler.updateLanguageDisplay()
     }

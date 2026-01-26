@@ -56,9 +56,6 @@ class CameraActivity : AppCompatActivity() {
     private var cameraControl: CameraControl? = null
     private var cameraInfo: CameraInfo? = null
 
-    /**
-     * Activity result launcher để chọn ảnh từ thư viện
-     */
     private val selectImageFromGalleryResult = registerForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -96,9 +93,6 @@ class CameraActivity : AppCompatActivity() {
         stopBorderAnimation()
     }
 
-    /**
-     * Thiết lập các click listeners cho buttons
-     */
     private fun setupClickListeners() {
         binding.captureButton.setOnClickListener {
             performHapticFeedback()
@@ -129,9 +123,6 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Thiết lập pinch-to-zoom và tap-to-focus
-     */
     @SuppressLint("ClickableViewAccessibility")
     private fun setupZoomAndFocus() {
         val listener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
@@ -155,9 +146,6 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Khởi động camera với cấu hình preview và image capture
-     */
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
@@ -202,9 +190,6 @@ class CameraActivity : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
-    /**
-     * Chuyển đổi giữa camera trước và sau
-     */
     private fun toggleCamera() {
         lensFacing = if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
             CameraSelector.LENS_FACING_BACK
@@ -214,9 +199,6 @@ class CameraActivity : AppCompatActivity() {
         startCamera()
     }
 
-    /**
-     * Thực hiện focus tại vị trí được tap
-     */
     private fun performFocus(x: Float, y: Float) {
         val factory = binding.viewFinder.meteringPointFactory
         val point = factory.createPoint(x, y)
@@ -228,9 +210,6 @@ class CameraActivity : AppCompatActivity() {
         showFocusIndicator(x, y)
     }
 
-    /**
-     * Chụp ảnh và lưu vào internal storage
-     */
     private fun takePhoto() {
         val imageCapture = imageCapture ?: return
 
@@ -261,9 +240,6 @@ class CameraActivity : AppCompatActivity() {
             })
     }
 
-    /**
-     * Xử lý ảnh sau khi chụp: lưu vào internal và public storage
-     */
     private fun handleCapturedImage(photoFile: File) {
         val internalPath = ImageUtils.saveFileToInternalStorage(this@CameraActivity, photoFile)
         ImageUtils.saveImageToPublicStorage(this@CameraActivity, photoFile)
@@ -289,16 +265,10 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Mở thư viện để chọn ảnh
-     */
     private fun openGallery() {
         selectImageFromGalleryResult.launch("image/*")
     }
 
-    /**
-     * Xử lý ảnh được chọn từ thư viện
-     */
     private fun handleSelectedImage(uri: Uri) {
         try {
             val tempFile = ImageUtils.uriToFile(this, uri, 1080)
@@ -323,9 +293,6 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Bật/tắt flash
-     */
     private fun toggleFlash() {
         val imageCapture = imageCapture ?: return
         val currentMode = imageCapture.flashMode
@@ -339,9 +306,6 @@ class CameraActivity : AppCompatActivity() {
         updateFlashIcon(newMode)
     }
 
-    /**
-     * Cập nhật icon flash dựa trên mode
-     */
     private fun updateFlashIcon(mode: Int) {
         val iconRes = when (mode) {
             ImageCapture.FLASH_MODE_ON -> R.drawable.ic_lightning
@@ -350,9 +314,6 @@ class CameraActivity : AppCompatActivity() {
         binding.flashToggle.setImageResource(iconRes)
     }
 
-    /**
-     * Hiển thị focus indicator tại vị trí được tap
-     */
     private fun showFocusIndicator(x: Float, y: Float) {
         binding.focusIndicator.apply {
             animate().cancel()
@@ -380,16 +341,10 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Haptic feedback khi nhấn nút chụp
-     */
     private fun performHapticFeedback() {
         binding.captureButton.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
     }
 
-    /**
-     * Animation thu nhỏ/phóng to nút chụp khi nhấn
-     */
     private fun animateCaptureButton() {
         binding.captureButton.animate()
             .scaleX(0.85f)
@@ -405,27 +360,18 @@ class CameraActivity : AppCompatActivity() {
             .start()
     }
 
-    /**
-     * Bắt đầu animation xoay vòng tròn border
-     */
     private fun startBorderAnimation() {
         rotateAnimation = AnimationUtils.loadAnimation(this, R.anim.rotate_infinite)
         binding.captureBorderAnimated.visibility = View.VISIBLE
         binding.captureBorderAnimated.startAnimation(rotateAnimation)
     }
 
-    /**
-     * Dừng animation border
-     */
     private fun stopBorderAnimation() {
         rotateAnimation?.cancel()
         binding.captureBorderAnimated.clearAnimation()
         binding.captureBorderAnimated.visibility = View.GONE
     }
 
-    /**
-     * Xử lý lỗi khi khởi động camera
-     */
     private fun handleCameraError(exc: Exception) {
         if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
             Toast.makeText(
@@ -445,10 +391,6 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
-
-    /**
-     * Đóng camera và quay lại màn hình trước
-     */
     @Suppress("DEPRECATION")
     private fun closeCamera() {
         finish()

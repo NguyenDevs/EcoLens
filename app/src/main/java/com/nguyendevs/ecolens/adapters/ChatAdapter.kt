@@ -29,9 +29,6 @@ class ChatAdapter(
     private val actionListener: OnChatActionListener
 ) : RecyclerView.Adapter<ChatAdapter.ChatViewHolder>() {
 
-    /**
-     * Interface để xử lý các action trên tin nhắn
-     */
     interface OnChatActionListener {
         fun onCopy(text: String)
         fun onShare(text: String)
@@ -88,10 +85,6 @@ class ChatAdapter(
 
     override fun getItemCount(): Int = messages.size
 
-    /**
-     * Cập nhật danh sách tin nhắn với tối ưu hóa notify
-     * Chỉ notify các item thay đổi thay vì toàn bộ list
-     */
     fun submitList(newMessages: List<ChatMessage>) {
         val oldSize = messages.size
         val newSize = newMessages.size
@@ -127,18 +120,12 @@ class ChatAdapter(
         private var loopCount = 0
         private var cursorAnimator: ValueAnimator? = null
 
-        /**
-         * Lấy màu từ theme hiện tại
-         */
         private fun getThemeColor(attr: Int): Int {
             val typedValue = TypedValue()
             itemView.context.theme.resolveAttribute(attr, typedValue, true)
             return typedValue.data
         }
 
-        /**
-         * Runnable tạo hiệu ứng loading với dấu ba chấm
-         */
         private val loadingAnimateRunnable = object : Runnable {
             override fun run() {
                 loopCount++
@@ -157,9 +144,6 @@ class ChatAdapter(
             }
         }
 
-        /**
-         * Dừng tất cả animation đang chạy
-         */
         fun stopAnimation() {
             handler.removeCallbacks(loadingAnimateRunnable)
             cursorAnimator?.cancel()
@@ -167,18 +151,12 @@ class ChatAdapter(
             binding.tvMessage.alpha = 1f
         }
 
-        /**
-         * Bind text đang streaming với cursor nhấp nháy
-         */
         fun bindStreamingText(message: ChatMessage) {
             if (message.isStreaming) {
                 markwon.setMarkdown(binding.tvMessage, message.content + " ▌")
             }
         }
 
-        /**
-         * Bind tin nhắn vào view dựa trên trạng thái
-         */
         fun bind(message: ChatMessage, position: Int) {
             stopAnimation()
             resetViews()
@@ -193,9 +171,6 @@ class ChatAdapter(
             }
         }
 
-        /**
-         * Reset views về trạng thái mặc định
-         */
         private fun resetViews() {
             binding.layoutAiActions.visibility = android.view.View.GONE
             binding.tvMessage.alpha = 1f
@@ -206,9 +181,6 @@ class ChatAdapter(
             binding.btnRenewAi.setOnClickListener(null)
         }
 
-        /**
-         * Hiển thị trạng thái loading với animation ba chấm
-         */
         private fun bindLoadingState(bgColor: Int, textColor: Int) {
             binding.chatContainer.gravity = Gravity.START
             binding.cardMessage.setCardBackgroundColor(bgColor)
@@ -218,9 +190,6 @@ class ChatAdapter(
             loadingAnimateRunnable.run()
         }
 
-        /**
-         * Hiển thị trạng thái streaming với cursor nhấp nháy
-         */
         private fun bindStreamingState(message: ChatMessage, bgColor: Int, textColor: Int) {
             binding.chatContainer.gravity = Gravity.START
             binding.cardMessage.setCardBackgroundColor(bgColor)
@@ -230,9 +199,6 @@ class ChatAdapter(
             binding.layoutAiActions.visibility = android.view.View.GONE
         }
 
-        /**
-         * Hiển thị tin nhắn của người dùng
-         */
         private fun bindUserMessage(message: ChatMessage) {
             markwon.setMarkdown(binding.tvMessage, message.content)
             binding.chatContainer.gravity = Gravity.END
@@ -244,9 +210,6 @@ class ChatAdapter(
             }
         }
 
-        /**
-         * Hiển thị tin nhắn của AI với các action buttons
-         */
         private fun bindAiMessage(message: ChatMessage, position: Int, bgColor: Int, textColor: Int) {
             markwon.setMarkdown(binding.tvMessage, message.content)
             binding.chatContainer.gravity = Gravity.START
@@ -266,9 +229,6 @@ class ChatAdapter(
             }
         }
 
-        /**
-         * Bắt đầu animation nhấp nháy cho cursor khi streaming
-         */
         private fun startCursorAnimation() {
             if (cursorAnimator == null) {
                 cursorAnimator = ValueAnimator.ofFloat(1f, 0.4f).apply {

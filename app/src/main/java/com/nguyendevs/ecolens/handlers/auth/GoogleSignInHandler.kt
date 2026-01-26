@@ -30,13 +30,11 @@ class GoogleSignInHandler(
     private lateinit var googleSignInClient: GoogleSignInClient
     private val googleSignInLauncher: ActivityResultLauncher<Intent>
 
-    // Store callbacks to be used when result comes back
     private var onLoadingChange: ((Boolean) -> Unit)? = null
     private var onSuccess: (() -> Unit)? = null
     private var rememberMe: Boolean = false
 
     init {
-        // Setup Activity Result Launcher TRONG INIT để register trước khi Activity start
         googleSignInLauncher = fragment.registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
@@ -63,12 +61,10 @@ class GoogleSignInHandler(
         onLoadingChange: (Boolean) -> Unit,
         onSuccess: () -> Unit
     ) {
-        // Store callbacks
         this.rememberMe = rememberMe
         this.onLoadingChange = onLoadingChange
         this.onSuccess = onSuccess
 
-        // Setup Google Sign-In Options
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(fragment.getString(R.string.default_web_client_id))
             .requestEmail()

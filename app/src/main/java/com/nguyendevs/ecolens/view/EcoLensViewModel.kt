@@ -30,7 +30,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     private val historyRepository by lazy { HistoryRepository(historyDao, application.applicationContext) }
     private val chatRepository by lazy { ChatRepository(chatDao, application.applicationContext) }
 
-    // Managers
     private val speciesManager by lazy {
         SpeciesIdentificationManager(
             application.applicationContext,
@@ -40,12 +39,10 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     private val historyManager by lazy { HistoryManager(application.applicationContext, historyRepository) }
     private val chatManager by lazy { ChatSessionManager(chatRepository, chatDao, viewModelScope) }
 
-    // UI State
     private val _uiState = MutableStateFlow(EcoLensUiState())
     val uiState: StateFlow<EcoLensUiState> = _uiState.asStateFlow()
     var currentImageUri: Uri? = null
 
-    // Chat State
     val chatMessages: StateFlow<List<ChatMessage>> = chatManager.chatMessages
     val isStreamingActive: StateFlow<Boolean> = chatManager.isStreamingActive
     val allChatSessions: Flow<List<ChatSession>> = chatManager.allChatSessions

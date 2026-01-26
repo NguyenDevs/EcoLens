@@ -3,7 +3,7 @@ package com.nguyendevs.ecolens.api
 // ==================== INATURALIST API MODELS ====================
 
 /**
- * Thông tin taxon (phân loại sinh học) từ iNaturalist
+ * Thông tin taxon từ iNaturalist
  */
 data class Taxon(
     val id: Int,
@@ -13,9 +13,6 @@ data class Taxon(
     val ancestors: List<Ancestor> = emptyList()
 )
 
-/**
- * Thông tin tổ tiên trong cây phân loại (taxonomy tree)
- */
 data class Ancestor(
     val id: Int,
     val name: String,

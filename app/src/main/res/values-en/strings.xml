@@ -23,6 +23,7 @@
     <string name="view_all">View all</string>
     <string name="recent">Recent</string>
     <string name="today">Today</string>
+    <string name="yesterday">Yesterday</string>
     <string name="search_hint_home">Search for plants, animals…</string>
 
     <!-- Quick Explore Hardcoded Items -->

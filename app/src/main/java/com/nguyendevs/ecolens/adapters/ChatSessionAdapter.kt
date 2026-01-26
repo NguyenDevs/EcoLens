@@ -29,9 +29,6 @@ class ChatSessionAdapter(
 
     // ==================== ADAPTER METHODS ====================
 
-    /**
-     * Cập nhật danh sách phiên chat
-     */
     fun updateList(newList: List<ChatSession>) {
         sessions = newList
         notifyDataSetChanged()
@@ -73,10 +70,6 @@ class ChatSessionAdapter(
         private val binding: ItemChatHistoryBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        /**
-         * Bind dữ liệu phiên chat vào view
-         * @param showHeader Hiển thị date header nếu là phiên đầu tiên trong ngày
-         */
         fun bind(session: ChatSession, showHeader: Boolean, dateTime: java.time.ZonedDateTime) {
             binding.tvDateHeader.visibility = if (showHeader) View.VISIBLE else View.GONE
             if (showHeader) {
@@ -95,10 +88,6 @@ class ChatSessionAdapter(
             }
         }
 
-        /**
-         * Hiệu ứng loading ring khi click vào phiên chat
-         * Animation xoay 360 độ rồi fade out
-         */
         private fun animateLoading() {
             binding.ivLoadingRing.apply {
                 visibility = View.VISIBLE

@@ -19,7 +19,6 @@ class ConfidenceDisplayHandler(
     private val infoBinding
         get() = binding
 
-    /** Hiển thị độ tin cậy với màu sắc và icon tương ứng theo mức độ. */
     @SuppressLint("StringFormatInvalid")
     fun displayConfidence(info: SpeciesInfo, isWaiting: Boolean) {
         val tvConfidence = infoBinding.tvConfidence
@@ -111,7 +110,6 @@ class ConfidenceDisplayHandler(
         }
     }
 
-    /** Xóa trạng thái đã lưu để reset hiển thị. */
     fun clearState() {
         lastConfidenceValue = null
     }

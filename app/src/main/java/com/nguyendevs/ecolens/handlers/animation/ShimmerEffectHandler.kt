@@ -18,28 +18,13 @@ import androidx.core.content.ContextCompat
 import com.nguyendevs.ecolens.R
 
 /**
- * Handler quản lý hiệu ứng shimmer (nhấp nháy) cho các View.
- *
- * Class này cung cấp các phương thức để tạo và quản lý hiệu ứng shimmer loading, hỗ trợ cả chế độ
- * sáng và tối của ứng dụng. Hiệu ứng shimmer được sử dụng để hiển thị trạng thái đang tải dữ liệu
- * cho người dùng.
+ * Handler quản lý hiệu ứng shimmer cho các View.
  *
  * @property context Context của ứng dụng, dùng để truy cập resources và cấu hình theme
  */
 class ShimmerEffectHandler(private val context: Context) {
     private var taxonomyShimmerAnimator: ValueAnimator? = null
 
-    /**
-     * Bắt đầu hiệu ứng shimmer cho view taxonomy.
-     *
-     * Phương thức này tạo một gradient animation chạy theo đường chéo của view, tạo hiệu ứng ánh
-     * sáng nhấp nháy. Tự động điều chỉnh màu sắc theo chế độ sáng/tối của hệ thống.
-     *
-     * @param view View cần áp dụng hiệu ứng shimmer. Nếu null hoặc đã có animator đang chạy,
-     * ```
-     *             phương thức sẽ không thực hiện gì.
-     * ```
-     */
     fun startTaxonomyShimmer(view: View?) {
         if (view == null || taxonomyShimmerAnimator != null) return
 
@@ -158,9 +143,6 @@ class ShimmerEffectHandler(private val context: Context) {
 
     /**
      * Dừng hiệu ứng shimmer và khôi phục background gốc cho view.
-     *
-     * Phương thức này hủy animator đang chạy và đặt lại background của view về trạng thái bình
-     * thường với màu surface_variant.
      *
      * @param view View cần dừng hiệu ứng shimmer
      */

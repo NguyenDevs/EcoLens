@@ -25,6 +25,7 @@
     <string name="view_all">Xem tất cả</string>
     <string name="recent">Gần đây</string>
     <string name="today">Hôm nay</string>
+    <string name="yesterday">Hôm qua</string>
     <string name="search_hint_home">Tìm kiếm thực vật, động vật…</string>
 
     <!-- Quick Explore Hardcoded Items -->

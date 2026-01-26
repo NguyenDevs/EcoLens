@@ -70,7 +70,6 @@ class HomeScreenHandler(
         val greetingBase = activity.getString(greetingResId)
         tvGreeting.text = greetingBase
 
-        // Lấy username từ Firebase
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null) {
             activity.lifecycleScope.launch {
@@ -181,11 +180,12 @@ class HomeScreenHandler(
         }
     }
 
+
+    // TẠM THỜI HARDCODE
     /** Setup Quick Explore với dữ liệu hardcoded */
     private fun setupQuickExplore() {
         val homeRoot = binding.homeContainer.root
 
-        // Card 1: Sen đá
         val card1 = homeRoot.findViewById<View>(R.id.exploreCard1)
         card1?.findViewById<TextView>(R.id.tvExploreName)?.text =
                 activity.getString(R.string.explore_item_1_name)
@@ -193,7 +193,6 @@ class HomeScreenHandler(
                 activity.getString(R.string.explore_item_1_desc)
         card1?.findViewById<ImageView>(R.id.imgExplore)?.setImageResource(R.drawable.succulent)
 
-        // Card 2: Bướm Monarch
         val card2 = homeRoot.findViewById<View>(R.id.exploreCard2)
         card2?.findViewById<TextView>(R.id.tvExploreName)?.text =
                 activity.getString(R.string.explore_item_2_name)
@@ -202,7 +201,6 @@ class HomeScreenHandler(
         card2?.findViewById<ImageView>(R.id.imgExplore)
                 ?.setImageResource(R.drawable.monarch_butterfly)
 
-        // Card 3: Hoa Oải Hương
         val card3 = homeRoot.findViewById<View>(R.id.exploreCard3)
         card3?.findViewById<TextView>(R.id.tvExploreName)?.text =
                 activity.getString(R.string.explore_item_3_name)
