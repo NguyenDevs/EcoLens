@@ -31,14 +31,12 @@
                     android:paddingHorizontal="@dimen/padding_screen_horizontal"
                     android:paddingTop="@dimen/spacing_md">
 
-                <!-- Greeting and Title Row -->
                 <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="@dimen/spacing_lg"
                         android:orientation="vertical">
 
-                    <!-- App Title -->
                     <TextView
                             android:id="@+id/tvAppTitle"
                             android:layout_width="wrap_content"
@@ -50,7 +48,6 @@
                             android:textSize="30sp"
                             android:textStyle="bold" />
 
-                    <!-- Greeting Text with Username -->
                     <TextView
                             android:id="@+id/tvGreeting"
                             android:layout_width="wrap_content"
@@ -76,13 +73,10 @@
                     app:cardElevation="0dp"
                     app:strokeWidth="0dp">
 
-                <!-- Fixed height as requested -->
                 <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="match_parent"
                         android:layout_height="320dp"
                         android:padding="0dp">
-
-                    <!-- Decorative Background Image -->
 
                     <!-- Badge -->
                     <com.google.android.material.imageview.ShapeableImageView
@@ -96,8 +90,8 @@
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
-                            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.MediumComponent"
-                            />
+                            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.MediumComponent"/>
+
                     <TextView
                             android:id="@+id/tvHeroBadge"
                             android:layout_width="wrap_content"
@@ -115,7 +109,6 @@
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent" />
 
-                    <!-- Title -->
                     <TextView
                             android:id="@+id/tvHeroTitle"
                             android:layout_width="wrap_content"
@@ -131,7 +124,6 @@
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toBottomOf="@id/tvHeroBadge" />
 
-                    <!-- Subtitle -->
                     <TextView
                             android:id="@+id/tvHeroSubtitle"
                             android:layout_width="0dp"
@@ -146,8 +138,6 @@
                             app:layout_constraintTop_toBottomOf="@id/tvHeroTitle"
                             app:layout_constraintWidth_max="180dp" />
 
-
-                    <!-- CTA Button -->
                     <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnStartNow"
                             android:layout_width="wrap_content"
@@ -168,7 +158,7 @@
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toBottomOf="@id/tvHeroSubtitle" />
 
-                    <!-- Full Hero Image (For Result) - Fills the card -->
+                    <!-- Full Hero Image -->
                     <com.google.android.material.imageview.ShapeableImageView
                             android:id="@+id/imgHeroFull"
                             android:layout_width="match_parent"
@@ -180,7 +170,7 @@
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent" />
 
-                    <!-- Progress Bar (Centered) -->
+                    <!-- Progress Bar -->
                     <FrameLayout
                             android:id="@+id/progressBarHero"
                             android:layout_width="match_parent"
@@ -229,7 +219,7 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Loading Text (Below Hero Card) -->
+            <!-- Loading Text -->
             <TextView
                     android:id="@+id/tvLoadingText"
                     style="@style/TextAppearance.App.Body1"
@@ -252,7 +242,6 @@
                     android:clipToPadding="false"
                     android:orientation="vertical">
 
-                <!-- Section Header -->
                 <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -339,7 +328,6 @@
                     android:orientation="vertical"
                     android:paddingHorizontal="@dimen/padding_screen_horizontal">
 
-                <!-- Section Header with Toggle -->
                 <FrameLayout
                         android:id="@+id/recentHeader"
                         android:layout_width="match_parent"
@@ -366,14 +354,12 @@
                             app:tint="@color/text_secondary" />
                 </FrameLayout>
 
-                <!-- Recent History Container (expandable) -->
                 <LinearLayout
                         android:id="@+id/recentContainer"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical">
 
-                    <!-- Recent History RecyclerView -->
                     <androidx.recyclerview.widget.RecyclerView
                             android:id="@+id/rvRecentHistory"
                             android:layout_width="match_parent"
@@ -381,11 +367,9 @@
                             android:clipChildren="false"
                             android:clipToPadding="false"
                             android:nestedScrollingEnabled="false"
-                            android:paddingHorizontal="@dimen/spacing_xxs"
                             tools:itemCount="5"
                             tools:listitem="@layout/item_recent_history" />
 
-                    <!-- Empty State -->
                     <LinearLayout
                             android:id="@+id/emptyRecentState"
                             android:layout_width="match_parent"
@@ -415,7 +399,7 @@
 
             </LinearLayout>
 
-            <!-- Loading Indicator (Legacy - Hidden) -->
+            <!-- Loading Indicator -->
             <LinearLayout
                     android:id="@+id/loadingCard"
                     android:layout_width="match_parent"
@@ -454,7 +438,6 @@
                     android:layout_marginBottom="@dimen/spacing_lg"
                     android:visibility="gone" />
 
-            <!-- Error Card -->
             <LinearLayout
                     android:id="@+id/errorCard"
                     android:layout_width="match_parent"

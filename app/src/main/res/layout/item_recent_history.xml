@@ -16,7 +16,6 @@
         app:cardCornerRadius="@dimen/radius_md"
         app:cardElevation="0dp"
         app:cardBackgroundColor="@color/surface"
-        app:strokeWidth="@dimen/border_thin"
         app:strokeColor="@color/border_light">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -69,6 +68,7 @@
                     android:textColor="@color/text_secondary"
                     android:textSize="@dimen/text_caption"
                     android:textStyle="italic"
+                    android:fontFamily="serif"
                     android:maxLines="1"
                     android:ellipsize="end"
                     tools:text="Solenopsis invicta" />

@@ -5,6 +5,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         style="@style/Widget.App.Card"
+        app:strokeColor="@color/border_light"
         app:cardCornerRadius="@dimen/radius_2xl">
 
         <!-- MODERN SPECIES INFO CARD -->
@@ -48,6 +49,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="@string/label_scientific_name"
+                                                android:fontFamily="serif"
                                                 android:textColor="@color/text_secondary"
                                                 android:textStyle="italic"
                                                 style="@style/TextAppearance.App.Body1" />
@@ -99,6 +101,7 @@
                                                         android:layout_marginStart="@dimen/spacing_xs"
                                                         android:text="@string/confidence_format"
                                                         android:textAllCaps="false"
+
                                                         android:textSize="@dimen/text_label"
                                                         style="@style/TextAppearance.App.Label" />
                                         </LinearLayout>
