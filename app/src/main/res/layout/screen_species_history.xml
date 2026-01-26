@@ -8,229 +8,180 @@
         android:orientation="vertical"
         android:background="@color/background">
 
-    <!-- MODERN HISTORY SCREEN -->
-
-    <!-- HEADER -->
+    <!-- ==================== HEADER ==================== -->
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingTop="10dp"
-            android:paddingBottom="1dp">
+            android:paddingBottom="@dimen/spacing_xxxs">
 
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/history_title_label"
-                android:paddingStart="@dimen/padding_screen_horizontal"
-                android:paddingEnd="@dimen/padding_screen_horizontal"
-
-                style="@style/TextAppearance.App.Display"
-                android:textColor="@color/primary"
-                android:layout_marginBottom="15dp"/>
-        <View
-                android:layout_width="match_parent"
-                android:background="@color/border_normal"
-                android:layout_marginStart="-20dp"
-                android:layout_marginBottom="10dp"
-                android:layout_marginEnd="-20dp"
-                android:layout_height="1.25dp"/>
-        <!-- OPTIONS TOGGLE -->
-        <FrameLayout
-                android:id="@+id/optionsHeader"
+        <!-- Title Row with Search -->
+        <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingStart="@dimen/padding_screen_horizontal"
-                android:paddingEnd="@dimen/padding_screen_horizontal"
-
-                android:clickable="true"
-                android:focusable="true"
-        >
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingTop="4dp"
+                android:paddingHorizontal="@dimen/padding_screen_horizontal">
 
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/options"
-                    style="@style/TextAppearance.App.Label"
-                    android:layout_marginStart="@dimen/spacing_xxs"/>
-
-            <ImageView
-                    android:id="@+id/ivExpandIcon"
-                    android:layout_width="@dimen/icon_md"
-                    android:layout_height="@dimen/icon_md"
-                    android:layout_gravity="end|center_vertical"
-                    android:src="@drawable/ic_arrow_down"
-                    app:tint="@color/text_secondary"/>
-        </FrameLayout>
-
-        <!-- OPTIONS CONTAINER -->
-        <LinearLayout
-                android:id="@+id/optionsContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="@dimen/padding_screen_horizontal"
-                android:paddingEnd="@dimen/padding_screen_horizontal"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-            <!-- MERGED OPTIONS CARD -->
-            <com.google.android.material.card.MaterialCardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/spacing_sm"
-                    style="@style/Widget.App.Card"
-                    app:cardCornerRadius="@dimen/radius_md">
-
-                <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                    <!-- SORT OPTION -->
-                    <LinearLayout
-                            android:id="@+id/btnSort"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:padding="@dimen/spacing_md"
-                            android:gravity="center_vertical"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:background="?attr/selectableItemBackground">
-
-                        <FrameLayout
-                                android:layout_width="@dimen/icon_xl"
-                                android:layout_height="@dimen/icon_xl"
-                                android:background="@drawable/bg_flag_rounded"
-                                android:backgroundTint="@color/surface_tint">
-                            <ImageView
-                                    android:layout_width="@dimen/icon_md"
-                                    android:layout_height="@dimen/icon_md"
-                                    android:layout_gravity="center"
-                                    android:src="@drawable/ic_sort"
-                                    app:tint="@color/primary"/>
-                        </FrameLayout>
-
-                        <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical"
-                                android:layout_marginStart="@dimen/spacing_md">
-
-                            <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/sort_by"
-                                    style="@style/TextAppearance.App.Body1"
-                                    android:textColor="@color/primary_dark"
-                                    android:textStyle="bold"/>
-
-                            <TextView
-                                    android:id="@+id/tvCurrentSort"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/sort_newest_first"
-                                    style="@style/TextAppearance.App.Body2"
-                                    android:textColor="@color/success_text"
-                                    android:layout_marginTop="2dp"/>
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <!-- DIVIDER -->
-                    <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:background="@color/border_normal"
-                            android:layout_marginStart="@dimen/spacing_xxs"
-                            android:layout_marginEnd="@dimen/spacing_xxs"/>
-
-                    <!-- FILTER BY DATE OPTION -->
-                    <LinearLayout
-                            android:id="@+id/btnFilterByDate"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:padding="@dimen/spacing_md"
-                            android:gravity="center_vertical"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:background="?attr/selectableItemBackground">
-
-                        <FrameLayout
-                                android:layout_width="@dimen/icon_xl"
-                                android:layout_height="@dimen/icon_xl"
-                                android:background="@drawable/bg_flag_rounded"
-                                android:backgroundTint="@color/surface_tint">
-                            <ImageView
-                                    android:layout_width="@dimen/icon_md"
-                                    android:layout_height="@dimen/icon_md"
-                                    android:layout_gravity="center"
-                                    android:src="@drawable/ic_calendar"
-                                    app:tint="@color/primary"/>
-                        </FrameLayout>
-
-                        <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical"
-                                android:layout_marginStart="@dimen/spacing_md">
-
-                            <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/filter_by_date"
-                                    style="@style/TextAppearance.App.Body1"
-                                    android:textColor="@color/primary_dark"
-                                    android:textStyle="bold"/>
-
-                            <LinearLayout
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:orientation="horizontal"
-                                    android:gravity="center_vertical"
-                                    android:layout_marginTop="2dp">
-
-                                <TextView
-                                        android:id="@+id/tvFilterSubtitle"
-                                        android:layout_width="0dp"
-                                        android:layout_height="wrap_content"
-                                        android:layout_weight="1"
-                                        android:text="@string/select_date"
-                                        style="@style/TextAppearance.App.Body2"
-                                        android:textColor="@color/text_secondary"/>
-
-                                <ImageView
-                                        android:id="@+id/btnClearFilter"
-                                        android:layout_width="@dimen/icon_sm"
-                                        android:layout_height="@dimen/icon_sm"
-                                        android:src="@drawable/ic_close"
-                                        android:background="?attr/selectableItemBackgroundBorderless"
-                                        android:padding="@dimen/spacing_xxs"
-                                        app:tint="@color/error"
-                                        android:visibility="gone"/>
-                            </LinearLayout>
-                        </LinearLayout>
-                    </LinearLayout>
-
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                    android:layout_marginBottom="@dimen/spacing_lg"
+                    android:text="@string/history_title_label"
+                    android:textColor="@color/primary"
+                    android:textSize="30sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:letterSpacing="-0.02"/>
 
         </LinearLayout>
 
-        <!-- DIVIDER -->
+        <!-- Divider -->
+        <View
+                android:layout_width="match_parent"
+                android:background="@color/border_normal"
+                android:layout_marginStart="@dimen/padding_screen_horizontal"
+                android:layout_marginEnd="@dimen/padding_screen_horizontal"
+                android:layout_marginBottom="@dimen/spacing_md"
+                android:layout_height="1dp"/>
+
+        <!-- Filter Chips -->
+        <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:paddingHorizontal="@dimen/padding_screen_horizontal"
+                android:clipToPadding="false">
+
+            <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                <!-- Category Filter Group -->
+                <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/chipGroupFilters"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:singleSelection="true"
+                        app:chipSpacingHorizontal="@dimen/spacing_xs">
+
+                    <!-- All Chip -->
+                    <com.google.android.material.chip.Chip
+                            android:id="@+id/chipAll"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:text="@string/history_chipAll"
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/text_body_small"
+                            android:textStyle="bold"
+                            app:chipBackgroundColor="@color/primary"
+                            app:chipStrokeWidth="0dp"
+                            app:chipCornerRadius="@dimen/radius_full"
+                            app:chipIcon="@drawable/ic_filter_first"
+                            app:chipIconTint="@color/white"
+                            app:chipIconSize="16dp"
+                            app:iconStartPadding="@dimen/spacing_xxs"/>
+
+                    <!-- Animals Chip -->
+                    <com.google.android.material.chip.Chip
+                            android:id="@+id/chipAnimals"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:text="@string/history_chipAnimals"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_body_small"
+                            android:textStyle="bold"
+                            app:chipBackgroundColor="@color/surface"
+                            app:chipStrokeWidth="1dp"
+                            app:chipStrokeColor="@color/border_normal"
+                            app:chipCornerRadius="@dimen/radius_full"/>
+
+                    <!-- Plants Chip -->
+                    <com.google.android.material.chip.Chip
+                            android:id="@+id/chipPlants"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:text="@string/history_chipPlants"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_body_small"
+                            android:textStyle="bold"
+                            app:chipBackgroundColor="@color/surface"
+                            app:chipStrokeWidth="1dp"
+                            app:chipStrokeColor="@color/border_normal"
+                            app:chipCornerRadius="@dimen/radius_full"/>
+                </com.google.android.material.chip.ChipGroup>
+
+                <!-- Divider -->
+                <View
+                        android:layout_width="1dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginHorizontal="@dimen/spacing_sm"
+                        android:background="@color/border_normal"/>
+
+                <!-- Sort & Filter Actions -->
+                <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                    <!-- Sort Chip -->
+                    <com.google.android.material.chip.Chip
+                            android:id="@+id/btnSort"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:text="@string/sort_newest_first"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_body_small"
+                            android:textStyle="bold"
+                            app:chipBackgroundColor="@color/surface"
+                            app:chipStrokeWidth="1dp"
+                            app:chipStrokeColor="@color/border_normal"
+                            app:chipCornerRadius="@dimen/radius_full"
+                            app:chipIcon="@drawable/ic_sort"
+                            app:chipIconTint="@color/text_secondary"
+                            app:chipIconSize="16dp"
+                            app:iconStartPadding="@dimen/spacing_xxs"/>
+
+                    <!-- Date Filter Chip -->
+                    <com.google.android.material.chip.Chip
+                            android:id="@+id/btnFilterByDate"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginStart="@dimen/spacing_xs"
+                            android:text="@string/select_date"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_body_small"
+                            android:textStyle="bold"
+                            app:chipBackgroundColor="@color/surface"
+                            app:chipStrokeWidth="1dp"
+                            app:chipStrokeColor="@color/border_normal"
+                            app:chipCornerRadius="@dimen/radius_full"
+                            app:chipIcon="@drawable/ic_calendar"
+                            app:chipIconTint="@color/text_secondary"
+                            app:chipIconSize="16dp"
+                            app:iconStartPadding="@dimen/spacing_xxs"
+                            app:closeIcon="@drawable/ic_close"
+                            app:closeIconVisible="false"
+                            app:closeIconTint="@color/error"/>
+
+                </LinearLayout>
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <!-- Divider -->
         <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="@color/border_normal"
                 android:layout_marginStart="@dimen/padding_screen_horizontal"
                 android:layout_marginEnd="@dimen/padding_screen_horizontal"
+                android:layout_marginTop="@dimen/spacing_md"/>
 
-        />
     </LinearLayout>
 
-    <!-- CONTENT -->
+    <!-- ==================== CONTENT ==================== -->
     <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -241,9 +192,8 @@
                 android:id="@+id/rvHistory"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
-                android:paddingTop="0dp"
+                android:paddingStart="@dimen/padding_screen_horizontal"
+                android:paddingEnd="@dimen/padding_screen_horizontal"
                 android:paddingBottom="84dp"
                 android:clipToPadding="false"
                 android:scrollbars="none"

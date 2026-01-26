@@ -26,8 +26,6 @@ abstract class BaseAuthActivity : AppCompatActivity() {
         setContentView(binding.root)
     }
 
-    // ==================== THEME ====================
-
     protected fun applyUserTheme(isDarkMode: Boolean) {
         val sharedPref = getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         sharedPref.edit().putBoolean("dark_mode", isDarkMode).apply()
@@ -44,8 +42,6 @@ abstract class BaseAuthActivity : AppCompatActivity() {
         val sharedPref = getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         sharedPref.edit().putBoolean("remember_me", isRemember).apply()
     }
-
-    // ==================== LOADING ====================
 
     /**
      * Set loading state - chỉ điều khiển loading overlay
