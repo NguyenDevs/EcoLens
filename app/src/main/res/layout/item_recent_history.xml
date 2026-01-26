@@ -68,6 +68,7 @@
                     android:textColor="@color/text_secondary"
                     android:textSize="@dimen/text_caption"
                     android:textStyle="italic"
+                    android:fontFamily="serif"
                     android:maxLines="1"
                     android:ellipsize="end"
                     tools:text="Solenopsis invicta" />

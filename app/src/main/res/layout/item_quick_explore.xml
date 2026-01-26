@@ -45,6 +45,8 @@
             android:layout_height="wrap_content"
             android:textColor="@color/text_secondary"
             android:textSize="@dimen/text_caption"
+            android:fontFamily="serif"
+            android:textStyle="italic"
             android:maxLines="1"
             android:ellipsize="end"
             tools:text="Thực vật mọng nước" />
