@@ -421,7 +421,6 @@ class MainActivity : AppCompatActivity() {
 
     /** Xử lý ảnh đã chụp từ camera */
     private fun handleCapturedImage(uri: Uri) {
-        // Prevent double clicks
         binding.fabCamera.isClickable = false
         binding.fabCamera.alpha = 0.5f
 
@@ -529,7 +528,6 @@ class MainActivity : AppCompatActivity() {
             loadingAnimationHandler.setText(R.string.analyzing_text)
             stopLoadingJob?.cancel()
 
-            // Cập nhật text loading dựa trên loadingStage
             when (loadingStage) {
                 LoadingStage.SCIENTIFIC_NAME,
                 LoadingStage.COMMON_NAME -> loadingAnimationHandler.setText(R.string.loading_taxon)

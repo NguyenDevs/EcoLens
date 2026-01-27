@@ -3,7 +3,6 @@ package com.nguyendevs.ecolens.model.history
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.google.firebase.database.Exclude
 import com.nguyendevs.ecolens.model.SpeciesInfo
 
 /**
@@ -23,5 +22,4 @@ data class HistoryEntry(
     val localImagePath: String = "",
     @Embedded val speciesInfo: SpeciesInfo = SpeciesInfo(),
     val timestamp: Long = 0
-   //@get:Exclude val isFavorite: Boolean = false
 )
