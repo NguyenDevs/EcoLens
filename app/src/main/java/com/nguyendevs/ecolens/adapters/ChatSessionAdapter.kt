@@ -1,10 +1,14 @@
 package com.nguyendevs.ecolens.adapters
 
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
+import android.widget.FrameLayout
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.progressindicator.CircularProgressIndicator
+import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemChatHistoryBinding
 import com.nguyendevs.ecolens.model.chat.ChatSession
 import io.noties.markwon.Markwon
@@ -18,23 +22,81 @@ import java.util.Locale
  * Tự động nhóm theo ngày với date header và hiệu ứng loading khi click
  */
 class ChatSessionAdapter(
-    private var sessions: List<ChatSession>,
+    private var sessions: MutableList<ChatSession>,
     private val onClick: (ChatSession) -> Unit
-) : RecyclerView.Adapter<ChatSessionAdapter.ChatSessionViewHolder>() {
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    companion object {
+        private const val VIEW_TYPE_ITEM = 0
+        private const val VIEW_TYPE_LOADING = 1
+    }
 
     private val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.getDefault())
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault())
     private val loadingInterpolator = LinearInterpolator()
     private lateinit var markwon: Markwon
+    private var isLoading = false
 
     // ==================== ADAPTER METHODS ====================
 
     fun updateList(newList: List<ChatSession>) {
-        sessions = newList
+        sessions.clear()
+        sessions.addAll(newList)
         notifyDataSetChanged()
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatSessionViewHolder {
+    fun addItems(newItems: List<ChatSession>) {
+        val startPosition = sessions.size
+        sessions.addAll(newItems)
+        notifyItemRangeInserted(startPosition, newItems.size)
+    }
+
+    fun setLoading(loading: Boolean) {
+        if (isLoading == loading) return
+        isLoading = loading
+        if (isLoading) {
+            notifyItemInserted(sessions.size)
+        } else {
+            notifyItemRemoved(sessions.size)
+        }
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return if (isLoading && position == sessions.size) VIEW_TYPE_LOADING else VIEW_TYPE_ITEM
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        if (viewType == VIEW_TYPE_LOADING) {
+            val context = parent.context
+            val frameLayout = FrameLayout(context)
+            val layoutParams = RecyclerView.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            frameLayout.layoutParams = layoutParams
+            frameLayout.setPadding(0, 32, 0, 32)
+
+            val progressBar = CircularProgressIndicator(context)
+            progressBar.isIndeterminate = true
+
+            val typedArray = context.resources.obtainTypedArray(R.array.gemini_colors)
+            val colors = IntArray(typedArray.length())
+            for (i in 0 until typedArray.length()) {
+                colors[i] = typedArray.getColor(i, 0)
+            }
+            typedArray.recycle()
+            progressBar.setIndicatorColor(*colors)
+
+            val progressParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            progressParams.gravity = Gravity.CENTER
+            frameLayout.addView(progressBar, progressParams)
+
+            return object : RecyclerView.ViewHolder(frameLayout) {}
+        }
+
         if (!::markwon.isInitialized) {
             markwon = Markwon.create(parent.context)
         }
@@ -46,23 +108,25 @@ class ChatSessionAdapter(
         return ChatSessionViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: ChatSessionViewHolder, position: Int) {
-        val session = sessions[position]
-        val currentDateTime = Instant.ofEpochMilli(session.timestamp)
-            .atZone(ZoneId.systemDefault())
-
-        val isFirstOfDay = if (position == 0) {
-            true
-        } else {
-            val prevDateTime = Instant.ofEpochMilli(sessions[position - 1].timestamp)
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        if (holder is ChatSessionViewHolder) {
+            val session = sessions[position]
+            val currentDateTime = Instant.ofEpochMilli(session.timestamp)
                 .atZone(ZoneId.systemDefault())
-            currentDateTime.toLocalDate() != prevDateTime.toLocalDate()
-        }
 
-        holder.bind(session, isFirstOfDay, currentDateTime)
+            val isFirstOfDay = if (position == 0) {
+                true
+            } else {
+                val prevDateTime = Instant.ofEpochMilli(sessions[position - 1].timestamp)
+                    .atZone(ZoneId.systemDefault())
+                currentDateTime.toLocalDate() != prevDateTime.toLocalDate()
+            }
+
+            holder.bind(session, isFirstOfDay, currentDateTime)
+        }
     }
 
-    override fun getItemCount() = sessions.size
+    override fun getItemCount() = sessions.size + if (isLoading) 1 else 0
 
     // ==================== VIEW HOLDER ====================
 
@@ -82,7 +146,7 @@ class ChatSessionAdapter(
             markwon.setMarkdown(binding.tvLastMessage, session.lastMessage)
             binding.tvTime.text = timeFormatter.format(dateTime)
 
-            binding.cardSession.setOnClickListener {
+            binding.itemContainer.setOnClickListener {
                 animateLoading()
                 onClick(session)
             }

@@ -1,14 +1,17 @@
 package com.nguyendevs.ecolens.adapters
 
 import android.view.LayoutInflater
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemSpeciesHistoryBinding
 import com.nguyendevs.ecolens.model.history.HistoryEntry
@@ -24,17 +27,24 @@ import java.util.*
  * border liên tục Sử dụng DiffUtil để tối ưu performance khi update list
  */
 class HistoryAdapter(
-        private var historyList: List<HistoryEntry>,
+        private var historyList: MutableList<HistoryEntry>,
         private val markwon: Markwon,
         private val clickListener: (HistoryEntry) -> Unit
-) : RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    companion object {
+        private const val VIEW_TYPE_ITEM = 0
+        private const val VIEW_TYPE_LOADING = 1
+    }
 
     private val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.getDefault())
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault())
+    private var isLoading = false
 
     // ==================== ADAPTER METHODS ====================
 
     fun updateList(newList: List<HistoryEntry>) {
+        // Dùng cho pull-to-refresh hoặc load lần đầu
         val diffCallback =
                 object : DiffUtil.Callback() {
                     override fun getOldListSize(): Int = historyList.size
@@ -95,33 +105,100 @@ class HistoryAdapter(
                     }
                 }
         val diffResult = DiffUtil.calculateDiff(diffCallback)
-        historyList = newList
+        historyList = newList.toMutableList()
         diffResult.dispatchUpdatesTo(this)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryViewHolder {
-        val binding =
-                ItemSpeciesHistoryBinding.inflate(
-                        LayoutInflater.from(parent.context),
-                        parent,
-                        false
-                )
+    /**
+     * Phương thức dùng cho Lazy Loading: Thêm dữ liệu vào cuối danh sách
+     */
+    fun addItems(newItems: List<HistoryEntry>) {
+        val startPosition = historyList.size
+        historyList.addAll(newItems)
+        notifyItemRangeInserted(startPosition, newItems.size)
+
+        // Cập nhật item cuối cùng của trang trước đó (để fix border/background nếu cùng ngày)
+        if (startPosition > 0 && newItems.isNotEmpty()) {
+            notifyItemChanged(startPosition - 1)
+        }
+    }
+
+    fun setLoading(loading: Boolean) {
+        if (isLoading == loading) return
+        isLoading = loading
+        if (isLoading) {
+            notifyItemInserted(historyList.size)
+        } else {
+            notifyItemRemoved(historyList.size)
+        }
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return if (isLoading && position == historyList.size) VIEW_TYPE_LOADING else VIEW_TYPE_ITEM
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        if (viewType == VIEW_TYPE_LOADING) {
+            // Tạo CircularProgressIndicator bọc trong FrameLayout để căn giữa
+            val context = parent.context
+            val frameLayout = FrameLayout(context)
+            val layoutParams = RecyclerView.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            frameLayout.layoutParams = layoutParams
+            frameLayout.setPadding(0, 32, 0, 32)
+
+            val progressBar = CircularProgressIndicator(context)
+            progressBar.isIndeterminate = true
+            
+            val typedArray = context.resources.obtainTypedArray(R.array.gemini_colors)
+            val colors = IntArray(typedArray.length())
+            for (i in 0 until typedArray.length()) {
+                colors[i] = typedArray.getColor(i, 0)
+            }
+            typedArray.recycle()
+            progressBar.setIndicatorColor(*colors)
+
+            val progressParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            progressParams.gravity = Gravity.CENTER
+            frameLayout.addView(progressBar, progressParams)
+
+            return object : RecyclerView.ViewHolder(frameLayout) {}
+        }
+
+        val binding = ItemSpeciesHistoryBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
         return HistoryViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: HistoryViewHolder, position: Int) {
-        val entry = historyList[position]
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        if (holder is HistoryViewHolder) {
+            val entry = historyList[position]
 
-        val isFirstItemOfDay =
+            val isFirstItemOfDay =
                 position == 0 || !isSameDay(entry.timestamp, historyList[position - 1].timestamp)
-        val isLastItemOfDay =
-                position == historyList.size - 1 ||
-                        !isSameDay(entry.timestamp, historyList[position + 1].timestamp)
+            
+            // Logic kiểm tra item cuối cùng trong ngày
+            val isLastItemOfDay = if (position == historyList.size - 1) {
+                // Nếu là item cuối cùng của list hiện tại
+                // Nếu đang loading thì tạm coi là cuối ngày, khi load thêm sẽ update lại sau
+                true 
+            } else {
+                !isSameDay(entry.timestamp, historyList[position + 1].timestamp)
+            }
 
-        holder.bind(entry, isFirstItemOfDay, isLastItemOfDay, clickListener)
+            holder.bind(entry, isFirstItemOfDay, isLastItemOfDay, clickListener)
+        }
     }
 
-    override fun getItemCount(): Int = historyList.size
+    override fun getItemCount(): Int = historyList.size + if (isLoading) 1 else 0
 
     private fun isSameDay(timestamp1: Long, timestamp2: Long): Boolean {
         val date1 = Instant.ofEpochMilli(timestamp1).atZone(ZoneId.systemDefault()).toLocalDate()
