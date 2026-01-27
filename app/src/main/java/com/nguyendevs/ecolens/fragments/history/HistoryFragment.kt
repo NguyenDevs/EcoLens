@@ -2,6 +2,8 @@ package com.nguyendevs.ecolens.fragments.history
 
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +12,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.util.Pair
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.gson.Gson
@@ -51,6 +55,12 @@ class HistoryFragment : Fragment() {
     private var currentSortOption = HistorySortOption.NEWEST_FIRST
     private var filterStartDate: Long? = null
     private var filterEndDate: Long? = null
+    
+    // Lazy loading variables
+    private var fullHistoryList: List<HistoryEntry> = emptyList()
+    private var currentPage = 0
+    private var isLoadingMore = false
+    private val pageSize = 20
 
     enum class CategoryFilter {
         ALL,
@@ -90,7 +100,7 @@ class HistoryFragment : Fragment() {
 
         adapter =
                 HistoryAdapter(
-                        historyList = emptyList(),
+                        historyList = mutableListOf(),
                         markwon = markwon,
                         clickListener = { entry ->
                             binding.rvHistory.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
@@ -98,6 +108,19 @@ class HistoryFragment : Fragment() {
                         }
                 )
         binding.rvHistory.adapter = adapter
+
+        binding.rvHistory.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                val totalItemCount = layoutManager.itemCount
+                val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
+
+                if (!isLoadingMore && totalItemCount <= (lastVisibleItem + 5)) {
+                    loadNextPage()
+                }
+            }
+        })
     }
 
     private fun setupClickListeners() {
@@ -191,10 +214,34 @@ class HistoryFragment : Fragment() {
                     } else {
                         binding.rvHistory.visibility = View.VISIBLE
                         binding.emptyStateContainer.visibility = View.GONE
-                        adapter.updateList(filteredList)
+                        
+                        fullHistoryList = filteredList
+                        currentPage = 0
+                        val firstPage = fullHistoryList.take(pageSize)
+                        adapter.updateList(firstPage)
                     }
                 }
         }
+    }
+
+    private fun loadNextPage() {
+        val start = (currentPage + 1) * pageSize
+        if (start >= fullHistoryList.size) return
+
+        isLoadingMore = true
+        adapter.setLoading(true)
+
+        // Simulate loading delay for better UX
+        Handler(Looper.getMainLooper()).postDelayed({
+            val end = (start + pageSize).coerceAtMost(fullHistoryList.size)
+            val newItems = fullHistoryList.subList(start, end)
+
+            adapter.setLoading(false)
+            adapter.addItems(newItems)
+
+            currentPage++
+            isLoadingMore = false
+        }, 500)
     }
 
     // ==================== SORT OPERATIONS ====================
