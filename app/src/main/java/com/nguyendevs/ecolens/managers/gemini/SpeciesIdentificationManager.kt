@@ -175,7 +175,6 @@ class SpeciesIdentificationManager(
         ))
 
         try {
-            // 1. Get Common Name from Gemini
             val commonName = streamingHelper.getCommonName(scientificName, languageCode)
             if (!commonName.isNullOrEmpty()) {
                 currentSpeciesInfo = currentSpeciesInfo?.copy(commonName = commonName)
@@ -186,7 +185,6 @@ class SpeciesIdentificationManager(
                 ))
             }
 
-            // 2. Parallel execution of GBIF, IUCN and Gemini Details
             coroutineScope {
                 val gbifDeferred = async(Dispatchers.IO) {
                     try {
@@ -212,7 +210,6 @@ class SpeciesIdentificationManager(
                     }
                 }
 
-                // Start streaming details immediately
                 val infoForDetails = currentSpeciesInfo ?: SpeciesInfo(
                     scientificName = scientificName,
                     confidence = confidence
@@ -225,7 +222,6 @@ class SpeciesIdentificationManager(
                         languageCode,
                         infoForDetails
                     ) { state ->
-                        // Fix: Merge taxonomy from currentSpeciesInfo because infoForDetails might be stale
                         val incomingInfo = state.speciesInfo
                         val current = currentSpeciesInfo
 
