@@ -6,36 +6,50 @@
         android:layout_height="match_parent"
         android:background="@color/background">
 
-    <!-- MODERN CHAT HISTORY SCREEN -->
-
+    <!-- MAIN CONTENT -->
     <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
             android:animateLayoutChanges="true"
-            android:paddingTop="10dp"
-            android:paddingBottom="46dp">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-        <!-- HEADER -->
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
-                android:text="@string/my_garden_title"
-                android:paddingStart="@dimen/padding_screen_horizontal"
-                android:paddingEnd="@dimen/padding_screen_horizontal"
-
-                style="@style/TextAppearance.App.Display"
-                android:textColor="@color/primary"/>
-
-        <View
+        <!-- ==================== CONTENT AREA ==================== -->
+        <LinearLayout
                 android:layout_width="match_parent"
-                android:background="@color/border_normal"
-                android:layout_marginStart="-20dp"
-                android:layout_marginEnd="-20dp"
-                android:layout_height="1.25dp"/>
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@color/background"
+                android:elevation="0dp">
 
-        <!-- CONTENT WRAPPER -->
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="@dimen/padding_screen_horizontal"
+                    android:paddingTop="@dimen/spacing_md">
+
+                <!-- Title -->
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/spacing_lg"
+                        android:text="@string/my_garden_title"
+                        android:textColor="@color/primary"
+                        android:textSize="30sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="-0.02"/>
+
+            </LinearLayout>
+
+            <!-- Divider -->
+            <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/border_normal"
+                    android:layout_marginStart="@dimen/padding_screen_horizontal"
+                    android:layout_marginEnd="@dimen/padding_screen_horizontal"/>
+
+        </LinearLayout>
         <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -46,10 +60,9 @@
                     android:id="@+id/rvChatHistory"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="20dp"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="36dp"
+                    android:paddingStart="@dimen/padding_screen_horizontal"
+                    android:paddingEnd="@dimen/padding_screen_horizontal"
+                    android:paddingBottom="76dp"
                     android:clipToPadding="false"
                     android:scrollbars="none"
                     android:overScrollMode="ifContentScrolls"
@@ -57,14 +70,14 @@
 
             <!-- EMPTY STATE -->
             <LinearLayout
-                    android:layout_marginTop="34.5dp"
                     android:id="@+id/emptyStateContainer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:orientation="vertical"
                     android:gravity="center_horizontal"
-                    android:padding="@dimen/spacing_xl">
+                    android:padding="@dimen/spacing_xl"
+                    android:visibility="gone">
 
                 <ImageView
                         android:layout_width="80dp"
@@ -87,26 +100,32 @@
                         android:layout_height="wrap_content"
                         android:text="@string/garden_subtitle"
                         style="@style/TextAppearance.App.Body2"
+                        android:textColor="@color/text_tertiary"
                         android:layout_marginTop="@dimen/spacing_xs"
                         android:textAlignment="center"/>
+
             </LinearLayout>
-            <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-                    android:id="@+id/fabNewChat"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom|end"
-                    android:layout_marginBottom="40dp"
-                    android:layout_marginEnd="24dp"
-                    android:textColor="@color/white"
-                    app:icon="@drawable/ic_chat_add"
-                    app:iconSize="@dimen/icon_lg"
-                    app:iconTint="@color/white"
-                    style="@style/Widget.App.FloatingActionButton"/>
 
         </FrameLayout>
 
     </LinearLayout>
 
-    <!-- NEW CHAT FAB -->
+    <!-- NEW CHAT FAB - Fixed at bottom right -->
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/fabNewChat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="@dimen/spacing_md"
+            android:layout_marginBottom="100dp"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            app:icon="@drawable/ic_chat_add"
+            app:iconSize="@dimen/icon_md"
+            app:iconTint="@color/white"
+            app:backgroundTint="@color/primary"
+            app:elevation="@dimen/elevation_lg"
+            app:pressedTranslationZ="@dimen/elevation_xl"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.FullRoundedComponent"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

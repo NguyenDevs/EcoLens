@@ -2,112 +2,144 @@
 <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:animateLayoutChanges="true"
-        android:orientation="vertical">
-
-    <!-- MODERN CHAT SESSION ITEM -->
+        android:orientation="vertical"
+        android:background="@android:color/transparent">
 
     <!-- DATE HEADER -->
     <TextView
             android:id="@+id/tvDateHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp"
-            android:paddingBottom="@dimen/spacing_xs"
-            android:text="Today"
-            style="@style/TextAppearance.App.Body2"
-            android:textColor="@color/primary"
+            android:paddingStart="@dimen/spacing_xxs"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:text="@string/today"
+            android:textSize="10sp"
+            android:textColor="@color/text_tertiary"
             android:textStyle="bold"
-            android:visibility="visible"/>
+            android:letterSpacing="0.15"
+            android:textAllCaps="true"
+            android:visibility="gone"
+            tools:visibility="visible"/>
 
-    <!-- SESSION CARD -->
+    <!-- CHAT SESSION CARD WITH BORDER -->
     <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardSession"
+            android:id="@+id/cardContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/spacing_xs"
-            style="@style/Widget.App.Card"
+            app:cardBackgroundColor="@color/surface"
+            app:cardElevation="0dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="@color/border_light"
             app:cardCornerRadius="@dimen/radius_md">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/itemContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:animateLayoutChanges="true"
-                android:padding="@dimen/spacing_md"
-                android:gravity="center_vertical">
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground"
+                android:padding="@dimen/spacing_md">
 
-            <!-- ICON -->
+            <!-- AI Avatar with Loading Ring -->
             <FrameLayout
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="@drawable/bg_flag_rounded"
-                    android:backgroundTint="@color/transparent">
+                    android:id="@+id/avatarContainer"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent">
 
+                <!-- Background Circle -->
+                <View
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/bg_icon_teal"/>
+
+                <!-- Loading Ring (Shows when AI is thinking) -->
                 <ImageView
                         android:id="@+id/ivLoadingRing"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:padding="-10dp"
+                        android:padding="-2dp"
                         android:src="@drawable/bg_gemini_ring_gradient"
                         android:scaleType="fitXY"
-                        android:visibility="visible"/>
+                        android:visibility="gone"
+                        tools:visibility="visible"/>
 
+                <!-- AI Icon -->
                 <ImageView
                         android:id="@+id/ivAiIcon"
                         android:layout_width="@dimen/icon_lg"
                         android:layout_height="@dimen/icon_lg"
-                        android:src="@drawable/ic_gemini_sparkle"
                         android:layout_gravity="center"
-                        android:padding="4dp"/>
+                        android:src="@drawable/ic_gemini_sparkle"
+                        android:padding="4dp"
+                        android:contentDescription="@string/my_garden"/>
+
             </FrameLayout>
 
             <!-- INFO SECTION -->
             <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
                     android:layout_marginStart="@dimen/spacing_md"
-                    android:layout_marginEnd="@dimen/spacing_xs">
+                    android:layout_marginEnd="@dimen/spacing_xs"
+                    android:orientation="vertical"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/tvTime"
+                    app:layout_constraintStart_toEndOf="@+id/avatarContainer"
+                    app:layout_constraintTop_toTopOf="parent">
 
+                <!-- Chat Title -->
                 <TextView
                         android:id="@+id/tvTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Hỏi về cây hoa hồng"
-                        style="@style/TextAppearance.App.Body1"
+                        android:textSize="16sp"
+                        android:textColor="@color/text_primary"
                         android:textStyle="bold"
-                        android:textColor="@color/primary_dark"
+                        android:fontFamily="sans-serif-medium"
                         android:maxLines="1"
-                        android:ellipsize="end"/>
+                        android:ellipsize="end"
+                        tools:text="Hỏi về cây hoa hồng"/>
 
+                <!-- Last Message Preview -->
                 <TextView
                         android:id="@+id/tvLastMessage"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
                         android:text="Nội dung tin nhắn cuối..."
-                        style="@style/TextAppearance.App.Body2"
+                        android:textSize="13sp"
+                        android:textColor="@color/text_secondary"
                         android:maxLines="1"
                         android:ellipsize="end"
-                        android:layout_marginTop="@dimen/spacing_xxxs"/>
+                        tools:text="Hoa hồng là loại thực vật thuộc họ..."/>
+
             </LinearLayout>
 
-            <!-- TIME -->
+            <!-- Time Stamp -->
             <TextView
                     android:id="@+id/tvTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="14:30"
-                    style="@style/TextAppearance.App.Caption"
+                    android:textSize="12sp"
                     android:textColor="@color/text_tertiary"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"/>
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="14:30"/>
 
-        </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
     </com.google.android.material.card.MaterialCardView>
+
 </LinearLayout>

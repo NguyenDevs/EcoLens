@@ -191,7 +191,7 @@
                     app:shapeAppearanceOverlay="@style/ShapeAppearance.App.FullRoundedComponent"/>
 
         </FrameLayout>
-                
+
     </com.google.android.material.card.MaterialCardView>
 
     <!-- FULLSCREEN IMAGE VIEWER -->
