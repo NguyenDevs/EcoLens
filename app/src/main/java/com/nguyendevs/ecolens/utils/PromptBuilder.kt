@@ -27,13 +27,16 @@ object PromptBuilder {
     }
 
     fun buildConservationPrompt(scientificName: String, iucnCode: String, isVietnamese: Boolean): String {
+        val codeToUse = iucnCode.trim()
+        val shouldSearch = codeToUse.isBlank() || codeToUse.equals("NE", ignoreCase = true)
+
         return if (isVietnamese) {
-            if (iucnCode.isNotBlank()) {
+            if (!shouldSearch) {
                 """
-                Phân tích tình trạng bảo tồn IUCN "$iucnCode" cho loài "$scientificName" bằng Tiếng Việt.
+                Phân tích tình trạng bảo tồn IUCN "$codeToUse" cho loài "$scientificName" bằng Tiếng Việt.
                 
                 Yêu cầu định dạng kết quả trong JSON (sử dụng \n để xuống dòng):
-                • **Tình trạng bảo tồn:** $iucnCode (Giải nghĩa ngắn gọn)
+                • **Tình trạng bảo tồn:** $codeToUse (Giải nghĩa ngắn gọn)
                 • **Giải thích tình trạng:** (Mô tả ngắn gọn về tình trạng này đối với loài)
                 • **Các mối đe doạ chính:** (Liệt kê các mối đe dọa chính)
                 
@@ -47,7 +50,7 @@ object PromptBuilder {
                 Hãy xác định tình trạng bảo tồn IUCN cho loài "$scientificName" bằng Tiếng Việt.
                 
                 Yêu cầu định dạng kết quả trong JSON (sử dụng \n để xuống dòng):
-                • **Tình trạng bảo tồn:** [Mã IUCN] (Giải nghĩa ngắn gọn)
+                • **Tình trạng bảo tồn:** [Mã IUCN tìm được] (Giải nghĩa ngắn gọn)
                 • **Giải thích tình trạng:** (Mô tả ngắn gọn về tình trạng này đối với loài)
                 • **Các mối đe doạ chính:** (Liệt kê các mối đe dọa chính)
                 
@@ -58,12 +61,12 @@ object PromptBuilder {
                 """.trimIndent()
             }
         } else {
-            if (iucnCode.isNotBlank()) {
+            if (!shouldSearch) {
                 """
-                Analyze IUCN conservation status "$iucnCode" for species "$scientificName" in English.
+                Analyze IUCN conservation status "$codeToUse" for species "$scientificName" in English.
                 
                 Format the result in JSON (use \n for new lines):
-                • **Conservation Status:** $iucnCode (Brief meaning)
+                • **Conservation Status:** $codeToUse (Brief meaning)
                 • **Status Explanation:** (Brief description of the status for this species)
                 • **Main Threats:** (List main threats)
                 
@@ -77,7 +80,7 @@ object PromptBuilder {
                 Determine the IUCN conservation status for species "$scientificName" in English.
                 
                 Format the result in JSON (use \n for new lines):
-                • **Conservation Status:** [IUCN Code] (Brief meaning)
+                • **Conservation Status:** [Found IUCN Code] (Brief meaning)
                 • **Status Explanation:** (Brief description of the status for this species)
                 • **Main Threats:** (List main threats)
                 
