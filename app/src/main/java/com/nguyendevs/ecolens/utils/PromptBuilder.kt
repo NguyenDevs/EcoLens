@@ -33,9 +33,9 @@ object PromptBuilder {
                 Phân tích tình trạng bảo tồn IUCN "$iucnCode" cho loài "$scientificName" bằng Tiếng Việt.
                 
                 Yêu cầu định dạng kết quả trong JSON (sử dụng \n để xuống dòng):
-                • Tình trạng bảo tồn: $iucnCode (Giải nghĩa ngắn gọn)
-                • Giải thích tình trạng: (Mô tả ngắn gọn về tình trạng này đối với loài)
-                • Các mối đe doạ chính: (Liệt kê các mối đe dọa chính)
+                • **Tình trạng bảo tồn:** $iucnCode (Giải nghĩa ngắn gọn)
+                • **Giải thích tình trạng:** (Mô tả ngắn gọn về tình trạng này đối với loài)
+                • **Các mối đe doạ chính:** (Liệt kê các mối đe dọa chính)
                 
                 Trả về JSON:
                 { "conservationStatus": "Nội dung đã định dạng..." }
@@ -47,9 +47,9 @@ object PromptBuilder {
                 Hãy xác định tình trạng bảo tồn IUCN cho loài "$scientificName" bằng Tiếng Việt.
                 
                 Yêu cầu định dạng kết quả trong JSON (sử dụng \n để xuống dòng):
-                • Tình trạng bảo tồn: [Mã IUCN tìm được] (Giải nghĩa ngắn gọn)
-                • Giải thích tình trạng: (Mô tả ngắn gọn về tình trạng này đối với loài)
-                • Các mối đe doạ chính: (Liệt kê các mối đe dọa chính)
+                • **Tình trạng bảo tồn:** [Mã IUCN] (Giải nghĩa ngắn gọn)
+                • **Giải thích tình trạng:** (Mô tả ngắn gọn về tình trạng này đối với loài)
+                • **Các mối đe doạ chính:** (Liệt kê các mối đe dọa chính)
                 
                 Trả về JSON:
                 { "conservationStatus": "Nội dung đã định dạng..." }
@@ -63,9 +63,9 @@ object PromptBuilder {
                 Analyze IUCN conservation status "$iucnCode" for species "$scientificName" in English.
                 
                 Format the result in JSON (use \n for new lines):
-                • Conservation Status: $iucnCode (Brief meaning)
-                • Status Explanation: (Brief description of the status for this species)
-                • Main Threats: (List main threats)
+                • **Conservation Status:** $iucnCode (Brief meaning)
+                • **Status Explanation:** (Brief description of the status for this species)
+                • **Main Threats:** (List main threats)
                 
                 Return JSON:
                 { "conservationStatus": "Formatted content..." }
@@ -77,9 +77,9 @@ object PromptBuilder {
                 Determine the IUCN conservation status for species "$scientificName" in English.
                 
                 Format the result in JSON (use \n for new lines):
-                • Conservation Status: [Found IUCN Code] (Brief meaning)
-                • Status Explanation: (Brief description of the status for this species)
-                • Main Threats: (List main threats)
+                • **Conservation Status:** [IUCN Code] (Brief meaning)
+                • **Status Explanation:** (Brief description of the status for this species)
+                • **Main Threats:** (List main threats)
                 
                 Return JSON:
                 { "conservationStatus": "Formatted content..." }
