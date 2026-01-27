@@ -295,28 +295,32 @@ class SpeciesIdentificationManager(
         gbif: GbifResponse,
         onStateUpdate: (EcoLensUiState) -> Unit
     ) = withContext(Dispatchers.Main) {
-        var updated = currentSpeciesInfo ?: return@withContext
-
-        fun format(value: String?, vi: String, en: String): String {
+        fun format(value: String?): String {
             return if (value != null) "<b>$value</b>" else ""
         }
 
-        updated = updated.copy(
-            kingdom = format(gbif.kingdom, "Giới", "Kingdom"),
-            phylum = format(gbif.phylum, "Ngành", "Phylum"),
-            className = format(gbif.className, "Lớp", "Class"),
-            taxorder = format(gbif.taxorder, "Bộ", "Order"),
-            family = format(gbif.family, "Họ", "Family"),
-            genus = format(gbif.genus, "Chi", "Genus"),
-            species = format(gbif.species, "Loài", "Species")
-        )
-        
-        currentSpeciesInfo = updated
-        onStateUpdate(EcoLensUiState(
-            isLoading = true,
-            speciesInfo = updated,
-            loadingStage = LoadingStage.TAXONOMY
-        ))
+        suspend fun updateAndDelay(block: (SpeciesInfo) -> SpeciesInfo) {
+            val current = currentSpeciesInfo ?: return
+            val updated = block(current)
+
+            if (updated != current) {
+                currentSpeciesInfo = updated
+                onStateUpdate(EcoLensUiState(
+                    isLoading = true,
+                    speciesInfo = updated,
+                    loadingStage = LoadingStage.TAXONOMY
+                ))
+                delay(100)
+            }
+        }
+
+        if (gbif.kingdom != null) updateAndDelay { it.copy(kingdom = format(gbif.kingdom)) }
+        if (gbif.phylum != null) updateAndDelay { it.copy(phylum = format(gbif.phylum)) }
+        if (gbif.className != null) updateAndDelay { it.copy(className = format(gbif.className)) }
+        if (gbif.taxorder != null) updateAndDelay { it.copy(taxorder = format(gbif.taxorder)) }
+        if (gbif.family != null) updateAndDelay { it.copy(family = format(gbif.family)) }
+        if (gbif.genus != null) updateAndDelay { it.copy(genus = format(gbif.genus)) }
+        if (gbif.species != null) updateAndDelay { it.copy(species = format(gbif.species)) }
     }
 
     // ==================== HISTORY MANAGEMENT ====================

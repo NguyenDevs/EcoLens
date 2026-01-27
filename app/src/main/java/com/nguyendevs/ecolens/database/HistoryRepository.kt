@@ -103,7 +103,28 @@ class HistoryRepository(
 
     /** Cập nhật bản ghi vào cả local và đồng bộ lên Firebase */
     suspend fun update(entry: HistoryEntry) {
-        updateLocal(entry)
+        // Sử dụng updateSpeciesDetails để đảm bảo tất cả các trường được cập nhật
+        withContext(Dispatchers.IO) {
+            historyDao.updateSpeciesDetails(
+                id = entry.id,
+                commonName = entry.speciesInfo.commonName,
+                scientificName = entry.speciesInfo.scientificName,
+                kingdom = entry.speciesInfo.kingdom,
+                phylum = entry.speciesInfo.phylum,
+                className = entry.speciesInfo.className,
+                taxorder = entry.speciesInfo.taxorder,
+                family = entry.speciesInfo.family,
+                genus = entry.speciesInfo.genus,
+                species = entry.speciesInfo.species,
+                description = entry.speciesInfo.description,
+                characteristics = entry.speciesInfo.characteristics,
+                distribution = entry.speciesInfo.distribution,
+                habitat = entry.speciesInfo.habitat,
+                conservationStatus = entry.speciesInfo.conservationStatus,
+                confidence = entry.speciesInfo.confidence,
+                timestamp = entry.timestamp
+            )
+        }
         externalScope.launch { syncRemote(entry) }
     }
 
