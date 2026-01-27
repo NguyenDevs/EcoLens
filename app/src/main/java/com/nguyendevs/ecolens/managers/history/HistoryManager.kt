@@ -150,7 +150,7 @@ class HistoryManager(
 
     /**
      * Toggle favorite status của một history entry
-     */
+
     suspend fun toggleFavorite(entry: HistoryEntry) {
         withContext(Dispatchers.IO) {
             runCatching {
@@ -160,6 +160,7 @@ class HistoryManager(
             }
         }
     }
+     */
 
     // ==================== DELETE OPERATIONS ====================
 

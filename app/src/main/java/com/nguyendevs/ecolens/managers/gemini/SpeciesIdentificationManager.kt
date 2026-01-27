@@ -225,8 +225,26 @@ class SpeciesIdentificationManager(
                         languageCode,
                         infoForDetails
                     ) { state ->
-                        currentSpeciesInfo = state.speciesInfo
-                        onStateUpdate(state)
+                        // Fix: Merge taxonomy from currentSpeciesInfo because infoForDetails might be stale
+                        val incomingInfo = state.speciesInfo
+                        val current = currentSpeciesInfo
+
+                        val mergedInfo = if (incomingInfo != null && current != null) {
+                            incomingInfo.copy(
+                                kingdom = current.kingdom,
+                                phylum = current.phylum,
+                                className = current.className,
+                                taxorder = current.taxorder,
+                                family = current.family,
+                                genus = current.genus,
+                                species = current.species
+                            )
+                        } else {
+                            incomingInfo
+                        }
+
+                        currentSpeciesInfo = mergedInfo
+                        onStateUpdate(state.copy(speciesInfo = mergedInfo))
                     }
                 }
 

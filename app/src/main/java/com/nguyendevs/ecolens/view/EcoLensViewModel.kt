@@ -160,12 +160,13 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
     /**
      * Bật/tắt đánh dấu yêu thích cho một mục lịch sử
-     */
+
     fun toggleFavorite(entry: HistoryEntry) {
         viewModelScope.launch {
             historyManager.toggleFavorite(entry)
         }
     }
+     */
 
     /**
      * Xóa một mục lịch sử
