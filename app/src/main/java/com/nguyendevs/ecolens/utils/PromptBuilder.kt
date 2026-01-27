@@ -1,33 +1,23 @@
 package com.nguyendevs.ecolens.utils
 
-/**
- * Builder for generating optimized prompts for Gemini API.
- * Token-optimized (~25% reduction) while maintaining output quality.
- */
 object PromptBuilder {
 
-    /**
-     * Generates a taxonomic classification prompt.
-     *
-     * @param scientificName Scientific name of the species
-     * @param isVietnamese Whether to request Vietnamese output
-     * @return Formatted prompt string for Gemini API
-     */
-    fun buildTaxonomyPrompt(scientificName: String, isVietnamese: Boolean): String {
+    fun buildCommonNamePrompt(scientificName: String, isVietnamese: Boolean): String {
         return if (isVietnamese) {
-            buildVietnameseTaxonomyPrompt(scientificName)
+            """
+            Cho biết tên thường gọi phổ biến nhất của "$scientificName" bằng Tiếng Việt.
+            Trả về JSON duy nhất: {"commonName": "Tên Tiếng Việt"}
+            CHỈ TRẢ VỀ JSON, KHÔNG MARKDOWN.
+            """.trimIndent()
         } else {
-            buildEnglishTaxonomyPrompt(scientificName)
+            """
+            Provide the most common name for "$scientificName" in English.
+            Return JSON only: {"commonName": "Name"}
+            RETURN ONLY JSON, NO MARKDOWN.
+            """.trimIndent()
         }
     }
 
-    /**
-     * Generates a detailed species information prompt.
-     *
-     * @param scientificName Scientific name of the species
-     * @param isVietnamese Whether to request Vietnamese output
-     * @return Formatted prompt string for Gemini API
-     */
     fun buildDetailsPrompt(scientificName: String, isVietnamese: Boolean): String {
         return if (isVietnamese) {
             buildVietnameseDetailsPrompt(scientificName)
@@ -36,43 +26,29 @@ object PromptBuilder {
         }
     }
 
-    // ========== Private Helper Methods ==========
-
-    private fun buildVietnameseTaxonomyPrompt(scientificName: String): String = """
-        Cung cấp phân loại khoa học đầy đủ về "$scientificName" bằng Tiếng Việt.
-        
-        Trả về JSON:
-        {
-          "commonName": "Tên thường gọi Tiếng Việt",
-          "kingdom": "Tên Tiếng Việt",
-          "phylum": "Tên Tiếng Việt",
-          "className": "Tên Tiếng Việt",
-          "taxorder": "Tên Tiếng Việt",
-          "family": "Tên khoa học",
-          "genus": "Tên khoa học",
-          "species": "Tên khoa học"
+    fun buildConservationPrompt(scientificName: String, iucnCode: String, isVietnamese: Boolean): String {
+        return if (isVietnamese) {
+            """
+            Giải thích ngắn gọn tình trạng bảo tồn IUCN "$iucnCode" cho loài "$scientificName" bằng Tiếng Việt.
+            Nêu rõ các mối đe dọa chính (nếu có).
+            
+            Trả về JSON:
+            { "conservationStatus": "Nội dung giải thích..." }
+            
+            CHỈ TRẢ VỀ JSON.
+            """.trimIndent()
+        } else {
+            """
+            Briefly explain IUCN conservation status "$iucnCode" for "$scientificName" in English.
+            Mention main threats (if any).
+            
+            Return JSON:
+            { "conservationStatus": "Explanation content..." }
+            
+            RETURN ONLY JSON.
+            """.trimIndent()
         }
-        
-        CHỈ TRẢ VỀ JSON, KHÔNG THÊM TEXT.
-    """.trimIndent()
-
-    private fun buildEnglishTaxonomyPrompt(scientificName: String): String = """
-        Provide complete taxonomic classification for "$scientificName" in English.
-        
-        Return JSON:
-        {
-          "commonName": "Common name",
-          "kingdom": "Kingdom name",
-          "phylum": "Phylum name",
-          "className": "Class name",
-          "taxorder": "Order name",
-          "family": "Family name",
-          "genus": "Genus name",
-          "species": "Species name"
-        }
-        
-        RETURN ONLY JSON, NO ADDITIONAL TEXT.
-    """.trimIndent()
+    }
 
     private fun buildVietnameseDetailsPrompt(scientificName: String): String = """
         Cung cấp thông tin chi tiết về "$scientificName" bằng Tiếng Việt.
@@ -87,8 +63,7 @@ object PromptBuilder {
           "description": "Tổng quan 4-5 câu đầy đủ. Dùng **in đậm** và ##xanh## cho đặc điểm nổi bật, địa danh và số đo.",
           "characteristics": "Danh sách gạch đầu dòng, mỗi dòng bắt đầu với dấu •:\n• Hình thái cơ thể\n• Cấu trúc cơ thể\n• Kích thước (dùng ##số đo##)\n• Màu sắc\n• Đặc điểm nhận dạng\n• Đặc điểm sinh học đặc biệt",
           "distribution": "Ưu tiên Việt Nam trước (nếu có), sau đó toàn cầu. Dùng ##xanh đậm## cho tên địa danh.",
-          "habitat": "Mô tả chi tiết môi trường sống: độ cao, khí hậu, thảm thực vật, nguồn thức ăn.",
-          "conservationStatus": "Chọn một: Cực kỳ nguy cấp (CR)/Nguy cấp (EN)/Sách Đỏ Việt Nam (VU)/Sắp nguy cấp (NT)/Ít lo ngại (LC)/Chưa đánh giá (NE). Thêm thông tin IUCN và các mối đe dọa chính."
+          "habitat": "Mô tả chi tiết môi trường sống: độ cao, khí hậu, thảm thực vật, nguồn thức ăn."
         }
         
         CHỈ TRẢ VỀ JSON.
@@ -107,8 +82,7 @@ object PromptBuilder {
           "description": "Comprehensive 4-5 sentence overview. Use **bold** and ##green## for key features, places and measurements.",
           "characteristics": "Bullet list, each line starts with •:\n• Body morphology\n• Body structure\n• Size dimensions (use ##measurements##)\n• Colors\n• Identifying features\n• Special biological traits",
           "distribution": "Vietnam first if applicable, then worldwide. Use ##green highlight## for locations.",
-          "habitat": "Detailed environment: elevation, climate, vegetation, food sources.",
-          "conservationStatus": "Choose one: Critically Endangered (CR)/Endangered (EN)/Vulnerable (VU)/Near Threatened (NT)/Least Concern (LC)/Not Evaluated (NE). Add IUCN info and main threats."
+          "habitat": "Detailed environment: elevation, climate, vegetation, food sources."
         }
         
         RETURN ONLY JSON.

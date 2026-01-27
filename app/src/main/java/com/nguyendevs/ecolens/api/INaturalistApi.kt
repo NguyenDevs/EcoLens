@@ -42,6 +42,17 @@ interface INaturalistApi {
         @Query("locale") locale: String = "vi"
     ): TaxonDetailsResponse
 
+    // ==================== EXTERNAL APIS (GBIF & IUCN) ====================
+
+    @GET
+    suspend fun getGbifTaxonomy(@Url url: String): GbifResponse
+
+    @GET("iucn/api/v4/taxa/scientific_name")
+    suspend fun getIucnStatus(
+        @Query("genus_name") genusName: String,
+        @Query("species_name") speciesName: String
+    ): IucnResponse
+
     // ==================== GEMINI AI - CHAT ====================
 
     /**

@@ -5,7 +5,9 @@ import android.net.Uri
 import android.util.Log
 import com.google.gson.Gson
 import com.nguyendevs.ecolens.R
+import com.nguyendevs.ecolens.api.GbifResponse
 import com.nguyendevs.ecolens.api.IdentificationResult
+import com.nguyendevs.ecolens.api.IucnResponse
 import com.nguyendevs.ecolens.database.HistoryRepository
 import com.nguyendevs.ecolens.model.*
 import com.nguyendevs.ecolens.model.history.HistoryEntry
@@ -20,7 +22,7 @@ import java.io.FileNotFoundException
 
 /**
  * Manager xử lý nhận diện loài từ ảnh
- * Flow: iNaturalist API → Gemini streaming (taxonomy + details) → Save to history
+ * Flow: iNaturalist API → Gemini (Common Name) → Parallel(GBIF + IUCN + Gemini Details) → Gemini Conservation → Save to history
  * Hỗ trợ update existing history entry hoặc tạo mới
  */
 class SpeciesIdentificationManager(
@@ -49,7 +51,7 @@ class SpeciesIdentificationManager(
 
     /**
      * Nhận diện loài từ ảnh
-     * Flow: Prepare image → iNaturalist API → Gemini streaming → Save history
+     * Flow: Prepare image → iNaturalist API → Gemini (Common Name) → Parallel(GBIF + IUCN + Gemini Details) → Gemini Conservation → Save history
      *
      * @param imageUri URI của ảnh cần nhận diện
      * @param languageCode Ngôn ngữ cho kết quả (vi/en)
@@ -146,7 +148,9 @@ class SpeciesIdentificationManager(
 
     /**
      * Xử lý kết quả nhận diện
-     * Stream taxonomy và details từ Gemini, sau đó save vào history
+     * 1. Lấy Common Name từ Gemini
+     * 2. Gọi song song GBIF, IUCN và Gemini Details
+     * 3. Sau khi Details xong, gọi Gemini Conservation
      */
     private suspend fun processIdentificationResult(
         result: IdentificationResult,
@@ -171,14 +175,109 @@ class SpeciesIdentificationManager(
         ))
 
         try {
-            streamTaxonomyAndDetails(scientificName, confidence, languageCode, onStateUpdate)
-            saveToHistory(existingHistoryId, imageFile)
+            // 1. Get Common Name from Gemini
+            val commonName = streamingHelper.getCommonName(scientificName, languageCode)
+            if (!commonName.isNullOrEmpty()) {
+                currentSpeciesInfo = currentSpeciesInfo?.copy(commonName = commonName)
+                onStateUpdate(EcoLensUiState(
+                    isLoading = true,
+                    speciesInfo = currentSpeciesInfo,
+                    loadingStage = LoadingStage.COMMON_NAME
+                ))
+            }
 
-            onStateUpdate(EcoLensUiState(
-                isLoading = false,
-                speciesInfo = currentSpeciesInfo,
-                loadingStage = LoadingStage.COMPLETE
-            ))
+            // 2. Parallel execution of GBIF, IUCN and Gemini Details
+            coroutineScope {
+                val gbifDeferred = async(Dispatchers.IO) {
+                    try {
+                        val url = "https://api.gbif.org/v1/species/match?name=$scientificName"
+                        apiService.getGbifTaxonomy(url)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "GBIF Error: ${e.message}")
+                        null
+                    }
+                }
+
+                val iucnDeferred = async(Dispatchers.IO) {
+                    try {
+                        val parts = scientificName.split(" ")
+                        if (parts.size >= 2) {
+                            apiService.getIucnStatus(parts[0], parts[1])
+                        } else {
+                            null
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "IUCN Error: ${e.message}")
+                        null
+                    }
+                }
+
+                // Start streaming details immediately
+                val infoForDetails = currentSpeciesInfo ?: SpeciesInfo(
+                    scientificName = scientificName,
+                    confidence = confidence
+                )
+
+                val geminiDetailsDeferred = async(Dispatchers.IO) {
+                    streamingHelper.streamDetails(
+                        scientificName,
+                        confidence,
+                        languageCode,
+                        infoForDetails
+                    ) { state ->
+                        currentSpeciesInfo = state.speciesInfo
+                        onStateUpdate(state)
+                    }
+                }
+
+                // Wait for GBIF and IUCN
+                val gbifResult = gbifDeferred.await()
+                val iucnResult = iucnDeferred.await()
+
+                // Update taxonomy from GBIF
+                if (gbifResult != null) {
+                    updateTaxonomyFromGbif(gbifResult, onStateUpdate)
+                }
+
+                // Get conservation status code
+                val iucnCode = iucnResult?.assessments?.firstOrNull()?.redListCategoryCode ?: "NE"
+
+                // Wait for Gemini Details to finish before showing Conservation
+                geminiDetailsDeferred.await()
+
+                // Set temporary "Searching..." text for conservation status
+                val searchingText = context.getString(R.string.searching_info)
+                currentSpeciesInfo = currentSpeciesInfo?.copy(conservationStatus = searchingText)
+                onStateUpdate(EcoLensUiState(
+                    isLoading = true,
+                    speciesInfo = currentSpeciesInfo,
+                    loadingStage = LoadingStage.CONSERVATION
+                ))
+
+                // 3. Stream Conservation Status description
+                val infoForConservation = currentSpeciesInfo ?: SpeciesInfo(
+                    scientificName = scientificName,
+                    confidence = confidence
+                )
+
+                streamingHelper.streamConservation(
+                    scientificName,
+                    iucnCode,
+                    languageCode,
+                    infoForConservation
+                ) { state ->
+                    currentSpeciesInfo = state.speciesInfo
+                    onStateUpdate(state)
+                }
+
+                saveToHistory(existingHistoryId, imageFile)
+
+                onStateUpdate(EcoLensUiState(
+                    isLoading = false,
+                    speciesInfo = currentSpeciesInfo,
+                    loadingStage = LoadingStage.COMPLETE
+                ))
+            }
 
         } catch (e: GeoBlockedException) {
             onStateUpdate(EcoLensUiState(
@@ -192,38 +291,32 @@ class SpeciesIdentificationManager(
         }
     }
 
-    /**
-     * Stream taxonomy và details từ Gemini API
-     */
-    private suspend fun streamTaxonomyAndDetails(
-        scientificName: String,
-        confidence: Double,
-        languageCode: String,
+    private suspend fun updateTaxonomyFromGbif(
+        gbif: GbifResponse,
         onStateUpdate: (EcoLensUiState) -> Unit
-    ) {
-        streamingHelper.streamTaxonomy(
-            scientificName,
-            confidence,
-            languageCode
-        ) { state ->
-            currentSpeciesInfo = state.speciesInfo
-            onStateUpdate(state)
+    ) = withContext(Dispatchers.Main) {
+        var updated = currentSpeciesInfo ?: return@withContext
+
+        fun format(value: String?, vi: String, en: String): String {
+            return if (value != null) "<b>$value</b>" else ""
         }
 
-        val infoForDetails = currentSpeciesInfo ?: SpeciesInfo(
-            scientificName = scientificName,
-            confidence = confidence
+        updated = updated.copy(
+            kingdom = format(gbif.kingdom, "Giới", "Kingdom"),
+            phylum = format(gbif.phylum, "Ngành", "Phylum"),
+            className = format(gbif.className, "Lớp", "Class"),
+            taxorder = format(gbif.taxorder, "Bộ", "Order"),
+            family = format(gbif.family, "Họ", "Family"),
+            genus = format(gbif.genus, "Chi", "Genus"),
+            species = format(gbif.species, "Loài", "Species")
         )
-
-        streamingHelper.streamDetails(
-            scientificName,
-            confidence,
-            languageCode,
-            infoForDetails
-        ) { state ->
-            currentSpeciesInfo = state.speciesInfo
-            onStateUpdate(state)
-        }
+        
+        currentSpeciesInfo = updated
+        onStateUpdate(EcoLensUiState(
+            isLoading = true,
+            speciesInfo = updated,
+            loadingStage = LoadingStage.TAXONOMY
+        ))
     }
 
     // ==================== HISTORY MANAGEMENT ====================

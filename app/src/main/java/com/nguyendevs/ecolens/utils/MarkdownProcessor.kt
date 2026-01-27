@@ -59,35 +59,80 @@ class MarkdownProcessor {
     }
 
     private fun colorizeConservationStatus(text: String, isVietnamese: Boolean): String {
+        // IUCN Red List Categories & Criteria
+        // EX - Extinct (Tuyệt chủng) - Black
+        // EW - Extinct in the Wild (Tuyệt chủng trong tự nhiên) - Purple
+        // CR - Critically Endangered (Cực kỳ nguy cấp) - Red
+        // EN - Endangered (Nguy cấp) - Orange
+        // VU - Vulnerable (Sắp nguy cấp) - Yellow
+        // NT - Near Threatened (Sắp bị đe dọa) - Light Green
+        // LC - Least Concern (Ít quan tâm) - Green
+        // DD - Data Deficient (Thiếu dữ liệu) - Grey
+        // NE - Not Evaluated (Chưa đánh giá) - White/Grey
+
         val statusMap = if (isVietnamese) {
             mapOf(
-                "Cực kỳ nguy cấp" to "#8B0000",
-                "Nguy cấp" to "#8B0000",
-                "Sách Đỏ Việt Nam" to "#c97408",
-                "Sách Đỏ" to "#c97408",
-                "Sắp nguy cấp" to "#eddb11",
-                "Ít lo ngại" to "#55f200",
-                "Chưa đánh giá" to "#05deff"
+                "EX" to "#000000",
+                "EW" to "#800080",
+                "CR" to "#D81E05",
+                "EN" to "#FC7F3F",
+                "VU" to "#F9E814",
+                "NT" to "#CCE226",
+                "LC" to "#60C659",
+                "DD" to "#D1D1D6",
+                "NE" to "#FFFFFF",
+                "Tuyệt chủng" to "#000000",
+                "Tuyệt chủng trong tự nhiên" to "#800080",
+                "Cực kỳ nguy cấp" to "#D81E05",
+                "Nguy cấp" to "#FC7F3F",
+                "Sắp nguy cấp" to "#F9E814",
+                "Sắp bị đe dọa" to "#CCE226",
+                "Ít quan tâm" to "#60C659",
+                "Thiếu dữ liệu" to "#D1D1D6",
+                "Chưa đánh giá" to "#FFFFFF"
             )
         } else {
             mapOf(
-                "Critically Endangered" to "#8B0000",
-                "Endangered" to "#8B0000",
-                "Vulnerable (Vietnam Red Data Book)" to "#c97408",
-                "Vulnerable" to "#c97408",
-                "Near Threatened" to "#eddb11",
-                "Least Concern" to "#55f200",
-                "Not Evaluated" to "#05deff"
+                "EX" to "#000000",
+                "EW" to "#800080",
+                "CR" to "#D81E05",
+                "EN" to "#FC7F3F",
+                "VU" to "#F9E814",
+                "NT" to "#CCE226",
+                "LC" to "#60C659",
+                "DD" to "#D1D1D6",
+                "NE" to "#FFFFFF",
+                "Extinct" to "#000000",
+                "Extinct in the Wild" to "#800080",
+                "Critically Endangered" to "#D81E05",
+                "Endangered" to "#FC7F3F",
+                "Vulnerable" to "#F9E814",
+                "Near Threatened" to "#CCE226",
+                "Least Concern" to "#60C659",
+                "Data Deficient" to "#D1D1D6",
+                "Not Evaluated" to "#FFFFFF"
             )
         }
 
         var result = text
         statusMap.entries.sortedByDescending { it.key.length }.forEach { (status, color) ->
-            if (result.contains(status, ignoreCase = true)) {
-                result = result.replace(
-                    Regex("(?i)$status"),
+            // Match whole word to avoid partial matches (e.g. "EN" inside "ENDANGERED")
+            // But for Vietnamese phrases, simple contains is safer.
+            // For codes like EX, EW, CR... we should be careful.
+            
+            if (status.length <= 2) {
+                 // For codes, use word boundary
+                 result = result.replace(
+                    Regex("\\b$status\\b", RegexOption.IGNORE_CASE),
                     "<font color='$color'><b>$status</b></font>"
                 )
+            } else {
+                if (result.contains(status, ignoreCase = true)) {
+                    result = result.replace(
+                        Regex("(?i)$status"),
+                        "<font color='$color'><b>$status</b></font>"
+                    )
+                }
             }
         }
         return result

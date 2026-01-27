@@ -297,4 +297,5 @@
     <string name="history_chipAnimals">Animals</string>
     <string name="history_chipPlants">Plants</string>
     <string name="history_chipAll">All</string>
+    <string name="searching_info">Searching...</string>
 </resources>
