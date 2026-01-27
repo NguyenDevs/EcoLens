@@ -103,7 +103,6 @@ class HistoryRepository(
 
     /** Cập nhật bản ghi vào cả local và đồng bộ lên Firebase */
     suspend fun update(entry: HistoryEntry) {
-        // Sử dụng updateSpeciesDetails để đảm bảo tất cả các trường được cập nhật
         withContext(Dispatchers.IO) {
             historyDao.updateSpeciesDetails(
                 id = entry.id,
