@@ -30,7 +30,7 @@ object PromptBuilder {
         return if (isVietnamese) {
             """
             Giải thích ngắn gọn tình trạng bảo tồn IUCN "$iucnCode" cho loài "$scientificName" bằng Tiếng Việt.
-            Nêu rõ các mối đe dọa chính (nếu có).
+            Danh sách gạch đầu dòng, mỗi dòng bắt đầu với dấu •: Nêu rõ các mối đe dọa chính (nếu có).
             
             Trả về JSON:
             { "conservationStatus": "Nội dung giải thích..." }
@@ -40,7 +40,7 @@ object PromptBuilder {
         } else {
             """
             Briefly explain IUCN conservation status "$iucnCode" for "$scientificName" in English.
-            Mention main threats (if any).
+            Bullet list, each line starts with •: Mention main threats (if any).
             
             Return JSON:
             { "conservationStatus": "Explanation content..." }
