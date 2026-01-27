@@ -113,7 +113,11 @@
     <string name="analyzing">Analyzing image…</string>
     <string name="analyzing_text">Analyzing image</string>
     <string name="analyzing_info">Retrieving species information</string>
-    <string name="loading_analyzing">Analyzing image...</string>
+    <string name="loading_analyzing">Analyzing image</string>
+    <string name="loading_taxon">Retrieving taxonomy</string>
+    <string name="loading_detail">Retrieving species information</string>
+    <string name="loading_conservation">Checking conservation status</string>
+    <string name="loading_done">Checking complete</string>
 
     <!-- History Screen -->
     <string name="history">History</string>
