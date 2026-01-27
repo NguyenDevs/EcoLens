@@ -230,22 +230,17 @@ class SpeciesIdentificationManager(
                     }
                 }
 
-                // Wait for GBIF and IUCN
                 val gbifResult = gbifDeferred.await()
                 val iucnResult = iucnDeferred.await()
 
-                // Update taxonomy from GBIF
                 if (gbifResult != null) {
                     updateTaxonomyFromGbif(gbifResult, onStateUpdate)
                 }
 
-                // Get conservation status code
                 val iucnCode = iucnResult?.assessments?.firstOrNull()?.redListCategoryCode ?: "NE"
 
-                // Wait for Gemini Details to finish before showing Conservation
                 geminiDetailsDeferred.await()
 
-                // Set temporary "Searching..." text for conservation status
                 val searchingText = context.getString(R.string.searching_info)
                 currentSpeciesInfo = currentSpeciesInfo?.copy(conservationStatus = searchingText)
                 onStateUpdate(EcoLensUiState(
@@ -254,7 +249,6 @@ class SpeciesIdentificationManager(
                     loadingStage = LoadingStage.CONSERVATION
                 ))
 
-                // 3. Stream Conservation Status description
                 val infoForConservation = currentSpeciesInfo ?: SpeciesInfo(
                     scientificName = scientificName,
                     confidence = confidence
@@ -371,8 +365,7 @@ class SpeciesIdentificationManager(
                 imagePath = localImagePath,
                 localImagePath = localImagePath,
                 speciesInfo = info,
-                timestamp = System.currentTimeMillis(),
-                isFavorite = false
+                timestamp = System.currentTimeMillis()
             )
 
             Log.d(TAG, "Inserting new history entry")
