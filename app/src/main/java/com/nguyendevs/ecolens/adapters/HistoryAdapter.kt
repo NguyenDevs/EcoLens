@@ -71,7 +71,7 @@ class HistoryAdapter(
                                                 newItem.speciesInfo.commonName &&
                                         oldItem.speciesInfo.scientificName ==
                                                 newItem.speciesInfo.scientificName &&
-                                        oldItem.isFavorite == newItem.isFavorite &&
+                                        //oldItem.isFavorite == newItem.isFavorite &&
                                         oldItem.imagePath == newItem.imagePath
 
                         if (!isContentSame) return false

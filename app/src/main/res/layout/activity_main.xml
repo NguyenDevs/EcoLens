@@ -127,7 +127,7 @@
             android:id="@+id/fabMute"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_marginTop="100dp"
+            android:layout_marginTop="90dp"
             android:layout_marginEnd="@dimen/spacing_md"
             android:contentDescription="@string/mute"
             android:src="@drawable/ic_mute"

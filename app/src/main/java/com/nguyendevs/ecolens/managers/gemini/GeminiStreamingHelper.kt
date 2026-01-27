@@ -15,7 +15,7 @@ class GeoBlockedException : IOException("Geo blocked")
 
 /**
  * Helper class xử lý streaming responses từ Gemini API
- * Hỗ trợ stream taxonomy và details thông tin loài với real-time UI updates
+ * Hỗ trợ stream details thông tin loài với real-time UI updates
  */
 class GeminiStreamingHelper(
     private val apiService: INaturalistApi,
@@ -27,32 +27,34 @@ class GeminiStreamingHelper(
         private const val TAG = "GeminiStreaming"
         private const val PREFIX_DATA = "data: "
         private const val STREAM_DONE = "[DONE]"
-        private const val UI_DELAY = 150L
         private const val DETAILS_DELAY = 200L
     }
 
-    // ==================== PUBLIC STREAMING METHODS ====================
+    // ==================== PUBLIC METHODS ====================
 
     /**
-     * Stream taxonomy information (phân loại sinh học) từ Gemini
-     * Update UI real-time khi nhận từng phần thông tin
+     * Lấy tên thường gọi từ Gemini (Non-streaming)
      */
-    suspend fun streamTaxonomy(
+    suspend fun getCommonName(
         scientificName: String,
-        confidence: Double,
-        languageCode: String,
-        onStateUpdate: (EcoLensUiState) -> Unit
-    ) = withContext(Dispatchers.IO) {
+        languageCode: String
+    ): String? = withContext(Dispatchers.IO) {
         val isVietnamese = languageCode != "en"
-        val prompt = PromptBuilder.buildTaxonomyPrompt(scientificName, isVietnamese)
+        val prompt = PromptBuilder.buildCommonNamePrompt(scientificName, isVietnamese)
         val request = createGeminiRequest(prompt)
 
-        val response = apiService.streamGemini(request)
-        validateResponse(response)
-
-        processStreamResponse(response, TaxonomyResponse::class.java) { taxonomy ->
-            updateTaxonomyUISync(taxonomy, scientificName, isVietnamese, confidence, onStateUpdate)
+        try {
+            val response = apiService.askGemini(request)
+            val text = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
+            if (!text.isNullOrEmpty()) {
+                val cleanedJson = cleanJsonString(text)
+                val result = gson.fromJson(cleanedJson, CommonNameResponse::class.java)
+                return@withContext result.commonName
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "GetCommonName Error: ${e.message}")
         }
+        return@withContext null
     }
 
     /**
@@ -82,6 +84,32 @@ class GeminiStreamingHelper(
         }
     }
 
+    /**
+     * Stream conservation status description
+     */
+    suspend fun streamConservation(
+        scientificName: String,
+        iucnCode: String,
+        languageCode: String,
+        currentInfo: SpeciesInfo,
+        onStateUpdate: (EcoLensUiState) -> Unit
+    ) = withContext(Dispatchers.IO) {
+        val isVietnamese = languageCode != "en"
+        val prompt = PromptBuilder.buildConservationPrompt(scientificName, iucnCode, isVietnamese)
+        val request = createGeminiRequest(prompt)
+
+        try {
+            val response = apiService.streamGemini(request)
+            if (response.isSuccessful) {
+                processStreamResponse(response, ConservationResponse::class.java) { conservation ->
+                    updateConservationUISync(conservation, isVietnamese, currentInfo, onStateUpdate)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "StreamConservation Error: ${e.message}")
+        }
+    }
+
     // ==================== REQUEST & RESPONSE PROCESSING ====================
 
     /**
@@ -96,19 +124,6 @@ class GeminiStreamingHelper(
                 )
             )
         )
-    }
-
-    /**
-     * Validate response và throw exception nếu có lỗi
-     */
-    private fun validateResponse(response: Response<ResponseBody>) {
-        if (!response.isSuccessful) {
-            val errorBody = response.errorBody()?.string() ?: ""
-            if (errorBody.contains("User location is not supported", ignoreCase = true)) {
-                throw GeoBlockedException()
-            }
-            throw IOException("API Error: ${response.code()} - $errorBody")
-        }
     }
 
     /**
@@ -200,68 +215,7 @@ class GeminiStreamingHelper(
     // ==================== UI UPDATE METHODS ====================
 
     /**
-     * Update UI với taxonomy information theo từng bước
-     * Delay giữa các update để tạo hiệu ứng mượt mà
-     */
-    private suspend fun updateTaxonomyUISync(
-        taxonomy: TaxonomyResponse,
-        scientificName: String,
-        isVietnamese: Boolean,
-        confidence: Double,
-        onStateUpdate: (EcoLensUiState) -> Unit
-    ) = withContext(Dispatchers.Main) {
-        var updated = SpeciesInfo(
-            scientificName = scientificName,
-            confidence = confidence,
-            commonName = taxonomy.commonName ?: "..."
-        )
-
-        suspend fun updateState(stage: LoadingStage) {
-            onStateUpdate(EcoLensUiState(isLoading = true, speciesInfo = updated, loadingStage = stage))
-            delay(UI_DELAY)
-        }
-
-        if (!taxonomy.commonName.isNullOrBlank() && taxonomy.commonName != "...") {
-            updated = updated.copy(commonName = taxonomy.commonName)
-            updateState(LoadingStage.COMMON_NAME)
-        }
-
-        fun format(value: String, vi: String, en: String) =
-            "<b>${markdownProcessor.removeRankPrefix(value, if (isVietnamese) vi else en)}</b>"
-
-        taxonomy.kingdom?.let {
-            updated = updated.copy(kingdom = format(it, "Giới", "Kingdom"))
-            updateState(LoadingStage.TAXONOMY)
-        }
-        taxonomy.phylum?.let {
-            updated = updated.copy(phylum = format(it, "Ngành", "Phylum"))
-            updateState(LoadingStage.TAXONOMY)
-        }
-        taxonomy.className?.let {
-            updated = updated.copy(className = format(it, "Lớp", "Class"))
-            updateState(LoadingStage.TAXONOMY)
-        }
-        taxonomy.taxorder?.let {
-            updated = updated.copy(taxorder = format(it, "Bộ", "Order"))
-            updateState(LoadingStage.TAXONOMY)
-        }
-        taxonomy.family?.let {
-            updated = updated.copy(family = format(it, "Họ", "Family"))
-            updateState(LoadingStage.TAXONOMY)
-        }
-        taxonomy.genus?.let {
-            updated = updated.copy(genus = format(it, "Chi", "Genus"))
-            updateState(LoadingStage.TAXONOMY)
-        }
-        taxonomy.species?.let {
-            updated = updated.copy(species = format(it, "Loài", "Species"))
-            updateState(LoadingStage.TAXONOMY)
-        }
-    }
-
-    /**
      * Update UI với details information theo từng bước
-     * Process markdown và delay giữa các update
      */
     private suspend fun updateDetailsUISync(
         details: DetailsResponse,
@@ -308,43 +262,43 @@ class GeminiStreamingHelper(
             )
             updateState(LoadingStage.HABITAT)
         }
+    }
 
-        details.conservationStatus?.takeIf { it.isNotBlank() }?.let {
-            updated = updated.copy(
+    /**
+     * Update UI với conservation information
+     */
+    private suspend fun updateConservationUISync(
+        conservation: ConservationResponse,
+        isVietnamese: Boolean,
+        currentInfo: SpeciesInfo,
+        onStateUpdate: (EcoLensUiState) -> Unit
+    ) = withContext(Dispatchers.Main) {
+        conservation.conservationStatus?.takeIf { it.isNotBlank() }?.let {
+            val updated = currentInfo.copy(
                 conservationStatus = markdownProcessor.process(
                     it,
                     isConservationStatus = true,
                     isVietnamese = isVietnamese
                 )
             )
-            updateState(LoadingStage.CONSERVATION)
+            onStateUpdate(EcoLensUiState(isLoading = true, speciesInfo = updated, loadingStage = LoadingStage.CONSERVATION))
         }
     }
 
     // ==================== DATA CLASSES ====================
 
-    /**
-     * Response model cho taxonomy information
-     */
-    data class TaxonomyResponse(
-        val commonName: String? = null,
-        val kingdom: String? = null,
-        val phylum: String? = null,
-        val className: String? = null,
-        val taxorder: String? = null,
-        val family: String? = null,
-        val genus: String? = null,
-        val species: String? = null
+    data class CommonNameResponse(
+        val commonName: String? = null
     )
 
-    /**
-     * Response model cho details information
-     */
     data class DetailsResponse(
         val description: String? = null,
         val characteristics: Any? = null,
         val distribution: String? = null,
-        val habitat: String? = null,
+        val habitat: String? = null
+    )
+
+    data class ConservationResponse(
         val conservationStatus: String? = null
     )
 }

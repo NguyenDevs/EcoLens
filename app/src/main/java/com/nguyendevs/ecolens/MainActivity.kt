@@ -273,12 +273,14 @@ class MainActivity : AppCompatActivity() {
                         this,
                         binding.homeContainer.speciesInfoCard,
                         { text ->
+                            /*
                             Toast.makeText(
                                             this,
                                             getString(R.string.copy_scientific_name) + ": " + text,
                                             Toast.LENGTH_SHORT
                                     )
                                     .show()
+                             */
                             searchBarHandler.expandSearchBar(text)
                         },
                         { viewModel.retryIdentification() }
@@ -524,20 +526,25 @@ class MainActivity : AppCompatActivity() {
         if (isLoading) {
             progressBarHero?.isVisible = true
             tvLoadingText?.isVisible = true
-
+            loadingAnimationHandler.setText(R.string.analyzing_text)
             stopLoadingJob?.cancel()
 
-            if (loadingStage == LoadingStage.SCIENTIFIC_NAME ||
-                            loadingStage == LoadingStage.COMMON_NAME ||
-                            loadingStage == LoadingStage.TAXONOMY
-            ) {
-                loadingAnimationHandler.setText(R.string.analyzing_info)
-            } else {
-                loadingAnimationHandler.setText(R.string.analyzing_text)
-            }
+            // Cập nhật text loading dựa trên loadingStage
+            when (loadingStage) {
+                LoadingStage.SCIENTIFIC_NAME,
+                LoadingStage.COMMON_NAME -> loadingAnimationHandler.setText(R.string.loading_taxon)
+                LoadingStage.TAXONOMY -> loadingAnimationHandler.setText(R.string.loading_detail)
+                LoadingStage.DESCRIPTION,
+                LoadingStage.CHARACTERISTICS,
+                LoadingStage.DISTRIBUTION,
+                LoadingStage.HABITAT,
+                LoadingStage.CONSERVATION -> loadingAnimationHandler.setText(R.string.loading_conservation)
+                else -> loadingAnimationHandler.setText(R.string.analyzing_text)
 
+            }
             loadingAnimationHandler.start()
         } else {
+            loadingAnimationHandler.setText(R.string.loading_done)
             progressBarHero?.isVisible = false
 
             if (isPhase2) {

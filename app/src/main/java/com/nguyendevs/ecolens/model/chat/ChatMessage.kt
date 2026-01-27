@@ -42,7 +42,11 @@ data class ChatMessage(
 
     val timestamp: Long = System.currentTimeMillis(),
 
-    val isLoading: Boolean = false,
+    @get:PropertyName("loading")
+    @set:PropertyName("loading")
+    var isLoading: Boolean = false,
 
-    val isStreaming: Boolean = false
+    @get:PropertyName("streaming")
+    @set:PropertyName("streaming")
+    var isStreaming: Boolean = false
 )

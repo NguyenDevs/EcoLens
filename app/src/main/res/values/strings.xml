@@ -115,7 +115,11 @@
     <string name="analyzing">Đang phân tích hình ảnh…</string>
     <string name="analyzing_text">Đang phân tích hình ảnh</string>
     <string name="analyzing_info">Đang truy xuất thông tin loài</string>
-    <string name="loading_analyzing">Đang phân tích hình ảnh...</string>
+    <string name="loading_analyzing">Đang phân tích hình ảnh</string>
+    <string name="loading_taxon">Đang truy xuất phân loại</string>
+    <string name="loading_detail">Đang truy xuất thông tin loài</string>
+    <string name="loading_conservation">Đang tra cứu tình trạng bảo tồn</string>
+    <string name="loading_done">Tra cứu hoàn tất</string>
 
     <!-- Màn hình Lịch sử -->
     <string name="history">Lịch sử</string>
@@ -301,6 +305,6 @@
     <string name="history_chipAnimals">Động vật</string>
     <string name="history_chipPlants">Thực vật</string>
     <string name="history_chipAll">Tất cả</string>
-
+    <string name="searching_info">Đang tra cứu...</string>
 
 </resources>

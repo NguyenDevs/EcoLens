@@ -17,6 +17,7 @@ import com.nguyendevs.ecolens.handlers.util.TextFormatter
 import com.nguyendevs.ecolens.model.LoadingStage
 import com.nguyendevs.ecolens.model.SpeciesInfo
 import kotlinx.coroutines.*
+import java.util.Locale
 
 /**
  * Main coordinator cho việc hiển thị thông tin loài sinh vật Điều phối các handler con để xử lý
@@ -281,7 +282,12 @@ class SpeciesInfoHandler(
                 lastDisplayedCommonName = "..."
             } else {
                 view.setTextColor(ContextCompat.getColor(context, R.color.green_primary))
-                textFormatter.setHtml(view, info.commonName)
+
+                val capitalizedCommonName = info.commonName.split(" ").joinToString(" ") { word ->
+                    word.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+                }
+                
+                textFormatter.setHtml(view, capitalizedCommonName)
 
                 if (lastDisplayedCommonName != info.commonName) {
                     animationHandler.slideAndFadeIn(view, duration = 600)
