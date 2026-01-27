@@ -21,6 +21,6 @@ data class HistoryEntry(
     val imagePath: String = "",
     val localImagePath: String = "",
     @Embedded val speciesInfo: SpeciesInfo = SpeciesInfo(),
-    val timestamp: Long = 0,
-    val isFavorite: Boolean = false
+    val timestamp: Long = 0
+    //@get:Exclude val isFavorite: Boolean = false
 )
