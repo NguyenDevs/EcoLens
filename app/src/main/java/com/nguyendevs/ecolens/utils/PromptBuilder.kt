@@ -28,25 +28,65 @@ object PromptBuilder {
 
     fun buildConservationPrompt(scientificName: String, iucnCode: String, isVietnamese: Boolean): String {
         return if (isVietnamese) {
-            """
-            Giải thích ngắn gọn tình trạng bảo tồn IUCN "$iucnCode" cho loài "$scientificName" bằng Tiếng Việt.
-            Danh sách gạch đầu dòng, mỗi dòng bắt đầu với dấu •: Nêu rõ các mối đe dọa chính (nếu có).
-            
-            Trả về JSON:
-            { "conservationStatus": "Nội dung giải thích..." }
-            
-            CHỈ TRẢ VỀ JSON.
-            """.trimIndent()
+            if (iucnCode.isNotBlank()) {
+                """
+                Phân tích tình trạng bảo tồn IUCN "$iucnCode" cho loài "$scientificName" bằng Tiếng Việt.
+                
+                Yêu cầu định dạng kết quả trong JSON (sử dụng \n để xuống dòng):
+                • Tình trạng bảo tồn: $iucnCode (Giải nghĩa ngắn gọn)
+                • Giải thích tình trạng: (Mô tả ngắn gọn về tình trạng này đối với loài)
+                • Các mối đe doạ chính: (Liệt kê các mối đe dọa chính)
+                
+                Trả về JSON:
+                { "conservationStatus": "Nội dung đã định dạng..." }
+                
+                CHỈ TRẢ VỀ JSON.
+                """.trimIndent()
+            } else {
+                """
+                Hãy xác định tình trạng bảo tồn IUCN cho loài "$scientificName" bằng Tiếng Việt.
+                
+                Yêu cầu định dạng kết quả trong JSON (sử dụng \n để xuống dòng):
+                • Tình trạng bảo tồn: [Mã IUCN tìm được] (Giải nghĩa ngắn gọn)
+                • Giải thích tình trạng: (Mô tả ngắn gọn về tình trạng này đối với loài)
+                • Các mối đe doạ chính: (Liệt kê các mối đe dọa chính)
+                
+                Trả về JSON:
+                { "conservationStatus": "Nội dung đã định dạng..." }
+                
+                CHỈ TRẢ VỀ JSON.
+                """.trimIndent()
+            }
         } else {
-            """
-            Briefly explain IUCN conservation status "$iucnCode" for "$scientificName" in English.
-            Bullet list, each line starts with •: Mention main threats (if any).
-            
-            Return JSON:
-            { "conservationStatus": "Explanation content..." }
-            
-            RETURN ONLY JSON.
-            """.trimIndent()
+            if (iucnCode.isNotBlank()) {
+                """
+                Analyze IUCN conservation status "$iucnCode" for species "$scientificName" in English.
+                
+                Format the result in JSON (use \n for new lines):
+                • Conservation Status: $iucnCode (Brief meaning)
+                • Status Explanation: (Brief description of the status for this species)
+                • Main Threats: (List main threats)
+                
+                Return JSON:
+                { "conservationStatus": "Formatted content..." }
+                
+                RETURN ONLY JSON.
+                """.trimIndent()
+            } else {
+                """
+                Determine the IUCN conservation status for species "$scientificName" in English.
+                
+                Format the result in JSON (use \n for new lines):
+                • Conservation Status: [Found IUCN Code] (Brief meaning)
+                • Status Explanation: (Brief description of the status for this species)
+                • Main Threats: (List main threats)
+                
+                Return JSON:
+                { "conservationStatus": "Formatted content..." }
+                
+                RETURN ONLY JSON.
+                """.trimIndent()
+            }
         }
     }
 
