@@ -188,6 +188,10 @@
     <string name="dialog_delete_account_message">Bạn có chắc chắn muốn xoá tài khoản? Hành động này không thể hoàn tác.</string>
     <string name="error_delete_account">Không thể xoá tài khoản. Vui lòng thử lại.</string>
 
+    <!-- Cấu hình -->
+    <string name="config">Thiết lập</string>
+    <string name="taxonomy_language">Phân loại</string>
+    <string name="iucn_searching">Tra cứu IUCN</string>
     <!-- Thông tin & Hỗ trợ -->
     <string name="about_label">Thông tin</string>
     <string name="about_app_title">Về chúng tôi</string>

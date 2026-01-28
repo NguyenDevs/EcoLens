@@ -178,6 +178,144 @@
 
     </LinearLayout>
 
+    <!-- ==================== CONFIG SECTION ==================== -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="@dimen/padding_screen_horizontal">
+
+            <!-- Section Header -->
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/spacing_sm"
+                    android:text="@string/config"
+                    android:textColor="@color/text_tertiary"
+                    android:textSize="10sp"
+                    android:letterSpacing="0.15"
+                    android:textAllCaps="true"
+                    android:textStyle="bold"/>
+
+            <!-- Support Card -->
+            <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/spacing_xl"
+                    app:cardBackgroundColor="@color/surface"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/border_light"
+                    app:cardCornerRadius="@dimen/radius_md">
+
+                <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                <LinearLayout
+                        android:id="@+id/btnTaxonomyLanguage"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/spacing_md"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground">
+
+                    <FrameLayout
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/bg_icon_purple">
+                        <ImageView
+                                android:layout_width="@dimen/icon_md"
+                                android:layout_height="@dimen/icon_md"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_taxonomy"
+                                app:tint="@color/purple_600"/>
+                    </FrameLayout>
+
+                    <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/spacing_sm"
+                            android:layout_weight="1"
+                            android:text="@string/taxonomy_language"
+                            android:textSize="@dimen/text_body_large"
+                            android:textColor="@color/text_primary"
+                            android:textStyle="bold"/>
+                    <TextView
+                            android:id="@+id/tvTaxonomyLanguage"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/lang_english"
+                            android:textSize="@dimen/text_body_large"
+                            android:layout_marginEnd="@dimen/spacing_xs"
+                            android:textColor="@color/text_tertiary"/>
+                    <ImageView
+                            android:layout_width="@dimen/icon_md"
+                            android:layout_height="@dimen/icon_md"
+                            android:src="@drawable/ic_chevron_right"
+                            app:tint="@color/border_strong"/>
+                </LinearLayout>
+
+                <View
+                        android:layout_width="match_parent"
+                        android:layout_marginStart="64dp"
+                        android:layout_marginEnd="@dimen/spacing_md"
+                        android:background="@color/border_light"
+                        android:layout_height="1dp"/>
+
+                <LinearLayout
+                        android:id="@+id/btnIUCN"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/spacing_md"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground">
+
+                    <FrameLayout
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/bg_icon_pink">
+                        <ImageView
+                                android:layout_width="@dimen/icon_md"
+                                android:layout_height="@dimen/icon_md"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_iucn"
+                                app:tint="@color/instagram_pink"/>
+                    </FrameLayout>
+
+                    <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/spacing_sm"
+                            android:layout_weight="1"
+                            android:text="@string/iucn_searching"
+                            android:textSize="@dimen/text_body_large"
+                            android:textColor="@color/text_primary"
+                            android:textStyle="bold"/>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchIUCNMode"
+                            android:layout_width="44dp"
+                            android:layout_height="24dp"
+                            android:minHeight="0dp"
+                            android:minWidth="0dp"
+                            app:thumbTint="@color/white"
+                            app:trackTint="@color/switch_track_selector"
+                            app:useMaterialThemeColors="false"/>
+                </LinearLayout>
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
     <!-- ==================== SUPPORT SECTION ==================== -->
     <LinearLayout
             android:layout_width="match_parent"
