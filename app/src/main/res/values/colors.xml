@@ -130,6 +130,8 @@
     <color name="teal_50">#F0FDFA</color>
     <color name="indigo_50">#EEF2FF</color>
     <color name="indigo_600">#4F46E5</color>
+    <color name="purple_50">#F5EBFF</color>
+    <color name="purple_600">#801FFB</color>
     <color name="orange_50">#FFF7ED</color>
     <color name="orange_600">#EA580C</color>
     <color name="blue_50">#EFF6FF</color>
