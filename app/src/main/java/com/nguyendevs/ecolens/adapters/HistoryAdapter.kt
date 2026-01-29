@@ -44,7 +44,6 @@ class HistoryAdapter(
     // ==================== ADAPTER METHODS ====================
 
     fun updateList(newList: List<HistoryEntry>) {
-        // Dùng cho pull-to-refresh hoặc load lần đầu
         val diffCallback =
                 object : DiffUtil.Callback() {
                     override fun getOldListSize(): Int = historyList.size
@@ -71,7 +70,6 @@ class HistoryAdapter(
                                                 newItem.speciesInfo.commonName &&
                                         oldItem.speciesInfo.scientificName ==
                                                 newItem.speciesInfo.scientificName &&
-                                        //oldItem.isFavorite == newItem.isFavorite &&
                                         oldItem.imagePath == newItem.imagePath
 
                         if (!isContentSame) return false
@@ -116,8 +114,6 @@ class HistoryAdapter(
         val startPosition = historyList.size
         historyList.addAll(newItems)
         notifyItemRangeInserted(startPosition, newItems.size)
-
-        // Cập nhật item cuối cùng của trang trước đó (để fix border/background nếu cùng ngày)
         if (startPosition > 0 && newItems.isNotEmpty()) {
             notifyItemChanged(startPosition - 1)
         }
@@ -139,7 +135,6 @@ class HistoryAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         if (viewType == VIEW_TYPE_LOADING) {
-            // Tạo CircularProgressIndicator bọc trong FrameLayout để căn giữa
             val context = parent.context
             val frameLayout = FrameLayout(context)
             val layoutParams = RecyclerView.LayoutParams(
@@ -184,11 +179,7 @@ class HistoryAdapter(
 
             val isFirstItemOfDay =
                 position == 0 || !isSameDay(entry.timestamp, historyList[position - 1].timestamp)
-            
-            // Logic kiểm tra item cuối cùng trong ngày
             val isLastItemOfDay = if (position == historyList.size - 1) {
-                // Nếu là item cuối cùng của list hiện tại
-                // Nếu đang loading thì tạm coi là cuối ngày, khi load thêm sẽ update lại sau
                 true 
             } else {
                 !isSameDay(entry.timestamp, historyList[position + 1].timestamp)

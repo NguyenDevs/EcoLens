@@ -32,8 +32,6 @@ class ChatHistoryFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var adapter: ChatSessionAdapter
-    
-    // Lazy loading variables
     private var fullChatList: List<ChatSession> = emptyList()
     private var currentPage = 0
     private var isLoadingMore = false

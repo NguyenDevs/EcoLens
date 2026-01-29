@@ -55,8 +55,6 @@ class HistoryFragment : Fragment() {
     private var currentSortOption = HistorySortOption.NEWEST_FIRST
     private var filterStartDate: Long? = null
     private var filterEndDate: Long? = null
-    
-    // Lazy loading variables
     private var fullHistoryList: List<HistoryEntry> = emptyList()
     private var currentPage = 0
     private var isLoadingMore = false
@@ -230,8 +228,6 @@ class HistoryFragment : Fragment() {
 
         isLoadingMore = true
         adapter.setLoading(true)
-
-        // Simulate loading delay for better UX
         Handler(Looper.getMainLooper()).postDelayed({
             val end = (start + pageSize).coerceAtMost(fullHistoryList.size)
             val newItems = fullHistoryList.subList(start, end)
