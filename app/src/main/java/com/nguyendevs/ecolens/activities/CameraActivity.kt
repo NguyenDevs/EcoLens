@@ -5,40 +5,30 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
-import android.view.HapticFeedbackConstants
-import android.view.MotionEvent
-import android.view.ScaleGestureDetector
 import android.view.View
-import android.view.animation.AccelerateDecelerateInterpolator
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.*
-import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.core.content.ContextCompat
+import androidx.camera.core.Camera
+import androidx.camera.core.ImageCapture
 import com.nguyendevs.ecolens.R
+import com.nguyendevs.ecolens.managers.CameraManager
+import com.nguyendevs.ecolens.handlers.PhotoCaptureHandler
+import com.nguyendevs.ecolens.handlers.animation.CameraAnimationHandler
 import com.nguyendevs.ecolens.databinding.ActivityCameraBinding
-import com.nguyendevs.ecolens.utils.ImageUtils
-import java.io.File
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 /**
  * Activity quản lý camera để chụp ảnh hoặc chọn ảnh từ thư viện
- * Hỗ trợ zoom, focus, flash, và chuyển đổi camera trước/sau
- * Tự động lưu ảnh vào internal storage và trả về URI
+ * Sử dụng các helper classes:
+ * - CameraManager: Quản lý camera operations
+ * - PhotoCaptureHandler: Xử lý chụp và lưu ảnh
+ * - CameraAnimationHandler: Quản lý animations và haptic feedback
  */
 class CameraActivity : AppCompatActivity() {
 
     companion object {
-        private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
         const val KEY_IMAGE_URI = "image_uri"
 
         fun newIntent(context: Context): Intent {
@@ -48,32 +38,163 @@ class CameraActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityCameraBinding
     private lateinit var cameraExecutor: ExecutorService
-    private var rotateAnimation: Animation? = null
 
-    private var camera: Camera? = null
-    private var imageCapture: ImageCapture? = null
-    private var lensFacing = CameraSelector.LENS_FACING_BACK
-    private var cameraControl: CameraControl? = null
-    private var cameraInfo: CameraInfo? = null
+    private lateinit var cameraManager: CameraManager
+    private lateinit var photoCaptureHandler: PhotoCaptureHandler
+    private lateinit var cameraAnimationHandler: CameraAnimationHandler
 
     private val selectImageFromGalleryResult = registerForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        uri?.let { handleSelectedImage(it) }
+        uri?.let { handleGalleryImage(it) }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityCameraBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        initializeComponents()
+        setupCamera()
+        setupClickListeners()
+        cameraAnimationHandler.startBorderAnimation(binding.captureBorderAnimated)
+    }
+
+    private fun initializeComponents() {
         cameraExecutor = Executors.newSingleThreadExecutor()
 
-        startCamera()
-        setupZoomAndFocus()
-        setupClickListeners()
-        startBorderAnimation()
+        cameraManager = CameraManager(this, this, binding.viewFinder)
+        photoCaptureHandler = PhotoCaptureHandler(this, cameraExecutor)
+        cameraAnimationHandler = CameraAnimationHandler(this)
+
+        setupCallbacks()
+    }
+
+    private fun setupCallbacks() {
+        cameraManager.setCallback(object : CameraManager.CameraCallback {
+            override fun onCameraReady(camera: Camera, imageCapture: ImageCapture) {
+                // Camera is ready
+            }
+
+            override fun onCameraError(exception: Exception) {
+                Toast.makeText(
+                    this@CameraActivity,
+                    getString(R.string.error_camera_open, exception.message),
+                    Toast.LENGTH_SHORT
+                ).show()
+                closeCamera()
+            }
+
+            override fun onFlashAvailabilityChanged(hasFlash: Boolean) {
+                binding.flashToggle.visibility = if (hasFlash) {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
+            }
+        })
+
+        photoCaptureHandler.setCallback(object : PhotoCaptureHandler.PhotoCaptureCallback {
+            override fun onPhotoSaved(uriString: String) {
+                runOnUiThread {
+                    val resultIntent = Intent().apply {
+                        putExtra(KEY_IMAGE_URI, uriString)
+                    }
+                    setResult(RESULT_OK, resultIntent)
+                    closeCamera()
+                }
+            }
+
+            override fun onPhotoError(message: String) {
+                runOnUiThread {
+                    Toast.makeText(this@CameraActivity, message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        })
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setupCamera() {
+        cameraManager.startCamera()
+
+        binding.viewFinder.setOnTouchListener(
+            cameraManager.setupZoomAndFocus { x, y ->
+                cameraAnimationHandler.performConfirmHapticFeedback(binding.viewFinder)
+                cameraAnimationHandler.showFocusIndicator(
+                    binding.focusIndicator,
+                    x,
+                    y,
+                    binding.viewFinder.top.toFloat()
+                )
+            }
+        )
+    }
+
+    private fun setupClickListeners() {
+        binding.captureButton.setOnClickListener {
+            cameraAnimationHandler.performCaptureHapticFeedback(binding.captureButton)
+            cameraAnimationHandler.animateCaptureButton(binding.captureButton)
+
+            cameraManager.getImageCapture()?.let { imageCapture ->
+                photoCaptureHandler.takePhoto(imageCapture)
+            }
+        }
+
+        binding.closeButton.setOnClickListener {
+            cameraAnimationHandler.performCaptureHapticFeedback(binding.closeButton)
+            closeCamera()
+        }
+
+        binding.uploadButton.setOnClickListener {
+            cameraAnimationHandler.performConfirmHapticFeedback(binding.uploadButton)
+            openGallery()
+        }
+
+        binding.refreshButton.setOnClickListener {
+            cameraAnimationHandler.performConfirmHapticFeedback(binding.refreshButton)
+            cameraAnimationHandler.animateRotateOnce(binding.refreshButton)
+            cameraManager.toggleCamera()
+        }
+
+        binding.flashToggle.setOnClickListener {
+            cameraAnimationHandler.performConfirmHapticFeedback(binding.flashToggle)
+            val newMode = cameraManager.toggleFlash()
+            updateFlashIcon(newMode)
+        }
+    }
+
+    private fun updateFlashIcon(mode: Int) {
+        val iconRes = when (mode) {
+            ImageCapture.FLASH_MODE_ON -> R.drawable.ic_lightning
+            else -> R.drawable.ic_lightning_off
+        }
+        binding.flashToggle.setImageResource(iconRes)
+    }
+
+    private fun openGallery() {
+        selectImageFromGalleryResult.launch("image/*")
+    }
+
+    private fun handleGalleryImage(uri: Uri) {
+        photoCaptureHandler.handleSelectedImage(uri, object : PhotoCaptureHandler.PhotoCaptureCallback {
+            override fun onPhotoSaved(uriString: String) {
+                runOnUiThread {
+                    val resultIntent = Intent().apply {
+                        data = uri
+                        flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        putExtra(KEY_IMAGE_URI, uriString)
+                    }
+                    setResult(RESULT_OK, resultIntent)
+                    closeCamera()
+                }
+            }
+
+            override fun onPhotoError(message: String) {
+                runOnUiThread {
+                    Toast.makeText(this@CameraActivity, message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        })
     }
 
     @Suppress("DEPRECATION")
@@ -90,305 +211,8 @@ class CameraActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()
-        stopBorderAnimation()
-    }
-
-    private fun setupClickListeners() {
-        binding.captureButton.setOnClickListener {
-            performHapticFeedback()
-            animateCaptureButton()
-            takePhoto()
-        }
-
-        binding.closeButton.setOnClickListener {
-            binding.closeButton.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-            closeCamera()
-        }
-
-        binding.uploadButton.setOnClickListener {
-            binding.uploadButton.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
-            openGallery()
-        }
-
-        binding.refreshButton.setOnClickListener {
-            binding.refreshButton.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
-            val rotateOnce = AnimationUtils.loadAnimation(this, R.anim.rotate_once)
-            binding.refreshButton.startAnimation(rotateOnce)
-            toggleCamera()
-        }
-
-        binding.flashToggle.setOnClickListener {
-            binding.flashToggle.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
-            toggleFlash()
-        }
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupZoomAndFocus() {
-        val listener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
-            override fun onScale(detector: ScaleGestureDetector): Boolean {
-                val currentZoomRatio = cameraInfo?.zoomState?.value?.zoomRatio ?: 1f
-                val delta = detector.scaleFactor
-                cameraControl?.setZoomRatio(currentZoomRatio * delta)
-                return true
-            }
-        }
-
-        val scaleGestureDetector = ScaleGestureDetector(this, listener)
-
-        binding.viewFinder.setOnTouchListener { _, event ->
-            scaleGestureDetector.onTouchEvent(event)
-            if (event.action == MotionEvent.ACTION_UP) {
-                binding.viewFinder.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
-                performFocus(event.x, event.y)
-            }
-            true
-        }
-    }
-
-    private fun startCamera() {
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
-
-        cameraProviderFuture.addListener({
-            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
-
-            val preview = Preview.Builder()
-                .build()
-                .also {
-                    it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
-                }
-
-            imageCapture = ImageCapture.Builder()
-                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                .setFlashMode(ImageCapture.FLASH_MODE_OFF)
-                .build()
-
-            updateFlashIcon(ImageCapture.FLASH_MODE_OFF)
-
-            val cameraSelector = CameraSelector.Builder()
-                .requireLensFacing(lensFacing)
-                .build()
-
-            try {
-                cameraProvider.unbindAll()
-                camera = cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview, imageCapture
-                )
-                cameraControl = camera?.cameraControl
-                cameraInfo = camera?.cameraInfo
-
-                binding.flashToggle.visibility = if (camera?.cameraInfo?.hasFlashUnit() == true) {
-                    View.VISIBLE
-                } else {
-                    View.GONE
-                }
-
-            } catch (exc: Exception) {
-                handleCameraError(exc)
-            }
-
-        }, ContextCompat.getMainExecutor(this))
-    }
-
-    private fun toggleCamera() {
-        lensFacing = if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
-            CameraSelector.LENS_FACING_BACK
-        } else {
-            CameraSelector.LENS_FACING_FRONT
-        }
-        startCamera()
-    }
-
-    private fun performFocus(x: Float, y: Float) {
-        val factory = binding.viewFinder.meteringPointFactory
-        val point = factory.createPoint(x, y)
-        val action = FocusMeteringAction.Builder(point, FocusMeteringAction.FLAG_AF)
-            .setAutoCancelDuration(3, TimeUnit.SECONDS)
-            .build()
-        cameraControl?.startFocusAndMetering(action)
-
-        showFocusIndicator(x, y)
-    }
-
-    private fun takePhoto() {
-        val imageCapture = imageCapture ?: return
-
-        val photoFile = File(
-            externalCacheDir ?: cacheDir,
-            DateTimeFormatter.ofPattern(FILENAME_FORMAT, Locale.US)
-                .format(LocalDateTime.now()) + ".jpg"
-        )
-
-        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
-
-        imageCapture.takePicture(
-            outputOptions, cameraExecutor, object : ImageCapture.OnImageSavedCallback {
-                override fun onError(exc: ImageCaptureException) {
-                    Log.e("CameraActivity", "Photo capture failed: ${exc.message}", exc)
-                    runOnUiThread {
-                        Toast.makeText(
-                            baseContext,
-                            getString(R.string.error_capture, exc.message),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-
-                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    handleCapturedImage(photoFile)
-                }
-            })
-    }
-
-    private fun handleCapturedImage(photoFile: File) {
-        val internalPath = ImageUtils.saveFileToInternalStorage(this@CameraActivity, photoFile)
-        ImageUtils.saveImageToPublicStorage(this@CameraActivity, photoFile)
-        if (photoFile.exists()) {
-            photoFile.delete()
-        }
-
-        runOnUiThread {
-            if (internalPath != null) {
-                val finalUriString = Uri.fromFile(File(internalPath)).toString()
-                val resultIntent = Intent().apply {
-                    putExtra(KEY_IMAGE_URI, finalUriString)
-                }
-                setResult(RESULT_OK, resultIntent)
-                closeCamera()
-            } else {
-                Toast.makeText(
-                    baseContext,
-                    "Lỗi lưu ảnh vào bộ nhớ ứng dụng",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
-    }
-
-    private fun openGallery() {
-        selectImageFromGalleryResult.launch("image/*")
-    }
-
-    private fun handleSelectedImage(uri: Uri) {
-        try {
-            val tempFile = ImageUtils.uriToFile(this, uri, 1080)
-            val internalPath = ImageUtils.saveFileToInternalStorage(this, tempFile)
-
-            val finalUriString = if (internalPath != null) {
-                Uri.fromFile(File(internalPath)).toString()
-            } else {
-                uri.toString()
-            }
-
-            val resultIntent = Intent().apply {
-                data = uri
-                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                putExtra(KEY_IMAGE_URI, finalUriString)
-            }
-            setResult(RESULT_OK, resultIntent)
-            closeCamera()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, "Lỗi xử lý ảnh: ${e.message}", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun toggleFlash() {
-        val imageCapture = imageCapture ?: return
-        val currentMode = imageCapture.flashMode
-        val newMode = if (currentMode == ImageCapture.FLASH_MODE_ON) {
-            ImageCapture.FLASH_MODE_OFF
-        } else {
-            ImageCapture.FLASH_MODE_ON
-        }
-
-        imageCapture.flashMode = newMode
-        updateFlashIcon(newMode)
-    }
-
-    private fun updateFlashIcon(mode: Int) {
-        val iconRes = when (mode) {
-            ImageCapture.FLASH_MODE_ON -> R.drawable.ic_lightning
-            else -> R.drawable.ic_lightning_off
-        }
-        binding.flashToggle.setImageResource(iconRes)
-    }
-
-    private fun showFocusIndicator(x: Float, y: Float) {
-        binding.focusIndicator.apply {
-            animate().cancel()
-            this.x = x - (width / 2)
-            this.y = y - (height / 2) + binding.viewFinder.top
-            visibility = View.VISIBLE
-            alpha = 1f
-            scaleX = 1.3f
-            scaleY = 1.3f
-
-            animate()
-                .scaleX(1f)
-                .scaleY(1f)
-                .setDuration(300)
-                .setInterpolator(AccelerateDecelerateInterpolator())
-                .withEndAction {
-                    animate()
-                        .alpha(0f)
-                        .setStartDelay(500)
-                        .setDuration(300)
-                        .withEndAction { visibility = View.INVISIBLE }
-                        .start()
-                }
-                .start()
-        }
-    }
-
-    private fun performHapticFeedback() {
-        binding.captureButton.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-    }
-
-    private fun animateCaptureButton() {
-        binding.captureButton.animate()
-            .scaleX(0.85f)
-            .scaleY(0.85f)
-            .setDuration(100)
-            .withEndAction {
-                binding.captureButton.animate()
-                    .scaleX(1f)
-                    .scaleY(1f)
-                    .setDuration(100)
-                    .start()
-            }
-            .start()
-    }
-
-    private fun startBorderAnimation() {
-        rotateAnimation = AnimationUtils.loadAnimation(this, R.anim.rotate_infinite)
-        binding.captureBorderAnimated.visibility = View.VISIBLE
-        binding.captureBorderAnimated.startAnimation(rotateAnimation)
-    }
-
-    private fun stopBorderAnimation() {
-        rotateAnimation?.cancel()
-        binding.captureBorderAnimated.clearAnimation()
-        binding.captureBorderAnimated.visibility = View.GONE
-    }
-
-    private fun handleCameraError(exc: Exception) {
-        if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
-            Toast.makeText(
-                this,
-                getString(R.string.error_camera_front),
-                Toast.LENGTH_SHORT
-            ).show()
-            lensFacing = CameraSelector.LENS_FACING_BACK
-            startCamera()
-        } else {
-            Toast.makeText(
-                this,
-                getString(R.string.error_camera_open, exc.message),
-                Toast.LENGTH_SHORT
-            ).show()
-            closeCamera()
-        }
+        cameraAnimationHandler.stopBorderAnimation(binding.captureBorderAnimated)
+        cameraAnimationHandler.cleanup()
     }
 
     @Suppress("DEPRECATION")
