@@ -18,8 +18,8 @@ import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.adapters.HistoryAdapter
 import com.nguyendevs.ecolens.databinding.ScreenSpeciesHistoryBinding
 import com.nguyendevs.ecolens.handlers.animations.HistoryAnimationHandler
-import com.nguyendevs.ecolens.model.history.HistoryEntry
-import com.nguyendevs.ecolens.model.history.HistorySortOption
+import com.nguyendevs.ecolens.models.history.HistoryEntry
+import com.nguyendevs.ecolens.models.history.HistorySortOption
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import io.noties.markwon.Markwon
 import io.noties.markwon.html.HtmlPlugin

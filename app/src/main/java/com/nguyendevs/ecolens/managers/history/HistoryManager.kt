@@ -3,8 +3,8 @@ package com.nguyendevs.ecolens.managers.history
 import android.content.Context
 import android.util.Log
 import com.nguyendevs.ecolens.database.HistoryRepository
-import com.nguyendevs.ecolens.model.history.HistoryEntry
-import com.nguyendevs.ecolens.model.history.HistorySortOption
+import com.nguyendevs.ecolens.models.history.HistoryEntry
+import com.nguyendevs.ecolens.models.history.HistorySortOption
 import com.nguyendevs.ecolens.utils.ImageUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow

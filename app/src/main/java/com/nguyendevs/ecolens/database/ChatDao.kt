@@ -5,8 +5,8 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.nguyendevs.ecolens.model.chat.ChatMessage
-import com.nguyendevs.ecolens.model.chat.ChatSession
+import com.nguyendevs.ecolens.models.chat.ChatMessage
+import com.nguyendevs.ecolens.models.chat.ChatSession
 import kotlinx.coroutines.flow.Flow
 
 @Dao

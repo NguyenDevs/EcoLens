@@ -13,7 +13,7 @@ import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemCardSpeciesInfoBinding
 import com.nguyendevs.ecolens.handlers.animations.HomeAnimationHandler
 import com.nguyendevs.ecolens.handlers.util.TextFormatter
-import com.nguyendevs.ecolens.model.SpeciesInfo
+import com.nguyendevs.ecolens.models.SpeciesInfo
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

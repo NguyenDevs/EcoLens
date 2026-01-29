@@ -37,8 +37,8 @@ import com.nguyendevs.ecolens.managers.*
 import com.nguyendevs.ecolens.managers.main.PermissionManager
 import com.nguyendevs.ecolens.managers.main.SpeakerManager
 import com.nguyendevs.ecolens.managers.setting.LanguageManager
-import com.nguyendevs.ecolens.model.LoadingStage
-import com.nguyendevs.ecolens.model.SpeciesInfo
+import com.nguyendevs.ecolens.models.LoadingStage
+import com.nguyendevs.ecolens.models.SpeciesInfo
 import com.nguyendevs.ecolens.utils.KeyboardUtils
 import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
 import com.nguyendevs.ecolens.view.EcoLensViewModel
@@ -495,7 +495,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     /** Cập nhật UI màn hình Home dựa trên state */
-    private suspend fun updateHomeUI(state: com.nguyendevs.ecolens.model.EcoLensUiState) {
+    private suspend fun updateHomeUI(state: com.nguyendevs.ecolens.models.EcoLensUiState) {
         val isLoading = state.isLoading
         val error = state.error
         val loadingStage = state.loadingStage
@@ -643,7 +643,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     /** Navigate to History Detail Fragment */
-    private fun navigateToHistoryDetail(entry: com.nguyendevs.ecolens.model.history.HistoryEntry) {
+    private fun navigateToHistoryDetail(entry: com.nguyendevs.ecolens.models.history.HistoryEntry) {
         val jsonEntry = com.google.gson.Gson().toJson(entry)
         val fragment =
                 com.nguyendevs.ecolens.fragments.history.HistoryDetailFragment().apply {

@@ -13,7 +13,7 @@ import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.adapters.LanguageAdapter
 import com.nguyendevs.ecolens.databinding.FragmentLanguageSelectionBinding
 import com.nguyendevs.ecolens.managers.setting.LanguageManager
-import com.nguyendevs.ecolens.model.Language
+import com.nguyendevs.ecolens.models.Language
 
 /**
  * Fragment cho phép người dùng chọn ngôn ngữ ứng dụng

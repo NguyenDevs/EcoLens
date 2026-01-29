@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.model
+package com.nguyendevs.ecolens.models
 
 /**
  * Model đại diện cho thông tin người dùng

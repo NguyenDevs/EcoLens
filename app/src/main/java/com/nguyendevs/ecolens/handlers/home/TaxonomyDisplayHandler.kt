@@ -6,7 +6,7 @@ import com.nguyendevs.ecolens.databinding.ItemCardSpeciesInfoBinding
 import com.nguyendevs.ecolens.handlers.animations.HomeAnimationHandler
 import com.nguyendevs.ecolens.handlers.animations.ShimmerAnimationHandler
 import com.nguyendevs.ecolens.handlers.util.TextFormatter
-import com.nguyendevs.ecolens.model.SpeciesInfo
+import com.nguyendevs.ecolens.models.SpeciesInfo
 
 /** Xử lý hiển thị thông tin phân loại học (taxonomy) với hiệu ứng waterfall. */
 class TaxonomyDisplayHandler(

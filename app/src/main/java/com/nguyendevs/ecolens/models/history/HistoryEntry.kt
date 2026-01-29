@@ -1,9 +1,9 @@
-package com.nguyendevs.ecolens.model.history
+package com.nguyendevs.ecolens.models.history
 
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.nguyendevs.ecolens.model.SpeciesInfo
+import com.nguyendevs.ecolens.models.SpeciesInfo
 
 /**
  * Entity đại diện cho một mục trong lịch sử nhận diện

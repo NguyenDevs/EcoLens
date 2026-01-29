@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.adapters.ChatAdapter
 import com.nguyendevs.ecolens.databinding.FragmentChatBinding
-import com.nguyendevs.ecolens.model.chat.ChatMessage
+import com.nguyendevs.ecolens.models.chat.ChatMessage
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch

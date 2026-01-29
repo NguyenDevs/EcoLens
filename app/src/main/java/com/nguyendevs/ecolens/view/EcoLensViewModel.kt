@@ -10,11 +10,11 @@ import com.nguyendevs.ecolens.database.HistoryRepository
 import com.nguyendevs.ecolens.managers.chat.ChatSessionManager
 import com.nguyendevs.ecolens.managers.gemini.SpeciesIdentificationManager
 import com.nguyendevs.ecolens.managers.history.HistoryManager
-import com.nguyendevs.ecolens.model.*
-import com.nguyendevs.ecolens.model.chat.ChatMessage
-import com.nguyendevs.ecolens.model.chat.ChatSession
-import com.nguyendevs.ecolens.model.history.HistoryEntry
-import com.nguyendevs.ecolens.model.history.HistorySortOption
+import com.nguyendevs.ecolens.models.*
+import com.nguyendevs.ecolens.models.chat.ChatMessage
+import com.nguyendevs.ecolens.models.chat.ChatSession
+import com.nguyendevs.ecolens.models.history.HistoryEntry
+import com.nguyendevs.ecolens.models.history.HistorySortOption
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 

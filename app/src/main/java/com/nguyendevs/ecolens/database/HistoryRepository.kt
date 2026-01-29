@@ -11,7 +11,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.nguyendevs.ecolens.BuildConfig
-import com.nguyendevs.ecolens.model.history.HistoryEntry
+import com.nguyendevs.ecolens.models.history.HistoryEntry
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream

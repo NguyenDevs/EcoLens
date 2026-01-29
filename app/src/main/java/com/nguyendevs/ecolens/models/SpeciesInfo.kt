@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.model
+package com.nguyendevs.ecolens.models
 
 /**
  * Thông tin chi tiết về một loài sinh vật

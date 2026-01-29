@@ -5,7 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.nguyendevs.ecolens.model.history.HistoryEntry
+import com.nguyendevs.ecolens.models.history.HistoryEntry
 import kotlinx.coroutines.flow.Flow
 
 /** Room DAO cho history table. Định nghĩa các operations CRUD trên database. */

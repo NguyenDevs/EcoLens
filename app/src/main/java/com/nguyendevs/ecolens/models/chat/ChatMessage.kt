@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.model.chat
+package com.nguyendevs.ecolens.models.chat
 
 import androidx.room.Entity
 import androidx.room.ForeignKey

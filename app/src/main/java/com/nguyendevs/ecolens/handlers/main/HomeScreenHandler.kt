@@ -15,7 +15,7 @@ import com.nguyendevs.ecolens.database.HistoryDatabase
 import com.nguyendevs.ecolens.database.HistoryRepository
 import com.nguyendevs.ecolens.database.UserRepository
 import com.nguyendevs.ecolens.databinding.ActivityMainBinding
-import com.nguyendevs.ecolens.model.history.HistoryEntry
+import com.nguyendevs.ecolens.models.history.HistoryEntry
 import java.util.Calendar
 import kotlinx.coroutines.launch
 

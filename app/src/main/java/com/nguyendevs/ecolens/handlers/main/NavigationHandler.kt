@@ -11,7 +11,7 @@ import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ActivityMainBinding
 import com.nguyendevs.ecolens.fragments.chat.ChatHistoryFragment
 import com.nguyendevs.ecolens.fragments.history.HistoryFragment
-import com.nguyendevs.ecolens.model.LoadingStage
+import com.nguyendevs.ecolens.models.LoadingStage
 
 /**
  * Handler quản lý Bottom Navigation và trạng thái các containers. Xử lý: tab switching, container

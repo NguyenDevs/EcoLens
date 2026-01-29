@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.model.history
+package com.nguyendevs.ecolens.models.history
 
 /**
  * Các tùy chọn sắp xếp lịch sử nhận diện

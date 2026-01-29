@@ -27,8 +27,8 @@ import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.FragmentSpeciesHistoryDetailBinding
 import com.nguyendevs.ecolens.handlers.animations.HistoryDetailAnimationHandler
 import com.nguyendevs.ecolens.managers.main.SpeakerManager
-import com.nguyendevs.ecolens.model.history.HistoryEntry
-import com.nguyendevs.ecolens.model.SpeciesInfo
+import com.nguyendevs.ecolens.models.history.HistoryEntry
+import com.nguyendevs.ecolens.models.SpeciesInfo
 import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.Dispatchers

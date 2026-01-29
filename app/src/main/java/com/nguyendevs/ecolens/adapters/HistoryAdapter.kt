@@ -14,7 +14,7 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemSpeciesHistoryBinding
-import com.nguyendevs.ecolens.model.history.HistoryEntry
+import com.nguyendevs.ecolens.models.history.HistoryEntry
 import io.noties.markwon.Markwon
 import java.io.File
 import java.time.Instant

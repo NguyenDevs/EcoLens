@@ -3,7 +3,7 @@ package com.nguyendevs.ecolens.managers.gemini
 import android.util.Log
 import com.google.gson.Gson
 import com.nguyendevs.ecolens.api.*
-import com.nguyendevs.ecolens.model.*
+import com.nguyendevs.ecolens.models.*
 import com.nguyendevs.ecolens.utils.MarkdownProcessor
 import com.nguyendevs.ecolens.utils.PromptBuilder
 import kotlinx.coroutines.*

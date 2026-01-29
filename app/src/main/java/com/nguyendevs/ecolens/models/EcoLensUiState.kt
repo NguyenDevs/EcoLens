@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.model
+package com.nguyendevs.ecolens.models
 
 /**
  * Trạng thái UI cho màn hình EcoLens
