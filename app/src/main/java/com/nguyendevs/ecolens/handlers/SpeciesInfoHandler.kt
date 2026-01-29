@@ -12,7 +12,7 @@ import com.nguyendevs.ecolens.handlers.animations.ShimmerAnimationHandler
 import com.nguyendevs.ecolens.handlers.display.ConfidenceDisplayHandler
 import com.nguyendevs.ecolens.handlers.display.SectionDisplayHandler
 import com.nguyendevs.ecolens.handlers.display.TaxonomyDisplayHandler
-import com.nguyendevs.ecolens.handlers.interaction.ButtonHandler
+import com.nguyendevs.ecolens.handlers.interaction.HomeButtonHandler
 import com.nguyendevs.ecolens.handlers.util.TextFormatter
 import com.nguyendevs.ecolens.model.LoadingStage
 import com.nguyendevs.ecolens.model.SpeciesInfo
@@ -51,8 +51,8 @@ class SpeciesInfoHandler(
     private val confidenceDisplayHandler =
             ConfidenceDisplayHandler(context, binding, homeAnimationHandler)
     private val sectionDisplayHandler = SectionDisplayHandler(binding, textFormatter)
-    private val buttonHandler =
-            ButtonHandler(
+    private val homeButtonHandler =
+            HomeButtonHandler(
                     context,
                     binding,
                     homeAnimationHandler,
@@ -93,9 +93,9 @@ class SpeciesInfoHandler(
                 isInitialLoad = true
                 displayCommonName(SpeciesInfo(commonName = "...", scientificName = ""))
                 taxonomyDisplayHandler.prepareTaxonomyContainer()
-                buttonHandler.setupCopyButton(info)
-                buttonHandler.showCopyButton()
-                buttonHandler.hideButtons()
+                homeButtonHandler.setupCopyButton(info)
+                homeButtonHandler.showCopyButton()
+                homeButtonHandler.hideButtons()
                 confidenceDisplayHandler.displayConfidence(info, isWaiting = true)
             }
             LoadingStage.COMMON_NAME -> {}
@@ -186,14 +186,14 @@ class SpeciesInfoHandler(
                 displayConservationStatus(info.conservationStatus, shouldScroll = false)
                 allSectionsRendered = true
 
-                buttonHandler.setupShareButton(info, currentImageUri)
-                buttonHandler.showShareButton()
-                buttonHandler.setupCopyButton(info)
+                homeButtonHandler.setupShareButton(info, currentImageUri)
+                homeButtonHandler.showShareButton()
+                homeButtonHandler.setupCopyButton(info)
 
                 if (info.confidence < 50.0) {
-                    buttonHandler.showRetryButton()
+                    homeButtonHandler.showRetryButton()
                 } else {
-                    buttonHandler.hideRetryButton()
+                    homeButtonHandler.hideRetryButton()
                 }
             }
         }
@@ -246,8 +246,8 @@ class SpeciesInfoHandler(
             allSectionsRendered = true
 
             if (!isInitialLoad) {
-                buttonHandler.setupShareButton(info, currentImageUri)
-                buttonHandler.showShareButton()
+                homeButtonHandler.setupShareButton(info, currentImageUri)
+                homeButtonHandler.showShareButton()
             }
         }
     }

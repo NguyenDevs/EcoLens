@@ -20,7 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class ButtonHandler(
+class HomeButtonHandler(
     private val context: Context,
     private val binding: ItemCardSpeciesInfoBinding,
     private val homeAnimationHandler: HomeAnimationHandler,
