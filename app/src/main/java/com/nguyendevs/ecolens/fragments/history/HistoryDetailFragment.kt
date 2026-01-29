@@ -2,7 +2,6 @@ package com.nguyendevs.ecolens.fragments.history
 
 import android.content.ClipData
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Typeface
 import android.net.Uri
@@ -10,7 +9,6 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Html
 import android.util.TypedValue
-import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,11 +22,10 @@ import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import com.bumptech.glide.Glide
-import com.bumptech.glide.GenericTransitionOptions
 import com.google.gson.Gson
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.FragmentSpeciesHistoryDetailBinding
+import com.nguyendevs.ecolens.handlers.animations.HistoryDetailAnimationHandler
 import com.nguyendevs.ecolens.managers.SpeakerManager
 import com.nguyendevs.ecolens.model.history.HistoryEntry
 import com.nguyendevs.ecolens.model.SpeciesInfo
@@ -39,6 +36,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
+/**
+ * Fragment hiển thị chi tiết lịch sử nhận diện loài
+ *
+ * Sử dụng animation helpers:
+ * - ImageLoadAnimationHelper: Xử lý image loading animations
+ * - ViewAnimationHelper: Xử lý FAB animations và haptic feedback
+ */
 class HistoryDetailFragment : Fragment() {
 
     private var _binding: FragmentSpeciesHistoryDetailBinding? = null
@@ -46,17 +50,12 @@ class HistoryDetailFragment : Fragment() {
 
     private val viewModel: EcoLensViewModel by activityViewModels()
     private lateinit var speakerManager: SpeakerManager
+
+    // Animation Handler
+    private lateinit var animationHandler: HistoryDetailAnimationHandler
+
     private var historyEntry: HistoryEntry? = null
     private var isSpeaking = false
-
-    private fun TextView.setHtml(html: String) {
-        text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT)
-        } else {
-            @Suppress("DEPRECATION")
-            Html.fromHtml(html)
-        }
-    }
 
     companion object {
         private val REGEX_BOLD = Regex("\\*\\*(.+?)\\*\\*")
@@ -64,6 +63,7 @@ class HistoryDetailFragment : Fragment() {
         private val REGEX_CODE = Regex("`(.+?)`")
     }
 
+    // ==================== LIFECYCLE ====================
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,9 +71,14 @@ class HistoryDetailFragment : Fragment() {
             historyEntry = Gson().fromJson(json, HistoryEntry::class.java)
         }
         speakerManager = SpeakerManager(requireContext())
+        animationHandler = HistoryDetailAnimationHandler(requireContext())
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentSpeciesHistoryDetailBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -94,7 +99,8 @@ class HistoryDetailFragment : Fragment() {
         setupFab(info)
         setupShareButton(info, entry.imagePath, entry.localImagePath)
         setupMoreOptionsButton()
-        binding.fabSpeak.show()
+
+        animationHandler.showFab(binding.fabSpeak)
         binding.fabSpeak.bringToFront()
     }
 
@@ -102,9 +108,7 @@ class HistoryDetailFragment : Fragment() {
         super.onStop()
         if (isSpeaking) {
             speakerManager.pause()
-            isSpeaking = false
-            binding.fabSpeak.setImageResource(R.drawable.ic_speak)
-            binding.fabSpeak.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green_primary))
+            updateFabUI(false)
         }
     }
 
@@ -113,8 +117,16 @@ class HistoryDetailFragment : Fragment() {
         super.onDestroy()
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    // ==================== UI SETUP ====================
+
     private fun setupBackButton() {
         binding.btnBack.setOnClickListener {
+            animationHandler.performConfirmFeedback(it)
             parentFragmentManager.popBackStack()
         }
 
@@ -124,6 +136,7 @@ class HistoryDetailFragment : Fragment() {
 
     private fun setupMoreOptionsButton() {
         binding.btnMoreOptions.setOnClickListener {
+            animationHandler.performConfirmFeedback(it)
             showMenuPopup(it)
         }
     }
@@ -160,7 +173,11 @@ class HistoryDetailFragment : Fragment() {
             .setPositiveButton(R.string.action_delete) { _, _ ->
                 historyEntry?.let { entry ->
                     viewModel.deleteHistory(entry)
-                    Toast.makeText(requireContext(), getString(R.string.delete_success), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.delete_success),
+                        Toast.LENGTH_SHORT
+                    ).show()
                     parentFragmentManager.popBackStack()
                 }
             }
@@ -168,10 +185,16 @@ class HistoryDetailFragment : Fragment() {
             .show()
     }
 
-    private fun setupShareButton(info: SpeciesInfo, remoteUrl: String?, localImagePath: String?) {
+    // ==================== SHARE FUNCTIONALITY ====================
+
+    private fun setupShareButton(
+        info: SpeciesInfo,
+        remoteUrl: String?,
+        localImagePath: String?
+    ) {
         binding.btnShareInfo.setOnClickListener {
-            binding.btnShareInfo.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
-            
+            animationHandler.performConfirmFeedback(it)
+
             lifecycleScope.launch(Dispatchers.IO) {
                 var imageUri: Uri? = null
 
@@ -197,7 +220,7 @@ class HistoryDetailFragment : Fragment() {
                         e.printStackTrace()
                     }
                 }
-                
+
                 withContext(Dispatchers.Main) {
                     shareSpeciesInfo(info, imageUri)
                 }
@@ -206,8 +229,10 @@ class HistoryDetailFragment : Fragment() {
     }
 
     private fun shareSpeciesInfo(info: SpeciesInfo, imageUri: Uri?) {
-        val confidencePercent =
-            String.format("%.2f", if (info.confidence > 1) info.confidence else info.confidence * 100)
+        val confidencePercent = String.format(
+            "%.2f",
+            if (info.confidence > 1) info.confidence else info.confidence * 100
+        )
 
         val context = requireContext()
         val shareText = buildString {
@@ -216,6 +241,7 @@ class HistoryDetailFragment : Fragment() {
             append("📌 ${stripHtml(info.commonName)}\n🔬 ${stripHtml(info.scientificName)}\n")
             append("✅ ${context.getString(R.string.label_confidence_template, confidencePercent)}%\n\n")
             append("━━━━━━━━━━━━━━━━━━━━\n${context.getString(R.string.share_taxonomy_title)}\n━━━━━━━━━━━━━━━━━━━━\n\n")
+
             if (info.kingdom.isNotEmpty()) append("• ${context.getString(R.string.label_kingdom)} ${stripHtml(info.kingdom)}\n")
             if (info.phylum.isNotEmpty()) append("• ${context.getString(R.string.label_phylum)} ${stripHtml(info.phylum)}\n")
             if (info.className.isNotEmpty()) append("• ${context.getString(R.string.label_class)} ${stripHtml(info.className)}\n")
@@ -233,11 +259,7 @@ class HistoryDetailFragment : Fragment() {
             )
             contentList.forEach { (content, title) ->
                 if (content.isNotEmpty()) {
-                    append(
-                        "\n━━━━━━━━━━━━━━━━━━━━\n${context.getString(title)}\n━━━━━━━━━━━━━━━━━━━━\n\n${
-                            stripHtml(content)
-                        }\n"
-                    )
+                    append("\n━━━━━━━━━━━━━━━━━━━━\n${context.getString(title)}\n━━━━━━━━━━━━━━━━━━━━\n\n${stripHtml(content)}\n")
                 }
             }
             append("\n━━━━━━━━━━━━━━━━━━━━\n${context.getString(R.string.share_footer)}")
@@ -262,46 +284,15 @@ class HistoryDetailFragment : Fragment() {
         }
     }
 
-    private fun stripHtml(html: String): String {
-        var text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT).toString()
-        } else {
-            @Suppress("DEPRECATION")
-            Html.fromHtml(html).toString()
-        }
-
-        // **bold**
-        text = text.replace(REGEX_BOLD, "$1")
-
-        // *italic*
-        text = text.replace(REGEX_ITALIC, "$1")
-
-        // `code` → italic (strip marker)
-        text = text.replace(REGEX_CODE, "$1")
-
-        return text.trim()
-    }
-
+    // ==================== DATA BINDING ====================
 
     private fun bindHeader(entry: HistoryEntry, info: SpeciesInfo) {
-        val localPath = entry.localImagePath
-        val remoteUrl = entry.imagePath
-        var loadModel: Any = remoteUrl
-
-        if (!localPath.isNullOrEmpty()) {
-            val file = File(localPath)
-            if (file.exists()) {
-                loadModel = file
-            }
-        }
-
-        Glide.with(this)
-            .load(loadModel)
-            .transition(GenericTransitionOptions.with(R.anim.fade_in_2))
-            .centerCrop()
-            .placeholder(R.mipmap.ic_launcher)
-            .error(R.mipmap.ic_launcher)
-            .into(binding.ivDetailImage)
+        animationHandler.loadImageWithFadeIn(
+            imageView = binding.ivDetailImage,
+            localPath = entry.localImagePath,
+            remoteUrl = entry.imagePath,
+            centerCrop = true
+        )
 
         binding.tvCommonName.setHtml(info.commonName)
         binding.tvScientificName.setHtml(info.scientificName)
@@ -404,6 +395,8 @@ class HistoryDetailFragment : Fragment() {
         container.addView(contentView)
     }
 
+    // ==================== TEXT-TO-SPEECH ====================
+
     private fun setupFab(info: SpeciesInfo) {
         speakerManager.onSpeechFinished = {
             activity?.runOnUiThread {
@@ -412,6 +405,8 @@ class HistoryDetailFragment : Fragment() {
         }
 
         binding.fabSpeak.setOnClickListener {
+            animationHandler.performConfirmFeedback(it)
+
             lifecycleScope.launch(Dispatchers.IO) {
                 if (isSpeaking) {
                     speakerManager.pause()
@@ -431,13 +426,33 @@ class HistoryDetailFragment : Fragment() {
 
     private fun updateFabUI(speaking: Boolean) {
         isSpeaking = speaking
-        if (speaking) {
-            binding.fabSpeak.setImageResource(R.drawable.ic_mute)
-            binding.fabSpeak.backgroundTintList = ColorStateList.valueOf(Color.RED)
+        animationHandler.animateFabState(binding.fabSpeak, speaking)
+    }
+
+    // ==================== UTILITY FUNCTIONS ====================
+
+    private fun TextView.setHtml(html: String) {
+        text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT)
         } else {
-            binding.fabSpeak.setImageResource(R.drawable.ic_speak)
-            binding.fabSpeak.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green_primary))
+            @Suppress("DEPRECATION")
+            Html.fromHtml(html)
         }
+    }
+
+    private fun stripHtml(html: String): String {
+        var text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT).toString()
+        } else {
+            @Suppress("DEPRECATION")
+            Html.fromHtml(html).toString()
+        }
+
+        text = text.replace(REGEX_BOLD, "$1")
+        text = text.replace(REGEX_ITALIC, "$1")
+        text = text.replace(REGEX_CODE, "$1")
+
+        return text.trim()
     }
 
     private fun Int.dpToPx(): Int {
@@ -446,10 +461,5 @@ class HistoryDetailFragment : Fragment() {
             this.toFloat(),
             resources.displayMetrics
         ).toInt()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }
