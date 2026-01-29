@@ -7,8 +7,8 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemCardSpeciesInfoBinding
-import com.nguyendevs.ecolens.handlers.animation.HomeAnimationHandler
-import com.nguyendevs.ecolens.handlers.animation.ShimmerAnimationHandler
+import com.nguyendevs.ecolens.handlers.animations.HomeAnimationHandler
+import com.nguyendevs.ecolens.handlers.animations.ShimmerAnimationHandler
 import com.nguyendevs.ecolens.handlers.display.ConfidenceDisplayHandler
 import com.nguyendevs.ecolens.handlers.display.SectionDisplayHandler
 import com.nguyendevs.ecolens.handlers.display.TaxonomyDisplayHandler

@@ -6,7 +6,7 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemCardSpeciesInfoBinding
-import com.nguyendevs.ecolens.handlers.animation.HomeAnimationHandler
+import com.nguyendevs.ecolens.handlers.animations.HomeAnimationHandler
 import com.nguyendevs.ecolens.model.SpeciesInfo
 
 /** Xử lý hiển thị độ tin cậy (confidence) của kết quả nhận dạng loài. */

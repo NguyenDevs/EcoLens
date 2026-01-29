@@ -13,7 +13,6 @@ import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -22,14 +21,13 @@ import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.transition.TransitionManager
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.nguyendevs.ecolens.activities.CameraActivity
 import com.nguyendevs.ecolens.databinding.ActivityMainBinding
 import com.nguyendevs.ecolens.fragments.chat.ChatHistoryFragment
 import com.nguyendevs.ecolens.fragments.history.HistoryFragment
 import com.nguyendevs.ecolens.handlers.*
-import com.nguyendevs.ecolens.handlers.animation.LoadingAnimationHandler
+import com.nguyendevs.ecolens.handlers.animations.LoadingAnimationHandler
 import com.nguyendevs.ecolens.handlers.interaction.ImageZoomHandler
 import com.nguyendevs.ecolens.handlers.interaction.SearchBarHandler
 import com.nguyendevs.ecolens.handlers.main.HomeScreenHandler

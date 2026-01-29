@@ -14,7 +14,7 @@ import androidx.camera.core.ImageCapture
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.managers.CameraManager
 import com.nguyendevs.ecolens.handlers.PhotoCaptureHandler
-import com.nguyendevs.ecolens.handlers.animation.CameraAnimationHandler
+import com.nguyendevs.ecolens.handlers.animations.CameraAnimationHandler
 import com.nguyendevs.ecolens.databinding.ActivityCameraBinding
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors

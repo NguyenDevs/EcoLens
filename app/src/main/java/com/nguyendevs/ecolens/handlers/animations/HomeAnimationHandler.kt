@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.handlers.animation
+package com.nguyendevs.ecolens.handlers.animations
 
 import android.animation.ObjectAnimator
 import android.view.View

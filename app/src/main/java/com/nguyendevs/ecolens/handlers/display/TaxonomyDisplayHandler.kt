@@ -3,8 +3,8 @@ package com.nguyendevs.ecolens.handlers.display
 import android.view.View
 import android.view.animation.DecelerateInterpolator
 import com.nguyendevs.ecolens.databinding.ItemCardSpeciesInfoBinding
-import com.nguyendevs.ecolens.handlers.animation.HomeAnimationHandler
-import com.nguyendevs.ecolens.handlers.animation.ShimmerAnimationHandler
+import com.nguyendevs.ecolens.handlers.animations.HomeAnimationHandler
+import com.nguyendevs.ecolens.handlers.animations.ShimmerAnimationHandler
 import com.nguyendevs.ecolens.handlers.util.TextFormatter
 import com.nguyendevs.ecolens.model.SpeciesInfo
 

@@ -11,7 +11,7 @@ import android.widget.Toast
 import androidx.core.content.FileProvider
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemCardSpeciesInfoBinding
-import com.nguyendevs.ecolens.handlers.animation.HomeAnimationHandler
+import com.nguyendevs.ecolens.handlers.animations.HomeAnimationHandler
 import com.nguyendevs.ecolens.handlers.util.TextFormatter
 import com.nguyendevs.ecolens.model.SpeciesInfo
 import java.io.File
