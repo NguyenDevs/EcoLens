@@ -14,8 +14,8 @@ import com.nguyendevs.ecolens.handlers.home.SectionDisplayHandler
 import com.nguyendevs.ecolens.handlers.home.TaxonomyDisplayHandler
 import com.nguyendevs.ecolens.handlers.home.HomeButtonHandler
 import com.nguyendevs.ecolens.handlers.util.TextFormatter
-import com.nguyendevs.ecolens.model.LoadingStage
-import com.nguyendevs.ecolens.model.SpeciesInfo
+import com.nguyendevs.ecolens.models.LoadingStage
+import com.nguyendevs.ecolens.models.SpeciesInfo
 import kotlinx.coroutines.*
 import java.util.Locale
 
