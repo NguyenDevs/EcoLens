@@ -245,19 +245,16 @@
                             android:textSize="@dimen/text_body_large"
                             android:textColor="@color/text_primary"
                             android:textStyle="bold"/>
-                    <TextView
-                            android:id="@+id/tvTaxonomyLanguage"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/lang_english"
-                            android:textSize="@dimen/text_body_large"
-                            android:layout_marginEnd="@dimen/spacing_xs"
-                            android:textColor="@color/text_tertiary"/>
-                    <ImageView
-                            android:layout_width="@dimen/icon_md"
-                            android:layout_height="@dimen/icon_md"
-                            android:src="@drawable/ic_chevron_right"
-                            app:tint="@color/border_strong"/>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchTaxoMode"
+                            android:layout_width="44dp"
+                            android:layout_height="24dp"
+                            android:minHeight="0dp"
+                            android:minWidth="0dp"
+                            app:thumbTint="@color/white"
+                            app:trackTint="@color/switch_track_selector"
+                            app:useMaterialThemeColors="false"/>
                 </LinearLayout>
 
                 <View

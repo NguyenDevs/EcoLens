@@ -188,9 +188,11 @@
     <string name="error_delete_account">Unable to delete account. Please try again.</string>
 
     <string name="config">Configuration</string>
-    <string name="taxonomy_language">Taxonomy</string>
+    <string name="taxonomy_language">Vietnamese Taxonomy</string>
     <string name="iucn_searching">IUCN Search</string>
     <string name="iucn_disabled_message">IUCN is disabled, enable in Settings</string>
+    <string name="error_feature_required_vietnamese">Feature required Language Setting: Vietnamese</string>
+
     <!-- About & Support -->
     <string name="about_label">Info</string>
     <string name="about_app_title">About us</string>

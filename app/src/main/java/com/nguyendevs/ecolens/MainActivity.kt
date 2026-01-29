@@ -588,7 +588,7 @@ class MainActivity : AppCompatActivity() {
             val errorCard = homeRoot.findViewById<View>(R.id.errorCard)
             if (errorCard != null) errorCard.isVisible = false
 
-            speciesInfoHandler.displaySpeciesInfo(state.speciesInfo, loadingStage)
+            speciesInfoHandler.displaySpeciesInfo(state.speciesInfo, loadingStage, state.isTaxonomyTranslating)
 
             if (loadingStage == LoadingStage.COMPLETE && binding.fabMute.visibility != View.VISIBLE
             ) {

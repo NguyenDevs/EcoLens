@@ -3,6 +3,7 @@ package com.nguyendevs.ecolens.handlers.setting
 import android.content.Context
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ScreenSettingsBinding
 import com.nguyendevs.ecolens.managers.setting.LanguageManager
 
@@ -95,11 +96,43 @@ class SettingsHandler(
         binding.btnIUCN.setOnClickListener {
             binding.switchIUCNMode.toggle()
         }
+
+        // Taxonomy Mode
+        val isVietnamese = languageManager.getLanguage() == LanguageManager.LANG_VI
+        binding.switchTaxoMode.isChecked = sharedPref.getBoolean("taxo_mode", false)
+        binding.switchTaxoMode.isEnabled = isVietnamese
+        if (!isVietnamese) {
+             binding.switchTaxoMode.alpha = 0.5f
+        }
+
+        binding.switchTaxoMode.setOnCheckedChangeListener { _, isChecked ->
+             sharedPref.edit().putBoolean("taxo_mode", isChecked).apply()
+        }
+
+        binding.btnTaxonomyLanguage.setOnClickListener {
+             if (languageManager.getLanguage() == LanguageManager.LANG_VI) {
+                 binding.switchTaxoMode.toggle()
+             } else {
+                 Toast.makeText(activity, "Feature required Language Setting: Vietnamese", Toast.LENGTH_SHORT).show()
+             }
+        }
     }
 
     // ==================== PUBLIC METHODS ====================
 
     fun updateLanguageDisplay() {
         socialLinksHandler.updateLanguageDisplay()
+        
+        // Update Taxonomy Mode state when language changes
+        val isVietnamese = languageManager.getLanguage() == LanguageManager.LANG_VI
+        binding.switchTaxoMode.isEnabled = isVietnamese
+        if (!isVietnamese) {
+             binding.switchTaxoMode.alpha = 0.5f
+             binding.switchTaxoMode.isChecked = false
+             val sharedPref = activity.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+             sharedPref.edit().putBoolean("taxo_mode", false).apply()
+        } else {
+             binding.switchTaxoMode.alpha = 1.0f
+        }
     }
 }

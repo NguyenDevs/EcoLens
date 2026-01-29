@@ -93,6 +93,35 @@ object PromptBuilder {
         }
     }
 
+    fun buildTaxonomyTranslationPrompt(
+        kingdom: String,
+        phylum: String,
+        className: String,
+        taxorder: String,
+        family: String,
+        genus: String,
+        species: String
+    ): String {
+        return """
+            Dịch các thuật ngữ phân loại sinh học sau sang Tiếng Việt chuẩn xác nhất.
+            Nếu không có tên tiếng Việt chính xác, hãy giữ nguyên tên khoa học hoặc phiên âm phù hợp.
+            
+            Input:
+            Kingdom: $kingdom
+            Phylum: $phylum
+            Class: $className
+            Order: $taxorder
+            Family: $family
+            Genus: $genus
+            Species: $species
+            
+            Trả về JSON duy nhất với các key tương ứng (kingdom, phylum, className, taxorder, family, genus, species).
+            Ví dụ: {"kingdom": "Thực vật", "phylum": "Ngọc lan", ...}
+            
+            CHỈ TRẢ VỀ JSON. KHÔNG MARKDOWN.
+        """.trimIndent()
+    }
+
     private fun buildVietnameseDetailsPrompt(scientificName: String): String = """
         Cung cấp thông tin chi tiết về "$scientificName" bằng Tiếng Việt.
         

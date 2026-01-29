@@ -190,9 +190,11 @@
 
     <!-- Cấu hình -->
     <string name="config">Thiết lập</string>
-    <string name="taxonomy_language">Phân loại</string>
+    <string name="taxonomy_language">Phân loại Tiếng Việt</string>
     <string name="iucn_searching">Tra cứu IUCN</string>
     <string name="iucn_disabled_message">IUCN Đang tắt, bật lại ở Cài đặt</string>
+    <string name="error_feature_required_vietnamese">Tính năng yêu cầu cài đặt ngôn ngữ: Tiếng Việt</string>
+
     <!-- Thông tin & Hỗ trợ -->
     <string name="about_label">Thông tin</string>
     <string name="about_app_title">Về chúng tôi</string>
