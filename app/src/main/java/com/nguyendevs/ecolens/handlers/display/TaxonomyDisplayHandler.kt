@@ -3,17 +3,17 @@ package com.nguyendevs.ecolens.handlers.display
 import android.view.View
 import android.view.animation.DecelerateInterpolator
 import com.nguyendevs.ecolens.databinding.ItemCardSpeciesInfoBinding
-import com.nguyendevs.ecolens.handlers.animation.AnimationHandler
+import com.nguyendevs.ecolens.handlers.animation.HomeAnimationHandler
 import com.nguyendevs.ecolens.handlers.animation.ShimmerEffectHandler
 import com.nguyendevs.ecolens.handlers.util.TextFormatter
 import com.nguyendevs.ecolens.model.SpeciesInfo
 
 /** Xử lý hiển thị thông tin phân loại học (taxonomy) với hiệu ứng waterfall. */
 class TaxonomyDisplayHandler(
-        private val binding: ItemCardSpeciesInfoBinding,
-        private val animationHandler: AnimationHandler,
-        private val shimmerEffectHandler: ShimmerEffectHandler,
-        private val textFormatter: TextFormatter
+    private val binding: ItemCardSpeciesInfoBinding,
+    private val homeAnimationHandler: HomeAnimationHandler,
+    private val shimmerEffectHandler: ShimmerEffectHandler,
+    private val textFormatter: TextFormatter
 ) {
     private val displayedRows = mutableSetOf<Int>()
     private val infoBinding

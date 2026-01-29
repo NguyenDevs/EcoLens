@@ -7,7 +7,7 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemCardSpeciesInfoBinding
-import com.nguyendevs.ecolens.handlers.animation.AnimationHandler
+import com.nguyendevs.ecolens.handlers.animation.HomeAnimationHandler
 import com.nguyendevs.ecolens.handlers.animation.ShimmerEffectHandler
 import com.nguyendevs.ecolens.handlers.display.ConfidenceDisplayHandler
 import com.nguyendevs.ecolens.handlers.display.SectionDisplayHandler
@@ -43,19 +43,19 @@ class SpeciesInfoHandler(
         currentImageUri = uri
     }
 
-    private val animationHandler = AnimationHandler()
+    private val homeAnimationHandler = HomeAnimationHandler()
     private val shimmerEffectHandler = ShimmerEffectHandler(context)
     private val textFormatter = TextFormatter()
     private val taxonomyDisplayHandler =
-            TaxonomyDisplayHandler(binding, animationHandler, shimmerEffectHandler, textFormatter)
+            TaxonomyDisplayHandler(binding, homeAnimationHandler, shimmerEffectHandler, textFormatter)
     private val confidenceDisplayHandler =
-            ConfidenceDisplayHandler(context, binding, animationHandler)
+            ConfidenceDisplayHandler(context, binding, homeAnimationHandler)
     private val sectionDisplayHandler = SectionDisplayHandler(binding, textFormatter)
     private val buttonHandler =
             ButtonHandler(
                     context,
                     binding,
-                    animationHandler,
+                    homeAnimationHandler,
                     textFormatter,
                     onCopySuccess,
                     onRetryClick,
@@ -200,7 +200,7 @@ class SpeciesInfoHandler(
     }
 
     fun onDestroy() {
-        animationHandler.destroy()
+        homeAnimationHandler.destroy()
         shimmerEffectHandler.destroy()
         handlerScope.cancel()
     }
@@ -256,9 +256,9 @@ class SpeciesInfoHandler(
     private fun displayScientificName(info: SpeciesInfo) {
         infoBinding.tvScientificName.apply {
             textFormatter.setHtml(this, info.scientificName)
-            animationHandler.slideAndFadeIn(this, duration = 500, delay = 100)
+            homeAnimationHandler.slideAndFadeIn(this, duration = 500, delay = 100)
         }
-        animationHandler.slideAndFadeIn(
+        homeAnimationHandler.slideAndFadeIn(
                 infoBinding.btnCopyScientificName,
                 duration = 500,
                 delay = 150
@@ -290,7 +290,7 @@ class SpeciesInfoHandler(
                 textFormatter.setHtml(view, capitalizedCommonName)
 
                 if (lastDisplayedCommonName != info.commonName) {
-                    animationHandler.slideAndFadeIn(view, duration = 600)
+                    homeAnimationHandler.slideAndFadeIn(view, duration = 600)
                 } else if (view.visibility != View.VISIBLE) {
                     view.visibility = View.VISIBLE
                     view.alpha = 1f

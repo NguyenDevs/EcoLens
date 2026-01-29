@@ -6,14 +6,14 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemCardSpeciesInfoBinding
-import com.nguyendevs.ecolens.handlers.animation.AnimationHandler
+import com.nguyendevs.ecolens.handlers.animation.HomeAnimationHandler
 import com.nguyendevs.ecolens.model.SpeciesInfo
 
 /** Xử lý hiển thị độ tin cậy (confidence) của kết quả nhận dạng loài. */
 class ConfidenceDisplayHandler(
         private val context: Context,
         private val binding: ItemCardSpeciesInfoBinding,
-        private val animationHandler: AnimationHandler
+        private val homeAnimationHandler: HomeAnimationHandler
 ) {
     private var lastConfidenceValue: String? = null
     private val infoBinding
@@ -46,9 +46,9 @@ class ConfidenceDisplayHandler(
                 }
             }
 
-            animationHandler.startConfidenceRotation(iconConfidence)
+            homeAnimationHandler.startConfidenceRotation(iconConfidence)
         } else {
-            animationHandler.stopConfidenceRotation(iconConfidence)
+            homeAnimationHandler.stopConfidenceRotation(iconConfidence)
 
             val confidenceValue = info.confidence.coerceIn(0.0, 100.0)
             val confidencePercent = String.format("%.2f", confidenceValue)
@@ -95,7 +95,7 @@ class ConfidenceDisplayHandler(
 
             confidenceCard.let { card ->
                 if (lastConfidenceValue != newText) {
-                    animationHandler.popInAnimation(card)
+                    homeAnimationHandler.popInAnimation(card)
                 } else {
                     if (card.visibility != View.VISIBLE || card.alpha < 1f) {
                         card.visibility = View.VISIBLE

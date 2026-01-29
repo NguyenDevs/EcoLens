@@ -11,7 +11,7 @@ import android.widget.Toast
 import androidx.core.content.FileProvider
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemCardSpeciesInfoBinding
-import com.nguyendevs.ecolens.handlers.animation.AnimationHandler
+import com.nguyendevs.ecolens.handlers.animation.HomeAnimationHandler
 import com.nguyendevs.ecolens.handlers.util.TextFormatter
 import com.nguyendevs.ecolens.model.SpeciesInfo
 import java.io.File
@@ -21,13 +21,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class ButtonHandler(
-        private val context: Context,
-        private val binding: ItemCardSpeciesInfoBinding,
-        private val animationHandler: AnimationHandler,
-        private val textFormatter: TextFormatter,
-        private val onCopySuccess: (String) -> Unit,
-        private val onRetryClick: () -> Unit,
-        private val handlerScope: CoroutineScope
+    private val context: Context,
+    private val binding: ItemCardSpeciesInfoBinding,
+    private val homeAnimationHandler: HomeAnimationHandler,
+    private val textFormatter: TextFormatter,
+    private val onCopySuccess: (String) -> Unit,
+    private val onRetryClick: () -> Unit,
+    private val handlerScope: CoroutineScope
 ) {
     private val infoBinding
         get() = binding
@@ -38,13 +38,13 @@ class ButtonHandler(
     }
 
     fun showShareButton() {
-        animationHandler.scaleInAnimation(infoBinding.btnShareInfo, duration = 400)
+        homeAnimationHandler.scaleInAnimation(infoBinding.btnShareInfo, duration = 400)
     }
 
     fun showRetryButton() {
         handlerScope.launch {
             withContext(Dispatchers.Main) {
-                animationHandler.scaleInAnimation(
+                homeAnimationHandler.scaleInAnimation(
                         infoBinding.btnRetryIdentification,
                         duration = 400,
                         delay = 100
@@ -59,7 +59,7 @@ class ButtonHandler(
     }
 
     fun showCopyButton() {
-        animationHandler.scaleInAnimation(
+        homeAnimationHandler.scaleInAnimation(
                 infoBinding.btnCopyScientificName,
                 duration = 400,
                 delay = 100
