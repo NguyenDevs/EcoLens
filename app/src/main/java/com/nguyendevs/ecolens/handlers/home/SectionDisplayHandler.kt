@@ -77,6 +77,20 @@ class SectionDisplayHandler(
         }
     }
 
+    fun hideSection(sectionId: Int) {
+        val section =
+            when (sectionId) {
+                R.id.sectionDescription -> infoBinding.sectionDescription
+                R.id.sectionCharacteristics -> infoBinding.sectionCharacteristics
+                R.id.sectionDistribution -> infoBinding.sectionDistribution
+                R.id.sectionHabitat -> infoBinding.sectionHabitat
+                R.id.sectionConservation -> infoBinding.sectionConservation
+                else -> null
+            }
+        section?.visibility = View.GONE
+        renderedSections.add(sectionId)
+    }
+
     fun isSectionRendered(sectionId: Int): Boolean {
         return renderedSections.contains(sectionId)
     }

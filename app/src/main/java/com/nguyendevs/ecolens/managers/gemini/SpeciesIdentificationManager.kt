@@ -184,6 +184,10 @@ class SpeciesIdentificationManager(
                 ))
             }
 
+            // Check IUCN Mode
+            val sharedPref = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+            val isIucnEnabled = sharedPref.getBoolean("iucn_mode", true)
+
             coroutineScope {
                 val gbifDeferred = async(Dispatchers.IO) {
                     try {
@@ -195,18 +199,22 @@ class SpeciesIdentificationManager(
                     }
                 }
 
-                val iucnDeferred = async(Dispatchers.IO) {
-                    try {
-                        val parts = scientificName.split(" ")
-                        if (parts.size >= 2) {
-                            apiService.getIucnStatus(parts[0], parts[1])
-                        } else {
+                val iucnDeferred = if (isIucnEnabled) {
+                    async(Dispatchers.IO) {
+                        try {
+                            val parts = scientificName.split(" ")
+                            if (parts.size >= 2) {
+                                apiService.getIucnStatus(parts[0], parts[1])
+                            } else {
+                                null
+                            }
+                        } catch (e: Exception) {
+                            Log.e(TAG, "IUCN Error: ${e.message}")
                             null
                         }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "IUCN Error: ${e.message}")
-                        null
                     }
+                } else {
+                    null
                 }
 
                 val infoForDetails = currentSpeciesInfo ?: SpeciesInfo(
@@ -244,37 +252,42 @@ class SpeciesIdentificationManager(
                 }
 
                 val gbifResult = gbifDeferred.await()
-                val iucnResult = iucnDeferred.await()
+                val iucnResult = iucnDeferred?.await()
 
                 if (gbifResult != null) {
                     updateTaxonomyFromGbif(gbifResult, onStateUpdate)
                 }
 
-                val iucnCode = iucnResult?.assessments?.firstOrNull()?.redListCategoryCode ?: "NE"
-
                 geminiDetailsDeferred.await()
 
-                val searchingText = context.getString(R.string.searching_info)
-                currentSpeciesInfo = currentSpeciesInfo?.copy(conservationStatus = searchingText)
-                onStateUpdate(EcoLensUiState(
-                    isLoading = true,
-                    speciesInfo = currentSpeciesInfo,
-                    loadingStage = LoadingStage.CONSERVATION
-                ))
+                if (isIucnEnabled) {
+                    val iucnCode = iucnResult?.assessments?.firstOrNull()?.redListCategoryCode ?: "NE"
 
-                val infoForConservation = currentSpeciesInfo ?: SpeciesInfo(
-                    scientificName = scientificName,
-                    confidence = confidence
-                )
+                    val searchingText = context.getString(R.string.searching_info)
+                    currentSpeciesInfo = currentSpeciesInfo?.copy(conservationStatus = searchingText)
+                    onStateUpdate(EcoLensUiState(
+                        isLoading = true,
+                        speciesInfo = currentSpeciesInfo,
+                        loadingStage = LoadingStage.CONSERVATION
+                    ))
 
-                streamingHelper.streamConservation(
-                    scientificName,
-                    iucnCode,
-                    languageCode,
-                    infoForConservation
-                ) { state ->
-                    currentSpeciesInfo = state.speciesInfo
-                    onStateUpdate(state)
+                    val infoForConservation = currentSpeciesInfo ?: SpeciesInfo(
+                        scientificName = scientificName,
+                        confidence = confidence
+                    )
+
+                    streamingHelper.streamConservation(
+                        scientificName,
+                        iucnCode,
+                        languageCode,
+                        infoForConservation
+                    ) { state ->
+                        currentSpeciesInfo = state.speciesInfo
+                        onStateUpdate(state)
+                    }
+                } else {
+                    // IUCN Disabled
+                    currentSpeciesInfo = currentSpeciesInfo?.copy(conservationStatus = "Vô hiệu")
                 }
 
                 saveToHistory(existingHistoryId, imageFile)

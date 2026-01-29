@@ -1,5 +1,6 @@
 package com.nguyendevs.ecolens.handlers.setting
 
+import android.content.Context
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.nguyendevs.ecolens.databinding.ScreenSettingsBinding
@@ -82,6 +83,18 @@ class SettingsHandler(
         }
 
         binding.logoutOption.setOnClickListener { logoutHandler.showLogoutConfirmDialog() }
+
+        // IUCN Mode
+        val sharedPref = activity.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+        binding.switchIUCNMode.isChecked = sharedPref.getBoolean("iucn_mode", true)
+
+        binding.switchIUCNMode.setOnCheckedChangeListener { _, isChecked ->
+            sharedPref.edit().putBoolean("iucn_mode", isChecked).apply()
+        }
+
+        binding.btnIUCN.setOnClickListener {
+            binding.switchIUCNMode.toggle()
+        }
     }
 
     // ==================== PUBLIC METHODS ====================
