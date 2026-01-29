@@ -3,9 +3,12 @@ package com.nguyendevs.ecolens.handlers.setting
 import android.content.Context
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.nguyendevs.ecolens.R
+import com.nguyendevs.ecolens.database.UserRepository
 import com.nguyendevs.ecolens.databinding.ScreenSettingsBinding
 import com.nguyendevs.ecolens.managers.setting.LanguageManager
+import kotlinx.coroutines.launch
 
 /**
  * Coordinator handler cho Settings screen. Delegates các chức năng cụ thể cho các handler con:
@@ -26,6 +29,7 @@ class SettingsHandler(
     private val accountDetailsHandler: AccountDetailsHandler
     private val logoutHandler: LogoutHandler
     private val socialLinksHandler: SocialLinksHandler
+    private val userRepository = UserRepository()
 
     init {
         themeHandler =
@@ -91,6 +95,9 @@ class SettingsHandler(
 
         binding.switchIUCNMode.setOnCheckedChangeListener { _, isChecked ->
             sharedPref.edit().putBoolean("iucn_mode", isChecked).apply()
+            activity.lifecycleScope.launch {
+                userRepository.updateIucnMode(isChecked)
+            }
         }
 
         binding.btnIUCN.setOnClickListener {
@@ -107,6 +114,9 @@ class SettingsHandler(
 
         binding.switchTaxoMode.setOnCheckedChangeListener { _, isChecked ->
              sharedPref.edit().putBoolean("taxo_mode", isChecked).apply()
+             activity.lifecycleScope.launch {
+                 userRepository.updateTaxoMode(isChecked)
+             }
         }
 
         binding.btnTaxonomyLanguage.setOnClickListener {
@@ -131,8 +141,49 @@ class SettingsHandler(
              binding.switchTaxoMode.isChecked = false
              val sharedPref = activity.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
              sharedPref.edit().putBoolean("taxo_mode", false).apply()
+             activity.lifecycleScope.launch {
+                 userRepository.updateTaxoMode(false)
+             }
         } else {
              binding.switchTaxoMode.alpha = 1.0f
+        }
+    }
+
+    /**
+     * Làm mới trạng thái UI từ SharedPreferences mà không kích hoạt sự kiện lưu lên Firebase
+     * Được gọi khi dữ liệu người dùng vừa được đồng bộ từ Firebase về
+     */
+    fun refreshSettingsState() {
+        val sharedPref = activity.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+        
+        // Tạm thời bỏ listener để tránh vòng lặp update lên Firebase
+        binding.switchIUCNMode.setOnCheckedChangeListener(null)
+        binding.switchTaxoMode.setOnCheckedChangeListener(null)
+        binding.switchDarkMode.setOnCheckedChangeListener(null)
+
+        // Cập nhật UI
+        binding.switchIUCNMode.isChecked = sharedPref.getBoolean("iucn_mode", true)
+        
+        val isVietnamese = languageManager.getLanguage() == LanguageManager.LANG_VI
+        val taxoMode = sharedPref.getBoolean("taxo_mode", false)
+        binding.switchTaxoMode.isChecked = taxoMode && isVietnamese
+        
+        // Cập nhật Dark Mode UI (ThemeHandler sẽ lo phần logic theme)
+        themeHandler.setupDarkModeSwitch()
+
+        // Gán lại listener
+        binding.switchIUCNMode.setOnCheckedChangeListener { _, isChecked ->
+            sharedPref.edit().putBoolean("iucn_mode", isChecked).apply()
+            activity.lifecycleScope.launch {
+                userRepository.updateIucnMode(isChecked)
+            }
+        }
+
+        binding.switchTaxoMode.setOnCheckedChangeListener { _, isChecked ->
+             sharedPref.edit().putBoolean("taxo_mode", isChecked).apply()
+             activity.lifecycleScope.launch {
+                 userRepository.updateTaxoMode(isChecked)
+             }
         }
     }
 }

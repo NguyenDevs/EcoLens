@@ -23,6 +23,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.nguyendevs.ecolens.activities.CameraActivity
+import com.nguyendevs.ecolens.database.UserRepository
 import com.nguyendevs.ecolens.databinding.ActivityMainBinding
 import com.nguyendevs.ecolens.fragments.chat.ChatHistoryFragment
 import com.nguyendevs.ecolens.fragments.history.HistoryFragment
@@ -63,6 +64,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var homeScreenHandler: HomeScreenHandler
     private lateinit var navigationHandler: NavigationHandler
+    private val userRepository = UserRepository()
 
     private val historyFragment = HistoryFragment()
     private val chatHistoryFragment = ChatHistoryFragment()
@@ -155,6 +157,26 @@ class MainActivity : AppCompatActivity() {
         }
 
         preloadFragments()
+        syncUserData()
+    }
+
+    /** Đồng bộ dữ liệu người dùng từ Firebase về SharedPreferences */
+    private fun syncUserData() {
+        if (userRepository.isUserLoggedIn()) {
+            lifecycleScope.launch {
+                val user = userRepository.getCurrentUserDetails()
+                if (user != null) {
+                    val appSettings = getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+                    appSettings.edit()
+                        .putBoolean("iucn_mode", user.iucnMode)
+                        .putBoolean("taxo_mode", user.taxoMode)
+                        .apply()
+                    
+                    // Cập nhật UI Settings nếu đang ở màn hình Settings
+                    settingsHandler.refreshSettingsState()
+                }
+            }
+        }
     }
 
     private fun preloadFragments() {
