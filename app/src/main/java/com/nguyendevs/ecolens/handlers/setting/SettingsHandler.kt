@@ -155,23 +155,19 @@ class SettingsHandler(
      */
     fun refreshSettingsState() {
         val sharedPref = activity.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
-        
-        // Tạm thời bỏ listener để tránh vòng lặp update lên Firebase
+
         binding.switchIUCNMode.setOnCheckedChangeListener(null)
         binding.switchTaxoMode.setOnCheckedChangeListener(null)
         binding.switchDarkMode.setOnCheckedChangeListener(null)
 
-        // Cập nhật UI
         binding.switchIUCNMode.isChecked = sharedPref.getBoolean("iucn_mode", true)
         
         val isVietnamese = languageManager.getLanguage() == LanguageManager.LANG_VI
         val taxoMode = sharedPref.getBoolean("taxo_mode", false)
         binding.switchTaxoMode.isChecked = taxoMode && isVietnamese
-        
-        // Cập nhật Dark Mode UI (ThemeHandler sẽ lo phần logic theme)
+
         themeHandler.setupDarkModeSwitch()
 
-        // Gán lại listener
         binding.switchIUCNMode.setOnCheckedChangeListener { _, isChecked ->
             sharedPref.edit().putBoolean("iucn_mode", isChecked).apply()
             activity.lifecycleScope.launch {
