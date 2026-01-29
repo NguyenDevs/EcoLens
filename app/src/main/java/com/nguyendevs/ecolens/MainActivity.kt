@@ -32,8 +32,11 @@ import com.nguyendevs.ecolens.handlers.home.ImageZoomHandler
 import com.nguyendevs.ecolens.handlers.home.SearchBarHandler
 import com.nguyendevs.ecolens.handlers.main.HomeScreenHandler
 import com.nguyendevs.ecolens.handlers.main.NavigationHandler
-import com.nguyendevs.ecolens.handlers.settings.SettingsHandler
+import com.nguyendevs.ecolens.handlers.setting.SettingsHandler
 import com.nguyendevs.ecolens.managers.*
+import com.nguyendevs.ecolens.managers.main.PermissionManager
+import com.nguyendevs.ecolens.managers.main.SpeakerManager
+import com.nguyendevs.ecolens.managers.setting.LanguageManager
 import com.nguyendevs.ecolens.model.LoadingStage
 import com.nguyendevs.ecolens.model.SpeciesInfo
 import com.nguyendevs.ecolens.utils.KeyboardUtils

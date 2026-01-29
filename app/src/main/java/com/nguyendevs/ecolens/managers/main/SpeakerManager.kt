@@ -1,10 +1,11 @@
-package com.nguyendevs.ecolens.managers
+package com.nguyendevs.ecolens.managers.main
 
 import android.content.Context
 import android.os.Build
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.util.Log
+import com.nguyendevs.ecolens.managers.setting.LanguageManager
 import java.util.Locale
 
 /**
