@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.handlers.settings
+package com.nguyendevs.ecolens.handlers.setting
 
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator

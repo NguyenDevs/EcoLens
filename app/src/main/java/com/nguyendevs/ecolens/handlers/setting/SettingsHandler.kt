@@ -1,9 +1,9 @@
-package com.nguyendevs.ecolens.handlers.settings
+package com.nguyendevs.ecolens.handlers.setting
 
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.nguyendevs.ecolens.databinding.ScreenSettingsBinding
-import com.nguyendevs.ecolens.managers.LanguageManager
+import com.nguyendevs.ecolens.managers.setting.LanguageManager
 
 /**
  * Coordinator handler cho Settings screen. Delegates các chức năng cụ thể cho các handler con:

@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.handlers.settings
+package com.nguyendevs.ecolens.handlers.setting
 
 import android.content.Intent
 import android.view.View
@@ -11,7 +11,7 @@ import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ScreenSettingsBinding
 import com.nguyendevs.ecolens.fragments.setting.AboutFragment
 import com.nguyendevs.ecolens.fragments.setting.LanguageSelectionFragment
-import com.nguyendevs.ecolens.managers.LanguageManager
+import com.nguyendevs.ecolens.managers.setting.LanguageManager
 
 /**
  * Handler quản lý social links, email feedback, navigation và language display. Xử lý: open URLs,
