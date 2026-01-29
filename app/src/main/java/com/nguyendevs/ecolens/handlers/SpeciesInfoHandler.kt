@@ -8,7 +8,7 @@ import androidx.core.content.ContextCompat
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemCardSpeciesInfoBinding
 import com.nguyendevs.ecolens.handlers.animation.HomeAnimationHandler
-import com.nguyendevs.ecolens.handlers.animation.ShimmerEffectHandler
+import com.nguyendevs.ecolens.handlers.animation.ShimmerAnimationHandler
 import com.nguyendevs.ecolens.handlers.display.ConfidenceDisplayHandler
 import com.nguyendevs.ecolens.handlers.display.SectionDisplayHandler
 import com.nguyendevs.ecolens.handlers.display.TaxonomyDisplayHandler
@@ -44,10 +44,10 @@ class SpeciesInfoHandler(
     }
 
     private val homeAnimationHandler = HomeAnimationHandler()
-    private val shimmerEffectHandler = ShimmerEffectHandler(context)
+    private val shimmerAnimationHandler = ShimmerAnimationHandler(context)
     private val textFormatter = TextFormatter()
     private val taxonomyDisplayHandler =
-            TaxonomyDisplayHandler(binding, homeAnimationHandler, shimmerEffectHandler, textFormatter)
+            TaxonomyDisplayHandler(binding, homeAnimationHandler, shimmerAnimationHandler, textFormatter)
     private val confidenceDisplayHandler =
             ConfidenceDisplayHandler(context, binding, homeAnimationHandler)
     private val sectionDisplayHandler = SectionDisplayHandler(binding, textFormatter)
@@ -201,7 +201,7 @@ class SpeciesInfoHandler(
 
     fun onDestroy() {
         homeAnimationHandler.destroy()
-        shimmerEffectHandler.destroy()
+        shimmerAnimationHandler.destroy()
         handlerScope.cancel()
     }
 

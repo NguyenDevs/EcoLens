@@ -22,7 +22,7 @@ import com.nguyendevs.ecolens.R
  *
  * @property context Context của ứng dụng, dùng để truy cập resources và cấu hình theme
  */
-class ShimmerEffectHandler(private val context: Context) {
+class ShimmerAnimationHandler(private val context: Context) {
     private var taxonomyShimmerAnimator: ValueAnimator? = null
 
     fun startTaxonomyShimmer(view: View?) {

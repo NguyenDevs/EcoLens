@@ -4,7 +4,7 @@ import android.view.View
 import android.view.animation.DecelerateInterpolator
 import com.nguyendevs.ecolens.databinding.ItemCardSpeciesInfoBinding
 import com.nguyendevs.ecolens.handlers.animation.HomeAnimationHandler
-import com.nguyendevs.ecolens.handlers.animation.ShimmerEffectHandler
+import com.nguyendevs.ecolens.handlers.animation.ShimmerAnimationHandler
 import com.nguyendevs.ecolens.handlers.util.TextFormatter
 import com.nguyendevs.ecolens.model.SpeciesInfo
 
@@ -12,7 +12,7 @@ import com.nguyendevs.ecolens.model.SpeciesInfo
 class TaxonomyDisplayHandler(
     private val binding: ItemCardSpeciesInfoBinding,
     private val homeAnimationHandler: HomeAnimationHandler,
-    private val shimmerEffectHandler: ShimmerEffectHandler,
+    private val shimmerAnimationHandler: ShimmerAnimationHandler,
     private val textFormatter: TextFormatter
 ) {
     private val displayedRows = mutableSetOf<Int>()
@@ -42,7 +42,7 @@ class TaxonomyDisplayHandler(
             }
         }
 
-        shimmerEffectHandler.startTaxonomyShimmer(container)
+        shimmerAnimationHandler.startTaxonomyShimmer(container)
     }
 
     fun displayTaxonomyWaterfall(info: SpeciesInfo) {
@@ -92,7 +92,7 @@ class TaxonomyDisplayHandler(
     }
 
     fun stopShimmer() {
-        shimmerEffectHandler.stopTaxonomyShimmer(infoBinding.taxonomyContainer)
+        shimmerAnimationHandler.stopTaxonomyShimmer(infoBinding.taxonomyContainer)
     }
 
     fun clearDisplayedRows() {
