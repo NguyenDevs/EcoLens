@@ -28,10 +28,11 @@ import com.nguyendevs.ecolens.fragments.chat.ChatHistoryFragment
 import com.nguyendevs.ecolens.fragments.history.HistoryFragment
 import com.nguyendevs.ecolens.handlers.*
 import com.nguyendevs.ecolens.handlers.animations.LoadingAnimationHandler
-import com.nguyendevs.ecolens.handlers.interaction.ImageZoomHandler
-import com.nguyendevs.ecolens.handlers.interaction.SearchBarHandler
+import com.nguyendevs.ecolens.handlers.home.ImageZoomHandler
+import com.nguyendevs.ecolens.handlers.home.SearchBarHandler
 import com.nguyendevs.ecolens.handlers.main.HomeScreenHandler
 import com.nguyendevs.ecolens.handlers.main.NavigationHandler
+import com.nguyendevs.ecolens.handlers.settings.SettingsHandler
 import com.nguyendevs.ecolens.managers.*
 import com.nguyendevs.ecolens.model.LoadingStage
 import com.nguyendevs.ecolens.model.SpeciesInfo

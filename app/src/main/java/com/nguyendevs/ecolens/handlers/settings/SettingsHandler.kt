@@ -1,12 +1,8 @@
-package com.nguyendevs.ecolens.handlers
+package com.nguyendevs.ecolens.handlers.settings
 
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.nguyendevs.ecolens.databinding.ScreenSettingsBinding
-import com.nguyendevs.ecolens.handlers.settings.AccountDetailsHandler
-import com.nguyendevs.ecolens.handlers.settings.LogoutHandler
-import com.nguyendevs.ecolens.handlers.settings.SocialLinksHandler
-import com.nguyendevs.ecolens.handlers.settings.ThemeHandler
 import com.nguyendevs.ecolens.managers.LanguageManager
 
 /**
@@ -17,9 +13,9 @@ import com.nguyendevs.ecolens.managers.LanguageManager
  * - SocialLinksHandler: Social links, email, language, navigation
  */
 class SettingsHandler(
-        private val activity: AppCompatActivity,
-        private val languageManager: LanguageManager,
-        private val binding: ScreenSettingsBinding
+    private val activity: AppCompatActivity,
+    private val languageManager: LanguageManager,
+    private val binding: ScreenSettingsBinding
 ) {
 
     private var isTransitioning = false

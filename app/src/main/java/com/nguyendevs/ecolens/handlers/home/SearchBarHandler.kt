@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.handlers.interaction
+package com.nguyendevs.ecolens.handlers.home
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter

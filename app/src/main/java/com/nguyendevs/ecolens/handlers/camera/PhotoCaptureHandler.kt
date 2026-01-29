@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.handlers
+package com.nguyendevs.ecolens.handlers.camera
 
 import android.content.Context
 import android.net.Uri
@@ -10,7 +10,7 @@ import com.nguyendevs.ecolens.utils.ImageUtils
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.Locale
 import java.util.concurrent.ExecutorService
 
 /**

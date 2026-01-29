@@ -9,10 +9,10 @@ import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemCardSpeciesInfoBinding
 import com.nguyendevs.ecolens.handlers.animations.HomeAnimationHandler
 import com.nguyendevs.ecolens.handlers.animations.ShimmerAnimationHandler
-import com.nguyendevs.ecolens.handlers.display.ConfidenceDisplayHandler
-import com.nguyendevs.ecolens.handlers.display.SectionDisplayHandler
-import com.nguyendevs.ecolens.handlers.display.TaxonomyDisplayHandler
-import com.nguyendevs.ecolens.handlers.interaction.HomeButtonHandler
+import com.nguyendevs.ecolens.handlers.home.ConfidenceDisplayHandler
+import com.nguyendevs.ecolens.handlers.home.SectionDisplayHandler
+import com.nguyendevs.ecolens.handlers.home.TaxonomyDisplayHandler
+import com.nguyendevs.ecolens.handlers.home.HomeButtonHandler
 import com.nguyendevs.ecolens.handlers.util.TextFormatter
 import com.nguyendevs.ecolens.model.LoadingStage
 import com.nguyendevs.ecolens.model.SpeciesInfo

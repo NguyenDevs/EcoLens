@@ -1,4 +1,4 @@
-package com.nguyendevs.ecolens.handlers.display
+package com.nguyendevs.ecolens.handlers.home
 
 import android.annotation.SuppressLint
 import android.content.Context
