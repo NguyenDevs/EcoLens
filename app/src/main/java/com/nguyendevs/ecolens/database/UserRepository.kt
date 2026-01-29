@@ -5,7 +5,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.FirebaseDatabase
 import com.nguyendevs.ecolens.BuildConfig
-import com.nguyendevs.ecolens.model.User
+import com.nguyendevs.ecolens.models.User
 import kotlinx.coroutines.tasks.await
 
 /**

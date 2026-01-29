@@ -6,7 +6,7 @@
     <data>
         <variable
             name="item"
-            type="com.nguyendevs.ecolens.model.history.HistoryEntry" />
+            type="com.nguyendevs.ecolens.models.history.HistoryEntry" />
     </data>
 
     <com.google.android.material.card.MaterialCardView

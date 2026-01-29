@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.adapters.ChatSessionAdapter
 import com.nguyendevs.ecolens.databinding.ScreenChatHistoryBinding
-import com.nguyendevs.ecolens.model.chat.ChatSession
+import com.nguyendevs.ecolens.models.chat.ChatSession
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -32,8 +32,6 @@ class ChatHistoryFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var adapter: ChatSessionAdapter
-    
-    // Lazy loading variables
     private var fullChatList: List<ChatSession> = emptyList()
     private var currentPage = 0
     private var isLoadingMore = false

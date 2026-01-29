@@ -6,7 +6,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemLanguagesBinding
-import com.nguyendevs.ecolens.model.Language
+import com.nguyendevs.ecolens.models.Language
 
 /**
  * Adapter hiển thị danh sách ngôn ngữ với visual feedback cho item được chọn

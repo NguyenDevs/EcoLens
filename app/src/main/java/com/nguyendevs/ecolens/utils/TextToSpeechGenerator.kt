@@ -2,7 +2,7 @@ package com.nguyendevs.ecolens.utils
 
 import android.content.Context
 import com.nguyendevs.ecolens.R
-import com.nguyendevs.ecolens.model.SpeciesInfo
+import com.nguyendevs.ecolens.models.SpeciesInfo
 
 /**
  * Tạo văn bản để đọc cho Text-to-Speech

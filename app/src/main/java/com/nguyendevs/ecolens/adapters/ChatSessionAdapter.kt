@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemChatHistoryBinding
-import com.nguyendevs.ecolens.model.chat.ChatSession
+import com.nguyendevs.ecolens.models.chat.ChatSession
 import io.noties.markwon.Markwon
 import java.time.Instant
 import java.time.ZoneId

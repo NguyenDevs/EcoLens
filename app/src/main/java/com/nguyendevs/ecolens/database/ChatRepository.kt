@@ -4,8 +4,8 @@ import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.nguyendevs.ecolens.BuildConfig
-import com.nguyendevs.ecolens.model.chat.ChatMessage
-import com.nguyendevs.ecolens.model.chat.ChatSession
+import com.nguyendevs.ecolens.models.chat.ChatMessage
+import com.nguyendevs.ecolens.models.chat.ChatSession
 import kotlinx.coroutines.tasks.await
 
 /**

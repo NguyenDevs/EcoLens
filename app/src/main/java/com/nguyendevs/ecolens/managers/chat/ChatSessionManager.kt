@@ -8,8 +8,8 @@ import com.nguyendevs.ecolens.api.GeminiRequest
 import com.nguyendevs.ecolens.api.GeminiResponse
 import com.nguyendevs.ecolens.database.ChatDao
 import com.nguyendevs.ecolens.database.ChatRepository
-import com.nguyendevs.ecolens.model.chat.ChatMessage
-import com.nguyendevs.ecolens.model.chat.ChatSession
+import com.nguyendevs.ecolens.models.chat.ChatMessage
+import com.nguyendevs.ecolens.models.chat.ChatSession
 import com.nguyendevs.ecolens.network.RetrofitClient
 import com.nguyendevs.ecolens.utils.MarkdownProcessor
 import kotlinx.coroutines.CoroutineScope

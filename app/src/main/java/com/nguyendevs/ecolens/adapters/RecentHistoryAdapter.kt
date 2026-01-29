@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemRecentHistoryBinding
-import com.nguyendevs.ecolens.model.history.HistoryEntry
+import com.nguyendevs.ecolens.models.history.HistoryEntry
 import java.io.File
 import java.time.Instant
 import java.time.ZoneId

@@ -7,10 +7,9 @@ import com.google.gson.Gson
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.api.GbifResponse
 import com.nguyendevs.ecolens.api.IdentificationResult
-import com.nguyendevs.ecolens.api.IucnResponse
 import com.nguyendevs.ecolens.database.HistoryRepository
-import com.nguyendevs.ecolens.model.*
-import com.nguyendevs.ecolens.model.history.HistoryEntry
+import com.nguyendevs.ecolens.models.*
+import com.nguyendevs.ecolens.models.history.HistoryEntry
 import com.nguyendevs.ecolens.network.RetrofitClient
 import com.nguyendevs.ecolens.utils.ImageUtils
 import kotlinx.coroutines.*

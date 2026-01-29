@@ -3,7 +3,7 @@ package com.nguyendevs.ecolens.database
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.nguyendevs.ecolens.model.SpeciesInfo
+import com.nguyendevs.ecolens.models.SpeciesInfo
 
 class HistoryTypeConverters {
 

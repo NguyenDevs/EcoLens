@@ -7,15 +7,15 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemCardSpeciesInfoBinding
-import com.nguyendevs.ecolens.handlers.animation.AnimationHandler
-import com.nguyendevs.ecolens.handlers.animation.ShimmerEffectHandler
-import com.nguyendevs.ecolens.handlers.display.ConfidenceDisplayHandler
-import com.nguyendevs.ecolens.handlers.display.SectionDisplayHandler
-import com.nguyendevs.ecolens.handlers.display.TaxonomyDisplayHandler
-import com.nguyendevs.ecolens.handlers.interaction.ButtonHandler
+import com.nguyendevs.ecolens.handlers.animations.HomeAnimationHandler
+import com.nguyendevs.ecolens.handlers.animations.ShimmerAnimationHandler
+import com.nguyendevs.ecolens.handlers.home.ConfidenceDisplayHandler
+import com.nguyendevs.ecolens.handlers.home.SectionDisplayHandler
+import com.nguyendevs.ecolens.handlers.home.TaxonomyDisplayHandler
+import com.nguyendevs.ecolens.handlers.home.HomeButtonHandler
 import com.nguyendevs.ecolens.handlers.util.TextFormatter
-import com.nguyendevs.ecolens.model.LoadingStage
-import com.nguyendevs.ecolens.model.SpeciesInfo
+import com.nguyendevs.ecolens.models.LoadingStage
+import com.nguyendevs.ecolens.models.SpeciesInfo
 import kotlinx.coroutines.*
 import java.util.Locale
 
@@ -43,19 +43,19 @@ class SpeciesInfoHandler(
         currentImageUri = uri
     }
 
-    private val animationHandler = AnimationHandler()
-    private val shimmerEffectHandler = ShimmerEffectHandler(context)
+    private val homeAnimationHandler = HomeAnimationHandler()
+    private val shimmerAnimationHandler = ShimmerAnimationHandler(context)
     private val textFormatter = TextFormatter()
     private val taxonomyDisplayHandler =
-            TaxonomyDisplayHandler(binding, animationHandler, shimmerEffectHandler, textFormatter)
+            TaxonomyDisplayHandler(binding, homeAnimationHandler, shimmerAnimationHandler, textFormatter)
     private val confidenceDisplayHandler =
-            ConfidenceDisplayHandler(context, binding, animationHandler)
+            ConfidenceDisplayHandler(context, binding, homeAnimationHandler)
     private val sectionDisplayHandler = SectionDisplayHandler(binding, textFormatter)
-    private val buttonHandler =
-            ButtonHandler(
+    private val homeButtonHandler =
+            HomeButtonHandler(
                     context,
                     binding,
-                    animationHandler,
+                    homeAnimationHandler,
                     textFormatter,
                     onCopySuccess,
                     onRetryClick,
@@ -93,9 +93,9 @@ class SpeciesInfoHandler(
                 isInitialLoad = true
                 displayCommonName(SpeciesInfo(commonName = "...", scientificName = ""))
                 taxonomyDisplayHandler.prepareTaxonomyContainer()
-                buttonHandler.setupCopyButton(info)
-                buttonHandler.showCopyButton()
-                buttonHandler.hideButtons()
+                homeButtonHandler.setupCopyButton(info)
+                homeButtonHandler.showCopyButton()
+                homeButtonHandler.hideButtons()
                 confidenceDisplayHandler.displayConfidence(info, isWaiting = true)
             }
             LoadingStage.COMMON_NAME -> {}
@@ -186,22 +186,22 @@ class SpeciesInfoHandler(
                 displayConservationStatus(info.conservationStatus, shouldScroll = false)
                 allSectionsRendered = true
 
-                buttonHandler.setupShareButton(info, currentImageUri)
-                buttonHandler.showShareButton()
-                buttonHandler.setupCopyButton(info)
+                homeButtonHandler.setupShareButton(info, currentImageUri)
+                homeButtonHandler.showShareButton()
+                homeButtonHandler.setupCopyButton(info)
 
                 if (info.confidence < 50.0) {
-                    buttonHandler.showRetryButton()
+                    homeButtonHandler.showRetryButton()
                 } else {
-                    buttonHandler.hideRetryButton()
+                    homeButtonHandler.hideRetryButton()
                 }
             }
         }
     }
 
     fun onDestroy() {
-        animationHandler.destroy()
-        shimmerEffectHandler.destroy()
+        homeAnimationHandler.destroy()
+        shimmerAnimationHandler.destroy()
         handlerScope.cancel()
     }
 
@@ -246,8 +246,8 @@ class SpeciesInfoHandler(
             allSectionsRendered = true
 
             if (!isInitialLoad) {
-                buttonHandler.setupShareButton(info, currentImageUri)
-                buttonHandler.showShareButton()
+                homeButtonHandler.setupShareButton(info, currentImageUri)
+                homeButtonHandler.showShareButton()
             }
         }
     }
@@ -256,9 +256,9 @@ class SpeciesInfoHandler(
     private fun displayScientificName(info: SpeciesInfo) {
         infoBinding.tvScientificName.apply {
             textFormatter.setHtml(this, info.scientificName)
-            animationHandler.slideAndFadeIn(this, duration = 500, delay = 100)
+            homeAnimationHandler.slideAndFadeIn(this, duration = 500, delay = 100)
         }
-        animationHandler.slideAndFadeIn(
+        homeAnimationHandler.slideAndFadeIn(
                 infoBinding.btnCopyScientificName,
                 duration = 500,
                 delay = 150
@@ -290,7 +290,7 @@ class SpeciesInfoHandler(
                 textFormatter.setHtml(view, capitalizedCommonName)
 
                 if (lastDisplayedCommonName != info.commonName) {
-                    animationHandler.slideAndFadeIn(view, duration = 600)
+                    homeAnimationHandler.slideAndFadeIn(view, duration = 600)
                 } else if (view.visibility != View.VISIBLE) {
                     view.visibility = View.VISIBLE
                     view.alpha = 1f
