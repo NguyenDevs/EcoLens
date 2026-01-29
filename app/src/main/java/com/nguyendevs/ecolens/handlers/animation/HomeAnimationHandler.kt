@@ -9,7 +9,7 @@ import android.view.animation.OvershootInterpolator
 /**
  * Handler quản lý các hiệu ứng animation cho Views trong ứng dụng.
  */
-class AnimationHandler {
+class HomeAnimationHandler {
     private var confidenceRotationAnimator: ObjectAnimator? = null
 
     /**
