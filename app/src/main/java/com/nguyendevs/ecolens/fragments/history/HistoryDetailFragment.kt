@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Html
 import android.util.TypedValue
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -344,10 +345,15 @@ class HistoryDetailFragment : Fragment() {
         addSection(binding.containerSections, getString(R.string.section_characteristics), info.characteristics)
         addSection(binding.containerSections, getString(R.string.section_distribution), info.distribution)
         addSection(binding.containerSections, getString(R.string.section_habitat), info.habitat)
-        addSection(binding.containerSections, getString(R.string.section_conservation), info.conservationStatus)
+        
+        if (info.conservationStatus == "Vô hiệu") {
+            addSection(binding.containerSections, getString(R.string.section_conservation), getString(R.string.iucn_disabled_message), isCenter = true)
+        } else {
+            addSection(binding.containerSections, getString(R.string.section_conservation), info.conservationStatus)
+        }
     }
 
-    private fun addSection(container: LinearLayout, title: String, content: String) {
+    private fun addSection(container: LinearLayout, title: String, content: String, isCenter: Boolean = false) {
         if (content.isBlank()) return
 
         val context = container.context
@@ -387,7 +393,12 @@ class HistoryDetailFragment : Fragment() {
             textSize = 15f
             setTextColor(contentColor)
             setLineSpacing(0f, 1.4f)
-            setHtml(content)
+            if (isCenter) {
+                gravity = Gravity.CENTER
+                text = content
+            } else {
+                setHtml(content)
+            }
         }
 
         container.addView(titleView)

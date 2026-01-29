@@ -58,6 +58,36 @@ class GeminiStreamingHelper(
     }
 
     /**
+     * Dịch taxonomy sang tiếng Việt (Non-streaming)
+     */
+    suspend fun translateTaxonomy(
+        kingdom: String,
+        phylum: String,
+        className: String,
+        taxorder: String,
+        family: String,
+        genus: String,
+        species: String
+    ): TaxonomyTranslationResponse? = withContext(Dispatchers.IO) {
+        val prompt = PromptBuilder.buildTaxonomyTranslationPrompt(
+            kingdom, phylum, className, taxorder, family, genus, species
+        )
+        val request = createGeminiRequest(prompt)
+
+        try {
+            val response = apiService.askGemini(request)
+            val text = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
+            if (!text.isNullOrEmpty()) {
+                val cleanedJson = cleanJsonString(text)
+                return@withContext gson.fromJson(cleanedJson, TaxonomyTranslationResponse::class.java)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "TranslateTaxonomy Error: ${e.message}")
+        }
+        return@withContext null
+    }
+
+    /**
      * Stream details information (mô tả, đặc điểm, phân bố) từ Gemini
      * Update UI real-time khi nhận từng phần thông tin
      */
@@ -289,6 +319,16 @@ class GeminiStreamingHelper(
 
     data class CommonNameResponse(
         val commonName: String? = null
+    )
+
+    data class TaxonomyTranslationResponse(
+        val kingdom: String? = null,
+        val phylum: String? = null,
+        val className: String? = null,
+        val taxorder: String? = null,
+        val family: String? = null,
+        val genus: String? = null,
+        val species: String? = null
     )
 
     data class DetailsResponse(

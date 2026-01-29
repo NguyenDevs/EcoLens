@@ -63,7 +63,7 @@ class SpeciesInfoHandler(
             )
 
     /** Hiển thị thông tin loài theo từng giai đoạn loading */
-    fun displaySpeciesInfo(info: SpeciesInfo, stage: LoadingStage) {
+    fun displaySpeciesInfo(info: SpeciesInfo, stage: LoadingStage, isTaxonomyTranslating: Boolean = false) {
         if (stage == LoadingStage.NONE) {
             handlerScope.coroutineContext.cancelChildren()
             clearAllViews()
@@ -81,6 +81,9 @@ class SpeciesInfoHandler(
         if (stage != LoadingStage.SCIENTIFIC_NAME) {
             confidenceDisplayHandler.displayConfidence(info, isWaiting = false)
         }
+
+        // Handle Taxonomy Translating State
+        taxonomyDisplayHandler.setTaxonomyTranslating(isTaxonomyTranslating)
 
         when (stage) {
             LoadingStage.NONE -> {
@@ -302,12 +305,17 @@ class SpeciesInfoHandler(
 
     /** Hiển thị trạng thái bảo tồn */
     private fun displayConservationStatus(status: String, shouldScroll: Boolean = true) {
-        sectionDisplayHandler.displaySection(
+        if (status == "Vô hiệu") {
+            // Không hiển thị section nếu IUCN bị vô hiệu
+            sectionDisplayHandler.hideSection(R.id.sectionConservation)
+        } else {
+            sectionDisplayHandler.displaySection(
                 R.id.sectionConservation,
                 R.id.tvConservationStatus,
                 status,
                 shouldScroll,
                 isInitialLoad
-        )
+            )
+        }
     }
 }

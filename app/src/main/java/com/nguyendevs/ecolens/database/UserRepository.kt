@@ -34,7 +34,9 @@ class UserRepository {
                 username = username,
                 email = email,
                 language = "vi",
-                darkMode = false
+                darkMode = false,
+                iucnMode = true,
+                taxoMode = false
             )
 
             usersRef.child(firebaseUser.uid).setValue(newUser).await()
@@ -80,7 +82,9 @@ class UserRepository {
                             ?: "User",
                         email = firebaseUser.email ?: "",
                         language = "vi",
-                        darkMode = false
+                        darkMode = false,
+                        iucnMode = true,
+                        taxoMode = false
                     )
                     usersRef.child(firebaseUser.uid).setValue(newUser).await()
                 }
@@ -146,6 +150,30 @@ class UserRepository {
         val uid = auth.currentUser?.uid ?: return
         try {
             usersRef.child(uid).child("darkMode").setValue(isDarkMode).await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    /**
+     * Cập nhật chế độ IUCN của người dùng
+     */
+    suspend fun updateIucnMode(isEnabled: Boolean) {
+        val uid = auth.currentUser?.uid ?: return
+        try {
+            usersRef.child(uid).child("iucnMode").setValue(isEnabled).await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    /**
+     * Cập nhật chế độ Taxonomy Translation của người dùng
+     */
+    suspend fun updateTaxoMode(isEnabled: Boolean) {
+        val uid = auth.currentUser?.uid ?: return
+        try {
+            usersRef.child(uid).child("taxoMode").setValue(isEnabled).await()
         } catch (e: Exception) {
             e.printStackTrace()
         }

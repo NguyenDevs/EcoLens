@@ -97,8 +97,12 @@ class LogoutHandler(private val activity: AppCompatActivity) {
             sharedPreferences.edit().remove("username").remove("last_nav_item").apply()
 
             val appSettings = activity.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
-            appSettings.edit().putBoolean("dark_mode", false).apply()
-            appSettings.edit().remove("remember_me").apply()
+            appSettings.edit()
+                .putBoolean("dark_mode", false)
+                .putBoolean("iucn_mode", true)
+                .putBoolean("taxo_mode", false)
+                .remove("remember_me")
+                .apply()
 
             withContext(Dispatchers.Main) {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)

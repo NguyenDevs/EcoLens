@@ -156,177 +156,194 @@
                         android:text="@string/taxonomy_title"
                         style="@style/TextAppearance.App.Headline3" />
 
-                <LinearLayout
+                <FrameLayout
                         android:id="@+id/taxonomyContainer"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@drawable/bg_white_rounded"
-                        android:backgroundTint="@color/surface_variant"
-                        android:orientation="vertical"
-                        android:padding="20dp">
+                        android:backgroundTint="@color/surface_variant">
 
-                        <!-- Kingdom -->
                         <LinearLayout
-                                android:id="@+id/rowKingdom"
+                                android:id="@+id/taxonomyContent"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:paddingBottom="@dimen/spacing_xs">
+                                android:orientation="vertical"
+                                android:padding="20dp">
 
-                                <TextView
-                                        android:layout_width="0dp"
+                                <!-- Kingdom -->
+                                <LinearLayout
+                                        android:id="@+id/rowKingdom"
+                                        android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
-                                        android:layout_weight="0.3"
-                                        android:text="@string/label_kingdom"
-                                        style="@style/Widget.App.Taxonomy.Label" />
+                                        android:orientation="horizontal"
+                                        android:paddingBottom="@dimen/spacing_xs">
 
-                                <TextView
-                                        android:id="@+id/tvKingdom"
-                                        android:layout_width="0dp"
+                                        <TextView
+                                                android:layout_width="0dp"
+                                                android:layout_height="wrap_content"
+                                                android:layout_weight="0.3"
+                                                android:text="@string/label_kingdom"
+                                                style="@style/Widget.App.Taxonomy.Label" />
+
+                                        <TextView
+                                                android:id="@+id/tvKingdom"
+                                                android:layout_width="0dp"
+                                                android:layout_height="wrap_content"
+                                                android:layout_weight="0.7"
+                                                style="@style/Widget.App.Taxonomy.Value" />
+                                </LinearLayout>
+
+                                <!-- Phylum -->
+                                <LinearLayout
+                                        android:id="@+id/rowPhylum"
+                                        android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
-                                        android:layout_weight="0.7"
-                                        style="@style/Widget.App.Taxonomy.Value" />
+                                        android:orientation="horizontal"
+                                        android:paddingBottom="@dimen/spacing_xs">
+
+                                        <TextView
+                                                android:layout_width="0dp"
+                                                android:layout_height="wrap_content"
+                                                android:layout_weight="0.3"
+                                                android:text="@string/label_phylum"
+                                                style="@style/Widget.App.Taxonomy.Label" />
+
+                                        <TextView
+                                                android:id="@+id/tvPhylum"
+                                                android:layout_width="0dp"
+                                                android:layout_height="wrap_content"
+                                                android:layout_weight="0.7"
+                                                style="@style/Widget.App.Taxonomy.Value" />
+                                </LinearLayout>
+
+                                <!-- Class -->
+                                <LinearLayout
+                                        android:id="@+id/rowClass"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:orientation="horizontal"
+                                        android:paddingBottom="@dimen/spacing_xs">
+
+                                        <TextView
+                                                android:layout_width="0dp"
+                                                android:layout_height="wrap_content"
+                                                android:layout_weight="0.3"
+                                                android:text="@string/label_class"
+                                                style="@style/Widget.App.Taxonomy.Label" />
+
+                                        <TextView
+                                                android:id="@+id/tvClass"
+                                                android:layout_width="0dp"
+                                                android:layout_height="wrap_content"
+                                                android:layout_weight="0.7"
+                                                style="@style/Widget.App.Taxonomy.Value" />
+                                </LinearLayout>
+
+                                <!-- Order -->
+                                <LinearLayout
+                                        android:id="@+id/rowOrder"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:orientation="horizontal"
+                                        android:paddingBottom="@dimen/spacing_xs">
+
+                                        <TextView
+                                                android:layout_width="0dp"
+                                                android:layout_height="wrap_content"
+                                                android:layout_weight="0.3"
+                                                android:text="@string/label_order"
+                                                style="@style/Widget.App.Taxonomy.Label" />
+
+                                        <TextView
+                                                android:id="@+id/tvOrder"
+                                                android:layout_width="0dp"
+                                                android:layout_height="wrap_content"
+                                                android:layout_weight="0.7"
+                                                style="@style/Widget.App.Taxonomy.Value" />
+                                </LinearLayout>
+
+                                <!-- Family -->
+                                <LinearLayout
+                                        android:id="@+id/rowFamily"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:orientation="horizontal"
+                                        android:paddingBottom="@dimen/spacing_xs">
+
+                                        <TextView
+                                                android:layout_width="0dp"
+                                                android:layout_height="wrap_content"
+                                                android:layout_weight="0.3"
+                                                android:text="@string/label_family"
+                                                style="@style/Widget.App.Taxonomy.Label" />
+
+                                        <TextView
+                                                android:id="@+id/tvFamily"
+                                                android:layout_width="0dp"
+                                                android:layout_height="wrap_content"
+                                                android:layout_weight="0.7"
+                                                style="@style/Widget.App.Taxonomy.Value" />
+                                </LinearLayout>
+
+                                <!-- Genus -->
+                                <LinearLayout
+                                        android:id="@+id/rowGenus"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:orientation="horizontal"
+                                        android:paddingBottom="@dimen/spacing_xs">
+
+                                        <TextView
+                                                android:layout_width="0dp"
+                                                android:layout_height="wrap_content"
+                                                android:layout_weight="0.3"
+                                                android:text="@string/label_genus"
+                                                style="@style/Widget.App.Taxonomy.Label" />
+
+                                        <TextView
+                                                android:id="@+id/tvGenus"
+                                                android:layout_width="0dp"
+                                                android:layout_height="wrap_content"
+                                                android:layout_weight="0.7"
+                                                style="@style/Widget.App.Taxonomy.Value" />
+                                </LinearLayout>
+
+                                <!-- Species -->
+                                <LinearLayout
+                                        android:id="@+id/rowSpecies"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:orientation="horizontal">
+
+                                        <TextView
+                                                android:layout_width="0dp"
+                                                android:layout_height="wrap_content"
+                                                android:layout_weight="0.3"
+                                                android:layout_marginBottom="0dp"
+                                                android:text="@string/label_species"
+                                                style="@style/Widget.App.Taxonomy.Label" />
+
+                                        <TextView
+                                                android:id="@+id/tvSpecies"
+                                                android:layout_width="0dp"
+                                                android:layout_height="wrap_content"
+                                                android:layout_weight="0.7"
+                                                android:layout_marginBottom="0dp"
+                                                style="@style/Widget.App.Taxonomy.Value" />
+                                </LinearLayout>
                         </LinearLayout>
 
-                        <!-- Phylum -->
-                        <LinearLayout
-                                android:id="@+id/rowPhylum"
-                                android:layout_width="match_parent"
+                        <com.google.android.material.progressindicator.CircularProgressIndicator
+                                android:id="@+id/taxonomyLoading"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:paddingBottom="@dimen/spacing_xs">
+                                android:layout_gravity="center"
+                                android:indeterminate="true"
+                                android:visibility="gone"
+                                app:indicatorColor="@color/primary"
+                                app:trackColor="@color/primary_20" />
 
-                                <TextView
-                                        android:layout_width="0dp"
-                                        android:layout_height="wrap_content"
-                                        android:layout_weight="0.3"
-                                        android:text="@string/label_phylum"
-                                        style="@style/Widget.App.Taxonomy.Label" />
-
-                                <TextView
-                                        android:id="@+id/tvPhylum"
-                                        android:layout_width="0dp"
-                                        android:layout_height="wrap_content"
-                                        android:layout_weight="0.7"
-                                        style="@style/Widget.App.Taxonomy.Value" />
-                        </LinearLayout>
-
-                        <!-- Class -->
-                        <LinearLayout
-                                android:id="@+id/rowClass"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:paddingBottom="@dimen/spacing_xs">
-
-                                <TextView
-                                        android:layout_width="0dp"
-                                        android:layout_height="wrap_content"
-                                        android:layout_weight="0.3"
-                                        android:text="@string/label_class"
-                                        style="@style/Widget.App.Taxonomy.Label" />
-
-                                <TextView
-                                        android:id="@+id/tvClass"
-                                        android:layout_width="0dp"
-                                        android:layout_height="wrap_content"
-                                        android:layout_weight="0.7"
-                                        style="@style/Widget.App.Taxonomy.Value" />
-                        </LinearLayout>
-
-                        <!-- Order -->
-                        <LinearLayout
-                                android:id="@+id/rowOrder"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:paddingBottom="@dimen/spacing_xs">
-
-                                <TextView
-                                        android:layout_width="0dp"
-                                        android:layout_height="wrap_content"
-                                        android:layout_weight="0.3"
-                                        android:text="@string/label_order"
-                                        style="@style/Widget.App.Taxonomy.Label" />
-
-                                <TextView
-                                        android:id="@+id/tvOrder"
-                                        android:layout_width="0dp"
-                                        android:layout_height="wrap_content"
-                                        android:layout_weight="0.7"
-                                        style="@style/Widget.App.Taxonomy.Value" />
-                        </LinearLayout>
-
-                        <!-- Family -->
-                        <LinearLayout
-                                android:id="@+id/rowFamily"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:paddingBottom="@dimen/spacing_xs">
-
-                                <TextView
-                                        android:layout_width="0dp"
-                                        android:layout_height="wrap_content"
-                                        android:layout_weight="0.3"
-                                        android:text="@string/label_family"
-                                        style="@style/Widget.App.Taxonomy.Label" />
-
-                                <TextView
-                                        android:id="@+id/tvFamily"
-                                        android:layout_width="0dp"
-                                        android:layout_height="wrap_content"
-                                        android:layout_weight="0.7"
-                                        style="@style/Widget.App.Taxonomy.Value" />
-                        </LinearLayout>
-
-                        <!-- Genus -->
-                        <LinearLayout
-                                android:id="@+id/rowGenus"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:paddingBottom="@dimen/spacing_xs">
-
-                                <TextView
-                                        android:layout_width="0dp"
-                                        android:layout_height="wrap_content"
-                                        android:layout_weight="0.3"
-                                        android:text="@string/label_genus"
-                                        style="@style/Widget.App.Taxonomy.Label" />
-
-                                <TextView
-                                        android:id="@+id/tvGenus"
-                                        android:layout_width="0dp"
-                                        android:layout_height="wrap_content"
-                                        android:layout_weight="0.7"
-                                        style="@style/Widget.App.Taxonomy.Value" />
-                        </LinearLayout>
-
-                        <!-- Species -->
-                        <LinearLayout
-                                android:id="@+id/rowSpecies"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal">
-
-                                <TextView
-                                        android:layout_width="0dp"
-                                        android:layout_height="wrap_content"
-                                        android:layout_weight="0.3"
-                                        android:layout_marginBottom="0dp"
-                                        android:text="@string/label_species"
-                                        style="@style/Widget.App.Taxonomy.Label" />
-
-                                <TextView
-                                        android:id="@+id/tvSpecies"
-                                        android:layout_width="0dp"
-                                        android:layout_height="wrap_content"
-                                        android:layout_weight="0.7"
-                                        android:layout_marginBottom="0dp"
-                                        style="@style/Widget.App.Taxonomy.Value" />
-                        </LinearLayout>
-                </LinearLayout>
+                </FrameLayout>
 
                 <!-- DESCRIPTION SECTION -->
                 <LinearLayout

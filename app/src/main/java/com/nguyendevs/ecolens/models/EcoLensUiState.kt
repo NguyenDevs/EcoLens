@@ -7,12 +7,14 @@ package com.nguyendevs.ecolens.models
  * @property speciesInfo Thông tin loài sinh vật
  * @property error Thông báo lỗi (nếu có)
  * @property loadingStage Giai đoạn tải hiện tại
+ * @property isTaxonomyTranslating Đang dịch taxonomy hay không
  */
 data class EcoLensUiState(
     val isLoading: Boolean = false,
     val speciesInfo: SpeciesInfo? = null,
     val error: String? = null,
-    val loadingStage: LoadingStage = LoadingStage.NONE
+    val loadingStage: LoadingStage = LoadingStage.NONE,
+    val isTaxonomyTranslating: Boolean = false
 )
 
 /**

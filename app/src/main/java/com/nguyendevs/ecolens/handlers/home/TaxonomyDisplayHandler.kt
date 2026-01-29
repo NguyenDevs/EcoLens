@@ -66,9 +66,10 @@ class TaxonomyDisplayHandler(
             val rowId = rowView.id
 
             if (hasData) {
-                if (!displayedRows.contains(rowId)) {
-                    textFormatter.setHtml(textView, text)
+                // Always update text content
+                textFormatter.setHtml(textView, text)
 
+                if (!displayedRows.contains(rowId)) {
                     rowView.visibility = View.VISIBLE
                     rowView.alpha = 0f
                     rowView.translationY = -10f
@@ -88,6 +89,19 @@ class TaxonomyDisplayHandler(
                     rowView.alpha = 0f
                 }
             }
+        }
+    }
+
+    fun setTaxonomyTranslating(isTranslating: Boolean) {
+        val content = infoBinding.taxonomyContent
+        val loading = infoBinding.taxonomyLoading
+
+        if (isTranslating) {
+            content.animate().alpha(0.3f).setDuration(300).start()
+            loading.visibility = View.VISIBLE
+        } else {
+            content.animate().alpha(1f).setDuration(300).start()
+            loading.visibility = View.GONE
         }
     }
 
@@ -125,5 +139,8 @@ class TaxonomyDisplayHandler(
                         infoBinding.tvSpecies
                 )
         textViews.forEach { it.text = "" }
+        
+        infoBinding.taxonomyContent.alpha = 1f
+        infoBinding.taxonomyLoading.visibility = View.GONE
     }
 }

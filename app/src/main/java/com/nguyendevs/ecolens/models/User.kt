@@ -7,10 +7,14 @@ package com.nguyendevs.ecolens.models
  * @property email Email của người dùng
  * @property language Ngôn ngữ được chọn (mặc định: "vi")
  * @property darkMode Chế độ tối có được bật hay không
+ * @property iucnMode Chế độ IUCN (mặc định: true)
+ * @property taxoMode Chế độ dịch Taxonomy (mặc định: false)
  */
 data class User(
     val username: String = "",
     val email: String = "",
     val language: String = "vi",
-    val darkMode: Boolean = false
+    val darkMode: Boolean = false,
+    val iucnMode: Boolean = true,
+    val taxoMode: Boolean = false
 )
