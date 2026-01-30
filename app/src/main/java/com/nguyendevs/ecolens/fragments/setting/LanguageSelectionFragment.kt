@@ -42,7 +42,7 @@ class LanguageSelectionFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         languageManager = LanguageManager(requireContext())
         setupLanguageList()
-        setupListeners()
+        //setupListeners()
     }
 
     override fun onDestroyView() {
@@ -81,11 +81,13 @@ class LanguageSelectionFragment : Fragment() {
         }
     }
 
-    private fun setupListeners() {
+    /*private fun setupListeners() {
         binding.btnBack.setOnClickListener {
             closeFragment()
         }
     }
+
+     */
 
     // ==================== LANGUAGE SELECTION ====================
 

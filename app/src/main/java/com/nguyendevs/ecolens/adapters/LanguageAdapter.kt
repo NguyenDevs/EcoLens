@@ -45,8 +45,7 @@ class LanguageAdapter(
         private val binding: ItemLanguagesBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        private val colorGreenPrimary = ContextCompat.getColor(itemView.context, R.color.green_primary)
-        private val colorGreenDark = ContextCompat.getColor(itemView.context, R.color.green_dark)
+        private val colorPrimary = ContextCompat.getColor(itemView.context, R.color.primary)
         private val colorTextPrimary = ContextCompat.getColor(itemView.context, R.color.text_primary)
         private val strokeWidthPx = (2 * itemView.resources.displayMetrics.density).toInt()
 
@@ -65,8 +64,8 @@ class LanguageAdapter(
 
             if (language.isSelected) {
                 binding.cardLanguage.strokeWidth = strokeWidthPx
-                binding.cardLanguage.strokeColor = colorGreenPrimary
-                binding.tvLanguageName.setTextColor(colorGreenDark)
+                binding.cardLanguage.strokeColor = colorPrimary
+                binding.tvLanguageName.setTextColor(colorPrimary)
             } else {
                 binding.cardLanguage.strokeWidth = 0
                 binding.tvLanguageName.setTextColor(colorTextPrimary)

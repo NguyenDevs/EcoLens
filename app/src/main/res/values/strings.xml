@@ -314,4 +314,24 @@
     <string name="history_chipAll">Tất cả</string>
     <string name="searching_info">Đang tra cứu...</string>
 
+    <!-- Biometric -->
+    <string name="biometric_title">Xác thực vân tay</string>
+    <string name="biometric_subtitle">Chạm vào cảm biến vân tay để xác nhận</string>
+    <string name="biometric_negative_button">Hủy</string>
+
+    <!-- Change Username -->
+    <string name="new_username">Tên người dùng mới</string>
+    <string name="current_password">Mật khẩu hiện tại</string>
+    <string name="confirm">Xác nhận</string>
+    <string name="username_updated">Cập nhật tên người dùng thành công</string>
+    <string name="username_update_failed">Cập nhật tên người dùng thất bại</string>
+
+    <!-- Change Password -->
+    <string name="old_password">Mật khẩu cũ</string>
+    <string name="new_password">Mật khẩu mới</string>
+    <string name="confirm_new_password">Xác nhận mật khẩu mới</string>
+    <string name="password_updated">Cập nhật mật khẩu thành công</string>
+    <string name="password_update_failed">Cập nhật mật khẩu thất bại</string>
+    <string name="error_reauth_failed">Xác thực lại thất bại. Vui lòng kiểm tra mật khẩu cũ.</string>
+
 </resources>

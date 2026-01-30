@@ -308,4 +308,25 @@
     <string name="history_chipPlants">Plants</string>
     <string name="history_chipAll">All</string>
     <string name="searching_info">Searching...</string>
+
+    <!-- Biometric -->
+    <string name="biometric_title">Biometric Authentication</string>
+    <string name="biometric_subtitle">Touch the fingerprint sensor to confirm</string>
+    <string name="biometric_negative_button">Cancel</string>
+
+    <!-- Change Username -->
+    <string name="new_username">New username</string>
+    <string name="current_password">Current password</string>
+    <string name="confirm">Confirm</string>
+    <string name="username_updated">Username updated successfully</string>
+    <string name="username_update_failed">Username update failed</string>
+
+    <!-- Change Password -->
+    <string name="old_password">Old password</string>
+    <string name="new_password">New password</string>
+    <string name="confirm_new_password">Confirm new password</string>
+    <string name="password_updated">Password updated successfully</string>
+    <string name="password_update_failed">Password update failed</string>
+    <string name="error_reauth_failed">Re-authentication failed. Please check your old password.</string>
+
 </resources>
