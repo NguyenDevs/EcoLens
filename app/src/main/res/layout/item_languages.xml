@@ -10,7 +10,8 @@
         app:cardElevation="0dp"
         app:strokeWidth="1dp"
         app:strokeColor="@color/border_light"
-        app:cardCornerRadius="@dimen/radius_md">
+        app:cardCornerRadius="@dimen/radius_md"
+        android:stateListAnimator="@null">
 
     <!-- MODERN LANGUAGE ITEM -->
 
@@ -29,7 +30,8 @@
                 app:cardCornerRadius="@dimen/radius_xxs"
                 app:cardElevation="0dp"
                 app:strokeWidth="1dp"
-                app:strokeColor="@color/border_light">
+                app:strokeColor="@color/border_light"
+                android:stateListAnimator="@null">
 
             <ImageView
                     android:id="@+id/ivFlag"
