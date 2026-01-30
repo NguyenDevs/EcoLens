@@ -206,6 +206,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
+        languageManager.updateBaseContext(this)
     }
 
     private fun handleTransitionAnimation() {

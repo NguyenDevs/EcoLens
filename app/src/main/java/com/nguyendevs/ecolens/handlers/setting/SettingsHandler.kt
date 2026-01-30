@@ -126,7 +126,7 @@ class SettingsHandler(
              if (languageManager.getLanguage() == LanguageManager.LANG_VI) {
                  binding.switchTaxoMode.toggle()
              } else {
-                 Toast.makeText(activity, "Feature required Language Setting: Vietnamese", Toast.LENGTH_SHORT).show()
+                 Toast.makeText(activity, activity.getString(R.string.error_feature_required_vietnamese), Toast.LENGTH_SHORT).show()
              }
         }
     }

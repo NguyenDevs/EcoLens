@@ -72,7 +72,12 @@ class LanguageManager(private val context: Context) {
      */
     fun updateBaseContext(context: Context): Context {
         val lang = getLanguage()
-        val locale = Locale(lang)
+        val localeCode = when (lang) {
+            LANG_CN -> "zh"
+            LANG_JP -> "ja"
+            else -> lang
+        }
+        val locale = Locale(localeCode)
         Locale.setDefault(locale)
 
         val config = Configuration(context.resources.configuration)
