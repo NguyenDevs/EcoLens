@@ -9,9 +9,8 @@
         app:cardBackgroundColor="@color/surface"
         app:cardElevation="0dp"
         app:strokeWidth="1dp"
-        app:strokeColor="@color/border_light"
-        app:cardCornerRadius="@dimen/radius_md"
-        android:stateListAnimator="@null">
+        app:strokeColor="@color/border_normal"
+        app:cardCornerRadius="@dimen/radius_md">
 
     <!-- MODERN LANGUAGE ITEM -->
 
@@ -19,6 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:background="@color/background"
             android:gravity="center_vertical"
             android:padding="@dimen/spacing_md">
 
@@ -30,8 +30,7 @@
                 app:cardCornerRadius="@dimen/radius_xxs"
                 app:cardElevation="0dp"
                 app:strokeWidth="1dp"
-                app:strokeColor="@color/border_light"
-                android:stateListAnimator="@null">
+                app:strokeColor="@color/border_light">
 
             <ImageView
                     android:id="@+id/ivFlag"
