@@ -128,17 +128,54 @@
                             android:textColor="@color/text_secondary"/>
                 </LinearLayout>
 
-                <ImageView
-                        android:id="@+id/btnShareInfo"
-                        android:layout_width="@dimen/icon_xl"
-                        android:layout_height="@dimen/icon_xl"
-                        android:background="@drawable/bg_white_rounded"
-                        android:backgroundTint="@color/surface_tint"
-                        android:padding="10dp"
-                        android:layout_marginTop="5dp"
-                        android:src="@drawable/ic_share"
-                        android:contentDescription="@string/share_info"
-                        app:tint="@color/primary"/>
+                <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal">
+
+                    <ImageView
+                            android:id="@+id/btnShareInfo"
+                            android:layout_width="@dimen/icon_xl"
+                            android:layout_height="@dimen/icon_xl"
+                            android:background="@drawable/bg_white_rounded"
+                            android:backgroundTint="@color/surface_tint"
+                            android:padding="10dp"
+                            android:layout_marginTop="5dp"
+                            android:src="@drawable/ic_share"
+                            android:contentDescription="@string/share_info"
+                            app:tint="@color/primary"/>
+
+                    <FrameLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp">
+
+                        <ImageView
+                                android:id="@+id/btnTranslate"
+                                android:layout_width="@dimen/icon_xl"
+                                android:layout_height="@dimen/icon_xl"
+                                android:background="@drawable/bg_white_rounded"
+                                android:backgroundTint="@color/surface_tint"
+                                android:padding="10dp"
+                                android:src="@drawable/ic_translate"
+                                app:tint="@color/primary"
+                                android:visibility="gone"
+                                tools:visibility="visible"/>
+
+                        <com.google.android.material.progressindicator.CircularProgressIndicator
+                                android:id="@+id/loadingTranslate"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:indeterminate="true"
+                                app:indicatorColor="@array/gemini_colors"
+                                app:indicatorSize="24dp"
+                                app:trackThickness="3dp"
+                                android:visibility="gone"/>
+                    </FrameLayout>
+
+                </LinearLayout>
 
             </LinearLayout>
 

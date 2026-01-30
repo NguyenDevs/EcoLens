@@ -3,6 +3,7 @@ package com.nguyendevs.ecolens.database
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.database.FirebaseDatabase
 import com.nguyendevs.ecolens.BuildConfig
 import com.nguyendevs.ecolens.models.User
@@ -40,6 +41,13 @@ class UserRepository {
             )
 
             usersRef.child(firebaseUser.uid).setValue(newUser).await()
+            
+            // Update display name in Firebase Auth
+            val profileUpdates = UserProfileChangeRequest.Builder()
+                .setDisplayName(username)
+                .build()
+            firebaseUser.updateProfile(profileUpdates).await()
+            
             true
         } catch (e: Exception) {
             e.printStackTrace()
@@ -138,6 +146,18 @@ class UserRepository {
         val uid = auth.currentUser?.uid ?: return
         try {
             usersRef.child(uid).setValue(user).await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    /**
+     * Cập nhật tên người dùng
+     */
+    suspend fun updateUsername(newUsername: String) {
+        val uid = auth.currentUser?.uid ?: return
+        try {
+            usersRef.child(uid).child("username").setValue(newUsername).await()
         } catch (e: Exception) {
             e.printStackTrace()
         }

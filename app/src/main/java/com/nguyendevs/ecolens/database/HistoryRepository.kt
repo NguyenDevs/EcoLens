@@ -121,7 +121,8 @@ class HistoryRepository(
                 habitat = entry.speciesInfo.habitat,
                 conservationStatus = entry.speciesInfo.conservationStatus,
                 confidence = entry.speciesInfo.confidence,
-                timestamp = entry.timestamp
+                timestamp = entry.timestamp,
+                language = entry.language
             )
         }
         externalScope.launch { syncRemote(entry) }

@@ -1,95 +1,52 @@
 package com.nguyendevs.ecolens.utils
 
+import com.nguyendevs.ecolens.managers.setting.LanguageManager
+
 object PromptBuilder {
 
-    fun buildCommonNamePrompt(scientificName: String, isVietnamese: Boolean): String {
-        return if (isVietnamese) {
-            """
-            Cho biết tên thường gọi phổ biến nhất của "$scientificName" bằng Tiếng Việt.
-            Trả về JSON duy nhất: {"commonName": "Tên Tiếng Việt"}
-            CHỈ TRẢ VỀ JSON, KHÔNG MARKDOWN.
+    fun buildCommonNamePrompt(scientificName: String, languageCode: String): String {
+        return when (languageCode) {
+            LanguageManager.LANG_VI -> """
+                Provide the most common name for "$scientificName" in Vietnamese.
+                Return JSON only: {"commonName": "Tên Tiếng Việt"}
+                RETURN ONLY JSON, NO MARKDOWN.
             """.trimIndent()
-        } else {
-            """
-            Provide the most common name for "$scientificName" in English.
-            Return JSON only: {"commonName": "Name"}
-            RETURN ONLY JSON, NO MARKDOWN.
+            LanguageManager.LANG_CN -> """
+                Provide the most common name for "$scientificName" in Simplified Chinese.
+                Return JSON only: {"commonName": "Name"}
+                RETURN ONLY JSON, NO MARKDOWN.
+            """.trimIndent()
+            LanguageManager.LANG_JP -> """
+                Provide the most common name for "$scientificName" in Japanese.
+                Return JSON only: {"commonName": "Name"}
+                RETURN ONLY JSON, NO MARKDOWN.
+            """.trimIndent()
+            else -> """
+                Provide the most common name for "$scientificName" in English.
+                Return JSON only: {"commonName": "Name"}
+                RETURN ONLY JSON, NO MARKDOWN.
             """.trimIndent()
         }
     }
 
-    fun buildDetailsPrompt(scientificName: String, isVietnamese: Boolean): String {
-        return if (isVietnamese) {
-            buildVietnameseDetailsPrompt(scientificName)
-        } else {
-            buildEnglishDetailsPrompt(scientificName)
+    fun buildDetailsPrompt(scientificName: String, languageCode: String): String {
+        return when (languageCode) {
+            LanguageManager.LANG_VI -> buildVietnameseDetailsPrompt(scientificName)
+            LanguageManager.LANG_CN -> buildChineseDetailsPrompt(scientificName)
+            LanguageManager.LANG_JP -> buildJapaneseDetailsPrompt(scientificName)
+            else -> buildEnglishDetailsPrompt(scientificName)
         }
     }
 
-    fun buildConservationPrompt(scientificName: String, iucnCode: String, isVietnamese: Boolean): String {
+    fun buildConservationPrompt(scientificName: String, iucnCode: String, languageCode: String): String {
         val codeToUse = iucnCode.trim()
         val shouldSearch = codeToUse.isBlank() || codeToUse.equals("NE", ignoreCase = true)
 
-        return if (isVietnamese) {
-            if (!shouldSearch) {
-                """
-                Phân tích tình trạng bảo tồn IUCN "$codeToUse" cho loài "$scientificName" bằng Tiếng Việt.
-                
-                Yêu cầu định dạng kết quả trong JSON (sử dụng \n để xuống dòng):
-                • **Tình trạng bảo tồn:** $codeToUse (Giải nghĩa ngắn gọn)
-                • **Giải thích tình trạng:** (Mô tả ngắn gọn về tình trạng này đối với loài)
-                • **Các mối đe doạ chính:** (Liệt kê các mối đe dọa chính)
-                
-                Trả về JSON:
-                { "conservationStatus": "Nội dung đã định dạng..." }
-                
-                CHỈ TRẢ VỀ JSON.
-                """.trimIndent()
-            } else {
-                """
-                Hãy xác định tình trạng bảo tồn IUCN cho loài "$scientificName" bằng Tiếng Việt.
-                
-                Yêu cầu định dạng kết quả trong JSON (sử dụng \n để xuống dòng):
-                • **Tình trạng bảo tồn:** [Mã IUCN tìm được] (Giải nghĩa ngắn gọn)
-                • **Giải thích tình trạng:** (Mô tả ngắn gọn về tình trạng này đối với loài)
-                • **Các mối đe doạ chính:** (Liệt kê các mối đe dọa chính)
-                
-                Trả về JSON:
-                { "conservationStatus": "Nội dung đã định dạng..." }
-                
-                CHỈ TRẢ VỀ JSON.
-                """.trimIndent()
-            }
-        } else {
-            if (!shouldSearch) {
-                """
-                Analyze IUCN conservation status "$codeToUse" for species "$scientificName" in English.
-                
-                Format the result in JSON (use \n for new lines):
-                • **Conservation Status:** $codeToUse (Brief meaning)
-                • **Status Explanation:** (Brief description of the status for this species)
-                • **Main Threats:** (List main threats)
-                
-                Return JSON:
-                { "conservationStatus": "Formatted content..." }
-                
-                RETURN ONLY JSON.
-                """.trimIndent()
-            } else {
-                """
-                Determine the IUCN conservation status for species "$scientificName" in English.
-                
-                Format the result in JSON (use \n for new lines):
-                • **Conservation Status:** [Found IUCN Code] (Brief meaning)
-                • **Status Explanation:** (Brief description of the status for this species)
-                • **Main Threats:** (List main threats)
-                
-                Return JSON:
-                { "conservationStatus": "Formatted content..." }
-                
-                RETURN ONLY JSON.
-                """.trimIndent()
-            }
+        return when (languageCode) {
+            LanguageManager.LANG_VI -> buildVietnameseConservationPrompt(scientificName, codeToUse, shouldSearch)
+            LanguageManager.LANG_CN -> buildChineseConservationPrompt(scientificName, codeToUse, shouldSearch)
+            LanguageManager.LANG_JP -> buildJapaneseConservationPrompt(scientificName, codeToUse, shouldSearch)
+            else -> buildEnglishConservationPrompt(scientificName, codeToUse, shouldSearch)
         }
     }
 
@@ -102,9 +59,13 @@ object PromptBuilder {
         genus: String,
         species: String
     ): String {
+        /*
+        Dịch các thuật ngữ phân loại sinh học sau sang Tiếng Việt chuẩn xác nhất.
+        Nếu không có tên tiếng Việt chính xác, hãy giữ nguyên tên khoa học hoặc phiên âm phù hợp.
+         */
         return """
-            Dịch các thuật ngữ phân loại sinh học sau sang Tiếng Việt chuẩn xác nhất.
-            Nếu không có tên tiếng Việt chính xác, hãy giữ nguyên tên khoa học hoặc phiên âm phù hợp.
+            Translate the following biological taxonomic terms into the most accurate Vietnamese possible.
+            If an exact Vietnamese name is unavailable, retain the scientific name or use a suitable transliteration.
             
             Input:
             Kingdom: $kingdom
@@ -115,21 +76,22 @@ object PromptBuilder {
             Genus: $genus
             Species: $species
             
-            Trả về JSON duy nhất với các key tương ứng (kingdom, phylum, className, taxorder, family, genus, species).
-            Ví dụ: {"kingdom": "Thực vật", "phylum": "Ngọc lan", ...}
+            Returns a unique JSON file with the corresponding keys. (kingdom, phylum, className, taxorder, family, genus, species).
+            Example: {"kingdom": "Thực vật", "phylum": "Ngọc lan", ...}
             
-            CHỈ TRẢ VỀ JSON. KHÔNG MARKDOWN.
+            RETURN ONLY JSON. NO MARKDOWN.
         """.trimIndent()
     }
 
-    private fun buildVietnameseDetailsPrompt(scientificName: String): String = """
-        Cung cấp thông tin chi tiết về "$scientificName" bằng Tiếng Việt.
-        
+    // ==================== VIETNAMESE PROMPTS ====================
+    /*
+    Cung cấp thông tin chi tiết về "$scientificName" bằng Tiếng Việt.
+
         QUY TẮC FORMAT:
         • Dùng **text** để in đậm từ khóa quan trọng
         • Dùng ##text## để highlight xanh cho địa danh, tên riêng, số đo
         • Dùng • cho bullet points
-        
+
         JSON FORMAT:
         {
           "description": "Tổng quan 4-5 câu đầy đủ. Dùng **in đậm** và ##xanh## cho đặc điểm nổi bật, địa danh và số đo.",
@@ -137,9 +99,88 @@ object PromptBuilder {
           "distribution": "Ưu tiên Việt Nam trước (nếu có), sau đó toàn cầu. Dùng ##xanh đậm## cho tên địa danh.",
           "habitat": "Mô tả chi tiết môi trường sống: độ cao, khí hậu, thảm thực vật, nguồn thức ăn."
         }
-        
+
         CHỈ TRẢ VỀ JSON.
+     */
+
+    private fun buildVietnameseDetailsPrompt(scientificName: String): String = """
+        Provide detailed information about "$scientificName" in Vietnamese.
+        
+        FORMAT RULES:
+        • Use **text** to bold important keywords
+        • Use ##text## to green highlight places, names, measurements
+        • Use • for bullet points
+        
+        JSON FORMAT:
+        {
+          "description": "Comprehensive 4-5 sentence overview. Use **bold** and ##green## for key features, places and measurements.",
+          "characteristics": "Bullet list, each line starts with •:\n• Body morphology\n• Body structure\n• Size dimensions (use ##measurements##)\n• Colors\n• Identifying features\n• Special biological traits",
+          "distribution": "Vietnam first if applicable, then worldwide. Use ##green highlight## for locations.",
+          "habitat": "Detailed environment: elevation, climate, vegetation, food sources."
+        }
+        
+        RETURN ONLY JSON.
     """.trimIndent()
+
+    /*
+    Phân tích tình trạng bảo tồn IUCN "$codeToUse" cho loài "$scientificName" bằng Tiếng Việt.
+
+            Yêu cầu định dạng kết quả trong JSON (sử dụng \n để xuống dòng):
+            • **Tình trạng bảo tồn:** $codeToUse (Giải nghĩa ngắn gọn)
+            • **Giải thích tình trạng:** (Mô tả ngắn gọn về tình trạng này đối với loài)
+            • **Các mối đe doạ chính:** (Liệt kê các mối đe dọa chính)
+
+            Trả về JSON:
+            { "conservationStatus": "Nội dung đã định dạng..." }
+
+            CHỈ TRẢ VỀ JSON.
+
+
+            Hãy xác định tình trạng bảo tồn IUCN cho loài "$scientificName" bằng Tiếng Việt.
+
+            Yêu cầu định dạng kết quả trong JSON (sử dụng \n để xuống dòng):
+            • **Tình trạng bảo tồn:** [Mã IUCN tìm được] (Giải nghĩa ngắn gọn)
+            • **Giải thích tình trạng:** (Mô tả ngắn gọn về tình trạng này đối với loài)
+            • **Các mối đe doạ chính:** (Liệt kê các mối đe dọa chính)
+
+            Trả về JSON:
+            { "conservationStatus": "Nội dung đã định dạng..." }
+
+            CHỈ TRẢ VỀ JSON.
+     */
+    private fun buildVietnameseConservationPrompt(scientificName: String, codeToUse: String, shouldSearch: Boolean): String {
+        return if (!shouldSearch) {
+            """
+            Analyze IUCN conservation status "$codeToUse" for species "$scientificName" in Vietnamese.
+            
+            Format the result in JSON (use \n for new lines):
+            • **Conservation Status:** $codeToUse (Brief meaning)
+            • **Status Explanation:** (Brief description of the status for this species)
+            • **Main Threats:** (List main threats)
+            
+            Return JSON:
+            { "conservationStatus": "Formatted content..." }
+            
+            RETURN ONLY JSON.
+            """.trimIndent()
+        } else {
+            """
+            Determine the IUCN conservation status for species "$scientificName" in Vietnamese.
+            
+            Format the result in JSON (use \n for new lines):
+            • **Conservation Status:** [Found IUCN Code] (Brief meaning)
+            • **Status Explanation:** (Brief description of the status for this species)
+            • **Main Threats:** (List main threats)
+            
+            Return JSON:
+            { "conservationStatus": "Formatted content..." }
+            
+            RETURN ONLY JSON.
+            """.trimIndent()
+        }
+    }
+
+    // ==================== ENGLISH PROMPTS ====================
 
     private fun buildEnglishDetailsPrompt(scientificName: String): String = """
         Provide detailed information about "$scientificName" in English.
@@ -159,4 +200,142 @@ object PromptBuilder {
         
         RETURN ONLY JSON.
     """.trimIndent()
+
+    private fun buildEnglishConservationPrompt(scientificName: String, codeToUse: String, shouldSearch: Boolean): String {
+        return if (!shouldSearch) {
+            """
+            Analyze IUCN conservation status "$codeToUse" for species "$scientificName" in English.
+            
+            Format the result in JSON (use \n for new lines):
+            • **Conservation Status:** $codeToUse (Brief meaning)
+            • **Status Explanation:** (Brief description of the status for this species)
+            • **Main Threats:** (List main threats)
+            
+            Return JSON:
+            { "conservationStatus": "Formatted content..." }
+            
+            RETURN ONLY JSON.
+            """.trimIndent()
+        } else {
+            """
+            Determine the IUCN conservation status for species "$scientificName" in English.
+            
+            Format the result in JSON (use \n for new lines):
+            • **Conservation Status:** [Found IUCN Code] (Brief meaning)
+            • **Status Explanation:** (Brief description of the status for this species)
+            • **Main Threats:** (List main threats)
+            
+            Return JSON:
+            { "conservationStatus": "Formatted content..." }
+            
+            RETURN ONLY JSON.
+            """.trimIndent()
+        }
+    }
+
+    // ==================== CHINESE PROMPTS ====================
+
+    private fun buildChineseDetailsPrompt(scientificName: String): String = """
+        Provide detailed information about "$scientificName" in Simplified Chinese.
+        
+        FORMAT RULES:
+        • Use **text** to bold important keywords
+        • Use ##text## to green highlight places, names, measurements
+        • Use • for bullet points
+        
+        JSON FORMAT:
+        {
+          "description": "Comprehensive 4-5 sentence overview. Use **bold** and ##green## for key features, places and measurements.",
+          "characteristics": "Bullet list, each line starts with •:\n• Body morphology\n• Body structure\n• Size dimensions (use ##measurements##)\n• Colors\n• Identifying features\n• Special biological traits",
+          "distribution": "Vietnam first if applicable, then worldwide. Use ##green highlight## for locations.",
+          "habitat": "Detailed environment: elevation, climate, vegetation, food sources."
+        }
+        
+        RETURN ONLY JSON.
+    """.trimIndent()
+
+    private fun buildChineseConservationPrompt(scientificName: String, codeToUse: String, shouldSearch: Boolean): String {
+        return if (!shouldSearch) {
+            """
+            Analyze IUCN conservation status "$codeToUse" for species "$scientificName" in Simplified Chinese.
+            
+            Format the result in JSON (use \n for new lines):
+            • **Conservation Status:** $codeToUse (Brief meaning)
+            • **Status Explanation:** (Brief description of the status for this species)
+            • **Main Threats:** (List main threats)
+            
+            Return JSON:
+            { "conservationStatus": "Formatted content..." }
+            
+            RETURN ONLY JSON.
+            """.trimIndent()
+        } else {
+            """
+            Determine the IUCN conservation status for species "$scientificName" in Simplified Chinese.
+            
+            Format the result in JSON (use \n for new lines):
+            • **Conservation Status:** [Found IUCN Code] (Brief meaning)
+            • **Status Explanation:** (Brief description of the status for this species)
+            • **Main Threats:** (List main threats)
+            
+            Return JSON:
+            { "conservationStatus": "Formatted content..." }
+            
+            RETURN ONLY JSON.
+            """.trimIndent()
+        }
+    }
+
+    // ==================== JAPANESE PROMPTS ====================
+
+    private fun buildJapaneseDetailsPrompt(scientificName: String): String = """
+        Provide detailed information about "$scientificName" in Japanese.
+        
+        FORMAT RULES:
+        • Use **text** to bold important keywords
+        • Use ##text## to green highlight places, names, measurements
+        • Use • for bullet points
+        
+        JSON FORMAT:
+        {
+          "description": "Comprehensive 4-5 sentence overview. Use **bold** and ##green## for key features, places and measurements.",
+          "characteristics": "Bullet list, each line starts with •:\n• Body morphology\n• Body structure\n• Size dimensions (use ##measurements##)\n• Colors\n• Identifying features\n• Special biological traits",
+          "distribution": "Vietnam first if applicable, then worldwide. Use ##green highlight## for locations.",
+          "habitat": "Detailed environment: elevation, climate, vegetation, food sources."
+        }
+        
+        RETURN ONLY JSON.
+    """.trimIndent()
+
+    private fun buildJapaneseConservationPrompt(scientificName: String, codeToUse: String, shouldSearch: Boolean): String {
+        return if (!shouldSearch) {
+            """
+            Analyze IUCN conservation status "$codeToUse" for species "$scientificName" in Japanese.
+            
+            Format the result in JSON (use \n for new lines):
+            • **Conservation Status:** $codeToUse (Brief meaning)
+            • **Status Explanation:** (Brief description of the status for this species)
+            • **Main Threats:** (List main threats)
+            
+            Return JSON:
+            { "conservationStatus": "Formatted content..." }
+            
+            RETURN ONLY JSON.
+            """.trimIndent()
+        } else {
+            """
+            Determine the IUCN conservation status for species "$scientificName" in Japanese.
+            
+            Format the result in JSON (use \n for new lines):
+            • **Conservation Status:** [Found IUCN Code] (Brief meaning)
+            • **Status Explanation:** (Brief description of the status for this species)
+            • **Main Threats:** (List main threats)
+            
+            Return JSON:
+            { "conservationStatus": "Formatted content..." }
+            
+            RETURN ONLY JSON.
+            """.trimIndent()
+        }
+    }
 }

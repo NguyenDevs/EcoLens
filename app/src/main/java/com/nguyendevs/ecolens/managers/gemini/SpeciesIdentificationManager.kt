@@ -8,6 +8,7 @@ import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.api.GbifResponse
 import com.nguyendevs.ecolens.api.IdentificationResult
 import com.nguyendevs.ecolens.database.HistoryRepository
+import com.nguyendevs.ecolens.managers.setting.LanguageManager
 import com.nguyendevs.ecolens.models.*
 import com.nguyendevs.ecolens.models.history.HistoryEntry
 import com.nguyendevs.ecolens.network.RetrofitClient
@@ -259,8 +260,8 @@ class SpeciesIdentificationManager(
                     updateTaxonomyFromGbif(gbifResult, onStateUpdate)
                 }
 
-                // Taxonomy Translation Logic
-                if (isTaxoModeEnabled && gbifResult != null) {
+                // Taxonomy Translation Logic (Only for Vietnamese)
+                if (isTaxoModeEnabled && gbifResult != null && languageCode == LanguageManager.LANG_VI) {
                     onStateUpdate(EcoLensUiState(
                         isLoading = true,
                         speciesInfo = currentSpeciesInfo,
@@ -322,7 +323,7 @@ class SpeciesIdentificationManager(
                     currentSpeciesInfo = currentSpeciesInfo?.copy(conservationStatus = "Vô hiệu")
                 }
 
-                saveToHistory(existingHistoryId, imageFile)
+                saveToHistory(existingHistoryId, imageFile, languageCode)
 
                 onStateUpdate(EcoLensUiState(
                     isLoading = false,
@@ -419,15 +420,15 @@ class SpeciesIdentificationManager(
      * Lưu kết quả vào history
      * Update existing entry nếu có, nếu không tạo mới
      */
-    private suspend fun saveToHistory(existingHistoryId: Int?, imageFile: File) {
+    private suspend fun saveToHistory(existingHistoryId: Int?, imageFile: File, languageCode: String) {
         val currentInfo = currentSpeciesInfo ?: return
 
         if (isValidInfo(currentInfo)) {
             withContext(Dispatchers.IO) {
                 if (existingHistoryId != null) {
-                    updateExistingHistory(existingHistoryId, currentInfo)
+                    updateExistingHistory(existingHistoryId, currentInfo, languageCode)
                 } else {
-                    createNewHistory(imageFile, currentInfo)
+                    createNewHistory(imageFile, currentInfo, languageCode)
                 }
             }
         }
@@ -436,10 +437,10 @@ class SpeciesIdentificationManager(
     /**
      * Update existing history entry
      */
-    private suspend fun updateExistingHistory(historyId: Int, info: SpeciesInfo) {
+    private suspend fun updateExistingHistory(historyId: Int, info: SpeciesInfo, languageCode: String) {
         val existingEntry = historyRepository.getHistoryById(historyId)
         if (existingEntry != null) {
-            val entry = existingEntry.copy(speciesInfo = info)
+            val entry = existingEntry.copy(speciesInfo = info, language = languageCode)
             Log.d(TAG, "Updating history entry: ${entry.id} - ${entry.speciesInfo.commonName}")
             historyRepository.update(entry)
         }
@@ -448,7 +449,7 @@ class SpeciesIdentificationManager(
     /**
      * Tạo history entry mới
      */
-    private suspend fun createNewHistory(imageFile: File, info: SpeciesInfo) {
+    private suspend fun createNewHistory(imageFile: File, info: SpeciesInfo, languageCode: String) {
         val localImagePath = if (currentImageUri != null && currentImageUri!!.scheme == "file") {
             currentImageUri!!.path
         } else {
@@ -461,7 +462,8 @@ class SpeciesIdentificationManager(
                 imagePath = localImagePath,
                 localImagePath = localImagePath,
                 speciesInfo = info,
-                timestamp = System.currentTimeMillis()
+                timestamp = System.currentTimeMillis(),
+                language = languageCode
             )
 
             Log.d(TAG, "Inserting new history entry")

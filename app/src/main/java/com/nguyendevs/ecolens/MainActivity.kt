@@ -1,6 +1,7 @@
 package com.nguyendevs.ecolens
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.graphics.Bitmap
@@ -174,6 +175,20 @@ class MainActivity : AppCompatActivity() {
                     
                     // Cập nhật UI Settings nếu đang ở màn hình Settings
                     settingsHandler.refreshSettingsState()
+
+                    // Kiểm tra và cập nhật ngôn ngữ nếu khác
+                    val currentLang = languageManager.getLanguage()
+                    if (user.language != currentLang) {
+                        languageManager.setLanguage(user.language)
+                        
+                        // Restart activity để áp dụng ngôn ngữ mới
+                        val intent = Intent(this@MainActivity, MainActivity::class.java)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                        // Giữ lại tab hiện tại nếu cần, hoặc về Home
+                        startActivity(intent)
+                        finish()
+                        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                    }
                 }
             }
         }
@@ -267,7 +282,14 @@ class MainActivity : AppCompatActivity() {
 
     /** Khởi tạo các handler xử lý UI */
     private fun initHandlers() {
-        settingsHandler = SettingsHandler(this, languageManager, binding.settingsContainer)
+        settingsHandler = SettingsHandler(
+            this, 
+            languageManager, 
+            binding.settingsContainer,
+            onUsernameChanged = {
+                homeScreenHandler.setupGreeting()
+            }
+        )
 
         val homeRoot = binding.homeContainer.root
 

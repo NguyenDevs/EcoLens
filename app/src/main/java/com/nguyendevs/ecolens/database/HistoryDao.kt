@@ -79,7 +79,8 @@ interface HistoryDao {
             habitat = :habitat,
             conservationStatus = :conservationStatus,
             confidence = :confidence,
-            timestamp = :timestamp
+            timestamp = :timestamp,
+            language = :language
         WHERE id = :id
     """
     )
@@ -100,7 +101,8 @@ interface HistoryDao {
             habitat: String,
             conservationStatus: String,
             confidence: Double,
-            timestamp: Long
+            timestamp: Long,
+            language: String
     )
 
     // ==================== DELETE ====================

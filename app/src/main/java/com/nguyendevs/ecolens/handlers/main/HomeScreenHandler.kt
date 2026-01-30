@@ -55,7 +55,7 @@ class HomeScreenHandler(
     }
 
     /** Setup greeting động theo thời gian trong ngày + Username từ Firebase */
-    private fun setupGreeting() {
+    fun setupGreeting() {
         val homeRoot = binding.homeContainer.root
         val tvGreeting = homeRoot.findViewById<TextView>(R.id.tvGreeting) ?: return
 

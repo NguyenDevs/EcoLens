@@ -20,7 +20,8 @@ import kotlinx.coroutines.launch
 class SettingsHandler(
     private val activity: AppCompatActivity,
     private val languageManager: LanguageManager,
-    private val binding: ScreenSettingsBinding
+    private val binding: ScreenSettingsBinding,
+    private val onUsernameChanged: (() -> Unit)? = null
 ) {
 
     private var isTransitioning = false
@@ -57,7 +58,7 @@ class SettingsHandler(
                         languageManager = languageManager
                 )
 
-        accountUpdateHandler = AccountUpdateHandler(activity)
+        accountUpdateHandler = AccountUpdateHandler(activity, onUsernameChanged)
 
         setupClickListeners()
     }

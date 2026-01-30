@@ -20,8 +20,8 @@ class LanguageManager(private val context: Context) {
 
         const val LANG_VI = "vi"
         const val LANG_EN = "en"
-        const val LANG_CN = "cn"
-        const val LANG_JP = "jp"
+        const val LANG_CN = "zh"
+        const val LANG_JP = "ja"
     }
 
     private val prefs = context.applicationContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
@@ -72,12 +72,7 @@ class LanguageManager(private val context: Context) {
      */
     fun updateBaseContext(context: Context): Context {
         val lang = getLanguage()
-        val localeCode = when (lang) {
-            LANG_CN -> "zh"
-            LANG_JP -> "ja"
-            else -> lang
-        }
-        val locale = Locale(localeCode)
+        val locale = Locale(lang)
         Locale.setDefault(locale)
 
         val config = Configuration(context.resources.configuration)
