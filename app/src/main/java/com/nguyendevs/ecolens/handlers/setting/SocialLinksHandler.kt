@@ -69,6 +69,18 @@ class SocialLinksHandler(
                 name = activity.getString(R.string.lang_english),
                 flagDrawable = R.drawable.flag_england,
                 isSelected = currentLang == LanguageManager.LANG_EN
+            ),
+            Language(
+                code = LanguageManager.LANG_CN,
+                name = activity.getString(R.string.lang_chinese),
+                flagDrawable = R.drawable.flag_chinese,
+                isSelected = currentLang == LanguageManager.LANG_CN
+            ),
+            Language(
+                code = LanguageManager.LANG_JP,
+                name = activity.getString(R.string.lang_japanese),
+                flagDrawable = R.drawable.flag_japan,
+                isSelected = currentLang == LanguageManager.LANG_JP
             )
         )
 
