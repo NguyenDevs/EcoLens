@@ -42,7 +42,7 @@ class LanguageSelectionFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         languageManager = LanguageManager(requireContext())
         setupLanguageList()
-        setupListeners()
+        //setupListeners()
     }
 
     override fun onDestroyView() {
@@ -67,6 +67,18 @@ class LanguageSelectionFragment : Fragment() {
                 name = getString(R.string.lang_english),
                 flagDrawable = R.drawable.flag_england,
                 isSelected = currentLang == LanguageManager.LANG_EN
+            ),
+            Language(
+                code = LanguageManager.LANG_CN,
+                name = getString(R.string.lang_chinese),
+                flagDrawable = R.drawable.flag_chinese,
+                isSelected = currentLang == LanguageManager.LANG_CN
+            ),
+            Language(
+                code = LanguageManager.LANG_JP,
+                name = getString(R.string.lang_japanese),
+                flagDrawable = R.drawable.flag_japan,
+                isSelected = currentLang == LanguageManager.LANG_JP
             )
         )
 
@@ -81,11 +93,13 @@ class LanguageSelectionFragment : Fragment() {
         }
     }
 
-    private fun setupListeners() {
+    /*private fun setupListeners() {
         binding.btnBack.setOnClickListener {
             closeFragment()
         }
     }
+
+     */
 
     // ==================== LANGUAGE SELECTION ====================
 

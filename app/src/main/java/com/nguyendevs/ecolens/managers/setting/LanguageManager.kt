@@ -17,8 +17,11 @@ class LanguageManager(private val context: Context) {
     companion object {
         private const val PREF_NAME = "EcoLensParams"
         private const val KEY_LANG = "KEY_LANG"
+
         const val LANG_VI = "vi"
         const val LANG_EN = "en"
+        const val LANG_CN = "cn"
+        const val LANG_JP = "jp"
     }
 
     private val prefs = context.applicationContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)

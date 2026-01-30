@@ -30,6 +30,7 @@ class SettingsHandler(
     private val logoutHandler: LogoutHandler
     private val socialLinksHandler: SocialLinksHandler
     private val userRepository = UserRepository()
+    private val accountUpdateHandler: AccountUpdateHandler
 
     init {
         themeHandler =
@@ -56,6 +57,8 @@ class SettingsHandler(
                         languageManager = languageManager
                 )
 
+        accountUpdateHandler = AccountUpdateHandler(activity)
+
         setupClickListeners()
     }
 
@@ -72,11 +75,11 @@ class SettingsHandler(
         }
 
         binding.changeUsernameOption.setOnClickListener {
-            Toast.makeText(activity, "Change Username - Coming soon", Toast.LENGTH_SHORT).show()
+            accountUpdateHandler.showChangeUsernameDialog()
         }
 
         binding.changePasswordOption.setOnClickListener {
-            Toast.makeText(activity, "Change Password - Coming soon", Toast.LENGTH_SHORT).show()
+            accountUpdateHandler.showChangePasswordDialog()
         }
 
         binding.linkGoogleOption.setOnClickListener {

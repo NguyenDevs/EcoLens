@@ -1,5 +1,5 @@
 <resources>
-    <!-- Thông tin ứng dụng -->
+    <!-- ==================== THÔNG TIN ỨNG DỤNG ==================== -->
     <string name="app_name">EcoLens</string>
     <string name="app_title">EcoLens</string>
     <string name="app_subtitle">NHẬN DIỆN ĐỘNG THỰC VẬT QUA HÌNH ẢNH</string>
@@ -7,20 +7,25 @@
     <string name="app_logo_description">Logo ứng dụng EcoLens</string>
     <string name="eco_illustration">Hình minh họa về môi trường</string>
 
-    <!-- Banner -->
+    <!-- ==================== BANNER ==================== -->
     <string name="banner_title">Nhận diện</string>
     <string name="banner_subtitle">Động - Thực vật</string>
     <string name="banner_action">Chạm để chụp</string>
 
-    <!-- Home Screen - New Design -->
+    <!-- ==================== TRANG CHỦ - THIẾT KẾ MỚI ==================== -->
+    <!-- Lời chào -->
     <string name="greeting_title">Chào bạn,</string>
     <string name="greeting_morning">Chào buổi sáng,</string>
     <string name="greeting_afternoon">Chào buổi chiều,</string>
     <string name="greeting_evening">Chào buổi tối,</string>
+
+    <!-- Hero Section -->
     <string name="hero_badge">AI IDENTIFIER</string>
     <string name="hero_title">Nhận diện\nTự nhiên</string>
     <string name="hero_subtitle">Khám phá thế giới thực vật &amp; động vật quanh bạn.</string>
     <string name="action_start_now">Bắt đầu ngay</string>
+
+    <!-- Khám phá nhanh -->
     <string name="quick_explore">Khám phá nhanh</string>
     <string name="view_all">Xem tất cả</string>
     <string name="recent">Gần đây</string>
@@ -28,7 +33,7 @@
     <string name="yesterday">Hôm qua</string>
     <string name="search_hint_home">Tìm kiếm thực vật, động vật…</string>
 
-    <!-- Quick Explore Hardcoded Items -->
+    <!-- Quick Explore Items -->
     <string name="explore_item_1_name">Sen đá</string>
     <string name="explore_item_1_desc">Echeveria</string>
     <string name="explore_item_2_name">Bướm Monarch</string>
@@ -36,13 +41,13 @@
     <string name="explore_item_3_name">Hoa Oải Hương</string>
     <string name="explore_item_3_desc">Lavandula</string>
 
-    <!-- Điều hướng -->
+    <!-- ==================== ĐIỀU HƯỚNG ==================== -->
     <string name="nav_home">Trang chủ</string>
     <string name="nav_history">Lịch sử</string>
     <string name="nav_my_garden">Trợ lý AI</string>
     <string name="nav_settings">Cài đặt</string>
 
-    <!-- Hành động chung -->
+    <!-- ==================== HÀNH ĐỘNG CHUNG ==================== -->
     <string name="ok">OK</string>
     <string name="cancel">Hủy</string>
     <string name="close">Đóng</string>
@@ -51,7 +56,7 @@
     <string name="loading">Đang tải…</string>
     <string name="please_wait">Vui lòng đợi…</string>
 
-    <!-- Máy ảnh & Hình ảnh -->
+    <!-- ==================== MÁY ẢNH & HÌNH ẢNH ==================== -->
     <string name="camera">Máy ảnh</string>
     <string name="capture">Chụp ảnh</string>
     <string name="upload">Tải lên</string>
@@ -66,7 +71,8 @@
     <string name="detail_image">Ảnh chi tiết</string>
     <string name="history_image">Ảnh lịch sử</string>
 
-    <!-- Hành động thông tin loài -->
+    <!-- ==================== THÔNG TIN LOÀI ==================== -->
+    <!-- Hành động -->
     <string name="favorite">Trợ lý</string>
     <string name="view_detail">Xem chi tiết</string>
     <string name="copy_scientific_name">Sao chép tên khoa học</string>
@@ -76,7 +82,7 @@
     <string name="mute">Dừng đọc</string>
     <string name="search_hint">Tìm kiếm trên Google...</string>
 
-    <!-- Nhãn thông tin loài -->
+    <!-- Nhãn thông tin -->
     <string name="label_common_name">Tên thường gọi</string>
     <string name="label_scientific_name">Tên khoa học</string>
     <string name="label_confidence_template">Độ tin cậy: %s</string>
@@ -93,7 +99,7 @@
     <string name="label_species">Loài:</string>
     <string name="taxonomy_title">🔬 Phân loại khoa học</string>
 
-    <!-- Các phần thông tin loài -->
+    <!-- Các phần thông tin -->
     <string name="section_description">📖 Mô tả</string>
     <string name="section_characteristics">✨ Đặc điểm</string>
     <string name="section_distribution">🌍 Phân bố</string>
@@ -111,7 +117,7 @@
     <!-- Thời gian -->
     <string name="time_prefix">Thời gian: </string>
 
-    <!-- Trạng thái phân tích -->
+    <!-- ==================== TRẠNG THÁI PHÂN TÍCH ==================== -->
     <string name="analyzing">Đang phân tích hình ảnh…</string>
     <string name="analyzing_text">Đang phân tích hình ảnh</string>
     <string name="analyzing_info">Đang truy xuất thông tin loài</string>
@@ -120,8 +126,9 @@
     <string name="loading_detail">Đang truy xuất thông tin loài</string>
     <string name="loading_conservation">Đang tra cứu tình trạng bảo tồn</string>
     <string name="loading_done">Tra cứu hoàn tất</string>
+    <string name="searching_info">Đang tra cứu...</string>
 
-    <!-- Màn hình Lịch sử -->
+    <!-- ==================== LỊCH SỬ ==================== -->
     <string name="history">Lịch sử</string>
     <string name="history_title_label">Lịch sử</string>
     <string name="history_placeholder">Lịch sử</string>
@@ -129,7 +136,12 @@
     <string name="history_empty">Chưa có lịch sử</string>
     <string name="lists">DANH SÁCH</string>
 
-    <!-- Sắp xếp & Lọc -->
+    <!-- Lọc theo loại -->
+    <string name="history_chipAnimals">Động vật</string>
+    <string name="history_chipPlants">Thực vật</string>
+    <string name="history_chipAll">Tất cả</string>
+
+    <!-- ==================== SẮP XẾP & LỌC ==================== -->
     <string name="sort_by">Sắp xếp theo</string>
     <string name="sort_newest_first">Ngày mới nhất</string>
     <string name="sort_oldest_first">Ngày cũ nhất</string>
@@ -145,7 +157,7 @@
     <string name="ic_sort">ic_sort</string>
     <string name="options">TÙY CHỌN</string>
 
-    <!-- Màn hình Trợ lý/Chat -->
+    <!-- ==================== TRỢ LÝ AI / CHAT ==================== -->
     <string name="my_garden">Trợ lý AI</string>
     <string name="my_garden_title">Trợ lý AI</string>
     <string name="my_garden_desc">Hỏi đáp về sinh vật học với AI</string>
@@ -160,15 +172,19 @@
     <string name="dialog_delete_chat_title">Xóa đoạn chat</string>
     <string name="dialog_delete_chat_message">Bạn có chắc muốn xóa đoạn chat này không?</string>
 
-    <!-- Màn hình Cài đặt -->
+    <!-- ==================== CÀI ĐẶT ==================== -->
     <string name="settings">Cài đặt</string>
     <string name="settings_title">Cài đặt</string>
     <string name="settings_placeholder">Cài đặt</string>
     <string name="settings_subtitle">Các tùy chọn cài đặt</string>
+
+    <!-- Giao diện -->
     <string name="preferences">Giao diện</string>
     <string name="language_label">Ngôn ngữ</string>
     <string name="lang_vietnamese">Tiếng Việt</string>
-    <string name="lang_english">English</string>
+    <string name="lang_english">Tiếng Anh</string>
+    <string name="lang_chinese">Tiếng Trung</string>
+    <string name="lang_japanese">Tiếng Nhật</string>
     <string name="dark_mode">Chế độ tối</string>
 
     <!-- Tài khoản -->
@@ -205,7 +221,7 @@
     <string name="follow_on_facebook">Theo dõi trên Facebook</string>
     <string name="email_support">Gửi phản hồi</string>
 
-    <!-- Chia sẻ nội dung -->
+    <!-- ==================== CHIA SẺ NỘI DUNG ==================== -->
     <string name="share_title">🌿 THÔNG TIN LOÀI</string>
     <string name="share_taxonomy_title">🔬 PHÂN LOẠI KHOA HỌC</string>
     <string name="share_desc_title">📖 MÔ TẢ</string>
@@ -217,7 +233,8 @@
     <string name="share_subject">Thông tin về %s</string>
     <string name="share_chooser_title">Chia sẻ thông tin loài qua</string>
 
-    <!-- Xác thực -->
+    <!-- ==================== XÁC THỰC ==================== -->
+    <!-- Đăng nhập / Đăng ký -->
     <string name="welcome_to_ecolens">Chào mừng đến với EcoLens</string>
     <string name="auth_subtitle">Đăng nhập hoặc tạo tài khoản mới</string>
     <string name="login">Đăng nhập</string>
@@ -235,7 +252,43 @@
     <string name="sign_in_with_biometric">Đăng nhập bằng vân tay</string>
     <string name="default_web_client_id">99190004722-8d4rpmasasjflta1hp7vgdu98a649rin.apps.googleusercontent.com</string>
 
-    <!-- Lỗi xác thực -->
+    <!-- Quên mật khẩu -->
+    <string name="forgot_password_title">Quên mật khẩu</string>
+    <string name="forgot_password_description">Vui lòng nhập email của bạn để xác nhận.</string>
+    <string name="forgot_password_icon">Biểu tượng khôi phục mật khẩu</string>
+    <string name="send_reset_link">Xác nhận</string>
+    <string name="remember_password">Đã nhớ mật khẩu?</string>
+    <string name="back_to_login">Đăng nhập</string>
+    <string name="reset_email_sent">Email đặt lại mật khẩu đã được gửi! Vui lòng kiểm tra hộp thư của bạn.</string>
+
+    <!-- Đổi tên người dùng -->
+    <string name="new_username">Tên người dùng mới</string>
+    <string name="current_password">Mật khẩu hiện tại</string>
+    <string name="confirm">Xác nhận</string>
+    <string name="username_updated">Cập nhật tên người dùng thành công</string>
+    <string name="username_update_failed">Cập nhật tên người dùng thất bại</string>
+
+    <!-- Đổi mật khẩu -->
+    <string name="old_password">Mật khẩu cũ</string>
+    <string name="new_password">Mật khẩu mới</string>
+    <string name="confirm_new_password">Xác nhận mật khẩu mới</string>
+    <string name="password_updated">Cập nhật mật khẩu thành công</string>
+    <string name="password_update_failed">Cập nhật mật khẩu thất bại</string>
+    <string name="error_reauth_failed">Xác thực lại thất bại. Vui lòng kiểm tra mật khẩu cũ.</string>
+
+    <!-- ==================== XÁC THỰC SINH TRẮC HỌC ==================== -->
+    <string name="biometric_title">Xác thực vân tay</string>
+    <string name="biometric_subtitle">Chạm vào cảm biến vân tay để xác nhận</string>
+    <string name="biometric_negative_button">Hủy</string>
+    <string name="biometric_not_available">Thiết bị không hỗ trợ sinh trhọc học</string>
+    <string name="biometric_authentication_failed">Xác thực sinh trắc học thất bại</string>
+
+    <!-- ==================== THÔNG BÁO THÀNH CÔNG ==================== -->
+    <string name="login_success">Đăng nhập thành công!</string>
+    <string name="register_success">Đăng ký thành công!</string>
+    <string name="delete_success">Đã xóa lịch sử thành công</string>
+
+    <!-- ==================== LỖI XÁC THỰC ==================== -->
     <string name="error_email_empty">Vui lòng nhập email</string>
     <string name="error_email_invalid">Email không hợp lệ</string>
     <string name="error_password_empty">Vui lòng nhập mật khẩu</string>
@@ -243,19 +296,11 @@
     <string name="error_password_mismatch">Mật khẩu không khớp</string>
     <string name="error_terms_not_accepted">Vui lòng đồng ý với điều khoản dịch vụ</string>
     <string name="error_fill_all_fields">Vui lòng điền đầy đủ thông tin</string>
+    <string name="error_email_not_found">Email này không tồn tại trong hệ thống</string>
+    <string name="error_reset_password_failed">Không thể gửi email đặt lại mật khẩu. Vui lòng thử lại.</string>
+    <string name="error_too_many_requests">Quá nhiều yêu cầu. Vui lòng thử lại sau ít phút.</string>
 
-    <!-- Thông báo thành công -->
-    <string name="login_success">Đăng nhập thành công!</string>
-    <string name="register_success">Đăng ký thành công!</string>
-    <string name="delete_success">Đã xóa lịch sử thành công</string>
-
-    <!-- Hành động hộp thoại -->
-    <string name="action_delete">Xóa</string>
-    <string name="action_cancel">Hủy</string>
-    <string name="dialog_delete_history_title">Xóa lịch sử</string>
-    <string name="dialog_delete_history_message">Bạn có chắc muốn xóa lịch sử nhận diện này không?</string>
-
-    <!-- Thông báo lỗi -->
+    <!-- ==================== THÔNG BÁO LỖI CHUNG ==================== -->
     <string name="error">Lỗi</string>
     <string name="error_occurred">Đã xảy ra lỗi</string>
     <string name="error_default">Đã xảy ra lỗi</string>
@@ -275,43 +320,27 @@
     <string name="login_failed">Đăng nhập thất bại. Vui lòng thử lại.</string>
     <string name="register_failed">Đăng ký thất bại. Vui lòng thử lại.</string>
     <string name="network_error">Lỗi kết nối. Kiểm tra mạng của bạn.</string>
-    <string name="biometric_not_available">Thiết bị không hỗ trợ sinh trhọc học</string>
-    <string name="biometric_authentication_failed">Xác thực sinh trắc học thất bại</string>
+    <string name="error_network">Lỗi kết nối mạng. Vui lòng kiểm tra internet của bạn.</string>
 
-    <!-- Thử lại -->
+    <!-- ==================== THỬ LẠI ==================== -->
     <string name="btn_retry_identification">Thử nhận dạng lại</string>
     <string name="retry_identification_hint">Độ tin cậy thấp. Nhấn để thử lại.</string>
 
-    <!-- Quyền truy cập -->
+    <!-- ==================== HỘP THOẠI ==================== -->
+    <string name="action_delete">Xóa</string>
+    <string name="action_cancel">Hủy</string>
+    <string name="dialog_delete_history_title">Xóa lịch sử</string>
+    <string name="dialog_delete_history_message">Bạn có chắc muốn xóa lịch sử nhận diện này không?</string>
+
+    <!-- ==================== QUYỀN TRUY CẬP ==================== -->
     <string name="permission_title">Cần quyền truy cập</string>
     <string name="permission_message">Ứng dụng cần quyền camera và thư viện ảnh để hoạt động.</string>
 
-    <!-- Khác -->
+    <!-- ==================== KHÁC ==================== -->
     <string name="feature_developing">Chức năng đang được phát triển</string>
 
-    <!-- Không dịch -->
+    <!-- ==================== KHÔNG DỊCH ==================== -->
     <string name="text_secondary" translatable="false">text_secondary</string>
     <string name="background_color" translatable="false">background_color</string>
-
-    <!-- Forgot Password -->
-    <string name="forgot_password_title">Quên mật khẩu</string>
-    <string name="forgot_password_description">Vui lòng nhập email của bạn để xác nhận.</string>
-    <string name="forgot_password_icon">Biểu tượng khôi phục mật khẩu</string>
-    <string name="send_reset_link">Xác nhận</string>
-    <string name="remember_password">Đã nhớ mật khẩu?</string>
-    <string name="back_to_login">Đăng nhập</string>
-
-    <!-- Success Messages -->
-    <string name="reset_email_sent">Email đặt lại mật khẩu đã được gửi! Vui lòng kiểm tra hộp thư của bạn.</string>
-
-    <!-- Error Messages -->
-    <string name="error_email_not_found">Email này không tồn tại trong hệ thống</string>
-    <string name="error_reset_password_failed">Không thể gửi email đặt lại mật khẩu. Vui lòng thử lại.</string>
-    <string name="error_network">Lỗi kết nối mạng. Vui lòng kiểm tra internet của bạn.</string>
-    <string name="error_too_many_requests">Quá nhiều yêu cầu. Vui lòng thử lại sau ít phút.</string>
-    <string name="history_chipAnimals">Động vật</string>
-    <string name="history_chipPlants">Thực vật</string>
-    <string name="history_chipAll">Tất cả</string>
-    <string name="searching_info">Đang tra cứu...</string>
 
 </resources>

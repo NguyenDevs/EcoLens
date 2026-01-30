@@ -6,7 +6,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/spacing_sm"
-        style="@style/Widget.App.Card"
+        app:cardBackgroundColor="@color/surface"
+        app:cardElevation="0dp"
+        app:strokeWidth="1dp"
+        app:strokeColor="@color/border_normal"
         app:cardCornerRadius="@dimen/radius_md">
 
     <!-- MODERN LANGUAGE ITEM -->
@@ -15,6 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:background="@color/background"
             android:gravity="center_vertical"
             android:padding="@dimen/spacing_md">
 
@@ -22,9 +26,10 @@
         <com.google.android.material.card.MaterialCardView
                 android:layout_width="48dp"
                 android:layout_height="32dp"
+                app:cardBackgroundColor="@color/surface"
                 app:cardCornerRadius="@dimen/radius_xxs"
-                app:cardElevation="@dimen/elevation_none"
-                app:strokeWidth="@dimen/border_normal"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
                 app:strokeColor="@color/border_light">
 
             <ImageView
@@ -42,7 +47,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="@dimen/spacing_md"
-                style="@style/TextAppearance.App.Body1"
+                android:textSize="16sp"
+                android:textColor="@color/text_primary"
                 android:textStyle="bold"
                 android:fontFamily="sans-serif-medium"/>
 
