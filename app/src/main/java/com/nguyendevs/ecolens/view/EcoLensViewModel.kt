@@ -49,11 +49,29 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
     private var lastLanguageCode: String = "en"
 
+    // Cache for translated history entries: Map<HistoryId, Pair<LanguageCode, SpeciesInfo>>
+    private val translationCache = mutableMapOf<Int, Pair<String, SpeciesInfo>>()
+
     init {
         viewModelScope.launch {
             historyRepository.fetchHistory()
             chatRepository.fetchSessionsAndMessages()
         }
+    }
+
+    // ==================== TRANSLATION CACHE ====================
+
+    fun getCachedTranslation(historyId: Int, targetLang: String): SpeciesInfo? {
+        val cached = translationCache[historyId]
+        return if (cached != null && cached.first == targetLang) {
+            cached.second
+        } else {
+            null
+        }
+    }
+
+    fun saveTranslationToCache(historyId: Int, language: String, info: SpeciesInfo) {
+        translationCache[historyId] = language to info
     }
 
     // ==================== NHẬN DIỆN LOÀI ====================

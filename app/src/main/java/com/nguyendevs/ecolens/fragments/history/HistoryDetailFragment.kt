@@ -27,9 +27,12 @@ import com.google.gson.Gson
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.FragmentSpeciesHistoryDetailBinding
 import com.nguyendevs.ecolens.handlers.animations.HistoryDetailAnimationHandler
+import com.nguyendevs.ecolens.managers.gemini.GeminiStreamingHelper
 import com.nguyendevs.ecolens.managers.main.SpeakerManager
+import com.nguyendevs.ecolens.managers.setting.LanguageManager
 import com.nguyendevs.ecolens.models.history.HistoryEntry
 import com.nguyendevs.ecolens.models.SpeciesInfo
+import com.nguyendevs.ecolens.network.RetrofitClient
 import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.Dispatchers
@@ -51,12 +54,17 @@ class HistoryDetailFragment : Fragment() {
 
     private val viewModel: EcoLensViewModel by activityViewModels()
     private lateinit var speakerManager: SpeakerManager
+    private lateinit var languageManager: LanguageManager
 
     // Animation Handler
     private lateinit var animationHandler: HistoryDetailAnimationHandler
 
     private var historyEntry: HistoryEntry? = null
     private var isSpeaking = false
+    private var cachedTranslatedInfo: SpeciesInfo? = null
+    private var isTranslated = false
+    private var isTranslating = false
+    private var translatedLanguage: String? = null
 
     companion object {
         private val REGEX_BOLD = Regex("\\*\\*(.+?)\\*\\*")
@@ -73,6 +81,7 @@ class HistoryDetailFragment : Fragment() {
         }
         speakerManager = SpeakerManager(requireContext())
         animationHandler = HistoryDetailAnimationHandler(requireContext())
+        languageManager = LanguageManager(requireContext())
     }
 
     override fun onCreateView(
@@ -100,6 +109,7 @@ class HistoryDetailFragment : Fragment() {
         setupFab(info)
         setupShareButton(info, entry.imagePath, entry.localImagePath)
         setupMoreOptionsButton()
+        setupTranslateButton(entry)
 
         animationHandler.showFab(binding.fabSpeak)
         binding.fabSpeak.bringToFront()
@@ -194,6 +204,7 @@ class HistoryDetailFragment : Fragment() {
         localImagePath: String?
     ) {
         binding.btnShareInfo.setOnClickListener {
+            if (isTranslating) return@setOnClickListener
             animationHandler.performConfirmFeedback(it)
 
             lifecycleScope.launch(Dispatchers.IO) {
@@ -283,6 +294,133 @@ class HistoryDetailFragment : Fragment() {
         } catch (e: Exception) {
             Toast.makeText(context, "${context.getString(R.string.error)}: ${e.message}", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    // ==================== TRANSLATE FUNCTIONALITY ====================
+
+    private fun setupTranslateButton(entry: HistoryEntry) {
+        val currentLang = languageManager.getLanguage()
+        if (entry.language != currentLang) {
+            binding.btnTranslate.visibility = View.VISIBLE
+            binding.btnTranslate.setOnClickListener {
+                if (isTranslating) return@setOnClickListener
+                animationHandler.performConfirmFeedback(it)
+                handleTranslateClick(entry, currentLang)
+            }
+        } else {
+            binding.btnTranslate.visibility = View.GONE
+        }
+    }
+
+    private fun handleTranslateClick(entry: HistoryEntry, targetLang: String) {
+        if (isTranslated) {
+            isTranslated = false
+            updateUI(entry.speciesInfo)
+            binding.btnTranslate.setImageResource(R.drawable.ic_translate)
+        } else {
+            val cached = viewModel.getCachedTranslation(entry.id, targetLang)
+            if (cached != null) {
+                cachedTranslatedInfo = cached
+                isTranslated = true
+                translatedLanguage = targetLang
+                updateUI(cached)
+                //binding.btnTranslate.setImageResource(R.drawable.ic_undo)
+            } else if (cachedTranslatedInfo != null && translatedLanguage == targetLang) {
+                isTranslated = true
+                updateUI(cachedTranslatedInfo!!)
+                //binding.btnTranslate.setImageResource(R.drawable.ic_undo)
+            } else {
+                performTranslation(entry, targetLang)
+            }
+        }
+    }
+
+    private fun performTranslation(entry: HistoryEntry, targetLang: String) {
+        isTranslating = true
+        setButtonsEnabled(false)
+        binding.btnTranslate.visibility = View.INVISIBLE
+        binding.loadingTranslate.visibility = View.VISIBLE
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val streamingHelper = GeminiStreamingHelper(RetrofitClient.iNaturalistApi, Gson())
+                val originalInfo = entry.speciesInfo
+
+                val commonName = streamingHelper.getCommonName(originalInfo.scientificName, targetLang) ?: originalInfo.commonName
+
+                var translatedInfo = originalInfo.copy(
+                    commonName = commonName,
+                    kingdom = originalInfo.kingdom,
+                    phylum = originalInfo.phylum,
+                    className = originalInfo.className,
+                    taxorder = originalInfo.taxorder,
+                    family = originalInfo.family,
+                    genus = originalInfo.genus,
+                    species = originalInfo.species
+                )
+
+                streamingHelper.streamDetails(
+                    originalInfo.scientificName,
+                    originalInfo.confidence,
+                    targetLang,
+                    translatedInfo
+                ) { state ->
+                    state.speciesInfo?.let { info ->
+                        translatedInfo = info
+                    }
+                }
+
+                val iucnCode = "NE"
+                streamingHelper.streamConservation(
+                    originalInfo.scientificName,
+                    iucnCode,
+                    targetLang,
+                    translatedInfo
+                ) { state ->
+                    state.speciesInfo?.let { info ->
+                        translatedInfo = info
+                    }
+                }
+
+                cachedTranslatedInfo = translatedInfo
+                isTranslated = true
+                translatedLanguage = targetLang
+
+                viewModel.saveTranslationToCache(entry.id, targetLang, translatedInfo)
+
+                withContext(Dispatchers.Main) {
+                    updateUI(translatedInfo)
+                    //binding.btnTranslate.setImageResource(R.drawable.ic_undo)
+                }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), getString(R.string.error_general, e.message), Toast.LENGTH_SHORT).show()
+                }
+            } finally {
+                withContext(Dispatchers.Main) {
+                    isTranslating = false
+                    setButtonsEnabled(true)
+                    binding.btnTranslate.visibility = View.VISIBLE
+                    binding.loadingTranslate.visibility = View.GONE
+                }
+            }
+        }
+    }
+
+    private fun setButtonsEnabled(enabled: Boolean) {
+        binding.btnBack.isEnabled = enabled
+        binding.btnMoreOptions.isEnabled = enabled
+        binding.btnShareInfo.isEnabled = enabled
+        binding.fabSpeak.isEnabled = enabled
+        binding.btnTranslate.isEnabled = enabled
+    }
+
+    private fun updateUI(info: SpeciesInfo) {
+        bindHeader(historyEntry!!, info)
+        bindTaxonomy(info)
+        bindContent(info)
     }
 
     // ==================== DATA BINDING ====================
@@ -416,6 +554,7 @@ class HistoryDetailFragment : Fragment() {
         }
 
         binding.fabSpeak.setOnClickListener {
+            if (isTranslating) return@setOnClickListener
             animationHandler.performConfirmFeedback(it)
 
             lifecycleScope.launch(Dispatchers.IO) {
@@ -425,7 +564,14 @@ class HistoryDetailFragment : Fragment() {
                         updateFabUI(false)
                     }
                 } else {
-                    val speechText = TextToSpeechGenerator.generateSpeechText(requireContext(), info)
+                    // Use translated info if available and active
+                    val infoToSpeak = if (isTranslated && cachedTranslatedInfo != null) cachedTranslatedInfo!! else info
+                    val langToSpeak = if (isTranslated && translatedLanguage != null) translatedLanguage!! else historyEntry?.language ?: "vi"
+                    
+                    // Update speaker language
+                    speakerManager.setLanguage(langToSpeak)
+
+                    val speechText = TextToSpeechGenerator.generateSpeechText(requireContext(), infoToSpeak)
                     withContext(Dispatchers.Main) {
                         speakerManager.speak(speechText)
                         updateFabUI(true)

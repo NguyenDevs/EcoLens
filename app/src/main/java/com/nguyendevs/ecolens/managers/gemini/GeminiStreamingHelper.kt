@@ -39,8 +39,7 @@ class GeminiStreamingHelper(
         scientificName: String,
         languageCode: String
     ): String? = withContext(Dispatchers.IO) {
-        val isVietnamese = languageCode != "en"
-        val prompt = PromptBuilder.buildCommonNamePrompt(scientificName, isVietnamese)
+        val prompt = PromptBuilder.buildCommonNamePrompt(scientificName, languageCode)
         val request = createGeminiRequest(prompt)
 
         try {
@@ -98,8 +97,8 @@ class GeminiStreamingHelper(
         currentInfo: SpeciesInfo,
         onStateUpdate: (EcoLensUiState) -> Unit
     ) = withContext(Dispatchers.IO) {
-        val isVietnamese = languageCode != "en"
-        val prompt = PromptBuilder.buildDetailsPrompt(scientificName, isVietnamese)
+        val isVietnamese = languageCode == "vi"
+        val prompt = PromptBuilder.buildDetailsPrompt(scientificName, languageCode)
         val request = createGeminiRequest(prompt)
 
         try {
@@ -124,8 +123,8 @@ class GeminiStreamingHelper(
         currentInfo: SpeciesInfo,
         onStateUpdate: (EcoLensUiState) -> Unit
     ) = withContext(Dispatchers.IO) {
-        val isVietnamese = languageCode != "en"
-        val prompt = PromptBuilder.buildConservationPrompt(scientificName, iucnCode, isVietnamese)
+        val isVietnamese = languageCode == "vi"
+        val prompt = PromptBuilder.buildConservationPrompt(scientificName, iucnCode, languageCode)
         val request = createGeminiRequest(prompt)
 
         try {

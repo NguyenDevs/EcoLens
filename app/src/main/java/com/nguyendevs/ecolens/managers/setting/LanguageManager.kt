@@ -20,8 +20,8 @@ class LanguageManager(private val context: Context) {
 
         const val LANG_VI = "vi"
         const val LANG_EN = "en"
-        const val LANG_CN = "cn"
-        const val LANG_JP = "jp"
+        const val LANG_CN = "zh"
+        const val LANG_JP = "ja"
     }
 
     private val prefs = context.applicationContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)

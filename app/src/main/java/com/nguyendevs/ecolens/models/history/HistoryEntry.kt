@@ -14,6 +14,7 @@ import com.nguyendevs.ecolens.models.SpeciesInfo
  * @property speciesInfo Thông tin chi tiết về loài
  * @property timestamp Thời gian nhận diện (milliseconds)
  * @property isFavorite Đánh dấu yêu thích hay không
+ * @property language Ngôn ngữ sử dụng khi nhận diện (vi, en, zh, ja)
  */
 @Entity(tableName = "history_table")
 data class HistoryEntry(
@@ -21,5 +22,6 @@ data class HistoryEntry(
     val imagePath: String = "",
     val localImagePath: String = "",
     @Embedded val speciesInfo: SpeciesInfo = SpeciesInfo(),
-    val timestamp: Long = 0
+    val timestamp: Long = 0,
+    val language: String = "vi"
 )

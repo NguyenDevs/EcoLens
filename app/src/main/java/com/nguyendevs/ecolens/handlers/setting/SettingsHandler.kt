@@ -20,7 +20,8 @@ import kotlinx.coroutines.launch
 class SettingsHandler(
     private val activity: AppCompatActivity,
     private val languageManager: LanguageManager,
-    private val binding: ScreenSettingsBinding
+    private val binding: ScreenSettingsBinding,
+    private val onUsernameChanged: (() -> Unit)? = null
 ) {
 
     private var isTransitioning = false
@@ -57,7 +58,7 @@ class SettingsHandler(
                         languageManager = languageManager
                 )
 
-        accountUpdateHandler = AccountUpdateHandler(activity)
+        accountUpdateHandler = AccountUpdateHandler(activity, onUsernameChanged)
 
         setupClickListeners()
     }
@@ -126,7 +127,7 @@ class SettingsHandler(
              if (languageManager.getLanguage() == LanguageManager.LANG_VI) {
                  binding.switchTaxoMode.toggle()
              } else {
-                 Toast.makeText(activity, "Feature required Language Setting: Vietnamese", Toast.LENGTH_SHORT).show()
+                 Toast.makeText(activity, activity.getString(R.string.error_feature_required_vietnamese), Toast.LENGTH_SHORT).show()
              }
         }
     }

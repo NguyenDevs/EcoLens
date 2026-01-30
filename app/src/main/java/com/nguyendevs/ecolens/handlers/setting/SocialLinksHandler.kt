@@ -116,6 +116,8 @@ class SocialLinksHandler(
                 when (currentLang) {
                     LanguageManager.LANG_EN -> activity.getString(R.string.lang_english)
                     LanguageManager.LANG_VI -> activity.getString(R.string.lang_vietnamese)
+                    LanguageManager.LANG_CN -> activity.getString(R.string.lang_chinese)
+                    LanguageManager.LANG_JP -> activity.getString(R.string.lang_japanese)
                     else -> activity.getString(R.string.lang_english)
                 }
     }

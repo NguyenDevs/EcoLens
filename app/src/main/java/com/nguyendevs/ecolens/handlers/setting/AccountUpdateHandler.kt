@@ -7,17 +7,24 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.nguyendevs.ecolens.R
+import com.nguyendevs.ecolens.database.UserRepository
+import kotlinx.coroutines.launch
 import java.util.concurrent.Executor
 
-class AccountUpdateHandler(private val activity: AppCompatActivity) {
+class AccountUpdateHandler(
+    private val activity: AppCompatActivity,
+    private val onUsernameChanged: (() -> Unit)? = null
+) {
 
     private val firebaseAuth = FirebaseAuth.getInstance()
+    private val userRepository = UserRepository()
 
     fun showChangeUsernameDialog() {
         val dialog = BottomSheetDialog(activity)
@@ -148,10 +155,18 @@ class AccountUpdateHandler(private val activity: AppCompatActivity) {
         user?.updateProfile(profileUpdates)
             ?.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    Toast.makeText(activity, activity.getString(R.string.username_updated), Toast.LENGTH_SHORT).show()
-                    // Update shared preferences if needed
-                    val sharedPreferences = activity.getSharedPreferences("EcoLensPrefs", Context.MODE_PRIVATE)
-                    sharedPreferences.edit().putString("username", newUsername).apply()
+                    // Update in Realtime Database
+                    activity.lifecycleScope.launch {
+                        userRepository.updateUsername(newUsername)
+                        Toast.makeText(activity, activity.getString(R.string.username_updated), Toast.LENGTH_SHORT).show()
+                        
+                        // Update shared preferences if needed
+                        val sharedPreferences = activity.getSharedPreferences("EcoLensPrefs", Context.MODE_PRIVATE)
+                        sharedPreferences.edit().putString("username", newUsername).apply()
+
+                        // Callback to refresh UI
+                        onUsernameChanged?.invoke()
+                    }
                 } else {
                     Toast.makeText(activity, activity.getString(R.string.username_update_failed), Toast.LENGTH_SHORT).show()
                 }

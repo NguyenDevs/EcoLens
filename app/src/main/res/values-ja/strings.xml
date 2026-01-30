@@ -43,7 +43,7 @@
     <!-- ==================== ナビゲーション ==================== -->
     <string name="nav_home">ホーム</string>
     <string name="nav_history">履歴</string>
-    <string name="nav_my_garden">アシスタント</string>
+    <string name="nav_my_garden">チャット</string>
     <string name="nav_settings">設定</string>
 
     <!-- ==================== 共通アクション ==================== -->
