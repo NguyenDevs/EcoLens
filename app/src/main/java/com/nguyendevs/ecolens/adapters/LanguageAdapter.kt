@@ -47,6 +47,7 @@ class LanguageAdapter(
 
         private val colorPrimary = ContextCompat.getColor(itemView.context, R.color.primary)
         private val colorTextPrimary = ContextCompat.getColor(itemView.context, R.color.text_primary)
+        private val colorSurface = ContextCompat.getColor(itemView.context, R.color.surface)
         private val strokeWidthPx = (2 * itemView.resources.displayMetrics.density).toInt()
 
         init {
@@ -61,6 +62,7 @@ class LanguageAdapter(
         fun bind(language: Language) {
             binding.ivFlag.setImageResource(language.flagDrawable)
             binding.tvLanguageName.text = language.name
+            binding.cardLanguage.setCardBackgroundColor(colorSurface)
 
             if (language.isSelected) {
                 binding.cardLanguage.strokeWidth = strokeWidthPx
