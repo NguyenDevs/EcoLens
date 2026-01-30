@@ -6,6 +6,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricPrompt
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -16,6 +19,7 @@ import com.nguyendevs.ecolens.database.HistoryDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.concurrent.Executor
 
 /**
  * Handler quản lý logout và delete account. Xử lý: confirm dialogs, clear local data, Firebase sign
@@ -36,9 +40,48 @@ class LogoutHandler(private val activity: AppCompatActivity) {
         AlertDialog.Builder(activity)
                 .setTitle(R.string.dialog_delete_account_title)
                 .setMessage(R.string.dialog_delete_account_message)
-                .setPositiveButton(R.string.action_delete) { _, _ -> deleteAccount() }
+                .setPositiveButton(R.string.action_delete) { _, _ ->
+                    authenticateWithBiometrics {
+                        deleteAccount()
+                    }
+                }
                 .setNegativeButton(R.string.action_cancel, null)
                 .show()
+    }
+
+    private fun authenticateWithBiometrics(onSuccess: () -> Unit) {
+        val biometricManager = BiometricManager.from(activity)
+        if (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) != BiometricManager.BIOMETRIC_SUCCESS) {
+               onSuccess()
+            return
+        }
+
+        val executor: Executor = ContextCompat.getMainExecutor(activity)
+        val biometricPrompt = BiometricPrompt(activity, executor,
+            object : BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                    super.onAuthenticationSucceeded(result)
+                    onSuccess()
+                }
+
+                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                    super.onAuthenticationError(errorCode, errString)
+                    Toast.makeText(activity, activity.getString(R.string.biometric_authentication_failed), Toast.LENGTH_SHORT).show()
+                }
+
+                override fun onAuthenticationFailed() {
+                    super.onAuthenticationFailed()
+                    Toast.makeText(activity, activity.getString(R.string.biometric_authentication_failed), Toast.LENGTH_SHORT).show()
+                }
+            })
+
+        val promptInfo = BiometricPrompt.PromptInfo.Builder()
+            .setTitle(activity.getString(R.string.biometric_title))
+            .setSubtitle(activity.getString(R.string.biometric_subtitle))
+            .setNegativeButtonText(activity.getString(R.string.biometric_negative_button))
+            .build()
+
+        biometricPrompt.authenticate(promptInfo)
     }
 
     private fun deleteAccount() {
