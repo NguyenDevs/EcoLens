@@ -1,5 +1,5 @@
 <resources>
-    <!-- App Information -->
+    <!-- ==================== APP INFORMATION ==================== -->
     <string name="app_name">EcoLens</string>
     <string name="app_title">EcoLens</string>
     <string name="app_subtitle">IDENTIFY SPECIES VIA IMAGES</string>
@@ -7,18 +7,24 @@
     <string name="app_logo_description">EcoLens app logo</string>
     <string name="eco_illustration">Environmental illustration</string>
 
-    <!-- Banner -->
+    <!-- ==================== BANNER ==================== -->
     <string name="banner_title">Identify</string>
     <string name="banner_subtitle">Flora and Fauna</string>
-    <!-- Home Screen - New Design -->
+
+    <!-- ==================== HOME SCREEN - NEW DESIGN ==================== -->
+    <!-- Greetings -->
     <string name="greeting_title">Hello,</string>
     <string name="greeting_morning">Good morning,</string>
     <string name="greeting_afternoon">Good afternoon,</string>
     <string name="greeting_evening">Good evening,</string>
+
+    <!-- Hero Section -->
     <string name="hero_badge">AI IDENTIFIER</string>
     <string name="hero_title">Identify\nNature</string>
     <string name="hero_subtitle">Explore the flora &amp; fauna world around you.</string>
     <string name="action_start_now">Start now</string>
+
+    <!-- Quick Explore -->
     <string name="quick_explore">Quick explore</string>
     <string name="view_all">View all</string>
     <string name="recent">Recent</string>
@@ -26,7 +32,7 @@
     <string name="yesterday">Yesterday</string>
     <string name="search_hint_home">Search for plants, animals…</string>
 
-    <!-- Quick Explore Hardcoded Items -->
+    <!-- Quick Explore Items -->
     <string name="explore_item_1_name">Succulent</string>
     <string name="explore_item_1_desc">Echeveria</string>
     <string name="explore_item_2_name">Monarch Butterfly</string>
@@ -34,13 +40,13 @@
     <string name="explore_item_3_name">Lavender</string>
     <string name="explore_item_3_desc">Lavandula</string>
 
-    <!-- Navigation -->
+    <!-- ==================== NAVIGATION ==================== -->
     <string name="nav_home">Home</string>
     <string name="nav_history">History</string>
     <string name="nav_my_garden">Assistant</string>
     <string name="nav_settings">Settings</string>
 
-    <!-- Common Actions -->
+    <!-- ==================== COMMON ACTIONS ==================== -->
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="close">Close</string>
@@ -49,7 +55,7 @@
     <string name="loading">Loading…</string>
     <string name="please_wait">Please wait…</string>
 
-    <!-- Camera & Image Actions -->
+    <!-- ==================== CAMERA & IMAGE ==================== -->
     <string name="camera">Camera</string>
     <string name="capture">Capture</string>
     <string name="upload">Upload</string>
@@ -64,7 +70,8 @@
     <string name="detail_image">Image detail</string>
     <string name="history_image">Image history</string>
 
-    <!-- Species Information Actions -->
+    <!-- ==================== SPECIES INFORMATION ==================== -->
+    <!-- Actions -->
     <string name="favorite">Assistant</string>
     <string name="view_detail">Detail</string>
     <string name="copy_scientific_name">Copy scientific name</string>
@@ -74,14 +81,14 @@
     <string name="mute">Stop reading</string>
     <string name="search_hint">Search on Google...</string>
 
-    <!-- Species Labels -->
+    <!-- Labels -->
     <string name="label_common_name">Common name</string>
     <string name="label_scientific_name">Scientific name</string>
     <string name="label_confidence_template">Confidence: %s</string>
     <string name="confidence">Confidence</string>
     <string name="confidence_format">Confidence: %s%%</string>
 
-    <!-- Taxonomy Labels -->
+    <!-- Taxonomy -->
     <string name="label_kingdom">Kingdom:</string>
     <string name="label_phylum">Phylum:</string>
     <string name="label_class">Class:</string>
@@ -91,7 +98,7 @@
     <string name="label_species">Species:</string>
     <string name="taxonomy_title">🔬 Scientific Classification</string>
 
-    <!-- Species Information Sections -->
+    <!-- Information Sections -->
     <string name="section_description">📖 Description</string>
     <string name="section_characteristics">✨ Characteristics</string>
     <string name="section_distribution">🌍 Distribution</string>
@@ -109,7 +116,7 @@
     <!-- Time -->
     <string name="time_prefix">Time: </string>
 
-    <!-- Analysis States -->
+    <!-- ==================== ANALYSIS STATES ==================== -->
     <string name="analyzing">Analyzing image…</string>
     <string name="analyzing_text">Analyzing image</string>
     <string name="analyzing_info">Retrieving species information</string>
@@ -118,8 +125,9 @@
     <string name="loading_detail">Retrieving species information</string>
     <string name="loading_conservation">Checking conservation status</string>
     <string name="loading_done">Checking complete</string>
+    <string name="searching_info">Searching...</string>
 
-    <!-- History Screen -->
+    <!-- ==================== HISTORY ==================== -->
     <string name="history">History</string>
     <string name="history_title_label">History</string>
     <string name="history_placeholder">History</string>
@@ -127,7 +135,12 @@
     <string name="history_empty">History empty</string>
     <string name="lists">HISTORY</string>
 
-    <!-- Sort & Filter -->
+    <!-- Filter by Type -->
+    <string name="history_chipAnimals">Animals</string>
+    <string name="history_chipPlants">Plants</string>
+    <string name="history_chipAll">All</string>
+
+    <!-- ==================== SORT & FILTER ==================== -->
     <string name="sort_by">Sort by</string>
     <string name="sort_newest_first">Newest first</string>
     <string name="sort_oldest_first">Oldest first</string>
@@ -143,7 +156,7 @@
     <string name="ic_sort">ic_sort</string>
     <string name="options">OPTIONS</string>
 
-    <!-- Assistant/Chat Screen -->
+    <!-- ==================== ASSISTANT / CHAT ==================== -->
     <string name="my_garden">Assistant</string>
     <string name="my_garden_title">Assistant</string>
     <string name="my_garden_desc">Chat about biology with AI</string>
@@ -158,17 +171,20 @@
     <string name="dialog_delete_chat_title">Delete chat</string>
     <string name="dialog_delete_chat_message">Are you sure you want to delete this chat?</string>
 
-    <!-- Settings Screen -->
+    <!-- ==================== SETTINGS ==================== -->
     <string name="settings">Settings</string>
     <string name="settings_title">Settings</string>
     <string name="settings_placeholder">Settings</string>
     <string name="settings_subtitle">Application options</string>
+
+    <!-- Preferences -->
     <string name="preferences">Preferences</string>
     <string name="language_label">Language</string>
-    <string name="lang_vietnamese">Tiếng Việt</string>
+    <string name="lang_vietnamese">Vietnamese</string>
     <string name="lang_english">English</string>
+    <string name="lang_chinese">Chinese</string>
+    <string name="lang_japanese">Japanese</string>
     <string name="dark_mode">Dark Mode</string>
-
 
     <!-- Account -->
     <string name="account">ACCOUNT</string>
@@ -187,6 +203,7 @@
     <string name="dialog_delete_account_message">Are you sure you want to delete your account? This action cannot be undone.</string>
     <string name="error_delete_account">Unable to delete account. Please try again.</string>
 
+    <!-- Configuration -->
     <string name="config">Configuration</string>
     <string name="taxonomy_language">Vietnamese Taxonomy</string>
     <string name="iucn_searching">IUCN Search</string>
@@ -203,7 +220,7 @@
     <string name="follow_on_facebook">Follow on Facebook</string>
     <string name="email_support">Email Support</string>
 
-    <!-- Share Content -->
+    <!-- ==================== SHARE CONTENT ==================== -->
     <string name="share_title">🌿 SPECIES INFORMATION</string>
     <string name="share_taxonomy_title">🔬 SCIENTIFIC CLASSIFICATION</string>
     <string name="share_desc_title">📖 DESCRIPTION</string>
@@ -215,7 +232,8 @@
     <string name="share_subject">Information about %s</string>
     <string name="share_chooser_title">Share species information via</string>
 
-    <!-- Authentication -->
+    <!-- ==================== AUTHENTICATION ==================== -->
+    <!-- Login / Register -->
     <string name="welcome_to_ecolens">Welcome to EcoLens</string>
     <string name="auth_subtitle">Sign in or create a new account</string>
     <string name="login">Login</string>
@@ -233,7 +251,43 @@
     <string name="sign_in_with_biometric">Sign in with fingerprint</string>
     <string name="default_web_client_id">99190004722-8d4rpmasasjflta1hp7vgdu98a649rin.apps.googleusercontent.com</string>
 
-    <!-- Validation Errors -->
+    <!-- Forgot Password -->
+    <string name="forgot_password_title">Forgot Password</string>
+    <string name="forgot_password_description">Please enter your email address to confirm.</string>
+    <string name="forgot_password_icon">Password recovery icon</string>
+    <string name="send_reset_link">Confirm</string>
+    <string name="remember_password">Remember your password?</string>
+    <string name="back_to_login">Login</string>
+    <string name="reset_email_sent">Password reset email has been sent! Please check your mail.</string>
+
+    <!-- Change Username -->
+    <string name="new_username">New username</string>
+    <string name="current_password">Current password</string>
+    <string name="confirm">Confirm</string>
+    <string name="username_updated">Username updated successfully</string>
+    <string name="username_update_failed">Username update failed</string>
+
+    <!-- Change Password -->
+    <string name="old_password">Old password</string>
+    <string name="new_password">New password</string>
+    <string name="confirm_new_password">Confirm new password</string>
+    <string name="password_updated">Password updated successfully</string>
+    <string name="password_update_failed">Password update failed</string>
+    <string name="error_reauth_failed">Re-authentication failed. Please check your old password.</string>
+
+    <!-- ==================== BIOMETRIC AUTHENTICATION ==================== -->
+    <string name="biometric_title">Biometric Authentication</string>
+    <string name="biometric_subtitle">Touch the fingerprint sensor to confirm</string>
+    <string name="biometric_negative_button">Cancel</string>
+    <string name="biometric_not_available">Device does not support biometrics</string>
+    <string name="biometric_authentication_failed">Biometric authentication failed</string>
+
+    <!-- ==================== SUCCESS MESSAGES ==================== -->
+    <string name="login_success">Login successful!</string>
+    <string name="register_success">Registration successful!</string>
+    <string name="delete_success">History successfully deleted.</string>
+
+    <!-- ==================== VALIDATION ERRORS ==================== -->
     <string name="error_email_empty">Please enter your email</string>
     <string name="error_email_invalid">Invalid email address</string>
     <string name="error_password_empty">Please enter your password</string>
@@ -241,19 +295,11 @@
     <string name="error_password_mismatch">Passwords do not match</string>
     <string name="error_terms_not_accepted">Please accept the terms of service</string>
     <string name="error_fill_all_fields">Please fill all fields</string>
+    <string name="error_email_not_found">This email does not exist in the system</string>
+    <string name="error_reset_password_failed">Unable to send password reset email. Please try again.</string>
+    <string name="error_too_many_requests">Too many requests. Please try again in a few minutes.</string>
 
-    <!-- Success Messages -->
-    <string name="login_success">Login successful!</string>
-    <string name="register_success">Registration successful!</string>
-    <string name="delete_success">History successfully deleted.</string>
-
-    <!-- Dialog Actions -->
-    <string name="action_delete">Delete</string>
-    <string name="action_cancel">Cancel</string>
-    <string name="dialog_delete_history_title">Delete history</string>
-    <string name="dialog_delete_history_message">Are you sure you want to delete this history?</string>
-
-    <!-- Error Messages -->
+    <!-- ==================== GENERAL ERROR MESSAGES ==================== -->
     <string name="error">Error</string>
     <string name="error_occurred">An error occurred</string>
     <string name="error_default">An error occurred</string>
@@ -273,60 +319,23 @@
     <string name="login_failed">Login failed. Please try again.</string>
     <string name="register_failed">Registration failed. Please try again.</string>
     <string name="network_error">Connection error. Check your network.</string>
-    <string name="biometric_not_available">Device does not support biometrics</string>
-    <string name="biometric_authentication_failed">Biometric authentication failed</string>
+    <string name="error_network">Network connection error. Please check your internet connection.</string>
 
-    <!-- Retry -->
+    <!-- ==================== RETRY ==================== -->
     <string name="btn_retry_identification">Retry identification</string>
     <string name="retry_identification_hint">Low confidence. Tap to try again.</string>
 
-    <!-- Permissions -->
+    <!-- ==================== DIALOGS ==================== -->
+    <string name="action_delete">Delete</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="dialog_delete_history_title">Delete history</string>
+    <string name="dialog_delete_history_message">Are you sure you want to delete this history?</string>
+
+    <!-- ==================== PERMISSIONS ==================== -->
     <string name="permission_title">Permission Required</string>
     <string name="permission_message">This app needs camera and storage permissions to function.</string>
 
-    <!-- Miscellaneous -->
+    <!-- ==================== MISCELLANEOUS ==================== -->
     <string name="feature_developing">Feature under development</string>
-
-    <!-- Forgot Password -->
-    <string name="forgot_password_title">Forgot Password</string>
-    <string name="forgot_password_description">Please enter your email address to confirm.</string>
-    <string name="forgot_password_icon">Password recovery icon</string>
-    <string name="send_reset_link">Confirm</string>
-    <string name="remember_password">Remember your password?</string>
-    <string name="back_to_login">Login</string>
-
-    <!-- Success Messages -->
-    <string name="reset_email_sent">Password reset email has been sent! Please check your mail.</string>
-
-    <!-- Error Messages -->
-    <string name="error_email_not_found">This email does not exist in the system</string>
-    <string name="error_reset_password_failed">Unable to send password reset email. Please try again.</string>
-    <string name="error_network">Network connection error. Please check your internet connection.</string>
-    <string name="error_too_many_requests">Too many requests. Please try again in a few minutes.</string>
-
-    <string name="history_chipAnimals">Animals</string>
-    <string name="history_chipPlants">Plants</string>
-    <string name="history_chipAll">All</string>
-    <string name="searching_info">Searching...</string>
-
-    <!-- Biometric -->
-    <string name="biometric_title">Biometric Authentication</string>
-    <string name="biometric_subtitle">Touch the fingerprint sensor to confirm</string>
-    <string name="biometric_negative_button">Cancel</string>
-
-    <!-- Change Username -->
-    <string name="new_username">New username</string>
-    <string name="current_password">Current password</string>
-    <string name="confirm">Confirm</string>
-    <string name="username_updated">Username updated successfully</string>
-    <string name="username_update_failed">Username update failed</string>
-
-    <!-- Change Password -->
-    <string name="old_password">Old password</string>
-    <string name="new_password">New password</string>
-    <string name="confirm_new_password">Confirm new password</string>
-    <string name="password_updated">Password updated successfully</string>
-    <string name="password_update_failed">Password update failed</string>
-    <string name="error_reauth_failed">Re-authentication failed. Please check your old password.</string>
 
 </resources>

@@ -1,0 +1,341 @@
+<resources>
+    <!-- ==================== アプリ情報 ==================== -->
+    <string name="app_name">EcoLens</string>
+    <string name="app_title">EcoLens</string>
+    <string name="app_subtitle">画像で生物を識別</string>
+    <string name="app_subtitle_home">画像で生物を識別</string>
+    <string name="app_logo_description">EcoLensアプリロゴ</string>
+    <string name="eco_illustration">環境イラスト</string>
+
+    <!-- ==================== バナー ==================== -->
+    <string name="banner_title">識別</string>
+    <string name="banner_subtitle">動植物</string>
+
+    <!-- ==================== ホーム画面 - 新デザイン ==================== -->
+    <!-- 挨拶 -->
+    <string name="greeting_title">こんにちは、</string>
+    <string name="greeting_morning">おはようございます、</string>
+    <string name="greeting_afternoon">こんにちは、</string>
+    <string name="greeting_evening">こんばんは、</string>
+
+    <!-- ヒーローセクション -->
+    <string name="hero_badge">AI識別</string>
+    <string name="hero_title">自然を\n識別</string>
+    <string name="hero_subtitle">あなたの周りの動植物の世界を探索しましょう。</string>
+    <string name="action_start_now">今すぐ始める</string>
+
+    <!-- クイック探索 -->
+    <string name="quick_explore">クイック探索</string>
+    <string name="view_all">すべて表示</string>
+    <string name="recent">最近</string>
+    <string name="today">今日</string>
+    <string name="yesterday">昨日</string>
+    <string name="search_hint_home">植物、動物を検索…</string>
+
+    <!-- クイック探索アイテム -->
+    <string name="explore_item_1_name">多肉植物</string>
+    <string name="explore_item_1_desc">エケベリア属</string>
+    <string name="explore_item_2_name">オオカバマダラ</string>
+    <string name="explore_item_2_desc">オオカバマダラ</string>
+    <string name="explore_item_3_name">ラベンダー</string>
+    <string name="explore_item_3_desc">ラベンダー属</string>
+
+    <!-- ==================== ナビゲーション ==================== -->
+    <string name="nav_home">ホーム</string>
+    <string name="nav_history">履歴</string>
+    <string name="nav_my_garden">アシスタント</string>
+    <string name="nav_settings">設定</string>
+
+    <!-- ==================== 共通アクション ==================== -->
+    <string name="ok">OK</string>
+    <string name="cancel">キャンセル</string>
+    <string name="close">閉じる</string>
+    <string name="back">戻る</string>
+    <string name="search">検索</string>
+    <string name="loading">読み込み中…</string>
+    <string name="please_wait">お待ちください…</string>
+
+    <!-- ==================== カメラと画像 ==================== -->
+    <string name="camera">カメラ</string>
+    <string name="capture">撮影</string>
+    <string name="upload">アップロード</string>
+    <string name="rotate">回転</string>
+    <string name="flash_toggle">フラッシュ切替</string>
+    <string name="zoom_in">ズームイン</string>
+    <string name="zoom_out">ズームアウト</string>
+    <string name="fullscreen_image">全画面</string>
+    <string name="image_preview">画像プレビュー</string>
+    <string name="no_image">画像なし</string>
+    <string name="no_image_selected">画像が選択されていません</string>
+    <string name="detail_image">画像詳細</string>
+    <string name="history_image">履歴画像</string>
+
+    <!-- ==================== 種情報 ==================== -->
+    <!-- アクション -->
+    <string name="favorite">アシスタント</string>
+    <string name="view_detail">詳細</string>
+    <string name="copy_scientific_name">学名をコピー</string>
+    <string name="share_info">情報を共有</string>
+    <string name="more_options">オプション</string>
+    <string name="speak">内容を読む</string>
+    <string name="mute">読み上げを停止</string>
+    <string name="search_hint">Googleで検索...</string>
+
+    <!-- ラベル -->
+    <string name="label_common_name">一般名</string>
+    <string name="label_scientific_name">学名</string>
+    <string name="label_confidence_template">信頼度：%s</string>
+    <string name="confidence">信頼度</string>
+    <string name="confidence_format">信頼度：%s%%</string>
+
+    <!-- 分類学 -->
+    <string name="label_kingdom">界：</string>
+    <string name="label_phylum">門：</string>
+    <string name="label_class">綱：</string>
+    <string name="label_order">目：</string>
+    <string name="label_family">科：</string>
+    <string name="label_genus">属：</string>
+    <string name="label_species">種：</string>
+    <string name="taxonomy_title">🔬 科学的分類</string>
+
+    <!-- 情報セクション -->
+    <string name="section_description">📖 説明</string>
+    <string name="section_characteristics">✨ 特徴</string>
+    <string name="section_distribution">🌍 分布</string>
+    <string name="section_habitat">🏞️ 生息地</string>
+    <string name="section_conservation">🛡️ 保全状況</string>
+
+    <!-- 音声読み上げ -->
+    <string name="tts_scientific_name">学名</string>
+    <string name="tts_taxonomy">科学的分類</string>
+
+    <!-- 不明な値 -->
+    <string name="unknown_common_name">[不明な一般名]</string>
+    <string name="unknown_scientific_name">[不明な学名]</string>
+
+    <!-- 時間 -->
+    <string name="time_prefix">時間：</string>
+
+    <!-- ==================== 分析状態 ==================== -->
+    <string name="analyzing">画像を分析中…</string>
+    <string name="analyzing_text">画像を分析中</string>
+    <string name="analyzing_info">種情報を取得中</string>
+    <string name="loading_analyzing">画像を分析中</string>
+    <string name="loading_taxon">分類を取得中</string>
+    <string name="loading_detail">種情報を取得中</string>
+    <string name="loading_conservation">保全状況を確認中</string>
+    <string name="loading_done">確認完了</string>
+    <string name="searching_info">検索中...</string>
+
+    <!-- ==================== 履歴 ==================== -->
+    <string name="history">履歴</string>
+    <string name="history_title_label">履歴</string>
+    <string name="history_placeholder">履歴</string>
+    <string name="history_subtitle">識別履歴を表示</string>
+    <string name="history_empty">履歴が空です</string>
+    <string name="lists">履歴</string>
+
+    <!-- タイプでフィルタリング -->
+    <string name="history_chipAnimals">動物</string>
+    <string name="history_chipPlants">植物</string>
+    <string name="history_chipAll">すべて</string>
+
+    <!-- ==================== 並べ替えとフィルター ==================== -->
+    <string name="sort_by">並べ替え</string>
+    <string name="sort_newest_first">新しい順</string>
+    <string name="sort_oldest_first">古い順</string>
+    <string name="sort">並べ替え</string>
+    <string name="filter_by_date">日付でフィルター</string>
+    <string name="select_start_date">開始日を選択</string>
+    <string name="select_end_date">終了日を選択</string>
+    <string name="select_date">日付を選択</string>
+    <string name="filter_date_range">%1$sから%2$sまで</string>
+    <string name="clear_filter">フィルターをクリア</string>
+    <string name="end_date_before_start_date_error">終了日は開始日より後でなければなりません</string>
+    <string name="ic_calendar">ic_calendar</string>
+    <string name="ic_sort">ic_sort</string>
+    <string name="options">オプション</string>
+
+    <!-- ==================== アシスタント / チャット ==================== -->
+    <string name="my_garden">アシスタント</string>
+    <string name="my_garden_title">アシスタント</string>
+    <string name="my_garden_desc">AIと生物学について会話</string>
+    <string name="garden_placeholder">アシスタント</string>
+    <string name="garden_subtitle">AIと生物学について会話</string>
+    <string name="chat_hint">動植物について質問...</string>
+    <string name="chat_welcome">EcoLens AIです。何かお手伝いできますか？</string>
+    <string name="chat_thinking">考え中...</string>
+    <string name="new_chat">新しいチャット</string>
+    <string name="delete_chat">チャットを削除</string>
+    <string name="cant_reply">申し訳ございません。現在お答えできません。</string>
+    <string name="dialog_delete_chat_title">チャットを削除</string>
+    <string name="dialog_delete_chat_message">このチャットを削除してもよろしいですか？</string>
+
+    <!-- ==================== 設定 ==================== -->
+    <string name="settings">設定</string>
+    <string name="settings_title">設定</string>
+    <string name="settings_placeholder">設定</string>
+    <string name="settings_subtitle">アプリオプション</string>
+
+    <!-- 設定 -->
+    <string name="preferences">設定</string>
+    <string name="language_label">言語</string>
+    <string name="lang_vietnamese">ベトナム語</string>
+    <string name="lang_english">英語</string>
+    <string name="lang_chinese">中国語</string>
+    <string name="lang_japanese">日本語</string>
+    <string name="dark_mode">ダークモード</string>
+
+    <!-- アカウント -->
+    <string name="account">アカウント</string>
+    <string name="account_details">設定とプライバシー</string>
+    <string name="logout">ログアウト</string>
+    <string name="dialog_logout_title">ログアウト</string>
+    <string name="dialog_logout_message">
+        ログアウトしてもよろしいですか？
+    </string>
+    <string name="action_logout">ログアウト</string>
+    <string name="change_username">ユーザー名を変更</string>
+    <string name="change_password">パスワードを変更</string>
+    <string name="link_google_account">Googleアカウントをリンク</string>
+    <string name="delete_account">アカウントを削除</string>
+    <string name="dialog_delete_account_title">アカウントを削除しますか？</string>
+    <string name="dialog_delete_account_message">アカウントを削除してもよろしいですか？この操作は元に戻せません。</string>
+    <string name="error_delete_account">アカウントを削除できません。もう一度お試しください。</string>
+
+    <!-- 構成 -->
+    <string name="config">構成</string>
+    <string name="taxonomy_language">ベトナム語分類</string>
+    <string name="iucn_searching">IUCN検索</string>
+    <string name="iucn_disabled_message">IUCNが無効です。設定で有効にしてください</string>
+    <string name="error_feature_required_vietnamese">機能には言語設定が必要です：ベトナム語</string>
+
+    <!-- 情報とサポート -->
+    <string name="about_label">情報</string>
+    <string name="about_app_title">私たちについて</string>
+    <string name="about_app_desc">EcoLens、画像による種の識別、@NguyenDevsによって開発</string>
+    <string name="support">サポート</string>
+    <string name="follow_on_tiktok">TikTokでフォロー</string>
+    <string name="follow_on_instagram">Instagramでフォロー</string>
+    <string name="follow_on_facebook">Facebookでフォロー</string>
+    <string name="email_support">メールサポート</string>
+
+    <!-- ==================== コンテンツを共有 ==================== -->
+    <string name="share_title">🌿 種情報</string>
+    <string name="share_taxonomy_title">🔬 科学的分類</string>
+    <string name="share_desc_title">📖 説明</string>
+    <string name="share_char_title">✨ 特徴</string>
+    <string name="share_dist_title">🌍 分布</string>
+    <string name="share_hab_title">🏞️ 生息地</string>
+    <string name="share_cons_title">🛡️ 保全状況</string>
+    <string name="share_footer">📱 EcoLensアプリから共有</string>
+    <string name="share_subject">%sに関する情報</string>
+    <string name="share_chooser_title">種情報を共有</string>
+
+    <!-- ==================== 認証 ==================== -->
+    <!-- ログイン/登録 -->
+    <string name="welcome_to_ecolens">EcoLensへようこそ</string>
+    <string name="auth_subtitle">サインインまたは新しいアカウントを作成</string>
+    <string name="login">ログイン</string>
+    <string name="register">登録</string>
+    <string name="email">メールアドレス</string>
+    <string name="password">パスワード</string>
+    <string name="confirm_password">パスワードを確認</string>
+    <string name="remember_me">ログイン状態を保持</string>
+    <string name="forgot_password">パスワードをお忘れですか？</string>
+    <string name="agree_terms"><b>利用規約</b>と<b>プライバシーポリシー</b>に同意します</string>
+    <string name="sign_in">サインイン</string>
+    <string name="sign_up">サインアップ</string>
+    <string name="or_continue_with">または続ける</string>
+    <string name="sign_in_with_google">Googleでサインイン</string>
+    <string name="sign_in_with_biometric">指紋でサインイン</string>
+    <string name="default_web_client_id">99190004722-8d4rpmasasjflta1hp7vgdu98a649rin.apps.googleusercontent.com</string>
+
+    <!-- パスワードを忘れた -->
+    <string name="forgot_password_title">パスワードを忘れた</string>
+    <string name="forgot_password_description">確認のためにメールアドレスを入力してください。</string>
+    <string name="forgot_password_icon">パスワード回復アイコン</string>
+    <string name="send_reset_link">確認</string>
+    <string name="remember_password">パスワードを思い出しましたか？</string>
+    <string name="back_to_login">ログイン</string>
+    <string name="reset_email_sent">パスワードリセットメールが送信されました！メールを確認してください。</string>
+
+    <!-- ユーザー名を変更 -->
+    <string name="new_username">新しいユーザー名</string>
+    <string name="current_password">現在のパスワード</string>
+    <string name="confirm">確認</string>
+    <string name="username_updated">ユーザー名が正常に更新されました</string>
+    <string name="username_update_failed">ユーザー名の更新に失敗しました</string>
+
+    <!-- パスワードを変更 -->
+    <string name="old_password">古いパスワード</string>
+    <string name="new_password">新しいパスワード</string>
+    <string name="confirm_new_password">新しいパスワードを確認</string>
+    <string name="password_updated">パスワードが正常に更新されました</string>
+    <string name="password_update_failed">パスワードの更新に失敗しました</string>
+    <string name="error_reauth_failed">再認証に失敗しました。古いパスワードを確認してください。</string>
+
+    <!-- ==================== 生体認証 ==================== -->
+    <string name="biometric_title">生体認証</string>
+    <string name="biometric_subtitle">指紋センサーに触れて確認してください</string>
+    <string name="biometric_negative_button">キャンセル</string>
+    <string name="biometric_not_available">デバイスは生体認証をサポートしていません</string>
+    <string name="biometric_authentication_failed">生体認証に失敗しました</string>
+
+    <!-- ==================== 成功メッセージ ==================== -->
+    <string name="login_success">ログイン成功！</string>
+    <string name="register_success">登録成功！</string>
+    <string name="delete_success">履歴が正常に削除されました。</string>
+
+    <!-- ==================== 検証エラー ==================== -->
+    <string name="error_email_empty">メールアドレスを入力してください</string>
+    <string name="error_email_invalid">無効なメールアドレス</string>
+    <string name="error_password_empty">パスワードを入力してください</string>
+    <string name="error_password_too_short">パスワードは6文字以上である必要があります</string>
+    <string name="error_password_mismatch">パスワードが一致しません</string>
+    <string name="error_terms_not_accepted">利用規約を受け入れてください</string>
+    <string name="error_fill_all_fields">すべてのフィールドを入力してください</string>
+    <string name="error_email_not_found">このメールアドレスはシステムに存在しません</string>
+    <string name="error_reset_password_failed">パスワードリセットメールを送信できません。もう一度お試しください。</string>
+    <string name="error_too_many_requests">リクエストが多すぎます。しばらくしてからもう一度お試しください。</string>
+
+    <!-- ==================== 一般的なエラーメッセージ ==================== -->
+    <string name="error">エラー</string>
+    <string name="error_occurred">エラーが発生しました</string>
+    <string name="error_default">エラーが発生しました</string>
+    <string name="error_prefix">エラーが発生しました：%s</string>
+    <string name="error_general">エラー：%1$s</string>
+    <string name="error_no_result">画像内の種を識別できません。別の画像を試してください。</string>
+    <string name="error_camera_front">フロントカメラを開けません</string>
+    <string name="error_camera_open">カメラを開けません：%s</string>
+    <string name="error_capture">キャプチャエラー：%s</string>
+    <string name="error_browser">Webブラウザが見つかりません</string>
+    <string name="error_quota_exceeded">APIクォータを超えました。後でもう一度お試しください。</string>
+    <string name="error_incomplete_data">この種に関する十分な情報を取得できません。もう一度お試しください。</string>
+    <string name="error_geo_block">APIサービスはお客様の地域では利用できません。後でもう一度お試しください。</string>
+    <string name="error_open_link">リンクを開けません</string>
+    <string name="error_no_email_app">メールアプリが見つかりません</string>
+    <string name="error_file_not_found">ファイルが見つかりません</string>
+    <string name="login_failed">ログインに失敗しました。もう一度お試しください。</string>
+    <string name="register_failed">登録に失敗しました。もう一度お試しください。</string>
+    <string name="network_error">接続エラー。ネットワークを確認してください。</string>
+    <string name="error_network">ネットワーク接続エラー。インターネット接続を確認してください。</string>
+
+    <!-- ==================== リトライ ==================== -->
+    <string name="btn_retry_identification">識別を再試行</string>
+    <string name="retry_identification_hint">信頼度が低い。タップして再試行してください。</string>
+
+    <!-- ==================== ダイアログ ==================== -->
+    <string name="action_delete">削除</string>
+    <string name="action_cancel">キャンセル</string>
+    <string name="dialog_delete_history_title">履歴を削除</string>
+    <string name="dialog_delete_history_message">この履歴を削除してもよろしいですか？</string>
+
+    <!-- ==================== 権限 ==================== -->
+    <string name="permission_title">権限が必要</string>
+    <string name="permission_message">このアプリを使用するには、カメラとストレージの権限が必要です。</string>
+
+    <!-- ==================== その他 ==================== -->
+    <string name="feature_developing">機能開発中</string>
+
+</resources>
