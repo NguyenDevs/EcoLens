@@ -177,6 +177,9 @@ dependencies {
     // Google Sign In
     implementation("com.google.android.gms:play-services-auth:21.0.0")
 
+    // Biometric
+    implementation("androidx.biometric:biometric:1.2.0-alpha05")
+
     // Testing
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
