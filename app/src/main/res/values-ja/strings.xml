@@ -125,7 +125,7 @@
     <string name="loading_detail">種情報を取得中</string>
     <string name="loading_conservation">保全状況を確認中</string>
     <string name="loading_done">確認完了</string>
-    <string name="searching_info">検索中...</string>
+    <string name="searching_info">IUCN を検索しています...</string>
 
     <!-- ==================== 履歴 ==================== -->
     <string name="history">履歴</string>
@@ -197,6 +197,7 @@
     <string name="action_logout">ログアウト</string>
     <string name="change_username">ユーザー名を変更</string>
     <string name="change_password">パスワードを変更</string>
+    <string name="re_login_prompt">確認のため、再度ログインしてください。</string>
     <string name="link_google_account">Googleアカウントをリンク</string>
     <string name="delete_account">アカウントを削除</string>
     <string name="dialog_delete_account_title">アカウントを削除しますか？</string>
@@ -273,7 +274,7 @@
     <string name="confirm_new_password">新しいパスワードを確認</string>
     <string name="password_updated">パスワードが正常に更新されました</string>
     <string name="password_update_failed">パスワードの更新に失敗しました</string>
-    <string name="error_reauth_failed">再認証に失敗しました。古いパスワードを確認してください。</string>
+    <string name="error_reauth_failed">再認証に失敗しました。もう一度お試しください。</string>
 
     <!-- ==================== 生体認証 ==================== -->
     <string name="biometric_title">生体認証</string>

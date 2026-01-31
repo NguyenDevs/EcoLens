@@ -306,7 +306,6 @@ class SpeciesInfoHandler(
     /** Hiển thị trạng thái bảo tồn */
     private fun displayConservationStatus(status: String, shouldScroll: Boolean = true) {
         if (status == "Vô hiệu") {
-            // Không hiển thị section nếu IUCN bị vô hiệu
             sectionDisplayHandler.hideSection(R.id.sectionConservation)
         } else {
             sectionDisplayHandler.displaySection(
