@@ -10,7 +10,7 @@
     <!-- ==================== BANNER ==================== -->
     <string name="banner_title">Nhận diện</string>
     <string name="banner_subtitle">Động - Thực vật</string>
-    <string name="banner_action">Chạm để chụp</string>
+    <string name="banner_action" translatable="false">Chạm để chụp</string>
 
     <!-- ==================== TRANG CHỦ - THIẾT KẾ MỚI ==================== -->
     <!-- Lời chào -->
@@ -126,7 +126,7 @@
     <string name="loading_detail">Đang truy xuất thông tin loài</string>
     <string name="loading_conservation">Đang tra cứu tình trạng bảo tồn</string>
     <string name="loading_done">Tra cứu hoàn tất</string>
-    <string name="searching_info">Đang tra cứu...</string>
+    <string name="searching_info">Đang tra cứu IUCN...</string>
 
     <!-- ==================== LỊCH SỬ ==================== -->
     <string name="history">Lịch sử</string>
@@ -264,6 +264,7 @@
     <!-- Đổi tên người dùng -->
     <string name="new_username">Tên người dùng mới</string>
     <string name="current_password">Mật khẩu hiện tại</string>
+    <string name="re_login_prompt">Vui lòng đăng nhập lại để xác nhận.</string>
     <string name="confirm">Xác nhận</string>
     <string name="username_updated">Cập nhật tên người dùng thành công</string>
     <string name="username_update_failed">Cập nhật tên người dùng thất bại</string>
@@ -274,7 +275,7 @@
     <string name="confirm_new_password">Xác nhận mật khẩu mới</string>
     <string name="password_updated">Cập nhật mật khẩu thành công</string>
     <string name="password_update_failed">Cập nhật mật khẩu thất bại</string>
-    <string name="error_reauth_failed">Xác thực lại thất bại. Vui lòng kiểm tra mật khẩu cũ.</string>
+    <string name="error_reauth_failed">Xác thực lại thất bại. Vui lòng thử lại</string>
 
     <!-- ==================== XÁC THỰC SINH TRẮC HỌC ==================== -->
     <string name="biometric_title">Xác thực vân tay</string>

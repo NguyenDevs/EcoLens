@@ -2,6 +2,8 @@ package com.nguyendevs.ecolens.handlers.setting
 
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import com.nguyendevs.ecolens.databinding.ScreenSettingsBinding
 
 /**
@@ -15,6 +17,7 @@ class AccountDetailsHandler(
 ) {
 
     private var isAccountDetailsExpanded = false
+    private val firebaseAuth = FirebaseAuth.getInstance()
 
     fun toggleAccountDetails() {
         if (isTransitioning()) return
@@ -30,9 +33,22 @@ class AccountDetailsHandler(
     }
 
     private fun expandAccountDetails() {
+        val user = firebaseAuth.currentUser
+        val isGoogleUser = user?.providerData?.any { it.providerId == GoogleAuthProvider.PROVIDER_ID } == true
+
         binding.dividerUsername.visibility = View.VISIBLE
-        binding.dividerChangepassword.visibility = View.VISIBLE
-        binding.dividerLinkgoogle.visibility = View.VISIBLE
+        
+        // Hide Change Password and Link Google if user is logged in with Google
+        if (isGoogleUser) {
+            binding.dividerChangepassword.visibility = View.GONE
+            binding.dividerLinkgoogle.visibility = View.GONE
+            binding.changePasswordOption.visibility = View.GONE
+            binding.linkGoogleOption.visibility = View.GONE
+        } else {
+            binding.dividerChangepassword.visibility = View.VISIBLE
+            binding.dividerLinkgoogle.visibility = View.VISIBLE
+        }
+        
         binding.dividerDeleteaccount.visibility = View.VISIBLE
 
         binding.accountDetailsContainer.visibility = View.VISIBLE
@@ -45,13 +61,15 @@ class AccountDetailsHandler(
                 .setInterpolator(AccelerateDecelerateInterpolator())
                 .start()
 
-        val options =
-                listOf(
-                        binding.changeUsernameOption,
-                        binding.changePasswordOption,
-                        binding.linkGoogleOption,
-                        binding.deleteAccountOption
-                )
+        val options = mutableListOf<View>()
+        options.add(binding.changeUsernameOption)
+        
+        if (!isGoogleUser) {
+            options.add(binding.changePasswordOption)
+            options.add(binding.linkGoogleOption)
+        }
+        
+        options.add(binding.deleteAccountOption)
 
         options.forEachIndexed { index, option ->
             option.alpha = 0f

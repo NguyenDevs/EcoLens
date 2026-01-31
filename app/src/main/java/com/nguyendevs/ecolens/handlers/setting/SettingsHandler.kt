@@ -134,6 +134,14 @@ class SettingsHandler(
 
     // ==================== PUBLIC METHODS ====================
 
+    fun setGoogleReAuthRequest(callback: () -> Unit) {
+        accountUpdateHandler.setGoogleReAuthRequest(callback)
+    }
+
+    fun onGoogleReAuthSuccess() {
+        accountUpdateHandler.onGoogleReAuthSuccess()
+    }
+
     fun updateLanguageDisplay() {
         socialLinksHandler.updateLanguageDisplay()
         

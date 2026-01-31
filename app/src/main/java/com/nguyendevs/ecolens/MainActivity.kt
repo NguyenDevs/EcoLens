@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -23,6 +24,10 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.GoogleAuthProvider
 import com.nguyendevs.ecolens.activities.CameraActivity
 import com.nguyendevs.ecolens.database.UserRepository
 import com.nguyendevs.ecolens.databinding.ActivityMainBinding
@@ -107,6 +112,29 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
+    /** Launcher cho Google Re-Auth */
+    private val googleReAuthLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+                try {
+                    val account = task.getResult(ApiException::class.java)
+                    account.idToken?.let { idToken ->
+                        val credential = GoogleAuthProvider.getCredential(idToken, null)
+                        userRepository.reauthenticateUser(credential) { success ->
+                            if (success) {
+                                settingsHandler.onGoogleReAuthSuccess()
+                            } else {
+                                Toast.makeText(this, getString(R.string.error_reauth_failed), Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                } catch (e: ApiException) {
+                    Toast.makeText(this, "Google re-auth failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
     override fun attachBaseContext(newBase: Context) {
         languageManager = LanguageManager(newBase)
         super.attachBaseContext(languageManager.updateBaseContext(newBase))
@@ -172,19 +200,15 @@ class MainActivity : AppCompatActivity() {
                         .putBoolean("iucn_mode", user.iucnMode)
                         .putBoolean("taxo_mode", user.taxoMode)
                         .apply()
-                    
-                    // Cập nhật UI Settings nếu đang ở màn hình Settings
+
                     settingsHandler.refreshSettingsState()
 
-                    // Kiểm tra và cập nhật ngôn ngữ nếu khác
                     val currentLang = languageManager.getLanguage()
                     if (user.language != currentLang) {
                         languageManager.setLanguage(user.language)
-                        
-                        // Restart activity để áp dụng ngôn ngữ mới
+
                         val intent = Intent(this@MainActivity, MainActivity::class.java)
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-                        // Giữ lại tab hiện tại nếu cần, hoặc về Home
                         startActivity(intent)
                         finish()
                         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
@@ -290,6 +314,19 @@ class MainActivity : AppCompatActivity() {
                 homeScreenHandler.setupGreeting()
             }
         )
+        
+        settingsHandler.setGoogleReAuthRequest {
+            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build()
+            val googleSignInClient = GoogleSignIn.getClient(this, gso)
+
+            googleSignInClient.signOut().addOnCompleteListener {
+                val signInIntent = googleSignInClient.signInIntent
+                googleReAuthLauncher.launch(signInIntent)
+            }
+        }
 
         val homeRoot = binding.homeContainer.root
 

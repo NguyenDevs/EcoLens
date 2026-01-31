@@ -91,7 +91,8 @@ class GoogleSignInHandler(
             val user = userRepository.signInWithCredential(credential)
 
             if (user != null) {
-                saveRememberMe(rememberMe)
+                // Nếu đăng nhập bằng Google, mặc định bật Remember Me
+                saveRememberMe(true)
 
                 val userDetails = userRepository.getCurrentUserDetails()
                 if (userDetails != null) {

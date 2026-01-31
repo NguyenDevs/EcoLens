@@ -104,6 +104,17 @@ class UserRepository {
         }
     }
 
+    /**
+     * Xác thực lại người dùng với credential
+     */
+    fun reauthenticateUser(credential: AuthCredential, onResult: (Boolean) -> Unit) {
+        val user = auth.currentUser
+        user?.reauthenticate(credential)
+            ?.addOnCompleteListener { task ->
+                onResult(task.isSuccessful)
+            }
+    }
+
     // ==================== AUTHENTICATION - LOGOUT ====================
 
     /**

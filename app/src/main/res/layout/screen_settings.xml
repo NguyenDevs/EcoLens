@@ -1,19 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<androidx.core.widget.NestedScrollView
+<LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/background"
-        android:fillViewport="true"
-        android:scrollbars="none">
-
-    <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="52dp">
+        android:orientation="vertical"
+        android:background="@color/background">
 
     <!-- ==================== HEADER SECTION ==================== -->
     <LinearLayout
@@ -21,7 +13,8 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingHorizontal="@dimen/padding_screen_horizontal"
-            android:paddingTop="@dimen/spacing_md">
+            android:paddingTop="@dimen/spacing_md"
+            android:background="@color/background">
 
         <!-- Title -->
         <TextView
@@ -33,8 +26,27 @@
                 android:textSize="30sp"
                 android:textStyle="bold"
                 android:letterSpacing="-0.02"/>
-
     </LinearLayout>
+    <View
+            android:layout_width="match_parent"
+            android:background="@color/border_normal"
+            android:layout_marginStart="@dimen/padding_screen_horizontal"
+            android:layout_marginEnd="@dimen/padding_screen_horizontal"
+            android:layout_height="1dp"/>
+
+    <!-- ==================== SCROLL VIEW ==================== -->
+    <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true"
+            android:scrollbars="none">
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="52dp">
 
     <!-- ==================== PREFERENCES SECTION ==================== -->
     <LinearLayout
@@ -871,4 +883,5 @@
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
     </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

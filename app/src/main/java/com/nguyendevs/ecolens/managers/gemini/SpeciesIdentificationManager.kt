@@ -89,7 +89,7 @@ class SpeciesIdentificationManager(
             } else {
                 onStateUpdate(EcoLensUiState(
                     isLoading = false,
-                    error = context.getString(R.string.error_no_result)
+                    error = getLocalizedString(R.string.error_no_result)
                 ))
             }
         } catch (e: Exception) {
@@ -296,7 +296,7 @@ class SpeciesIdentificationManager(
                 if (isIucnEnabled) {
                     val iucnCode = iucnResult?.assessments?.firstOrNull()?.redListCategoryCode ?: "NE"
 
-                    val searchingText = context.getString(R.string.searching_info)
+                    val searchingText = getLocalizedString(R.string.searching_info)
                     currentSpeciesInfo = currentSpeciesInfo?.copy(conservationStatus = searchingText)
                     onStateUpdate(EcoLensUiState(
                         isLoading = true,
@@ -336,7 +336,7 @@ class SpeciesIdentificationManager(
             onStateUpdate(EcoLensUiState(
                 isLoading = false,
                 speciesInfo = null,
-                error = context.getString(R.string.error_geo_block)
+                error = getLocalizedString(R.string.error_geo_block)
             ))
         } catch (e: Exception) {
             Log.e(TAG, "Streaming error: ${e.message}", e)
@@ -491,12 +491,23 @@ class SpeciesIdentificationManager(
     private fun handleError(e: Exception, onStateUpdate: (EcoLensUiState) -> Unit) {
         val errorMsg = when {
             e.message?.contains("429") == true ->
-                context.getString(R.string.error_quota_exceeded)
+                getLocalizedString(R.string.error_quota_exceeded)
             e is FileNotFoundException ->
-                context.getString(R.string.error_file_not_found)
+                getLocalizedString(R.string.error_file_not_found)
             else ->
-                context.getString(R.string.error_general, e.message)
+                getLocalizedString(R.string.error_general, e.message)
         }
         onStateUpdate(EcoLensUiState(isLoading = false, error = errorMsg))
+    }
+
+    /**
+     * Helper để lấy string resource theo ngôn ngữ hiện tại (currentLanguageCode)
+     */
+    private fun getLocalizedString(resId: Int, vararg args: Any?): String {
+        val locale = java.util.Locale(currentLanguageCode)
+        val config = android.content.res.Configuration(context.resources.configuration)
+        config.setLocale(locale)
+        val localizedContext = context.createConfigurationContext(config)
+        return localizedContext.getString(resId, *args)
     }
 }

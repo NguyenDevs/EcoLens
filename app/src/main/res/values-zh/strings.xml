@@ -125,7 +125,7 @@
     <string name="loading_detail">正在检索物种信息</string>
     <string name="loading_conservation">正在检查保护状态</string>
     <string name="loading_done">检查完成</string>
-    <string name="searching_info">搜索中...</string>
+    <string name="searching_info">正在搜索 IUCN...</string>
 
     <!-- ==================== 历史 ==================== -->
     <string name="history">历史</string>
@@ -196,6 +196,7 @@
     </string>
     <string name="action_logout">退出登录</string>
     <string name="change_username">更改用户名</string>
+    <string name="re_login_prompt">请重新登录以确认。</string>
     <string name="change_password">更改密码</string>
     <string name="link_google_account">关联谷歌账户</string>
     <string name="delete_account">删除账户</string>
@@ -273,7 +274,7 @@
     <string name="confirm_new_password">确认新密码</string>
     <string name="password_updated">密码更新成功</string>
     <string name="password_update_failed">密码更新失败</string>
-    <string name="error_reauth_failed">重新认证失败。请检查您的旧密码。</string>
+    <string name="error_reauth_failed">重新验证失败，请重试。</string>
 
     <!-- ==================== 生物识别认证 ==================== -->
     <string name="biometric_title">生物识别认证</string>
