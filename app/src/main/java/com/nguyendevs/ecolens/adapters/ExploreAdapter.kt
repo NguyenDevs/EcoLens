@@ -117,7 +117,6 @@ class ExploreAdapter(private val onItemClick: (ExploreItem) -> Unit) :
         }
 
         private fun loadImageWithShimmer(item: ExploreItem) {
-            // Bật shimmer ảnh ngay từ đầu
             binding.shimmerViewContainer?.apply {
                 visibility = View.VISIBLE
                 startShimmer()

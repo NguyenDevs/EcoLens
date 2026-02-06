@@ -16,6 +16,7 @@
                 android:orientation="vertical"
                 android:padding="@dimen/spacing_lg">
 
+
                 <!-- HEADER SECTION -->
                 <LinearLayout
                         android:layout_width="match_parent"
@@ -163,6 +164,12 @@
                         android:background="@drawable/bg_white_rounded"
                         android:backgroundTint="@color/surface_variant">
 
+                        <com.facebook.shimmer.ShimmerFrameLayout
+                                android:id="@+id/shimmer_view_container"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                app:shimmer_auto_start="false"
+                                app:shimmer_duration="1200">
                         <LinearLayout
                                 android:id="@+id/taxonomyContent"
                                 android:layout_width="match_parent"
@@ -332,6 +339,7 @@
                                                 style="@style/Widget.App.Taxonomy.Value" />
                                 </LinearLayout>
                         </LinearLayout>
+                        </com.facebook.shimmer.ShimmerFrameLayout>
 
                         <com.google.android.material.progressindicator.CircularProgressIndicator
                                 android:id="@+id/taxonomyLoading"

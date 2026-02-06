@@ -385,9 +385,6 @@ class MainActivity : AppCompatActivity() {
                         speakerManager.pause()
                         toggleSpeakerUI(false)
                     }
-                    if (itemId == R.id.nav_home) {
-                        homeScreenHandler.fetchExploreData()
-                    }
                 }
     }
 
