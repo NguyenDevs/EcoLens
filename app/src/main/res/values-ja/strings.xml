@@ -32,13 +32,7 @@
     <string name="yesterday">昨日</string>
     <string name="search_hint_home">植物、動物を検索…</string>
 
-    <!-- クイック探索アイテム -->
-    <string name="explore_item_1_name">多肉植物</string>
-    <string name="explore_item_1_desc">エケベリア属</string>
-    <string name="explore_item_2_name">オオカバマダラ</string>
-    <string name="explore_item_2_desc">オオカバマダラ</string>
-    <string name="explore_item_3_name">ラベンダー</string>
-    <string name="explore_item_3_desc">ラベンダー属</string>
+
 
     <!-- ==================== ナビゲーション ==================== -->
     <string name="nav_home">ホーム</string>

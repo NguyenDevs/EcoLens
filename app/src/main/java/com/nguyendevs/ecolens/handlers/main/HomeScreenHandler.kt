@@ -10,7 +10,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
 import com.nguyendevs.ecolens.R
+import com.nguyendevs.ecolens.adapters.ExploreAdapter
 import com.nguyendevs.ecolens.adapters.RecentHistoryAdapter
+import com.nguyendevs.ecolens.database.ExploreRepository
 import com.nguyendevs.ecolens.database.HistoryDatabase
 import com.nguyendevs.ecolens.database.HistoryRepository
 import com.nguyendevs.ecolens.database.UserRepository
@@ -36,7 +38,9 @@ class HomeScreenHandler(
                 activity.applicationContext
         )
     }
+    private val exploreRepository by lazy { ExploreRepository() }
     private var isRecentExpanded = true
+    private lateinit var exploreAdapter: ExploreAdapter
 
     /** Setup tất cả components của Home Screen */
     fun setup() {
@@ -180,32 +184,53 @@ class HomeScreenHandler(
         }
     }
 
-
-    // TẠM THỜI HARDCODE
-    /** Setup Quick Explore với dữ liệu hardcoded */
+    /** Setup Quick Explore với dữ liệu từ Firebase/Room */
     private fun setupQuickExplore() {
         val homeRoot = binding.homeContainer.root
+        val rvQuickExplore =
+                homeRoot.findViewById<androidx.recyclerview.widget.RecyclerView>(
+                        R.id.rvQuickExplore
+                )
 
-        val card1 = homeRoot.findViewById<View>(R.id.exploreCard1)
-        card1?.findViewById<TextView>(R.id.tvExploreName)?.text =
-                activity.getString(R.string.explore_item_1_name)
-        card1?.findViewById<TextView>(R.id.tvExploreDesc)?.text =
-                activity.getString(R.string.explore_item_1_desc)
-        card1?.findViewById<ImageView>(R.id.imgExplore)?.setImageResource(R.drawable.succulent)
+        exploreAdapter = ExploreAdapter { item ->
+            // Handle item click if needed, e.g., show details or start search
+            // For now, maybe just expand search bar with the name
+            val currentLanguage = java.util.Locale.getDefault().language
+            val displayName =
+                    when (currentLanguage) {
+                        "vi" -> item.name
+                        "en" -> if (item.name_en.isNotEmpty()) item.name_en else item.name
+                        "ja" -> if (item.name_ja.isNotEmpty()) item.name_ja else item.name
+                        "zh" -> if (item.name_zh.isNotEmpty()) item.name_zh else item.name
+                        else -> item.name
+                    }
+            // Optional: trigger search or show detail
+            // For this task, we can just log or toast, or maybe fill search bar?
+            // User didn't specify interaction, just "explore".
+        }
 
-        val card2 = homeRoot.findViewById<View>(R.id.exploreCard2)
-        card2?.findViewById<TextView>(R.id.tvExploreName)?.text =
-                activity.getString(R.string.explore_item_2_name)
-        card2?.findViewById<TextView>(R.id.tvExploreDesc)?.text =
-                activity.getString(R.string.explore_item_2_desc)
-        card2?.findViewById<ImageView>(R.id.imgExplore)
-                ?.setImageResource(R.drawable.monarch_butterfly)
+        rvQuickExplore.apply {
+            layoutManager = LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false)
+            adapter = exploreAdapter
+        }
 
-        val card3 = homeRoot.findViewById<View>(R.id.exploreCard3)
-        card3?.findViewById<TextView>(R.id.tvExploreName)?.text =
-                activity.getString(R.string.explore_item_3_name)
-        card3?.findViewById<TextView>(R.id.tvExploreDesc)?.text =
-                activity.getString(R.string.explore_item_3_desc)
-        card3?.findViewById<ImageView>(R.id.imgExplore)?.setImageResource(R.drawable.lavender)
+        // Show placeholders immediately
+        val placeholders =
+                List(5) { i ->
+                    com.nguyendevs.ecolens.models.ExploreItem(
+                            id = "placeholder_$i",
+                            name = "...",
+                            desc = "..."
+                    )
+                }
+        exploreAdapter.submitList(placeholders)
+
+        activity.lifecycleScope.launch {
+            // Fetch cached data
+            val items = exploreRepository.getRandomExploreItems(5)
+            if (items.isNotEmpty()) {
+                exploreAdapter.submitList(items)
+            }
+        }
     }
 }

@@ -32,13 +32,7 @@
     <string name="yesterday">昨天</string>
     <string name="search_hint_home">搜索植物、动物…</string>
 
-    <!-- 快速探索项目 -->
-    <string name="explore_item_1_name">多肉植物</string>
-    <string name="explore_item_1_desc">拟石莲花属</string>
-    <string name="explore_item_2_name">帝王蝶</string>
-    <string name="explore_item_2_desc">大桦斑蝶</string>
-    <string name="explore_item_3_name">薰衣草</string>
-    <string name="explore_item_3_desc">薰衣草属</string>
+
 
     <!-- ==================== 导航 ==================== -->
     <string name="nav_home">主页</string>
