@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@android:color/transparent">
+
+    <!-- DATE HEADER SKELETON -->
+    <View
+            android:layout_width="80dp"
+            android:layout_height="14dp"
+            android:layout_marginStart="@dimen/spacing_xxs"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_skeleton_rounded"/>
+
+    <!-- CHAT SESSION CARD SKELETON -->
+    <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_xs"
+            app:cardBackgroundColor="@color/surface"
+            app:cardElevation="0dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="@color/border_light"
+            app:cardCornerRadius="@dimen/radius_md">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/spacing_md">
+
+            <!-- Avatar Skeleton -->
+            <View
+                    android:id="@+id/avatarSkeleton"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:background="@drawable/bg_skeleton_circle"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+            <!-- INFO SECTION SKELETON -->
+            <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_md"
+                    android:layout_marginEnd="@dimen/spacing_xs"
+                    android:orientation="vertical"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/timeSkeleton"
+                    app:layout_constraintStart_toEndOf="@+id/avatarSkeleton"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                <View
+                        android:layout_width="180dp"
+                        android:layout_height="16dp"
+                        android:background="@drawable/bg_skeleton_rounded"/>
+
+                <View
+                        android:layout_width="120dp"
+                        android:layout_height="12dp"
+                        android:layout_marginTop="6dp"
+                        android:background="@drawable/bg_skeleton_rounded"/>
+
+            </LinearLayout>
+
+            <!-- Time Skeleton -->
+            <View
+                    android:id="@+id/timeSkeleton"
+                    android:layout_width="30dp"
+                    android:layout_height="12dp"
+                    android:background="@drawable/bg_skeleton_rounded"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</LinearLayout>
