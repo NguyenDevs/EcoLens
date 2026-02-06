@@ -1,5 +1,6 @@
 package com.nguyendevs.ecolens.adapters
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -9,6 +10,8 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemQuickExploreBinding
+import com.facebook.shimmer.Shimmer
+import com.facebook.shimmer.ShimmerDrawable
 import com.nguyendevs.ecolens.models.ExploreItem
 import java.util.Locale
 
@@ -58,11 +61,23 @@ class ExploreAdapter(private val onItemClick: (ExploreItem) -> Unit) :
             binding.tvExploreName.text = displayName
             binding.tvExploreDesc.text = item.desc
 
+            val shimmer = Shimmer.ColorHighlightBuilder()
+                    .setBaseColor(Color.parseColor("#E0E0E0"))
+                    .setHighlightColor(Color.parseColor("#F5F5F5"))
+                    .setDuration(1800)
+                    .setDirection(Shimmer.Direction.LEFT_TO_RIGHT)
+                    .setAutoStart(true)
+                    .build()
+
+            val shimmerDrawable = ShimmerDrawable().apply {
+                setShimmer(shimmer)
+            }
+
             Glide.with(context)
                     .load(item.image)
                     .transition(DrawableTransitionOptions.withCrossFade())
-                    .placeholder(R.mipmap.ic_launcher) // Use a better placeholder in future
-                    .error(R.mipmap.ic_launcher) // Use a better error image in future
+                    .placeholder(shimmerDrawable)
+                    .error(shimmerDrawable)
                     .centerCrop()
                     .into(binding.imgExplore)
 
