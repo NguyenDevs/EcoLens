@@ -81,6 +81,8 @@ class NavigationHandler(
         binding.myGardenContainer.visibility = View.GONE
         binding.settingsContainer.root.visibility = View.GONE
         binding.searchBarContainer.visibility = View.GONE
+        binding.fabSpeak.visibility = View.GONE
+        binding.fabMute.visibility = View.GONE
 
         binding.bottomNavigation.visibility = View.VISIBLE
         binding.fabCamera.visibility = View.VISIBLE
