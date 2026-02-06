@@ -1,8 +1,6 @@
 package com.nguyendevs.ecolens.fragments.history
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,6 +14,7 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.gson.Gson
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.adapters.HistoryAdapter
+import com.nguyendevs.ecolens.adapters.HistoryUiModel
 import com.nguyendevs.ecolens.databinding.ScreenSpeciesHistoryBinding
 import com.nguyendevs.ecolens.handlers.animations.HistoryAnimationHandler
 import com.nguyendevs.ecolens.models.history.HistoryEntry
@@ -28,20 +27,12 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.TimeZone
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-/**
- * Fragment hiển thị lịch sử nhận diện loài
- * - Filter theo category (All/Animals/Plants)
- * - Sort (mới nhất/cũ nhất)
- * - Filter theo khoảng thời gian
- *
- * Sử dụng animation helpers:
- * - ChipAnimationHelper: Xử lý chip animations
- * - FragmentTransitionHelper: Xử lý fragment transitions
- * - ViewAnimationHelper: Xử lý haptic feedback
- */
 class HistoryFragment : Fragment() {
 
     private val viewModel: EcoLensViewModel by activityViewModels()
@@ -57,18 +48,18 @@ class HistoryFragment : Fragment() {
     private var currentSortOption = HistorySortOption.NEWEST_FIRST
     private var filterStartDate: Long? = null
     private var filterEndDate: Long? = null
-    private var fullHistoryList: List<HistoryEntry> = emptyList()
-    private var currentPage = 0
+    
+    private var currentLimit = 10
+    private val pageSize = 10
     private var isLoadingMore = false
-    private val pageSize = 20
+    private var hasMoreData = true
+    private var observeJob: Job? = null
 
     enum class CategoryFilter {
         ALL,
         ANIMALS,
         PLANTS
     }
-
-    // ==================== LIFECYCLE ====================
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,7 +79,10 @@ class HistoryFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupAdapter()
         setupClickListeners()
+        
+        currentLimit = pageSize
         observeHistory()
+        
         updateSortUI()
         updateCategoryChipsUI(currentCategory)
     }
@@ -98,13 +92,10 @@ class HistoryFragment : Fragment() {
         _binding = null
     }
 
-    // ==================== UI SETUP ====================
-
     private fun setupAdapter() {
         val markwon = Markwon.builder(requireContext()).usePlugin(HtmlPlugin.create()).build()
 
         adapter = HistoryAdapter(
-            historyList = mutableListOf(),
             markwon = markwon,
             clickListener = { entry ->
                 animationHandler.performConfirmFeedback(binding.rvHistory)
@@ -112,15 +103,19 @@ class HistoryFragment : Fragment() {
             }
         )
         binding.rvHistory.adapter = adapter
+        binding.rvHistory.itemAnimator = null
 
         binding.rvHistory.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
+                
+                if (dy <= 0) return
+
                 val layoutManager = recyclerView.layoutManager as LinearLayoutManager
                 val totalItemCount = layoutManager.itemCount
                 val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
 
-                if (!isLoadingMore && totalItemCount <= (lastVisibleItem + 5)) {
+                if (!isLoadingMore && hasMoreData && totalItemCount <= (lastVisibleItem + 3)) {
                     loadNextPage()
                 }
             }
@@ -148,7 +143,6 @@ class HistoryFragment : Fragment() {
             toggleSortOption()
         }
 
-        // Setup sort button ripple effect
         animationHandler.setupSortButtonRipple(binding.btnSort)
 
         binding.btnFilterByDate.setOnClickListener {
@@ -161,11 +155,11 @@ class HistoryFragment : Fragment() {
         }
     }
 
-    // ==================== CATEGORY FILTER ====================
-
     private fun updateCategoryFilter(category: CategoryFilter) {
         currentCategory = category
         updateCategoryChipsUI(category)
+        // Reset limit when changing filter to ensure we load enough data
+        currentLimit = pageSize
         observeHistory()
     }
 
@@ -177,11 +171,25 @@ class HistoryFragment : Fragment() {
         )
     }
 
-    // ==================== VIEWMODEL OBSERVERS ====================
-
     private fun observeHistory() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.getHistoryBySortOption(currentSortOption, filterStartDate, filterEndDate)
+        observeJob?.cancel()
+        
+        observeJob = viewLifecycleOwner.lifecycleScope.launch {
+            // We need to fetch ALL data if we are filtering locally, OR handle filtering in DB query.
+            // Since the current implementation filters locally in the fragment, we might not get enough items
+            // if we limit the DB query.
+            // However, fetching everything might be slow.
+            // A better approach is to fetch more than limit if filtering, or move filtering to DB.
+            // For now, let's try to fetch a larger batch if filtering is active, or just rely on the flow updates.
+            
+            // Actually, the issue described is that when filtering, we might filter out all items in the current 'limit'
+            // resulting in an empty list or very few items, even if there are more matching items in the DB.
+            // The correct fix is to move filtering to the ViewModel/Repository level so the DB query returns the correct 'limit' number of MATCHING items.
+            
+            // But since I cannot change the DAO interface easily without knowing all usages, 
+            // I will implement a client-side fix: if the filtered list is too small but we have more data, load more automatically.
+            
+            viewModel.getHistoryBySortOption(currentSortOption, filterStartDate, filterEndDate, currentLimit)
                 .collectLatest { allList ->
                     val filteredList = when (currentCategory) {
                         CategoryFilter.ALL -> allList
@@ -195,41 +203,79 @@ class HistoryFragment : Fragment() {
                         }
                     }
 
+                    // If we have filtered data but it's less than pageSize, and we suspect there's more data in DB
+                    // (meaning the original list size equals the limit), we should load more.
+                    if (filteredList.size < pageSize && allList.size >= currentLimit) {
+                         currentLimit += pageSize
+                         // The collectLatest will be cancelled and restarted with new limit automatically
+                         // by the next emission or we can just let the flow continue if we call observeHistory again?
+                         // No, calling observeHistory cancels the current job.
+                         // So we just update limit and let the flow re-trigger? 
+                         // No, getHistoryBySortOption returns a Flow based on the limit passed.
+                         // We need to restart the observation with the new limit.
+                         // But we must be careful not to create an infinite loop if there really is no more data.
+                         
+                         // Let's just trigger a reload with higher limit here.
+                         // To avoid infinite loop, we can check if the allList size actually increased since last time?
+                         // Or just rely on a max limit cap?
+                         
+                         // A safer simple fix for now without complex logic:
+                         // If filtered list is empty or small, and we hit the limit, auto load next page.
+                         loadNextPage()
+                         return@collectLatest
+                    }
+
                     if (filteredList.isEmpty()) {
-                        animationHandler.fadeOut(binding.rvHistory)
-                        animationHandler.fadeIn(binding.emptyStateContainer)
+                        if (allList.size < currentLimit) {
+                            // We loaded everything and still nothing matches
+                            animationHandler.fadeOut(binding.rvHistory)
+                            animationHandler.fadeIn(binding.emptyStateContainer)
+                            hasMoreData = false
+                        } else {
+                            // Filtered list empty but maybe more data exists
+                             animationHandler.fadeOut(binding.rvHistory)
+                             animationHandler.fadeIn(binding.emptyStateContainer)
+                             // We could auto-load more here too, but let's be careful.
+                        }
                     } else {
                         animationHandler.fadeIn(binding.rvHistory)
                         animationHandler.fadeOut(binding.emptyStateContainer)
-
-                        fullHistoryList = filteredList
-                        currentPage = 0
-                        val firstPage = fullHistoryList.take(pageSize)
-                        adapter.updateList(firstPage)
+                        
+                        if (allList.size < currentLimit) {
+                            hasMoreData = false
+                        } else {
+                            hasMoreData = true
+                        }
+                        
+                        val uiModels = withContext(Dispatchers.Default) {
+                            filteredList.mapIndexed { index, entry ->
+                                val isFirstOfDay = index == 0 || !isSameDay(entry.timestamp, filteredList[index - 1].timestamp)
+                                val isLastOfDay = index == filteredList.size - 1 || !isSameDay(entry.timestamp, filteredList[index + 1].timestamp)
+                                HistoryUiModel(entry, isFirstOfDay, isLastOfDay)
+                            }
+                        }
+                        adapter.submitList(uiModels)
                     }
+                    
+                    isLoadingMore = false
+                    adapter.setLoading(false)
                 }
         }
     }
 
-    private fun loadNextPage() {
-        val start = (currentPage + 1) * pageSize
-        if (start >= fullHistoryList.size) return
-
-        isLoadingMore = true
-        adapter.setLoading(true)
-        Handler(Looper.getMainLooper()).postDelayed({
-            val end = (start + pageSize).coerceAtMost(fullHistoryList.size)
-            val newItems = fullHistoryList.subList(start, end)
-
-            adapter.setLoading(false)
-            adapter.addItems(newItems)
-
-            currentPage++
-            isLoadingMore = false
-        }, 500)
+    private fun isSameDay(timestamp1: Long, timestamp2: Long): Boolean {
+        val date1 = Instant.ofEpochMilli(timestamp1).atZone(ZoneId.systemDefault()).toLocalDate()
+        val date2 = Instant.ofEpochMilli(timestamp2).atZone(ZoneId.systemDefault()).toLocalDate()
+        return date1 == date2
     }
 
-    // ==================== SORT OPERATIONS ====================
+    private fun loadNextPage() {
+        isLoadingMore = true
+        adapter.setLoading(true)
+        
+        currentLimit += pageSize
+        observeHistory()
+    }
 
     private fun toggleSortOption() {
         currentSortOption = if (currentSortOption == HistorySortOption.NEWEST_FIRST) {
@@ -238,6 +284,7 @@ class HistoryFragment : Fragment() {
             HistorySortOption.NEWEST_FIRST
         }
         updateSortUI()
+        currentLimit = pageSize
         observeHistory()
     }
 
@@ -249,8 +296,6 @@ class HistoryFragment : Fragment() {
         }
         binding.btnSort.text = sortText
     }
-
-    // ==================== DATE FILTER OPERATIONS ====================
 
     private fun showDateRangePickerDialog() {
         val builder = MaterialDatePicker.Builder.dateRangePicker()
@@ -283,6 +328,7 @@ class HistoryFragment : Fragment() {
         binding.btnFilterByDate.isCloseIconVisible = true
 
         animationHandler.updateChipStyle(binding.btnFilterByDate, true)
+        currentLimit = pageSize
         observeHistory()
     }
 
@@ -293,10 +339,9 @@ class HistoryFragment : Fragment() {
         binding.btnFilterByDate.isCloseIconVisible = false
 
         animationHandler.updateChipStyle(binding.btnFilterByDate, false)
+        currentLimit = pageSize
         observeHistory()
     }
-
-    // ==================== NAVIGATION ====================
 
     private fun navigateToDetail(entry: HistoryEntry) {
         val jsonEntry = Gson().toJson(entry)
