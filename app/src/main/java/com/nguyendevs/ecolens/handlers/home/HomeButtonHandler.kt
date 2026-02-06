@@ -83,8 +83,8 @@ class HomeButtonHandler(
                 var shareableUri = imageUri
 
                 if (shareableUri != null) {
-                    if (shareableUri.scheme == "file" || shareableUri.path?.startsWith("/") == true
-                    ) {
+                    // Nếu là file URI hoặc đường dẫn file
+                    if (shareableUri.scheme == "file" || shareableUri.path?.startsWith("/") == true) {
                         try {
                             val path = shareableUri.path
                             if (path != null) {
@@ -100,6 +100,22 @@ class HomeButtonHandler(
                             }
                         } catch (e: Exception) {
                             e.printStackTrace()
+                        }
+                    }
+                    // Nếu là content URI (ví dụ từ thư viện ảnh) thì giữ nguyên
+                    // Nếu là http/https URL (từ Explore) thì cần tải về trước khi share
+                    else if (shareableUri.scheme == "http" || shareableUri.scheme == "https") {
+                        try {
+                            val file = com.nguyendevs.ecolens.utils.ImageUtils.uriToFile(context, shareableUri, 1024)
+                            shareableUri = FileProvider.getUriForFile(
+                                context,
+                                "${context.packageName}.provider",
+                                file
+                            )
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            // Nếu tải thất bại, share text only
+                            shareableUri = null
                         }
                     }
                 }
@@ -162,14 +178,20 @@ class HomeButtonHandler(
                             "• ${context.getString(R.string.label_species)} ${textFormatter.stripHtml(info.species)}\n"
                     )
 
-            val contentList =
-                    listOf(
-                            info.description to R.string.share_desc_title,
-                            info.characteristics to R.string.share_char_title,
-                            info.distribution to R.string.share_dist_title,
-                            info.habitat to R.string.share_hab_title,
-                            info.conservationStatus to R.string.share_cons_title
-                    )
+            val sharedPref = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+            val isIucnEnabled = sharedPref.getBoolean("iucn_mode", true)
+
+            val contentList = mutableListOf(
+                info.description to R.string.share_desc_title,
+                info.characteristics to R.string.share_char_title,
+                info.distribution to R.string.share_dist_title,
+                info.habitat to R.string.share_hab_title
+            )
+
+            if (isIucnEnabled) {
+                contentList.add(info.conservationStatus to R.string.share_cons_title)
+            }
+
             contentList.forEach { (content, title) ->
                 if (content.isNotEmpty()) {
                     append(
@@ -188,7 +210,8 @@ class HomeButtonHandler(
                         if (imageUri != null) {
                             type = "image/*"
                             putExtra(Intent.EXTRA_STREAM, imageUri)
-                            clipData = ClipData.newRawUri(null, imageUri)
+                            // Sử dụng newUri thay vì newRawUri để hỗ trợ ContentResolver
+                            clipData = ClipData.newUri(context.contentResolver, "Image", imageUri)
                             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         } else {
                             type = "text/plain"
