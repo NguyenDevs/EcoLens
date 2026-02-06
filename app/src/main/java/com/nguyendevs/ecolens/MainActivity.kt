@@ -390,6 +390,18 @@ class MainActivity : AppCompatActivity() {
                         speakerManager.pause()
                         toggleSpeakerUI(false)
                     }
+
+                    if (itemId == R.id.nav_home) {
+                        val state = viewModel.uiState.value
+                        val isComplete = state.loadingStage == LoadingStage.COMPLETE
+                        val hasInfo =
+                                state.speciesInfo != null && !state.isLoading && state.error == null
+
+                        if (isComplete && hasInfo) {
+                            binding.fabSpeak.isVisible = true
+                            binding.fabMute.isVisible = false
+                        }
+                    }
                 }
     }
 
@@ -677,9 +689,13 @@ class MainActivity : AppCompatActivity() {
 
             speciesInfoHandler.displaySpeciesInfo(state.speciesInfo, loadingStage, state.isTaxonomyTranslating)
 
-            if (loadingStage == LoadingStage.COMPLETE && binding.fabMute.visibility != View.VISIBLE
-            ) {
-                binding.fabSpeak.isVisible = true
+            if (navigationHandler.isHomeTab()) {
+                if (loadingStage == LoadingStage.COMPLETE && binding.fabMute.visibility != View.VISIBLE
+                ) {
+                    binding.fabSpeak.isVisible = true
+                } else {
+                    binding.fabSpeak.isVisible = false
+                }
             } else {
                 binding.fabSpeak.isVisible = false
             }

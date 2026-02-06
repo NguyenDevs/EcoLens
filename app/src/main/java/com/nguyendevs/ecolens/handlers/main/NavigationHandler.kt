@@ -70,11 +70,8 @@ class NavigationHandler(
     /** Cập nhật trạng thái navigation dựa trên tab được chọn */
     fun updateNavigationState(
             itemId: Int,
-            checkSpeaking: Boolean = true,
             uiStateChecker: (() -> Triple<LoadingStage, Boolean, Boolean>)? = null
     ) {
-        onTabChanged(itemId)
-
         val transition = Fade()
         transition.duration = TRANSITION_DURATION_MS
         TransitionManager.beginDelayedTransition(binding.mainContent, transition)
@@ -84,8 +81,6 @@ class NavigationHandler(
         binding.myGardenContainer.visibility = View.GONE
         binding.settingsContainer.root.visibility = View.GONE
         binding.searchBarContainer.visibility = View.GONE
-        binding.fabSpeak.visibility = View.GONE
-        binding.fabMute.visibility = View.GONE
 
         binding.bottomNavigation.visibility = View.VISIBLE
         binding.fabCamera.visibility = View.VISIBLE
@@ -137,6 +132,8 @@ class NavigationHandler(
                 binding.settingsContainer.root.visibility = View.VISIBLE
             }
         }
+
+        onTabChanged(itemId)
     }
 
     fun isHomeTab(): Boolean = binding.bottomNavigation.selectedItemId == R.id.nav_home
