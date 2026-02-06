@@ -181,7 +181,7 @@ dependencies {
     implementation("androidx.biometric:biometric:1.2.0-alpha05")
 
     // Shimmer Loading
-    implementation("com.github.skydoves:androidveil:1.1.4")
+    implementation("com.facebook.shimmer:shimmer:0.5.0")
 
     // Testing
     testImplementation("junit:junit:4.13.2")
