@@ -82,7 +82,6 @@ class NavigationHandler(
         binding.settingsContainer.root.visibility = View.GONE
         binding.searchBarContainer.visibility = View.GONE
         binding.fabSpeak.visibility = View.GONE
-        binding.fabMute.visibility = View.GONE
 
         binding.bottomNavigation.visibility = View.VISIBLE
         binding.fabCamera.visibility = View.VISIBLE
@@ -93,22 +92,14 @@ class NavigationHandler(
                 binding.searchBarContainer.visibility = View.VISIBLE
 
                 uiStateChecker?.let { checker ->
-                    val (loadingStage, isSpeaking, hasInfo) = checker()
+                    val (loadingStage, _, hasInfo) = checker()
                     val isComplete = loadingStage == LoadingStage.COMPLETE
 
                     // Chỉ hiển thị nút khi đã tải xong và có thông tin
                     if (isComplete && hasInfo) {
-                        if (isSpeaking) {
-                            binding.fabMute.visibility = View.VISIBLE
-                            binding.fabSpeak.visibility = View.GONE
-                        } else {
-                            binding.fabSpeak.visibility = View.VISIBLE
-                            binding.fabMute.visibility = View.GONE
-                        }
+                        binding.fabSpeak.visibility = View.VISIBLE
                     } else {
-                        // Nếu chưa hoàn thành hoặc không có thông tin, ẩn cả hai
                         binding.fabSpeak.visibility = View.GONE
-                        binding.fabMute.visibility = View.GONE
                     }
                 }
             }

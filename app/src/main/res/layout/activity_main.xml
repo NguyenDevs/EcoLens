@@ -124,26 +124,6 @@
             app:pressedTranslationZ="@dimen/elevation_xl"
             app:layout_anchorGravity="top|end"
             android:layout_gravity="top|end"
-            android:visibility="visible"/>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabMute"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginTop="90dp"
-            android:layout_marginEnd="@dimen/spacing_md"
-            android:contentDescription="@string/mute"
-            android:src="@drawable/ic_mute"
-            app:fabSize="normal"
-            app:maxImageSize="30dp"
-            app:fabCustomSize="50dp"
-            app:backgroundTint="@color/error"
-            app:tint="@color/white"
-            app:elevation="13dp"
-            app:pressedTranslationZ="@dimen/elevation_xl"
-            app:borderWidth="0dp"
-            app:layout_anchorGravity="top|end"
-            android:layout_gravity="top|end"
             android:visibility="gone"/>
 
     <!-- BOTTOM NAVIGATION -->

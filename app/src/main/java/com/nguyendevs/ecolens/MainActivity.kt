@@ -3,11 +3,14 @@ package com.nguyendevs.ecolens
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Looper
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -19,6 +22,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
@@ -34,6 +38,7 @@ import com.nguyendevs.ecolens.databinding.ActivityMainBinding
 import com.nguyendevs.ecolens.fragments.chat.ChatHistoryFragment
 import com.nguyendevs.ecolens.fragments.history.HistoryFragment
 import com.nguyendevs.ecolens.handlers.*
+import com.nguyendevs.ecolens.handlers.animations.HistoryDetailAnimationHandler
 import com.nguyendevs.ecolens.handlers.animations.LoadingAnimationHandler
 import com.nguyendevs.ecolens.handlers.home.ImageZoomHandler
 import com.nguyendevs.ecolens.handlers.home.SearchBarHandler
@@ -54,7 +59,9 @@ import kotlinx.coroutines.*
 
 /** Activity chính của ứng dụng EcoLens. Quản lý navigation, nhận diện loài, và UI chính. */
 class MainActivity : AppCompatActivity() {
-
+    private val FAB_ANIM_DURATION = 180L
+    private val FAB_SCALE_DOWN = 0.82f
+    private val FAB_SCALE_NORMAL = 1f
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: EcoLensViewModel
 
@@ -70,6 +77,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var homeScreenHandler: HomeScreenHandler
     private lateinit var navigationHandler: NavigationHandler
+    private lateinit var animationHandler: HistoryDetailAnimationHandler
     private val userRepository = UserRepository()
 
     private val historyFragment = HistoryFragment()
@@ -77,6 +85,8 @@ class MainActivity : AppCompatActivity() {
     private var imageUri: Uri? = null
     private var isExpandedState = false
     private var stopLoadingJob: Job? = null
+    private var isSpeaking = false
+
 
     companion object {
         private const val PREF_NAME = "EcoLensPrefs"
@@ -155,7 +165,6 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.currentImageUri?.let { uri ->
             this.imageUri = uri
-            // binding.root.post { restoreExpandedState(uri) }
         }
 
         initHandlers()
@@ -388,7 +397,7 @@ class MainActivity : AppCompatActivity() {
                 ) { itemId ->
                     if (speakerManager.isSpeaking()) {
                         speakerManager.pause()
-                        toggleSpeakerUI(false)
+                        updateFabUI(false)
                     }
 
                     if (itemId == R.id.nav_home) {
@@ -399,17 +408,20 @@ class MainActivity : AppCompatActivity() {
 
                         if (isComplete && hasInfo) {
                             binding.fabSpeak.isVisible = true
-                            binding.fabMute.isVisible = false
                         }
+                    } else {
+                        binding.fabSpeak.isVisible = false
                     }
                 }
+        
+        animationHandler = HistoryDetailAnimationHandler(this)
     }
 
     /** Khởi tạo các manager */
     private fun initManagers() {
         permissionManager = PermissionManager(this, permissionLauncher)
         speakerManager = SpeakerManager(this)
-        speakerManager.onSpeechFinished = { runOnUiThread { toggleSpeakerUI(false) } }
+        speakerManager.onSpeechFinished = { runOnUiThread { updateFabUI(false) } }
 
         supportFragmentManager.addOnBackStackChangedListener {
             val count = supportFragmentManager.backStackEntryCount
@@ -527,7 +539,7 @@ class MainActivity : AppCompatActivity() {
 
         if (speakerManager.isSpeaking()) {
             speakerManager.pause()
-            toggleSpeakerUI(false)
+            updateFabUI(false)
         }
 
         if (searchBarHandler.isExpanded()) searchBarHandler.collapseSearchBar()
@@ -549,7 +561,7 @@ class MainActivity : AppCompatActivity() {
             binding.fabCamera.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
             if (speakerManager.isSpeaking()) {
                 speakerManager.pause()
-                toggleSpeakerUI(false)
+                updateFabUI(false)
             }
 
             if (permissionManager.hasPermissions()) {
@@ -563,29 +575,29 @@ class MainActivity : AppCompatActivity() {
         binding.fabSpeak.setOnClickListener {
             viewModel.uiState.value.speciesInfo?.let { info ->
                 lifecycleScope.launch(Dispatchers.IO) {
-                    val text = TextToSpeechGenerator.generateSpeechText(this@MainActivity, info)
-                    if (text.isNotEmpty()) {
+                    if (isSpeaking) {
+                        speakerManager.pause()
                         withContext(Dispatchers.Main) {
-                            speakerManager.setLanguage(languageManager.getLanguage())
-                            speakerManager.speak(text)
-                            toggleSpeakerUI(true)
+                            updateFabUI(false)
+                        }
+                    } else {
+                        val text = TextToSpeechGenerator.generateSpeechText(this@MainActivity, info)
+                        if (text.isNotEmpty()) {
+                            withContext(Dispatchers.Main) {
+                                speakerManager.setLanguage(languageManager.getLanguage())
+                                speakerManager.speak(text)
+                                updateFabUI(true)
+                            }
                         }
                     }
                 }
             }
         }
-
-        binding.fabMute.setOnClickListener {
-            speakerManager.pause()
-            toggleSpeakerUI(false)
-        }
     }
 
-    /** Chuyển đổi UI của speaker button */
-    private fun toggleSpeakerUI(isSpeaking: Boolean) {
-        if (!binding.homeContainer.root.isVisible) return
-        binding.fabSpeak.visibility = if (!isSpeaking) View.VISIBLE else View.GONE
-        binding.fabMute.visibility = if (isSpeaking) View.VISIBLE else View.GONE
+    private fun updateFabUI(speaking: Boolean) {
+        isSpeaking = speaking
+        animationHandler.animateFabState(binding.fabSpeak, speaking)
     }
 
     /** Thiết lập observers cho UI state */
@@ -690,9 +702,9 @@ class MainActivity : AppCompatActivity() {
             speciesInfoHandler.displaySpeciesInfo(state.speciesInfo, loadingStage, state.isTaxonomyTranslating)
 
             if (navigationHandler.isHomeTab()) {
-                if (loadingStage == LoadingStage.COMPLETE && binding.fabMute.visibility != View.VISIBLE
-                ) {
+                if (loadingStage == LoadingStage.COMPLETE) {
                     binding.fabSpeak.isVisible = true
+                    animationHandler.showFab(binding.fabSpeak)
                 } else {
                     binding.fabSpeak.isVisible = false
                 }
