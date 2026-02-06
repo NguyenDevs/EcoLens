@@ -237,6 +237,7 @@
                     android:id="@+id/sectionQuickExplore"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:animateLayoutChanges="true"
                     android:layout_marginTop="@dimen/spacing_xl"
                     android:clipChildren="false"
                     android:clipToPadding="false"
