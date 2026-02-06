@@ -7,18 +7,15 @@ import com.nguyendevs.ecolens.models.history.HistoryEntry
 import com.nguyendevs.ecolens.models.history.HistorySortOption
 import com.nguyendevs.ecolens.utils.ImageUtils
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.collections.forEach
 
-/**
- * Manager quản lý lịch sử nhận diện loài
- * Hỗ trợ sort, filter, repair missing images
- */
 class HistoryManager(
     private val context: Context,
     private val historyRepository: HistoryRepository
@@ -31,64 +28,44 @@ class HistoryManager(
 
     private val downloadingImages = ConcurrentHashMap<Int, Boolean>()
 
-    // ==================== QUERY METHODS ====================
-
-    /**
-     * Lấy lịch sử theo sort option và date range (optional)
-     * @param sortOption Sort mới nhất hoặc cũ nhất
-     * @param startDate Start date của range filter (optional)
-     * @param endDate End date của range filter (optional)
-     * @return Flow của danh sách history entries
-     */
     fun getHistoryBySortOption(
         sortOption: HistorySortOption,
         startDate: Long? = null,
-        endDate: Long? = null
+        endDate: Long? = null,
+        limit: Int = 20
     ): Flow<List<HistoryEntry>> {
         val flow = if (startDate != null && endDate != null) {
             when (sortOption) {
                 HistorySortOption.NEWEST_FIRST ->
-                    historyRepository.getHistoryByDateRangeNewest(startDate, endDate)
+                    historyRepository.getHistoryByDateRangeNewest(startDate, endDate, limit)
                 HistorySortOption.OLDEST_FIRST ->
-                    historyRepository.getHistoryByDateRangeOldest(startDate, endDate)
+                    historyRepository.getHistoryByDateRangeOldest(startDate, endDate, limit)
             }
         } else {
             when (sortOption) {
                 HistorySortOption.NEWEST_FIRST ->
-                    historyRepository.getAllHistoryNewestFirst()
+                    historyRepository.getHistoryNewestFirst(limit)
                 HistorySortOption.OLDEST_FIRST ->
-                    historyRepository.getAllHistoryOldestFirst()
+                    historyRepository.getHistoryOldestFirst(limit)
             }
         }
 
         return flow.flowOn(Dispatchers.IO)
     }
 
-    // ==================== IMAGE REPAIR ====================
-
-    /**
-     * Repair missing images cho tất cả entries
-     * Download lại ảnh từ remote nếu local file không tồn tại
-     */
     suspend fun repairMissingImagesOnce() = withContext(Dispatchers.IO) {
         runCatching {
-            Log.d(TAG, "Starting one-time image repair check...")
-
             val entries = collectAllEntries()
-
-            entries.forEach { entry ->
-                launch {
-                    repairSingleImage(entry)
-                }
+            entries.chunked(4).forEach { batch ->
+                batch.map { entry ->
+                    async { repairSingleImage(entry) }
+                }.awaitAll()
             }
         }.onFailure { e ->
             Log.e(TAG, "Error in repair: ${e.message}", e)
         }
     }
 
-    /**
-     * Collect tất cả entries từ Flow
-     */
     private suspend fun collectAllEntries(): List<HistoryEntry> {
         val allEntries = historyRepository.getAllHistoryNewestFirst()
         val entries = mutableListOf<HistoryEntry>()
@@ -101,10 +78,6 @@ class HistoryManager(
         return entries
     }
 
-    /**
-     * Repair missing image cho một entry
-     * Download từ remote URL nếu local file không tồn tại
-     */
     private suspend fun repairSingleImage(entry: HistoryEntry) {
         if (downloadingImages.containsKey(entry.id)) {
             return
@@ -124,50 +97,20 @@ class HistoryManager(
         }
     }
 
-    /**
-     * Download image từ remote và update entry
-     */
     private suspend fun downloadAndUpdateImage(entry: HistoryEntry, remoteUrl: String) {
         try {
             downloadingImages[entry.id] = true
-            Log.d(TAG, "Downloading missing image for entry ${entry.id}...")
-
             val newLocalPath = ImageUtils.downloadImageToInternalStorage(context, remoteUrl)
 
             if (newLocalPath != null) {
                 val updatedEntry = entry.copy(localImagePath = newLocalPath)
-                historyRepository.update(updatedEntry)
-                Log.d(TAG, "Restored image: $newLocalPath")
-            } else {
-                Log.e(TAG, "Failed to restore image for entry ${entry.id}")
+                historyRepository.updateLocal(updatedEntry)
             }
         } finally {
             downloadingImages.remove(entry.id)
         }
     }
 
-    // ==================== FAVORITE OPERATIONS ====================
-
-    /**
-     * Toggle favorite status của một history entry
-
-    suspend fun toggleFavorite(entry: HistoryEntry) {
-        withContext(Dispatchers.IO) {
-            runCatching {
-                historyRepository.update(entry.copy(isFavorite = !entry.isFavorite))
-            }.onFailure { e ->
-                Log.e(TAG, "Error toggling favorite: ${e.message}", e)
-            }
-        }
-    }
-     */
-
-    // ==================== DELETE OPERATIONS ====================
-
-    /**
-     * Xóa một history entry
-     * Tự động xóa local image file nếu tồn tại
-     */
     suspend fun deleteHistory(entry: HistoryEntry) {
         withContext(Dispatchers.IO) {
             runCatching {
@@ -179,10 +122,6 @@ class HistoryManager(
         }
     }
 
-    /**
-     * Xóa toàn bộ lịch sử
-     * Tự động xóa tất cả image files có prefix "species_"
-     */
     suspend fun deleteAllHistory() {
         withContext(Dispatchers.IO) {
             runCatching {
@@ -194,9 +133,6 @@ class HistoryManager(
         }
     }
 
-    /**
-     * Xóa local image file nếu tồn tại
-     */
     private fun deleteLocalImageFile(localPath: String) {
         if (localPath.isNotEmpty()) {
             val file = File(localPath)
@@ -206,9 +142,6 @@ class HistoryManager(
         }
     }
 
-    /**
-     * Xóa tất cả local images có prefix "species_"
-     */
     private fun deleteAllLocalImages() {
         val dir = context.filesDir
         dir.listFiles()?.forEach { file ->

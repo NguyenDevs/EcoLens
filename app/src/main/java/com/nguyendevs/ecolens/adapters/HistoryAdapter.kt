@@ -4,9 +4,11 @@ import android.view.LayoutInflater
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -22,11 +24,16 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
 
+data class HistoryUiModel(
+    val entry: HistoryEntry,
+    val isFirstOfDay: Boolean,
+    val isLastOfDay: Boolean
+)
+
 class HistoryAdapter(
-        private var historyList: MutableList<HistoryEntry>,
-        private val markwon: Markwon,
-        private val clickListener: (HistoryEntry) -> Unit
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    private val markwon: Markwon,
+    private val clickListener: (HistoryEntry) -> Unit
+) : ListAdapter<HistoryUiModel, RecyclerView.ViewHolder>(HistoryDiffCallback) {
 
     companion object {
         private const val VIEW_TYPE_ITEM = 0
@@ -36,92 +43,24 @@ class HistoryAdapter(
     private val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.getDefault())
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault())
     private var isLoading = false
-
-    fun updateList(newList: List<HistoryEntry>) {
-        val diffCallback =
-                object : DiffUtil.Callback() {
-                    override fun getOldListSize(): Int = historyList.size
-                    override fun getNewListSize(): Int = newList.size
-
-                    override fun areItemsTheSame(
-                            oldItemPosition: Int,
-                            newItemPosition: Int
-                    ): Boolean {
-                        return historyList[oldItemPosition].id == newList[newItemPosition].id
-                    }
-
-                    override fun areContentsTheSame(
-                            oldItemPosition: Int,
-                            newItemPosition: Int
-                    ): Boolean {
-                        val oldItem = historyList[oldItemPosition]
-                        val newItem = newList[newItemPosition]
-
-                        val isContentSame =
-                                oldItem.id == newItem.id &&
-                                        oldItem.timestamp == newItem.timestamp &&
-                                        oldItem.speciesInfo.commonName ==
-                                                newItem.speciesInfo.commonName &&
-                                        oldItem.speciesInfo.scientificName ==
-                                                newItem.speciesInfo.scientificName &&
-                                        oldItem.imagePath == newItem.imagePath
-
-                        if (!isContentSame) return false
-
-                        val oldIsFirst =
-                                oldItemPosition == 0 ||
-                                        !isSameDay(
-                                                oldItem.timestamp,
-                                                historyList[oldItemPosition - 1].timestamp
-                                        )
-                        val oldIsLast =
-                                oldItemPosition == historyList.size - 1 ||
-                                        !isSameDay(
-                                                oldItem.timestamp,
-                                                historyList[oldItemPosition + 1].timestamp
-                                        )
-                        val newIsFirst =
-                                newItemPosition == 0 ||
-                                        !isSameDay(
-                                                newItem.timestamp,
-                                                newList[newItemPosition - 1].timestamp
-                                        )
-                        val newIsLast =
-                                newItemPosition == newList.size - 1 ||
-                                        !isSameDay(
-                                                newItem.timestamp,
-                                                newList[newItemPosition + 1].timestamp
-                                        )
-
-                        return oldIsFirst == newIsFirst && oldIsLast == newIsLast
-                    }
-                }
-        val diffResult = DiffUtil.calculateDiff(diffCallback)
-        historyList = newList.toMutableList()
-        diffResult.dispatchUpdatesTo(this)
-    }
-
-    fun addItems(newItems: List<HistoryEntry>) {
-        val startPosition = historyList.size
-        historyList.addAll(newItems)
-        notifyItemRangeInserted(startPosition, newItems.size)
-        if (startPosition > 0 && newItems.isNotEmpty()) {
-            notifyItemChanged(startPosition - 1)
-        }
-    }
+    private var lastPosition = -1
 
     fun setLoading(loading: Boolean) {
         if (isLoading == loading) return
         isLoading = loading
         if (isLoading) {
-            notifyItemInserted(historyList.size)
+            notifyItemInserted(super.getItemCount())
         } else {
-            notifyItemRemoved(historyList.size)
+            notifyItemRemoved(super.getItemCount())
         }
     }
 
+    override fun getItemCount(): Int {
+        return super.getItemCount() + if (isLoading) 1 else 0
+    }
+
     override fun getItemViewType(position: Int): Int {
-        return if (isLoading && position == historyList.size) VIEW_TYPE_LOADING else VIEW_TYPE_ITEM
+        return if (isLoading && position == super.getItemCount()) VIEW_TYPE_LOADING else VIEW_TYPE_ITEM
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -166,37 +105,38 @@ class HistoryAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is HistoryViewHolder) {
-            val entry = historyList[position]
-
-            val isFirstItemOfDay =
-                position == 0 || !isSameDay(entry.timestamp, historyList[position - 1].timestamp)
-            val isLastItemOfDay = if (position == historyList.size - 1) {
-                true 
-            } else {
-                !isSameDay(entry.timestamp, historyList[position + 1].timestamp)
-            }
-
-            holder.bind(entry, isFirstItemOfDay, isLastItemOfDay, clickListener)
+            val item = getItem(position)
+            holder.bind(item, clickListener)
+            setAnimation(holder.itemView, position)
         }
     }
 
-    override fun getItemCount(): Int = historyList.size + if (isLoading) 1 else 0
+    private fun setAnimation(viewToAnimate: View, position: Int) {
+        if (position > lastPosition) {
+            val animation = AnimationUtils.loadAnimation(viewToAnimate.context, R.anim.slide_in_bottom)
+            viewToAnimate.startAnimation(animation)
+            lastPosition = position
+        }
+    }
 
-    private fun isSameDay(timestamp1: Long, timestamp2: Long): Boolean {
-        val date1 = Instant.ofEpochMilli(timestamp1).atZone(ZoneId.systemDefault()).toLocalDate()
-        val date2 = Instant.ofEpochMilli(timestamp2).atZone(ZoneId.systemDefault()).toLocalDate()
-        return date1 == date2
+    object HistoryDiffCallback : DiffUtil.ItemCallback<HistoryUiModel>() {
+        override fun areItemsTheSame(oldItem: HistoryUiModel, newItem: HistoryUiModel): Boolean {
+            return oldItem.entry.id == newItem.entry.id
+        }
+
+        override fun areContentsTheSame(oldItem: HistoryUiModel, newItem: HistoryUiModel): Boolean {
+            return oldItem == newItem
+        }
     }
 
     inner class HistoryViewHolder(private val binding: ItemSpeciesHistoryBinding) :
             RecyclerView.ViewHolder(binding.root) {
 
         fun bind(
-                entry: HistoryEntry,
-                isFirstItemOfDay: Boolean,
-                isLastItemOfDay: Boolean,
-                clickListener: (HistoryEntry) -> Unit
+            uiModel: HistoryUiModel,
+            clickListener: (HistoryEntry) -> Unit
         ) {
+            val entry = uiModel.entry
             val currentDateTime =
                     Instant.ofEpochMilli(entry.timestamp).atZone(ZoneId.systemDefault())
 
@@ -214,8 +154,8 @@ class HistoryAdapter(
             binding.tvHistoryTime.text = timeFormatter.format(currentDateTime)
 
             loadImage(entry)
-            setupDateHeader(isFirstItemOfDay, currentDateTime)
-            setupCardAppearance(isFirstItemOfDay, isLastItemOfDay)
+            setupDateHeader(uiModel.isFirstOfDay, currentDateTime)
+            setupCardAppearance(uiModel.isFirstOfDay, uiModel.isLastOfDay)
             setupConfidenceBadge(entry)
 
             binding.itemContainer.setOnClickListener { clickListener(entry) }
@@ -246,6 +186,7 @@ class HistoryAdapter(
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .transition(DrawableTransitionOptions.withCrossFade(200))
                     .centerCrop()
+                    .override(200, 200)
                     .placeholder(R.mipmap.ic_launcher)
                     .error(R.mipmap.ic_launcher)
                     .into(binding.ivHistoryImage)

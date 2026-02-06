@@ -18,10 +18,6 @@ import com.nguyendevs.ecolens.models.history.HistorySortOption
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-/**
- * ViewModel chính cho ứng dụng EcoLens
- * Quản lý nhận diện loài, lịch sử và chat
- */
 class EcoLensViewModel(application: Application) : AndroidViewModel(application) {
 
     private val historyDao by lazy { HistoryDatabase.getDatabase(application).historyDao() }
@@ -49,17 +45,15 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
     private var lastLanguageCode: String = "en"
 
-    // Cache for translated history entries: Map<HistoryId, Pair<LanguageCode, SpeciesInfo>>
     private val translationCache = mutableMapOf<Int, Pair<String, SpeciesInfo>>()
 
     init {
         viewModelScope.launch {
             historyRepository.fetchHistory()
+            historyManager.repairMissingImagesOnce()
             chatRepository.fetchSessionsAndMessages()
         }
     }
-
-    // ==================== TRANSLATION CACHE ====================
 
     fun getCachedTranslation(historyId: Int, targetLang: String): SpeciesInfo? {
         val cached = translationCache[historyId]
@@ -74,15 +68,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         translationCache[historyId] = language to info
     }
 
-    // ==================== NHẬN DIỆN LOÀI ====================
-
-    /**
-     * Nhận diện loài từ ảnh
-     *
-     * @param imageUri URI của ảnh
-     * @param languageCode Mã ngôn ngữ
-     * @param existingHistoryId ID lịch sử hiện có (nếu có)
-     */
     fun identifySpecies(imageUri: Uri, languageCode: String, existingHistoryId: Int? = null) {
         this.currentImageUri = imageUri
         lastLanguageCode = languageCode
@@ -98,9 +83,6 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    /**
-     * Thử lại nhận diện với ảnh hiện tại
-     */
     fun retryIdentification() {
         speciesManager.currentImageUri?.let { uri ->
             identifySpecies(
@@ -111,93 +93,53 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    // ==================== CHỨC NĂNG CHAT ====================
-
-    /**
-     * Khởi tạo phiên chat mới với tin nhắn chào mừng
-     */
     fun initNewChatSession(welcomeMessage: String, defaultTitle: String) {
         viewModelScope.launch {
             chatManager.initNewChatSession(welcomeMessage, defaultTitle)
         }
     }
 
-    /**
-     * Tải một phiên chat đã có
-     */
     fun loadChatSession(sessionId: Long) {
         chatManager.loadChatSession(sessionId)
     }
 
-    /**
-     * Gửi tin nhắn chat từ người dùng
-     */
     fun sendChatMessage(userMessage: String, defaultTitle: String) {
         viewModelScope.launch {
             chatManager.sendChatMessage(userMessage, defaultTitle)
         }
     }
 
-    /**
-     * Tạo lại phản hồi AI cho một tin nhắn
-     */
     fun renewAiResponse(aiMessage: ChatMessage) {
         viewModelScope.launch {
             chatManager.renewAiResponse(aiMessage)
         }
     }
 
-    /**
-     * Xóa một phiên chat
-     */
     fun deleteChatSession(sessionId: Long) {
         viewModelScope.launch {
             chatManager.deleteChatSession(sessionId)
         }
     }
 
-    /**
-     * Bắt đầu phiên chat mới
-     */
     fun startNewChatSession() {
         chatManager.startNewChatSession()
     }
 
-    // ==================== CHỨC NĂNG LỊCH SỬ ====================
-
-    /**
-     * Lấy lịch sử theo tùy chọn sắp xếp và khoảng thời gian
-     */
     fun getHistoryBySortOption(
         sortOption: HistorySortOption,
         startDate: Long? = null,
-        endDate: Long? = null
+        endDate: Long? = null,
+        limit: Int = 20
     ): Flow<List<HistoryEntry>> {
-        return historyManager.getHistoryBySortOption(sortOption, startDate, endDate)
+        return historyManager.getHistoryBySortOption(sortOption, startDate, endDate, limit)
     }
 
-    /**
-     * Bật/tắt đánh dấu yêu thích cho một mục lịch sử
-
-    fun toggleFavorite(entry: HistoryEntry) {
-        viewModelScope.launch {
-            historyManager.toggleFavorite(entry)
-        }
-    }
-     */
-
-    /**
-     * Xóa một mục lịch sử
-     */
     fun deleteHistory(entry: HistoryEntry) {
         viewModelScope.launch {
             historyManager.deleteHistory(entry)
         }
     }
 
-    /**
-     * Xóa toàn bộ lịch sử
-     */
     fun deleteAllHistory() {
         viewModelScope.launch {
             historyManager.deleteAllHistory()
