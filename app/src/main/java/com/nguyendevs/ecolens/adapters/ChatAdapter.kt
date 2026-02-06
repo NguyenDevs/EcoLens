@@ -21,10 +21,6 @@ import io.noties.markwon.Markwon
 import io.noties.markwon.core.MarkwonTheme
 import io.noties.markwon.html.HtmlPlugin
 
-/**
- * Adapter hiển thị danh sách tin nhắn chat với hỗ trợ Markdown
- * Hỗ trợ hiệu ứng loading, streaming text và các action (copy, share, renew)
- */
 class ChatAdapter(
     private val actionListener: OnChatActionListener
 ) : RecyclerView.Adapter<ChatAdapter.ChatViewHolder>() {
@@ -37,8 +33,6 @@ class ChatAdapter(
 
     private val messages = mutableListOf<ChatMessage>()
     private lateinit var markwon: Markwon
-
-    // ==================== ADAPTER METHODS ====================
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
         if (!::markwon.isInitialized) {
@@ -106,8 +100,6 @@ class ChatAdapter(
             notifyDataSetChanged()
         }
     }
-
-    // ==================== VIEW HOLDER ====================
 
     inner class ChatViewHolder(
         private val binding: ItemChatMessageBinding

@@ -1,11 +1,17 @@
 package com.nguyendevs.ecolens.adapters
 
+import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemQuickExploreBinding
@@ -13,11 +19,11 @@ import com.nguyendevs.ecolens.models.ExploreItem
 import java.util.Locale
 
 class ExploreAdapter(private val onItemClick: (ExploreItem) -> Unit) :
-        ListAdapter<ExploreItem, ExploreAdapter.ExploreViewHolder>(ExploreDiffCallback()) {
+    ListAdapter<ExploreItem, ExploreAdapter.ExploreViewHolder>(ExploreDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ExploreViewHolder {
         val binding =
-                ItemQuickExploreBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            ItemQuickExploreBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ExploreViewHolder(binding, onItemClick)
     }
 
@@ -37,36 +43,121 @@ class ExploreAdapter(private val onItemClick: (ExploreItem) -> Unit) :
     }
 
     class ExploreViewHolder(
-            private val binding: ItemQuickExploreBinding,
-            private val onItemClick: (ExploreItem) -> Unit
+        private val binding: ItemQuickExploreBinding,
+        private val onItemClick: (ExploreItem) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: ExploreItem) {
             val context = binding.root.context
+            val isPlaceholder = item.id.startsWith("placeholder_")
 
-            // Localization logic
+            if (isPlaceholder) {
+                startAllShimmers()
+
+                binding.imgExplore.visibility = View.INVISIBLE
+                binding.tvExploreName.visibility = View.INVISIBLE
+                binding.tvExploreDesc.visibility = View.INVISIBLE
+
+                binding.root.alpha = 0.7f
+
+                binding.root.setOnClickListener(null)
+                return
+            }
+
+            stopAllShimmers()
+            showRealContent()
+
+            binding.root.alpha = 0f
+            binding.root.animate().alpha(1f).setDuration(400).start()
+
             val currentLanguage = Locale.getDefault().language
-            val displayName =
-                    when (currentLanguage) {
-                        "vi" -> item.name
-                        "en" -> if (item.name_en.isNotEmpty()) item.name_en else item.name
-                        "ja" -> if (item.name_ja.isNotEmpty()) item.name_ja else item.name
-                        "zh" -> if (item.name_zh.isNotEmpty()) item.name_zh else item.name
-                        else -> item.name
-                    }
+            val displayName = when (currentLanguage) {
+                "vi" -> item.name
+                "en" -> if (item.name_en.isNotEmpty()) item.name_en else item.name
+                "ja" -> if (item.name_ja.isNotEmpty()) item.name_ja else item.name
+                "zh" -> if (item.name_zh.isNotEmpty()) item.name_zh else item.name
+                else -> item.name
+            }
 
             binding.tvExploreName.text = displayName
             binding.tvExploreDesc.text = item.desc
 
-            Glide.with(context)
-                    .load(item.image)
-                    .transition(DrawableTransitionOptions.withCrossFade())
-                    .placeholder(R.mipmap.ic_launcher) // Use a better placeholder in future
-                    .error(R.mipmap.ic_launcher) // Use a better error image in future
-                    .centerCrop()
-                    .into(binding.imgExplore)
-
             binding.root.setOnClickListener { onItemClick(item) }
+
+            loadImageWithShimmer(item)
+        }
+
+        private fun startAllShimmers() {
+            listOfNotNull(
+                binding.shimmerViewContainer,
+                binding.shimmerName,
+                binding.shimmerDesc
+            ).forEach {
+                it.visibility = View.VISIBLE
+                it.startShimmer()
+            }
+        }
+
+        private fun stopAllShimmers() {
+            listOfNotNull(
+                binding.shimmerViewContainer,
+                binding.shimmerName,
+                binding.shimmerDesc
+            ).forEach {
+                it.stopShimmer()
+                it.visibility = View.GONE
+            }
+        }
+
+        private fun showRealContent() {
+            binding.imgExplore.visibility = View.VISIBLE
+            binding.tvExploreName.visibility = View.VISIBLE
+            binding.tvExploreDesc.visibility = View.VISIBLE
+            binding.root.alpha = 1f
+        }
+
+        private fun loadImageWithShimmer(item: ExploreItem) {
+            // Bật shimmer ảnh ngay từ đầu
+            binding.shimmerViewContainer?.apply {
+                visibility = View.VISIBLE
+                startShimmer()
+            }
+
+            Glide.with(binding.root.context)
+                .load(item.image)
+                .centerCrop()
+                .transition(DrawableTransitionOptions.withCrossFade())
+                .placeholder(R.drawable.bg_skeleton_transparent)
+                .error(R.drawable.bg_skeleton_rounded)
+                .listener(object : RequestListener<Drawable> {
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<Drawable>,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        binding.shimmerViewContainer?.apply {
+                            stopShimmer()
+                            visibility = View.GONE
+                        }
+                        return false
+                    }
+
+                    override fun onResourceReady(
+                        resource: Drawable,
+                        model: Any,
+                        target: Target<Drawable>,
+                        dataSource: DataSource,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        binding.shimmerViewContainer?.apply {
+                            stopShimmer()
+                            visibility = View.GONE
+                        }
+                        return false
+                    }
+                })
+                .into(binding.imgExplore)
         }
     }
 

@@ -17,10 +17,6 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-/**
- * Adapter hiển thị danh sách các phiên chat
- * Tự động nhóm theo ngày với date header và hiệu ứng loading khi click
- */
 class ChatSessionAdapter(
     private var sessions: MutableList<ChatSession>,
     private val onClick: (ChatSession) -> Unit
@@ -36,8 +32,6 @@ class ChatSessionAdapter(
     private val loadingInterpolator = LinearInterpolator()
     private lateinit var markwon: Markwon
     private var isLoading = false
-
-    // ==================== ADAPTER METHODS ====================
 
     fun updateList(newList: List<ChatSession>) {
         sessions.clear()
@@ -127,8 +121,6 @@ class ChatSessionAdapter(
     }
 
     override fun getItemCount() = sessions.size + if (isLoading) 1 else 0
-
-    // ==================== VIEW HOLDER ====================
 
     inner class ChatSessionViewHolder(
         private val binding: ItemChatHistoryBinding

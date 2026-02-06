@@ -380,10 +380,13 @@ class MainActivity : AppCompatActivity() {
                         sharedPreferences,
                         historyFragment,
                         chatHistoryFragment
-                ) { _ ->
+                ) { itemId ->
                     if (speakerManager.isSpeaking()) {
                         speakerManager.pause()
                         toggleSpeakerUI(false)
+                    }
+                    if (itemId == R.id.nav_home) {
+                        homeScreenHandler.fetchExploreData()
                     }
                 }
     }

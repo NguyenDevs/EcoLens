@@ -23,7 +23,8 @@
     <color name="surface">#1E293B</color>    <!-- slate-800 -->
     <color name="surface_variant">#0F172A</color>    <!-- slate-900 / background-dark -->
     <color name="surface_tint">#1E293B</color>
-    <color name="background">#0F172A</color>    <!-- HTML bg-background-dark -->
+    <color name="background">#0F172A</color>
+    <color name="shimmer">#141E37</color><!-- HTML bg-background-dark -->
     <color name="background_dark">#0F172A</color>
     <color name="on_surface">#FFFFFF</color>
 
