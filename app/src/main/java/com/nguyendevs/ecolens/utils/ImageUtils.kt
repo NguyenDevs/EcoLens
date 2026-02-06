@@ -34,6 +34,47 @@ object ImageUtils {
         val cacheDir = context.cacheDir
         val file = File(cacheDir, "temp_image_${System.currentTimeMillis()}.jpg")
 
+        // Check if URI is a web URL
+        if (uri.scheme == "http" || uri.scheme == "https") {
+            try {
+                val url = URL(uri.toString())
+                val connection = url.openConnection()
+                connection.connect()
+                
+                val inputStream = connection.getInputStream()
+                val bitmap = BitmapFactory.decodeStream(inputStream)
+                inputStream.close()
+                
+                if (bitmap != null) {
+                    // Resize if needed
+                    val scaledBitmap = if (bitmap.width > maxDimension || bitmap.height > maxDimension) {
+                        val ratio = Math.min(
+                            maxDimension.toFloat() / bitmap.width,
+                            maxDimension.toFloat() / bitmap.height
+                        )
+                        val width = (bitmap.width * ratio).toInt()
+                        val height = (bitmap.height * ratio).toInt()
+                        Bitmap.createScaledBitmap(bitmap, width, height, true)
+                    } else {
+                        bitmap
+                    }
+                    
+                    FileOutputStream(file).use { out ->
+                        scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 80, out)
+                    }
+                    
+                    if (scaledBitmap != bitmap) bitmap.recycle()
+                    scaledBitmap.recycle()
+                    
+                    return file
+                } else {
+                    throw Exception("Failed to decode bitmap from URL: $uri")
+                }
+            } catch (e: Exception) {
+                throw Exception("Failed to download image from URL: $uri", e)
+            }
+        }
+
         var inputStream: InputStream? = null
         try {
             inputStream = context.contentResolver.openInputStream(uri)
