@@ -35,12 +35,6 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
-                <VideoView
-                        android:id="@+id/videoLogo"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:contentDescription="@string/app_logo_description"
-                        android:visibility="invisible" />
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.imageview.ShapeableImageView
@@ -50,7 +44,6 @@
                     android:src="@mipmap/ic_launcher"
                     android:contentDescription="@string/app_logo_description"
                     android:scaleType="centerCrop"
-                    android:visibility="invisible"
                     app:shapeAppearanceOverlay="@style/RoundedCornerImageView"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
