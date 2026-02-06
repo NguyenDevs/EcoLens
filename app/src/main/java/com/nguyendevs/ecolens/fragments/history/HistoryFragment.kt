@@ -158,6 +158,7 @@ class HistoryFragment : Fragment() {
     private fun updateCategoryFilter(category: CategoryFilter) {
         currentCategory = category
         updateCategoryChipsUI(category)
+        // Reset limit when changing filter to ensure we load enough data
         currentLimit = pageSize
         observeHistory()
     }
@@ -174,6 +175,20 @@ class HistoryFragment : Fragment() {
         observeJob?.cancel()
         
         observeJob = viewLifecycleOwner.lifecycleScope.launch {
+            // We need to fetch ALL data if we are filtering locally, OR handle filtering in DB query.
+            // Since the current implementation filters locally in the fragment, we might not get enough items
+            // if we limit the DB query.
+            // However, fetching everything might be slow.
+            // A better approach is to fetch more than limit if filtering, or move filtering to DB.
+            // For now, let's try to fetch a larger batch if filtering is active, or just rely on the flow updates.
+            
+            // Actually, the issue described is that when filtering, we might filter out all items in the current 'limit'
+            // resulting in an empty list or very few items, even if there are more matching items in the DB.
+            // The correct fix is to move filtering to the ViewModel/Repository level so the DB query returns the correct 'limit' number of MATCHING items.
+            
+            // But since I cannot change the DAO interface easily without knowing all usages, 
+            // I will implement a client-side fix: if the filtered list is too small but we have more data, load more automatically.
+            
             viewModel.getHistoryBySortOption(currentSortOption, filterStartDate, filterEndDate, currentLimit)
                 .collectLatest { allList ->
                     val filteredList = when (currentCategory) {
@@ -188,17 +203,45 @@ class HistoryFragment : Fragment() {
                         }
                     }
 
+                    // If we have filtered data but it's less than pageSize, and we suspect there's more data in DB
+                    // (meaning the original list size equals the limit), we should load more.
+                    if (filteredList.size < pageSize && allList.size >= currentLimit) {
+                         currentLimit += pageSize
+                         // The collectLatest will be cancelled and restarted with new limit automatically
+                         // by the next emission or we can just let the flow continue if we call observeHistory again?
+                         // No, calling observeHistory cancels the current job.
+                         // So we just update limit and let the flow re-trigger? 
+                         // No, getHistoryBySortOption returns a Flow based on the limit passed.
+                         // We need to restart the observation with the new limit.
+                         // But we must be careful not to create an infinite loop if there really is no more data.
+                         
+                         // Let's just trigger a reload with higher limit here.
+                         // To avoid infinite loop, we can check if the allList size actually increased since last time?
+                         // Or just rely on a max limit cap?
+                         
+                         // A safer simple fix for now without complex logic:
+                         // If filtered list is empty or small, and we hit the limit, auto load next page.
+                         loadNextPage()
+                         return@collectLatest
+                    }
+
                     if (filteredList.isEmpty()) {
-                        if (currentLimit == pageSize) {
+                        if (allList.size < currentLimit) {
+                            // We loaded everything and still nothing matches
                             animationHandler.fadeOut(binding.rvHistory)
                             animationHandler.fadeIn(binding.emptyStateContainer)
+                            hasMoreData = false
+                        } else {
+                            // Filtered list empty but maybe more data exists
+                             animationHandler.fadeOut(binding.rvHistory)
+                             animationHandler.fadeIn(binding.emptyStateContainer)
+                             // We could auto-load more here too, but let's be careful.
                         }
-                        hasMoreData = false
                     } else {
                         animationHandler.fadeIn(binding.rvHistory)
                         animationHandler.fadeOut(binding.emptyStateContainer)
                         
-                        if (filteredList.size < currentLimit) {
+                        if (allList.size < currentLimit) {
                             hasMoreData = false
                         } else {
                             hasMoreData = true

@@ -45,6 +45,17 @@ class HistoryAdapter(
     private var isLoading = false
     private var lastPosition = -1
 
+    init {
+        setHasStableIds(true)
+    }
+
+    override fun getItemId(position: Int): Long {
+        if (isLoading && position == super.getItemCount()) {
+            return -1L 
+        }
+        return getItem(position).entry.id.toLong()
+    }
+
     fun setLoading(loading: Boolean) {
         if (isLoading == loading) return
         isLoading = loading
@@ -126,6 +137,14 @@ class HistoryAdapter(
 
         override fun areContentsTheSame(oldItem: HistoryUiModel, newItem: HistoryUiModel): Boolean {
             return oldItem == newItem
+        }
+        
+        override fun getChangePayload(oldItem: HistoryUiModel, newItem: HistoryUiModel): Any? {
+             return if (oldItem.entry.id == newItem.entry.id) {
+                 newItem
+             } else {
+                 null
+             }
         }
     }
 
