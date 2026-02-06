@@ -22,10 +22,6 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
 
-/**
- * Adapter hiển thị danh sách lịch sử nhận diện loài Tự động nhóm theo ngày với rounded corners và
- * border liên tục Sử dụng DiffUtil để tối ưu performance khi update list
- */
 class HistoryAdapter(
         private var historyList: MutableList<HistoryEntry>,
         private val markwon: Markwon,
@@ -40,8 +36,6 @@ class HistoryAdapter(
     private val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.getDefault())
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault())
     private var isLoading = false
-
-    // ==================== ADAPTER METHODS ====================
 
     fun updateList(newList: List<HistoryEntry>) {
         val diffCallback =
@@ -107,9 +101,6 @@ class HistoryAdapter(
         diffResult.dispatchUpdatesTo(this)
     }
 
-    /**
-     * Phương thức dùng cho Lazy Loading: Thêm dữ liệu vào cuối danh sách
-     */
     fun addItems(newItems: List<HistoryEntry>) {
         val startPosition = historyList.size
         historyList.addAll(newItems)
@@ -196,8 +187,6 @@ class HistoryAdapter(
         val date2 = Instant.ofEpochMilli(timestamp2).atZone(ZoneId.systemDefault()).toLocalDate()
         return date1 == date2
     }
-
-    // ==================== VIEW HOLDER ====================
 
     inner class HistoryViewHolder(private val binding: ItemSpeciesHistoryBinding) :
             RecyclerView.ViewHolder(binding.root) {

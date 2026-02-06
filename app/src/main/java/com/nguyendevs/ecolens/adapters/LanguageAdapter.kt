@@ -8,16 +8,10 @@ import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemLanguagesBinding
 import com.nguyendevs.ecolens.models.Language
 
-/**
- * Adapter hiển thị danh sách ngôn ngữ với visual feedback cho item được chọn
- * Item được chọn sẽ có stroke màu xanh và text màu đậm hơn
- */
 class LanguageAdapter(
     private var languages: List<Language>,
     private val onLanguageClick: (Language) -> Unit
 ) : RecyclerView.Adapter<LanguageAdapter.LanguageViewHolderModern>() {
-
-    // ==================== ADAPTER METHODS ====================
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LanguageViewHolderModern {
         val binding = ItemLanguagesBinding.inflate(
@@ -38,8 +32,6 @@ class LanguageAdapter(
         languages = newLanguages
         notifyDataSetChanged()
     }
-
-    // ==================== VIEW HOLDER ====================
 
     inner class LanguageViewHolderModern(
         private val binding: ItemLanguagesBinding
