@@ -178,9 +178,6 @@ class HomeButtonHandler(
                             "• ${context.getString(R.string.label_species)} ${textFormatter.stripHtml(info.species)}\n"
                     )
 
-            val sharedPref = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
-            val isIucnEnabled = sharedPref.getBoolean("iucn_mode", true)
-
             val contentList = mutableListOf(
                 info.description to R.string.share_desc_title,
                 info.characteristics to R.string.share_char_title,
@@ -188,7 +185,7 @@ class HomeButtonHandler(
                 info.habitat to R.string.share_hab_title
             )
 
-            if (isIucnEnabled) {
+            if (info.iucn) {
                 contentList.add(info.conservationStatus to R.string.share_cons_title)
             }
 

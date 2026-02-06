@@ -371,7 +371,12 @@ class MainActivity : AppCompatActivity() {
                 )
 
         homeScreenHandler =
-                HomeScreenHandler(this, binding) { entry -> navigateToHistoryDetail(entry) }
+                HomeScreenHandler(
+                    this, 
+                    binding, 
+                    { entry -> navigateToHistoryDetail(entry) },
+                    { imageUrl -> handleCapturedImage(imageUrl.toUri()) }
+                )
 
         navigationHandler =
                 NavigationHandler(

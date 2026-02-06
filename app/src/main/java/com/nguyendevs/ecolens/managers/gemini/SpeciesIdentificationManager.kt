@@ -162,10 +162,16 @@ class SpeciesIdentificationManager(
         val scientificName = result.taxon.name
         val confidence = result.combined_score
 
+        // Check IUCN Mode
+        val sharedPref = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+        val isIucnEnabled = sharedPref.getBoolean("iucn_mode", true)
+        val isTaxoModeEnabled = sharedPref.getBoolean("taxo_mode", false)
+
         currentSpeciesInfo = SpeciesInfo(
             scientificName = scientificName,
             confidence = confidence,
-            commonName = "..."
+            commonName = "...",
+            iucn = isIucnEnabled
         )
 
         onStateUpdate(EcoLensUiState(
@@ -184,11 +190,6 @@ class SpeciesIdentificationManager(
                     loadingStage = LoadingStage.COMMON_NAME
                 ))
             }
-
-            // Check IUCN Mode
-            val sharedPref = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
-            val isIucnEnabled = sharedPref.getBoolean("iucn_mode", true)
-            val isTaxoModeEnabled = sharedPref.getBoolean("taxo_mode", false)
 
             coroutineScope {
                 val gbifDeferred = async(Dispatchers.IO) {
@@ -221,7 +222,8 @@ class SpeciesIdentificationManager(
 
                 val infoForDetails = currentSpeciesInfo ?: SpeciesInfo(
                     scientificName = scientificName,
-                    confidence = confidence
+                    confidence = confidence,
+                    iucn = isIucnEnabled
                 )
 
                 val geminiDetailsDeferred = async(Dispatchers.IO) {
@@ -242,7 +244,8 @@ class SpeciesIdentificationManager(
                                 taxorder = current.taxorder,
                                 family = current.family,
                                 genus = current.genus,
-                                species = current.species
+                                species = current.species,
+                                iucn = isIucnEnabled
                             )
                         } else {
                             incomingInfo
@@ -306,7 +309,8 @@ class SpeciesIdentificationManager(
 
                     val infoForConservation = currentSpeciesInfo ?: SpeciesInfo(
                         scientificName = scientificName,
-                        confidence = confidence
+                        confidence = confidence,
+                        iucn = true
                     )
 
                     streamingHelper.streamConservation(

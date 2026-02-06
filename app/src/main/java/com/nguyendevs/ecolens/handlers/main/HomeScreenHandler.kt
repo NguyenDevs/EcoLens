@@ -5,6 +5,7 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -28,7 +29,8 @@ import kotlinx.coroutines.launch
 class HomeScreenHandler(
         private val activity: AppCompatActivity,
         private val binding: ActivityMainBinding,
-        private val onNavigateToDetail: (HistoryEntry) -> Unit
+        private val onNavigateToDetail: (HistoryEntry) -> Unit,
+        private val onExploreItemClick: (String) -> Unit
 ) {
 
     private lateinit var recentHistoryAdapter: RecentHistoryAdapter
@@ -215,15 +217,9 @@ class HomeScreenHandler(
                 )
 
         exploreAdapter = ExploreAdapter { item ->
-            val currentLanguage = java.util.Locale.getDefault().language
-            val displayName =
-                    when (currentLanguage) {
-                        "vi" -> item.name
-                        "en" -> if (item.name_en.isNotEmpty()) item.name_en else item.name
-                        "ja" -> if (item.name_ja.isNotEmpty()) item.name_ja else item.name
-                        "zh" -> if (item.name_zh.isNotEmpty()) item.name_zh else item.name
-                        else -> item.name
-                    }
+            if (item.image.isNotEmpty()) {
+                onExploreItemClick(item.image)
+            }
         }
 
         rvQuickExplore.apply {

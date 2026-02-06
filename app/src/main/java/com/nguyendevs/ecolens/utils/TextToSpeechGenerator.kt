@@ -28,15 +28,12 @@ object TextToSpeechGenerator {
             sb.append(". ")
         }
 
-        val sharedPref = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
-        val isIucnEnabled = sharedPref.getBoolean("iucn_mode", true)
-
         appendSectionIfNotEmpty(sb, context, R.string.section_description, info.description)
         appendSectionIfNotEmpty(sb, context, R.string.section_characteristics, info.characteristics)
         appendSectionIfNotEmpty(sb, context, R.string.section_distribution, info.distribution)
         appendSectionIfNotEmpty(sb, context, R.string.section_habitat, info.habitat)
         
-        if (isIucnEnabled) {
+        if (info.iucn) {
             appendSectionIfNotEmpty(sb, context, R.string.section_conservation, info.conservationStatus)
         }
 

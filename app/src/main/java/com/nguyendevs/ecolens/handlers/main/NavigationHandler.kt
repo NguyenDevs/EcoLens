@@ -99,10 +99,19 @@ class NavigationHandler(
                     val (loadingStage, isSpeaking, hasInfo) = checker()
                     val isComplete = loadingStage == LoadingStage.COMPLETE
 
-                    if (isComplete && hasInfo && !isSpeaking) {
-                        binding.fabSpeak.visibility = View.VISIBLE
-                    } else if (isSpeaking) {
-                        binding.fabMute.visibility = View.VISIBLE
+                    // Chỉ hiển thị nút khi đã tải xong và có thông tin
+                    if (isComplete && hasInfo) {
+                        if (isSpeaking) {
+                            binding.fabMute.visibility = View.VISIBLE
+                            binding.fabSpeak.visibility = View.GONE
+                        } else {
+                            binding.fabSpeak.visibility = View.VISIBLE
+                            binding.fabMute.visibility = View.GONE
+                        }
+                    } else {
+                        // Nếu chưa hoàn thành hoặc không có thông tin, ẩn cả hai
+                        binding.fabSpeak.visibility = View.GONE
+                        binding.fabMute.visibility = View.GONE
                     }
                 }
             }
