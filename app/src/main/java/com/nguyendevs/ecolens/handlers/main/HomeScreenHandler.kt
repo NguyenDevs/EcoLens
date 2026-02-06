@@ -41,6 +41,20 @@ class HomeScreenHandler(
     private val exploreRepository by lazy { ExploreRepository() }
     private var isRecentExpanded = true
     private lateinit var exploreAdapter: ExploreAdapter
+    private var hasFetchedExplore = false
+
+    fun fetchExploreData() {
+        if (hasFetchedExplore) return
+        activity.lifecycleScope.launch {
+            val items = exploreRepository.getRandomExploreItems(5)
+            if (items.isNotEmpty()) {
+                kotlinx.coroutines.delay(5000)
+
+                exploreAdapter.submitList(items)
+                hasFetchedExplore = true
+            }
+        }
+    }
 
     /** Setup tất cả components của Home Screen */
     fun setup() {
@@ -193,8 +207,6 @@ class HomeScreenHandler(
                 )
 
         exploreAdapter = ExploreAdapter { item ->
-            // Handle item click if needed, e.g., show details or start search
-            // For now, maybe just expand search bar with the name
             val currentLanguage = java.util.Locale.getDefault().language
             val displayName =
                     when (currentLanguage) {
@@ -204,9 +216,6 @@ class HomeScreenHandler(
                         "zh" -> if (item.name_zh.isNotEmpty()) item.name_zh else item.name
                         else -> item.name
                     }
-            // Optional: trigger search or show detail
-            // For this task, we can just log or toast, or maybe fill search bar?
-            // User didn't specify interaction, just "explore".
         }
 
         rvQuickExplore.apply {
@@ -214,23 +223,14 @@ class HomeScreenHandler(
             adapter = exploreAdapter
         }
 
-        // Show placeholders immediately
         val placeholders =
                 List(5) { i ->
                     com.nguyendevs.ecolens.models.ExploreItem(
                             id = "placeholder_$i",
-                            name = "...",
-                            desc = "..."
+                            name = "Loading name.",
+                            desc = "Loading description."
                     )
                 }
         exploreAdapter.submitList(placeholders)
-
-        activity.lifecycleScope.launch {
-            // Fetch cached data
-            val items = exploreRepository.getRandomExploreItems(5)
-            if (items.isNotEmpty()) {
-                exploreAdapter.submitList(items)
-            }
-        }
     }
 }
