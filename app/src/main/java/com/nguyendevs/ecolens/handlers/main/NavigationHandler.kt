@@ -70,11 +70,8 @@ class NavigationHandler(
     /** Cập nhật trạng thái navigation dựa trên tab được chọn */
     fun updateNavigationState(
             itemId: Int,
-            checkSpeaking: Boolean = true,
             uiStateChecker: (() -> Triple<LoadingStage, Boolean, Boolean>)? = null
     ) {
-        onTabChanged(itemId)
-
         val transition = Fade()
         transition.duration = TRANSITION_DURATION_MS
         TransitionManager.beginDelayedTransition(binding.mainContent, transition)
@@ -85,7 +82,6 @@ class NavigationHandler(
         binding.settingsContainer.root.visibility = View.GONE
         binding.searchBarContainer.visibility = View.GONE
         binding.fabSpeak.visibility = View.GONE
-        binding.fabMute.visibility = View.GONE
 
         binding.bottomNavigation.visibility = View.VISIBLE
         binding.fabCamera.visibility = View.VISIBLE
@@ -96,13 +92,14 @@ class NavigationHandler(
                 binding.searchBarContainer.visibility = View.VISIBLE
 
                 uiStateChecker?.let { checker ->
-                    val (loadingStage, isSpeaking, hasInfo) = checker()
+                    val (loadingStage, _, hasInfo) = checker()
                     val isComplete = loadingStage == LoadingStage.COMPLETE
 
-                    if (isComplete && hasInfo && !isSpeaking) {
+                    // Chỉ hiển thị nút khi đã tải xong và có thông tin
+                    if (isComplete && hasInfo) {
                         binding.fabSpeak.visibility = View.VISIBLE
-                    } else if (isSpeaking) {
-                        binding.fabMute.visibility = View.VISIBLE
+                    } else {
+                        binding.fabSpeak.visibility = View.GONE
                     }
                 }
             }
@@ -128,6 +125,8 @@ class NavigationHandler(
                 binding.settingsContainer.root.visibility = View.VISIBLE
             }
         }
+
+        onTabChanged(itemId)
     }
 
     fun isHomeTab(): Boolean = binding.bottomNavigation.selectedItemId == R.id.nav_home

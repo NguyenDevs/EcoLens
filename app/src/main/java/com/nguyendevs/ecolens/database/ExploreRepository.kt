@@ -14,21 +14,29 @@ class ExploreRepository {
             FirebaseDatabase.getInstance(BuildConfig.FIREBASE_DATABASE_URL)
     private val exploreRef = firebaseDatabase.getReference("explore/items")
 
-    // In-memory cache
-    private var cachedItems: List<ExploreItem> = emptyList()
+    companion object {
+        private var allItemsCache: List<ExploreItem> = emptyList()
+        private var displayedItemsCache: List<ExploreItem> = emptyList()
+    }
 
     /** Lấy ngẫu nhiên [count] items. Nếu chưa có cache thì fetch từ Firebase. Lưu cache vào RAM. */
     suspend fun getRandomExploreItems(count: Int): List<ExploreItem> =
             withContext(Dispatchers.IO) {
-                if (cachedItems.isEmpty()) {
+                if (displayedItemsCache.isNotEmpty()) {
+                    return@withContext displayedItemsCache
+                }
+
+                if (allItemsCache.isEmpty()) {
                     fetchFromFirebase()
                 }
 
-                if (cachedItems.isEmpty()) {
+                if (allItemsCache.isEmpty()) {
                     return@withContext emptyList()
                 }
 
-                return@withContext cachedItems.shuffled().take(count)
+                val items = allItemsCache.shuffled().take(count)
+                displayedItemsCache = items
+                return@withContext items
             }
 
     private suspend fun fetchFromFirebase() {
@@ -41,7 +49,7 @@ class ExploreRepository {
                     items.add(item)
                 }
             }
-            cachedItems = items
+            allItemsCache = items
         } catch (e: Exception) {
             Log.e("ExploreRepository", "Error fetching from Firebase", e)
         }

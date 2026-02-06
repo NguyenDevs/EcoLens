@@ -32,7 +32,10 @@ object TextToSpeechGenerator {
         appendSectionIfNotEmpty(sb, context, R.string.section_characteristics, info.characteristics)
         appendSectionIfNotEmpty(sb, context, R.string.section_distribution, info.distribution)
         appendSectionIfNotEmpty(sb, context, R.string.section_habitat, info.habitat)
-        appendSectionIfNotEmpty(sb, context, R.string.section_conservation, info.conservationStatus)
+        
+        if (info.iucn) {
+            appendSectionIfNotEmpty(sb, context, R.string.section_conservation, info.conservationStatus)
+        }
 
         return sb.toString()
     }

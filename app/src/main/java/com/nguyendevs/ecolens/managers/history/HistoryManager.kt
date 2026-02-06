@@ -17,7 +17,7 @@ import kotlin.collections.forEach
 
 /**
  * Manager quản lý lịch sử nhận diện loài
- * Hỗ trợ sort, filter, repair missing images, và toggle favorite
+ * Hỗ trợ sort, filter, repair missing images
  */
 class HistoryManager(
     private val context: Context,
