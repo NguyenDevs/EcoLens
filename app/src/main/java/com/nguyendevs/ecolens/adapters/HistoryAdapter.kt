@@ -51,7 +51,7 @@ class HistoryAdapter(
 
     override fun getItemId(position: Int): Long {
         if (isLoading && position == super.getItemCount()) {
-            return -1L 
+            return -1L
         }
         return getItem(position).entry.id.toLong()
     }
