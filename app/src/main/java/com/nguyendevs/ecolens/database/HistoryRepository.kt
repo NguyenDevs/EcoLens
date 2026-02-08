@@ -43,17 +43,17 @@ class HistoryRepository(
 
     private fun getStorageRef() = storage.reference.child("users").child(getUserId())
 
-    fun getAllHistoryNewestFirst() = historyDao.getAllHistoryNewestFirst()
+    fun getAllHistoryNewestFirst() = historyDao.getAllHistoryNewestFirst(getUserId())
 
-    fun getHistoryNewestFirst(limit: Int) = historyDao.getHistoryNewestFirst(limit)
+    fun getHistoryNewestFirst(limit: Int) = historyDao.getHistoryNewestFirst(getUserId(), limit)
 
-    fun getHistoryOldestFirst(limit: Int) = historyDao.getHistoryOldestFirst(limit)
+    fun getHistoryOldestFirst(limit: Int) = historyDao.getHistoryOldestFirst(getUserId(), limit)
 
     fun getHistoryByDateRangeNewest(startDate: Long, endDate: Long, limit: Int) =
-            historyDao.getHistoryByDateRangeNewest(startDate, endDate, limit)
+            historyDao.getHistoryByDateRangeNewest(getUserId(), startDate, endDate, limit)
 
     fun getHistoryByDateRangeOldest(startDate: Long, endDate: Long, limit: Int) =
-            historyDao.getHistoryByDateRangeOldest(startDate, endDate, limit)
+            historyDao.getHistoryByDateRangeOldest(getUserId(), startDate, endDate, limit)
 
     suspend fun getHistoryById(id: Int): HistoryEntry? {
         return historyDao.getHistoryById(id)
@@ -63,14 +63,14 @@ class HistoryRepository(
             withContext(Dispatchers.IO) {
                 val maxId = historyDao.getMaxId() ?: 0
                 val newId = maxId + 1
-                val entryWithId = entry.copy(id = newId)
+                val entryWithId = entry.copy(id = newId, userId = getUserId())
                 historyDao.insert(entryWithId)
                 newId.toLong()
             }
 
     suspend fun insert(entry: HistoryEntry): Long {
         val id = insertLocal(entry)
-        val entryWithId = entry.copy(id = id.toInt())
+        val entryWithId = entry.copy(id = id.toInt(), userId = getUserId())
         externalScope.launch { syncRemote(entryWithId) }
         return id
     }
@@ -176,7 +176,7 @@ class HistoryRepository(
             }
 
     suspend fun deleteAll() {
-        historyDao.deleteAll()
+        // historyDao.deleteAll() // Dangerous to delete all rows
         try {
             getHistoryRef().removeValue().await()
         } catch (e: Exception) {
@@ -204,39 +204,12 @@ class HistoryRepository(
             }
         }
 
-        reorderIds(idToDelete)
+        // reorderIds(idToDelete)
     }
 
     private suspend fun reorderIds(deletedId: Int) =
             withContext(Dispatchers.IO) {
-                try {
-                    val entriesToUpdate = historyDao.getEntriesWithIdGreaterThan(deletedId)
-                    if (entriesToUpdate.isEmpty()) return@withContext
-
-                    val updates = hashMapOf<String, Any?>()
-
-                    for (entry in entriesToUpdate) {
-                        val oldId = entry.id
-                        val newId = oldId - 1
-                        val updatedEntry = entry.copy(id = newId)
-
-                        historyDao.deleteById(oldId)
-                        historyDao.insert(updatedEntry)
-
-                        updates[oldId.toString()] = null
-                        updates[newId.toString()] = updatedEntry
-                    }
-
-                    if (updates.isNotEmpty()) {
-                        try {
-                            getHistoryRef().updateChildren(updates).await()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
+                // Reorder logic disabled to prevent multi-user ID collision
             }
 
     @RequiresApi(Build.VERSION_CODES.O)

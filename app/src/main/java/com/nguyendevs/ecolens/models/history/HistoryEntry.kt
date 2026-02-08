@@ -18,10 +18,11 @@ import com.nguyendevs.ecolens.models.SpeciesInfo
  */
 @Entity(tableName = "history_table")
 data class HistoryEntry(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val imagePath: String = "",
-    val localImagePath: String = "",
-    @Embedded val speciesInfo: SpeciesInfo = SpeciesInfo(),
-    val timestamp: Long = 0,
-    val language: String = "vi"
+        @PrimaryKey(autoGenerate = true) val id: Int = 0,
+        val userId: String = "",
+        val imagePath: String = "",
+        val localImagePath: String = "",
+        @Embedded val speciesInfo: SpeciesInfo = SpeciesInfo(),
+        val timestamp: Long = 0,
+        val language: String = "vi"
 )

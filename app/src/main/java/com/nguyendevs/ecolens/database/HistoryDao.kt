@@ -11,26 +11,26 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface HistoryDao {
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(entry: HistoryEntry): Long
+    @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insert(entry: HistoryEntry): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(entries: List<HistoryEntry>)
 
-    @Query("SELECT MAX(id) FROM history_table")
-    suspend fun getMaxId(): Int?
+    @Query("SELECT MAX(id) FROM history_table") suspend fun getMaxId(): Int?
 
-    @Query("SELECT * FROM history_table ORDER BY timestamp DESC LIMIT :limit")
-    fun getHistoryNewestFirst(limit: Int): Flow<List<HistoryEntry>>
+    @Query(
+            "SELECT * FROM history_table WHERE userId = :userId ORDER BY timestamp DESC LIMIT :limit"
+    )
+    fun getHistoryNewestFirst(userId: String, limit: Int): Flow<List<HistoryEntry>>
 
-    @Query("SELECT * FROM history_table ORDER BY timestamp ASC LIMIT :limit")
-    fun getHistoryOldestFirst(limit: Int): Flow<List<HistoryEntry>>
+    @Query("SELECT * FROM history_table WHERE userId = :userId ORDER BY timestamp ASC LIMIT :limit")
+    fun getHistoryOldestFirst(userId: String, limit: Int): Flow<List<HistoryEntry>>
 
-    @Query("SELECT * FROM history_table ORDER BY timestamp DESC")
-    fun getAllHistoryNewestFirst(): Flow<List<HistoryEntry>>
+    @Query("SELECT * FROM history_table WHERE userId = :userId ORDER BY timestamp DESC")
+    fun getAllHistoryNewestFirst(userId: String): Flow<List<HistoryEntry>>
 
-    @Query("SELECT * FROM history_table ORDER BY timestamp ASC")
-    fun getAllHistoryOldestFirst(): Flow<List<HistoryEntry>>
+    @Query("SELECT * FROM history_table WHERE userId = :userId ORDER BY timestamp ASC")
+    fun getAllHistoryOldestFirst(userId: String): Flow<List<HistoryEntry>>
 
     @Query("SELECT * FROM history_table WHERE id = :id LIMIT 1")
     suspend fun getHistoryById(id: Int): HistoryEntry?
@@ -41,16 +41,30 @@ interface HistoryDao {
     @Query("SELECT * FROM history_table WHERE id > :id ORDER BY id ASC")
     suspend fun getEntriesWithIdGreaterThan(id: Int): List<HistoryEntry>
 
-    @Query("SELECT * FROM history_table WHERE timestamp BETWEEN :startDate AND :endDate ORDER BY timestamp DESC LIMIT :limit")
-    fun getHistoryByDateRangeNewest(startDate: Long, endDate: Long, limit: Int): Flow<List<HistoryEntry>>
+    @Query(
+            "SELECT * FROM history_table WHERE userId = :userId AND timestamp BETWEEN :startDate AND :endDate ORDER BY timestamp DESC LIMIT :limit"
+    )
+    fun getHistoryByDateRangeNewest(
+            userId: String,
+            startDate: Long,
+            endDate: Long,
+            limit: Int
+    ): Flow<List<HistoryEntry>>
 
-    @Query("SELECT * FROM history_table WHERE timestamp BETWEEN :startDate AND :endDate ORDER BY timestamp ASC LIMIT :limit")
-    fun getHistoryByDateRangeOldest(startDate: Long, endDate: Long, limit: Int): Flow<List<HistoryEntry>>
+    @Query(
+            "SELECT * FROM history_table WHERE userId = :userId AND timestamp BETWEEN :startDate AND :endDate ORDER BY timestamp ASC LIMIT :limit"
+    )
+    fun getHistoryByDateRangeOldest(
+            userId: String,
+            startDate: Long,
+            endDate: Long,
+            limit: Int
+    ): Flow<List<HistoryEntry>>
 
-    @Update
-    suspend fun update(entry: HistoryEntry)
+    @Update suspend fun update(entry: HistoryEntry)
 
-    @Query("""
+    @Query(
+            """
         UPDATE history_table 
         SET commonName = :commonName,
             scientificName = :scientificName,
@@ -70,7 +84,8 @@ interface HistoryDao {
             timestamp = :timestamp,
             language = :language
         WHERE id = :id
-    """)
+    """
+    )
     suspend fun updateSpeciesDetails(
             id: Int,
             commonName: String,
@@ -92,9 +107,7 @@ interface HistoryDao {
             language: String
     )
 
-    @Query("DELETE FROM history_table")
-    suspend fun deleteAll()
+    @Query("DELETE FROM history_table") suspend fun deleteAll()
 
-    @Query("DELETE FROM history_table WHERE id = :id")
-    suspend fun deleteById(id: Int)
+    @Query("DELETE FROM history_table WHERE id = :id") suspend fun deleteById(id: Int)
 }
