@@ -233,7 +233,10 @@ class ChatSessionManager(
 
         try {
             val currentHistory = buildConversationHistory(sessionId)
-            val request = GeminiRequest(contents = currentHistory)
+            val systemInstruction =
+                    com.nguyendevs.ecolens.utils.PromptBuilder.buildChatSystemInstruction()
+            val request =
+                    GeminiRequest(contents = currentHistory, system_instruction = systemInstruction)
             val response = apiService.streamGemini(request)
 
             if (response.isSuccessful) {

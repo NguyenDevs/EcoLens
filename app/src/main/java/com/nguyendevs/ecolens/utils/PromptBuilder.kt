@@ -1,27 +1,33 @@
 package com.nguyendevs.ecolens.utils
 
+import com.nguyendevs.ecolens.api.GeminiContent
+import com.nguyendevs.ecolens.api.GeminiPart
 import com.nguyendevs.ecolens.managers.setting.LanguageManager
 
 object PromptBuilder {
 
     fun buildCommonNamePrompt(scientificName: String, languageCode: String): String {
         return when (languageCode) {
-            LanguageManager.LANG_VI -> """
+            LanguageManager.LANG_VI ->
+                    """
                 Provide the most common name for "$scientificName" in Vietnamese.
                 Return JSON only: {"commonName": "Tên Tiếng Việt"}
                 RETURN ONLY JSON, NO MARKDOWN.
             """.trimIndent()
-            LanguageManager.LANG_CN -> """
+            LanguageManager.LANG_CN ->
+                    """
                 Provide the most common name for "$scientificName" in Simplified Chinese.
                 Return JSON only: {"commonName": "Name"}
                 RETURN ONLY JSON, NO MARKDOWN.
             """.trimIndent()
-            LanguageManager.LANG_JP -> """
+            LanguageManager.LANG_JP ->
+                    """
                 Provide the most common name for "$scientificName" in Japanese.
                 Return JSON only: {"commonName": "Name"}
                 RETURN ONLY JSON, NO MARKDOWN.
             """.trimIndent()
-            else -> """
+            else ->
+                    """
                 Provide the most common name for "$scientificName" in English.
                 Return JSON only: {"commonName": "Name"}
                 RETURN ONLY JSON, NO MARKDOWN.
@@ -38,26 +44,33 @@ object PromptBuilder {
         }
     }
 
-    fun buildConservationPrompt(scientificName: String, iucnCode: String, languageCode: String): String {
+    fun buildConservationPrompt(
+            scientificName: String,
+            iucnCode: String,
+            languageCode: String
+    ): String {
         val codeToUse = iucnCode.trim()
         val shouldSearch = codeToUse.isBlank() || codeToUse.equals("NE", ignoreCase = true)
 
         return when (languageCode) {
-            LanguageManager.LANG_VI -> buildVietnameseConservationPrompt(scientificName, codeToUse, shouldSearch)
-            LanguageManager.LANG_CN -> buildChineseConservationPrompt(scientificName, codeToUse, shouldSearch)
-            LanguageManager.LANG_JP -> buildJapaneseConservationPrompt(scientificName, codeToUse, shouldSearch)
+            LanguageManager.LANG_VI ->
+                    buildVietnameseConservationPrompt(scientificName, codeToUse, shouldSearch)
+            LanguageManager.LANG_CN ->
+                    buildChineseConservationPrompt(scientificName, codeToUse, shouldSearch)
+            LanguageManager.LANG_JP ->
+                    buildJapaneseConservationPrompt(scientificName, codeToUse, shouldSearch)
             else -> buildEnglishConservationPrompt(scientificName, codeToUse, shouldSearch)
         }
     }
 
     fun buildTaxonomyTranslationPrompt(
-        kingdom: String,
-        phylum: String,
-        className: String,
-        taxorder: String,
-        family: String,
-        genus: String,
-        species: String
+            kingdom: String,
+            phylum: String,
+            className: String,
+            taxorder: String,
+            family: String,
+            genus: String,
+            species: String
     ): String {
         /*
         Dịch các thuật ngữ phân loại sinh học sau sang Tiếng Việt chuẩn xác nhất.
@@ -103,7 +116,8 @@ object PromptBuilder {
         CHỈ TRẢ VỀ JSON.
      */
 
-    private fun buildVietnameseDetailsPrompt(scientificName: String): String = """
+    private fun buildVietnameseDetailsPrompt(scientificName: String): String =
+            """
         Provide detailed information about "$scientificName" in Vietnamese.
         
         FORMAT RULES:
@@ -148,7 +162,11 @@ object PromptBuilder {
 
             CHỈ TRẢ VỀ JSON.
      */
-    private fun buildVietnameseConservationPrompt(scientificName: String, codeToUse: String, shouldSearch: Boolean): String {
+    private fun buildVietnameseConservationPrompt(
+            scientificName: String,
+            codeToUse: String,
+            shouldSearch: Boolean
+    ): String {
         return if (!shouldSearch) {
             """
             Analyze IUCN conservation status "$codeToUse" for species "$scientificName" in Vietnamese.
@@ -182,7 +200,8 @@ object PromptBuilder {
 
     // ==================== ENGLISH PROMPTS ====================
 
-    private fun buildEnglishDetailsPrompt(scientificName: String): String = """
+    private fun buildEnglishDetailsPrompt(scientificName: String): String =
+            """
         Provide detailed information about "$scientificName" in English.
         
         FORMAT RULES:
@@ -201,7 +220,11 @@ object PromptBuilder {
         RETURN ONLY JSON.
     """.trimIndent()
 
-    private fun buildEnglishConservationPrompt(scientificName: String, codeToUse: String, shouldSearch: Boolean): String {
+    private fun buildEnglishConservationPrompt(
+            scientificName: String,
+            codeToUse: String,
+            shouldSearch: Boolean
+    ): String {
         return if (!shouldSearch) {
             """
             Analyze IUCN conservation status "$codeToUse" for species "$scientificName" in English.
@@ -235,7 +258,8 @@ object PromptBuilder {
 
     // ==================== CHINESE PROMPTS ====================
 
-    private fun buildChineseDetailsPrompt(scientificName: String): String = """
+    private fun buildChineseDetailsPrompt(scientificName: String): String =
+            """
         Provide detailed information about "$scientificName" in Simplified Chinese.
         
         FORMAT RULES:
@@ -254,7 +278,11 @@ object PromptBuilder {
         RETURN ONLY JSON.
     """.trimIndent()
 
-    private fun buildChineseConservationPrompt(scientificName: String, codeToUse: String, shouldSearch: Boolean): String {
+    private fun buildChineseConservationPrompt(
+            scientificName: String,
+            codeToUse: String,
+            shouldSearch: Boolean
+    ): String {
         return if (!shouldSearch) {
             """
             Analyze IUCN conservation status "$codeToUse" for species "$scientificName" in Simplified Chinese.
@@ -288,7 +316,8 @@ object PromptBuilder {
 
     // ==================== JAPANESE PROMPTS ====================
 
-    private fun buildJapaneseDetailsPrompt(scientificName: String): String = """
+    private fun buildJapaneseDetailsPrompt(scientificName: String): String =
+            """
         Provide detailed information about "$scientificName" in Japanese.
         
         FORMAT RULES:
@@ -307,7 +336,11 @@ object PromptBuilder {
         RETURN ONLY JSON.
     """.trimIndent()
 
-    private fun buildJapaneseConservationPrompt(scientificName: String, codeToUse: String, shouldSearch: Boolean): String {
+    private fun buildJapaneseConservationPrompt(
+            scientificName: String,
+            codeToUse: String,
+            shouldSearch: Boolean
+    ): String {
         return if (!shouldSearch) {
             """
             Analyze IUCN conservation status "$codeToUse" for species "$scientificName" in Japanese.
@@ -337,5 +370,30 @@ object PromptBuilder {
             RETURN ONLY JSON.
             """.trimIndent()
         }
+    }
+    fun buildChatSystemInstruction(): GeminiContent {
+        return GeminiContent(
+                role = "user",
+                parts =
+                        listOf(
+                            GeminiPart(
+                                text =
+                                    """
+                    You are EcoLens AI, a helpful assistant specializing in biology, nature, and environmental science.
+                    
+                    STRICT RULES:
+                    1. ONLY answer questions related to:
+                       - Animals, Plants, Insects, Fungi
+                       - Nature, Environment, Ecology, Conservation
+                       - Biological processes, Habitats, Taxonomy
+                    
+                    2. If a user asks about anything else (e.g., programming, math, history, politics, general advice), you must POLITELY REFUSE.
+                       - Sample refusal: "I'm sorry, I can only assist with questions about nature, animals, and plants." (Translate this to the user's language).
+                    
+                    3. Keep answers concise, accurate, and easy to understand.
+                """.trimIndent()
+                            )
+                        )
+        )
     }
 }
