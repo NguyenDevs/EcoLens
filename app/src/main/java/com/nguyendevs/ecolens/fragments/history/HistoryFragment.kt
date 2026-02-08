@@ -230,11 +230,11 @@ class HistoryFragment : Fragment() {
                                 if (filteredList.isEmpty()) {
                                     if (allList.size < currentLimit) {
                                         animationHandler.fadeOut(binding.rvHistory)
-                                        animationHandler.fadeIn(binding.emptyStateContainer)
+                                        //animationHandler.fadeIn(binding.emptyStateContainer)
                                         hasMoreData = false
                                     } else {
                                         animationHandler.fadeOut(binding.rvHistory)
-                                        animationHandler.fadeIn(binding.emptyStateContainer)
+                                        //animationHandler.fadeIn(binding.emptyStateContainer)
                                     }
                                 } else {
                                     animationHandler.fadeIn(binding.rvHistory)

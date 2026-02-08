@@ -191,6 +191,7 @@
                 android:id="@+id/shimmerViewContainer"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                app:shimmer_duration="1500"
                 android:visibility="gone">
 
             <LinearLayout
