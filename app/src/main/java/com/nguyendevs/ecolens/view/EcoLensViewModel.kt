@@ -23,16 +23,17 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     private val historyDao by lazy { HistoryDatabase.getDatabase(application).historyDao() }
     private val chatDao by lazy { HistoryDatabase.getDatabase(application).chatDao() }
 
-    private val historyRepository by lazy { HistoryRepository(historyDao, application.applicationContext) }
+    private val historyRepository by lazy {
+        HistoryRepository(historyDao, application.applicationContext)
+    }
     private val chatRepository by lazy { ChatRepository(chatDao, application.applicationContext) }
 
     private val speciesManager by lazy {
-        SpeciesIdentificationManager(
-            application.applicationContext,
-            historyRepository
-        )
+        SpeciesIdentificationManager(application.applicationContext, historyRepository)
     }
-    private val historyManager by lazy { HistoryManager(application.applicationContext, historyRepository) }
+    private val historyManager by lazy {
+        HistoryManager(application.applicationContext, historyRepository)
+    }
     private val chatManager by lazy { ChatSessionManager(chatRepository, chatDao, viewModelScope) }
 
     private val _uiState = MutableStateFlow(EcoLensUiState())
@@ -47,12 +48,18 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
     private val translationCache = mutableMapOf<Int, Pair<String, SpeciesInfo>>()
 
+    private val _isHistoryLoading = MutableStateFlow(false)
+    val isHistoryLoading: StateFlow<Boolean> = _isHistoryLoading.asStateFlow()
+
     init {
         viewModelScope.launch {
+            _isHistoryLoading.value = true
             historyRepository.fetchHistory()
+            _isHistoryLoading.value = false
             historyManager.repairMissingImagesOnce()
-            chatRepository.fetchSessionsAndMessages()
         }
+
+        viewModelScope.launch { chatRepository.fetchSessionsAndMessages() }
     }
 
     fun getCachedTranslation(historyId: Int, targetLang: String): SpeciesInfo? {
@@ -73,12 +80,10 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         lastLanguageCode = languageCode
         viewModelScope.launch {
             speciesManager.identifySpecies(
-                imageUri = imageUri,
-                languageCode = languageCode,
-                existingHistoryId = existingHistoryId,
-                onStateUpdate = { state ->
-                    _uiState.value = state
-                }
+                    imageUri = imageUri,
+                    languageCode = languageCode,
+                    existingHistoryId = existingHistoryId,
+                    onStateUpdate = { state -> _uiState.value = state }
             )
         }
     }
@@ -86,17 +91,15 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     fun retryIdentification() {
         speciesManager.currentImageUri?.let { uri ->
             identifySpecies(
-                imageUri = uri,
-                languageCode = lastLanguageCode,
-                existingHistoryId = speciesManager.currentHistoryEntryId
+                    imageUri = uri,
+                    languageCode = lastLanguageCode,
+                    existingHistoryId = speciesManager.currentHistoryEntryId
             )
         }
     }
 
     fun initNewChatSession(welcomeMessage: String, defaultTitle: String) {
-        viewModelScope.launch {
-            chatManager.initNewChatSession(welcomeMessage, defaultTitle)
-        }
+        viewModelScope.launch { chatManager.initNewChatSession(welcomeMessage, defaultTitle) }
     }
 
     fun loadChatSession(sessionId: Long) {
@@ -104,21 +107,15 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun sendChatMessage(userMessage: String, defaultTitle: String) {
-        viewModelScope.launch {
-            chatManager.sendChatMessage(userMessage, defaultTitle)
-        }
+        viewModelScope.launch { chatManager.sendChatMessage(userMessage, defaultTitle) }
     }
 
     fun renewAiResponse(aiMessage: ChatMessage) {
-        viewModelScope.launch {
-            chatManager.renewAiResponse(aiMessage)
-        }
+        viewModelScope.launch { chatManager.renewAiResponse(aiMessage) }
     }
 
     fun deleteChatSession(sessionId: Long) {
-        viewModelScope.launch {
-            chatManager.deleteChatSession(sessionId)
-        }
+        viewModelScope.launch { chatManager.deleteChatSession(sessionId) }
     }
 
     fun startNewChatSession() {
@@ -126,23 +123,19 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun getHistoryBySortOption(
-        sortOption: HistorySortOption,
-        startDate: Long? = null,
-        endDate: Long? = null,
-        limit: Int = 20
+            sortOption: HistorySortOption,
+            startDate: Long? = null,
+            endDate: Long? = null,
+            limit: Int = 20
     ): Flow<List<HistoryEntry>> {
         return historyManager.getHistoryBySortOption(sortOption, startDate, endDate, limit)
     }
 
     fun deleteHistory(entry: HistoryEntry) {
-        viewModelScope.launch {
-            historyManager.deleteHistory(entry)
-        }
+        viewModelScope.launch { historyManager.deleteHistory(entry) }
     }
 
     fun deleteAllHistory() {
-        viewModelScope.launch {
-            historyManager.deleteAllHistory()
-        }
+        viewModelScope.launch { historyManager.deleteAllHistory() }
     }
 }
