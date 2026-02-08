@@ -51,6 +51,9 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             historyRepository.fetchHistory()
             historyManager.repairMissingImagesOnce()
+        }
+
+        viewModelScope.launch {
             chatRepository.fetchSessionsAndMessages()
         }
     }
