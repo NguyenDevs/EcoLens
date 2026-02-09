@@ -3,14 +3,11 @@ package com.nguyendevs.ecolens
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Looper
-import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -22,7 +19,6 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
@@ -40,6 +36,7 @@ import com.nguyendevs.ecolens.fragments.history.HistoryFragment
 import com.nguyendevs.ecolens.handlers.*
 import com.nguyendevs.ecolens.handlers.animations.HistoryDetailAnimationHandler
 import com.nguyendevs.ecolens.handlers.animations.LoadingAnimationHandler
+import com.nguyendevs.ecolens.utils.FabAnimationHelper
 import com.nguyendevs.ecolens.handlers.home.ImageZoomHandler
 import com.nguyendevs.ecolens.handlers.home.SearchBarHandler
 import com.nguyendevs.ecolens.handlers.main.HomeScreenHandler
@@ -87,7 +84,6 @@ class MainActivity : AppCompatActivity() {
     private var stopLoadingJob: Job? = null
     private var isSpeaking = false
 
-
     companion object {
         private const val PREF_NAME = "EcoLensPrefs"
         private const val TRANSITION_ANIMATION_DURATION = 400L
@@ -124,26 +120,36 @@ class MainActivity : AppCompatActivity() {
 
     /** Launcher cho Google Re-Auth */
     private val googleReAuthLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-                try {
-                    val account = task.getResult(ApiException::class.java)
-                    account.idToken?.let { idToken ->
-                        val credential = GoogleAuthProvider.getCredential(idToken, null)
-                        userRepository.reauthenticateUser(credential) { success ->
-                            if (success) {
-                                settingsHandler.onGoogleReAuthSuccess()
-                            } else {
-                                Toast.makeText(this, getString(R.string.error_reauth_failed), Toast.LENGTH_SHORT).show()
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == RESULT_OK) {
+                    val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+                    try {
+                        val account = task.getResult(ApiException::class.java)
+                        account.idToken?.let { idToken ->
+                            val credential = GoogleAuthProvider.getCredential(idToken, null)
+                            userRepository.reauthenticateUser(credential) { success ->
+                                if (success) {
+                                    settingsHandler.onGoogleReAuthSuccess()
+                                } else {
+                                    Toast.makeText(
+                                                    this,
+                                                    getString(R.string.error_reauth_failed),
+                                                    Toast.LENGTH_SHORT
+                                            )
+                                            .show()
+                                }
                             }
                         }
+                    } catch (e: ApiException) {
+                        Toast.makeText(
+                                        this,
+                                        "Google re-auth failed: ${e.message}",
+                                        Toast.LENGTH_SHORT
+                                )
+                                .show()
                     }
-                } catch (e: ApiException) {
-                    Toast.makeText(this, "Google re-auth failed: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
-        }
 
     override fun attachBaseContext(newBase: Context) {
         languageManager = LanguageManager(newBase)
@@ -163,9 +169,7 @@ class MainActivity : AppCompatActivity() {
 
         setupViewModel()
 
-        viewModel.currentImageUri?.let { uri ->
-            this.imageUri = uri
-        }
+        viewModel.currentImageUri?.let { uri -> this.imageUri = uri }
 
         initHandlers()
         initManagers()
@@ -205,10 +209,11 @@ class MainActivity : AppCompatActivity() {
                 val user = userRepository.getCurrentUserDetails()
                 if (user != null) {
                     val appSettings = getSharedPreferences("app_settings", Context.MODE_PRIVATE)
-                    appSettings.edit()
-                        .putBoolean("iucn_mode", user.iucnMode)
-                        .putBoolean("taxo_mode", user.taxoMode)
-                        .apply()
+                    appSettings
+                            .edit()
+                            .putBoolean("iucn_mode", user.iucnMode)
+                            .putBoolean("taxo_mode", user.taxoMode)
+                            .apply()
 
                     settingsHandler.refreshSettingsState()
 
@@ -217,7 +222,9 @@ class MainActivity : AppCompatActivity() {
                         languageManager.setLanguage(user.language)
 
                         val intent = Intent(this@MainActivity, MainActivity::class.java)
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                        intent.addFlags(
+                                Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                        )
                         startActivity(intent)
                         finish()
                         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
@@ -315,20 +322,20 @@ class MainActivity : AppCompatActivity() {
 
     /** Khởi tạo các handler xử lý UI */
     private fun initHandlers() {
-        settingsHandler = SettingsHandler(
-            this, 
-            languageManager, 
-            binding.settingsContainer,
-            onUsernameChanged = {
-                homeScreenHandler.setupGreeting()
-            }
-        )
-        
+        settingsHandler =
+                SettingsHandler(
+                        this,
+                        languageManager,
+                        binding.settingsContainer,
+                        onUsernameChanged = { homeScreenHandler.setupGreeting() }
+                )
+
         settingsHandler.setGoogleReAuthRequest {
-            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build()
+            val gso =
+                    GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                            .requestIdToken(getString(R.string.default_web_client_id))
+                            .requestEmail()
+                            .build()
             val googleSignInClient = GoogleSignIn.getClient(this, gso)
 
             googleSignInClient.signOut().addOnCompleteListener {
@@ -381,10 +388,10 @@ class MainActivity : AppCompatActivity() {
 
         homeScreenHandler =
                 HomeScreenHandler(
-                    this, 
-                    binding, 
-                    { entry -> navigateToHistoryDetail(entry) },
-                    { imageUrl -> handleCapturedImage(imageUrl.toUri()) }
+                        this,
+                        binding,
+                        { entry -> navigateToHistoryDetail(entry) },
+                        { imageUrl -> handleCapturedImage(imageUrl.toUri()) }
                 )
 
         navigationHandler =
@@ -413,7 +420,7 @@ class MainActivity : AppCompatActivity() {
                         binding.fabSpeak.isVisible = false
                     }
                 }
-        
+
         animationHandler = HistoryDetailAnimationHandler(this)
     }
 
@@ -559,16 +566,20 @@ class MainActivity : AppCompatActivity() {
     private fun setupFAB() {
         binding.fabCamera.setOnClickListener {
             binding.fabCamera.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
-            if (speakerManager.isSpeaking()) {
-                speakerManager.pause()
-                updateFabUI(false)
-            }
+            FabAnimationHelper.animateClick(
+                    binding.fabCamera
+            ) {
+                if (speakerManager.isSpeaking()) {
+                    speakerManager.pause()
+                    updateFabUI(false)
+                }
 
-            if (permissionManager.hasPermissions()) {
-                cameraActivityLauncher.launch(CameraActivity.newIntent(this))
-                overridePendingTransition(R.anim.slide_in_bottom, R.anim.hold)
-            } else {
-                permissionManager.requestPermissions()
+                if (permissionManager.hasPermissions()) {
+                    cameraActivityLauncher.launch(CameraActivity.newIntent(this))
+                    overridePendingTransition(R.anim.slide_in_bottom, R.anim.hold)
+                } else {
+                    permissionManager.requestPermissions()
+                }
             }
         }
 
@@ -577,9 +588,7 @@ class MainActivity : AppCompatActivity() {
                 lifecycleScope.launch(Dispatchers.IO) {
                     if (isSpeaking) {
                         speakerManager.pause()
-                        withContext(Dispatchers.Main) {
-                            updateFabUI(false)
-                        }
+                        withContext(Dispatchers.Main) { updateFabUI(false) }
                     } else {
                         val text = TextToSpeechGenerator.generateSpeechText(this@MainActivity, info)
                         if (text.isNotEmpty()) {
@@ -642,16 +651,16 @@ class MainActivity : AppCompatActivity() {
             stopLoadingJob?.cancel()
 
             when (loadingStage) {
-                LoadingStage.SCIENTIFIC_NAME,
-                LoadingStage.COMMON_NAME -> loadingAnimationHandler.setText(R.string.loading_taxon)
+                LoadingStage.SCIENTIFIC_NAME, LoadingStage.COMMON_NAME ->
+                        loadingAnimationHandler.setText(R.string.loading_taxon)
                 LoadingStage.TAXONOMY -> loadingAnimationHandler.setText(R.string.loading_detail)
                 LoadingStage.DESCRIPTION,
                 LoadingStage.CHARACTERISTICS,
                 LoadingStage.DISTRIBUTION,
                 LoadingStage.HABITAT,
-                LoadingStage.CONSERVATION -> loadingAnimationHandler.setText(R.string.loading_conservation)
+                LoadingStage.CONSERVATION ->
+                        loadingAnimationHandler.setText(R.string.loading_conservation)
                 else -> loadingAnimationHandler.setText(R.string.analyzing_text)
-
             }
             loadingAnimationHandler.start()
         } else {
@@ -699,7 +708,11 @@ class MainActivity : AppCompatActivity() {
             val errorCard = homeRoot.findViewById<View>(R.id.errorCard)
             if (errorCard != null) errorCard.isVisible = false
 
-            speciesInfoHandler.displaySpeciesInfo(state.speciesInfo, loadingStage, state.isTaxonomyTranslating)
+            speciesInfoHandler.displaySpeciesInfo(
+                    state.speciesInfo,
+                    loadingStage,
+                    state.isTaxonomyTranslating
+            )
 
             if (navigationHandler.isHomeTab()) {
                 if (loadingStage == LoadingStage.COMPLETE) {

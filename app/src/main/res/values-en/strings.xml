@@ -323,12 +323,14 @@
     <!-- ==================== DIALOGS ==================== -->
     <string name="action_delete">Delete</string>
     <string name="action_cancel">Cancel</string>
+    <string name="action_more_options">Options</string>
+    <string name="action_delete_chat">Delete chat</string>
     <string name="dialog_delete_history_title">Delete history</string>
     <string name="dialog_delete_history_message">Are you sure you want to delete this history?</string>
     <string name="dialog_save_picture_history_title">Download picture</string>
     <string name="dialog_export_history_title">Export history</string>
     <string name="label_select_format">Select export format:</string>
-    <string name="label_include_image">Include images (Except JSON)</string>
+    <string name="label_include_image">Include images</string>
     <string name="action_export">Export file</string>
     <string name="action_save">Save</string>
     <string name="dialog_save_picture_title">Save image</string>

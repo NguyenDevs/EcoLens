@@ -323,12 +323,14 @@
     <!-- ==================== ダイアログ ==================== -->
     <string name="action_delete">削除</string>
     <string name="action_cancel">キャンセル</string>
+    <string name="action_more_options">オプション</string>
+    <string name="action_delete_chat">チャットを削除</string>
     <string name="dialog_delete_history_title">履歴を削除</string>
     <string name="dialog_delete_history_message">この履歴を削除してもよろしいですか？</string>
     <string name="dialog_save_picture_history_title">画像をダウンロード</string>
     <string name="dialog_export_history_title">履歴をエクスポート</string>
     <string name="label_select_format">エクスポート形式を選択：</string>
-    <string name="label_include_image">画像を含める（JSON除く）</string>
+    <string name="label_include_image">画像を含める</string>
     <string name="action_export">ファイルをエクスポート</string>
     <string name="action_save">保存</string>
     <string name="dialog_save_picture_title">画像を保存</string>

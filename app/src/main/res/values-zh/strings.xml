@@ -323,12 +323,14 @@
     <!-- ==================== 对话框 ==================== -->
     <string name="action_delete">删除</string>
     <string name="action_cancel">取消</string>
+    <string name="action_more_options">选项</string>
+    <string name="action_delete_chat">删除聊天记录</string>
     <string name="dialog_delete_history_title">删除历史</string>
     <string name="dialog_delete_history_message">您确定要删除此历史记录吗？</string>
     <string name="dialog_save_picture_history_title">下载图片</string>
     <string name="dialog_export_history_title">导出历史记录</string>
     <string name="label_select_format">选择导出格式：</string>
-    <string name="label_include_image">包含图片（JSON除外）</string>
+    <string name="label_include_image">包含图片</string>
     <string name="action_export">导出文件</string>
     <string name="action_save">保存</string>
     <string name="dialog_save_picture_title">保存图片</string>

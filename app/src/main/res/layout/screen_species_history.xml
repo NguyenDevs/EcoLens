@@ -55,6 +55,7 @@
             <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:animateLayoutChanges="true"
                     android:orientation="horizontal">
 
                 <!-- Category Filter Group -->
@@ -123,6 +124,7 @@
                 <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:animateLayoutChanges="true"
                         android:orientation="horizontal">
 
                     <!-- Sort Chip -->
