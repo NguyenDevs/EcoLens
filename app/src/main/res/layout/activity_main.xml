@@ -64,7 +64,7 @@
                     android:padding="@dimen/spacing_sm"
                     android:src="@drawable/ic_search"
                     app:tint="@color/primary"
-                    app:elevation="0dp"
+                    app:elevation="1dp"
                     app:pressedTranslationZ="@dimen/elevation_xl"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
