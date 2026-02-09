@@ -328,6 +328,18 @@
     <string name="dialog_delete_history_message">Bạn có chắc muốn xóa lịch sử nhận diện này không?</string>
     <string name="dialog_save_picture_history_title">Tải hình ảnh</string>
     <string name="dialog_export_history_title">Xuất lịch sử</string>
+    <string name="label_select_format">Chọn định dạng xuất:</string>
+    <string name="label_include_image">Bao gồm hình ảnh (Trừ JSON)</string>
+    <string name="action_export">Xuất file</string>
+    <string name="action_save">Lưu</string>
+    <string name="dialog_save_picture_title">Lưu hình ảnh</string>
+    <string name="dialog_save_picture_message">Bạn có muốn lưu hình ảnh này vào thư viện không?</string>
+    <string name="save_success">Đã lưu ảnh vào thư viện</string>
+    <string name="error_save_failed">Lưu ảnh thất bại</string>
+    <string name="export_success">Đã xuất file thành công: %s</string>
+    <string name="error_export_failed">Xuất file thất bại</string>
+    <string name="error_image_not_found">Không tìm thấy file ảnh gốc</string>
+    <string name="dialog_export_title">Tùy chọn xuất</string>
 
     <!-- ==================== QUYỀN TRUY CẬP ==================== -->
     <string name="permission_title">Cần quyền truy cập</string>
