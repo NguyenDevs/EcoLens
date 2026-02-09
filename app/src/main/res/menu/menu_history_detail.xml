@@ -6,4 +6,14 @@
             android:title="@string/dialog_delete_history_title"
             android:icon="@drawable/ic_delete"
             android:iconTint="@color/text_primary"/>
+    <item
+            android:id="@+id/action_save_picture_history"
+            android:title="@string/dialog_save_picture_history_title"
+            android:icon="@drawable/ic_save_picture"
+            android:iconTint="@color/text_primary"/>
+    <item
+            android:id="@+id/action_export_history"
+            android:title="@string/dialog_export_history_title"
+            android:icon="@drawable/ic_export"
+            android:iconTint="@color/text_primary"/>
 </menu>

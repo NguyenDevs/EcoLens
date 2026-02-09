@@ -13,8 +13,10 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.PopupMenu
+import android.widget.CheckBox
 import android.widget.LinearLayout
+import android.widget.PopupMenu
+import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -30,15 +32,17 @@ import com.nguyendevs.ecolens.handlers.animations.HistoryDetailAnimationHandler
 import com.nguyendevs.ecolens.managers.gemini.GeminiStreamingHelper
 import com.nguyendevs.ecolens.managers.main.SpeakerManager
 import com.nguyendevs.ecolens.managers.setting.LanguageManager
-import com.nguyendevs.ecolens.models.history.HistoryEntry
 import com.nguyendevs.ecolens.models.SpeciesInfo
+import com.nguyendevs.ecolens.models.history.HistoryEntry
 import com.nguyendevs.ecolens.network.RetrofitClient
+import com.nguyendevs.ecolens.utils.ExportUtils
+import com.nguyendevs.ecolens.utils.ExportUtils.ExportFormat
 import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
 import com.nguyendevs.ecolens.view.EcoLensViewModel
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
 
 /**
  * Fragment hiển thị chi tiết lịch sử nhận diện loài
@@ -50,7 +54,8 @@ import java.io.File
 class HistoryDetailFragment : Fragment() {
 
     private var _binding: FragmentSpeciesHistoryDetailBinding? = null
-    private val binding get() = _binding!!
+    private val binding
+        get() = _binding!!
 
     private val viewModel: EcoLensViewModel by activityViewModels()
     private lateinit var speakerManager: SpeakerManager
@@ -85,9 +90,9 @@ class HistoryDetailFragment : Fragment() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSpeciesHistoryDetailBinding.inflate(inflater, container, false)
         return binding.root
@@ -161,8 +166,8 @@ class HistoryDetailFragment : Fragment() {
             fieldMPopup.isAccessible = true
             val mPopup = fieldMPopup.get(popup)
             mPopup.javaClass
-                .getDeclaredMethod("setForceShowIcon", Boolean::class.javaPrimitiveType)
-                .invoke(mPopup, true)
+                    .getDeclaredMethod("setForceShowIcon", Boolean::class.javaPrimitiveType)
+                    .invoke(mPopup, true)
         }
 
         popup.setOnMenuItemClickListener { item ->
@@ -174,35 +179,138 @@ class HistoryDetailFragment : Fragment() {
                 else -> false
             }
         }
+        popup.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.action_delete_history -> {
+                    showDeleteConfirmDialog()
+                    true
+                }
+                R.id.action_save_picture_history -> {
+                    historyEntry?.let { entry ->
+                        if (entry.localImagePath.isNotEmpty() && File(entry.localImagePath).exists()
+                        ) {
+                            showDownloadConfirmation(entry.localImagePath)
+                        } else {
+                            Toast.makeText(
+                                            requireContext(),
+                                            getString(R.string.error_image_not_found),
+                                            Toast.LENGTH_SHORT
+                                    )
+                                    .show()
+                        }
+                    }
+                    true
+                }
+                R.id.action_export_history -> {
+                    historyEntry?.let { showExportDialog(it) }
+                    true
+                }
+                else -> false
+            }
+        }
         popup.show()
+    }
+
+    private fun showDownloadConfirmation(imagePath: String) {
+        AlertDialog.Builder(requireContext())
+                .setTitle(R.string.dialog_save_picture_title)
+                .setMessage(R.string.dialog_save_picture_message)
+                .setPositiveButton(R.string.action_save) { _, _ ->
+                    if (ExportUtils.saveImageToGallery(requireContext(), imagePath)) {
+                        Toast.makeText(
+                                        requireContext(),
+                                        getString(R.string.save_success),
+                                        Toast.LENGTH_SHORT
+                                )
+                                .show()
+                    } else {
+                        Toast.makeText(
+                                        requireContext(),
+                                        getString(R.string.error_save_failed),
+                                        Toast.LENGTH_SHORT
+                                )
+                                .show()
+                    }
+                }
+                .setNegativeButton(R.string.action_cancel, null)
+                .show()
+    }
+
+    private fun showExportDialog(entry: HistoryEntry) {
+        val context = requireContext()
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_export_options, null)
+        val radioGroup = dialogView.findViewById<RadioGroup>(R.id.radioGroupFormat)
+        val checkIncludeImage = dialogView.findViewById<CheckBox>(R.id.checkIncludeImage)
+
+        radioGroup.setOnCheckedChangeListener { _, checkedId ->
+            // Disable image checkbox for JSON/CSV if needed, currently JSON logic supports NO image
+            if (checkedId == R.id.radioJson) {
+                checkIncludeImage.isChecked = false
+                checkIncludeImage.isEnabled = false
+            } else {
+                checkIncludeImage.isEnabled = true
+            }
+        }
+
+        AlertDialog.Builder(context)
+                .setTitle(R.string.dialog_export_title)
+                .setView(dialogView)
+                .setPositiveButton(R.string.action_export) { _, _ ->
+                    val format =
+                            when (radioGroup.checkedRadioButtonId) {
+                                R.id.radioDocx -> ExportFormat.DOCX
+                                R.id.radioXlsx -> ExportFormat.XLSX
+                                R.id.radioPdf -> ExportFormat.PDF
+                                R.id.radioJson -> ExportFormat.JSON
+                                else -> ExportFormat.DOCX
+                            }
+                    val includeImage = checkIncludeImage.isChecked
+
+                    // Perform export
+                    val result = ExportUtils.exportHistory(context, entry, format, includeImage)
+                    if (result != null) {
+                        Toast.makeText(
+                                        context,
+                                        getString(R.string.export_success, result),
+                                        Toast.LENGTH_LONG
+                                )
+                                .show()
+                    } else {
+                        Toast.makeText(
+                                        context,
+                                        getString(R.string.error_export_failed),
+                                        Toast.LENGTH_SHORT
+                                )
+                                .show()
+                    }
+                }
+                .setNegativeButton(R.string.action_cancel, null)
+                .show()
     }
 
     private fun showDeleteConfirmDialog() {
         AlertDialog.Builder(requireContext())
-            .setTitle(R.string.dialog_delete_history_title)
-            .setMessage(R.string.dialog_delete_history_message)
-            .setPositiveButton(R.string.action_delete) { _, _ ->
-                historyEntry?.let { entry ->
-                    viewModel.deleteHistory(entry)
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.delete_success),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    parentFragmentManager.popBackStack()
+                .setTitle(R.string.dialog_delete_history_title)
+                .setMessage(R.string.dialog_delete_history_message)
+                .setPositiveButton(R.string.action_delete) { _, _ ->
+                    historyEntry?.let { entry ->
+                        viewModel.deleteHistory(entry)
+                        Toast.makeText(
+                                        requireContext(),
+                                        getString(R.string.delete_success),
+                                        Toast.LENGTH_SHORT
+                                )
+                                .show()
+                        parentFragmentManager.popBackStack()
+                    }
                 }
-            }
-            .setNegativeButton(R.string.action_cancel, null)
-            .show()
+                .setNegativeButton(R.string.action_cancel, null)
+                .show()
     }
 
     // ==================== SHARE FUNCTIONALITY ====================
 
-    private fun setupShareButton(
-        info: SpeciesInfo,
-        remoteUrl: String?,
-        localImagePath: String?
-    ) {
+    private fun setupShareButton(info: SpeciesInfo, remoteUrl: String?, localImagePath: String?) {
         binding.btnShareInfo.setOnClickListener {
             if (isTranslating) return@setOnClickListener
             animationHandler.performConfirmFeedback(it)
@@ -214,11 +322,12 @@ class HistoryDetailFragment : Fragment() {
                     val file = File(localImagePath)
                     if (file.exists()) {
                         try {
-                            imageUri = FileProvider.getUriForFile(
-                                requireContext(),
-                                "${requireContext().packageName}.provider",
-                                file
-                            )
+                            imageUri =
+                                    FileProvider.getUriForFile(
+                                            requireContext(),
+                                            "${requireContext().packageName}.provider",
+                                            file
+                                    )
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
@@ -233,66 +342,107 @@ class HistoryDetailFragment : Fragment() {
                     }
                 }
 
-                withContext(Dispatchers.Main) {
-                    shareSpeciesInfo(info, imageUri)
-                }
+                withContext(Dispatchers.Main) { shareSpeciesInfo(info, imageUri) }
             }
         }
     }
 
     private fun shareSpeciesInfo(info: SpeciesInfo, imageUri: Uri?) {
-        val confidencePercent = String.format(
-            "%.2f",
-            if (info.confidence > 1) info.confidence else info.confidence * 100
-        )
+        val confidencePercent =
+                String.format(
+                        "%.2f",
+                        if (info.confidence > 1) info.confidence else info.confidence * 100
+                )
 
         val context = requireContext()
         val shareText = buildString {
             append(context.getString(R.string.share_title))
             append("\n━━━━━━━━━━━━━━━━━━━━\n\n")
             append("📌 ${stripHtml(info.commonName)}\n🔬 ${stripHtml(info.scientificName)}\n")
-            append("✅ ${context.getString(R.string.label_confidence_template, confidencePercent)}%\n\n")
-            append("━━━━━━━━━━━━━━━━━━━━\n${context.getString(R.string.share_taxonomy_title)}\n━━━━━━━━━━━━━━━━━━━━\n\n")
-
-            if (info.kingdom.isNotEmpty()) append("• ${context.getString(R.string.label_kingdom)} ${stripHtml(info.kingdom)}\n")
-            if (info.phylum.isNotEmpty()) append("• ${context.getString(R.string.label_phylum)} ${stripHtml(info.phylum)}\n")
-            if (info.className.isNotEmpty()) append("• ${context.getString(R.string.label_class)} ${stripHtml(info.className)}\n")
-            if (info.taxorder.isNotEmpty()) append("• ${context.getString(R.string.label_order)} ${stripHtml(info.taxorder)}\n")
-            if (info.family.isNotEmpty()) append("• ${context.getString(R.string.label_family)} ${stripHtml(info.family)}\n")
-            if (info.genus.isNotEmpty()) append("• ${context.getString(R.string.label_genus)} ${stripHtml(info.genus)}\n")
-            if (info.species.isNotEmpty()) append("• ${context.getString(R.string.label_species)} ${stripHtml(info.species)}\n")
-
-            val contentList = listOf(
-                info.description to R.string.share_desc_title,
-                info.characteristics to R.string.share_char_title,
-                info.distribution to R.string.share_dist_title,
-                info.habitat to R.string.share_hab_title,
-                info.conservationStatus to R.string.share_cons_title
+            append(
+                    "✅ ${context.getString(R.string.label_confidence_template, confidencePercent)}%\n\n"
             )
+            append(
+                    "━━━━━━━━━━━━━━━━━━━━\n${context.getString(R.string.share_taxonomy_title)}\n━━━━━━━━━━━━━━━━━━━━\n\n"
+            )
+
+            if (info.kingdom.isNotEmpty())
+                    append(
+                            "• ${context.getString(R.string.label_kingdom)} ${stripHtml(info.kingdom)}\n"
+                    )
+            if (info.phylum.isNotEmpty())
+                    append(
+                            "• ${context.getString(R.string.label_phylum)} ${stripHtml(info.phylum)}\n"
+                    )
+            if (info.className.isNotEmpty())
+                    append(
+                            "• ${context.getString(R.string.label_class)} ${stripHtml(info.className)}\n"
+                    )
+            if (info.taxorder.isNotEmpty())
+                    append(
+                            "• ${context.getString(R.string.label_order)} ${stripHtml(info.taxorder)}\n"
+                    )
+            if (info.family.isNotEmpty())
+                    append(
+                            "• ${context.getString(R.string.label_family)} ${stripHtml(info.family)}\n"
+                    )
+            if (info.genus.isNotEmpty())
+                    append(
+                            "• ${context.getString(R.string.label_genus)} ${stripHtml(info.genus)}\n"
+                    )
+            if (info.species.isNotEmpty())
+                    append(
+                            "• ${context.getString(R.string.label_species)} ${stripHtml(info.species)}\n"
+                    )
+
+            val contentList =
+                    listOf(
+                            info.description to R.string.share_desc_title,
+                            info.characteristics to R.string.share_char_title,
+                            info.distribution to R.string.share_dist_title,
+                            info.habitat to R.string.share_hab_title,
+                            info.conservationStatus to R.string.share_cons_title
+                    )
             contentList.forEach { (content, title) ->
                 if (content.isNotEmpty()) {
-                    append("\n━━━━━━━━━━━━━━━━━━━━\n${context.getString(title)}\n━━━━━━━━━━━━━━━━━━━━\n\n${stripHtml(content)}\n")
+                    append(
+                            "\n━━━━━━━━━━━━━━━━━━━━\n${context.getString(title)}\n━━━━━━━━━━━━━━━━━━━━\n\n${stripHtml(content)}\n"
+                    )
                 }
             }
             append("\n━━━━━━━━━━━━━━━━━━━━\n${context.getString(R.string.share_footer)}")
         }
 
         try {
-            val intent = Intent(Intent.ACTION_SEND).apply {
-                if (imageUri != null) {
-                    type = "image/*"
-                    putExtra(Intent.EXTRA_STREAM, imageUri)
-                    clipData = ClipData.newRawUri(null, imageUri)
-                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                } else {
-                    type = "text/plain"
-                }
-                putExtra(Intent.EXTRA_TEXT, shareText)
-                putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.share_subject, stripHtml(info.commonName)))
-            }
-            startActivity(Intent.createChooser(intent, context.getString(R.string.share_chooser_title)))
+            val intent =
+                    Intent(Intent.ACTION_SEND).apply {
+                        if (imageUri != null) {
+                            type = "image/*"
+                            putExtra(Intent.EXTRA_STREAM, imageUri)
+                            clipData = ClipData.newRawUri(null, imageUri)
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        } else {
+                            type = "text/plain"
+                        }
+                        putExtra(Intent.EXTRA_TEXT, shareText)
+                        putExtra(
+                                Intent.EXTRA_SUBJECT,
+                                context.getString(
+                                        R.string.share_subject,
+                                        stripHtml(info.commonName)
+                                )
+                        )
+                    }
+            startActivity(
+                    Intent.createChooser(intent, context.getString(R.string.share_chooser_title))
+            )
         } catch (e: Exception) {
-            Toast.makeText(context, "${context.getString(R.string.error)}: ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                            context,
+                            "${context.getString(R.string.error)}: ${e.message}",
+                            Toast.LENGTH_SHORT
+                    )
+                    .show()
         }
     }
 
@@ -324,11 +474,11 @@ class HistoryDetailFragment : Fragment() {
                 isTranslated = true
                 translatedLanguage = targetLang
                 updateUI(cached)
-                //binding.btnTranslate.setImageResource(R.drawable.ic_undo)
+                // binding.btnTranslate.setImageResource(R.drawable.ic_undo)
             } else if (cachedTranslatedInfo != null && translatedLanguage == targetLang) {
                 isTranslated = true
                 updateUI(cachedTranslatedInfo!!)
-                //binding.btnTranslate.setImageResource(R.drawable.ic_undo)
+                // binding.btnTranslate.setImageResource(R.drawable.ic_undo)
             } else {
                 performTranslation(entry, targetLang)
             }
@@ -346,41 +496,36 @@ class HistoryDetailFragment : Fragment() {
                 val streamingHelper = GeminiStreamingHelper(RetrofitClient.iNaturalistApi, Gson())
                 val originalInfo = entry.speciesInfo
 
-                val commonName = streamingHelper.getCommonName(originalInfo.scientificName, targetLang) ?: originalInfo.commonName
+                val commonName =
+                        streamingHelper.getCommonName(originalInfo.scientificName, targetLang)
+                                ?: originalInfo.commonName
 
-                var translatedInfo = originalInfo.copy(
-                    commonName = commonName,
-                    kingdom = originalInfo.kingdom,
-                    phylum = originalInfo.phylum,
-                    className = originalInfo.className,
-                    taxorder = originalInfo.taxorder,
-                    family = originalInfo.family,
-                    genus = originalInfo.genus,
-                    species = originalInfo.species
-                )
+                var translatedInfo =
+                        originalInfo.copy(
+                                commonName = commonName,
+                                kingdom = originalInfo.kingdom,
+                                phylum = originalInfo.phylum,
+                                className = originalInfo.className,
+                                taxorder = originalInfo.taxorder,
+                                family = originalInfo.family,
+                                genus = originalInfo.genus,
+                                species = originalInfo.species
+                        )
 
                 streamingHelper.streamDetails(
-                    originalInfo.scientificName,
-                    originalInfo.confidence,
-                    targetLang,
-                    translatedInfo
-                ) { state ->
-                    state.speciesInfo?.let { info ->
-                        translatedInfo = info
-                    }
-                }
+                        originalInfo.scientificName,
+                        originalInfo.confidence,
+                        targetLang,
+                        translatedInfo
+                ) { state -> state.speciesInfo?.let { info -> translatedInfo = info } }
 
                 val iucnCode = "NE"
                 streamingHelper.streamConservation(
-                    originalInfo.scientificName,
-                    iucnCode,
-                    targetLang,
-                    translatedInfo
-                ) { state ->
-                    state.speciesInfo?.let { info ->
-                        translatedInfo = info
-                    }
-                }
+                        originalInfo.scientificName,
+                        iucnCode,
+                        targetLang,
+                        translatedInfo
+                ) { state -> state.speciesInfo?.let { info -> translatedInfo = info } }
 
                 cachedTranslatedInfo = translatedInfo
                 isTranslated = true
@@ -390,13 +535,17 @@ class HistoryDetailFragment : Fragment() {
 
                 withContext(Dispatchers.Main) {
                     updateUI(translatedInfo)
-                    //binding.btnTranslate.setImageResource(R.drawable.ic_undo)
+                    // binding.btnTranslate.setImageResource(R.drawable.ic_undo)
                 }
-
             } catch (e: Exception) {
                 e.printStackTrace()
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(requireContext(), getString(R.string.error_general, e.message), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                                    requireContext(),
+                                    getString(R.string.error_general, e.message),
+                                    Toast.LENGTH_SHORT
+                            )
+                            .show()
                 }
             } finally {
                 withContext(Dispatchers.Main) {
@@ -427,10 +576,10 @@ class HistoryDetailFragment : Fragment() {
 
     private fun bindHeader(entry: HistoryEntry, info: SpeciesInfo) {
         animationHandler.loadImageWithFadeIn(
-            imageView = binding.ivDetailImage,
-            localPath = entry.localImagePath,
-            remoteUrl = entry.imagePath,
-            centerCrop = true
+                imageView = binding.ivDetailImage,
+                localPath = entry.localImagePath,
+                remoteUrl = entry.imagePath,
+                centerCrop = true
         )
 
         binding.tvCommonName.setHtml(info.commonName)
@@ -479,19 +628,45 @@ class HistoryDetailFragment : Fragment() {
     private fun bindContent(info: SpeciesInfo) {
         binding.containerSections.removeAllViews()
 
-        addSection(binding.containerSections, getString(R.string.section_description), info.description)
-        addSection(binding.containerSections, getString(R.string.section_characteristics), info.characteristics)
-        addSection(binding.containerSections, getString(R.string.section_distribution), info.distribution)
+        addSection(
+                binding.containerSections,
+                getString(R.string.section_description),
+                info.description
+        )
+        addSection(
+                binding.containerSections,
+                getString(R.string.section_characteristics),
+                info.characteristics
+        )
+        addSection(
+                binding.containerSections,
+                getString(R.string.section_distribution),
+                info.distribution
+        )
         addSection(binding.containerSections, getString(R.string.section_habitat), info.habitat)
-        
+
         if (info.conservationStatus == "Vô hiệu") {
-            addSection(binding.containerSections, getString(R.string.section_conservation), getString(R.string.iucn_disabled_message), isCenter = true)
+            addSection(
+                    binding.containerSections,
+                    getString(R.string.section_conservation),
+                    getString(R.string.iucn_disabled_message),
+                    isCenter = true
+            )
         } else {
-            addSection(binding.containerSections, getString(R.string.section_conservation), info.conservationStatus)
+            addSection(
+                    binding.containerSections,
+                    getString(R.string.section_conservation),
+                    info.conservationStatus
+            )
         }
     }
 
-    private fun addSection(container: LinearLayout, title: String, content: String, isCenter: Boolean = false) {
+    private fun addSection(
+            container: LinearLayout,
+            title: String,
+            content: String,
+            isCenter: Boolean = false
+    ) {
         if (content.isBlank()) return
 
         val context = container.context
@@ -503,41 +678,46 @@ class HistoryDetailFragment : Fragment() {
         val bottomMarginDivider = 12.dpToPx()
         val dividerHeight = 1.dpToPx()
 
-        val titleView = TextView(context).apply {
-            text = title
-            textSize = 20f
-            setTextColor(titleColor)
-            setTypeface(null, Typeface.BOLD)
-            layoutParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            ).apply {
-                this.topMargin = topMargin
-                this.bottomMargin = bottomMarginTitle
-            }
-        }
+        val titleView =
+                TextView(context).apply {
+                    text = title
+                    textSize = 20f
+                    setTextColor(titleColor)
+                    setTypeface(null, Typeface.BOLD)
+                    layoutParams =
+                            LinearLayout.LayoutParams(
+                                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                                            ViewGroup.LayoutParams.WRAP_CONTENT
+                                    )
+                                    .apply {
+                                        this.topMargin = topMargin
+                                        this.bottomMargin = bottomMarginTitle
+                                    }
+                }
 
-        val divider = View(context).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                dividerHeight
-            ).apply {
-                this.bottomMargin = bottomMarginDivider
-            }
-            setBackgroundColor(dividerColor)
-        }
+        val divider =
+                View(context).apply {
+                    layoutParams =
+                            LinearLayout.LayoutParams(
+                                            ViewGroup.LayoutParams.MATCH_PARENT,
+                                            dividerHeight
+                                    )
+                                    .apply { this.bottomMargin = bottomMarginDivider }
+                    setBackgroundColor(dividerColor)
+                }
 
-        val contentView = TextView(context).apply {
-            textSize = 15f
-            setTextColor(contentColor)
-            setLineSpacing(0f, 1.4f)
-            if (isCenter) {
-                gravity = Gravity.CENTER
-                text = content
-            } else {
-                setHtml(content)
-            }
-        }
+        val contentView =
+                TextView(context).apply {
+                    textSize = 15f
+                    setTextColor(contentColor)
+                    setLineSpacing(0f, 1.4f)
+                    if (isCenter) {
+                        gravity = Gravity.CENTER
+                        text = content
+                    } else {
+                        setHtml(content)
+                    }
+                }
 
         container.addView(titleView)
         container.addView(divider)
@@ -547,11 +727,7 @@ class HistoryDetailFragment : Fragment() {
     // ==================== TEXT-TO-SPEECH ====================
 
     private fun setupFab(info: SpeciesInfo) {
-        speakerManager.onSpeechFinished = {
-            activity?.runOnUiThread {
-                updateFabUI(false)
-            }
-        }
+        speakerManager.onSpeechFinished = { activity?.runOnUiThread { updateFabUI(false) } }
 
         binding.fabSpeak.setOnClickListener {
             if (isTranslating) return@setOnClickListener
@@ -560,18 +736,21 @@ class HistoryDetailFragment : Fragment() {
             lifecycleScope.launch(Dispatchers.IO) {
                 if (isSpeaking) {
                     speakerManager.pause()
-                    withContext(Dispatchers.Main) {
-                        updateFabUI(false)
-                    }
+                    withContext(Dispatchers.Main) { updateFabUI(false) }
                 } else {
                     // Use translated info if available and active
-                    val infoToSpeak = if (isTranslated && cachedTranslatedInfo != null) cachedTranslatedInfo!! else info
-                    val langToSpeak = if (isTranslated && translatedLanguage != null) translatedLanguage!! else historyEntry?.language ?: "vi"
-                    
+                    val infoToSpeak =
+                            if (isTranslated && cachedTranslatedInfo != null) cachedTranslatedInfo!!
+                            else info
+                    val langToSpeak =
+                            if (isTranslated && translatedLanguage != null) translatedLanguage!!
+                            else historyEntry?.language ?: "vi"
+
                     // Update speaker language
                     speakerManager.setLanguage(langToSpeak)
 
-                    val speechText = TextToSpeechGenerator.generateSpeechText(requireContext(), infoToSpeak)
+                    val speechText =
+                            TextToSpeechGenerator.generateSpeechText(requireContext(), infoToSpeak)
                     withContext(Dispatchers.Main) {
                         speakerManager.speak(speechText)
                         updateFabUI(true)
@@ -589,21 +768,21 @@ class HistoryDetailFragment : Fragment() {
     // ==================== UTILITY FUNCTIONS ====================
 
     private fun TextView.setHtml(html: String) {
-        text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT)
-        } else {
-            @Suppress("DEPRECATION")
-            Html.fromHtml(html)
-        }
+        text =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT)
+                } else {
+                    @Suppress("DEPRECATION") Html.fromHtml(html)
+                }
     }
 
     private fun stripHtml(html: String): String {
-        var text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT).toString()
-        } else {
-            @Suppress("DEPRECATION")
-            Html.fromHtml(html).toString()
-        }
+        var text =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT).toString()
+                } else {
+                    @Suppress("DEPRECATION") Html.fromHtml(html).toString()
+                }
 
         text = text.replace(REGEX_BOLD, "$1")
         text = text.replace(REGEX_ITALIC, "$1")
@@ -614,9 +793,10 @@ class HistoryDetailFragment : Fragment() {
 
     private fun Int.dpToPx(): Int {
         return TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            this.toFloat(),
-            resources.displayMetrics
-        ).toInt()
+                        TypedValue.COMPLEX_UNIT_DIP,
+                        this.toFloat(),
+                        resources.displayMetrics
+                )
+                .toInt()
     }
 }

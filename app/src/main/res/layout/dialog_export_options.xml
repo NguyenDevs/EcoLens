@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/label_select_format"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="12dp"
+        android:textColor="?attr/colorOnSurface"/>
+
+    <RadioGroup
+        android:id="@+id/radioGroupFormat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checkedButton="@+id/radioDocx">
+
+        <RadioButton
+            android:id="@+id/radioDocx"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Microsoft Word (.docx)"
+            android:padding="8dp"/>
+
+        <RadioButton
+            android:id="@+id/radioXlsx"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Microsoft Excel (.xlsx)"
+            android:padding="8dp"/>
+
+        <RadioButton
+            android:id="@+id/radioPdf"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="PDF Document (.pdf)"
+            android:padding="8dp"/>
+
+        <RadioButton
+            android:id="@+id/radioJson"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="JSON Data (.json)"
+            android:padding="8dp"/>
+    </RadioGroup>
+
+    <CheckBox
+        android:id="@+id/checkIncludeImage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/label_include_image"
+        android:layout_marginTop="16dp"
+        android:checked="true"/>
+
+</LinearLayout>
