@@ -6,7 +6,6 @@ import android.text.Html
 import android.view.*
 import android.widget.PopupMenu
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -20,15 +19,15 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
- * Fragment hiển thị giao diện chat với AI
- * Hỗ trợ streaming response, copy, share và renew messages
+ * Fragment hiển thị giao diện chat với AI Hỗ trợ streaming response, copy, share và renew messages
  * Tự động scroll và disable UI khi đang streaming
  */
 class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
 
     private val viewModel: EcoLensViewModel by activityViewModels()
     private var _binding: FragmentChatBinding? = null
-    private val binding get() = _binding!!
+    private val binding
+        get() = _binding!!
 
     private lateinit var adapter: ChatAdapter
     private var currentSessionId: Long? = null
@@ -41,9 +40,7 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
 
         fun newInstance(sessionId: Long? = null): ChatFragment {
             return ChatFragment().apply {
-                arguments = Bundle().apply {
-                    sessionId?.let { putLong(ARG_SESSION_ID, it) }
-                }
+                arguments = Bundle().apply { sessionId?.let { putLong(ARG_SESSION_ID, it) } }
             }
         }
     }
@@ -56,9 +53,9 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View {
         _binding = FragmentChatBinding.inflate(inflater, container, false)
         return binding.root
@@ -82,38 +79,29 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
 
     // ==================== INITIALIZATION ====================
 
-    /**
-     * Khởi tạo hoặc load chat session
-     * Load session cũ nếu có sessionId, tạo mới nếu không
-     */
+    /** Khởi tạo hoặc load chat session Load session cũ nếu có sessionId, tạo mới nếu không */
     private fun initializeSession() {
         if (currentSessionId != null) {
             viewModel.loadChatSession(currentSessionId!!)
         } else {
             viewModel.initNewChatSession(
-                getString(R.string.chat_welcome),
-                getString(R.string.new_chat)
+                    getString(R.string.chat_welcome),
+                    getString(R.string.new_chat)
             )
         }
     }
 
     // ==================== UI SETUP ====================
 
-    /**
-     * Cấu hình RecyclerView cho chat messages
-     */
+    /** Cấu hình RecyclerView cho chat messages */
     private fun setupRecyclerView() {
-        val layoutManager = LinearLayoutManager(requireContext()).apply {
-            stackFromEnd = true
-        }
+        val layoutManager = LinearLayoutManager(requireContext()).apply { stackFromEnd = true }
         binding.rvChat.layoutManager = layoutManager
         binding.rvChat.adapter = adapter
         binding.rvChat.itemAnimator = null
     }
 
-    /**
-     * Cấu hình click listeners cho UI elements
-     */
+    /** Cấu hình click listeners cho UI elements */
     private fun setupListeners() {
         binding.btnSend.setOnClickListener {
             val text = binding.etChatInput.text.toString().trim()
@@ -124,44 +112,36 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
             }
         }
 
-        binding.btnBack.setOnClickListener {
-            parentFragmentManager.popBackStack()
-        }
+        binding.btnBack.setOnClickListener { parentFragmentManager.popBackStack() }
 
-        binding.btnMenu.setOnClickListener {
-            showMenuPopup(it)
-        }
+        binding.btnMenu.setOnClickListener { showMenuPopup(it) }
     }
 
     // ==================== CHAT ADAPTER CALLBACKS ====================
 
-    /**
-     * Sao chép nội dung tin nhắn vào clipboard
-     */
+    /** Sao chép nội dung tin nhắn vào clipboard */
     override fun onCopy(text: String) {
         performHapticFeedback()
-        val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clipboard =
+                requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val cleanText = stripHtml(text)
         val clip = ClipData.newPlainText("EcoLens", cleanText)
         clipboard.setPrimaryClip(clip)
         Toast.makeText(requireContext(), "Đã sao chép", Toast.LENGTH_SHORT).show()
     }
 
-    /**
-     * Chia sẻ nội dung tin nhắn
-     */
+    /** Chia sẻ nội dung tin nhắn */
     override fun onShare(text: String) {
         val cleanText = stripHtml(text)
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, cleanText)
-        }
+        val intent =
+                Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, cleanText)
+                }
         startActivity(Intent.createChooser(intent, "Chia sẻ tin nhắn"))
     }
 
-    /**
-     * Tạo lại response từ AI cho tin nhắn này
-     */
+    /** Tạo lại response từ AI cho tin nhắn này */
     override fun onRenew(position: Int, message: ChatMessage) {
         performHapticFeedback()
         viewModel.renewAiResponse(message)
@@ -169,9 +149,7 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
 
     // ==================== MENU & DIALOGS ====================
 
-    /**
-     * Hiển thị popup menu với các action cho chat
-     */
+    /** Hiển thị popup menu với các action cho chat */
     private fun showMenuPopup(anchor: View) {
         val popup = PopupMenu(requireContext(), anchor)
         popup.menuInflater.inflate(R.menu.menu_chat, popup.menu)
@@ -181,8 +159,8 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
             fieldMPopup.isAccessible = true
             val mPopup = fieldMPopup.get(popup)
             mPopup.javaClass
-                .getDeclaredMethod("setForceShowIcon", Boolean::class.javaPrimitiveType)
-                .invoke(mPopup, true)
+                    .getDeclaredMethod("setForceShowIcon", Boolean::class.javaPrimitiveType)
+                    .invoke(mPopup, true)
         }
 
         popup.setOnMenuItemClickListener { item ->
@@ -197,34 +175,30 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         popup.show()
     }
 
-    /**
-     * Hiển thị dialog xác nhận xóa chat
-     */
+    /** Hiển thị dialog xác nhận xóa chat */
     private fun showDeleteConfirmDialog() {
-        AlertDialog.Builder(requireContext())
-            .setTitle(R.string.dialog_delete_chat_title)
-            .setMessage(R.string.dialog_delete_chat_message)
-            .setPositiveButton(R.string.action_delete) { _, _ ->
-                currentSessionId?.let { sessionId ->
-                    viewModel.deleteChatSession(sessionId)
-                    parentFragmentManager.popBackStack()
+        com.nguyendevs.ecolens.utils.CustomDialogUtils.showConfirmationDialog(
+                context = requireContext(),
+                title = getString(R.string.dialog_delete_chat_title),
+                message = getString(R.string.dialog_delete_chat_message),
+                confirmText = getString(R.string.action_delete),
+                onConfirm = {
+                    currentSessionId?.let { sessionId ->
+                        viewModel.deleteChatSession(sessionId)
+                        parentFragmentManager.popBackStack()
+                    }
                 }
-            }
-            .setNegativeButton(R.string.action_cancel, null)
-            .show()
+        )
     }
 
     // ==================== VIEWMODEL OBSERVERS ====================
 
     /**
-     * Observe các state từ ViewModel
-     * Cập nhật UI khi có messages mới hoặc streaming state thay đổi
+     * Observe các state từ ViewModel Cập nhật UI khi có messages mới hoặc streaming state thay đổi
      */
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.chatMessages.collectLatest { messages ->
-                handleMessagesUpdate(messages)
-            }
+            viewModel.chatMessages.collectLatest { messages -> handleMessagesUpdate(messages) }
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -235,8 +209,7 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
     }
 
     /**
-     * Xử lý cập nhật danh sách messages
-     * Tự động scroll xuống khi có message mới hoặc đang ở bottom
+     * Xử lý cập nhật danh sách messages Tự động scroll xuống khi có message mới hoặc đang ở bottom
      */
     private fun handleMessagesUpdate(messages: List<ChatMessage>) {
         val isNewMessageAdded = messages.size > adapter.itemCount
@@ -258,10 +231,7 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         }
     }
 
-    /**
-     * Cập nhật UI dựa trên trạng thái streaming
-     * Disable input và buttons khi đang streaming
-     */
+    /** Cập nhật UI dựa trên trạng thái streaming Disable input và buttons khi đang streaming */
     private fun updateUIForStreamingState(isStreaming: Boolean) {
         val alpha = if (isStreaming) 0.5f else 1f
         val enabled = !isStreaming
@@ -278,22 +248,19 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
 
     // ==================== HELPER METHODS ====================
 
-    /**
-     * Thực hiện haptic feedback
-     */
+    /** Thực hiện haptic feedback */
     private fun performHapticFeedback() {
         binding.root.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
     }
 
-    /**
-     * Loại bỏ HTML tags và markdown formatting khỏi text
-     */
+    /** Loại bỏ HTML tags và markdown formatting khỏi text */
     private fun stripHtml(html: String): String {
-        var text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT).toString()
-        } else {
-            @Suppress("DEPRECATION") Html.fromHtml(html).toString()
-        }
+        var text =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT).toString()
+                } else {
+                    @Suppress("DEPRECATION") Html.fromHtml(html).toString()
+                }
         text = text.replace(REGEX_BOLD, "$1")
         text = text.replace(REGEX_HEADER, "$1")
         text = text.replace(REGEX_STRIKE, "$1")

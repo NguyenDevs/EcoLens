@@ -12,20 +12,21 @@ import com.nguyendevs.ecolens.R
 object CustomDialogUtils {
 
     fun showConfirmationDialog(
-            context: Context,
-            title: String,
-            message: String,
-            confirmText: String? = null,
-            cancelText: String? = null,
-            onConfirm: () -> Unit
+        context: Context,
+        title: String,
+        message: String,
+        confirmText: String? = null,
+        cancelText: String? = null,
+        onConfirm: () -> Unit
     ) {
         val dialogView =
-                LayoutInflater.from(context).inflate(R.layout.dialog_custom_confirmation, null)
+            LayoutInflater.from(context).inflate(R.layout.dialog_custom_confirmation, null)
 
         val tvTitle = dialogView.findViewById<TextView>(R.id.tvDialogTitle)
         val tvMessage = dialogView.findViewById<TextView>(R.id.tvDialogMessage)
         val btnConfirm = dialogView.findViewById<Button>(R.id.btnConfirm)
         val btnCancel = dialogView.findViewById<Button>(R.id.btnCancel)
+        val dialog = AlertDialog.Builder(context).setView(dialogView).setCancelable(true).create()
 
         tvTitle.text = title
         tvMessage.text = message
@@ -33,17 +34,16 @@ object CustomDialogUtils {
         if (confirmText != null) btnConfirm.text = confirmText
         if (cancelText != null) btnCancel.text = cancelText
 
-        val dialog = AlertDialog.Builder(context).setView(dialogView).setCancelable(true).create()
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
 
-        // Make background transparent to show rounded corners
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
         btnConfirm.setOnClickListener {
             dialog.dismiss()
             onConfirm()
         }
-
-        btnCancel.setOnClickListener { dialog.dismiss() }
 
         dialog.show()
     }
