@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
 import android.net.Uri
 import android.os.Build
@@ -283,7 +284,7 @@ object ExportUtils {
             val titleRun = titleParagraph.createRun()
             titleRun.setText(context.getString(R.string.share_title))
             titleRun.isBold = true
-            titleRun.fontSize = 20
+            titleRun.fontSize = 16
             titleRun.addBreak()
 
             if (includeImage && entry.localImagePath.isNotEmpty()) {
@@ -301,6 +302,7 @@ object ExportUtils {
                             Units.toEMU(300.0),
                             Units.toEMU(300.0)
                         )
+                        imgRun.addBreak()
                         iStream.close()
                     }
                 } catch (e: Exception) {
@@ -310,10 +312,10 @@ object ExportUtils {
 
             val info = entry.speciesInfo
 
-            addDocxParagraph(document, context.getString(R.string.label_common_name), info.commonName)
-            addDocxParagraph(document, context.getString(R.string.label_scientific_name), info.scientificName)
+            addDocxSectionHeader(document, context.getString(R.string.taxonomy_title))
 
-            addDocxHeader(document, context.getString(R.string.taxonomy_title))
+            addDocxParagraph(document, context.getString(R.string.label_common_name), info.commonName, true)
+            addDocxParagraph(document, context.getString(R.string.label_scientific_name), info.scientificName, true)
             addDocxParagraph(document, context.getString(R.string.label_kingdom), info.kingdom)
             addDocxParagraph(document, context.getString(R.string.label_phylum), info.phylum)
             addDocxParagraph(document, context.getString(R.string.label_class), info.className)
@@ -322,11 +324,13 @@ object ExportUtils {
             addDocxParagraph(document, context.getString(R.string.label_genus), info.genus)
             addDocxParagraph(document, context.getString(R.string.label_species), info.species)
 
-            addDocxSection(document, context.getString(R.string.section_description), info.description)
-            addDocxSection(document, context.getString(R.string.section_characteristics), info.characteristics)
-            addDocxSection(document, context.getString(R.string.section_distribution), info.distribution)
-            addDocxSection(document, context.getString(R.string.section_habitat), info.habitat)
-            addDocxSection(document, context.getString(R.string.section_conservation), info.conservationStatus)
+            addDocxContentSection(document, context.getString(R.string.section_description), info.description)
+            addDocxContentSection(document, context.getString(R.string.section_characteristics), info.characteristics)
+            addDocxContentSection(document, context.getString(R.string.section_distribution), info.distribution)
+            addDocxContentSection(document, context.getString(R.string.section_habitat), info.habitat)
+            if (info.conservationStatus != "Vô hiệu") {
+                addDocxContentSection(document, context.getString(R.string.section_conservation), info.conservationStatus)
+            }
 
             val out = getOutputStream(
                 context,
@@ -343,71 +347,79 @@ object ExportUtils {
         }
     }
 
-    private fun addDocxParagraph(doc: XWPFDocument, label: String, value: String) {
-        if (value.isBlank()) return
+    private fun addDocxSectionHeader(doc: XWPFDocument, title: String) {
         val p = doc.createParagraph()
-        val r1 = p.createRun()
-        r1.setText("$label ")
-        r1.isBold = true
-
-        val segments = parseRichText(value)
-        if (segments.isEmpty()) {
-            val r2 = p.createRun()
-            r2.setText(value)
-        } else {
-            for (segment in segments) {
-                val r = p.createRun()
-                r.setText(segment.text)
-                r.isBold = segment.isBold
-                r.isItalic = segment.isItalic
-                if (segment.isUnderline) r.underline = org.apache.poi.xwpf.usermodel.UnderlinePatterns.SINGLE
-                if (segment.color != null) {
-                    try {
-                        val color = Color.parseColor(segment.color)
-                        val hexColor = String.format("%02X%02X%02X", Color.red(color), Color.green(color), Color.blue(color))
-                        r.color = hexColor
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }
-            }
-        }
-    }
-
-    private fun addDocxHeader(doc: XWPFDocument, title: String) {
-        val p = doc.createParagraph()
+        p.alignment = ParagraphAlignment.LEFT
         val r = p.createRun()
-        r.addBreak()
         r.setText(title)
         r.isBold = true
-        r.fontSize = 14
+        r.isItalic = true
+        r.fontSize = 15
+        r.addBreak()
     }
 
-    private fun addDocxSection(doc: XWPFDocument, title: String, content: String) {
-        if (content.isBlank()) return
-        addDocxHeader(doc, title)
+    private fun addDocxParagraph(doc: XWPFDocument, label: String, value: String, addColon: Boolean = false) {
+        if (value.isBlank()) return
         val p = doc.createParagraph()
+        p.alignment = ParagraphAlignment.LEFT
+
+        val r1 = p.createRun()
+        r1.setText(if (addColon) "$label: " else "$label ")
+        r1.isBold = true
+        r1.fontSize = 13
+
+        val r2 = p.createRun()
+        r2.setText(stripTags(value))
+        r2.fontSize = 13
+    }
+
+    private fun addDocxContentSection(doc: XWPFDocument, title: String, content: String) {
+        if (content.isBlank()) return
+
+        val titlePara = doc.createParagraph()
+        titlePara.alignment = ParagraphAlignment.LEFT
+        val titleRun = titlePara.createRun()
+        titleRun.setText(title)
+        titleRun.isBold = true
+        titleRun.isItalic = true
+        titleRun.fontSize = 13
+
+        val contentPara = doc.createParagraph()
+        contentPara.alignment = ParagraphAlignment.LEFT
+        contentPara.setSpacingBetween(1.0)
 
         val segments = parseRichText(content)
+
         if (segments.isEmpty()) {
-            val r = p.createRun()
+            val r = contentPara.createRun()
             r.setText(content)
+            r.fontSize = 13
         } else {
+            var isFirstSegment = true
             for (segment in segments) {
-                val r = p.createRun()
-                r.setText(segment.text)
-                r.isBold = segment.isBold
-                r.isItalic = segment.isItalic
-                if (segment.isUnderline) r.underline = org.apache.poi.xwpf.usermodel.UnderlinePatterns.SINGLE
-                if (segment.color != null) {
-                    try {
-                        val color = Color.parseColor(segment.color)
-                        val hexColor = String.format("%02X%02X%02X", Color.red(color), Color.green(color), Color.blue(color))
-                        r.color = hexColor
-                    } catch (e: Exception) {
-                        e.printStackTrace()
+                val r = contentPara.createRun()
+                if (segment.text == "\n") {
+                    if (!isFirstSegment) {
+                        r.addBreak()
+                    }
+                } else {
+                    r.setText(segment.text)
+                    r.isBold = segment.isBold
+                    r.isItalic = segment.isItalic
+                    if (segment.isUnderline) r.underline = org.apache.poi.xwpf.usermodel.UnderlinePatterns.SINGLE
+                    r.fontSize = 13
+
+                    if (segment.color != null) {
+                        try {
+                            val color = Color.parseColor(segment.color)
+                            val hexColor = String.format("%02X%02X%02X", Color.red(color), Color.green(color), Color.blue(color))
+                            r.color = hexColor
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
                     }
                 }
+                isFirstSegment = false
             }
         }
     }
@@ -445,40 +457,7 @@ object ExportUtils {
                 labelCell.cellStyle = labelStyle
 
                 val valueCell = row.createCell(1)
-                val richText = XSSFRichTextString()
-                val segments = parseRichText(value)
-
-                if (segments.isEmpty()) {
-                    richText.append(value)
-                } else {
-                    for (segment in segments) {
-                        val font = workbook.createFont()
-                        if (segment.isBold) font.bold = true
-                        if (segment.isItalic) font.italic = true
-                        if (segment.isUnderline) font.underline = Font.U_SINGLE
-
-                        if (segment.color != null) {
-                            try {
-                                val color = Color.parseColor(segment.color)
-                                val r = Color.red(color).toByte()
-                                val g = Color.green(color).toByte()
-                                val b = Color.blue(color).toByte()
-
-                                val xssfColor = org.apache.poi.xssf.usermodel.XSSFColor(
-                                    byteArrayOf(r, g, b),
-                                    null
-                                )
-                                font.setColor(xssfColor)
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            }
-                        }
-
-                        richText.append(segment.text, font)
-                    }
-                }
-
-                valueCell.setCellValue(richText)
+                valueCell.setCellValue(stripTags(value))
                 valueCell.cellStyle = valueStyle
             }
 
@@ -564,12 +543,14 @@ object ExportUtils {
             sheet.createRow(rowNum++)
 
             addMergedSection(context.getString(R.string.section_habitat), info.habitat)
-            sheet.createRow(rowNum++)
 
-            addMergedSection(context.getString(R.string.section_conservation), info.conservationStatus)
+            if (info.conservationStatus != "Vô hiệu") {
+                sheet.createRow(rowNum++)
+                addMergedSection(context.getString(R.string.section_conservation), info.conservationStatus)
+            }
 
-            sheet.setColumnWidth(0, 9500)
-            sheet.setColumnWidth(1, 8700)
+            sheet.setColumnWidth(0, 7500)
+            sheet.setColumnWidth(1, 7500)
             for (i in 2..7) {
                 sheet.setColumnWidth(i, 3000)
             }
@@ -597,91 +578,246 @@ object ExportUtils {
     ): String? {
         try {
             val pdfDocument = PdfDocument()
-            val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create()
-            val page = pdfDocument.startPage(pageInfo)
-            val canvas = page.canvas
+            val pageWidth = 595
+            val pageHeight = 842
+            val margin = 50f
+            val contentWidth = pageWidth - (2 * margin)
+
+            var pageNumber = 1
+            var pageInfo = PdfDocument.PageInfo.Builder(pageWidth, pageHeight, pageNumber).create()
+            var page = pdfDocument.startPage(pageInfo)
+            var canvas = page.canvas
+
             val titlePaint = Paint().apply {
-                textSize = 24f
+                textSize = 22f
                 isFakeBoldText = true
                 color = Color.BLACK
-            }
-            val contentPaint = Paint().apply {
-                textSize = 14f
-                color = Color.BLACK
-            }
-            val labelPaint = Paint().apply {
-                textSize = 14f
-                isFakeBoldText = true
-                color = Color.BLACK
+                textAlign = Paint.Align.CENTER
             }
 
-            var y = 50f
-            canvas.drawText(context.getString(R.string.share_title), 50f, y, titlePaint)
+            val sectionHeaderPaint = Paint().apply {
+                textSize = 19f
+                isFakeBoldText = true
+                typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD_ITALIC)
+                color = Color.BLACK
+                textAlign = Paint.Align.LEFT
+            }
+
+            val labelPaint = Paint().apply {
+                textSize = 18f
+                isFakeBoldText = true
+                color = Color.BLACK
+                textAlign = Paint.Align.LEFT
+            }
+
+            val contentPaint = Paint().apply {
+                textSize = 18f
+                color = Color.BLACK
+                textAlign = Paint.Align.LEFT
+            }
+
+            var y = margin + 20f
+
+            fun checkNewPage() {
+                if (y > pageHeight - margin - 50f) {
+                    pdfDocument.finishPage(page)
+                    pageNumber++
+                    pageInfo = PdfDocument.PageInfo.Builder(pageWidth, pageHeight, pageNumber).create()
+                    page = pdfDocument.startPage(pageInfo)
+                    canvas = page.canvas
+                    y = margin + 20f
+                }
+            }
+
+            canvas.drawText(
+                context.getString(R.string.share_title),
+                pageWidth / 2f,
+                y,
+                titlePaint
+            )
             y += 40f
 
             if (includeImage && entry.localImagePath.isNotEmpty()) {
                 val file = File(entry.localImagePath)
                 if (file.exists()) {
-                    val bitmap = BitmapFactory.decodeFile(file.absolutePath)
-                    val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 200, 200, true)
-                    canvas.drawBitmap(scaledBitmap, 50f, y, Paint())
-                    y += 220f
+                    try {
+                        val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+                        val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 200, 200, true)
+                        val imageX = (pageWidth - 200) / 2f
+                        canvas.drawBitmap(scaledBitmap, imageX, y, Paint())
+                        y += 220f
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
             }
 
             val info = entry.speciesInfo
 
-            fun drawLine(label: String, value: String) {
+            checkNewPage()
+            canvas.drawText(context.getString(R.string.taxonomy_title), margin, y, sectionHeaderPaint)
+            y += 30f
+
+            fun drawLabelValue(label: String, value: String, addColon: Boolean = false) {
                 if (value.isBlank()) return
-                canvas.drawText("$label ", 50f, y, labelPaint)
-                val labelWidth = labelPaint.measureText("$label ")
-                canvas.drawText(stripTags(value), 50f + labelWidth, y, contentPaint)
+                checkNewPage()
+                val labelText = if (addColon) "$label: " else "$label "
+                canvas.drawText(labelText, margin, y, labelPaint)
+                val labelWidth = labelPaint.measureText(labelText)
+
+                val cleanValue = stripTags(value)
+                val words = cleanValue.split(" ")
+                var currentLine = ""
+                var lineX = margin + labelWidth
+
+                val valuePaint = Paint().apply {
+                    textSize = 18f
+                    color = Color.BLACK
+                    textAlign = Paint.Align.LEFT
+                }
+
+                for (word in words) {
+                    val testLine = if (currentLine.isEmpty()) word else "$currentLine $word"
+                    if (valuePaint.measureText(testLine) < contentWidth - labelWidth) {
+                        currentLine = testLine
+                    } else {
+                        canvas.drawText(currentLine, lineX, y, valuePaint)
+                        y += 25f
+                        checkNewPage()
+                        currentLine = word
+                        lineX = margin
+                    }
+                }
+                if (currentLine.isNotEmpty()) {
+                    canvas.drawText(currentLine, lineX, y, valuePaint)
+                }
                 y += 25f
             }
 
-            drawLine(context.getString(R.string.label_common_name), info.commonName)
-            drawLine(context.getString(R.string.label_scientific_name), info.scientificName)
+            drawLabelValue(context.getString(R.string.label_common_name), info.commonName, true)
+            drawLabelValue(context.getString(R.string.label_scientific_name), info.scientificName, true)
+            drawLabelValue(context.getString(R.string.label_kingdom), info.kingdom)
+            drawLabelValue(context.getString(R.string.label_phylum), info.phylum)
+            drawLabelValue(context.getString(R.string.label_class), info.className)
+            drawLabelValue(context.getString(R.string.label_order), info.taxorder)
+            drawLabelValue(context.getString(R.string.label_family), info.family)
+            drawLabelValue(context.getString(R.string.label_genus), info.genus)
+            drawLabelValue(context.getString(R.string.label_species), info.species)
 
-            y += 10f
-            canvas.drawText(context.getString(R.string.taxonomy_title), 50f, y, labelPaint)
-            y += 25f
-
-            drawLine(context.getString(R.string.label_kingdom), info.kingdom)
-            drawLine(context.getString(R.string.label_phylum), info.phylum)
-            drawLine(context.getString(R.string.label_class), info.className)
-            drawLine(context.getString(R.string.label_order), info.taxorder)
-            drawLine(context.getString(R.string.label_family), info.family)
-            drawLine(context.getString(R.string.label_genus), info.genus)
-            drawLine(context.getString(R.string.label_species), info.species)
-
-            fun drawSection(title: String, content: String) {
+            fun drawContentSection(title: String, content: String) {
                 if (content.isBlank()) return
-                y += 10f
-                canvas.drawText(title, 50f, y, labelPaint)
-                y += 20f
 
-                val cleanContent = stripTags(content)
-                val words = cleanContent.split(" ")
-                var currentLine = ""
-                for (word in words) {
-                    if (contentPaint.measureText(currentLine + word) < 450) {
-                        currentLine += "$word "
-                    } else {
-                        canvas.drawText(currentLine, 50f, y, contentPaint)
-                        y += 20f
-                        if (y > 800) break
-                        currentLine = "$word "
+                y += 10f
+                checkNewPage()
+                canvas.drawText(title, margin, y, sectionHeaderPaint)
+                y += 25f
+
+                val segments = parseRichText(content)
+
+                if (segments.isEmpty()) {
+                    val cleanContent = stripTags(content)
+                    val lines = cleanContent.split("\n")
+
+                    for (line in lines) {
+                        if (line.isBlank()) continue
+
+                        val words = line.split(" ")
+                        var currentLine = ""
+
+                        for (word in words) {
+                            val testLine = if (currentLine.isEmpty()) word else "$currentLine $word"
+                            if (contentPaint.measureText(testLine) < contentWidth) {
+                                currentLine = testLine
+                            } else {
+                                if (currentLine.isNotEmpty()) {
+                                    checkNewPage()
+                                    canvas.drawText(currentLine, margin, y, contentPaint)
+                                    y += 22f
+                                }
+                                currentLine = word
+                            }
+                        }
+
+                        if (currentLine.isNotEmpty()) {
+                            checkNewPage()
+                            canvas.drawText(currentLine, margin, y, contentPaint)
+                            y += 22f
+                        }
+                    }
+                } else {
+                    var currentLine = ""
+                    var currentX = margin
+
+                    for (segment in segments) {
+                        if (segment.text == "\n") {
+                            if (currentLine.isNotEmpty()) {
+                                y += 22f
+                                checkNewPage()
+                            }
+                            currentLine = ""
+                            currentX = margin
+                            continue
+                        }
+
+                        val paint = Paint().apply {
+                            textSize = 18f
+                            color = Color.BLACK
+                            textAlign = Paint.Align.LEFT
+                            isFakeBoldText = segment.isBold
+
+                            if (segment.isItalic) {
+                                typeface = if (segment.isBold) {
+                                    Typeface.create(Typeface.DEFAULT, Typeface.BOLD_ITALIC)
+                                } else {
+                                    Typeface.create(Typeface.DEFAULT, Typeface.ITALIC)
+                                }
+                            } else if (segment.isBold) {
+                                typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+                            }
+
+                            if (segment.color != null) {
+                                try {
+                                    this.color = Color.parseColor(segment.color)
+                                } catch (e: Exception) {
+                                    this.color = Color.BLACK
+                                }
+                            }
+                        }
+
+                        val words = segment.text.split(" ")
+                        for (i in words.indices) {
+                            val word = words[i]
+                            val wordWithSpace = if (i < words.size - 1) "$word " else word
+                            val wordWidth = paint.measureText(wordWithSpace)
+
+                            if (currentX + wordWidth > pageWidth - margin) {
+                                if (currentLine.isNotEmpty()) {
+                                    y += 22f
+                                    checkNewPage()
+                                }
+                                currentX = margin
+                                currentLine = ""
+                            }
+
+                            canvas.drawText(wordWithSpace, currentX, y, paint)
+                            currentX += wordWidth
+                            currentLine += wordWithSpace
+                        }
+                    }
+
+                    if (currentLine.isNotEmpty()) {
+                        y += 22f
                     }
                 }
-                canvas.drawText(currentLine, 50f, y, contentPaint)
-                y += 20f
             }
 
-            drawSection(context.getString(R.string.section_description), info.description)
-            drawSection(context.getString(R.string.section_characteristics), info.characteristics)
-            drawSection(context.getString(R.string.section_distribution), info.distribution)
-            drawSection(context.getString(R.string.section_habitat), info.habitat)
-            drawSection(context.getString(R.string.section_conservation), info.conservationStatus)
+            drawContentSection(context.getString(R.string.section_description), info.description)
+            drawContentSection(context.getString(R.string.section_characteristics), info.characteristics)
+            drawContentSection(context.getString(R.string.section_distribution), info.distribution)
+            drawContentSection(context.getString(R.string.section_habitat), info.habitat)
+            if (info.conservationStatus != "Vô hiệu") {
+                drawContentSection(context.getString(R.string.section_conservation), info.conservationStatus)
+            }
 
             pdfDocument.finishPage(page)
 
