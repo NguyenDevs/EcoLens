@@ -325,6 +325,8 @@
     <string name="action_cancel">Cancel</string>
     <string name="dialog_delete_history_title">Delete history</string>
     <string name="dialog_delete_history_message">Are you sure you want to delete this history?</string>
+    <string name="dialog_save_picture_history_title">Download picture</string>
+    <string name="dialog_export_history_title">Export history</string>
 
     <!-- ==================== PERMISSIONS ==================== -->
     <string name="permission_title">Permission Required</string>

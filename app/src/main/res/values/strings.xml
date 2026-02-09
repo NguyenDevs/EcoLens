@@ -326,6 +326,8 @@
     <string name="action_cancel">Hủy</string>
     <string name="dialog_delete_history_title">Xóa lịch sử</string>
     <string name="dialog_delete_history_message">Bạn có chắc muốn xóa lịch sử nhận diện này không?</string>
+    <string name="dialog_save_picture_history_title">Tải hình ảnh</string>
+    <string name="dialog_export_history_title">Xuất lịch sử</string>
 
     <!-- ==================== QUYỀN TRUY CẬP ==================== -->
     <string name="permission_title">Cần quyền truy cập</string>

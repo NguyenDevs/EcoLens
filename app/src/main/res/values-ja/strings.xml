@@ -325,6 +325,8 @@
     <string name="action_cancel">キャンセル</string>
     <string name="dialog_delete_history_title">履歴を削除</string>
     <string name="dialog_delete_history_message">この履歴を削除してもよろしいですか？</string>
+    <string name="dialog_save_picture_history_title">画像をダウンロード</string>
+    <string name="dialog_export_history_title">履歴をエクスポート</string>
 
     <!-- ==================== 権限 ==================== -->
     <string name="permission_title">権限が必要</string>
