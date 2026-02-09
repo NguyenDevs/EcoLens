@@ -12,15 +12,20 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import com.google.gson.Gson
+import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.models.history.HistoryEntry
+import org.apache.poi.ss.usermodel.Font
+import org.apache.poi.ss.usermodel.VerticalAlignment
+import org.apache.poi.util.Units
+import org.apache.poi.xssf.usermodel.XSSFRichTextString
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.apache.poi.xwpf.usermodel.ParagraphAlignment
+import org.apache.poi.xwpf.usermodel.XWPFDocument
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.OutputStream
-import org.apache.poi.util.Units
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
-import org.apache.poi.xwpf.usermodel.ParagraphAlignment
-import org.apache.poi.xwpf.usermodel.XWPFDocument
+import java.util.regex.Pattern
 
 object ExportUtils {
 
@@ -31,6 +36,164 @@ object ExportUtils {
         JSON
     }
 
+    data class RichTextSegment(
+        val text: String,
+        val isBold: Boolean = false,
+        val isItalic: Boolean = false,
+        val isUnderline: Boolean = false,
+        val color: String? = null
+    )
+
+    private fun parseRichText(input: String): List<RichTextSegment> {
+        val segments = mutableListOf<RichTextSegment>()
+        if (input.isEmpty()) return segments
+
+        val text = input
+        val stack = mutableListOf<Map<String, Any>>()
+        var currentPos = 0
+        var currentText = StringBuilder()
+
+        while (currentPos < text.length) {
+            val openTagStart = text.indexOf('<', currentPos)
+
+            if (openTagStart == -1) {
+                currentText.append(text.substring(currentPos))
+                break
+            }
+
+            if (openTagStart > currentPos) {
+                currentText.append(text.substring(currentPos, openTagStart))
+            }
+
+            val openTagEnd = text.indexOf('>', openTagStart)
+            if (openTagEnd == -1) {
+                currentText.append(text.substring(currentPos))
+                break
+            }
+
+            val fullTag = text.substring(openTagStart, openTagEnd + 1)
+            val tagContent = text.substring(openTagStart + 1, openTagEnd)
+
+            when {
+                tagContent == "br" || tagContent == "br/" -> {
+                    val currentFormatting = getCurrentFormatting(stack)
+                    if (currentText.isNotEmpty()) {
+                        segments.add(RichTextSegment(
+                            currentText.toString(),
+                            currentFormatting["bold"] as? Boolean ?: false,
+                            currentFormatting["italic"] as? Boolean ?: false,
+                            currentFormatting["underline"] as? Boolean ?: false,
+                            currentFormatting["color"] as? String
+                        ))
+                        currentText.clear()
+                    }
+                    segments.add(RichTextSegment("\n"))
+                    currentPos = openTagEnd + 1
+                }
+                tagContent.startsWith("/") -> {
+                    val tagName = tagContent.substring(1).trim()
+
+                    if (currentText.isNotEmpty()) {
+                        val currentFormatting = getCurrentFormatting(stack)
+                        segments.add(RichTextSegment(
+                            currentText.toString(),
+                            currentFormatting["bold"] as? Boolean ?: false,
+                            currentFormatting["italic"] as? Boolean ?: false,
+                            currentFormatting["underline"] as? Boolean ?: false,
+                            currentFormatting["color"] as? String
+                        ))
+                        currentText.clear()
+                    }
+
+                    if (stack.isNotEmpty()) {
+                        val lastTag = stack.lastOrNull()
+                        if (lastTag != null && lastTag["tag"] == tagName) {
+                            stack.removeAt(stack.lastIndex)
+                        }
+                    }
+
+                    currentPos = openTagEnd + 1
+                }
+                else -> {
+                    val formatting = mutableMapOf<String, Any>()
+
+                    when {
+                        tagContent == "b" -> {
+                            formatting["tag"] = "b"
+                            formatting["bold"] = true
+                        }
+                        tagContent == "i" -> {
+                            formatting["tag"] = "i"
+                            formatting["italic"] = true
+                        }
+                        tagContent == "u" -> {
+                            formatting["tag"] = "u"
+                            formatting["underline"] = true
+                        }
+                        tagContent.startsWith("font") -> {
+                            formatting["tag"] = "font"
+                            val colorPattern = Pattern.compile("color\\s*=\\s*['\"]([^'\"]+)['\"]")
+                            val matcher = colorPattern.matcher(tagContent)
+                            if (matcher.find()) {
+                                formatting["color"] = matcher.group(1)
+                            }
+                        }
+                    }
+
+                    if (currentText.isNotEmpty()) {
+                        val currentFormatting = getCurrentFormatting(stack)
+                        segments.add(RichTextSegment(
+                            currentText.toString(),
+                            currentFormatting["bold"] as? Boolean ?: false,
+                            currentFormatting["italic"] as? Boolean ?: false,
+                            currentFormatting["underline"] as? Boolean ?: false,
+                            currentFormatting["color"] as? String
+                        ))
+                        currentText.clear()
+                    }
+
+                    if (formatting.isNotEmpty()) {
+                        stack.add(formatting)
+                    }
+
+                    currentPos = openTagEnd + 1
+                }
+            }
+        }
+
+        if (currentText.isNotEmpty()) {
+            val currentFormatting = getCurrentFormatting(stack)
+            segments.add(RichTextSegment(
+                currentText.toString(),
+                currentFormatting["bold"] as? Boolean ?: false,
+                currentFormatting["italic"] as? Boolean ?: false,
+                currentFormatting["underline"] as? Boolean ?: false,
+                currentFormatting["color"] as? String
+            ))
+        }
+
+        return segments
+    }
+
+    private fun getCurrentFormatting(stack: List<Map<String, Any>>): Map<String, Any> {
+        val result = mutableMapOf<String, Any>()
+
+        for (item in stack) {
+            if (item["bold"] == true) result["bold"] = true
+            if (item["italic"] == true) result["italic"] = true
+            if (item["underline"] == true) result["underline"] = true
+            if (item.containsKey("color")) result["color"] = item["color"]!!
+        }
+
+        return result
+    }
+
+    private fun stripTags(input: String): String {
+        return input
+            .replace(Regex("<br/?>"), "\n")
+            .replace(Regex("<[^>]*>"), "")
+    }
+
     fun saveImageToGallery(context: Context, imagePath: String): Boolean {
         val bitmap = BitmapFactory.decodeFile(imagePath) ?: return false
         val filename = "EcoLens_${System.currentTimeMillis()}.jpg"
@@ -39,28 +202,16 @@ object ExportUtils {
 
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                val contentValues =
-                        ContentValues().apply {
-                            put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
-                            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-                            put(
-                                    MediaStore.MediaColumns.RELATIVE_PATH,
-                                    Environment.DIRECTORY_PICTURES + "/EcoLens"
-                            )
-                        }
+                val contentValues = ContentValues().apply {
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+                    put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/EcoLens")
+                }
                 val contentResolver = context.contentResolver
-                imageUri =
-                        contentResolver.insert(
-                                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                                contentValues
-                        )
+                imageUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
                 fos = imageUri?.let { contentResolver.openOutputStream(it) }
             } else {
-                val imagesDir =
-                        Environment.getExternalStoragePublicDirectory(
-                                        Environment.DIRECTORY_PICTURES
-                                )
-                                .toString() + "/EcoLens"
+                val imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString() + "/EcoLens"
                 val file = File(imagesDir)
                 if (!file.exists()) file.mkdirs()
                 val image = File(imagesDir, filename)
@@ -73,7 +224,6 @@ object ExportUtils {
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            // Cleanup on error if URI was created
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && imageUri != null) {
                 context.contentResolver.delete(imageUri, null, null)
             }
@@ -82,10 +232,10 @@ object ExportUtils {
     }
 
     fun exportHistory(
-            context: Context,
-            entry: HistoryEntry,
-            format: ExportFormat,
-            includeImage: Boolean
+        context: Context,
+        entry: HistoryEntry,
+        format: ExportFormat,
+        includeImage: Boolean
     ): String? {
         val filename = "EcoLens_Export_${System.currentTimeMillis()}"
         return when (format) {
@@ -97,30 +247,21 @@ object ExportUtils {
     }
 
     private fun getOutputStream(
-            context: Context,
-            filename: String,
-            extension: String,
-            mimeType: String
+        context: Context,
+        filename: String,
+        extension: String,
+        mimeType: String
     ): OutputStream? {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val contentValues =
-                    ContentValues().apply {
-                        put(MediaStore.MediaColumns.DISPLAY_NAME, "$filename.$extension")
-                        put(MediaStore.MediaColumns.MIME_TYPE, mimeType)
-                        put(
-                                MediaStore.MediaColumns.RELATIVE_PATH,
-                                Environment.DIRECTORY_DOCUMENTS + "/EcoLens/Exports"
-                        )
-                    }
-            context.contentResolver.insert(
-                            MediaStore.Files.getContentUri("external"),
-                            contentValues
-                    )
-                    ?.let { context.contentResolver.openOutputStream(it) }
+            val contentValues = ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, "$filename.$extension")
+                put(MediaStore.MediaColumns.MIME_TYPE, mimeType)
+                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOCUMENTS + "/EcoLens/Exports")
+            }
+            val uri = context.contentResolver.insert(MediaStore.Files.getContentUri("external"), contentValues)
+            uri?.let { context.contentResolver.openOutputStream(it) }
         } else {
-            val docsDir =
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
-                            .toString() + "/EcoLens/Exports"
+            val docsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).toString() + "/EcoLens/Exports"
             val file = File(docsDir)
             if (!file.exists()) file.mkdirs()
             val outFile = File(docsDir, "$filename.$extension")
@@ -129,24 +270,22 @@ object ExportUtils {
     }
 
     private fun exportToDocx(
-            context: Context,
-            entry: HistoryEntry,
-            filename: String,
-            includeImage: Boolean
+        context: Context,
+        entry: HistoryEntry,
+        filename: String,
+        includeImage: Boolean
     ): String? {
         try {
             val document = XWPFDocument()
 
-            // Title
             val titleParagraph = document.createParagraph()
             titleParagraph.alignment = ParagraphAlignment.CENTER
             val titleRun = titleParagraph.createRun()
-            titleRun.text = "EcoLens - Species Report"
+            titleRun.setText(context.getString(R.string.share_title))
             titleRun.isBold = true
             titleRun.fontSize = 20
             titleRun.addBreak()
 
-            // Image
             if (includeImage && entry.localImagePath.isNotEmpty()) {
                 try {
                     val file = File(entry.localImagePath)
@@ -156,11 +295,11 @@ object ExportUtils {
                         imgParagraph.alignment = ParagraphAlignment.CENTER
                         val imgRun = imgParagraph.createRun()
                         imgRun.addPicture(
-                                iStream,
-                                XWPFDocument.PICTURE_TYPE_JPEG,
-                                file.name,
-                                Units.toEMU(300.0),
-                                Units.toEMU(300.0)
+                            iStream,
+                            XWPFDocument.PICTURE_TYPE_JPEG,
+                            file.name,
+                            Units.toEMU(300.0),
+                            Units.toEMU(300.0)
                         )
                         iStream.close()
                     }
@@ -169,29 +308,32 @@ object ExportUtils {
                 }
             }
 
-            // Content
             val info = entry.speciesInfo
-            addDocxParagraph(document, "Common Name: ", info.commonName)
-            addDocxParagraph(document, "Scientific Name: ", info.scientificName)
-            addDocxParagraph(document, "Family: ", info.family)
-            addDocxParagraph(document, "Kingdom: ", info.kingdom)
-            addDocxParagraph(document, "Conservation Status: ", info.conservationStatus)
 
-            document.createParagraph().createRun().apply {
-                addBreak()
-                text = "Description:"
-                isBold = true
-            }
-            document.createParagraph().createRun().text = info.description
+            addDocxParagraph(document, context.getString(R.string.label_common_name), info.commonName)
+            addDocxParagraph(document, context.getString(R.string.label_scientific_name), info.scientificName)
 
-            // Save
-            val out =
-                    getOutputStream(
-                            context,
-                            filename,
-                            "docx",
-                            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                    )
+            addDocxHeader(document, context.getString(R.string.taxonomy_title))
+            addDocxParagraph(document, context.getString(R.string.label_kingdom), info.kingdom)
+            addDocxParagraph(document, context.getString(R.string.label_phylum), info.phylum)
+            addDocxParagraph(document, context.getString(R.string.label_class), info.className)
+            addDocxParagraph(document, context.getString(R.string.label_order), info.taxorder)
+            addDocxParagraph(document, context.getString(R.string.label_family), info.family)
+            addDocxParagraph(document, context.getString(R.string.label_genus), info.genus)
+            addDocxParagraph(document, context.getString(R.string.label_species), info.species)
+
+            addDocxSection(document, context.getString(R.string.section_description), info.description)
+            addDocxSection(document, context.getString(R.string.section_characteristics), info.characteristics)
+            addDocxSection(document, context.getString(R.string.section_distribution), info.distribution)
+            addDocxSection(document, context.getString(R.string.section_habitat), info.habitat)
+            addDocxSection(document, context.getString(R.string.section_conservation), info.conservationStatus)
+
+            val out = getOutputStream(
+                context,
+                filename,
+                "docx",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
             out?.use { document.write(it) } ?: return null
             document.close()
             return "$filename.docx"
@@ -205,88 +347,239 @@ object ExportUtils {
         if (value.isBlank()) return
         val p = doc.createParagraph()
         val r1 = p.createRun()
-        r1.text = label
+        r1.setText("$label ")
         r1.isBold = true
-        val r2 = p.createRun()
-        r2.text = value
+
+        val segments = parseRichText(value)
+        if (segments.isEmpty()) {
+            val r2 = p.createRun()
+            r2.setText(value)
+        } else {
+            for (segment in segments) {
+                val r = p.createRun()
+                r.setText(segment.text)
+                r.isBold = segment.isBold
+                r.isItalic = segment.isItalic
+                if (segment.isUnderline) r.underline = org.apache.poi.xwpf.usermodel.UnderlinePatterns.SINGLE
+                if (segment.color != null) {
+                    try {
+                        val color = Color.parseColor(segment.color)
+                        val hexColor = String.format("%02X%02X%02X", Color.red(color), Color.green(color), Color.blue(color))
+                        r.color = hexColor
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun addDocxHeader(doc: XWPFDocument, title: String) {
+        val p = doc.createParagraph()
+        val r = p.createRun()
+        r.addBreak()
+        r.setText(title)
+        r.isBold = true
+        r.fontSize = 14
+    }
+
+    private fun addDocxSection(doc: XWPFDocument, title: String, content: String) {
+        if (content.isBlank()) return
+        addDocxHeader(doc, title)
+        val p = doc.createParagraph()
+
+        val segments = parseRichText(content)
+        if (segments.isEmpty()) {
+            val r = p.createRun()
+            r.setText(content)
+        } else {
+            for (segment in segments) {
+                val r = p.createRun()
+                r.setText(segment.text)
+                r.isBold = segment.isBold
+                r.isItalic = segment.isItalic
+                if (segment.isUnderline) r.underline = org.apache.poi.xwpf.usermodel.UnderlinePatterns.SINGLE
+                if (segment.color != null) {
+                    try {
+                        val color = Color.parseColor(segment.color)
+                        val hexColor = String.format("%02X%02X%02X", Color.red(color), Color.green(color), Color.blue(color))
+                        r.color = hexColor
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+        }
     }
 
     private fun exportToXlsx(
-            context: Context,
-            entry: HistoryEntry,
-            filename: String,
-            includeImage: Boolean
+        context: Context,
+        entry: HistoryEntry,
+        filename: String,
+        includeImage: Boolean
     ): String? {
         try {
             val workbook = XSSFWorkbook()
             val sheet = workbook.createSheet("Species Info")
 
+            val labelStyle = workbook.createCellStyle().apply {
+                val font = workbook.createFont()
+                font.bold = true
+                setFont(font)
+                verticalAlignment = VerticalAlignment.TOP
+            }
+
+            val valueStyle = workbook.createCellStyle().apply {
+                wrapText = true
+                verticalAlignment = VerticalAlignment.TOP
+            }
+
             var rowNum = 0
             val info = entry.speciesInfo
 
-            // Image support in Excel is complex, skipping for simplicity or basic implementation
-            // depending on libraries
-            // Assuming we just list data for now as POI android issues might occur with drawings
-
-            // If includeImage is strictly required for Excel, we need Drawing patriarch.
-            // Let's implement basic rows first.
-
-            val headers = listOf("Field", "Value")
-            val headerRow = sheet.createRow(rowNum++)
-            headers.forEachIndexed { index, s -> headerRow.createCell(index).setCellValue(s) }
-
-            val data =
-                    listOf(
-                            "Common Name" to info.commonName,
-                            "Scientific Name" to info.scientificName,
-                            "Family" to info.family,
-                            "Kingdom" to info.kingdom,
-                            "Description" to info.description,
-                            "Confidence" to "${info.confidence}"
-                    )
-
-            data.forEach { (key, value) ->
+            fun addSimpleRow(label: String, value: String) {
+                if (value.isBlank()) return
                 val row = sheet.createRow(rowNum++)
-                row.createCell(0).setCellValue(key)
-                row.createCell(1).setCellValue(value)
+                val labelCell = row.createCell(0)
+                labelCell.setCellValue(label)
+                labelCell.cellStyle = labelStyle
+
+                val valueCell = row.createCell(1)
+                val richText = XSSFRichTextString()
+                val segments = parseRichText(value)
+
+                if (segments.isEmpty()) {
+                    richText.append(value)
+                } else {
+                    for (segment in segments) {
+                        val font = workbook.createFont()
+                        if (segment.isBold) font.bold = true
+                        if (segment.isItalic) font.italic = true
+                        if (segment.isUnderline) font.underline = Font.U_SINGLE
+
+                        if (segment.color != null) {
+                            try {
+                                val color = Color.parseColor(segment.color)
+                                val r = Color.red(color).toByte()
+                                val g = Color.green(color).toByte()
+                                val b = Color.blue(color).toByte()
+
+                                val xssfColor = org.apache.poi.xssf.usermodel.XSSFColor(
+                                    byteArrayOf(r, g, b),
+                                    null
+                                )
+                                font.setColor(xssfColor)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+
+                        richText.append(segment.text, font)
+                    }
+                }
+
+                valueCell.setCellValue(richText)
+                valueCell.cellStyle = valueStyle
             }
 
-            // Image handling (Simplified: Add a note if image is requested but not fully supported
-            // to avoid crashes)
-            // Or try to add it.
-            if (includeImage && entry.localImagePath.isNotEmpty()) {
-                try {
-                    val file = File(entry.localImagePath)
-                    if (file.exists()) {
-                        val inputStream = FileInputStream(file)
-                        val bytes = inputStream.readBytes()
-                        val pictureIdx = workbook.addPicture(bytes, XSSFWorkbook.PICTURE_TYPE_JPEG)
-                        inputStream.close()
+            fun addMergedSection(label: String, value: String) {
+                if (value.isBlank()) return
+                val startRow = rowNum
 
-                        val drawing = sheet.createDrawingPatriarch()
-                        val helper = workbook.creationHelper
-                        val anchor = helper.createClientAnchor()
+                val labelRow = sheet.createRow(rowNum++)
+                val labelCell = labelRow.createCell(0)
+                labelCell.setCellValue(label)
+                labelCell.cellStyle = labelStyle
 
-                        // Position image
-                        anchor.setCol1(3)
-                        anchor.setRow1(1)
-                        anchor.setCol2(8)
-                        anchor.setRow2(15)
+                val valueCell = labelRow.createCell(1)
+                val richText = XSSFRichTextString()
+                val segments = parseRichText(value)
 
-                        drawing.createPicture(anchor, pictureIdx)
+                if (segments.isEmpty()) {
+                    richText.append(value)
+                } else {
+                    for (segment in segments) {
+                        val font = workbook.createFont()
+                        if (segment.isBold) font.bold = true
+                        if (segment.isItalic) font.italic = true
+                        if (segment.isUnderline) font.underline = Font.U_SINGLE
+
+                        if (segment.color != null) {
+                            try {
+                                val color = Color.parseColor(segment.color)
+                                val r = Color.red(color).toByte()
+                                val g = Color.green(color).toByte()
+                                val b = Color.blue(color).toByte()
+
+                                val xssfColor = org.apache.poi.xssf.usermodel.XSSFColor(
+                                    byteArrayOf(r, g, b),
+                                    null
+                                )
+                                font.setColor(xssfColor)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+
+                        richText.append(segment.text, font)
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
+                }
+
+                valueCell.setCellValue(richText)
+                valueCell.cellStyle = valueStyle
+
+                val mergeRegion = org.apache.poi.ss.util.CellRangeAddress(
+                    startRow,
+                    startRow + 5,
+                    1,
+                    7
+                )
+                sheet.addMergedRegion(mergeRegion)
+
+                for (i in 1..5) {
+                    sheet.createRow(rowNum++)
                 }
             }
 
-            val out =
-                    getOutputStream(
-                            context,
-                            filename,
-                            "xlsx",
-                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                    )
+            addSimpleRow(context.getString(R.string.label_common_name), info.commonName)
+            addSimpleRow(context.getString(R.string.label_scientific_name), info.scientificName)
+            sheet.createRow(rowNum++)
+
+            addSimpleRow(context.getString(R.string.label_kingdom), info.kingdom)
+            addSimpleRow(context.getString(R.string.label_phylum), info.phylum)
+            addSimpleRow(context.getString(R.string.label_class), info.className)
+            addSimpleRow(context.getString(R.string.label_order), info.taxorder)
+            addSimpleRow(context.getString(R.string.label_family), info.family)
+            addSimpleRow(context.getString(R.string.label_genus), info.genus)
+            addSimpleRow(context.getString(R.string.label_species), info.species)
+            sheet.createRow(rowNum++)
+
+            addMergedSection(context.getString(R.string.section_description), info.description)
+            sheet.createRow(rowNum++)
+
+            addMergedSection(context.getString(R.string.section_characteristics), info.characteristics)
+            sheet.createRow(rowNum++)
+
+            addMergedSection(context.getString(R.string.section_distribution), info.distribution)
+            sheet.createRow(rowNum++)
+
+            addMergedSection(context.getString(R.string.section_habitat), info.habitat)
+            sheet.createRow(rowNum++)
+
+            addMergedSection(context.getString(R.string.section_conservation), info.conservationStatus)
+
+            sheet.setColumnWidth(0, 9500)
+            sheet.setColumnWidth(1, 8700)
+            for (i in 2..7) {
+                sheet.setColumnWidth(i, 3000)
+            }
+
+            val out = getOutputStream(
+                context,
+                filename,
+                "xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
             out?.use { workbook.write(it) } ?: return null
             workbook.close()
             return "$filename.xlsx"
@@ -297,79 +590,98 @@ object ExportUtils {
     }
 
     private fun exportToPdf(
-            context: Context,
-            entry: HistoryEntry,
-            filename: String,
-            includeImage: Boolean
+        context: Context,
+        entry: HistoryEntry,
+        filename: String,
+        includeImage: Boolean
     ): String? {
         try {
             val pdfDocument = PdfDocument()
-            val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create() // A4 size in points
+            val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create()
             val page = pdfDocument.startPage(pageInfo)
             val canvas = page.canvas
-            val paint = Paint()
-            val titlePaint =
-                    Paint().apply {
-                        textSize = 24f
-                        isFakeBoldText = true
-                        color = Color.BLACK
-                    }
-            val contentPaint =
-                    Paint().apply {
-                        textSize = 14f
-                        color = Color.BLACK
-                    }
+            val titlePaint = Paint().apply {
+                textSize = 24f
+                isFakeBoldText = true
+                color = Color.BLACK
+            }
+            val contentPaint = Paint().apply {
+                textSize = 14f
+                color = Color.BLACK
+            }
+            val labelPaint = Paint().apply {
+                textSize = 14f
+                isFakeBoldText = true
+                color = Color.BLACK
+            }
 
             var y = 50f
-            canvas.drawText("EcoLens Species Report", 50f, y, titlePaint)
+            canvas.drawText(context.getString(R.string.share_title), 50f, y, titlePaint)
             y += 40f
 
-            // Image
             if (includeImage && entry.localImagePath.isNotEmpty()) {
                 val file = File(entry.localImagePath)
                 if (file.exists()) {
                     val bitmap = BitmapFactory.decodeFile(file.absolutePath)
                     val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 200, 200, true)
-                    canvas.drawBitmap(scaledBitmap, 50f, y, paint)
+                    canvas.drawBitmap(scaledBitmap, 50f, y, Paint())
                     y += 220f
                 }
             }
 
             val info = entry.speciesInfo
-            val lines =
-                    listOf(
-                            "Common Name: ${info.commonName}",
-                            "Scientific Name: ${info.scientificName}",
-                            "Kingdom: ${info.kingdom}",
-                            "Family: ${info.family}",
-                            "Conservation: ${info.conservationStatus}"
-                    )
 
-            for (line in lines) {
-                canvas.drawText(line, 50f, y, contentPaint)
+            fun drawLine(label: String, value: String) {
+                if (value.isBlank()) return
+                canvas.drawText("$label ", 50f, y, labelPaint)
+                val labelWidth = labelPaint.measureText("$label ")
+                canvas.drawText(stripTags(value), 50f + labelWidth, y, contentPaint)
                 y += 25f
             }
 
-            // Initial description with simple wrapping
-            y += 10f
-            canvas.drawText("Description:", 50f, y, contentPaint)
-            y += 20f
+            drawLine(context.getString(R.string.label_common_name), info.commonName)
+            drawLine(context.getString(R.string.label_scientific_name), info.scientificName)
 
-            // Simple text wrapping (very basic)
-            val description = info.description
-            val words = description.split(" ")
-            var currentLine = ""
-            for (word in words) {
-                if (contentPaint.measureText(currentLine + word) < 450) {
-                    currentLine += "$word "
-                } else {
-                    canvas.drawText(currentLine, 50f, y, contentPaint)
-                    y += 20f
-                    if (y > 800) break // Simple page overflow protection
-                    currentLine = "$word "
+            y += 10f
+            canvas.drawText(context.getString(R.string.taxonomy_title), 50f, y, labelPaint)
+            y += 25f
+
+            drawLine(context.getString(R.string.label_kingdom), info.kingdom)
+            drawLine(context.getString(R.string.label_phylum), info.phylum)
+            drawLine(context.getString(R.string.label_class), info.className)
+            drawLine(context.getString(R.string.label_order), info.taxorder)
+            drawLine(context.getString(R.string.label_family), info.family)
+            drawLine(context.getString(R.string.label_genus), info.genus)
+            drawLine(context.getString(R.string.label_species), info.species)
+
+            fun drawSection(title: String, content: String) {
+                if (content.isBlank()) return
+                y += 10f
+                canvas.drawText(title, 50f, y, labelPaint)
+                y += 20f
+
+                val cleanContent = stripTags(content)
+                val words = cleanContent.split(" ")
+                var currentLine = ""
+                for (word in words) {
+                    if (contentPaint.measureText(currentLine + word) < 450) {
+                        currentLine += "$word "
+                    } else {
+                        canvas.drawText(currentLine, 50f, y, contentPaint)
+                        y += 20f
+                        if (y > 800) break
+                        currentLine = "$word "
+                    }
                 }
+                canvas.drawText(currentLine, 50f, y, contentPaint)
+                y += 20f
             }
-            canvas.drawText(currentLine, 50f, y, contentPaint)
+
+            drawSection(context.getString(R.string.section_description), info.description)
+            drawSection(context.getString(R.string.section_characteristics), info.characteristics)
+            drawSection(context.getString(R.string.section_distribution), info.distribution)
+            drawSection(context.getString(R.string.section_habitat), info.habitat)
+            drawSection(context.getString(R.string.section_conservation), info.conservationStatus)
 
             pdfDocument.finishPage(page)
 
