@@ -4,7 +4,6 @@ import android.content.*
 import android.os.*
 import android.text.Html
 import android.view.*
-import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -149,30 +148,10 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
 
     // ==================== MENU & DIALOGS ====================
 
-    /** Hiển thị popup menu với các action cho chat */
     private fun showMenuPopup(anchor: View) {
-        val popup = PopupMenu(requireContext(), anchor)
-        popup.menuInflater.inflate(R.menu.menu_chat, popup.menu)
-
-        runCatching {
-            val fieldMPopup = PopupMenu::class.java.getDeclaredField("mPopup")
-            fieldMPopup.isAccessible = true
-            val mPopup = fieldMPopup.get(popup)
-            mPopup.javaClass
-                    .getDeclaredMethod("setForceShowIcon", Boolean::class.javaPrimitiveType)
-                    .invoke(mPopup, true)
-        }
-
-        popup.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.action_delete_chat -> {
-                    showDeleteConfirmDialog()
-                    true
-                }
-                else -> false
-            }
-        }
-        popup.show()
+        val bottomSheet = ChatMenuBottomSheet.newInstance()
+        bottomSheet.onDeleteClicked = { showDeleteConfirmDialog() }
+        bottomSheet.show(childFragmentManager, ChatMenuBottomSheet.TAG)
     }
 
     /** Hiển thị dialog xác nhận xóa chat */

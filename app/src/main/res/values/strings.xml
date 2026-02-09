@@ -324,6 +324,7 @@
     <!-- ==================== HỘP THOẠI ==================== -->
     <string name="action_delete">Xóa</string>
     <string name="action_cancel">Hủy</string>
+    <string name="action_delete_chat">Xoá đoạn chat</string>
     <string name="action_more_options">Tuỳ chọn</string>
     <string name="dialog_delete_history_title">Xóa lịch sử</string>
     <string name="dialog_delete_history_message">Bạn có chắc muốn xóa lịch sử nhận diện này không?</string>

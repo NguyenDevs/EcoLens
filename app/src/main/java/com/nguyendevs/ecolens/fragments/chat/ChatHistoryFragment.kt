@@ -16,20 +16,21 @@ import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.adapters.ChatSessionAdapter
 import com.nguyendevs.ecolens.databinding.ScreenChatHistoryBinding
 import com.nguyendevs.ecolens.models.chat.ChatSession
+import com.nguyendevs.ecolens.utils.FabAnimationHelper
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
- * Fragment hiển thị danh sách các phiên chat
- * Hỗ trợ tạo chat mới và mở lại chat cũ
- * Tự động hiển thị empty state khi không có chat
+ * Fragment hiển thị danh sách các phiên chat Hỗ trợ tạo chat mới và mở lại chat cũ Tự động hiển thị
+ * empty state khi không có chat
  */
 class ChatHistoryFragment : Fragment() {
 
     private val viewModel: EcoLensViewModel by activityViewModels()
     private var _binding: ScreenChatHistoryBinding? = null
-    private val binding get() = _binding!!
+    private val binding
+        get() = _binding!!
 
     private lateinit var adapter: ChatSessionAdapter
     private var fullChatList: List<ChatSession> = emptyList()
@@ -40,9 +41,9 @@ class ChatHistoryFragment : Fragment() {
     // ==================== LIFECYCLE ====================
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View {
         _binding = ScreenChatHistoryBinding.inflate(inflater, container, false)
         return binding.root
@@ -62,49 +63,49 @@ class ChatHistoryFragment : Fragment() {
 
     // ==================== UI SETUP ====================
 
-    /**
-     * Cấu hình RecyclerView hiển thị danh sách chat sessions
-     */
+    /** Cấu hình RecyclerView hiển thị danh sách chat sessions */
     private fun setupRecyclerView() {
-        adapter = ChatSessionAdapter(mutableListOf()) { session ->
-            binding.rvChatHistory.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
-            openChatScreen(session.id)
-        }
+        adapter =
+                ChatSessionAdapter(mutableListOf()) { session ->
+                    binding.rvChatHistory.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+                    openChatScreen(session.id)
+                }
 
         binding.rvChatHistory.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = this@ChatHistoryFragment.adapter
-            
-            addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                    super.onScrolled(recyclerView, dx, dy)
-                    val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-                    val totalItemCount = layoutManager.itemCount
-                    val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
 
-                    if (!isLoadingMore && totalItemCount <= (lastVisibleItem + 5)) {
-                        loadNextPage()
+            addOnScrollListener(
+                    object : RecyclerView.OnScrollListener() {
+                        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                            super.onScrolled(recyclerView, dx, dy)
+                            val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                            val totalItemCount = layoutManager.itemCount
+                            val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
+
+                            if (!isLoadingMore && totalItemCount <= (lastVisibleItem + 5)) {
+                                loadNextPage()
+                            }
+                        }
                     }
-                }
-            })
+            )
         }
     }
 
-    /**
-     * Cấu hình FAB để tạo chat mới
-     */
+    /** Cấu hình FAB để tạo chat mới */
     private fun setupFabListener() {
         binding.fabNewChat.setOnClickListener {
             binding.fabNewChat.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
-            openChatScreen(null)
+            FabAnimationHelper.animateClick(
+                    binding.fabNewChat
+            ) { openChatScreen(null) }
         }
     }
 
     // ==================== VIEWMODEL OBSERVERS ====================
 
     /**
-     * Observe danh sách chat sessions từ ViewModel
-     * Tự động toggle giữa RecyclerView và empty state
+     * Observe danh sách chat sessions từ ViewModel Tự động toggle giữa RecyclerView và empty state
      */
     private fun observeChatSessions() {
         viewLifecycleOwner.lifecycleScope.launch {
@@ -116,7 +117,7 @@ class ChatHistoryFragment : Fragment() {
                     binding.rvChatHistory.visibility = View.VISIBLE
                     binding.emptyStateContainer.visibility = View.GONE
                 }
-                
+
                 fullChatList = list
                 currentPage = 0
                 val firstPage = fullChatList.take(pageSize)
@@ -134,21 +135,20 @@ class ChatHistoryFragment : Fragment() {
     private fun openChatScreen(sessionId: Long?) {
         val fragment = ChatFragment.newInstance(sessionId)
 
-        parentFragmentManager.beginTransaction()
-            .setCustomAnimations(
-                R.anim.slide_in_right,
-                R.anim.fade_out,
-                R.anim.fade_in,
-                R.anim.fade_out
-            )
-            .replace(R.id.fragmentContainer, fragment)
-            .addToBackStack("chat_detail")
-            .commit()
+        parentFragmentManager
+                .beginTransaction()
+                .setCustomAnimations(
+                        R.anim.slide_in_right,
+                        R.anim.fade_out,
+                        R.anim.fade_in,
+                        R.anim.fade_out
+                )
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("chat_detail")
+                .commit()
     }
 
-    /**
-     * Tải trang tiếp theo của danh sách chat
-     */
+    /** Tải trang tiếp theo của danh sách chat */
     private fun loadNextPage() {
         val start = (currentPage + 1) * pageSize
         if (start >= fullChatList.size) return
@@ -156,15 +156,19 @@ class ChatHistoryFragment : Fragment() {
         isLoadingMore = true
         adapter.setLoading(true)
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            val end = (start + pageSize).coerceAtMost(fullChatList.size)
-            val newItems = fullChatList.subList(start, end)
+        Handler(Looper.getMainLooper())
+                .postDelayed(
+                        {
+                            val end = (start + pageSize).coerceAtMost(fullChatList.size)
+                            val newItems = fullChatList.subList(start, end)
 
-            adapter.setLoading(false)
-            adapter.addItems(newItems)
+                            adapter.setLoading(false)
+                            adapter.addItems(newItems)
 
-            currentPage++
-            isLoadingMore = false
-        }, 500)
+                            currentPage++
+                            isLoadingMore = false
+                        },
+                        500
+                )
     }
 }

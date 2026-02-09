@@ -324,6 +324,7 @@
     <string name="action_delete">削除</string>
     <string name="action_cancel">キャンセル</string>
     <string name="action_more_options">オプション</string>
+    <string name="action_delete_chat">チャットを削除</string>
     <string name="dialog_delete_history_title">履歴を削除</string>
     <string name="dialog_delete_history_message">この履歴を削除してもよろしいですか？</string>
     <string name="dialog_save_picture_history_title">画像をダウンロード</string>
