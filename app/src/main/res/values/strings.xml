@@ -324,12 +324,13 @@
     <!-- ==================== HỘP THOẠI ==================== -->
     <string name="action_delete">Xóa</string>
     <string name="action_cancel">Hủy</string>
+    <string name="action_more_options">Tuỳ chọn</string>
     <string name="dialog_delete_history_title">Xóa lịch sử</string>
     <string name="dialog_delete_history_message">Bạn có chắc muốn xóa lịch sử nhận diện này không?</string>
     <string name="dialog_save_picture_history_title">Tải hình ảnh</string>
     <string name="dialog_export_history_title">Xuất lịch sử</string>
     <string name="label_select_format">Chọn định dạng xuất:</string>
-    <string name="label_include_image">Bao gồm hình ảnh (Trừ JSON)</string>
+    <string name="label_include_image">Bao gồm hình ảnh</string>
     <string name="action_export">Xuất file</string>
     <string name="action_save">Lưu</string>
     <string name="dialog_save_picture_title">Lưu hình ảnh</string>

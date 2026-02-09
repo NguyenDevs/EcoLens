@@ -13,13 +13,9 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox
 import android.widget.LinearLayout
-import android.widget.PopupMenu
-import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
@@ -35,8 +31,8 @@ import com.nguyendevs.ecolens.managers.setting.LanguageManager
 import com.nguyendevs.ecolens.models.SpeciesInfo
 import com.nguyendevs.ecolens.models.history.HistoryEntry
 import com.nguyendevs.ecolens.network.RetrofitClient
+import com.nguyendevs.ecolens.utils.CustomDialogUtils
 import com.nguyendevs.ecolens.utils.ExportUtils
-import com.nguyendevs.ecolens.utils.ExportUtils.ExportFormat
 import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import java.io.File
@@ -153,69 +149,38 @@ class HistoryDetailFragment : Fragment() {
     private fun setupMoreOptionsButton() {
         binding.btnMoreOptions.setOnClickListener {
             animationHandler.performConfirmFeedback(it)
-            showMenuPopup(it)
+            showHistoryMenu()
         }
     }
 
-    private fun showMenuPopup(anchor: View) {
-        val popup = PopupMenu(requireContext(), anchor)
-        popup.menuInflater.inflate(R.menu.menu_history_detail, popup.menu)
-
-        runCatching {
-            val fieldMPopup = PopupMenu::class.java.getDeclaredField("mPopup")
-            fieldMPopup.isAccessible = true
-            val mPopup = fieldMPopup.get(popup)
-            mPopup.javaClass
-                    .getDeclaredMethod("setForceShowIcon", Boolean::class.javaPrimitiveType)
-                    .invoke(mPopup, true)
-        }
-
-        popup.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.action_delete_history -> {
-                    showDeleteConfirmDialog()
-                    true
+    private fun showHistoryMenu() {
+        val bottomSheet = HistoryMenuBottomSheet.newInstance()
+        bottomSheet.onDeleteClicked = { showDeleteConfirmDialog() }
+        bottomSheet.onDownloadClicked = {
+            historyEntry?.let { entry ->
+                if (entry.localImagePath.isNotEmpty() && File(entry.localImagePath).exists()) {
+                    showDownloadConfirmation(entry.localImagePath)
+                } else {
+                    Toast.makeText(
+                                    requireContext(),
+                                    getString(R.string.error_image_not_found),
+                                    Toast.LENGTH_SHORT
+                            )
+                            .show()
                 }
-                else -> false
             }
         }
-        popup.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.action_delete_history -> {
-                    showDeleteConfirmDialog()
-                    true
-                }
-                R.id.action_save_picture_history -> {
-                    historyEntry?.let { entry ->
-                        if (entry.localImagePath.isNotEmpty() && File(entry.localImagePath).exists()
-                        ) {
-                            showDownloadConfirmation(entry.localImagePath)
-                        } else {
-                            Toast.makeText(
-                                            requireContext(),
-                                            getString(R.string.error_image_not_found),
-                                            Toast.LENGTH_SHORT
-                                    )
-                                    .show()
-                        }
-                    }
-                    true
-                }
-                R.id.action_export_history -> {
-                    historyEntry?.let { showExportDialog(it) }
-                    true
-                }
-                else -> false
-            }
-        }
-        popup.show()
+        bottomSheet.onExportClicked = { showExportOptions() }
+        bottomSheet.show(childFragmentManager, HistoryMenuBottomSheet.TAG)
     }
 
     private fun showDownloadConfirmation(imagePath: String) {
-        AlertDialog.Builder(requireContext())
-                .setTitle(R.string.dialog_save_picture_title)
-                .setMessage(R.string.dialog_save_picture_message)
-                .setPositiveButton(R.string.action_save) { _, _ ->
+        CustomDialogUtils.showConfirmationDialog(
+                context = requireContext(),
+                title = getString(R.string.dialog_save_picture_title),
+                message = getString(R.string.dialog_save_picture_message),
+                confirmText = getString(R.string.action_save),
+                onConfirm = {
                     if (ExportUtils.saveImageToGallery(requireContext(), imagePath)) {
                         Toast.makeText(
                                         requireContext(),
@@ -232,67 +197,42 @@ class HistoryDetailFragment : Fragment() {
                                 .show()
                     }
                 }
-                .setNegativeButton(R.string.action_cancel, null)
-                .show()
+        )
     }
 
-    private fun showExportDialog(entry: HistoryEntry) {
-        val context = requireContext()
-        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_export_options, null)
-        val radioGroup = dialogView.findViewById<RadioGroup>(R.id.radioGroupFormat)
-        val checkIncludeImage = dialogView.findViewById<CheckBox>(R.id.checkIncludeImage)
-
-        radioGroup.setOnCheckedChangeListener { _, checkedId ->
-            // Disable image checkbox for JSON/CSV if needed, currently JSON logic supports NO image
-            if (checkedId == R.id.radioJson) {
-                checkIncludeImage.isChecked = false
-                checkIncludeImage.isEnabled = false
-            } else {
-                checkIncludeImage.isEnabled = true
+    private fun showExportOptions() {
+        val exportSheet = ExportHistoryBottomSheet.newInstance()
+        exportSheet.onExportConfirmed = { format, includeImage ->
+            historyEntry?.let { entry ->
+                val result =
+                        ExportUtils.exportHistory(requireContext(), entry, format, includeImage)
+                if (result != null) {
+                    Toast.makeText(
+                                    requireContext(),
+                                    getString(R.string.export_success, result),
+                                    Toast.LENGTH_LONG
+                            )
+                            .show()
+                } else {
+                    Toast.makeText(
+                                    requireContext(),
+                                    getString(R.string.error_export_failed),
+                                    Toast.LENGTH_SHORT
+                            )
+                            .show()
+                }
             }
         }
-
-        AlertDialog.Builder(context)
-                .setTitle(R.string.dialog_export_title)
-                .setView(dialogView)
-                .setPositiveButton(R.string.action_export) { _, _ ->
-                    val format =
-                            when (radioGroup.checkedRadioButtonId) {
-                                R.id.radioDocx -> ExportFormat.DOCX
-                                R.id.radioXlsx -> ExportFormat.XLSX
-                                R.id.radioPdf -> ExportFormat.PDF
-                                R.id.radioJson -> ExportFormat.JSON
-                                else -> ExportFormat.DOCX
-                            }
-                    val includeImage = checkIncludeImage.isChecked
-
-                    // Perform export
-                    val result = ExportUtils.exportHistory(context, entry, format, includeImage)
-                    if (result != null) {
-                        Toast.makeText(
-                                        context,
-                                        getString(R.string.export_success, result),
-                                        Toast.LENGTH_LONG
-                                )
-                                .show()
-                    } else {
-                        Toast.makeText(
-                                        context,
-                                        getString(R.string.error_export_failed),
-                                        Toast.LENGTH_SHORT
-                                )
-                                .show()
-                    }
-                }
-                .setNegativeButton(R.string.action_cancel, null)
-                .show()
+        exportSheet.show(childFragmentManager, ExportHistoryBottomSheet.TAG)
     }
 
     private fun showDeleteConfirmDialog() {
-        AlertDialog.Builder(requireContext())
-                .setTitle(R.string.dialog_delete_history_title)
-                .setMessage(R.string.dialog_delete_history_message)
-                .setPositiveButton(R.string.action_delete) { _, _ ->
+        CustomDialogUtils.showConfirmationDialog(
+                context = requireContext(),
+                title = getString(R.string.dialog_delete_history_title),
+                message = getString(R.string.dialog_delete_history_message),
+                confirmText = getString(R.string.action_delete),
+                onConfirm = {
                     historyEntry?.let { entry ->
                         viewModel.deleteHistory(entry)
                         Toast.makeText(
@@ -304,8 +244,7 @@ class HistoryDetailFragment : Fragment() {
                         parentFragmentManager.popBackStack()
                     }
                 }
-                .setNegativeButton(R.string.action_cancel, null)
-                .show()
+        )
     }
 
     // ==================== SHARE FUNCTIONALITY ====================
