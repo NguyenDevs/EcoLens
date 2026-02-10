@@ -193,7 +193,6 @@ object ExportUtils {
         return input
             .replace(Regex("<br/?>"), "\n")
             .replace(Regex("<[^>]*>"), "")
-            .replace("\\n", "\n")
     }
 
     fun saveImageToGallery(context: Context, imagePath: String): Boolean {
