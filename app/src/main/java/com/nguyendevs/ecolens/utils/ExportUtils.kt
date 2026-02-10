@@ -857,7 +857,11 @@ object ExportUtils {
                 "conservationStatus" to if (info.conservationStatus != "Vô hiệu") stripTags(info.conservationStatus) else null
             )
 
-            val jsonString = Gson().toJson(cleanedData)
+            val gson = com.google.gson.GsonBuilder()
+                .setPrettyPrinting()
+                .disableHtmlEscaping()
+                .create()
+            val jsonString = gson.toJson(cleanedData)
             val out = getOutputStream(context, filename, "json", "application/json")
             out?.use { it.write(jsonString.toByteArray()) } ?: return null
             return "$filename.json"
