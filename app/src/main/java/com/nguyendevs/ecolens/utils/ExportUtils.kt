@@ -833,7 +833,35 @@ object ExportUtils {
 
     private fun exportToJson(context: Context, entry: HistoryEntry, filename: String): String? {
         try {
-            val jsonString = Gson().toJson(entry)
+            val info = entry.speciesInfo
+
+            // Tạo object JSON với text đã được làm sạch
+            val cleanedData = mapOf(
+                "title" to context.getString(R.string.share_title),
+                "timestamp" to entry.timestamp,
+                "taxonomy" to mapOf(
+                    "commonName" to stripTags(info.commonName),
+                    "scientificName" to stripTags(info.scientificName),
+                    "kingdom" to stripTags(info.kingdom),
+                    "phylum" to stripTags(info.phylum),
+                    "class" to stripTags(info.className),
+                    "order" to stripTags(info.taxorder),
+                    "family" to stripTags(info.family),
+                    "genus" to stripTags(info.genus),
+                    "species" to stripTags(info.species)
+                ),
+                "description" to stripTags(info.description),
+                "characteristics" to stripTags(info.characteristics),
+                "distribution" to stripTags(info.distribution),
+                "habitat" to stripTags(info.habitat),
+                "conservationStatus" to if (info.conservationStatus != "Vô hiệu") stripTags(info.conservationStatus) else null
+            )
+
+            val gson = com.google.gson.GsonBuilder()
+                .setPrettyPrinting()
+                .disableHtmlEscaping()
+                .create()
+            val jsonString = gson.toJson(cleanedData)
             val out = getOutputStream(context, filename, "json", "application/json")
             out?.use { it.write(jsonString.toByteArray()) } ?: return null
             return "$filename.json"

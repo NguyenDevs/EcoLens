@@ -30,7 +30,7 @@
                     android:scaleType="centerCrop"
                     app:shapeAppearanceOverlay="@style/ShapeAppearance.App.MediumComponent"
                     android:visibility="visible"
-                    tools:src="@drawable/succulent" />
+                    tools:src="@mipmap/ic_launcher" />
 
             <!-- Shimmer overlay cho image -->
             <com.facebook.shimmer.ShimmerFrameLayout
