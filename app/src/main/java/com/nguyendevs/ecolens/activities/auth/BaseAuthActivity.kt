@@ -1,18 +1,18 @@
 package com.nguyendevs.ecolens.activities.auth
 
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.WindowInsetsController
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.view.WindowCompat
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.database.UserRepository
 import com.nguyendevs.ecolens.databinding.ActivityAuthBinding
+import com.nguyendevs.ecolens.managers.setting.LanguageManager
 
-/**
- * Base Activity cho authentication flow
- * Chứa các phương thức chung như theme, loading
- */
 abstract class BaseAuthActivity : AppCompatActivity() {
 
     protected lateinit var binding: ActivityAuthBinding
@@ -24,6 +24,34 @@ abstract class BaseAuthActivity : AppCompatActivity() {
 
         binding = ActivityAuthBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        setupEdgeToEdge()
+    }
+
+    override fun attachBaseContext(newBase: Context?) {
+        if (newBase != null) {
+            val languageManager = LanguageManager(newBase)
+            super.attachBaseContext(languageManager.updateBaseContext(newBase))
+        } else {
+            super.attachBaseContext(newBase)
+        }
+    }
+
+    private fun setupEdgeToEdge() {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.statusBarColor = android.graphics.Color.TRANSPARENT
+        window.navigationBarColor = android.graphics.Color.TRANSPARENT
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.insetsController?.setSystemBarsAppearance(
+                0,
+                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            window.decorView.systemUiVisibility =
+                window.decorView.systemUiVisibility and View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.inv()
+        }
     }
 
     protected fun applyUserTheme(isDarkMode: Boolean) {

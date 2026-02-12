@@ -15,16 +15,15 @@ import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.GoogleAuthProvider
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.database.UserRepository
+import com.nguyendevs.ecolens.managers.setting.LanguageManager
 import kotlinx.coroutines.launch
 
-/**
- * Handler cho Google Sign-In
- * Quản lý flow đăng nhập với Google
- */
+/** Handler cho Google Sign-In Quản lý flow đăng nhập với Google */
 class GoogleSignInHandler(
-    private val fragment: Fragment,
-    private val userRepository: UserRepository,
-    private val lifecycleScope: LifecycleCoroutineScope
+        private val fragment: Fragment,
+        private val userRepository: UserRepository,
+        private val lifecycleScope: LifecycleCoroutineScope,
+        private val languageManager: LanguageManager
 ) {
 
     private lateinit var googleSignInClient: GoogleSignInClient
@@ -35,40 +34,44 @@ class GoogleSignInHandler(
     private var rememberMe: Boolean = false
 
     init {
-        googleSignInLauncher = fragment.registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()
-        ) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-                try {
-                    val account = task.getResult(ApiException::class.java)
-                    account.idToken?.let {
-                        firebaseAuthWithGoogle(it, rememberMe, onLoadingChange!!, onSuccess!!)
+        googleSignInLauncher =
+                fragment.registerForActivityResult(
+                        ActivityResultContracts.StartActivityForResult()
+                ) { result ->
+                    if (result.resultCode == Activity.RESULT_OK) {
+                        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+                        try {
+                            val account = task.getResult(ApiException::class.java)
+                            account.idToken?.let {
+                                firebaseAuthWithGoogle(
+                                        it,
+                                        rememberMe,
+                                        onLoadingChange!!,
+                                        onSuccess!!
+                                )
+                            }
+                        } catch (e: ApiException) {
+                            Toast.makeText(
+                                            fragment.requireContext(),
+                                            "Google sign in failed: ${e.message}",
+                                            Toast.LENGTH_SHORT
+                                    )
+                                    .show()
+                        }
                     }
-                } catch (e: ApiException) {
-                    Toast.makeText(
-                        fragment.requireContext(),
-                        "Google sign in failed: ${e.message}",
-                        Toast.LENGTH_SHORT
-                    ).show()
                 }
-            }
-        }
     }
 
-    fun setup(
-        rememberMe: Boolean,
-        onLoadingChange: (Boolean) -> Unit,
-        onSuccess: () -> Unit
-    ) {
+    fun setup(rememberMe: Boolean, onLoadingChange: (Boolean) -> Unit, onSuccess: () -> Unit) {
         this.rememberMe = rememberMe
         this.onLoadingChange = onLoadingChange
         this.onSuccess = onSuccess
 
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(fragment.getString(R.string.default_web_client_id))
-            .requestEmail()
-            .build()
+        val gso =
+                GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestIdToken(fragment.getString(R.string.default_web_client_id))
+                        .requestEmail()
+                        .build()
 
         googleSignInClient = GoogleSignIn.getClient(fragment.requireActivity(), gso)
     }
@@ -79,10 +82,10 @@ class GoogleSignInHandler(
     }
 
     private fun firebaseAuthWithGoogle(
-        idToken: String,
-        rememberMe: Boolean,
-        onLoadingChange: (Boolean) -> Unit,
-        onSuccess: () -> Unit
+            idToken: String,
+            rememberMe: Boolean,
+            onLoadingChange: (Boolean) -> Unit,
+            onSuccess: () -> Unit
     ) {
         onLoadingChange(true)
 
@@ -91,8 +94,8 @@ class GoogleSignInHandler(
             val user = userRepository.signInWithCredential(credential)
 
             if (user != null) {
-                // Nếu đăng nhập bằng Google, mặc định bật Remember Me
                 saveRememberMe(true)
+                userRepository.updateLanguage(languageManager.getLanguage())
 
                 val userDetails = userRepository.getCurrentUserDetails()
                 if (userDetails != null) {
@@ -100,18 +103,20 @@ class GoogleSignInHandler(
                 }
 
                 Toast.makeText(
-                    fragment.requireContext(),
-                    fragment.getString(R.string.login_success),
-                    Toast.LENGTH_SHORT
-                ).show()
+                                fragment.requireContext(),
+                                fragment.getString(R.string.login_success),
+                                Toast.LENGTH_SHORT
+                        )
+                        .show()
 
                 onSuccess()
             } else {
                 Toast.makeText(
-                    fragment.requireContext(),
-                    fragment.getString(R.string.login_failed),
-                    Toast.LENGTH_SHORT
-                ).show()
+                                fragment.requireContext(),
+                                fragment.getString(R.string.login_failed),
+                                Toast.LENGTH_SHORT
+                        )
+                        .show()
             }
 
             onLoadingChange(false)
@@ -119,12 +124,16 @@ class GoogleSignInHandler(
     }
 
     private fun saveRememberMe(isRemember: Boolean) {
-        val sharedPref = fragment.requireActivity().getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+        val sharedPref =
+                fragment.requireActivity()
+                        .getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         sharedPref.edit().putBoolean("remember_me", isRemember).apply()
     }
 
     private fun applyUserTheme(isDarkMode: Boolean) {
-        val sharedPref = fragment.requireActivity().getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+        val sharedPref =
+                fragment.requireActivity()
+                        .getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         sharedPref.edit().putBoolean("dark_mode", isDarkMode).apply()
     }
 }

@@ -4,7 +4,8 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_auth_gradient">
 
     <FrameLayout
             android:id="@+id/fragmentContainer"
@@ -15,15 +16,49 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
+    <LinearLayout
+            android:id="@+id/btnLanguage"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginTop="40dp"
+            android:layout_marginEnd="20dp"
+            android:background="@drawable/bg_language_button"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_language"
+                app:tint="#FFFFFF"
+                android:contentDescription="@string/language_label"
+                android:layout_marginEnd="6dp" />
+
+        <TextView
+                android:id="@+id/tvLanguageLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                tools:text="VI" />
+    </LinearLayout>
+
     <FrameLayout
             android:id="@+id/loadingOverlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#80000000"
+            android:background="@color/overlay_dark"
             android:clickable="true"
             android:focusable="true"
             android:visibility="gone"
-            tools:visibility="visible">
+            tools:visibility="gone">
 
         <com.google.android.material.card.MaterialCardView
                 android:layout_width="wrap_content"
@@ -47,7 +82,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:indeterminate="true"
-                        app:indicatorColor="#018367"
+                        app:indicatorColor="@color/accent"
                         app:trackThickness="4dp"
                         app:indicatorSize="48dp" />
 
