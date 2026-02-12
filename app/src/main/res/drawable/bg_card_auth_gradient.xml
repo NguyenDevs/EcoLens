@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Base black background -->
     <item>
         <shape>
-            <solid android:color="#000000" />
+            <solid android:color="#FFFFFF" />
         </shape>
     </item>
 
-    <!-- Emerald glow at top (radial gradient) -->
     <item>
         <shape>
             <gradient
                     android:type="radial"
-                    android:gradientRadius="70%p"
+                    android:gradientRadius="90%p"
                     android:centerX="0.5"
                     android:centerY="0.0"
-                    android:startColor="#065F46"
+                    android:startColor="#4882F6C4"
                     android:endColor="#00000000" />
         </shape>
     </item>
