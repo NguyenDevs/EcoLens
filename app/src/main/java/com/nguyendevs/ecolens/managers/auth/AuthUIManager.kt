@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
 import android.widget.TextView
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.tabs.TabLayout
@@ -36,8 +37,22 @@ class AuthUIManager(private val binding: FragmentLoginBinding, private val conte
             page.scaleY = 1f - absPos * 0.08f
         }
 
+        binding.viewPagerAuth.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                val tab = binding.tabLayoutAuth.getTabAt(position)
+                if (tab != null && !tab.isSelected) {
+                    tab.select()
+                }
+            }
+        })
+
         setupTabs()
-        updateTabTypeface(0)
+        val currentItem = binding.viewPagerAuth.currentItem
+        if (currentItem > 0 && currentItem < binding.tabLayoutAuth.tabCount) {
+            binding.tabLayoutAuth.getTabAt(currentItem)?.select()
+        }
+        updateTabTypeface(currentItem)
     }
 
     private fun setupTabs() {
