@@ -15,6 +15,7 @@ import com.nguyendevs.ecolens.handlers.auth.GoogleSignInHandler
 import com.nguyendevs.ecolens.handlers.auth.LoginHandler
 import com.nguyendevs.ecolens.handlers.auth.RegisterHandler
 import com.nguyendevs.ecolens.managers.auth.AuthUIManager
+import com.nguyendevs.ecolens.managers.setting.LanguageManager
 
 class LoginFragment : Fragment() {
 
@@ -41,11 +42,15 @@ class LoginFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         userRepository = UserRepository()
+        val languageManager = LanguageManager(requireContext())
         authUIManager = AuthUIManager(binding, requireContext())
-        loginHandler = LoginHandler(requireContext(), userRepository, lifecycleScope)
-        registerHandler = RegisterHandler(requireContext(), userRepository, lifecycleScope)
+        loginHandler =
+                LoginHandler(requireContext(), userRepository, lifecycleScope, languageManager)
+        registerHandler =
+                RegisterHandler(requireContext(), userRepository, lifecycleScope, languageManager)
 
-        googleSignInHandler = GoogleSignInHandler(this, userRepository, lifecycleScope)
+        googleSignInHandler =
+                GoogleSignInHandler(this, userRepository, lifecycleScope, languageManager)
 
         authUIManager.setupViewPager()
 

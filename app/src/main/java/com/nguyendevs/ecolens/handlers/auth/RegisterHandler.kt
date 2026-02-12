@@ -5,50 +5,52 @@ import android.widget.Toast
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.database.UserRepository
+import com.nguyendevs.ecolens.managers.setting.LanguageManager
 import kotlinx.coroutines.launch
 
-/**
- * Handler cho register logic
- * Xử lý đăng ký tài khoản mới với email/password
- */
+/** Handler cho register logic Xử lý đăng ký tài khoản mới với email/password */
 class RegisterHandler(
-    private val context: Context,
-    private val userRepository: UserRepository,
-    private val lifecycleScope: LifecycleCoroutineScope
+        private val context: Context,
+        private val userRepository: UserRepository,
+        private val lifecycleScope: LifecycleCoroutineScope,
+        private val languageManager: LanguageManager
 ) {
 
     fun handleRegister(
-        email: String,
-        password: String,
-        confirmPassword: String,
-        agreeTerms: Boolean,
-        onLoadingChange: (Boolean) -> Unit,
-        onSuccess: () -> Unit
+            email: String,
+            password: String,
+            confirmPassword: String,
+            agreeTerms: Boolean,
+            onLoadingChange: (Boolean) -> Unit,
+            onSuccess: () -> Unit
     ) {
         if (email.isBlank() || password.isBlank()) {
             Toast.makeText(
-                context,
-                context.getString(R.string.error_fill_all_fields),
-                Toast.LENGTH_SHORT
-            ).show()
+                            context,
+                            context.getString(R.string.error_fill_all_fields),
+                            Toast.LENGTH_SHORT
+                    )
+                    .show()
             return
         }
 
         if (password != confirmPassword) {
             Toast.makeText(
-                context,
-                context.getString(R.string.error_password_mismatch),
-                Toast.LENGTH_SHORT
-            ).show()
+                            context,
+                            context.getString(R.string.error_password_mismatch),
+                            Toast.LENGTH_SHORT
+                    )
+                    .show()
             return
         }
 
         if (!agreeTerms) {
             Toast.makeText(
-                context,
-                context.getString(R.string.error_terms_not_accepted),
-                Toast.LENGTH_SHORT
-            ).show()
+                            context,
+                            context.getString(R.string.error_terms_not_accepted),
+                            Toast.LENGTH_SHORT
+                    )
+                    .show()
             return
         }
 
@@ -59,21 +61,24 @@ class RegisterHandler(
 
             if (userRepository.registerUser(email, password, username)) {
                 saveRememberMe(true)
+                userRepository.updateLanguage(languageManager.getLanguage())
                 applyUserTheme(false)
 
                 Toast.makeText(
-                    context,
-                    context.getString(R.string.register_success),
-                    Toast.LENGTH_SHORT
-                ).show()
+                                context,
+                                context.getString(R.string.register_success),
+                                Toast.LENGTH_SHORT
+                        )
+                        .show()
 
                 onSuccess()
             } else {
                 Toast.makeText(
-                    context,
-                    context.getString(R.string.register_failed),
-                    Toast.LENGTH_SHORT
-                ).show()
+                                context,
+                                context.getString(R.string.register_failed),
+                                Toast.LENGTH_SHORT
+                        )
+                        .show()
             }
 
             onLoadingChange(false)

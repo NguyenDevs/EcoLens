@@ -8,31 +8,31 @@ import com.nguyendevs.ecolens.MainActivity
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.activities.auth.BaseAuthActivity
 import com.nguyendevs.ecolens.database.UserRepository
+import com.nguyendevs.ecolens.managers.setting.LanguageManager
 import kotlinx.coroutines.launch
 
-/**
- * Handler cho login logic
- * Xử lý email/password login
- */
+/** Handler cho login logic Xử lý email/password login */
 class LoginHandler(
-    private val context: Context,
-    private val userRepository: UserRepository,
-    private val lifecycleScope: LifecycleCoroutineScope
+        private val context: Context,
+        private val userRepository: UserRepository,
+        private val lifecycleScope: LifecycleCoroutineScope,
+        private val languageManager: LanguageManager
 ) {
 
     fun handleLogin(
-        email: String,
-        password: String,
-        rememberMe: Boolean,
-        onLoadingChange: (Boolean) -> Unit,
-        onSuccess: () -> Unit
+            email: String,
+            password: String,
+            rememberMe: Boolean,
+            onLoadingChange: (Boolean) -> Unit,
+            onSuccess: () -> Unit
     ) {
         if (email.isBlank() || password.isBlank()) {
             Toast.makeText(
-                context,
-                context.getString(R.string.error_fill_all_fields),
-                Toast.LENGTH_SHORT
-            ).show()
+                            context,
+                            context.getString(R.string.error_fill_all_fields),
+                            Toast.LENGTH_SHORT
+                    )
+                    .show()
             return
         }
 
@@ -43,6 +43,7 @@ class LoginHandler(
 
             if (firebaseUser != null) {
                 saveRememberMe(rememberMe)
+                userRepository.updateLanguage(languageManager.getLanguage())
 
                 val userDetails = userRepository.getCurrentUserDetails()
                 if (userDetails != null) {
@@ -50,18 +51,20 @@ class LoginHandler(
                 }
 
                 Toast.makeText(
-                    context,
-                    context.getString(R.string.login_success),
-                    Toast.LENGTH_SHORT
-                ).show()
+                                context,
+                                context.getString(R.string.login_success),
+                                Toast.LENGTH_SHORT
+                        )
+                        .show()
 
                 onSuccess()
             } else {
                 Toast.makeText(
-                    context,
-                    context.getString(R.string.login_failed),
-                    Toast.LENGTH_SHORT
-                ).show()
+                                context,
+                                context.getString(R.string.login_failed),
+                                Toast.LENGTH_SHORT
+                        )
+                        .show()
             }
 
             onLoadingChange(false)
