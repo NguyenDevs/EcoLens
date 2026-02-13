@@ -138,4 +138,10 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     fun deleteAllHistory() {
         viewModelScope.launch { historyManager.deleteAllHistory() }
     }
+
+    fun resetState() {
+        _uiState.value = EcoLensUiState()
+        currentImageUri = null
+        lastLanguageCode = "en"
+    }
 }

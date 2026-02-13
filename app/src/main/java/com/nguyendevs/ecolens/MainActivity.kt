@@ -36,7 +36,6 @@ import com.nguyendevs.ecolens.fragments.history.HistoryFragment
 import com.nguyendevs.ecolens.handlers.*
 import com.nguyendevs.ecolens.handlers.animations.HistoryDetailAnimationHandler
 import com.nguyendevs.ecolens.handlers.animations.LoadingAnimationHandler
-import com.nguyendevs.ecolens.utils.FabAnimationHelper
 import com.nguyendevs.ecolens.handlers.home.ImageZoomHandler
 import com.nguyendevs.ecolens.handlers.home.SearchBarHandler
 import com.nguyendevs.ecolens.handlers.main.HomeScreenHandler
@@ -48,6 +47,7 @@ import com.nguyendevs.ecolens.managers.main.SpeakerManager
 import com.nguyendevs.ecolens.managers.setting.LanguageManager
 import com.nguyendevs.ecolens.models.LoadingStage
 import com.nguyendevs.ecolens.models.SpeciesInfo
+import com.nguyendevs.ecolens.utils.FabAnimationHelper
 import com.nguyendevs.ecolens.utils.KeyboardUtils
 import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
 import com.nguyendevs.ecolens.view.EcoLensViewModel
@@ -566,9 +566,7 @@ class MainActivity : AppCompatActivity() {
     private fun setupFAB() {
         binding.fabCamera.setOnClickListener {
             binding.fabCamera.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
-            FabAnimationHelper.animateClick(
-                    binding.fabCamera
-            ) {
+            FabAnimationHelper.animateClick(binding.fabCamera) {
                 if (speakerManager.isSpeaking()) {
                     speakerManager.pause()
                     updateFabUI(false)
@@ -762,8 +760,17 @@ class MainActivity : AppCompatActivity() {
                         if (binding.bottomNavigation.selectedItemId != R.id.nav_home) {
                             binding.bottomNavigation.selectedItemId = R.id.nav_home
                         } else {
-                            isEnabled = false
-                            onBackPressedDispatcher.onBackPressed()
+                            val state = viewModel.uiState.value
+                            val hasData =
+                                    state.speciesInfo != null ||
+                                            state.error != null ||
+                                            state.isLoading
+                            if (hasData) {
+                                viewModel.resetState()
+                            } else {
+                                isEnabled = false
+                                onBackPressedDispatcher.onBackPressed()
+                            }
                         }
                     }
                 }
