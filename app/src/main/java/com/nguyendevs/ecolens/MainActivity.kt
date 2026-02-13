@@ -765,8 +765,8 @@ class MainActivity : AppCompatActivity() {
 
                             val hasData = state.speciesInfo != null || state.error != null
                             if (hasData) {
-                                binding.homeContainer.homeScrollView.smoothScrollTo(0, 0)
                                 viewModel.resetState()
+                                binding.homeContainer.homeScrollView.smoothScrollTo(0, 0)
                             } else {
                                 isEnabled = false
                                 onBackPressedDispatcher.onBackPressed()
