@@ -761,10 +761,9 @@ class MainActivity : AppCompatActivity() {
                             binding.bottomNavigation.selectedItemId = R.id.nav_home
                         } else {
                             val state = viewModel.uiState.value
-                            val hasData =
-                                    state.speciesInfo != null ||
-                                            state.error != null ||
-                                            state.isLoading
+                            if (state.isLoading) return
+
+                            val hasData = state.speciesInfo != null || state.error != null
                             if (hasData) {
                                 viewModel.resetState()
                             } else {
