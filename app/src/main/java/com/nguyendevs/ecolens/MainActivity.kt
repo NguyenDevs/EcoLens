@@ -744,37 +744,52 @@ class MainActivity : AppCompatActivity() {
     /** Thiết lập xử lý nút Back */
     private fun setupBackNavigation() {
         onBackPressedDispatcher.addCallback(
-                this,
-                object : OnBackPressedCallback(true) {
-                    override fun handleOnBackPressed() {
-                        if (imageZoomHandler.isFullScreenVisible()) {
-                            imageZoomHandler.hideFullScreen()
-                            return
-                        }
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (imageZoomHandler.isFullScreenVisible()) {
+                        imageZoomHandler.hideFullScreen()
+                        return
+                    }
 
-                        if (supportFragmentManager.backStackEntryCount > 0) {
-                            supportFragmentManager.popBackStack()
-                            return
-                        }
+                    if (supportFragmentManager.backStackEntryCount > 0) {
+                        supportFragmentManager.popBackStack()
+                        return
+                    }
 
-                        if (binding.bottomNavigation.selectedItemId != R.id.nav_home) {
-                            binding.bottomNavigation.selectedItemId = R.id.nav_home
+                    if (binding.bottomNavigation.selectedItemId != R.id.nav_home) {
+                        binding.bottomNavigation.selectedItemId = R.id.nav_home
+                    } else {
+                        val state = viewModel.uiState.value
+                        if (state.isLoading) return
+
+                        val hasData = state.speciesInfo != null || state.error != null
+                        if (hasData) {
+                            viewModel.resetState()
+                            binding.homeContainer.homeScrollView.postDelayed({
+                                smoothScrollToTop()
+                            }, 900)
                         } else {
-                            val state = viewModel.uiState.value
-                            if (state.isLoading) return
-
-                            val hasData = state.speciesInfo != null || state.error != null
-                            if (hasData) {
-                                viewModel.resetState()
-                                binding.homeContainer.homeScrollView.smoothScrollTo(0, 0)
-                            } else {
-                                isEnabled = false
-                                onBackPressedDispatcher.onBackPressed()
-                            }
+                            isEnabled = false
+                            onBackPressedDispatcher.onBackPressed()
                         }
                     }
                 }
+            }
         )
+    }
+
+    private fun smoothScrollToTop() {
+        val scrollView = binding.homeContainer.homeScrollView
+        val animator = android.animation.ObjectAnimator.ofInt(
+            scrollView,
+            "scrollY",
+            scrollView.scrollY,
+            0
+        )
+        animator.duration = 600
+        animator.interpolator = android.view.animation.DecelerateInterpolator()
+        animator.start()
     }
 
     /** Navigate to History Detail Fragment */
