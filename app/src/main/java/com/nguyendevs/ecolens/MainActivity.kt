@@ -740,13 +740,17 @@ class MainActivity : AppCompatActivity() {
         speciesInfoHandler.onDestroy()
         super.onDestroy()
     }
-
-    /** Thiết lập xử lý nút Back */
     private fun setupBackNavigation() {
         onBackPressedDispatcher.addCallback(
             this,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
+                    if (speakerManager.isSpeaking()) {
+                        speakerManager.pause()
+                        updateFabUI(false)
+                        return
+                    }
+
                     if (imageZoomHandler.isFullScreenVisible()) {
                         imageZoomHandler.hideFullScreen()
                         return
