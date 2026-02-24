@@ -701,7 +701,7 @@
                             android:id="@+id/ivExpandIcon"
                             android:layout_width="@dimen/icon_md"
                             android:layout_height="@dimen/icon_md"
-                            android:src="@drawable/ic_arrow_down"
+                            android:src="@drawable/ic_arrow_down_2"
                             app:tint="@color/text_primary"/>
                 </LinearLayout>
 
