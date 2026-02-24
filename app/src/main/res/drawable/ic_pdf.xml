@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:aapt="http://schemas.android.com/aapt"
+        android:width="32dp"
+        android:height="32dp"
+        android:viewportWidth="32"
+        android:viewportHeight="32">
+
+    <path
+            android:fillColor="#EE4141"
+            android:strokeWidth="1"
+            android:pathData="M28.362,2.816 L9.261,2.816 C8.603,2.815,8.068,3.348,8.068,4.007 L8.068,9.316 L19.137,12.566 L29.556,9.316 L29.556,4.007 C29.555,3.348,29.021,2.815,28.362,2.816 Z" />
+
+    <path
+            android:fillColor="#D32B2B"
+            android:strokeWidth="1"
+            android:pathData="M29.556,9.316 L8.068,9.316 L8.068,15.816 L19.137,17.766 L29.556,15.816 L29.556,9.316 Z" />
+
+    <path
+            android:fillColor="#BD1818"
+            android:strokeWidth="1"
+            android:pathData="M8.068,15.816 L8.068,22.316 L18.486,23.616 L29.556,22.316 L29.556,15.816 L8.068,15.816 Z" />
+
+    <path
+            android:fillColor="#910F0F"
+            android:strokeWidth="1"
+            android:pathData="M9.261,28.816 L28.361,28.816 C29.02,28.817,29.555,28.284,29.556,27.625 L29.556,22.316 L8.068,22.316 L8.068,27.625 C8.068,28.283,8.603,28.816,9.261,28.816 Z" />
+
+    <path
+            android:fillColor="#000000"
+            android:fillAlpha="0.1"
+            android:strokeAlpha="0.1"
+            android:strokeWidth="1"
+            android:pathData="M15.99,8.016 L8.068,8.016 L8.068,24.266 L15.99,24.266 C16.647,24.262,17.179,23.732,17.184,23.075 L17.184,9.207 C17.179,8.55,16.647,8.019,15.99,8.016 Z" />
+
+    <path
+            android:fillColor="#000000"
+            android:fillAlpha="0.2"
+            android:strokeAlpha="0.2"
+            android:strokeWidth="1"
+            android:pathData="M14.688,8.666 L8.068,8.666 L8.068,23.616 L14.688,23.616 C15.345,23.612,15.877,23.082,15.882,22.425 L15.882,9.857 C15.877,9.2,15.345,8.669,14.688,8.666 Z" />
+
+    <!-- Card background with inline gradient (replaces url(#redGrad)) -->
+    <path
+            android:strokeWidth="1"
+            android:pathData="M2.75,8.666 L14.688,8.666 C15.346,8.665,15.881,9.198,15.882,9.857 L15.882,21.775 C15.881,22.433,15.346,22.966,14.688,22.966 L2.75,22.966 C2.091,22.967,1.556,22.433,1.556,21.775 L1.556,9.857 C1.556,9.198,2.091,8.665,2.75,8.666 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                    android:type="linear"
+                    android:startX="4.05"
+                    android:startY="7.91"
+                    android:endX="13.39"
+                    android:endY="24.09">
+                <item android:offset="0" android:color="#FFC42323" />
+                <item android:offset="0.5" android:color="#FFBE1A1A" />
+                <item android:offset="1" android:color="#FFAC1111" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- PDF icon (acrobat style) -->
+    <path
+            android:fillColor="#ffffff"
+            android:strokeWidth="1"
+            android:pathData="M13.315,16.943 C13.057,16.659,12.485,16.518,11.713,16.518 C11.256,16.518,10.77,16.575,10.198,16.659 C9.591,16.097,9.089,15.436,8.711,14.704 C8.996,13.854,9.197,13.032,9.197,12.409 C9.197,11.927,9.025,11.162,8.339,11.162 C8.139,11.162,7.966,11.275,7.853,11.445 C7.567,11.955,7.681,13.089,8.224,14.279 C7.827,15.416,7.35,16.524,6.795,17.595 C5.278,18.218,4.277,18.898,4.192,19.437 C4.135,19.692,4.306,20.117,4.907,20.117 C5.793,20.117,6.766,18.842,7.509,17.538 C8.368,17.245,9.247,17.018,10.14,16.858 C11.227,17.793,12.17,17.935,12.629,17.935 C13.543,17.935,13.629,17.283,13.315,16.943 Z M7.995,11.53 C8.224,11.19,8.739,11.304,8.739,11.984 C8.739,12.437,8.596,13.174,8.31,14.024 C7.795,12.834,7.795,11.899,7.995,11.53 Z M4.363,19.465 C4.449,19.011,5.307,18.388,6.651,17.85 C5.908,19.097,5.164,19.89,4.707,19.89 C4.421,19.89,4.335,19.635,4.363,19.465 Z M9.998,16.688 C9.191,16.837,8.398,17.045,7.624,17.311 C8.046,16.554,8.391,15.757,8.653,14.931 C9.029,15.568,9.48,16.157,9.998,16.688 Z M10.369,16.801 C11.284,16.659,12.056,16.688,12.4,16.744 C13.228,16.914,12.942,17.906,12.028,17.679 C11.369,17.538,10.827,17.169,10.369,16.801 Z" />
+
+</vector>

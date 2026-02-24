@@ -1,87 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:background="@drawable/rounded_top_sheet_background">
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical"
+              android:padding="24dp"
+              android:background="@drawable/rounded_top_sheet_background">
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/dialog_export_title"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:textColor="@color/text_primary"
-        android:layout_marginBottom="16dp"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/dialog_export_title"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="16dp"/>
 
     <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/border_normal"
-        android:layout_marginTop="-4dp"
-        android:layout_marginBottom="20dp"
-        android:layout_marginStart="-20dp"
-        android:layout_marginEnd="-20dp"/>
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/border_normal"
+            android:layout_marginTop="-4dp"
+            android:layout_marginBottom="20dp"
+            android:layout_marginStart="-20dp"
+            android:layout_marginEnd="-20dp"/>
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/label_select_format"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="12dp"
-        android:textColor="@color/text_primary"/>
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/label_select_format"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp"
+            android:textColor="@color/text_primary"/>
 
     <RadioGroup
-        android:id="@+id/radioGroupFormat"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:checkedButton="@+id/radioDocx">
-
-        <RadioButton
-            android:id="@+id/radioDocx"
+            android:id="@+id/radioGroupFormat"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Microsoft Word (.docx)"
-            android:padding="8dp"
-            android:textColor="@color/text_secondary"
-            android:buttonTint="@color/primary"/>
+            android:checkedButton="@+id/radioDocx">
 
         <RadioButton
-            android:id="@+id/radioXlsx"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Microsoft Excel (.xlsx)"
-            android:padding="8dp"
-            android:textColor="@color/text_secondary"
-            android:buttonTint="@color/primary"/>
+                android:id="@+id/radioDocx"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Microsoft Word"
+                android:drawableStart="@drawable/ic_word"
+                android:drawablePadding="12dp"
+                android:padding="8dp"
+                android:textColor="@color/text_secondary"
+                android:buttonTint="@color/primary"/>
 
         <RadioButton
-            android:id="@+id/radioPdf"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="PDF Document (.pdf)"
-            android:padding="8dp"
-            android:textColor="@color/text_secondary"
-            android:buttonTint="@color/primary"/>
+                android:id="@+id/radioXlsx"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Microsoft Excel"
+                android:drawableStart="@drawable/ic_excel"
+                android:drawablePadding="12dp"
+                android:padding="8dp"
+                android:textColor="@color/text_secondary"
+                android:buttonTint="@color/primary"/>
 
         <RadioButton
-            android:id="@+id/radioJson"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="JSON Data (.json)"
-            android:padding="8dp"
-            android:textColor="@color/text_secondary"
-            android:buttonTint="@color/primary"/>
+                android:id="@+id/radioPdf"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="PDF Document"
+                android:drawableStart="@drawable/ic_pdf"
+                android:drawablePadding="12dp"
+                android:padding="8dp"
+                android:textColor="@color/text_secondary"
+                android:buttonTint="@color/primary"/>
+
+        <RadioButton
+                android:id="@+id/radioJson"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="JSON Data"
+                android:drawableStart="@drawable/ic_json"
+                android:drawablePadding="12dp"
+                android:padding="8dp"
+                android:textColor="@color/text_secondary"
+                android:buttonTint="@color/primary"/>
     </RadioGroup>
 
     <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/border_light"
-        android:layout_marginVertical="16dp"/>
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/border_light"
+            android:layout_marginVertical="16dp"/>
 
     <CheckBox
             android:id="@+id/checkIncludeImage"
@@ -91,17 +99,18 @@
             android:textColor="@color/text_primary"
             app:buttonTint="@color/checkbox_tint"
             android:checked="true"/>
+
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnConfirmExport"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="@string/action_export"
-        android:textAllCaps="false"
-        app:cornerRadius="12dp"
-        android:paddingVertical="12dp"
-        android:textSize="16sp"
-        android:backgroundTint="@color/primary"
-        android:textColor="@color/white"/>
+            android:id="@+id/btnConfirmExport"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/action_export"
+            android:textAllCaps="false"
+            app:cornerRadius="12dp"
+            android:paddingVertical="12dp"
+            android:textSize="16sp"
+            android:backgroundTint="@color/primary"
+            android:textColor="@color/white"/>
 
 </LinearLayout>

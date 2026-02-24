@@ -6,18 +6,19 @@ import android.net.Uri
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.nguyendevs.ecolens.R
+import com.nguyendevs.ecolens.adapters.SpeciesImageAdapter
 import com.nguyendevs.ecolens.databinding.ItemCardSpeciesInfoBinding
 import com.nguyendevs.ecolens.handlers.animations.HomeAnimationHandler
 import com.nguyendevs.ecolens.handlers.animations.ShimmerAnimationHandler
 import com.nguyendevs.ecolens.handlers.home.ConfidenceDisplayHandler
+import com.nguyendevs.ecolens.handlers.home.HomeButtonHandler
 import com.nguyendevs.ecolens.handlers.home.SectionDisplayHandler
 import com.nguyendevs.ecolens.handlers.home.TaxonomyDisplayHandler
-import com.nguyendevs.ecolens.handlers.home.HomeButtonHandler
 import com.nguyendevs.ecolens.handlers.util.TextFormatter
 import com.nguyendevs.ecolens.models.LoadingStage
 import com.nguyendevs.ecolens.models.SpeciesInfo
-import kotlinx.coroutines.*
 import java.util.Locale
+import kotlinx.coroutines.*
 
 /**
  * Main coordinator cho việc hiển thị thông tin loài sinh vật Điều phối các handler con để xử lý
@@ -47,7 +48,12 @@ class SpeciesInfoHandler(
     private val shimmerAnimationHandler = ShimmerAnimationHandler(context)
     private val textFormatter = TextFormatter()
     private val taxonomyDisplayHandler =
-            TaxonomyDisplayHandler(binding, homeAnimationHandler, shimmerAnimationHandler, textFormatter)
+            TaxonomyDisplayHandler(
+                    binding,
+                    homeAnimationHandler,
+                    shimmerAnimationHandler,
+                    textFormatter
+            )
     private val confidenceDisplayHandler =
             ConfidenceDisplayHandler(context, binding, homeAnimationHandler)
     private val sectionDisplayHandler = SectionDisplayHandler(binding, textFormatter)
@@ -62,11 +68,43 @@ class SpeciesInfoHandler(
                     handlerScope
             )
 
+    private val imagesAdapter = SpeciesImageAdapter()
+    private var isImagesExpanded = true
+
+    init {
+        binding.rvSpeciesImages.adapter = imagesAdapter
+        binding.headerImages.setOnClickListener { toggleImagesExpand() }
+    }
+
+    private fun toggleImagesExpand() {
+        isImagesExpanded = !isImagesExpanded
+        val rotation = if (isImagesExpanded) 0f else -90f
+        binding.ivImagesExpandIcon.animate().rotation(rotation).setDuration(200).start()
+
+        if (isImagesExpanded) {
+            homeAnimationHandler.slideAndFadeIn(binding.rvSpeciesImages, duration = 300)
+        } else {
+            binding.rvSpeciesImages
+                    .animate()
+                    .alpha(0f)
+                    .translationY(0f)
+                    .setDuration(200)
+                    .withEndAction { binding.rvSpeciesImages.visibility = View.GONE }
+                    .start()
+        }
+    }
+
     /** Hiển thị thông tin loài theo từng giai đoạn loading */
-    fun displaySpeciesInfo(info: SpeciesInfo, stage: LoadingStage, isTaxonomyTranslating: Boolean = false) {
+    fun displaySpeciesInfo(
+            info: SpeciesInfo,
+            stage: LoadingStage,
+            isTaxonomyTranslating: Boolean = false,
+            images: List<String> = emptyList()
+    ) {
         if (stage == LoadingStage.NONE) {
             handlerScope.coroutineContext.cancelChildren()
             clearAllViews()
+            imagesAdapter.submitList(emptyList())
             isInitialLoad = true
             allSectionsRendered = false
             return
@@ -85,10 +123,23 @@ class SpeciesInfoHandler(
         // Handle Taxonomy Translating State
         taxonomyDisplayHandler.setTaxonomyTranslating(isTaxonomyTranslating)
 
+        if (images.isNotEmpty()) {
+            if (binding.sectionImages.visibility != View.VISIBLE) {
+                homeAnimationHandler.slideAndFadeIn(binding.sectionImages, duration = 400)
+                isImagesExpanded = false
+                binding.ivImagesExpandIcon.rotation = -90f
+                binding.rvSpeciesImages.visibility = View.GONE
+            }
+            imagesAdapter.submitList(images)
+        } else if (stage == LoadingStage.NONE) {
+            binding.sectionImages.visibility = View.GONE
+        }
+
         when (stage) {
             LoadingStage.NONE -> {
                 handlerScope.coroutineContext.cancelChildren()
                 clearAllViews()
+                imagesAdapter.submitList(emptyList())
                 isInitialLoad = true
                 allSectionsRendered = false
             }
@@ -105,6 +156,38 @@ class SpeciesInfoHandler(
             LoadingStage.TAXONOMY -> {
                 taxonomyDisplayHandler.stopShimmer()
                 taxonomyDisplayHandler.displayTaxonomyWaterfall(info)
+
+                // Pre-render empty sections (headers only, collapsed)
+                sectionDisplayHandler.displaySection(
+                        R.id.sectionDescription,
+                        R.id.tvDescription,
+                        "",
+                        isInitialLoad = isInitialLoad
+                )
+                sectionDisplayHandler.displaySection(
+                        R.id.sectionCharacteristics,
+                        R.id.tvCharacteristics,
+                        "",
+                        isInitialLoad = isInitialLoad
+                )
+                sectionDisplayHandler.displaySection(
+                        R.id.sectionDistribution,
+                        R.id.tvDistribution,
+                        "",
+                        isInitialLoad = isInitialLoad
+                )
+                sectionDisplayHandler.displaySection(
+                        R.id.sectionHabitat,
+                        R.id.tvHabitat,
+                        "",
+                        isInitialLoad = isInitialLoad
+                )
+                sectionDisplayHandler.displaySection(
+                        R.id.sectionConservation,
+                        R.id.tvConservationStatus,
+                        "",
+                        isInitialLoad = isInitialLoad
+                )
             }
             LoadingStage.DESCRIPTION -> {
                 taxonomyDisplayHandler.stopShimmer()
@@ -189,6 +272,14 @@ class SpeciesInfoHandler(
                 displayConservationStatus(info.conservationStatus, shouldScroll = false)
                 allSectionsRendered = true
 
+                // Expand images section automatically after other sections
+                if (!isImagesExpanded && imagesAdapter.itemCount > 0) {
+                    binding.headerImages.postDelayed(
+                            { toggleImagesExpand() },
+                            2500L
+                    ) // Delay matches the cascading effect of the other sections
+                }
+
                 homeButtonHandler.setupShareButton(info, currentImageUri)
                 homeButtonHandler.showShareButton()
                 homeButtonHandler.setupCopyButton(info)
@@ -221,7 +312,8 @@ class SpeciesInfoHandler(
                         infoBinding.tvCommonName,
                         infoBinding.tvScientificName,
                         infoBinding.confidenceCard,
-                        infoBinding.taxonomyContainer
+                        infoBinding.taxonomyContainer,
+                        infoBinding.sectionImages
                 )
         viewsToHide.forEach { view ->
             view.visibility = View.GONE
@@ -286,10 +378,14 @@ class SpeciesInfoHandler(
             } else {
                 view.setTextColor(ContextCompat.getColor(context, R.color.green_primary))
 
-                val capitalizedCommonName = info.commonName.split(" ").joinToString(" ") { word ->
-                    word.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
-                }
-                
+                val capitalizedCommonName =
+                        info.commonName.split(" ").joinToString(" ") { word ->
+                            word.replaceFirstChar {
+                                if (it.isLowerCase()) it.titlecase(Locale.getDefault())
+                                else it.toString()
+                            }
+                        }
+
                 textFormatter.setHtml(view, capitalizedCommonName)
 
                 if (lastDisplayedCommonName != info.commonName) {
@@ -309,11 +405,11 @@ class SpeciesInfoHandler(
             sectionDisplayHandler.hideSection(R.id.sectionConservation)
         } else {
             sectionDisplayHandler.displaySection(
-                R.id.sectionConservation,
-                R.id.tvConservationStatus,
-                status,
-                shouldScroll,
-                isInitialLoad
+                    R.id.sectionConservation,
+                    R.id.tvConservationStatus,
+                    status,
+                    shouldScroll,
+                    isInitialLoad
             )
         }
     }

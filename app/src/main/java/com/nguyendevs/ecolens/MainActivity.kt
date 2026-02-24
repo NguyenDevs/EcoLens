@@ -709,7 +709,8 @@ class MainActivity : AppCompatActivity() {
             speciesInfoHandler.displaySpeciesInfo(
                     state.speciesInfo,
                     loadingStage,
-                    state.isTaxonomyTranslating
+                    state.isTaxonomyTranslating,
+                    state.images
             )
 
             if (navigationHandler.isHomeTab()) {
@@ -740,53 +741,54 @@ class MainActivity : AppCompatActivity() {
         speciesInfoHandler.onDestroy()
         super.onDestroy()
     }
-
-    /** Thiết lập xử lý nút Back */
     private fun setupBackNavigation() {
         onBackPressedDispatcher.addCallback(
-            this,
-            object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    if (imageZoomHandler.isFullScreenVisible()) {
-                        imageZoomHandler.hideFullScreen()
-                        return
-                    }
+                this,
+                object : OnBackPressedCallback(true) {
+                    override fun handleOnBackPressed() {
+                        if (speakerManager.isSpeaking()) {
+                            speakerManager.pause()
+                            updateFabUI(false)
+                            return
+                        }
 
-                    if (supportFragmentManager.backStackEntryCount > 0) {
-                        supportFragmentManager.popBackStack()
-                        return
-                    }
+                        if (imageZoomHandler.isFullScreenVisible()) {
+                            imageZoomHandler.hideFullScreen()
+                            return
+                        }
 
-                    if (binding.bottomNavigation.selectedItemId != R.id.nav_home) {
-                        binding.bottomNavigation.selectedItemId = R.id.nav_home
-                    } else {
-                        val state = viewModel.uiState.value
-                        if (state.isLoading) return
+                        if (supportFragmentManager.backStackEntryCount > 0) {
+                            supportFragmentManager.popBackStack()
+                            return
+                        }
 
-                        val hasData = state.speciesInfo != null || state.error != null
-                        if (hasData) {
-                            viewModel.resetState()
-                            binding.homeContainer.homeScrollView.postDelayed({
-                                smoothScrollToTop()
-                            }, 900)
+                        if (binding.bottomNavigation.selectedItemId != R.id.nav_home) {
+                            binding.bottomNavigation.selectedItemId = R.id.nav_home
                         } else {
-                            isEnabled = false
-                            onBackPressedDispatcher.onBackPressed()
+                            val state = viewModel.uiState.value
+                            if (state.isLoading) return
+
+                            val hasData = state.speciesInfo != null || state.error != null
+                            if (hasData) {
+                                viewModel.resetState()
+                                binding.homeContainer.homeScrollView.postDelayed(
+                                        { smoothScrollToTop() },
+                                        900
+                                )
+                            } else {
+                                isEnabled = false
+                                onBackPressedDispatcher.onBackPressed()
+                            }
                         }
                     }
                 }
-            }
         )
     }
 
     private fun smoothScrollToTop() {
         val scrollView = binding.homeContainer.homeScrollView
-        val animator = android.animation.ObjectAnimator.ofInt(
-            scrollView,
-            "scrollY",
-            scrollView.scrollY,
-            0
-        )
+        val animator =
+                android.animation.ObjectAnimator.ofInt(scrollView, "scrollY", scrollView.scrollY, 0)
         animator.duration = 600
         animator.interpolator = android.view.animation.DecelerateInterpolator()
         animator.start()

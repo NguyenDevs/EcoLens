@@ -1,0 +1,81 @@
+package com.nguyendevs.ecolens.adapters
+
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
+import com.nguyendevs.ecolens.databinding.ItemSpeciesImageBinding
+
+class SpeciesImageAdapter :
+        ListAdapter<String, SpeciesImageAdapter.ImageViewHolder>(ImageDiffCallback()) {
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
+        val binding =
+                ItemSpeciesImageBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ImageViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
+        holder.bind(getItem(position))
+    }
+
+    class ImageViewHolder(private val binding: ItemSpeciesImageBinding) :
+            RecyclerView.ViewHolder(binding.root) {
+        fun bind(url: String) {
+            // Reset states before loading
+            binding.ivSpeciesImage.visibility = android.view.View.INVISIBLE
+            binding.shimmerSpeciesImage.visibility = android.view.View.VISIBLE
+            binding.shimmerSpeciesImage.startShimmer()
+
+            Glide.with(binding.root.context)
+                    .load(url)
+                    .listener(
+                            object : RequestListener<android.graphics.drawable.Drawable> {
+                                override fun onLoadFailed(
+                                        e: GlideException?,
+                                        model: Any?,
+                                        target: Target<android.graphics.drawable.Drawable>,
+                                        isFirstResource: Boolean
+                                ): Boolean {
+                                    binding.shimmerSpeciesImage.stopShimmer()
+                                    binding.shimmerSpeciesImage.visibility = android.view.View.GONE
+                                    binding.ivSpeciesImage.visibility = android.view.View.VISIBLE
+                                    return false
+                                }
+
+                                override fun onResourceReady(
+                                        resource: android.graphics.drawable.Drawable,
+                                        model: Any,
+                                        target: Target<android.graphics.drawable.Drawable>,
+                                        dataSource: DataSource,
+                                        isFirstResource: Boolean
+                                ): Boolean {
+                                    binding.shimmerSpeciesImage.stopShimmer()
+                                    binding.shimmerSpeciesImage.visibility = android.view.View.GONE
+                                    binding.ivSpeciesImage.visibility = android.view.View.VISIBLE
+                                    return false
+                                }
+                            }
+                    )
+                    .transition(DrawableTransitionOptions.withCrossFade())
+                    .into(binding.ivSpeciesImage)
+        }
+    }
+
+    class ImageDiffCallback : DiffUtil.ItemCallback<String>() {
+        override fun areItemsTheSame(oldItem: String, newItem: String): Boolean {
+            return oldItem == newItem
+        }
+
+        override fun areContentsTheSame(oldItem: String, newItem: String): Boolean {
+            return oldItem == newItem
+        }
+    }
+}
