@@ -346,6 +346,54 @@
 
                 </FrameLayout>
 
+                <!-- IMAGES SECTION -->
+                <LinearLayout
+                        android:id="@+id/sectionImages"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginTop="@dimen/spacing_lg"
+                        android:visibility="gone">
+
+                        <LinearLayout
+                                android:id="@+id/headerImages"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical"
+                                android:clickable="true"
+                                android:focusable="true">
+
+                                <TextView
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:text="@string/section_images"
+                                        style="@style/TextAppearance.App.Headline3" />
+
+                                <ImageView
+                                        android:id="@+id/ivImagesExpandIcon"
+                                        android:layout_width="24dp"
+                                        android:layout_height="24dp"
+                                        android:src="@drawable/ic_arrow_down"
+                                        app:tint="@color/text_secondary" />
+                        </LinearLayout>
+
+                        <View
+                                style="@style/Widget.App.Divider"
+                                android:layout_marginTop="@dimen/spacing_xs"
+                                android:layout_marginBottom="@dimen/spacing_xs" />
+
+                        <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/rvSpeciesImages"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:clipToPadding="false"
+                                android:paddingEnd="@dimen/spacing_md"
+                                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+                </LinearLayout>
+
                 <!-- DESCRIPTION SECTION -->
                 <LinearLayout
                         android:id="@+id/sectionDescription"

@@ -13,21 +13,21 @@ import com.nguyendevs.ecolens.models.*
 import com.nguyendevs.ecolens.models.history.HistoryEntry
 import com.nguyendevs.ecolens.network.RetrofitClient
 import com.nguyendevs.ecolens.utils.ImageUtils
+import java.io.File
+import java.io.FileNotFoundException
 import kotlinx.coroutines.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
-import java.io.File
-import java.io.FileNotFoundException
 
 /**
- * Manager xử lý nhận diện loài từ ảnh
- * Flow: iNaturalist API → Gemini (Common Name) → Parallel(GBIF + IUCN + Gemini Details) → Gemini Conservation → Save to history
- * Hỗ trợ update existing history entry hoặc tạo mới
+ * Manager xử lý nhận diện loài từ ảnh Flow: iNaturalist API → Gemini (Common Name) → Parallel(GBIF
+ * + IUCN + Gemini Details) → Gemini Conservation → Save to history Hỗ trợ update existing history
+ * entry hoặc tạo mới
  */
 class SpeciesIdentificationManager(
-    private val context: Context,
-    private val historyRepository: HistoryRepository
+        private val context: Context,
+        private val historyRepository: HistoryRepository
 ) {
     private val apiService = RetrofitClient.iNaturalistApi
     private val gson by lazy { Gson() }
@@ -50,8 +50,8 @@ class SpeciesIdentificationManager(
     // ==================== IDENTIFICATION FLOW ====================
 
     /**
-     * Nhận diện loài từ ảnh
-     * Flow: Prepare image → iNaturalist API → Gemini (Common Name) → Parallel(GBIF + IUCN + Gemini Details) → Gemini Conservation → Save history
+     * Nhận diện loài từ ảnh Flow: Prepare image → iNaturalist API → Gemini (Common Name) →
+     * Parallel(GBIF + IUCN + Gemini Details) → Gemini Conservation → Save history
      *
      * @param imageUri URI của ảnh cần nhận diện
      * @param languageCode Ngôn ngữ cho kết quả (vi/en)
@@ -59,19 +59,16 @@ class SpeciesIdentificationManager(
      * @param onStateUpdate Callback để update UI state
      */
     suspend fun identifySpecies(
-        imageUri: Uri,
-        languageCode: String,
-        existingHistoryId: Int?,
-        onStateUpdate: (EcoLensUiState) -> Unit
+            imageUri: Uri,
+            languageCode: String,
+            existingHistoryId: Int?,
+            onStateUpdate: (EcoLensUiState) -> Unit
     ) {
         currentLanguageCode = languageCode
         currentImageUri = imageUri
         currentHistoryEntryId = existingHistoryId
 
-        onStateUpdate(EcoLensUiState(
-            isLoading = true,
-            loadingStage = LoadingStage.NONE
-        ))
+        onStateUpdate(EcoLensUiState(isLoading = true, loadingStage = LoadingStage.NONE))
         delay(DELAY_INIT)
 
         try {
@@ -80,17 +77,19 @@ class SpeciesIdentificationManager(
 
             if (topResult != null) {
                 processIdentificationResult(
-                    topResult,
-                    languageCode,
-                    existingHistoryId,
-                    imageFile,
-                    onStateUpdate
+                        topResult,
+                        languageCode,
+                        existingHistoryId,
+                        imageFile,
+                        onStateUpdate
                 )
             } else {
-                onStateUpdate(EcoLensUiState(
-                    isLoading = false,
-                    error = getLocalizedString(R.string.error_no_result)
-                ))
+                onStateUpdate(
+                        EcoLensUiState(
+                                isLoading = false,
+                                error = getLocalizedString(R.string.error_no_result)
+                        )
+                )
             }
         } catch (e: Exception) {
             Log.e(TAG, "Identification error: ${e.message}", e)
@@ -100,27 +99,23 @@ class SpeciesIdentificationManager(
 
     // ==================== IMAGE PREPARATION ====================
 
-    /**
-     * Chuẩn bị image file từ URI
-     * Resize về max 1024px và validate file existence
-     */
+    /** Chuẩn bị image file từ URI Resize về max 1024px và validate file existence */
     private suspend fun prepareImageFile(imageUri: Uri): File {
-        val imageFile = withContext(Dispatchers.Default) {
-            ImageUtils.uriToFile(context, imageUri, MAX_IMAGE_SIZE)
-        }
+        val imageFile =
+                withContext(Dispatchers.Default) {
+                    ImageUtils.uriToFile(context, imageUri, MAX_IMAGE_SIZE)
+                }
 
         if (!imageFile.exists()) {
             throw FileNotFoundException(
-                "Image file could not be created or found: ${imageFile.absolutePath}"
+                    "Image file could not be created or found: ${imageFile.absolutePath}"
             )
         }
 
         return imageFile
     }
 
-    /**
-     * Tạo MultipartBody.Part từ image file
-     */
+    /** Tạo MultipartBody.Part từ image file */
     private fun createImagePart(file: File): MultipartBody.Part {
         val requestFile = file.asRequestBody(MIME_TYPE_JPEG.toMediaTypeOrNull())
         return MultipartBody.Part.createFormData(PART_NAME_IMAGE, file.name, requestFile)
@@ -133,14 +128,11 @@ class SpeciesIdentificationManager(
      * @return Top result hoặc null nếu không có kết quả
      */
     private suspend fun callINaturalistAPI(
-        imageFile: File,
-        languageCode: String
+            imageFile: File,
+            languageCode: String
     ): IdentificationResult? {
         val imagePart = createImagePart(imageFile)
-        val response = apiService.identifySpecies(
-            image = imagePart,
-            locale = languageCode
-        )
+        val response = apiService.identifySpecies(image = imagePart, locale = languageCode)
         return response.results.firstOrNull()
     }
 
@@ -153,11 +145,11 @@ class SpeciesIdentificationManager(
      * 3. Sau khi Details xong, gọi Gemini Conservation
      */
     private suspend fun processIdentificationResult(
-        result: IdentificationResult,
-        languageCode: String,
-        existingHistoryId: Int?,
-        imageFile: File,
-        onStateUpdate: (EcoLensUiState) -> Unit
+            result: IdentificationResult,
+            languageCode: String,
+            existingHistoryId: Int?,
+            imageFile: File,
+            onStateUpdate: (EcoLensUiState) -> Unit
     ) {
         val scientificName = result.taxon.name
         val confidence = result.combined_score
@@ -167,160 +159,215 @@ class SpeciesIdentificationManager(
         val isIucnEnabled = sharedPref.getBoolean("iucn_mode", true)
         val isTaxoModeEnabled = sharedPref.getBoolean("taxo_mode", false)
 
-        currentSpeciesInfo = SpeciesInfo(
-            scientificName = scientificName,
-            confidence = confidence,
-            commonName = "...",
-            iucn = isIucnEnabled
-        )
+        currentSpeciesInfo =
+                SpeciesInfo(
+                        scientificName = scientificName,
+                        confidence = confidence,
+                        commonName = "...",
+                        iucn = isIucnEnabled
+                )
 
-        onStateUpdate(EcoLensUiState(
-            isLoading = true,
-            speciesInfo = currentSpeciesInfo,
-            loadingStage = LoadingStage.SCIENTIFIC_NAME
-        ))
+        onStateUpdate(
+                EcoLensUiState(
+                        isLoading = true,
+                        speciesInfo = currentSpeciesInfo,
+                        loadingStage = LoadingStage.SCIENTIFIC_NAME
+                )
+        )
 
         try {
             val commonName = streamingHelper.getCommonName(scientificName, languageCode)
             if (!commonName.isNullOrEmpty()) {
                 currentSpeciesInfo = currentSpeciesInfo?.copy(commonName = commonName)
-                onStateUpdate(EcoLensUiState(
-                    isLoading = true,
-                    speciesInfo = currentSpeciesInfo,
-                    loadingStage = LoadingStage.COMMON_NAME
-                ))
+                onStateUpdate(
+                        EcoLensUiState(
+                                isLoading = true,
+                                speciesInfo = currentSpeciesInfo,
+                                loadingStage = LoadingStage.COMMON_NAME
+                        )
+                )
             }
 
             coroutineScope {
-                val gbifDeferred = async(Dispatchers.IO) {
-                    try {
-                        val url = "https://api.gbif.org/v1/species/match?name=$scientificName"
-                        apiService.getGbifTaxonomy(url)
-                    } catch (e: Exception) {
-                        Log.e(TAG, "GBIF Error: ${e.message}")
-                        null
-                    }
-                }
-
-                val iucnDeferred = if (isIucnEnabled) {
-                    async(Dispatchers.IO) {
-                        try {
-                            val parts = scientificName.split(" ")
-                            if (parts.size >= 2) {
-                                apiService.getIucnStatus(parts[0], parts[1])
-                            } else {
+                val gbifDeferred =
+                        async(Dispatchers.IO) {
+                            try {
+                                val url =
+                                        "https://api.gbif.org/v1/species/match?name=$scientificName"
+                                apiService.getGbifTaxonomy(url)
+                            } catch (e: Exception) {
+                                Log.e(TAG, "GBIF Error: ${e.message}")
                                 null
                             }
-                        } catch (e: Exception) {
-                            Log.e(TAG, "IUCN Error: ${e.message}")
+                        }
+
+                val iucnDeferred =
+                        if (isIucnEnabled) {
+                            async(Dispatchers.IO) {
+                                try {
+                                    val parts = scientificName.split(" ")
+                                    if (parts.size >= 2) {
+                                        apiService.getIucnStatus(parts[0], parts[1])
+                                    } else {
+                                        null
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e(TAG, "IUCN Error: ${e.message}")
+                                    null
+                                }
+                            }
+                        } else {
                             null
                         }
-                    }
-                } else {
-                    null
-                }
 
-                val infoForDetails = currentSpeciesInfo ?: SpeciesInfo(
-                    scientificName = scientificName,
-                    confidence = confidence,
-                    iucn = isIucnEnabled
-                )
+                val infoForDetails =
+                        currentSpeciesInfo
+                                ?: SpeciesInfo(
+                                        scientificName = scientificName,
+                                        confidence = confidence,
+                                        iucn = isIucnEnabled
+                                )
 
-                val geminiDetailsDeferred = async(Dispatchers.IO) {
-                    streamingHelper.streamDetails(
-                        scientificName,
-                        confidence,
-                        languageCode,
-                        infoForDetails
-                    ) { state ->
-                        val incomingInfo = state.speciesInfo
-                        val current = currentSpeciesInfo
+                val geminiDetailsDeferred =
+                        async(Dispatchers.IO) {
+                            streamingHelper.streamDetails(
+                                    scientificName,
+                                    confidence,
+                                    languageCode,
+                                    infoForDetails
+                            ) { state ->
+                                val incomingInfo = state.speciesInfo
+                                val current = currentSpeciesInfo
 
-                        val mergedInfo = if (incomingInfo != null && current != null) {
-                            incomingInfo.copy(
-                                kingdom = current.kingdom,
-                                phylum = current.phylum,
-                                className = current.className,
-                                taxorder = current.taxorder,
-                                family = current.family,
-                                genus = current.genus,
-                                species = current.species,
-                                iucn = isIucnEnabled
-                            )
-                        } else {
-                            incomingInfo
+                                val mergedInfo =
+                                        if (incomingInfo != null && current != null) {
+                                            incomingInfo.copy(
+                                                    kingdom = current.kingdom,
+                                                    phylum = current.phylum,
+                                                    className = current.className,
+                                                    taxorder = current.taxorder,
+                                                    family = current.family,
+                                                    genus = current.genus,
+                                                    species = current.species,
+                                                    iucn = isIucnEnabled
+                                            )
+                                        } else {
+                                            incomingInfo
+                                        }
+
+                                currentSpeciesInfo = mergedInfo
+                                onStateUpdate(
+                                        state.copy(speciesInfo = mergedInfo, images = state.images)
+                                )
+                            }
                         }
 
-                        currentSpeciesInfo = mergedInfo
-                        onStateUpdate(state.copy(speciesInfo = mergedInfo))
-                    }
-                }
+                val imagesDeferred =
+                        async(Dispatchers.IO) {
+                            try {
+                                val detailResponse = apiService.getTaxonDetails(result.taxon.id)
+                                val photos =
+                                        detailResponse.results.firstOrNull()?.taxon_photos
+                                                ?: emptyList()
+                                photos.mapNotNull { it.photo.large_url ?: it.photo.medium_url }
+                            } catch (e: Exception) {
+                                Log.e(TAG, "Fetch photos error: ${e.message}")
+                                emptyList<String>()
+                            }
+                        }
 
                 val gbifResult = gbifDeferred.await()
                 val iucnResult = iucnDeferred?.await()
+                val fetchedImages = imagesDeferred.await()
+
+                if (fetchedImages.isNotEmpty()) {
+                    onStateUpdate(
+                            EcoLensUiState(
+                                    isLoading = true,
+                                    speciesInfo = currentSpeciesInfo,
+                                    loadingStage = LoadingStage.TAXONOMY,
+                                    images = fetchedImages
+                            )
+                    )
+                }
 
                 if (gbifResult != null) {
                     updateTaxonomyFromGbif(gbifResult, onStateUpdate)
                 }
 
                 // Taxonomy Translation Logic (Only for Vietnamese)
-                if (isTaxoModeEnabled && gbifResult != null && languageCode == LanguageManager.LANG_VI) {
-                    onStateUpdate(EcoLensUiState(
-                        isLoading = true,
-                        speciesInfo = currentSpeciesInfo,
-                        loadingStage = LoadingStage.TAXONOMY,
-                        isTaxonomyTranslating = true
-                    ))
-
-                    val translatedTaxonomy = streamingHelper.translateTaxonomy(
-                        kingdom = gbifResult.kingdom ?: "",
-                        phylum = gbifResult.phylum ?: "",
-                        className = gbifResult.className ?: "",
-                        taxorder = gbifResult.taxorder ?: "",
-                        family = gbifResult.family ?: "",
-                        genus = gbifResult.genus ?: "",
-                        species = gbifResult.species ?: ""
+                if (isTaxoModeEnabled &&
+                                gbifResult != null &&
+                                languageCode == LanguageManager.LANG_VI
+                ) {
+                    onStateUpdate(
+                            EcoLensUiState(
+                                    isLoading = true,
+                                    speciesInfo = currentSpeciesInfo,
+                                    loadingStage = LoadingStage.TAXONOMY,
+                                    isTaxonomyTranslating = true
+                            )
                     )
+
+                    val translatedTaxonomy =
+                            streamingHelper.translateTaxonomy(
+                                    kingdom = gbifResult.kingdom ?: "",
+                                    phylum = gbifResult.phylum ?: "",
+                                    className = gbifResult.className ?: "",
+                                    taxorder = gbifResult.taxorder ?: "",
+                                    family = gbifResult.family ?: "",
+                                    genus = gbifResult.genus ?: "",
+                                    species = gbifResult.species ?: ""
+                            )
 
                     if (translatedTaxonomy != null) {
                         updateTaxonomyFromTranslation(translatedTaxonomy, onStateUpdate)
                     }
 
-                    onStateUpdate(EcoLensUiState(
-                        isLoading = true,
-                        speciesInfo = currentSpeciesInfo,
-                        loadingStage = LoadingStage.TAXONOMY,
-                        isTaxonomyTranslating = false
-                    ))
+                    onStateUpdate(
+                            EcoLensUiState(
+                                    isLoading = true,
+                                    speciesInfo = currentSpeciesInfo,
+                                    loadingStage = LoadingStage.TAXONOMY,
+                                    isTaxonomyTranslating = false
+                            )
+                    )
                 }
 
                 geminiDetailsDeferred.await()
 
                 if (isIucnEnabled) {
-                    val iucnCode = iucnResult?.assessments?.firstOrNull()?.redListCategoryCode ?: "NE"
+                    val iucnCode =
+                            iucnResult?.assessments?.firstOrNull()?.redListCategoryCode ?: "NE"
 
                     val searchingText = getLocalizedString(R.string.searching_info)
-                    currentSpeciesInfo = currentSpeciesInfo?.copy(conservationStatus = searchingText)
-                    onStateUpdate(EcoLensUiState(
-                        isLoading = true,
-                        speciesInfo = currentSpeciesInfo,
-                        loadingStage = LoadingStage.CONSERVATION
-                    ))
-
-                    val infoForConservation = currentSpeciesInfo ?: SpeciesInfo(
-                        scientificName = scientificName,
-                        confidence = confidence,
-                        iucn = true
+                    currentSpeciesInfo =
+                            currentSpeciesInfo?.copy(conservationStatus = searchingText)
+                    onStateUpdate(
+                            EcoLensUiState(
+                                    isLoading = true,
+                                    speciesInfo = currentSpeciesInfo,
+                                    loadingStage = LoadingStage.CONSERVATION,
+                                    images = fetchedImages
+                            )
                     )
 
+                    val infoForConservation =
+                            currentSpeciesInfo
+                                    ?: SpeciesInfo(
+                                            scientificName = scientificName,
+                                            confidence = confidence,
+                                            iucn = true
+                                    )
+
                     streamingHelper.streamConservation(
-                        scientificName,
-                        iucnCode,
-                        languageCode,
-                        infoForConservation
+                            scientificName,
+                            iucnCode,
+                            languageCode,
+                            infoForConservation
                     ) { state ->
                         currentSpeciesInfo = state.speciesInfo
-                        onStateUpdate(state)
+                        onStateUpdate(state.copy(images = fetchedImages))
                     }
                 } else {
                     // IUCN Disabled
@@ -329,19 +376,23 @@ class SpeciesIdentificationManager(
 
                 saveToHistory(existingHistoryId, imageFile, languageCode)
 
-                onStateUpdate(EcoLensUiState(
-                    isLoading = false,
-                    speciesInfo = currentSpeciesInfo,
-                    loadingStage = LoadingStage.COMPLETE
-                ))
+                onStateUpdate(
+                        EcoLensUiState(
+                                isLoading = false,
+                                speciesInfo = currentSpeciesInfo,
+                                loadingStage = LoadingStage.COMPLETE,
+                                images = fetchedImages
+                        )
+                )
             }
-
         } catch (e: GeoBlockedException) {
-            onStateUpdate(EcoLensUiState(
-                isLoading = false,
-                speciesInfo = null,
-                error = getLocalizedString(R.string.error_geo_block)
-            ))
+            onStateUpdate(
+                    EcoLensUiState(
+                            isLoading = false,
+                            speciesInfo = null,
+                            error = getLocalizedString(R.string.error_geo_block)
+                    )
+            )
         } catch (e: Exception) {
             Log.e(TAG, "Streaming error: ${e.message}", e)
             handleError(e, onStateUpdate)
@@ -349,82 +400,92 @@ class SpeciesIdentificationManager(
     }
 
     private suspend fun updateTaxonomyFromGbif(
-        gbif: GbifResponse,
-        onStateUpdate: (EcoLensUiState) -> Unit
-    ) = withContext(Dispatchers.Main) {
-        fun format(value: String?): String {
-            return if (value != null) "<b>$value</b>" else ""
-        }
+            gbif: GbifResponse,
+            onStateUpdate: (EcoLensUiState) -> Unit
+    ) =
+            withContext(Dispatchers.Main) {
+                fun format(value: String?): String {
+                    return if (value != null) "<b>$value</b>" else ""
+                }
 
-        suspend fun updateAndDelay(block: (SpeciesInfo) -> SpeciesInfo) {
-            val current = currentSpeciesInfo ?: return
-            val updated = block(current)
+                suspend fun updateAndDelay(block: (SpeciesInfo) -> SpeciesInfo) {
+                    val current = currentSpeciesInfo ?: return
+                    val updated = block(current)
 
-            if (updated != current) {
-                currentSpeciesInfo = updated
-                onStateUpdate(EcoLensUiState(
-                    isLoading = true,
-                    speciesInfo = updated,
-                    loadingStage = LoadingStage.TAXONOMY
-                ))
-                delay(100)
+                    if (updated != current) {
+                        currentSpeciesInfo = updated
+                        onStateUpdate(
+                                EcoLensUiState(
+                                        isLoading = true,
+                                        speciesInfo = updated,
+                                        loadingStage = LoadingStage.TAXONOMY
+                                )
+                        )
+                        delay(100)
+                    }
+                }
+
+                if (gbif.kingdom != null) updateAndDelay { it.copy(kingdom = format(gbif.kingdom)) }
+                if (gbif.phylum != null) updateAndDelay { it.copy(phylum = format(gbif.phylum)) }
+                if (gbif.className != null)
+                        updateAndDelay { it.copy(className = format(gbif.className)) }
+                if (gbif.taxorder != null)
+                        updateAndDelay { it.copy(taxorder = format(gbif.taxorder)) }
+                if (gbif.family != null) updateAndDelay { it.copy(family = format(gbif.family)) }
+                if (gbif.genus != null) updateAndDelay { it.copy(genus = format(gbif.genus)) }
+                if (gbif.species != null) updateAndDelay { it.copy(species = format(gbif.species)) }
             }
-        }
-
-        if (gbif.kingdom != null) updateAndDelay { it.copy(kingdom = format(gbif.kingdom)) }
-        if (gbif.phylum != null) updateAndDelay { it.copy(phylum = format(gbif.phylum)) }
-        if (gbif.className != null) updateAndDelay { it.copy(className = format(gbif.className)) }
-        if (gbif.taxorder != null) updateAndDelay { it.copy(taxorder = format(gbif.taxorder)) }
-        if (gbif.family != null) updateAndDelay { it.copy(family = format(gbif.family)) }
-        if (gbif.genus != null) updateAndDelay { it.copy(genus = format(gbif.genus)) }
-        if (gbif.species != null) updateAndDelay { it.copy(species = format(gbif.species)) }
-    }
 
     private suspend fun updateTaxonomyFromTranslation(
-        translation: GeminiStreamingHelper.TaxonomyTranslationResponse,
-        onStateUpdate: (EcoLensUiState) -> Unit
-    ) = withContext(Dispatchers.Main) {
-        fun format(value: String?): String {
-            if (value == null) return ""
-            
-            // Clean up prefixes
-            var cleaned = value.trim()
-            val prefixes = listOf("Giới ", "Ngành ", "Lớp ", "Bộ ", "Họ ", "Chi ", "Loài ")
-            for (prefix in prefixes) {
-                if (cleaned.startsWith(prefix, ignoreCase = true)) {
-                    cleaned = cleaned.substring(prefix.length).trim()
+            translation: GeminiStreamingHelper.TaxonomyTranslationResponse,
+            onStateUpdate: (EcoLensUiState) -> Unit
+    ) =
+            withContext(Dispatchers.Main) {
+                fun format(value: String?): String {
+                    if (value == null) return ""
+
+                    // Clean up prefixes
+                    var cleaned = value.trim()
+                    val prefixes = listOf("Giới ", "Ngành ", "Lớp ", "Bộ ", "Họ ", "Chi ", "Loài ")
+                    for (prefix in prefixes) {
+                        if (cleaned.startsWith(prefix, ignoreCase = true)) {
+                            cleaned = cleaned.substring(prefix.length).trim()
+                        }
+                    }
+
+                    return "<b>$cleaned</b>"
                 }
+
+                val current = currentSpeciesInfo ?: return@withContext
+                val updated =
+                        current.copy(
+                                kingdom = format(translation.kingdom),
+                                phylum = format(translation.phylum),
+                                className = format(translation.className),
+                                taxorder = format(translation.taxorder),
+                                family = format(translation.family),
+                                genus = format(translation.genus),
+                                species = format(translation.species)
+                        )
+
+                currentSpeciesInfo = updated
+                onStateUpdate(
+                        EcoLensUiState(
+                                isLoading = true,
+                                speciesInfo = updated,
+                                loadingStage = LoadingStage.TAXONOMY
+                        )
+                )
             }
-            
-            return "<b>$cleaned</b>"
-        }
-
-        val current = currentSpeciesInfo ?: return@withContext
-        val updated = current.copy(
-            kingdom = format(translation.kingdom),
-            phylum = format(translation.phylum),
-            className = format(translation.className),
-            taxorder = format(translation.taxorder),
-            family = format(translation.family),
-            genus = format(translation.genus),
-            species = format(translation.species)
-        )
-
-        currentSpeciesInfo = updated
-        onStateUpdate(EcoLensUiState(
-            isLoading = true,
-            speciesInfo = updated,
-            loadingStage = LoadingStage.TAXONOMY
-        ))
-    }
 
     // ==================== HISTORY MANAGEMENT ====================
 
-    /**
-     * Lưu kết quả vào history
-     * Update existing entry nếu có, nếu không tạo mới
-     */
-    private suspend fun saveToHistory(existingHistoryId: Int?, imageFile: File, languageCode: String) {
+    /** Lưu kết quả vào history Update existing entry nếu có, nếu không tạo mới */
+    private suspend fun saveToHistory(
+            existingHistoryId: Int?,
+            imageFile: File,
+            languageCode: String
+    ) {
         val currentInfo = currentSpeciesInfo ?: return
 
         if (isValidInfo(currentInfo)) {
@@ -438,10 +499,12 @@ class SpeciesIdentificationManager(
         }
     }
 
-    /**
-     * Update existing history entry
-     */
-    private suspend fun updateExistingHistory(historyId: Int, info: SpeciesInfo, languageCode: String) {
+    /** Update existing history entry */
+    private suspend fun updateExistingHistory(
+            historyId: Int,
+            info: SpeciesInfo,
+            languageCode: String
+    ) {
         val existingEntry = historyRepository.getHistoryById(historyId)
         if (existingEntry != null) {
             val entry = existingEntry.copy(speciesInfo = info, language = languageCode)
@@ -450,25 +513,25 @@ class SpeciesIdentificationManager(
         }
     }
 
-    /**
-     * Tạo history entry mới
-     */
+    /** Tạo history entry mới */
     private suspend fun createNewHistory(imageFile: File, info: SpeciesInfo, languageCode: String) {
-        val localImagePath = if (currentImageUri != null && currentImageUri!!.scheme == "file") {
-            currentImageUri!!.path
-        } else {
-            ImageUtils.saveFileToInternalStorage(context, imageFile)
-        }
+        val localImagePath =
+                if (currentImageUri != null && currentImageUri!!.scheme == "file") {
+                    currentImageUri!!.path
+                } else {
+                    ImageUtils.saveFileToInternalStorage(context, imageFile)
+                }
 
         if (localImagePath != null) {
-            val entry = HistoryEntry(
-                id = 0,
-                imagePath = localImagePath,
-                localImagePath = localImagePath,
-                speciesInfo = info,
-                timestamp = System.currentTimeMillis(),
-                language = languageCode
-            )
+            val entry =
+                    HistoryEntry(
+                            id = 0,
+                            imagePath = localImagePath,
+                            localImagePath = localImagePath,
+                            speciesInfo = info,
+                            timestamp = System.currentTimeMillis(),
+                            language = languageCode
+                    )
 
             Log.d(TAG, "Inserting new history entry")
             val newId = historyRepository.insert(entry)
@@ -476,9 +539,7 @@ class SpeciesIdentificationManager(
         }
     }
 
-    /**
-     * Validate xem info có hợp lệ để save không
-     */
+    /** Validate xem info có hợp lệ để save không */
     private fun isValidInfo(info: SpeciesInfo): Boolean {
         return info.commonName.isNotEmpty() &&
                 info.commonName != "..." &&
@@ -489,24 +550,19 @@ class SpeciesIdentificationManager(
 
     // ==================== ERROR HANDLING ====================
 
-    /**
-     * Xử lý lỗi và trả về error message phù hợp
-     */
+    /** Xử lý lỗi và trả về error message phù hợp */
     private fun handleError(e: Exception, onStateUpdate: (EcoLensUiState) -> Unit) {
-        val errorMsg = when {
-            e.message?.contains("429") == true ->
-                getLocalizedString(R.string.error_quota_exceeded)
-            e is FileNotFoundException ->
-                getLocalizedString(R.string.error_file_not_found)
-            else ->
-                getLocalizedString(R.string.error_general, e.message)
-        }
+        val errorMsg =
+                when {
+                    e.message?.contains("429") == true ->
+                            getLocalizedString(R.string.error_quota_exceeded)
+                    e is FileNotFoundException -> getLocalizedString(R.string.error_file_not_found)
+                    else -> getLocalizedString(R.string.error_general, e.message)
+                }
         onStateUpdate(EcoLensUiState(isLoading = false, error = errorMsg))
     }
 
-    /**
-     * Helper để lấy string resource theo ngôn ngữ hiện tại (currentLanguageCode)
-     */
+    /** Helper để lấy string resource theo ngôn ngữ hiện tại (currentLanguageCode) */
     private fun getLocalizedString(resId: Int, vararg args: Any?): String {
         val locale = java.util.Locale(currentLanguageCode)
         val config = android.content.res.Configuration(context.resources.configuration)

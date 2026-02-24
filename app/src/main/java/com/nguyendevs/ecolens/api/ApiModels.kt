@@ -22,8 +22,20 @@ data class IdentificationResponse(val results: List<IdentificationResult>)
 /** Response chứa chi tiết taxon từ iNaturalist */
 data class TaxonDetailsResponse(val results: List<TaxonDetail>)
 
-/** Chi tiết taxon bao gồm Wikipedia summary */
-data class TaxonDetail(val id: Int, val wikipedia_summary: String = "")
+/** Chi tiết taxon bao gồm Wikipedia summary và danh sách ảnh */
+data class TaxonDetail(
+        val id: Int,
+        val wikipedia_summary: String = "",
+        val taxon_photos: List<TaxonPhoto> = emptyList()
+)
+
+data class TaxonPhoto(val photo: PhotoDetails)
+
+data class PhotoDetails(
+        val id: Long,
+        val medium_url: String? = null,
+        val large_url: String? = null
+)
 
 // ==================== GEMINI API MODELS ====================
 

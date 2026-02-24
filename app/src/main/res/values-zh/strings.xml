@@ -97,6 +97,7 @@
     <string name="section_characteristics">✨ 特征</string>
     <string name="section_distribution">🌍 分布</string>
     <string name="section_habitat">🏞️ 栖息地</string>
+    <string name="section_images">📸 图片</string>
     <string name="section_conservation">🛡️ 保护状态</string>
 
     <!-- 文本转语音 -->

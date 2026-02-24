@@ -10,16 +10,15 @@ package com.nguyendevs.ecolens.models
  * @property isTaxonomyTranslating Đang dịch taxonomy hay không
  */
 data class EcoLensUiState(
-    val isLoading: Boolean = false,
-    val speciesInfo: SpeciesInfo? = null,
-    val error: String? = null,
-    val loadingStage: LoadingStage = LoadingStage.NONE,
-    val isTaxonomyTranslating: Boolean = false
+        val isLoading: Boolean = false,
+        val speciesInfo: SpeciesInfo? = null,
+        val error: String? = null,
+        val loadingStage: LoadingStage = LoadingStage.NONE,
+        val isTaxonomyTranslating: Boolean = false,
+        val images: List<String> = emptyList()
 )
 
-/**
- * Các giai đoạn tải thông tin loài
- */
+/** Các giai đoạn tải thông tin loài */
 enum class LoadingStage {
     NONE,
     SCIENTIFIC_NAME,

@@ -97,6 +97,7 @@
     <string name="section_characteristics">✨ Characteristics</string>
     <string name="section_distribution">🌍 Distribution</string>
     <string name="section_habitat">🏞️ Habitat</string>
+    <string name="section_images">📸 Images</string>
     <string name="section_conservation">🛡️ Conservation Status</string>
 
     <!-- Text-to-Speech -->
