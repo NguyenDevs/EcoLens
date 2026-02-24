@@ -126,8 +126,9 @@ class SpeciesInfoHandler(
         if (images.isNotEmpty()) {
             if (binding.sectionImages.visibility != View.VISIBLE) {
                 homeAnimationHandler.slideAndFadeIn(binding.sectionImages, duration = 400)
-                isImagesExpanded = true
-                binding.ivImagesExpandIcon.rotation = 0f
+                isImagesExpanded = false
+                binding.ivImagesExpandIcon.rotation = -90f
+                binding.rvSpeciesImages.visibility = View.GONE
             }
             imagesAdapter.submitList(images)
         } else if (stage == LoadingStage.NONE) {
@@ -155,6 +156,38 @@ class SpeciesInfoHandler(
             LoadingStage.TAXONOMY -> {
                 taxonomyDisplayHandler.stopShimmer()
                 taxonomyDisplayHandler.displayTaxonomyWaterfall(info)
+
+                // Pre-render empty sections (headers only, collapsed)
+                sectionDisplayHandler.displaySection(
+                        R.id.sectionDescription,
+                        R.id.tvDescription,
+                        "",
+                        isInitialLoad = isInitialLoad
+                )
+                sectionDisplayHandler.displaySection(
+                        R.id.sectionCharacteristics,
+                        R.id.tvCharacteristics,
+                        "",
+                        isInitialLoad = isInitialLoad
+                )
+                sectionDisplayHandler.displaySection(
+                        R.id.sectionDistribution,
+                        R.id.tvDistribution,
+                        "",
+                        isInitialLoad = isInitialLoad
+                )
+                sectionDisplayHandler.displaySection(
+                        R.id.sectionHabitat,
+                        R.id.tvHabitat,
+                        "",
+                        isInitialLoad = isInitialLoad
+                )
+                sectionDisplayHandler.displaySection(
+                        R.id.sectionConservation,
+                        R.id.tvConservationStatus,
+                        "",
+                        isInitialLoad = isInitialLoad
+                )
             }
             LoadingStage.DESCRIPTION -> {
                 taxonomyDisplayHandler.stopShimmer()
@@ -238,6 +271,14 @@ class SpeciesInfoHandler(
                 )
                 displayConservationStatus(info.conservationStatus, shouldScroll = false)
                 allSectionsRendered = true
+
+                // Expand images section automatically after other sections
+                if (!isImagesExpanded && imagesAdapter.itemCount > 0) {
+                    binding.headerImages.postDelayed(
+                            { toggleImagesExpand() },
+                            2500L
+                    ) // Delay matches the cascading effect of the other sections
+                }
 
                 homeButtonHandler.setupShareButton(info, currentImageUri)
                 homeButtonHandler.showShareButton()

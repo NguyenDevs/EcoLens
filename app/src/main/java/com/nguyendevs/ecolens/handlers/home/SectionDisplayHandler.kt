@@ -211,7 +211,6 @@ class SectionDisplayHandler(
             }
         } else {
             section?.let { sectionView ->
-                val wasAlreadyRendered = renderedSections.contains(sectionId)
                 if (sectionView.visibility != View.VISIBLE) {
                     sectionView.visibility = View.VISIBLE
                     sectionView.alpha = 0f

@@ -11,10 +11,28 @@
     app:strokeColor="@color/border_light"
     app:strokeWidth="1dp">
 
-    <ImageView
-        android:id="@+id/ivSpeciesImage"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:background="@color/surface_variant" />
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/ivSpeciesImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:background="@color/surface_variant" />
+
+        <com.facebook.shimmer.ShimmerFrameLayout
+            android:id="@+id/shimmerSpeciesImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:shimmer_auto_start="true"
+            app:shimmer_duration="1500">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/surface_variant" />
+        </com.facebook.shimmer.ShimmerFrameLayout>
+    </FrameLayout>
 </com.google.android.material.card.MaterialCardView>
