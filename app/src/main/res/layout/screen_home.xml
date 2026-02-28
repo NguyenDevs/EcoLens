@@ -324,48 +324,56 @@
                             app:tint="@color/text_secondary" />
                 </FrameLayout>
 
-                <LinearLayout
+                <net.cachapa.expandablelayout.ExpandableLayout
                         android:id="@+id/recentContainer"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                    <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/rvRecentHistory"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:clipChildren="false"
-                            android:clipToPadding="false"
-                            android:nestedScrollingEnabled="false"
-                            tools:itemCount="5"
-                            tools:listitem="@layout/item_recent_history" />
+                        app:el_duration="300"
+                        app:el_expanded="true"
+                        app:el_parallax="0.5">
 
                     <LinearLayout
-                            android:id="@+id/emptyRecentState"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:orientation="vertical"
-                            android:padding="@dimen/spacing_xl"
-                            android:visibility="gone">
+                            android:orientation="vertical">
 
-                        <ImageView
-                                android:layout_width="64dp"
-                                android:layout_height="64dp"
-                                android:contentDescription="@null"
-                                android:src="@drawable/ic_history"
-                                app:tint="@color/text_tertiary" />
-
-                        <TextView
-                                android:layout_width="wrap_content"
+                        <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/rvRecentHistory"
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="@dimen/spacing_sm"
-                                android:text="@string/history_empty"
-                                android:textColor="@color/text_secondary"
-                                android:textSize="@dimen/text_body" />
+                                android:clipChildren="false"
+                                android:clipToPadding="false"
+                                android:nestedScrollingEnabled="false"
+                                tools:itemCount="5"
+                                tools:listitem="@layout/item_recent_history" />
 
+                        <LinearLayout
+                                android:id="@+id/emptyRecentState"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:orientation="vertical"
+                                android:padding="@dimen/spacing_xl"
+                                android:visibility="gone">
+
+                            <ImageView
+                                    android:layout_width="64dp"
+                                    android:layout_height="64dp"
+                                    android:contentDescription="@null"
+                                    android:src="@drawable/ic_history"
+                                    app:tint="@color/text_tertiary" />
+
+                            <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/spacing_sm"
+                                    android:text="@string/history_empty"
+                                    android:textColor="@color/text_secondary"
+                                    android:textSize="@dimen/text_body" />
+
+                        </LinearLayout>
                     </LinearLayout>
-                </LinearLayout>
+                </net.cachapa.expandablelayout.ExpandableLayout>
 
             </LinearLayout>
 
