@@ -16,28 +16,28 @@ class AccountDetailsHandler(
         private val setTransitioning: (Boolean) -> Unit
 ) {
 
-    private var isAccountDetailsExpanded = false
     private val firebaseAuth = FirebaseAuth.getInstance()
 
     fun toggleAccountDetails() {
+        // Prevent toggling while a transition is occurring immediately
         if (isTransitioning()) return
 
-        isAccountDetailsExpanded = !isAccountDetailsExpanded
         setTransitioning(true)
 
-        if (isAccountDetailsExpanded) {
-            expandAccountDetails()
-        } else {
+        if (binding.accountDetailsContainer.isExpanded) {
             collapseAccountDetails()
+        } else {
+            expandAccountDetails()
         }
     }
 
     private fun expandAccountDetails() {
         val user = firebaseAuth.currentUser
-        val isGoogleUser = user?.providerData?.any { it.providerId == GoogleAuthProvider.PROVIDER_ID } == true
+        val isGoogleUser =
+                user?.providerData?.any { it.providerId == GoogleAuthProvider.PROVIDER_ID } == true
 
         binding.dividerUsername.visibility = View.VISIBLE
-        
+
         // Hide Change Password and Link Google if user is logged in with Google
         if (isGoogleUser) {
             binding.dividerChangepassword.visibility = View.GONE
@@ -47,80 +47,42 @@ class AccountDetailsHandler(
         } else {
             binding.dividerChangepassword.visibility = View.VISIBLE
             binding.dividerLinkgoogle.visibility = View.VISIBLE
+
+            // Need to set alpha back to 1 if we're migrating from stagger animation
+            binding.changePasswordOption.alpha = 1f
+            binding.linkGoogleOption.alpha = 1f
+
+            binding.changePasswordOption.visibility = View.VISIBLE
+            binding.linkGoogleOption.visibility = View.VISIBLE
         }
-        
+
+        binding.changeUsernameOption.alpha = 1f
+        binding.deleteAccountOption.alpha = 1f
+
+        binding.changeUsernameOption.visibility = View.VISIBLE
+        binding.deleteAccountOption.visibility = View.VISIBLE
         binding.dividerDeleteaccount.visibility = View.VISIBLE
 
-        binding.accountDetailsContainer.visibility = View.VISIBLE
-        binding.accountDetailsContainer.alpha = 1f
+        binding.accountDetailsContainer.expand()
 
         binding.ivExpandIcon
                 .animate()
                 .rotation(180f)
                 .setDuration(300)
                 .setInterpolator(AccelerateDecelerateInterpolator())
+                .withEndAction { setTransitioning(false) }
                 .start()
-
-        val options = mutableListOf<View>()
-        options.add(binding.changeUsernameOption)
-        
-        if (!isGoogleUser) {
-            options.add(binding.changePasswordOption)
-            options.add(binding.linkGoogleOption)
-        }
-        
-        options.add(binding.deleteAccountOption)
-
-        options.forEachIndexed { index, option ->
-            option.alpha = 0f
-            option.translationY = -20f
-            option.visibility = View.VISIBLE
-
-            option.animate()
-                    .alpha(1f)
-                    .translationY(0f)
-                    .setStartDelay((index * 50L))
-                    .setDuration(250)
-                    .setInterpolator(AccelerateDecelerateInterpolator())
-                    .withEndAction {
-                        if (index == options.size - 1) {
-                            setTransitioning(false)
-                        }
-                    }
-                    .start()
-        }
     }
 
     private fun collapseAccountDetails() {
-        binding.accountDetailsContainer
-                .animate()
-                .alpha(0f)
-                .translationY(-30f)
-                .setDuration(250)
-                .setInterpolator(AccelerateDecelerateInterpolator())
-                .withEndAction {
-                    binding.dividerDeleteaccount.visibility = View.GONE
-                    binding.dividerLinkgoogle.visibility = View.GONE
-                    binding.dividerChangepassword.visibility = View.GONE
-                    binding.dividerUsername.visibility = View.GONE
-
-                    binding.accountDetailsContainer.visibility = View.GONE
-                    binding.accountDetailsContainer.translationY = 0f
-
-                    binding.changeUsernameOption.visibility = View.GONE
-                    binding.changePasswordOption.visibility = View.GONE
-                    binding.linkGoogleOption.visibility = View.GONE
-                    binding.deleteAccountOption.visibility = View.GONE
-
-                    setTransitioning(false)
-                }
-                .start()
+        binding.accountDetailsContainer.collapse()
 
         binding.ivExpandIcon
                 .animate()
                 .rotation(0f)
-                .setDuration(250)
+                .setDuration(300)
                 .setInterpolator(AccelerateDecelerateInterpolator())
+                .withEndAction { setTransitioning(false) }
                 .start()
     }
 }
