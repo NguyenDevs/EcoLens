@@ -1,11 +1,9 @@
 package com.nguyendevs.ecolens.handlers.main
 
 import android.view.View
-import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -41,7 +39,6 @@ class HomeScreenHandler(
         )
     }
     private val exploreRepository by lazy { ExploreRepository() }
-    private var isRecentExpanded = true
     private lateinit var exploreAdapter: ExploreAdapter
     private var hasFetchedExplore = false
 
@@ -128,7 +125,10 @@ class HomeScreenHandler(
                         ?: return
         val emptyRecentState = homeRoot.findViewById<View>(R.id.emptyRecentState)
         val recentHeader = homeRoot.findViewById<View>(R.id.recentHeader)
-        val recentContainer = homeRoot.findViewById<View>(R.id.recentContainer)
+        val recentContainer =
+                homeRoot.findViewById<net.cachapa.expandablelayout.ExpandableLayout>(
+                        R.id.recentContainer
+                )
         val ivRecentExpandIcon = homeRoot.findViewById<ImageView>(R.id.ivRecentExpandIcon)
 
         recentHistoryAdapter = RecentHistoryAdapter { entry -> onNavigateToDetail(entry) }
@@ -148,56 +148,33 @@ class HomeScreenHandler(
     }
 
     /** Toggle expand/collapse cho Recent History section */
-    private fun toggleRecentExpansion(container: View?, expandIcon: ImageView?) {
+    private fun toggleRecentExpansion(
+            container: net.cachapa.expandablelayout.ExpandableLayout?,
+            expandIcon: ImageView?
+    ) {
         container ?: return
         expandIcon ?: return
 
-        if (isRecentExpanded) {
-            isRecentExpanded = false
+        if (container.isExpanded) {
+            container.collapse()
             expandIcon.animate().rotation(0f).setDuration(300).start()
-            animateRecentHeight(container, container.height, 0) { container.visibility = View.GONE }
         } else {
-            isRecentExpanded = true
+            container.expand()
             expandIcon.animate().rotation(180f).setDuration(300).start()
-            container.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
-            val targetHeight = container.measuredHeight
-            container.layoutParams.height = 0
-            container.visibility = View.VISIBLE
-            animateRecentHeight(container, 0, targetHeight)
         }
-    }
-
-    /** Animate height của Recent History container */
-    private fun animateRecentHeight(view: View, from: Int, to: Int, onEnd: (() -> Unit)? = null) {
-        val animator = android.animation.ValueAnimator.ofInt(from, to)
-        animator.addUpdateListener { animation ->
-            view.layoutParams.height = animation.animatedValue as Int
-            view.requestLayout()
-        }
-        animator.interpolator = AccelerateDecelerateInterpolator()
-        animator.duration = 300
-        onEnd?.let {
-            animator.addListener(
-                    object : android.animation.AnimatorListenerAdapter() {
-                        override fun onAnimationEnd(animation: android.animation.Animator) {
-                            it()
-                        }
-                    }
-            )
-        }
-        animator.start()
     }
 
     /** Load 5 item lịch sử gần nhất từ database */
     private fun loadRecentHistory(emptyState: View?) {
         activity.lifecycleScope.launch {
             // Show placeholders first
-             val placeholders = List(3) { i ->
-                HistoryEntry(
-                    id = -1 - i, // Negative IDs for placeholders
-                    timestamp = 0
-                )
-            }
+            val placeholders =
+                    List(3) { i ->
+                        HistoryEntry(
+                                id = -1 - i, // Negative IDs for placeholders
+                                timestamp = 0
+                        )
+                    }
             recentHistoryAdapter.submitList(placeholders)
 
             historyRepository.getAllHistoryNewestFirst().collect { allHistory ->
