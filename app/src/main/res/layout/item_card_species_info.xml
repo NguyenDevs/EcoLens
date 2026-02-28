@@ -379,19 +379,32 @@
                                         app:tint="@color/text_secondary" />
                         </LinearLayout>
 
-                        <View
-                                style="@style/Widget.App.Divider"
-                                android:layout_marginTop="@dimen/spacing_xs"
-                                android:layout_marginBottom="@dimen/spacing_xs" />
-
-                        <androidx.recyclerview.widget.RecyclerView
-                                android:id="@+id/rvSpeciesImages"
+                        <net.cachapa.expandablelayout.ExpandableLayout
+                                android:id="@+id/expandableImages"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:clipToPadding="false"
-                                android:paddingEnd="@dimen/spacing_md"
-                                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+                                app:el_duration="300"
+                                app:el_expanded="true"
+                                app:el_parallax="0.5">
+                            <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="vertical">
+                                <View
+                                        style="@style/Widget.App.Divider"
+                                        android:layout_marginTop="@dimen/spacing_xs"
+                                        android:layout_marginBottom="@dimen/spacing_xs" />
+
+                                <androidx.recyclerview.widget.RecyclerView
+                                        android:id="@+id/rvSpeciesImages"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:orientation="horizontal"
+                                        android:clipToPadding="false"
+                                        android:paddingEnd="@dimen/spacing_md"
+                                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+                            </LinearLayout>
+                        </net.cachapa.expandablelayout.ExpandableLayout>
                 </LinearLayout>
 
                 <!-- DESCRIPTION SECTION -->
@@ -427,18 +440,31 @@
                                         app:tint="@color/text_secondary" />
                         </LinearLayout>
 
-                        <View
-                                style="@style/Widget.App.Divider"
-                                android:layout_marginTop="@dimen/spacing_xs"
-                                android:layout_marginBottom="@dimen/spacing_xs" />
-
-                        <TextView
-                                android:id="@+id/tvDescription"
+                        <net.cachapa.expandablelayout.ExpandableLayout
+                                android:id="@+id/expandableDescription"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:textColor="@color/text_secondary"
-                                android:lineSpacingExtra="6dp"
-                                style="@style/TextAppearance.App.Body1" />
+                                app:el_duration="300"
+                                app:el_expanded="false"
+                                app:el_parallax="0.5">
+                            <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="vertical">
+                                <View
+                                        style="@style/Widget.App.Divider"
+                                        android:layout_marginTop="@dimen/spacing_xs"
+                                        android:layout_marginBottom="@dimen/spacing_xs" />
+
+                                <TextView
+                                        android:id="@+id/tvDescription"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:textColor="@color/text_secondary"
+                                        android:lineSpacingExtra="6dp"
+                                        style="@style/TextAppearance.App.Body1" />
+                            </LinearLayout>
+                        </net.cachapa.expandablelayout.ExpandableLayout>
                 </LinearLayout>
 
                 <!-- CHARACTERISTICS SECTION -->
@@ -474,18 +500,31 @@
                                         app:tint="@color/text_secondary" />
                         </LinearLayout>
 
-                        <View
-                                style="@style/Widget.App.Divider"
-                                android:layout_marginTop="@dimen/spacing_xs"
-                                android:layout_marginBottom="@dimen/spacing_xs" />
-
-                        <TextView
-                                android:id="@+id/tvCharacteristics"
+                        <net.cachapa.expandablelayout.ExpandableLayout
+                                android:id="@+id/expandableCharacteristics"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:textColor="@color/text_secondary"
-                                android:lineSpacingExtra="6dp"
-                                style="@style/TextAppearance.App.Body1" />
+                                app:el_duration="300"
+                                app:el_expanded="false"
+                                app:el_parallax="0.5">
+                            <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="vertical">
+                                <View
+                                        style="@style/Widget.App.Divider"
+                                        android:layout_marginTop="@dimen/spacing_xs"
+                                        android:layout_marginBottom="@dimen/spacing_xs" />
+
+                                <TextView
+                                        android:id="@+id/tvCharacteristics"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:textColor="@color/text_secondary"
+                                        android:lineSpacingExtra="6dp"
+                                        style="@style/TextAppearance.App.Body1" />
+                            </LinearLayout>
+                        </net.cachapa.expandablelayout.ExpandableLayout>
                 </LinearLayout>
 
                 <!-- DISTRIBUTION SECTION -->
@@ -521,18 +560,31 @@
                                         app:tint="@color/text_secondary" />
                         </LinearLayout>
 
-                        <View
-                                style="@style/Widget.App.Divider"
-                                android:layout_marginTop="@dimen/spacing_xs"
-                                android:layout_marginBottom="@dimen/spacing_xs" />
-
-                        <TextView
-                                android:id="@+id/tvDistribution"
+                        <net.cachapa.expandablelayout.ExpandableLayout
+                                android:id="@+id/expandableDistribution"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:textColor="@color/text_secondary"
-                                android:lineSpacingExtra="6dp"
-                                style="@style/TextAppearance.App.Body1" />
+                                app:el_duration="300"
+                                app:el_expanded="false"
+                                app:el_parallax="0.5">
+                            <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="vertical">
+                                <View
+                                        style="@style/Widget.App.Divider"
+                                        android:layout_marginTop="@dimen/spacing_xs"
+                                        android:layout_marginBottom="@dimen/spacing_xs" />
+
+                                <TextView
+                                        android:id="@+id/tvDistribution"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:textColor="@color/text_secondary"
+                                        android:lineSpacingExtra="6dp"
+                                        style="@style/TextAppearance.App.Body1" />
+                            </LinearLayout>
+                        </net.cachapa.expandablelayout.ExpandableLayout>
                 </LinearLayout>
 
                 <!-- HABITAT SECTION -->
@@ -568,18 +620,31 @@
                                         app:tint="@color/text_secondary" />
                         </LinearLayout>
 
-                        <View
-                                style="@style/Widget.App.Divider"
-                                android:layout_marginTop="@dimen/spacing_xs"
-                                android:layout_marginBottom="@dimen/spacing_xs" />
-
-                        <TextView
-                                android:id="@+id/tvHabitat"
+                        <net.cachapa.expandablelayout.ExpandableLayout
+                                android:id="@+id/expandableHabitat"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:textColor="@color/text_secondary"
-                                android:lineSpacingExtra="6dp"
-                                style="@style/TextAppearance.App.Body1" />
+                                app:el_duration="300"
+                                app:el_expanded="false"
+                                app:el_parallax="0.5">
+                            <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="vertical">
+                                <View
+                                        style="@style/Widget.App.Divider"
+                                        android:layout_marginTop="@dimen/spacing_xs"
+                                        android:layout_marginBottom="@dimen/spacing_xs" />
+
+                                <TextView
+                                        android:id="@+id/tvHabitat"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:textColor="@color/text_secondary"
+                                        android:lineSpacingExtra="6dp"
+                                        style="@style/TextAppearance.App.Body1" />
+                            </LinearLayout>
+                        </net.cachapa.expandablelayout.ExpandableLayout>
                 </LinearLayout>
 
                 <!-- CONSERVATION SECTION -->
@@ -615,18 +680,31 @@
                                         app:tint="@color/text_secondary" />
                         </LinearLayout>
 
-                        <View
-                                style="@style/Widget.App.Divider"
-                                android:layout_marginTop="@dimen/spacing_xs"
-                                android:layout_marginBottom="@dimen/spacing_xs" />
-
-                        <TextView
-                                android:id="@+id/tvConservationStatus"
+                        <net.cachapa.expandablelayout.ExpandableLayout
+                                android:id="@+id/expandableConservation"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:textColor="@color/text_secondary"
-                                android:lineSpacingExtra="6dp"
-                                style="@style/TextAppearance.App.Body1" />
+                                app:el_duration="300"
+                                app:el_expanded="false"
+                                app:el_parallax="0.5">
+                            <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="vertical">
+                                <View
+                                        style="@style/Widget.App.Divider"
+                                        android:layout_marginTop="@dimen/spacing_xs"
+                                        android:layout_marginBottom="@dimen/spacing_xs" />
+
+                                <TextView
+                                        android:id="@+id/tvConservationStatus"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:textColor="@color/text_secondary"
+                                        android:lineSpacingExtra="6dp"
+                                        style="@style/TextAppearance.App.Body1" />
+                            </LinearLayout>
+                        </net.cachapa.expandablelayout.ExpandableLayout>
                 </LinearLayout>
         </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
