@@ -69,7 +69,6 @@ class SpeciesInfoHandler(
             )
 
     private val imagesAdapter = SpeciesImageAdapter()
-    private var isImagesExpanded = true
 
     init {
         binding.rvSpeciesImages.adapter = imagesAdapter
@@ -77,20 +76,12 @@ class SpeciesInfoHandler(
     }
 
     private fun toggleImagesExpand() {
-        isImagesExpanded = !isImagesExpanded
-        val rotation = if (isImagesExpanded) 0f else -90f
-        binding.ivImagesExpandIcon.animate().rotation(rotation).setDuration(200).start()
-
-        if (isImagesExpanded) {
-            homeAnimationHandler.slideAndFadeIn(binding.rvSpeciesImages, duration = 300)
+        if (binding.expandableImages.isExpanded) {
+            binding.expandableImages.collapse()
+            binding.ivImagesExpandIcon.animate().rotation(-90f).setDuration(200).start()
         } else {
-            binding.rvSpeciesImages
-                    .animate()
-                    .alpha(0f)
-                    .translationY(0f)
-                    .setDuration(200)
-                    .withEndAction { binding.rvSpeciesImages.visibility = View.GONE }
-                    .start()
+            binding.expandableImages.expand()
+            binding.ivImagesExpandIcon.animate().rotation(0f).setDuration(200).start()
         }
     }
 
@@ -126,9 +117,8 @@ class SpeciesInfoHandler(
         if (images.isNotEmpty()) {
             if (binding.sectionImages.visibility != View.VISIBLE) {
                 homeAnimationHandler.slideAndFadeIn(binding.sectionImages, duration = 400)
-                isImagesExpanded = false
+                binding.expandableImages.collapse(false)
                 binding.ivImagesExpandIcon.rotation = -90f
-                binding.rvSpeciesImages.visibility = View.GONE
             }
             imagesAdapter.submitList(images)
         } else if (stage == LoadingStage.NONE) {
@@ -273,7 +263,7 @@ class SpeciesInfoHandler(
                 allSectionsRendered = true
 
                 // Expand images section automatically after other sections
-                if (!isImagesExpanded && imagesAdapter.itemCount > 0) {
+                if (!binding.expandableImages.isExpanded && imagesAdapter.itemCount > 0) {
                     binding.headerImages.postDelayed(
                             { toggleImagesExpand() },
                             2500L

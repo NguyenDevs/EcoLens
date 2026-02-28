@@ -659,8 +659,9 @@
             <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:animateLayoutChanges="true"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp">
 
                 <!-- Account Details Option -->
                 <LinearLayout
@@ -671,8 +672,7 @@
                         android:orientation="horizontal"
                         android:padding="@dimen/spacing_md"
                         android:clickable="true"
-                        android:focusable="true"
-                        android:background="?attr/selectableItemBackground">
+                        android:focusable="true">
 
                     <FrameLayout
                             android:layout_width="40dp"
@@ -706,14 +706,19 @@
                 </LinearLayout>
 
                 <!-- Expandable Account Details Container -->
-                <LinearLayout
+                <net.cachapa.expandablelayout.ExpandableLayout
                         android:id="@+id/accountDetailsContainer"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:visibility="gone"
-                        android:paddingStart="64dp"
-                        android:paddingEnd="@dimen/spacing_md">
+                        app:el_duration="300"
+                        app:el_expanded="false"
+                        app:el_parallax="0.5">
+                    <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:paddingStart="64dp"
+                            android:paddingEnd="@dimen/spacing_md">
 
                     <View
                             android:id="@+id/dividerUsername"
@@ -835,7 +840,8 @@
                                 android:textColor="@color/error"/>
                     </LinearLayout>
 
-                </LinearLayout>
+                    </LinearLayout>
+                </net.cachapa.expandablelayout.ExpandableLayout>
 
                 <!-- Divider -->
                 <View

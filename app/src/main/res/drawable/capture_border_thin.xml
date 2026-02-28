@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- res/drawable/gemini_thin_ring.xml -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:aapt="http://schemas.android.com/aapt"
         android:width="48dp"
@@ -15,13 +14,13 @@
                     android:type="sweep"
                     android:centerX="24"
                     android:centerY="24"
-                    android:startColor="#FABC12"
-                    android:endColor="#FABC12">
-                <item android:offset="0.0" android:color="#FABC12" />
-                <item android:offset="0.25" android:color="#F94543" />
-                <item android:offset="0.5" android:color="#08B962" />
-                <item android:offset="0.75" android:color="#3186FF" />
-                <item android:offset="1.0" android:color="#FABC12" />
+                    android:startColor="#08B962"
+                    android:endColor="#08B962">
+                <item android:offset="0.0" android:color="#08B962" />
+                <item android:offset="0.25" android:color="#00796B" />
+                <item android:offset="0.5" android:color="#7AE063" />
+                <item android:offset="0.75" android:color="#018367" />
+                <item android:offset="1.0" android:color="#08B962" />
             </gradient>
         </aapt:attr>
     </path>

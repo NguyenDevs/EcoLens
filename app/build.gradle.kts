@@ -191,4 +191,7 @@ dependencies {
     // Apache POI for Docx/Xlsx Export
     implementation("org.apache.poi:poi:5.2.3")
     implementation("org.apache.poi:poi-ooxml:5.2.3")
+
+    // Expandable Layout
+    implementation("com.github.cachapa:ExpandableLayout:2.9.2")
 }
