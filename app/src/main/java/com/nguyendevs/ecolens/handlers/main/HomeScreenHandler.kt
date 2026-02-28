@@ -20,22 +20,18 @@ import com.nguyendevs.ecolens.models.history.HistoryEntry
 import java.util.Calendar
 import kotlinx.coroutines.launch
 
-/**
- * Handler quản lý Home Screen components. Xử lý: greeting động, recent history, quick explore,
- * toggle recent section.
- */
 class HomeScreenHandler(
-        private val activity: AppCompatActivity,
-        private val binding: ActivityMainBinding,
-        private val onNavigateToDetail: (HistoryEntry) -> Unit,
-        private val onExploreItemClick: (String) -> Unit
+    private val activity: AppCompatActivity,
+    private val binding: ActivityMainBinding,
+    private val onNavigateToDetail: (HistoryEntry) -> Unit,
+    private val onExploreItemClick: (String) -> Unit
 ) {
 
     private lateinit var recentHistoryAdapter: RecentHistoryAdapter
     private val historyRepository by lazy {
         HistoryRepository(
-                HistoryDatabase.getDatabase(activity.applicationContext).historyDao(),
-                activity.applicationContext
+            HistoryDatabase.getDatabase(activity.applicationContext).historyDao(),
+            activity.applicationContext
         )
     }
     private val exploreRepository by lazy { ExploreRepository() }
@@ -53,7 +49,6 @@ class HomeScreenHandler(
         }
     }
 
-    /** Setup tất cả components của Home Screen */
     fun setup() {
         setupGreeting()
         setupHeroCardButton()
@@ -62,7 +57,6 @@ class HomeScreenHandler(
         fetchExploreData()
     }
 
-    /** Setup hero card button để trigger camera */
     private fun setupHeroCardButton() {
         val homeRoot = binding.homeContainer.root
         homeRoot.findViewById<View>(R.id.btnStartNow)?.setOnClickListener {
@@ -70,65 +64,53 @@ class HomeScreenHandler(
         }
     }
 
-    /** Setup greeting động theo thời gian trong ngày + Username từ Firebase */
     fun setupGreeting() {
         val homeRoot = binding.homeContainer.root
         val tvGreeting = homeRoot.findViewById<TextView>(R.id.tvGreeting) ?: return
 
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-        val greetingResId =
-                when {
-                    hour < 12 -> R.string.greeting_morning
-                    hour < 18 -> R.string.greeting_afternoon
-                    else -> R.string.greeting_evening
-                }
+        val greetingResId = when {
+            hour < 12 -> R.string.greeting_morning
+            hour < 18 -> R.string.greeting_afternoon
+            else -> R.string.greeting_evening
+        }
 
         val greetingBase = activity.getString(greetingResId)
         tvGreeting.text = greetingBase
 
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        if (currentUser != null) {
-            activity.lifecycleScope.launch {
-                try {
-                    val userDetails = UserRepository().getCurrentUserDetails()
-                    val username =
-                            userDetails?.username?.takeIf { it.isNotBlank() }
-                                    ?: currentUser.displayName?.takeIf { it.isNotBlank() }
-                                            ?: currentUser.email?.substringBefore("@")?.takeIf {
-                                        it.isNotBlank()
-                                    }
+        val currentUser = FirebaseAuth.getInstance().currentUser ?: return
 
-                    if (!username.isNullOrEmpty()) {
-                        tvGreeting.text = "$greetingBase $username"
-                    }
-                } catch (e: Exception) {
-                    val fallbackName =
-                            currentUser.displayName?.takeIf { it.isNotBlank() }
-                                    ?: currentUser.email?.substringBefore("@")?.takeIf {
-                                        it.isNotBlank()
-                                    }
-                    if (!fallbackName.isNullOrEmpty()) {
-                        tvGreeting.text = "$greetingBase $fallbackName"
-                    }
+        activity.lifecycleScope.launch {
+            try {
+                val userDetails = UserRepository().getCurrentUserDetails()
+                val username = userDetails?.username?.takeIf { it.isNotBlank() }
+                    ?: currentUser.displayName?.takeIf { it.isNotBlank() }
+                    ?: currentUser.email?.substringBefore("@")?.takeIf { it.isNotBlank() }
+
+                if (!username.isNullOrEmpty()) {
+                    tvGreeting.text = "$greetingBase $username"
+                }
+            } catch (e: Exception) {
+                val fallbackName = currentUser.displayName?.takeIf { it.isNotBlank() }
+                    ?: currentUser.email?.substringBefore("@")?.takeIf { it.isNotBlank() }
+
+                if (!fallbackName.isNullOrEmpty()) {
+                    tvGreeting.text = "$greetingBase $fallbackName"
                 }
             }
         }
     }
 
-    /** Setup RecyclerView cho Recent History với 5 item gần nhất */
     private fun setupRecentHistory() {
         val homeRoot = binding.homeContainer.root
-        val rvRecentHistory =
-                homeRoot.findViewById<androidx.recyclerview.widget.RecyclerView>(
-                        R.id.rvRecentHistory
-                )
-                        ?: return
+        val rvRecentHistory = homeRoot.findViewById<androidx.recyclerview.widget.RecyclerView>(
+            R.id.rvRecentHistory
+        ) ?: return
         val emptyRecentState = homeRoot.findViewById<View>(R.id.emptyRecentState)
         val recentHeader = homeRoot.findViewById<View>(R.id.recentHeader)
-        val recentContainer =
-                homeRoot.findViewById<net.cachapa.expandablelayout.ExpandableLayout>(
-                        R.id.recentContainer
-                )
+        val recentContainer = homeRoot.findViewById<net.cachapa.expandablelayout.ExpandableLayout>(
+            R.id.recentContainer
+        )
         val ivRecentExpandIcon = homeRoot.findViewById<ImageView>(R.id.ivRecentExpandIcon)
 
         recentHistoryAdapter = RecentHistoryAdapter { entry -> onNavigateToDetail(entry) }
@@ -147,10 +129,9 @@ class HomeScreenHandler(
         loadRecentHistory(emptyRecentState)
     }
 
-    /** Toggle expand/collapse cho Recent History section */
     private fun toggleRecentExpansion(
-            container: net.cachapa.expandablelayout.ExpandableLayout?,
-            expandIcon: ImageView?
+        container: net.cachapa.expandablelayout.ExpandableLayout?,
+        expandIcon: ImageView?
     ) {
         container ?: return
         expandIcon ?: return
@@ -161,20 +142,29 @@ class HomeScreenHandler(
         } else {
             container.expand()
             expandIcon.animate().rotation(180f).setDuration(300).start()
+
+            container.setOnExpansionUpdateListener { expansionFraction, _ ->
+                if (expansionFraction == 1f) {
+                    val homeScrollView = binding.homeContainer.root
+                        .findViewById<androidx.core.widget.NestedScrollView>(R.id.homeScrollView)
+                    val sectionRecent = binding.homeContainer.root
+                        .findViewById<View>(R.id.sectionRecent)
+
+                    homeScrollView?.smoothScrollTo(0, sectionRecent?.top ?: 0)
+                    container.setOnExpansionUpdateListener(null)
+                }
+            }
         }
     }
 
-    /** Load 5 item lịch sử gần nhất từ database */
     private fun loadRecentHistory(emptyState: View?) {
         activity.lifecycleScope.launch {
-            // Show placeholders first
-            val placeholders =
-                    List(3) { i ->
-                        HistoryEntry(
-                                id = -1 - i, // Negative IDs for placeholders
-                                timestamp = 0
-                        )
-                    }
+            val placeholders = List(3) { i ->
+                HistoryEntry(
+                    id = -1 - i,
+                    timestamp = 0
+                )
+            }
             recentHistoryAdapter.submitList(placeholders)
 
             historyRepository.getAllHistoryNewestFirst().collect { allHistory ->
@@ -185,13 +175,11 @@ class HomeScreenHandler(
         }
     }
 
-    /** Setup Quick Explore với dữ liệu từ Firebase/Room */
     private fun setupQuickExplore() {
         val homeRoot = binding.homeContainer.root
-        val rvQuickExplore =
-                homeRoot.findViewById<androidx.recyclerview.widget.RecyclerView>(
-                        R.id.rvQuickExplore
-                )
+        val rvQuickExplore = homeRoot.findViewById<androidx.recyclerview.widget.RecyclerView>(
+            R.id.rvQuickExplore
+        )
 
         exploreAdapter = ExploreAdapter { item ->
             if (item.image.isNotEmpty()) {
@@ -204,14 +192,13 @@ class HomeScreenHandler(
             adapter = exploreAdapter
         }
 
-        val placeholders =
-                List(5) { i ->
-                    com.nguyendevs.ecolens.models.ExploreItem(
-                            id = "placeholder_$i",
-                            name = "Loading name.",
-                            desc = "Loading description."
-                    )
-                }
+        val placeholders = List(5) { i ->
+            com.nguyendevs.ecolens.models.ExploreItem(
+                id = "placeholder_$i",
+                name = "Loading name.",
+                desc = "Loading description."
+            )
+        }
         exploreAdapter.submitList(placeholders)
     }
 }
