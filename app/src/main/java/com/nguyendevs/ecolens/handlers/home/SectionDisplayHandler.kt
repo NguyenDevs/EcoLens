@@ -6,6 +6,7 @@ import android.widget.ScrollView
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemCardSpeciesInfoBinding
 import com.nguyendevs.ecolens.handlers.util.TextFormatter
+import net.cachapa.expandablelayout.ExpandableLayout
 
 /** Xử lý hiển thị các section thông tin chi tiết (mô tả, đặc điểm, phân bố...). */
 class SectionDisplayHandler(
@@ -13,7 +14,6 @@ class SectionDisplayHandler(
         private val textFormatter: TextFormatter
 ) {
     private val renderedSections = mutableSetOf<Int>()
-    private val expandedStates = mutableMapOf<Int, Boolean>()
     private val infoBinding
         get() = binding
 
@@ -26,69 +26,50 @@ class SectionDisplayHandler(
                 listOf(
                         Triple(
                                 infoBinding.headerDescription,
-                                infoBinding.tvDescription,
+                                infoBinding.expandableDescription,
                                 infoBinding.ivDescriptionExpandIcon
                         ),
                         Triple(
                                 infoBinding.headerCharacteristics,
-                                infoBinding.tvCharacteristics,
+                                infoBinding.expandableCharacteristics,
                                 infoBinding.ivCharacteristicsExpandIcon
                         ),
                         Triple(
                                 infoBinding.headerDistribution,
-                                infoBinding.tvDistribution,
+                                infoBinding.expandableDistribution,
                                 infoBinding.ivDistributionExpandIcon
                         ),
                         Triple(
                                 infoBinding.headerHabitat,
-                                infoBinding.tvHabitat,
+                                infoBinding.expandableHabitat,
                                 infoBinding.ivHabitatExpandIcon
                         ),
                         Triple(
                                 infoBinding.headerConservation,
-                                infoBinding.tvConservationStatus,
+                                infoBinding.expandableConservation,
                                 infoBinding.ivConservationExpandIcon
                         )
                 )
 
         togglePairs.forEach { (header, content, icon) ->
-            expandedStates[header.id] = false
-            header.setOnClickListener { toggleSection(header.id, content, icon) }
+            header.setOnClickListener { toggleSection(content, icon) }
         }
     }
 
-    private fun toggleSection(headerId: Int, contentView: View, iconView: View) {
-        val isExpanded = expandedStates[headerId] ?: false
-        val newState = !isExpanded
-        expandedStates[headerId] = newState
-
-        val rotation = if (newState) 180f else 0f
-        iconView.animate()
-                .rotation(rotation)
-                .setDuration(300)
-                .setInterpolator(android.view.animation.AccelerateDecelerateInterpolator())
-                .start()
-
-        if (newState) {
-            contentView.visibility = View.VISIBLE
-            contentView.alpha = 0f
-            contentView.translationY = -20f
-            contentView
-                    .animate()
-                    .alpha(1f)
-                    .translationY(0f)
-                    .setDuration(250)
+    private fun toggleSection(expandableLayout: ExpandableLayout, iconView: View) {
+        if (expandableLayout.isExpanded) {
+            expandableLayout.collapse()
+            iconView.animate()
+                    .rotation(0f)
+                    .setDuration(300)
                     .setInterpolator(android.view.animation.AccelerateDecelerateInterpolator())
-                    .withEndAction {}
                     .start()
         } else {
-            contentView
-                    .animate()
-                    .alpha(0f)
-                    .translationY(-30f)
-                    .setDuration(250)
+            expandableLayout.expand()
+            iconView.animate()
+                    .rotation(180f)
+                    .setDuration(300)
                     .setInterpolator(android.view.animation.AccelerateDecelerateInterpolator())
-                    .withEndAction { contentView.visibility = View.GONE }
                     .start()
         }
     }
@@ -128,13 +109,13 @@ class SectionDisplayHandler(
                     R.id.sectionConservation -> infoBinding.ivConservationExpandIcon
                     else -> null
                 }
-        val headerId =
+        val expandableLayout =
                 when (sectionId) {
-                    R.id.sectionDescription -> infoBinding.headerDescription.id
-                    R.id.sectionCharacteristics -> infoBinding.headerCharacteristics.id
-                    R.id.sectionDistribution -> infoBinding.headerDistribution.id
-                    R.id.sectionHabitat -> infoBinding.headerHabitat.id
-                    R.id.sectionConservation -> infoBinding.headerConservation.id
+                    R.id.sectionDescription -> infoBinding.expandableDescription
+                    R.id.sectionCharacteristics -> infoBinding.expandableCharacteristics
+                    R.id.sectionDistribution -> infoBinding.expandableDistribution
+                    R.id.sectionHabitat -> infoBinding.expandableHabitat
+                    R.id.sectionConservation -> infoBinding.expandableConservation
                     else -> null
                 }
 
@@ -151,11 +132,8 @@ class SectionDisplayHandler(
                     sectionView.translationY = 15f
 
                     // Initially hide content
-                    textView?.visibility = View.GONE
+                    expandableLayout?.collapse(false)
                     iconView?.rotation = 0f
-                    if (headerId != null) {
-                        expandedStates[headerId] = false
-                    }
 
                     // Calculate delay based on section index for a cascading effect
                     val delayIndex =
@@ -182,13 +160,11 @@ class SectionDisplayHandler(
                                 renderedSections.add(sectionId)
 
                                 // Expand the section with delay
-                                if (headerId != null && textView != null && iconView != null) {
-                                    textView.postDelayed(
+                                if (expandableLayout != null && iconView != null) {
+                                    expandableLayout.postDelayed(
                                             {
-                                                val isCurrentlyExpanded =
-                                                        expandedStates[headerId] ?: false
-                                                if (!isCurrentlyExpanded) {
-                                                    toggleSection(headerId, textView, iconView)
+                                                if (!expandableLayout.isExpanded) {
+                                                    toggleSection(expandableLayout, iconView)
                                                 }
                                             },
                                             startDelay
@@ -199,13 +175,9 @@ class SectionDisplayHandler(
                 } else {
                     renderedSections.add(sectionId)
                     // If already visible but content is collapsed, ensure we expand it
-                    val isCurrentlyExpanded = headerId?.let { expandedStates[it] } ?: false
-                    if (!isCurrentlyExpanded &&
-                                    headerId != null &&
-                                    textView != null &&
-                                    iconView != null
-                    ) {
-                        toggleSection(headerId, textView, iconView)
+                    val isCurrentlyExpanded = expandableLayout?.isExpanded ?: false
+                    if (!isCurrentlyExpanded && expandableLayout != null && iconView != null) {
+                        toggleSection(expandableLayout, iconView)
                     }
                 }
             }
@@ -216,11 +188,8 @@ class SectionDisplayHandler(
                     sectionView.alpha = 0f
                     sectionView.translationY = 15f
 
-                    textView?.visibility = View.GONE
+                    expandableLayout?.collapse(false)
                     iconView?.rotation = 0f
-                    if (headerId != null) {
-                        expandedStates[headerId] = false
-                    }
 
                     sectionView
                             .animate()
@@ -284,18 +253,13 @@ class SectionDisplayHandler(
 
         val contents =
                 listOf(
-                        infoBinding.tvDescription,
-                        infoBinding.tvCharacteristics,
-                        infoBinding.tvDistribution,
-                        infoBinding.tvHabitat,
-                        infoBinding.tvConservationStatus
+                        infoBinding.expandableDescription,
+                        infoBinding.expandableCharacteristics,
+                        infoBinding.expandableDistribution,
+                        infoBinding.expandableHabitat,
+                        infoBinding.expandableConservation
                 )
-        contents.forEach { content ->
-            content.visibility = View.GONE
-            content.alpha = 0f
-            content.translationY = 0f
-        }
-        expandedStates.keys.forEach { key -> expandedStates[key] = false }
+        contents.forEach { content -> content.collapse(false) }
     }
 
     private fun smoothScrollToView(view: View) {
