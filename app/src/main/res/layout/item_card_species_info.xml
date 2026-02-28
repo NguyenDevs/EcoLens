@@ -382,7 +382,7 @@
                                 android:id="@+id/expandableImages"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                app:el_duration="300"
+                                app:el_duration="500"
                                 app:el_expanded="true"
                                 app:el_parallax="0.5">
                             <LinearLayout
@@ -443,7 +443,7 @@
                                 android:id="@+id/expandableDescription"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                app:el_duration="300"
+                                app:el_duration="500"
                                 app:el_expanded="false"
                                 app:el_parallax="0.5">
                             <LinearLayout
@@ -503,7 +503,7 @@
                                 android:id="@+id/expandableCharacteristics"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                app:el_duration="300"
+                                app:el_duration="500"
                                 app:el_expanded="false"
                                 app:el_parallax="0.5">
                             <LinearLayout
@@ -563,7 +563,7 @@
                                 android:id="@+id/expandableDistribution"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                app:el_duration="300"
+                                app:el_duration="500"
                                 app:el_expanded="false"
                                 app:el_parallax="0.5">
                             <LinearLayout
@@ -623,7 +623,7 @@
                                 android:id="@+id/expandableHabitat"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                app:el_duration="300"
+                                app:el_duration="500"
                                 app:el_expanded="false"
                                 app:el_parallax="0.5">
                             <LinearLayout
@@ -683,7 +683,7 @@
                                 android:id="@+id/expandableConservation"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                app:el_duration="300"
+                                app:el_duration="500"
                                 app:el_expanded="false"
                                 app:el_parallax="0.5">
                             <LinearLayout
