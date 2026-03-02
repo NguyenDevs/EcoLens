@@ -172,12 +172,18 @@ class SpeciesInfoHandler(
                         "",
                         isInitialLoad = isInitialLoad
                 )
-                sectionDisplayHandler.displaySection(
-                        R.id.sectionConservation,
-                        R.id.tvConservationStatus,
-                        "",
-                        isInitialLoad = isInitialLoad
-                )
+
+                val sharedPref = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+                val isIucnEnabled = sharedPref.getBoolean("iucn_mode", true)
+
+                if (isIucnEnabled) {
+                    sectionDisplayHandler.displaySection(
+                            R.id.sectionConservation,
+                            R.id.tvConservationStatus,
+                            "",
+                            isInitialLoad = isInitialLoad
+                    )
+                }
             }
             LoadingStage.DESCRIPTION -> {
                 taxonomyDisplayHandler.stopShimmer()
@@ -391,7 +397,10 @@ class SpeciesInfoHandler(
 
     /** Hiển thị trạng thái bảo tồn */
     private fun displayConservationStatus(status: String, shouldScroll: Boolean = true) {
-        if (status == "Vô hiệu") {
+        val sharedPref = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+        val isIucnEnabled = sharedPref.getBoolean("iucn_mode", true)
+
+        if (!isIucnEnabled || status == "Vô hiệu") {
             sectionDisplayHandler.hideSection(R.id.sectionConservation)
         } else {
             sectionDisplayHandler.displaySection(
