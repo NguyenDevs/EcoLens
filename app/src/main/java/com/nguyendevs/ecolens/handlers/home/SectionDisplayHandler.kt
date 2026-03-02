@@ -14,6 +14,7 @@ class SectionDisplayHandler(
         private val textFormatter: TextFormatter
 ) {
     private val renderedSections = mutableSetOf<Int>()
+    private val sectionsWithData = mutableSetOf<Int>()
     private val infoBinding
         get() = binding
 
@@ -24,53 +25,66 @@ class SectionDisplayHandler(
     private fun setupToggleListeners() {
         val togglePairs =
                 listOf(
-                        Triple(
-                                infoBinding.headerDescription,
-                                infoBinding.expandableDescription,
-                                infoBinding.ivDescriptionExpandIcon
+                        Pair(
+                                R.id.sectionDescription,
+                                Triple(
+                                        infoBinding.headerDescription,
+                                        infoBinding.expandableDescription,
+                                        infoBinding.ivDescriptionExpandIcon
+                                )
                         ),
-                        Triple(
-                                infoBinding.headerCharacteristics,
-                                infoBinding.expandableCharacteristics,
-                                infoBinding.ivCharacteristicsExpandIcon
+                        Pair(
+                                R.id.sectionCharacteristics,
+                                Triple(
+                                        infoBinding.headerCharacteristics,
+                                        infoBinding.expandableCharacteristics,
+                                        infoBinding.ivCharacteristicsExpandIcon
+                                )
                         ),
-                        Triple(
-                                infoBinding.headerDistribution,
-                                infoBinding.expandableDistribution,
-                                infoBinding.ivDistributionExpandIcon
+                        Pair(
+                                R.id.sectionDistribution,
+                                Triple(
+                                        infoBinding.headerDistribution,
+                                        infoBinding.expandableDistribution,
+                                        infoBinding.ivDistributionExpandIcon
+                                )
                         ),
-                        Triple(
-                                infoBinding.headerHabitat,
-                                infoBinding.expandableHabitat,
-                                infoBinding.ivHabitatExpandIcon
+                        Pair(
+                                R.id.sectionHabitat,
+                                Triple(
+                                        infoBinding.headerHabitat,
+                                        infoBinding.expandableHabitat,
+                                        infoBinding.ivHabitatExpandIcon
+                                )
                         ),
-                        Triple(
-                                infoBinding.headerConservation,
-                                infoBinding.expandableConservation,
-                                infoBinding.ivConservationExpandIcon
+                        Pair(
+                                R.id.sectionConservation,
+                                Triple(
+                                        infoBinding.headerConservation,
+                                        infoBinding.expandableConservation,
+                                        infoBinding.ivConservationExpandIcon
+                                )
                         )
                 )
 
-        togglePairs.forEach { (header, content, icon) ->
-            header.setOnClickListener { toggleSection(content, icon) }
+        togglePairs.forEach { (sectionId, views) ->
+            val (header, content, icon) = views
+            header.setOnClickListener {
+                if (sectionsWithData.contains(sectionId)) {
+                    toggleSection(content, icon)
+                }
+            }
+            icon.rotation = -90f
         }
     }
 
     private fun toggleSection(expandableLayout: ExpandableLayout, iconView: View) {
         if (expandableLayout.isExpanded) {
             expandableLayout.collapse()
-            iconView.animate()
-                    .rotation(0f)
-                    .setDuration(300)
-                    .setInterpolator(android.view.animation.AccelerateDecelerateInterpolator())
-                    .start()
+            iconView.animate().rotation(-90f).setDuration(200).start()
         } else {
             expandableLayout.expand()
-            iconView.animate()
-                    .rotation(180f)
-                    .setDuration(300)
-                    .setInterpolator(android.view.animation.AccelerateDecelerateInterpolator())
-                    .start()
+            iconView.animate().rotation(0f).setDuration(200).start()
         }
     }
 
@@ -120,8 +134,20 @@ class SectionDisplayHandler(
                 }
 
         if (text.isNotEmpty()) {
+            sectionsWithData.add(sectionId)
             val trimmedText = text.trim()
             textView?.let { tv -> textFormatter.setHtml(tv, trimmedText) }
+
+            val delayIndex =
+                    when (sectionId) {
+                        R.id.sectionConservation -> 0
+                        R.id.sectionHabitat -> 1
+                        R.id.sectionDistribution -> 2
+                        R.id.sectionCharacteristics -> 3
+                        R.id.sectionDescription -> 4
+                        else -> 0
+                    }
+            val startDelay = delayIndex * 750L
 
             section?.let { sectionView ->
                 val wasAlreadyRendered = renderedSections.contains(sectionId)
@@ -131,21 +157,8 @@ class SectionDisplayHandler(
                     sectionView.alpha = 0f
                     sectionView.translationY = 15f
 
-                    // Initially hide content
                     expandableLayout?.collapse(false)
-                    iconView?.rotation = 0f
-
-                    // Calculate delay based on section index for a cascading effect
-                    val delayIndex =
-                            when (sectionId) {
-                                R.id.sectionDescription -> 0
-                                R.id.sectionCharacteristics -> 1
-                                R.id.sectionDistribution -> 2
-                                R.id.sectionHabitat -> 3
-                                R.id.sectionConservation -> 4
-                                else -> 0
-                            }
-                    val startDelay = delayIndex * 500L
+                    iconView?.rotation = -90f
 
                     sectionView
                             .animate()
@@ -159,7 +172,6 @@ class SectionDisplayHandler(
                                 }
                                 renderedSections.add(sectionId)
 
-                                // Expand the section with delay
                                 if (expandableLayout != null && iconView != null) {
                                     expandableLayout.postDelayed(
                                             {
@@ -174,10 +186,16 @@ class SectionDisplayHandler(
                             .start()
                 } else {
                     renderedSections.add(sectionId)
-                    // If already visible but content is collapsed, ensure we expand it
                     val isCurrentlyExpanded = expandableLayout?.isExpanded ?: false
                     if (!isCurrentlyExpanded && expandableLayout != null && iconView != null) {
-                        toggleSection(expandableLayout, iconView)
+                        expandableLayout.postDelayed(
+                                {
+                                    if (!expandableLayout.isExpanded) {
+                                        toggleSection(expandableLayout, iconView)
+                                    }
+                                },
+                                startDelay
+                        )
                     }
                 }
             }
@@ -187,9 +205,6 @@ class SectionDisplayHandler(
                     sectionView.visibility = View.VISIBLE
                     sectionView.alpha = 0f
                     sectionView.translationY = 15f
-
-                    expandableLayout?.collapse(false)
-                    iconView?.rotation = 0f
 
                     sectionView
                             .animate()
@@ -226,6 +241,7 @@ class SectionDisplayHandler(
 
     fun clearRenderedSections() {
         renderedSections.clear()
+        sectionsWithData.clear()
 
         val sections =
                 listOf(
@@ -249,7 +265,7 @@ class SectionDisplayHandler(
                         infoBinding.ivHabitatExpandIcon,
                         infoBinding.ivConservationExpandIcon
                 )
-        icons.forEach { icon -> icon.rotation = 0f }
+        icons.forEach { icon -> icon.rotation = -90f }
 
         val contents =
                 listOf(

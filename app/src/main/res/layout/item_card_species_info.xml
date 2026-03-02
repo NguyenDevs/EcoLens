@@ -12,6 +12,7 @@
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:animateLayoutChanges="true"
                 android:orientation="vertical"
                 android:padding="@dimen/spacing_lg">
 
@@ -149,12 +150,28 @@
                         android:layout_marginBottom="@dimen/spacing_lg" />
 
                 <!-- TAXONOMY SECTION -->
-                <TextView
-                        android:layout_width="wrap_content"
+                <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="@dimen/spacing_md"
-                        android:text="@string/taxonomy_title"
-                        style="@style/TextAppearance.App.Headline3" />
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                                android:id="@+id/iconTaxonomy"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:src="@drawable/ic_taxo_section"
+                                android:contentDescription="@string/taxonomy_title"
+                                android:layout_marginEnd="8dp"/>
+
+                        <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/taxonomy_title"
+                                style="@style/TextAppearance.App.Headline3" />
+                </LinearLayout>
+
 
                 <FrameLayout
                         android:id="@+id/taxonomyContainer"
@@ -363,6 +380,15 @@
                                 android:clickable="true"
                                 android:focusable="true">
 
+                                <ImageView
+                                        android:id="@+id/iconImages"
+                                        android:layout_width="28dp"
+                                        android:layout_height="28dp"
+                                        android:src="@drawable/ic_image_section"
+                                        android:layout_marginEnd="8dp"
+                                        android:contentDescription="@string/section_description"
+                                />
+
                                 <TextView
                                         android:layout_width="0dp"
                                         android:layout_height="wrap_content"
@@ -424,6 +450,15 @@
                                 android:clickable="true"
                                 android:focusable="true">
 
+                                <ImageView
+                                        android:id="@+id/iconDescription"
+                                        android:layout_width="28dp"
+                                        android:layout_height="28dp"
+                                        android:src="@drawable/ic_desc_section"
+                                        android:layout_marginEnd="8dp"
+                                        android:contentDescription="@string/section_description"
+                                />
+
                                 <TextView
                                         android:layout_width="0dp"
                                         android:layout_height="wrap_content"
@@ -435,6 +470,7 @@
                                         android:id="@+id/ivDescriptionExpandIcon"
                                         android:layout_width="24dp"
                                         android:layout_height="24dp"
+                                        android:rotation="-90"
                                         android:src="@drawable/ic_arrow_down_2"
                                         app:tint="@color/text_secondary" />
                         </LinearLayout>
@@ -484,6 +520,15 @@
                                 android:clickable="true"
                                 android:focusable="true">
 
+                                <ImageView
+                                        android:id="@+id/iconCharacteristics"
+                                        android:layout_width="28dp"
+                                        android:layout_height="28dp"
+                                        android:src="@drawable/ic_character_section"
+                                        android:layout_marginEnd="8dp"
+                                        android:contentDescription="@string/section_description"
+                                />
+
                                 <TextView
                                         android:layout_width="0dp"
                                         android:layout_height="wrap_content"
@@ -495,6 +540,7 @@
                                         android:id="@+id/ivCharacteristicsExpandIcon"
                                         android:layout_width="24dp"
                                         android:layout_height="24dp"
+                                        android:rotation="-90"
                                         android:src="@drawable/ic_arrow_down_2"
                                         app:tint="@color/text_secondary" />
                         </LinearLayout>
@@ -544,6 +590,15 @@
                                 android:clickable="true"
                                 android:focusable="true">
 
+                                <ImageView
+                                        android:id="@+id/iconDistribution"
+                                        android:layout_width="28dp"
+                                        android:layout_height="28dp"
+                                        android:src="@drawable/ic_distribution_section"
+                                        android:layout_marginEnd="8dp"
+                                        android:contentDescription="@string/section_description"
+                                />
+
                                 <TextView
                                         android:layout_width="0dp"
                                         android:layout_height="wrap_content"
@@ -555,6 +610,7 @@
                                         android:id="@+id/ivDistributionExpandIcon"
                                         android:layout_width="24dp"
                                         android:layout_height="24dp"
+                                        android:rotation="-90"
                                         android:src="@drawable/ic_arrow_down_2"
                                         app:tint="@color/text_secondary" />
                         </LinearLayout>
@@ -604,6 +660,14 @@
                                 android:clickable="true"
                                 android:focusable="true">
 
+                                <ImageView
+                                        android:id="@+id/iconHabitat"
+                                        android:layout_width="28dp"
+                                        android:layout_height="28dp"
+                                        android:src="@drawable/ic_habitat_section"
+                                        android:layout_marginEnd="8dp"
+                                        android:contentDescription="@string/section_description"
+                                />
                                 <TextView
                                         android:layout_width="0dp"
                                         android:layout_height="wrap_content"
@@ -615,6 +679,7 @@
                                         android:id="@+id/ivHabitatExpandIcon"
                                         android:layout_width="24dp"
                                         android:layout_height="24dp"
+                                        android:rotation="-90"
                                         android:src="@drawable/ic_arrow_down_2"
                                         app:tint="@color/text_secondary" />
                         </LinearLayout>
@@ -664,6 +729,15 @@
                                 android:clickable="true"
                                 android:focusable="true">
 
+                                <ImageView
+                                        android:id="@+id/iconConservation"
+                                        android:layout_width="28dp"
+                                        android:layout_height="28dp"
+                                        android:src="@drawable/ic_conservation_section"
+                                        android:layout_marginEnd="8dp"
+                                        android:contentDescription="@string/section_description"
+                                />
+
                                 <TextView
                                         android:layout_width="0dp"
                                         android:layout_height="wrap_content"
@@ -675,6 +749,7 @@
                                         android:id="@+id/ivConservationExpandIcon"
                                         android:layout_width="24dp"
                                         android:layout_height="24dp"
+                                        android:rotation="-90"
                                         android:src="@drawable/ic_arrow_down_2"
                                         app:tint="@color/text_secondary" />
                         </LinearLayout>

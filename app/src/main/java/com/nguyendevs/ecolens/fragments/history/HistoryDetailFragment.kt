@@ -568,43 +568,49 @@ class HistoryDetailFragment : Fragment() {
         binding.containerSections.removeAllViews()
 
         addSection(
-                binding.containerSections,
-                getString(R.string.section_description),
-                info.description
+            binding.containerSections,
+            getString(R.string.section_description),
+            info.description,
+            iconRes = R.drawable.ic_desc_section
         )
         addSection(
-                binding.containerSections,
-                getString(R.string.section_characteristics),
-                info.characteristics
+            binding.containerSections,
+            getString(R.string.section_characteristics),
+            info.characteristics,
+            iconRes = R.drawable.ic_character_section
         )
         addSection(
-                binding.containerSections,
-                getString(R.string.section_distribution),
-                info.distribution
+            binding.containerSections,
+            getString(R.string.section_distribution),
+            info.distribution,
+            iconRes = R.drawable.ic_distribution_section
         )
-        addSection(binding.containerSections, getString(R.string.section_habitat), info.habitat)
+        addSection(
+            binding.containerSections,
+            getString(R.string.section_habitat),
+            info.habitat,
+            iconRes = R.drawable.ic_habitat_section
+        )
 
-        if (info.conservationStatus == "Vô hiệu") {
-            addSection(
-                    binding.containerSections,
-                    getString(R.string.section_conservation),
-                    getString(R.string.iucn_disabled_message),
-                    isCenter = true
-            )
-        } else {
-            addSection(
-                    binding.containerSections,
-                    getString(R.string.section_conservation),
-                    info.conservationStatus
-            )
-        }
+        val conservationContent = if (info.conservationStatus == "Vô hiệu")
+            getString(R.string.iucn_disabled_message)
+        else info.conservationStatus
+
+        addSection(
+            binding.containerSections,
+            getString(R.string.section_conservation),
+            conservationContent,
+            isCenter = info.conservationStatus == "Vô hiệu",
+            iconRes = R.drawable.ic_conservation_section
+        )
     }
 
     private fun addSection(
             container: LinearLayout,
             title: String,
             content: String,
-            isCenter: Boolean = false
+            isCenter: Boolean = false,
+            iconRes: Int = 0
     ) {
         if (content.isBlank()) return
 
@@ -617,22 +623,39 @@ class HistoryDetailFragment : Fragment() {
         val bottomMarginDivider = 12.dpToPx()
         val dividerHeight = 1.dpToPx()
 
-        val titleView =
-                TextView(context).apply {
-                    text = title
-                    textSize = 20f
-                    setTextColor(titleColor)
-                    setTypeface(null, Typeface.BOLD)
-                    layoutParams =
-                            LinearLayout.LayoutParams(
-                                            ViewGroup.LayoutParams.WRAP_CONTENT,
-                                            ViewGroup.LayoutParams.WRAP_CONTENT
-                                    )
-                                    .apply {
-                                        this.topMargin = topMargin
-                                        this.bottomMargin = bottomMarginTitle
-                                    }
+        val headerLayout = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER_VERTICAL
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                this.topMargin = topMargin
+                this.bottomMargin = bottomMarginTitle
+            }
+        }
+
+        if (iconRes != 0) {
+            val iconView = android.widget.ImageView(context).apply {
+                setImageResource(iconRes)
+                layoutParams = LinearLayout.LayoutParams(28.dpToPx(), 28.dpToPx()).apply {
+                    marginEnd = 8.dpToPx()
                 }
+            }
+            headerLayout.addView(iconView)
+        }
+
+        val titleView = TextView(context).apply {
+            text = title
+            textSize = 20f
+            setTextColor(titleColor)
+            setTypeface(null, Typeface.BOLD)
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        }
+        headerLayout.addView(titleView)
 
         val divider =
                 View(context).apply {
@@ -658,7 +681,7 @@ class HistoryDetailFragment : Fragment() {
                     }
                 }
 
-        container.addView(titleView)
+        container.addView(headerLayout)
         container.addView(divider)
         container.addView(contentView)
     }
