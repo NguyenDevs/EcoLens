@@ -138,6 +138,17 @@ class SectionDisplayHandler(
             val trimmedText = text.trim()
             textView?.let { tv -> textFormatter.setHtml(tv, trimmedText) }
 
+            val delayIndex =
+                    when (sectionId) {
+                        R.id.sectionConservation -> 0
+                        R.id.sectionHabitat -> 1
+                        R.id.sectionDistribution -> 2
+                        R.id.sectionCharacteristics -> 3
+                        R.id.sectionDescription -> 4
+                        else -> 0
+                    }
+            val startDelay = delayIndex * 750L
+
             section?.let { sectionView ->
                 val wasAlreadyRendered = renderedSections.contains(sectionId)
 
@@ -145,17 +156,6 @@ class SectionDisplayHandler(
                     sectionView.visibility = View.VISIBLE
                     sectionView.alpha = 0f
                     sectionView.translationY = 15f
-
-                    val delayIndex =
-                            when (sectionId) {
-                                R.id.sectionConservation -> 0
-                                R.id.sectionHabitat -> 1
-                                R.id.sectionDistribution -> 2
-                                R.id.sectionCharacteristics -> 3
-                                R.id.sectionDescription -> 4
-                                else -> 0
-                            }
-                    val startDelay = 450L + delayIndex * 750L
 
                     expandableLayout?.collapse(false)
                     iconView?.rotation = -90f
@@ -188,7 +188,14 @@ class SectionDisplayHandler(
                     renderedSections.add(sectionId)
                     val isCurrentlyExpanded = expandableLayout?.isExpanded ?: false
                     if (!isCurrentlyExpanded && expandableLayout != null && iconView != null) {
-                        toggleSection(expandableLayout, iconView)
+                        expandableLayout.postDelayed(
+                                {
+                                    if (!expandableLayout.isExpanded) {
+                                        toggleSection(expandableLayout, iconView)
+                                    }
+                                },
+                                startDelay
+                        )
                     }
                 }
             }
