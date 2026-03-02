@@ -91,15 +91,15 @@
     <string name="label_family">Họ:</string>
     <string name="label_genus">Chi:</string>
     <string name="label_species">Loài:</string>
-    <string name="taxonomy_title">🔬 Phân loại khoa học</string>
+    <string name="taxonomy_title">Phân loại khoa học</string>
 
     <!-- Các phần thông tin -->
-    <string name="section_description">📖 Mô tả</string>
-    <string name="section_characteristics">✨ Đặc điểm</string>
-    <string name="section_distribution">🌍 Phân bố</string>
-    <string name="section_habitat">🏞️ Môi trường sống</string>
-    <string name="section_images">📸 Hình ảnh</string>
-    <string name="section_conservation">🛡️ Tình trạng bảo tồn</string>
+    <string name="section_description">Mô tả</string>
+    <string name="section_characteristics">Đặc điểm</string>
+    <string name="section_distribution">Phân bố</string>
+    <string name="section_habitat">Môi trường sống</string>
+    <string name="section_images">Hình ảnh</string>
+    <string name="section_conservation">Tình trạng bảo tồn</string>
 
     <!-- Đọc văn bản -->
     <string name="tts_scientific_name">Tên khoa học</string>

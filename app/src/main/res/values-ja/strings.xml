@@ -90,15 +90,15 @@
     <string name="label_family">科：</string>
     <string name="label_genus">属：</string>
     <string name="label_species">種：</string>
-    <string name="taxonomy_title">🔬 科学的分類</string>
+    <string name="taxonomy_title">科学的分類</string>
 
     <!-- 情報セクション -->
-    <string name="section_description">📖 説明</string>
-    <string name="section_characteristics">✨ 特徴</string>
-    <string name="section_distribution">🌍 分布</string>
-    <string name="section_habitat">🏞️ 生息地</string>
-    <string name="section_images">📸 画像</string>
-    <string name="section_conservation">🛡️ 保全状況</string>
+    <string name="section_description">説明</string>
+    <string name="section_characteristics">特徴</string>
+    <string name="section_distribution">分布</string>
+    <string name="section_habitat">生息地</string>
+    <string name="section_images">画像</string>
+    <string name="section_conservation">保全状況</string>
 
     <!-- 音声読み上げ -->
     <string name="tts_scientific_name">学名</string>
