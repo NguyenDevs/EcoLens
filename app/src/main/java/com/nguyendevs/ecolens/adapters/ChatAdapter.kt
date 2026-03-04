@@ -11,10 +11,8 @@ import android.text.style.ForegroundColorSpan
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.shape.CornerFamily
@@ -42,6 +40,15 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
     private val messages = mutableListOf<ChatMessage>()
     private lateinit var markwon: Markwon
     private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+    private var expandedPosition = -1
+
+    fun collapseExpandedActions() {
+        if (expandedPosition != -1) {
+            val prev = expandedPosition
+            expandedPosition = -1
+            notifyItemChanged(prev, "TOGGLE_ACTIONS")
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
         if (!::markwon.isInitialized) {
@@ -69,6 +76,19 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
         val binding =
                 ItemChatMessageBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ChatViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(
+            holder: ChatViewHolder,
+            position: Int,
+            payloads: MutableList<Any>
+    ) {
+        if (payloads.contains("TOGGLE_ACTIONS")) {
+            val isExpanded = position == expandedPosition
+            holder.binding.layoutActions.setExpanded(isExpanded, true)
+        } else {
+            super.onBindViewHolder(holder, position, payloads)
+        }
     }
 
     override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
@@ -104,7 +124,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
         }
     }
 
-    inner class ChatViewHolder(private val binding: ItemChatMessageBinding) :
+    inner class ChatViewHolder(val binding: ItemChatMessageBinding) :
             RecyclerView.ViewHolder(binding.root) {
 
         private val colorWhite = ContextCompat.getColor(itemView.context, R.color.white)
@@ -182,8 +202,8 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
 
             when {
                 message.isLoading -> bindLoadingState(colorSurface, colorOnSurface)
-                message.isStreaming -> bindStreamingState(message, colorSurface, colorOnSurface)
-                message.isUser -> bindUserMessage(message)
+                message.isStreaming -> bindStreamingState(colorSurface, colorOnSurface)
+                message.isUser -> bindUserMessage(message, position)
                 else -> bindAiMessage(message, position, colorSurface, colorOnSurface)
             }
         }
@@ -194,11 +214,15 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
             binding.tvMessage.alpha = 1f
             binding.tvMessage.setTypeface(null, Typeface.NORMAL)
             binding.tvTimestamp.visibility = View.GONE
-            binding.viewAccentBar.visibility = View.GONE
             binding.layoutMessageContent.background = null
+            binding.expandableText.setExpanded(true, false)
             binding.cardMessage.strokeWidth = 0
+            binding.cardMessage.cardElevation =
+                    itemView.resources.getDimension(R.dimen.elevation_xs)
             binding.cardMessage.setOnClickListener(null)
             binding.cardMessage.setOnLongClickListener(null)
+            binding.tvMessage.setOnLongClickListener(null)
+            binding.layoutActions.setExpanded(false, false)
         }
 
         private fun showTimestamp(message: ChatMessage) {
@@ -243,6 +267,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
 
                         override fun setAlpha(alpha: Int) {}
                         override fun setColorFilter(colorFilter: android.graphics.ColorFilter?) {}
+                        @Suppress("DEPRECATION")
                         override fun getOpacity(): Int = android.graphics.PixelFormat.TRANSLUCENT
                     }
             binding.layoutMessageContent.background = leftBorderDrawable
@@ -277,14 +302,16 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
             loadingAnimateRunnable.run()
         }
 
-        private fun bindStreamingState(message: ChatMessage, bgColor: Int, textColor: Int) {
+        private fun bindStreamingState(bgColor: Int, textColor: Int) {
             configureAiLayout()
             binding.cardMessage.setCardBackgroundColor(bgColor)
             binding.tvMessage.setTextColor(textColor)
+            binding.tvMessage.text = ""
+            binding.expandableText.setExpanded(false, false)
             startTypingAnimation()
         }
 
-        private fun bindUserMessage(message: ChatMessage) {
+        private fun bindUserMessage(message: ChatMessage, position: Int) {
             configureUserLayout()
             markwon.setMarkdown(binding.tvMessage, message.content)
             binding.cardMessage.setCardBackgroundColor(colorPrimary)
@@ -295,6 +322,25 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
                 actionListener.onCopy(message.content)
                 true
             }
+            binding.tvMessage.setOnLongClickListener {
+                actionListener.onCopy(message.content)
+                true
+            }
+
+            val collapseListener =
+                    View.OnClickListener {
+                        if (expandedPosition != -1) {
+                            val prev = expandedPosition
+                            expandedPosition = -1
+                            (binding.root.parent as? RecyclerView)?.adapter?.notifyItemChanged(
+                                    prev,
+                                    "TOGGLE_ACTIONS"
+                            )
+                        }
+                    }
+            binding.root.setOnClickListener(collapseListener)
+            binding.cardMessage.setOnClickListener(collapseListener)
+            binding.tvMessage.setOnClickListener(collapseListener)
         }
 
         private fun bindAiMessage(
@@ -316,53 +362,80 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
             }
 
             markwon.setMarkdown(binding.tvMessage, message.content)
+            binding.expandableText.setExpanded(true, true)
 
             if (position > 0) {
-                val longClickListener =
-                        View.OnLongClickListener { view ->
-                            val popup = PopupMenu(view.context, binding.cardMessage)
-                            popup.menu.add(
-                                    0,
-                                    1,
-                                    0,
-                                    itemView.context.getString(R.string.copy_scientific_name)
-                            )
-                            popup.menu.add(0, 2, 0, itemView.context.getString(R.string.share_info))
+                val isExpanded = position == expandedPosition
+                binding.layoutActions.setExpanded(isExpanded, false)
 
-                            if (position == messages.size - 1) {
-                                popup.menu.add(
-                                        0,
-                                        3,
-                                        0,
-                                        itemView.context.getString(
-                                                R.string.btn_retry_identification
-                                        )
+                val longClickListener =
+                        View.OnLongClickListener {
+                            val prevExpanded = expandedPosition
+                            expandedPosition = if (isExpanded) -1 else position
+
+                            if (prevExpanded != -1) {
+                                (binding.root.parent as? RecyclerView)?.adapter?.notifyItemChanged(
+                                        prevExpanded,
+                                        "TOGGLE_ACTIONS"
                                 )
                             }
-
-                            popup.setOnMenuItemClickListener { item: MenuItem ->
-                                when (item.itemId) {
-                                    1 -> {
-                                        actionListener.onCopy(message.content)
-                                        true
-                                    }
-                                    2 -> {
-                                        actionListener.onShare(message.content)
-                                        true
-                                    }
-                                    3 -> {
-                                        actionListener.onRenew(position, message)
-                                        true
-                                    }
-                                    else -> false
-                                }
+                            if (expandedPosition != -1) {
+                                (binding.root.parent as? RecyclerView)?.adapter?.notifyItemChanged(
+                                        expandedPosition,
+                                        "TOGGLE_ACTIONS"
+                                )
                             }
-                            popup.show()
                             true
                         }
 
                 binding.cardMessage.setOnLongClickListener(longClickListener)
                 binding.tvMessage.setOnLongClickListener(longClickListener)
+
+                val collapseListener =
+                        View.OnClickListener {
+                            if (expandedPosition != -1 && expandedPosition != position) {
+                                val prev = expandedPosition
+                                expandedPosition = -1
+                                (binding.root.parent as? RecyclerView)?.adapter?.notifyItemChanged(
+                                        prev,
+                                        "TOGGLE_ACTIONS"
+                                )
+                            } else if (expandedPosition == position) {
+                                expandedPosition = -1
+                                (binding.root.parent as? RecyclerView)?.adapter?.notifyItemChanged(
+                                        position,
+                                        "TOGGLE_ACTIONS"
+                                )
+                            }
+                        }
+                binding.root.setOnClickListener(collapseListener)
+                binding.cardMessage.setOnClickListener(collapseListener)
+                binding.tvMessage.setOnClickListener(collapseListener)
+
+                binding.btnCopy.setOnClickListener {
+                    actionListener.onCopy(message.content)
+                    expandedPosition = -1
+                    binding.layoutActions.collapse()
+                }
+
+                binding.btnShare.setOnClickListener {
+                    actionListener.onShare(message.content)
+                    expandedPosition = -1
+                    binding.layoutActions.collapse()
+                }
+
+                if (position == messages.size - 1) {
+                    binding.btnRegenerate.visibility = View.VISIBLE
+                    binding.btnRegenerate.setOnClickListener {
+                        actionListener.onRenew(position, message)
+                        expandedPosition = -1
+                        binding.layoutActions.collapse()
+                    }
+                } else {
+                    binding.btnRegenerate.visibility = View.GONE
+                }
+            } else {
+                binding.layoutActions.setExpanded(false, false)
             }
         }
 
