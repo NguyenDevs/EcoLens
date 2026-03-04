@@ -49,6 +49,7 @@
             <LinearLayout
                     android:id="@+id/layoutMessageContent"
                     android:layout_width="wrap_content"
+                    android:animateLayoutChanges="true"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
@@ -59,17 +60,25 @@
                         android:background="@color/primary_light"
                         android:visibility="gone"/>
 
-                <TextView
-                        android:id="@+id/tvMessage"
+                <net.cachapa.expandablelayout.ExpandableLayout
+                        android:id="@+id/expandableText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:maxWidth="260dp"
-                        android:textSize="@dimen/text_body"
-                        android:lineSpacingExtra="3dp"
-                        android:paddingStart="14dp"
-                        android:paddingEnd="14dp"
-                        android:paddingTop="10dp"
-                        android:paddingBottom="10dp"/>
+                        app:el_duration="300"
+                        app:el_expanded="true">
+
+                    <TextView
+                            android:id="@+id/tvMessage"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:maxWidth="260dp"
+                            android:textSize="@dimen/text_body"
+                            android:lineSpacingExtra="3dp"
+                            android:paddingStart="14dp"
+                            android:paddingEnd="14dp"
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp"/>
+                </net.cachapa.expandablelayout.ExpandableLayout>
 
                 <LinearLayout
                         android:id="@+id/layoutTypingIndicator"
@@ -77,6 +86,8 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
+                        android:clipChildren="false"
+                        android:clipToPadding="false"
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
                         android:paddingTop="12dp"
@@ -149,5 +160,72 @@
                 android:visibility="gone"/>
 
     </LinearLayout>
+
+    <!-- AI Actions Dropdown (Expandable) -->
+    <net.cachapa.expandablelayout.ExpandableLayout
+            android:id="@+id/layoutActions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:el_duration="500"
+            app:el_expanded="false">
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingStart="40dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:gravity="start|center_vertical">
+
+            <FrameLayout
+                    android:id="@+id/btnCopy"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true">
+                <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_copy_2"
+                        app:tint="@color/text_secondary"/>
+            </FrameLayout>
+
+            <FrameLayout
+                    android:id="@+id/btnShare"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true">
+                <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_share"
+                        app:tint="@color/text_secondary"/>
+            </FrameLayout>
+
+            <FrameLayout
+                    android:id="@+id/btnRegenerate"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true">
+                <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_renew"
+                        app:tint="@color/text_secondary"/>
+            </FrameLayout>
+
+        </LinearLayout>
+    </net.cachapa.expandablelayout.ExpandableLayout>
 
 </LinearLayout>
