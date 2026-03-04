@@ -4,15 +4,11 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:animateLayoutChanges="true"
         android:background="@color/background"
         android:orientation="vertical"
         android:clickable="true"
         android:focusable="true">
 
-    <!-- ═══════════════════════════════════════════ -->
-    <!--  HEADER                                     -->
-    <!-- ═══════════════════════════════════════════ -->
     <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -142,15 +138,11 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Header divider -->
     <View
             android:layout_width="match_parent"
             android:layout_height="@dimen/divider_normal"
             android:background="@color/border_light"/>
 
-    <!-- ═══════════════════════════════════════════ -->
-    <!--  CHAT MESSAGES                              -->
-    <!-- ═══════════════════════════════════════════ -->
     <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvChat"
             android:layout_width="match_parent"
@@ -164,9 +156,6 @@
             android:scrollbars="none"
             android:overScrollMode="ifContentScrolls"/>
 
-    <!-- ═══════════════════════════════════════════ -->
-    <!--  INPUT AREA                                 -->
-    <!-- ═══════════════════════════════════════════ -->
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
