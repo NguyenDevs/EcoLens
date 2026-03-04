@@ -64,7 +64,7 @@
                         android:id="@+id/expandableText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:el_duration="300"
+                        app:el_duration="500"
                         app:el_expanded="true">
 
                     <TextView
