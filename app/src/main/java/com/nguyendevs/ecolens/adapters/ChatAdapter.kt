@@ -71,18 +71,6 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
         return ChatViewHolder(binding)
     }
 
-    override fun onBindViewHolder(
-            holder: ChatViewHolder,
-            position: Int,
-            payloads: MutableList<Any>
-    ) {
-        if (payloads.isNotEmpty() && payloads[0] == "STREAMING") {
-            holder.bindStreamingText(messages[position])
-        } else {
-            super.onBindViewHolder(holder, position, payloads)
-        }
-    }
-
     override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
         holder.bind(messages[position], position)
     }
@@ -135,7 +123,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
 
         private val handler = Handler(Looper.getMainLooper())
         private var loopCount = 0
-        private var cursorAnimator: ValueAnimator? = null
+        private var typingAnimatorSet: android.animation.AnimatorSet? = null
 
         private fun getThemeColor(attr: Int): Int {
             val typedValue = TypedValue()
@@ -180,15 +168,8 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
 
         fun stopAnimation() {
             handler.removeCallbacks(loadingAnimateRunnable)
-            cursorAnimator?.cancel()
-            cursorAnimator = null
+            stopTypingAnimation()
             binding.tvMessage.alpha = 1f
-        }
-
-        fun bindStreamingText(message: ChatMessage) {
-            if (message.isStreaming) {
-                markwon.setMarkdown(binding.tvMessage, message.content + " ▌")
-            }
         }
 
         fun bind(message: ChatMessage, position: Int) {
@@ -208,10 +189,13 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
         }
 
         private fun resetViews() {
+            binding.tvMessage.visibility = View.VISIBLE
+            binding.layoutTypingIndicator.visibility = View.GONE
             binding.tvMessage.alpha = 1f
             binding.tvMessage.setTypeface(null, Typeface.NORMAL)
             binding.tvTimestamp.visibility = View.GONE
             binding.viewAccentBar.visibility = View.GONE
+            binding.layoutMessageContent.background = null
             binding.cardMessage.strokeWidth = 0
             binding.cardMessage.setOnClickListener(null)
             binding.cardMessage.setOnLongClickListener(null)
@@ -231,9 +215,37 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
             binding.layoutFooterRow.gravity = Gravity.START
 
             binding.cardMessage.shapeAppearanceModel = aiBubbleShape
-            binding.viewAccentBar.visibility = View.VISIBLE
+            binding.viewAccentBar.visibility = View.GONE
             binding.cardMessage.strokeWidth = 1
             binding.cardMessage.strokeColor = colorBorderLight
+
+            val leftBorderWidthPx = 3f * itemView.resources.displayMetrics.density
+            val leftBorderDrawable =
+                    object : android.graphics.drawable.Drawable() {
+                        val shapeDrawable =
+                                com.google.android.material.shape.MaterialShapeDrawable(
+                                                aiBubbleShape
+                                        )
+                                        .apply {
+                                            fillColor =
+                                                    android.content.res.ColorStateList.valueOf(
+                                                            colorPrimaryLight
+                                                    )
+                                        }
+
+                        override fun draw(canvas: android.graphics.Canvas) {
+                            shapeDrawable.bounds = bounds
+                            canvas.save()
+                            canvas.clipRect(0f, 0f, leftBorderWidthPx, bounds.height().toFloat())
+                            shapeDrawable.draw(canvas)
+                            canvas.restore()
+                        }
+
+                        override fun setAlpha(alpha: Int) {}
+                        override fun setColorFilter(colorFilter: android.graphics.ColorFilter?) {}
+                        override fun getOpacity(): Int = android.graphics.PixelFormat.TRANSLUCENT
+                    }
+            binding.layoutMessageContent.background = leftBorderDrawable
         }
 
         private fun configureUserLayout() {
@@ -243,7 +255,6 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
             binding.chatContainer.gravity = Gravity.END
             binding.layoutBubbleRow.gravity = Gravity.END
 
-            // Fix: User footer needs to push content to the end
             val params =
                     binding.tvTimestamp.layoutParams as android.widget.LinearLayout.LayoutParams
             params.gravity = Gravity.END
@@ -252,6 +263,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
 
             binding.cardMessage.shapeAppearanceModel = userBubbleShape
             binding.viewAccentBar.visibility = View.GONE
+            binding.layoutMessageContent.background = null
             binding.cardMessage.strokeWidth = 0
         }
 
@@ -269,8 +281,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
             configureAiLayout()
             binding.cardMessage.setCardBackgroundColor(bgColor)
             binding.tvMessage.setTextColor(textColor)
-            bindStreamingText(message)
-            startCursorAnimation()
+            startTypingAnimation()
         }
 
         private fun bindUserMessage(message: ChatMessage) {
@@ -299,70 +310,120 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
                 binding.cardMessage.strokeColor = colorEmerald100
                 binding.tvMessage.setTextColor(colorPrimaryDark)
                 binding.tvMessage.setTypeface(null, Typeface.ITALIC)
-                binding.viewAccentBar.setBackgroundColor(colorPrimaryLight)
             } else {
                 binding.cardMessage.setCardBackgroundColor(bgColor)
                 binding.tvMessage.setTextColor(textColor)
-                binding.viewAccentBar.setBackgroundColor(colorPrimaryLight)
             }
 
             markwon.setMarkdown(binding.tvMessage, message.content)
 
             if (position > 0) {
-                binding.cardMessage.setOnLongClickListener { view ->
-                    val popup = PopupMenu(view.context, view)
-                    popup.menu.add(
-                            0,
-                            1,
-                            0,
-                            itemView.context.getString(R.string.copy_scientific_name)
-                    )
-                    popup.menu.add(0, 2, 0, itemView.context.getString(R.string.share_info))
+                val longClickListener =
+                        View.OnLongClickListener { view ->
+                            val popup = PopupMenu(view.context, binding.cardMessage)
+                            popup.menu.add(
+                                    0,
+                                    1,
+                                    0,
+                                    itemView.context.getString(R.string.copy_scientific_name)
+                            )
+                            popup.menu.add(0, 2, 0, itemView.context.getString(R.string.share_info))
 
-                    if (position == messages.size - 1) {
-                        popup.menu.add(
-                                0,
-                                3,
-                                0,
-                                itemView.context.getString(R.string.btn_retry_identification)
-                        )
-                    }
+                            if (position == messages.size - 1) {
+                                popup.menu.add(
+                                        0,
+                                        3,
+                                        0,
+                                        itemView.context.getString(
+                                                R.string.btn_retry_identification
+                                        )
+                                )
+                            }
 
-                    popup.setOnMenuItemClickListener { item: MenuItem ->
-                        when (item.itemId) {
-                            1 -> {
-                                actionListener.onCopy(message.content)
-                                true
+                            popup.setOnMenuItemClickListener { item: MenuItem ->
+                                when (item.itemId) {
+                                    1 -> {
+                                        actionListener.onCopy(message.content)
+                                        true
+                                    }
+                                    2 -> {
+                                        actionListener.onShare(message.content)
+                                        true
+                                    }
+                                    3 -> {
+                                        actionListener.onRenew(position, message)
+                                        true
+                                    }
+                                    else -> false
+                                }
                             }
-                            2 -> {
-                                actionListener.onShare(message.content)
-                                true
-                            }
-                            3 -> {
-                                actionListener.onRenew(position, message)
-                                true
-                            }
-                            else -> false
+                            popup.show()
+                            true
                         }
-                    }
-                    popup.show()
-                    true
-                }
+
+                binding.cardMessage.setOnLongClickListener(longClickListener)
+                binding.tvMessage.setOnLongClickListener(longClickListener)
             }
         }
 
-        private fun startCursorAnimation() {
-            if (cursorAnimator == null) {
-                cursorAnimator =
-                        ValueAnimator.ofFloat(1f, 0.4f).apply {
-                            duration = 600
-                            repeatCount = ValueAnimator.INFINITE
-                            repeatMode = ValueAnimator.REVERSE
-                            addUpdateListener { animator ->
-                                binding.tvMessage.alpha = animator.animatedValue as Float
-                            }
-                            start()
-                        }
+        private fun startTypingAnimation() {
+            binding.layoutTypingIndicator.visibility = View.VISIBLE
+            binding.tvMessage.visibility = View.GONE
+
+            if (typingAnimatorSet?.isRunning == true) return
+
+            val dot1 = binding.dot1
+            val dot2 = binding.dot2
+            val dot3 = binding.dot3
+
+            val bounceAnim1 = createBounceAnimator(dot1, 0)
+            val bounceAnim2 = createBounceAnimator(dot2, 200)
+            val bounceAnim3 = createBounceAnimator(dot3, 400)
+
+            typingAnimatorSet =
+                    android.animation.AnimatorSet().apply {
+                        playTogether(bounceAnim1, bounceAnim2, bounceAnim3)
+                        start()
+                    }
+        }
+
+        private fun stopTypingAnimation() {
+            binding.layoutTypingIndicator.visibility = View.GONE
+            binding.tvMessage.visibility = View.VISIBLE
+            typingAnimatorSet?.cancel()
+            typingAnimatorSet = null
+            binding.dot1.translationY = 0f
+            binding.dot2.translationY = 0f
+            binding.dot3.translationY = 0f
+            binding.dot1.alpha = 1f
+            binding.dot2.alpha = 1f
+            binding.dot3.alpha = 1f
+        }
+
+        private fun createBounceAnimator(target: View, startDelayMs: Long): ValueAnimator {
+            val distancePx = -6f * target.context.resources.displayMetrics.density
+            return ValueAnimator.ofFloat(0f, 1f).apply {
+                duration = 1200
+                repeatCount = ValueAnimator.INFINITE
+                startDelay = startDelayMs
+                addUpdateListener { animator ->
+                    val fraction = animator.animatedValue as Float
+                    var ty = 0f
+                    var alpha = 0.5f
+
+                    if (fraction <= 0.4f) {
+                        val progress = fraction / 0.4f
+                        ty = distancePx * progress
+                        alpha = 0.5f + (0.5f * progress)
+                    } else if (fraction <= 0.8f) {
+                        val progress = (fraction - 0.4f) / 0.4f
+                        ty = distancePx * (1f - progress)
+                        alpha = 1f - (0.5f * progress)
+                    }
+
+                    target.translationY = ty
+                    target.alpha = alpha
+                }
             }
         }
     }
