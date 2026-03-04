@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- shape_status_dot.xml — chấm nhỏ bên cạnh text "Đang hoạt động" -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+        android:shape="oval">
+    <solid android:color="@color/primary_light"/>
+    <size
+            android:width="5dp"
+            android:height="5dp"/>
+</shape>

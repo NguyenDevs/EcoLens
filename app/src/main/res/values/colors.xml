@@ -13,6 +13,10 @@
     <color name="accent">#10B981</color>    <!-- Accent color - emerald-500 -->
     <color name="on_primary">#FFFFFF</color>
 
+    <color name="emerald_50">#ECFDF5</color>
+    <color name="emerald_100">#D1FAE5</color>
+    <color name="chat_user_gradient_end">#087A5A</color>
+
     <!-- Primary variants for different opacity -->
     <color name="primary_10">#1A065F46</color>    <!-- 10% opacity -->
     <color name="primary_20">#33065F46</color>    <!-- 20% opacity -->

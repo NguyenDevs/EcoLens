@@ -9,71 +9,163 @@
         android:clickable="true"
         android:focusable="true">
 
-    <!-- MODERN CHAT FRAGMENT -->
-
-    <!-- HEADER -->
-    <RelativeLayout
+    <!-- ═══════════════════════════════════════════ -->
+    <!--  HEADER                                     -->
+    <!-- ═══════════════════════════════════════════ -->
+    <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="@dimen/spacing_md"
-            android:background="@color/background">
+            android:paddingStart="@dimen/spacing_md"
+            android:paddingEnd="@dimen/spacing_md"
+            android:paddingTop="@dimen/spacing_sm"
+            android:paddingBottom="@dimen/spacing_sm"
+            android:background="@color/surface">
 
+        <!-- Back button -->
         <ImageView
                 android:id="@+id/btnBack"
                 android:layout_width="@dimen/icon_xl"
                 android:layout_height="@dimen/icon_xl"
-                android:layout_centerVertical="true"
-                android:layout_alignParentStart="true"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:padding="@dimen/spacing_xs"
                 android:src="@drawable/ic_back"
-                app:tint="@color/text_primary"
-                android:contentDescription="@string/back"/>
+                app:tint="@color/text_secondary"
+                android:contentDescription="@string/back"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
 
-        <TextView
+        <!-- Bot identity (avatar + name + status) -->
+        <LinearLayout
+                android:id="@+id/layoutBotIdentity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="@string/my_garden_title"
-                style="@style/TextAppearance.App.Headline3"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent">
 
+            <!-- Avatar with online dot -->
+            <FrameLayout
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:clipChildren="false">
+
+                <com.google.android.material.card.MaterialCardView
+                        android:layout_width="38dp"
+                        android:layout_height="38dp"
+                        app:cardCornerRadius="19dp"
+                        app:cardBackgroundColor="@color/primary">
+
+                    <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:src="@mipmap/ic_launcher"
+                            android:scaleType="fitCenter"
+                            android:contentDescription="@string/app_logo_description"/>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Online indicator dot -->
+                <View
+                        android:id="@+id/viewOnlineDot"
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:layout_gravity="bottom|end"
+                        android:layout_marginEnd="1dp"
+                        android:layout_marginBottom="1dp"
+                        android:background="@drawable/shape_online_dot"/>
+
+            </FrameLayout>
+
+            <!-- Name + status text -->
+            <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="10dp">
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/my_garden_title"
+                        android:textSize="@dimen/text_body_large"
+                        android:textColor="@color/text_primary"
+                        android:textStyle="bold"
+                        android:letterSpacing="-0.01"/>
+
+                <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="1dp">
+
+                    <View
+                            android:layout_width="5dp"
+                            android:layout_height="5dp"
+                            android:background="@drawable/shape_status_dot"/>
+
+                    <TextView
+                            android:id="@+id/tvStatus"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:text="@string/chat_thinking"
+                            android:textSize="11sp"
+                            android:textColor="@color/primary_light"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Menu button -->
         <ImageView
                 android:id="@+id/btnMenu"
                 android:layout_width="@dimen/icon_xl"
                 android:layout_height="@dimen/icon_xl"
-                android:layout_centerVertical="true"
-                android:layout_alignParentEnd="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:padding="@dimen/spacing_xs"
                 android:src="@drawable/ic_more_vert"
-                app:tint="@color/text_primary"
+                app:tint="@color/text_secondary"
                 android:clickable="true"
                 android:focusable="true"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/settings"/>
+                android:contentDescription="@string/settings"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
 
-    </RelativeLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Header divider -->
     <View
             android:layout_width="match_parent"
-            android:background="@color/border_normal"
-            android:layout_marginTop="-4dp"
-            android:layout_marginStart="-20dp"
-            android:layout_marginEnd="-20dp"
-            android:layout_height="1dp"/>
-    <!-- CHAT MESSAGES -->
+            android:layout_height="@dimen/divider_normal"
+            android:background="@color/border_light"/>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!--  CHAT MESSAGES                              -->
+    <!-- ═══════════════════════════════════════════ -->
     <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvChat"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:clipToPadding="false"
-            android:paddingTop="@dimen/spacing_xs"
-            android:paddingBottom="@dimen/spacing_xs"
-            android:paddingStart="@dimen/spacing_sm"
-            android:paddingEnd="@dimen/spacing_sm"
+            android:paddingTop="@dimen/spacing_sm"
+            android:paddingBottom="@dimen/spacing_sm"
+            android:paddingStart="@dimen/spacing_md"
+            android:paddingEnd="@dimen/spacing_md"
             android:scrollbars="none"
             android:overScrollMode="ifContentScrolls"/>
 
-    <!-- INPUT AREA -->
+    <!-- ═══════════════════════════════════════════ -->
+    <!--  INPUT AREA                                 -->
+    <!-- ═══════════════════════════════════════════ -->
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -81,9 +173,9 @@
             android:background="@color/surface"
             android:elevation="@dimen/elevation_lg">
 
-        <!-- TOP DIVIDER -->
         <View
-                style="@style/Widget.App.Divider"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/divider_normal"
                 android:background="@color/border_light"/>
 
         <LinearLayout
@@ -94,18 +186,18 @@
                 android:paddingStart="@dimen/spacing_md"
                 android:paddingEnd="@dimen/spacing_md"
                 android:paddingTop="@dimen/spacing_sm"
-                android:paddingBottom="@dimen/spacing_sm">
+                android:paddingBottom="@dimen/spacing_md">
 
-            <!-- INPUT CARD -->
+            <!-- Input card -->
             <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     app:cardCornerRadius="22dp"
                     app:cardElevation="@dimen/elevation_none"
-                    app:strokeWidth="@dimen/border_thin"
+                    app:strokeWidth="@dimen/border_normal"
                     app:strokeColor="@color/border_strong"
-                    app:cardBackgroundColor="@color/surface">
+                    app:cardBackgroundColor="@color/surface_variant">
 
                 <EditText
                         android:id="@+id/etChatInput"
@@ -123,15 +215,15 @@
                         android:inputType="textCapSentences|textMultiLine"
                         android:textColor="@color/text_primary"
                         android:textColorHint="@color/text_tertiary"/>
+
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- SEND BUTTON -->
+            <!-- Send button -->
             <com.google.android.material.card.MaterialCardView
                     android:layout_width="44dp"
                     android:layout_height="44dp"
                     android:layout_marginStart="10dp"
                     app:cardCornerRadius="22dp"
-                    app:cardElevation="@dimen/elevation_none"
                     app:cardBackgroundColor="@color/primary">
 
                 <ImageView
@@ -145,6 +237,7 @@
                         android:clickable="true"
                         android:focusable="true"
                         android:contentDescription="@string/chat_hint"/>
+
             </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>

@@ -161,6 +161,8 @@
     <string name="chat_hint">Hỏi về động thực vật...</string>
     <string name="chat_welcome">Tôi là EcoLens. Tôi có thể giúp gì cho bạn?</string>
     <string name="chat_thinking">Đang suy nghĩ...</string>
+    <string name="chat_responding">Đang phản hồi...</string>
+    <string name="chat_active">Đang hoạt động</string>
     <string name="new_chat">Đoạn chat mới</string>
     <string name="delete_chat">Xóa đoạn chat</string>
     <string name="cant_reply">Xin lỗi, tôi không thể trả lời lúc này.</string>
