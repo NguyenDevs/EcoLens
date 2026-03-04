@@ -160,6 +160,8 @@
     <string name="chat_hint">動植物について質問...</string>
     <string name="chat_welcome">EcoLens AIです。何かお手伝いできますか？</string>
     <string name="chat_thinking">考え中...</string>
+    <string name="chat_responding">応答中...</string>
+    <string name="chat_active">オンライン</string>
     <string name="new_chat">新しいチャット</string>
     <string name="delete_chat">チャットを削除</string>
     <string name="cant_reply">申し訳ございません。現在お答えできません。</string>

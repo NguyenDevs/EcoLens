@@ -160,6 +160,8 @@
     <string name="chat_hint">询问动植物...</string>
     <string name="chat_welcome">我是EcoLens AI。我能帮您什么？</string>
     <string name="chat_thinking">思考中...</string>
+    <string name="chat_responding">回复中...</string>
+    <string name="chat_active">在线</string>
     <string name="new_chat">新聊天</string>
     <string name="delete_chat">删除聊天</string>
     <string name="cant_reply">抱歉，我现在无法回答。</string>

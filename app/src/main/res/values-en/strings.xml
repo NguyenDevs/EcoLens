@@ -160,6 +160,8 @@
     <string name="chat_hint">Ask about flora and fauna...</string>
     <string name="chat_welcome">I\'m EcoLens AI. How can I help you?</string>
     <string name="chat_thinking">Thinking...</string>
+    <string name="chat_responding">Responding...</string>
+    <string name="chat_active">Active</string>
     <string name="new_chat">New chat</string>
     <string name="delete_chat">Delete chat</string>
     <string name="cant_reply">I\'m sorry, I can\'t answer right now.</string>

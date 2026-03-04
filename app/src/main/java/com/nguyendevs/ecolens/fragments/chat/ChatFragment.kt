@@ -223,6 +223,13 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         binding.btnBack.alpha = alpha
         binding.btnMenu.isEnabled = enabled
         binding.btnMenu.alpha = alpha
+
+        binding.tvStatus.text =
+                if (isStreaming) {
+                    getString(R.string.chat_responding)
+                } else {
+                    getString(R.string.chat_active)
+                }
     }
 
     // ==================== HELPER METHODS ====================
