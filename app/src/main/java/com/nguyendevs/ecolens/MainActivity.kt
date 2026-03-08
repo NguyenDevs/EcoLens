@@ -373,14 +373,6 @@ class MainActivity : AppCompatActivity() {
                         this,
                         binding.homeContainer.speciesInfoCard,
                         { text ->
-                            /*
-                            Toast.makeText(
-                                            this,
-                                            getString(R.string.copy_scientific_name) + ": " + text,
-                                            Toast.LENGTH_SHORT
-                                    )
-                                    .show()
-                             */
                             searchBarHandler.expandSearchBar(text)
                         },
                         { viewModel.retryIdentification() }
