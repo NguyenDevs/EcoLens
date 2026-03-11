@@ -9,8 +9,8 @@ import androidx.core.content.ContextCompat
 import com.nguyendevs.ecolens.R
 
 /**
- * Manager quản lý runtime permissions Xử lý Camera và Storage permissions với version-specific
- * logic
+ * Manager quản lý runtime permissions
+ * Xử lý Camera, Storage và Location permissions với version-specific logic
  */
 class PermissionManager(
         private val context: Context,
@@ -19,14 +19,22 @@ class PermissionManager(
 
     /**
      * Required permissions dựa trên Android version
-     * - API 33+: CAMERA, READ_MEDIA_IMAGES
-     * - API < 33: CAMERA, READ_EXTERNAL_STORAGE
+     * - API 33+: CAMERA, READ_MEDIA_IMAGES, ACCESS_FINE_LOCATION
+     * - API < 33: CAMERA, READ_EXTERNAL_STORAGE, ACCESS_FINE_LOCATION
      */
     private val requiredPermissions =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                arrayOf(Manifest.permission.CAMERA, Manifest.permission.READ_MEDIA_IMAGES)
+                arrayOf(
+                        Manifest.permission.CAMERA,
+                        Manifest.permission.READ_MEDIA_IMAGES,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                )
             } else {
-                arrayOf(Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE)
+                arrayOf(
+                        Manifest.permission.CAMERA,
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                )
             }
 
     // ==================== PERMISSION CHECK ====================
@@ -40,6 +48,26 @@ class PermissionManager(
             ContextCompat.checkSelfPermission(context, permission) ==
                     PackageManager.PERMISSION_GRANTED
         }
+    }
+
+    /**
+     * Kiểm tra riêng camera permission
+     * @return true nếu camera permission đã được cấp
+     */
+    fun hasCameraPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
+                PackageManager.PERMISSION_GRANTED
+    }
+
+    /**
+     * Kiểm tra riêng location permission
+     * @return true nếu location permission đã được cấp
+     */
+    fun hasLocationPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED
     }
 
     // ==================== PERMISSION REQUEST ====================

@@ -45,6 +45,8 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     val allChatSessions: Flow<List<ChatSession>> = chatManager.allChatSessions
 
     private var lastLanguageCode: String = "en"
+    private var lastLat: Double = 16.0544
+    private var lastLng: Double = 108.2022
 
     private val translationCache = mutableMapOf<Int, Pair<String, SpeciesInfo>>()
 
@@ -75,14 +77,24 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         translationCache[historyId] = language to info
     }
 
-    fun identifySpecies(imageUri: Uri, languageCode: String, existingHistoryId: Int? = null) {
+    fun identifySpecies(
+            imageUri: Uri,
+            languageCode: String,
+            lat: Double = 16.0544,
+            lng: Double = 108.2022,
+            existingHistoryId: Int? = null
+    ) {
         this.currentImageUri = imageUri
         lastLanguageCode = languageCode
+        lastLat = lat
+        lastLng = lng
         viewModelScope.launch {
             speciesManager.identifySpecies(
                     imageUri = imageUri,
                     languageCode = languageCode,
                     existingHistoryId = existingHistoryId,
+                    lat = lat,
+                    lng = lng,
                     onStateUpdate = { state -> _uiState.value = state }
             )
         }
@@ -93,6 +105,8 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
             identifySpecies(
                     imageUri = uri,
                     languageCode = lastLanguageCode,
+                    lat = lastLat,
+                    lng = lastLng,
                     existingHistoryId = speciesManager.currentHistoryEntryId
             )
         }

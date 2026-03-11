@@ -40,16 +40,36 @@ object RetrofitClient {
         }
     }
 
-    /** Logging interceptor cho debug mode. */
+    /** Logging interceptor cho debug mode - chỉ log headers. */
     private val loggingInterceptor =
             HttpLoggingInterceptor().apply {
                 level =
                         if (BuildConfig.DEBUG) {
-                            HttpLoggingInterceptor.Level.BODY
+                            HttpLoggingInterceptor.Level.HEADERS
                         } else {
                             HttpLoggingInterceptor.Level.NONE
                         }
             }
+
+    /**
+     * Custom interceptor log gọn thông tin upload ảnh thay vì dump raw bytes.
+     * Chỉ áp dụng cho multipart request đến score_image.
+     */
+    private val imageUploadLoggingInterceptor = Interceptor { chain ->
+        val request = chain.request()
+        if (BuildConfig.DEBUG && request.url.toString().contains("score_image")) {
+            val body = request.body
+            if (body is okhttp3.MultipartBody) {
+                body.parts.forEach { part ->
+                    val disposition = part.headers?.get("Content-Disposition") ?: ""
+                    val filename = Regex("filename=\"([^\"]+)\"").find(disposition)?.groupValues?.get(1) ?: "unknown"
+                    val size = part.body.contentLength()
+                    android.util.Log.d("Upload", "Sending image: $filename ($size bytes)")
+                }
+            }
+        }
+        chain.proceed(request)
+    }
 
     /** HMAC interceptor xác thực requests. */
     private val hmacInterceptor = HMACInterceptor()
@@ -92,6 +112,7 @@ object RetrofitClient {
     private val okHttpClient =
             OkHttpClient.Builder()
                     .addInterceptor(hmacInterceptor)
+                    .addInterceptor(imageUploadLoggingInterceptor)
                     .addInterceptor(loggingInterceptor)
                     .addInterceptor(authErrorInterceptor)
                     .connectTimeout(60, TimeUnit.SECONDS)

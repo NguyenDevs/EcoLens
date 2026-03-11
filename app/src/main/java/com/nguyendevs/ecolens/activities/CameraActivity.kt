@@ -3,6 +3,7 @@ package com.nguyendevs.ecolens.activities
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -11,11 +12,15 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.Camera
 import androidx.camera.core.ImageCapture
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.managers.camera.CameraManager
 import com.nguyendevs.ecolens.handlers.camera.PhotoCaptureHandler
 import com.nguyendevs.ecolens.handlers.animations.CameraAnimationHandler
 import com.nguyendevs.ecolens.databinding.ActivityCameraBinding
+import com.nguyendevs.ecolens.managers.main.EcoLocationManager
+import kotlinx.coroutines.launch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -25,11 +30,17 @@ import java.util.concurrent.Executors
  * - CameraManager: Quản lý camera operations
  * - PhotoCaptureHandler: Xử lý chụp và lưu ảnh
  * - CameraAnimationHandler: Quản lý animations và haptic feedback
+ *
+ * Khi chụp ảnh: lấy GPS thực (KEY_LAT, KEY_LNG trong result Intent)
+ * Khi upload từ gallery: lat/lng = null → MainActivity sẽ dùng tọa độ Đà Nẵng mặc định
  */
 class CameraActivity : AppCompatActivity() {
 
     companion object {
         const val KEY_IMAGE_URI = "image_uri"
+        const val KEY_LAT = "lat"
+        const val KEY_LNG = "lng"
+        const val KEY_IS_FROM_CAMERA = "is_from_camera"
 
         fun newIntent(context: Context): Intent {
             return Intent(context, CameraActivity::class.java)
@@ -97,11 +108,8 @@ class CameraActivity : AppCompatActivity() {
         photoCaptureHandler.setCallback(object : PhotoCaptureHandler.PhotoCaptureCallback {
             override fun onPhotoSaved(uriString: String) {
                 runOnUiThread {
-                    val resultIntent = Intent().apply {
-                        putExtra(KEY_IMAGE_URI, uriString)
-                    }
-                    setResult(RESULT_OK, resultIntent)
-                    closeCamera()
+                    // Ảnh chụp từ camera — lấy vị trí GPS thực trước khi trả về result
+                    returnCameraResult(uriString)
                 }
             }
 
@@ -111,6 +119,41 @@ class CameraActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    /**
+     * Lấy GPS thực khi chụp ảnh, rồi trả về result với tọa độ
+     * Nếu không có quyền location → trả về result không có lat/lng (sẽ dùng Đà Nẵng mặc định)
+     */
+    private fun returnCameraResult(uriString: String) {
+        val hasLocation = ContextCompat.checkSelfPermission(
+            this, android.Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(
+                    this, android.Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+
+        if (hasLocation) {
+            lifecycleScope.launch {
+                val coords = EcoLocationManager.getCurrentLocation(this@CameraActivity)
+                val resultIntent = Intent().apply {
+                    putExtra(KEY_IMAGE_URI, uriString)
+                    putExtra(KEY_IS_FROM_CAMERA, true)
+                    putExtra(KEY_LAT, coords.lat)
+                    putExtra(KEY_LNG, coords.lng)
+                }
+                setResult(RESULT_OK, resultIntent)
+                closeCamera()
+            }
+        } else {
+            // Không có quyền location → trả về không có tọa độ
+            val resultIntent = Intent().apply {
+                putExtra(KEY_IMAGE_URI, uriString)
+                putExtra(KEY_IS_FROM_CAMERA, true)
+            }
+            setResult(RESULT_OK, resultIntent)
+            closeCamera()
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -179,10 +222,13 @@ class CameraActivity : AppCompatActivity() {
         photoCaptureHandler.handleSelectedImage(uri, object : PhotoCaptureHandler.PhotoCaptureCallback {
             override fun onPhotoSaved(uriString: String) {
                 runOnUiThread {
+                    // Ảnh từ gallery — KHÔNG lấy GPS, để MainActivity dùng tọa độ Đà Nẵng mặc định
                     val resultIntent = Intent().apply {
                         data = uri
                         flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
                         putExtra(KEY_IMAGE_URI, uriString)
+                        putExtra(KEY_IS_FROM_CAMERA, false)
+                        // Không truyền KEY_LAT / KEY_LNG → MainActivity sẽ dùng default
                     }
                     setResult(RESULT_OK, resultIntent)
                     closeCamera()

@@ -104,7 +104,17 @@ class MainActivity : AppCompatActivity() {
                 if (result.resultCode == RESULT_OK) {
                     val uriString = result.data?.getStringExtra(CameraActivity.KEY_IMAGE_URI)
                     if (uriString != null) {
-                        handleCapturedImage(uriString.toUri())
+                        val lat = result.data?.getDoubleExtra(CameraActivity.KEY_LAT, Double.MIN_VALUE)
+                        val lng = result.data?.getDoubleExtra(CameraActivity.KEY_LNG, Double.MIN_VALUE)
+                        // Nếu lat/lng hợp lệ (ảnh chụp từ camera có GPS) → dùng vị trí thực
+                        // Nếu không có (upload từ gallery hoặc không có quyền) → dùng Đà Nẵng mặc định
+                        val hasValidCoords = lat != null && lat != Double.MIN_VALUE &&
+                                lng != null && lng != Double.MIN_VALUE
+                        if (hasValidCoords) {
+                            handleCapturedImage(uriString.toUri(), lat!!, lng!!)
+                        } else {
+                            handleCapturedImage(uriString.toUri())
+                        }
                     }
                 }
             }
@@ -113,7 +123,11 @@ class MainActivity : AppCompatActivity() {
     private val permissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
                     permissions ->
-                if (!permissions.values.all { it }) {
+                // Chỉ mở CameraActivity khi TẤT CẢ permissions được cấp
+                if (permissions.values.all { it }) {
+                    cameraActivityLauncher.launch(CameraActivity.newIntent(this))
+                    overridePendingTransition(R.anim.slide_in_bottom, R.anim.hold)
+                } else {
                     permissionManager.showPermissionDeniedDialog()
                 }
             }
@@ -531,8 +545,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** Xử lý ảnh đã chụp từ camera */
-    private fun handleCapturedImage(uri: Uri) {
+    /** Xử lý ảnh đã chụp từ camera hoặc upload từ gallery */
+    private fun handleCapturedImage(
+            uri: Uri,
+            lat: Double = 16.0544,
+            lng: Double = 108.2022
+    ) {
         binding.fabCamera.isClickable = false
         binding.fabCamera.alpha = 0.5f
 
@@ -551,7 +569,7 @@ class MainActivity : AppCompatActivity() {
 
         toggleHomeState(showResults = true)
 
-        viewModel.identifySpecies(uri, languageManager.getLanguage())
+        viewModel.identifySpecies(uri, languageManager.getLanguage(), lat = lat, lng = lng)
     }
 
     /** Thiết lập các Floating Action Button và Camera setup */

@@ -25,8 +25,8 @@ interface INaturalistApi {
     @POST("inaturalist/v1/computervision/score_image")
     suspend fun identifySpecies(
         @Part image: MultipartBody.Part,
-        @Query("lat") lat: Double = 16.0544,
-        @Query("lng") lng: Double = 108.2022,
+        @Query("lat") lat: Double,
+        @Query("lng") lng: Double,
         @Query("locale") locale: String
     ): IdentificationResponse
 
