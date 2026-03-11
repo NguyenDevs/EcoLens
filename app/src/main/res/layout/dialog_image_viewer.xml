@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <com.nguyendevs.ecolens.utils.ZoomableImageView
+        android:id="@+id/ivFullscreenImage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="matrix" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="24dp"
+        android:orientation="horizontal">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btnSaveImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/ic_save_picture"
+            app:backgroundTint="@color/surface_variant"
+            app:tint="@color/on_surface"
+            app:fabSize="normal"
+            android:contentDescription="Save Image" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btnCloseViewer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_close"
+            app:backgroundTint="@color/surface_variant"
+            app:tint="@color/on_surface"
+            app:fabSize="normal"
+            android:contentDescription="Close Viewer" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progressBarImageSaving"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
+</FrameLayout>
