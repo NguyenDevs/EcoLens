@@ -11,7 +11,20 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemSpeciesImageBinding
+import com.nguyendevs.ecolens.utils.ImageUtils
+import com.nguyendevs.ecolens.utils.ZoomableImageView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import android.widget.Toast
+import android.view.View
+import android.app.Dialog
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import android.view.Window
 
 class SpeciesImageAdapter :
     ListAdapter<String, SpeciesImageAdapter.ImageViewHolder>(ImageDiffCallback()) {
@@ -72,28 +85,68 @@ class SpeciesImageAdapter :
                             
                             binding.ivSpeciesImage.setOnClickListener {
                                 val context = binding.root.context
-                                val dialog = android.app.Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
-                                dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE)
+                                val dialog = Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+                                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
                                 
-                                val imageView = android.widget.ImageView(context)
-                                imageView.layoutParams = android.view.ViewGroup.LayoutParams(
-                                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                                    android.view.ViewGroup.LayoutParams.MATCH_PARENT
-                                )
-                                imageView.setBackgroundColor(android.graphics.Color.BLACK)
-                                imageView.scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
+                                val dialogView = android.view.LayoutInflater.from(context).inflate(R.layout.dialog_image_viewer, null)
                                 
-                                com.bumptech.glide.Glide.with(context)
+                                val ivFullscreenImage = dialogView.findViewById<ZoomableImageView>(R.id.ivFullscreenImage)
+                                val btnCloseViewer = dialogView.findViewById<View>(R.id.btnCloseViewer)
+                                val btnSaveImage = dialogView.findViewById<View>(R.id.btnSaveImage)
+                                val progressBarImageSaving = dialogView.findViewById<View>(R.id.progressBarImageSaving)
+                                
+                                Glide.with(context)
                                     .load(url)
-                                    .into(imageView)
+                                    .into(ivFullscreenImage)
                                     
-                                imageView.setOnClickListener {
-                                    dialog.dismiss()
+                                btnCloseViewer.setOnClickListener {
+                                    dialogView.animate().alpha(0f).setDuration(250).withEndAction {
+                                        dialog.dismiss()
+                                    }.start()
                                 }
                                 
-                                dialog.setContentView(imageView)
+                                btnSaveImage.setOnClickListener {
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        try {
+                                            withContext(Dispatchers.Main) {
+                                                progressBarImageSaving.visibility = View.VISIBLE
+                                                btnSaveImage.isEnabled = false
+                                            }
+                                            
+                                            val file = Glide.with(context)
+                                                .asFile()
+                                                .load(url)
+                                                .submit()
+                                                .get()
+                                                
+                                            val savedUri = ImageUtils.saveImageToPublicStorage(context, file)
+                                            
+                                            withContext(Dispatchers.Main) {
+                                                progressBarImageSaving.visibility = View.GONE
+                                                btnSaveImage.isEnabled = true
+                                                if (savedUri != null) {
+                                                    Toast.makeText(context, "Đã lưu ảnh", Toast.LENGTH_SHORT).show()
+                                                } else {
+                                                    Toast.makeText(context, "Lỗi khi lưu ảnh", Toast.LENGTH_SHORT).show()
+                                                }
+                                            }
+                                        } catch (e: Exception) {
+                                            withContext(Dispatchers.Main) {
+                                                progressBarImageSaving.visibility = View.GONE
+                                                btnSaveImage.isEnabled = true
+                                                Toast.makeText(context, "Lỗi khi tải ảnh", Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                dialogView.alpha = 0f
+                                dialog.setContentView(dialogView)
                                 dialog.window?.setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT)
+                                dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
                                 dialog.show()
+                                
+                                dialogView.animate().alpha(1f).setDuration(250).start()
                             }
                             
                             return false
