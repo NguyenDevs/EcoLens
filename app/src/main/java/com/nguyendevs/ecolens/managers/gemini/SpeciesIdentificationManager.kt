@@ -62,6 +62,8 @@ class SpeciesIdentificationManager(
             imageUri: Uri,
             languageCode: String,
             existingHistoryId: Int?,
+            lat: Double = 16.0544,
+            lng: Double = 108.2022,
             onStateUpdate: (EcoLensUiState) -> Unit
     ) {
         currentLanguageCode = languageCode
@@ -73,7 +75,7 @@ class SpeciesIdentificationManager(
 
         try {
             val imageFile = prepareImageFile(imageUri)
-            val topResult = callINaturalistAPI(imageFile, languageCode)
+            val topResult = callINaturalistAPI(imageFile, languageCode, lat, lng)
 
             if (topResult != null) {
                 processIdentificationResult(
@@ -129,10 +131,17 @@ class SpeciesIdentificationManager(
      */
     private suspend fun callINaturalistAPI(
             imageFile: File,
-            languageCode: String
+            languageCode: String,
+            lat: Double = 16.0544,
+            lng: Double = 108.2022
     ): IdentificationResult? {
         val imagePart = createImagePart(imageFile)
-        val response = apiService.identifySpecies(image = imagePart, locale = languageCode)
+        val response = apiService.identifySpecies(
+                image = imagePart,
+                lat = lat,
+                lng = lng,
+                locale = languageCode
+        )
         return response.results.firstOrNull()
     }
 
