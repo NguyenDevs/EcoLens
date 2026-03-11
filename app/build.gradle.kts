@@ -177,6 +177,9 @@ dependencies {
     // Google Sign In
     implementation("com.google.android.gms:play-services-auth:21.0.0")
 
+    // Location Services
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+
     // Biometric
     implementation("androidx.biometric:biometric:1.2.0-alpha05")
 
