@@ -69,6 +69,33 @@ class SpeciesImageAdapter :
                             binding.shimmerSpeciesImage.stopShimmer()
                             binding.shimmerSpeciesImage.visibility = android.view.View.GONE
                             binding.ivSpeciesImage.visibility = android.view.View.VISIBLE
+                            
+                            binding.ivSpeciesImage.setOnClickListener {
+                                val context = binding.root.context
+                                val dialog = android.app.Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+                                dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE)
+                                
+                                val imageView = android.widget.ImageView(context)
+                                imageView.layoutParams = android.view.ViewGroup.LayoutParams(
+                                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                                    android.view.ViewGroup.LayoutParams.MATCH_PARENT
+                                )
+                                imageView.setBackgroundColor(android.graphics.Color.BLACK)
+                                imageView.scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
+                                
+                                com.bumptech.glide.Glide.with(context)
+                                    .load(url)
+                                    .into(imageView)
+                                    
+                                imageView.setOnClickListener {
+                                    dialog.dismiss()
+                                }
+                                
+                                dialog.setContentView(imageView)
+                                dialog.window?.setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT)
+                                dialog.show()
+                            }
+                            
                             return false
                         }
                     }
