@@ -223,7 +223,6 @@ class HistoryFragment : Fragment() {
                 spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
                     override fun getSpanSize(position: Int): Int {
                         return if (adapter.getItemViewType(position) == 2) 2
-                        else if (position < adapter.itemCount && adapter.currentList.getOrNull(position)?.isFirstOfDay == true) 2
                         else 1
                     }
                 }
