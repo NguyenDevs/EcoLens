@@ -55,7 +55,7 @@ class HistoryFragment : Fragment() {
     private var filterStartDate: Long? = null
     private var filterEndDate: Long? = null
     private var searchQuery: String = ""
-    private var currentViewMode = HistoryViewMode.GRID
+    private var currentViewMode = HistoryViewMode.LIST
 
     private var currentLimit = 10
     private val pageSize = 10
@@ -63,7 +63,7 @@ class HistoryFragment : Fragment() {
     private var hasMoreData = true
     private var observeJob: Job? = null
 
-    enum class CategoryFilter { ALL, ANIMALS, PLANTS }
+    enum class CategoryFilter { ALL, ANIMALS, PLANTS, FUNGI }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -168,15 +168,13 @@ class HistoryFragment : Fragment() {
     private fun setupClickListeners() {
         binding.chipAll.setOnClickListener {
             animationHandler.performConfirmFeedback(it)
-            updateCategoryFilter(CategoryFilter.ALL)
-        }
-        binding.chipAnimals.setOnClickListener {
-            animationHandler.performConfirmFeedback(it)
-            updateCategoryFilter(CategoryFilter.ANIMALS)
-        }
-        binding.chipPlants.setOnClickListener {
-            animationHandler.performConfirmFeedback(it)
-            updateCategoryFilter(CategoryFilter.PLANTS)
+            val nextCategory = when (currentCategory) {
+                CategoryFilter.ALL -> CategoryFilter.ANIMALS
+                CategoryFilter.ANIMALS -> CategoryFilter.PLANTS
+                CategoryFilter.PLANTS -> CategoryFilter.FUNGI
+                CategoryFilter.FUNGI -> CategoryFilter.ALL
+            }
+            updateCategoryFilter(nextCategory)
         }
         binding.btnSort.setOnClickListener {
             animationHandler.performConfirmFeedback(it)
@@ -235,11 +233,23 @@ class HistoryFragment : Fragment() {
     }
 
     private fun updateCategoryChipsUI(selected: CategoryFilter) {
-        animationHandler.updateMultipleChips(
-            binding.chipAll to (selected == CategoryFilter.ALL),
-            binding.chipAnimals to (selected == CategoryFilter.ANIMALS),
-            binding.chipPlants to (selected == CategoryFilter.PLANTS)
-        )
+        val textRes = when (selected) {
+            CategoryFilter.ALL -> R.string.history_chipAll
+            CategoryFilter.ANIMALS -> R.string.history_chipAnimals
+            CategoryFilter.PLANTS -> R.string.history_chipPlants
+            CategoryFilter.FUNGI -> R.string.history_chipFungi
+        }
+        
+        binding.chipAll.apply {
+            text = getString(textRes)
+            // Use ic_filter_first for All, and null for others (using emojis in text)
+            if (selected == CategoryFilter.ALL) {
+                setChipIconResource(R.drawable.ic_filter_first)
+            } else {
+                chipIcon = null
+            }
+            animationHandler.updateChipStyle(this, true)
+        }
     }
 
     private fun observeHistory() {
@@ -256,6 +266,10 @@ class HistoryFragment : Fragment() {
                         CategoryFilter.PLANTS -> allList.filter {
                             val k = it.speciesInfo.kingdom.lowercase()
                             k.contains("plant") || k.contains("thực vật")
+                        }
+                        CategoryFilter.FUNGI -> allList.filter {
+                            val k = it.speciesInfo.kingdom.lowercase()
+                            k.contains("fungi") || k.contains("nấm")
                         }
                     }
 
