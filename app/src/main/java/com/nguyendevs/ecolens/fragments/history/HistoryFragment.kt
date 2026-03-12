@@ -298,7 +298,7 @@ class HistoryFragment : Fragment() {
                     filtered = when (currentSortOption) {
                         HistorySortOption.ALPHABETICAL -> filtered.sortedBy { it.speciesInfo.commonName }
                         HistorySortOption.CONFIDENCE_HIGH -> filtered.sortedByDescending { it.speciesInfo.confidence }
-                        else -> filtered 
+                        else -> filtered
                     }
 
                     val isFiltering = searchQuery.isNotEmpty() || currentCategory != CategoryFilter.ALL || filterStartDate != null
