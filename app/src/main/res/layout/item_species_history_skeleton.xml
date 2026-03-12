@@ -4,7 +4,6 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="120dp"
         android:orientation="vertical"
         android:background="@android:color/transparent">
 
@@ -15,7 +14,7 @@
         <!-- Timeline Line -->
         <View
                 android:layout_width="2dp"
-                android:layout_height="match_parent"
+                android:layout_height="125dp"
                 android:layout_marginStart="6dp"
                 android:background="@color/primary_10"/>
 
@@ -83,7 +82,6 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minHeight="76dp"
                     android:padding="10dp"
                     android:layout_marginStart="20dp"
                     android:layout_marginTop="0dp">
@@ -185,8 +183,6 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginStart="20dp"
-            android:background="@color/border_light"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"/>
+            android:background="@color/border_light"/>
 
 </LinearLayout>
