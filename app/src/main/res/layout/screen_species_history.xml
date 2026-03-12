@@ -101,6 +101,7 @@
             <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:animateLayoutChanges="true"
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
 
@@ -113,7 +114,7 @@
 
                     <com.google.android.material.chip.Chip
                             android:id="@+id/chipAll"
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="40dp"
                             android:text="@string/history_chipAll"
                             android:textColor="@color/white"
@@ -126,32 +127,6 @@
                             app:chipIconTint="@color/white"
                             app:chipIconSize="14dp"
                             app:iconStartPadding="@dimen/spacing_xxs"/>
-
-                    <com.google.android.material.chip.Chip
-                            android:id="@+id/chipAnimals"
-                            android:layout_width="wrap_content"
-                            android:layout_height="40dp"
-                            android:text="@string/history_chipAnimals"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="13sp"
-                            android:textStyle="bold"
-                            app:chipBackgroundColor="@color/surface"
-                            app:chipStrokeWidth="1.5dp"
-                            app:chipStrokeColor="@color/border_light"
-                            app:chipCornerRadius="@dimen/radius_full"/>
-
-                    <com.google.android.material.chip.Chip
-                            android:id="@+id/chipPlants"
-                            android:layout_width="wrap_content"
-                            android:layout_height="40dp"
-                            android:text="@string/history_chipPlants"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="13sp"
-                            android:textStyle="bold"
-                            app:chipBackgroundColor="@color/surface"
-                            app:chipStrokeWidth="1.5dp"
-                            app:chipStrokeColor="@color/border_light"
-                            app:chipCornerRadius="@dimen/radius_full"/>
                 </com.google.android.material.chip.ChipGroup>
 
                 <View
