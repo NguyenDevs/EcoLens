@@ -29,7 +29,8 @@ import java.util.*
 data class HistoryUiModel(
     val entry: HistoryEntry,
     val isFirstOfDay: Boolean,
-    val isLastOfDay: Boolean
+    val isLastOfDay: Boolean,
+    val isPlaceholder: Boolean = false
 )
 
 enum class HistoryViewMode { LIST, GRID }
@@ -156,6 +157,17 @@ class HistoryAdapter(
         RecyclerView.ViewHolder(b.root) {
 
         fun bind(uiModel: HistoryUiModel, click: (HistoryEntry) -> Unit) {
+            if (uiModel.isPlaceholder) {
+                b.root.visibility = View.GONE
+                b.root.layoutParams = RecyclerView.LayoutParams(0, 0)
+                return
+            }
+            b.root.visibility = View.VISIBLE
+            b.root.layoutParams = RecyclerView.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+
             val entry = uiModel.entry
             val dt = Instant.ofEpochMilli(entry.timestamp).atZone(ZoneId.systemDefault())
 
@@ -224,6 +236,13 @@ class HistoryAdapter(
         RecyclerView.ViewHolder(b.root) {
 
         fun bind(uiModel: HistoryUiModel, click: (HistoryEntry) -> Unit) {
+            if (uiModel.isPlaceholder) {
+                b.root.visibility = View.INVISIBLE
+                b.itemContainer.setOnClickListener(null)
+                return
+            }
+            b.root.visibility = View.VISIBLE
+
             val entry = uiModel.entry
             val dt = Instant.ofEpochMilli(entry.timestamp).atZone(ZoneId.systemDefault())
 
