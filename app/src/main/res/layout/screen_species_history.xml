@@ -196,6 +196,7 @@
                     android:textSize="12sp"
                     android:layout_marginStart="8dp"
                     android:textColor="@color/text_tertiary"
+                    android:visibility="gone"
                     tools:text="32 kết quả"
                     xmlns:tools="http://schemas.android.com/tools"/>
 
