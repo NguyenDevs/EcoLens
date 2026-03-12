@@ -61,6 +61,8 @@ class HistoryManager(
         return flow.flowOn(Dispatchers.IO)
     }
 
+    fun getTotalHistoryCount(): Flow<Int> = historyRepository.getTotalHistoryCount()
+
     suspend fun repairMissingImagesOnce() = withContext(Dispatchers.IO) {
         runCatching {
             val entries = collectAllEntries()

@@ -21,6 +21,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -70,6 +71,8 @@ class HistoryRepository(
     suspend fun getHistoryById(id: Int): HistoryEntry? {
         return historyDao.getHistoryById(id)
     }
+
+    fun getTotalHistoryCount(): Flow<Int> = historyDao.getTotalHistoryCount(getUserId())
 
     suspend fun insertLocal(entry: HistoryEntry): Long =
             withContext(Dispatchers.IO) {

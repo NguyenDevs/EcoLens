@@ -113,7 +113,7 @@
                             android:layout_height="wrap_content"
                             tools:text="Cây Hoa Hồng"
                             style="@style/TextAppearance.App.Headline1"
-                            android:textColor="@color/primary_dark"/>
+                            android:textColor="@color/text_primary"/>
 
                     <TextView
                             android:id="@+id/tvScientificName"

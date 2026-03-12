@@ -136,4 +136,7 @@ interface HistoryDao {
     @Query("DELETE FROM history_table") suspend fun deleteAll()
 
     @Query("DELETE FROM history_table WHERE id = :id") suspend fun deleteById(id: Int)
+
+    @Query("SELECT COUNT(*) FROM history_table WHERE userId = :userId")
+    fun getTotalHistoryCount(userId: String): Flow<Int>
 }

@@ -83,9 +83,18 @@ class HistoryFragment : Fragment() {
         applyViewMode(currentViewMode)
         currentLimit = pageSize
         observeHistory()
+        observeTotalCount()
         updateSortUI()
         updateCategoryChipsUI(currentCategory)
         observeLoadingState()
+    }
+
+    private fun observeTotalCount() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.totalHistoryCount.collect { count ->
+                binding.tvSpeciesCount.text = getString(R.string.history_total_species_count, count)
+            }
+        }
     }
 
     private fun observeLoadingState() {
@@ -289,9 +298,8 @@ class HistoryFragment : Fragment() {
 
                     val isFiltering = searchQuery.isNotEmpty() || currentCategory != CategoryFilter.ALL || filterStartDate != null
                     
-                    binding.tvResultCount.visibility = if (isFiltering) View.VISIBLE else View.GONE
+                    binding.tvResultCount.visibility = if (isFiltering) View.VISIBLE else View.INVISIBLE
                     binding.tvResultCount.text = getString(R.string.history_results_count, filtered.size)
-                    binding.tvSpeciesCount.text = getString(R.string.history_total_species_count, allList.size)
 
                     if (filtered.size < pageSize && allList.size >= currentLimit) {
                         currentLimit += pageSize
