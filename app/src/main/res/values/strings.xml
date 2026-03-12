@@ -132,15 +132,21 @@
     <string name="lists">DANH SÁCH</string>
 
     <!-- Lọc theo loại -->
-    <string name="history_chipAnimals">Động vật</string>
-    <string name="history_chipPlants">Thực vật</string>
+    <string name="history_chipAnimals">🐾 Động vật</string>
+    <string name="history_chipPlants">🌿 Thực vật</string>
+    <string name="history_chipFungi">🍄 Nấm</string>
     <string name="history_chipAll">Tất cả</string>
 
     <!-- ==================== SẮP XẾP & LỌC ==================== -->
     <string name="sort_by">Sắp xếp theo</string>
-    <string name="sort_newest_first">Ngày mới nhất</string>
-    <string name="sort_oldest_first">Ngày cũ nhất</string>
+    <string name="sort_newest_first">Mới nhất</string>
+    <string name="sort_oldest_first">Cũ nhất</string>
+    <string name="sort_az">Tên A → Z</string>
+    <string name="sort_confidence">Độ chính xác</string>
     <string name="sort">Sắp xếp</string>
+    <string name="history_total_species_count">%d loài đã lưu</string>
+    <string name="history_results_count">%d kết quả</string>
+    <string name="history_syncing">Đang đồng bộ…</string>
     <string name="filter_by_date">Lọc theo ngày</string>
     <string name="select_start_date">Chọn ngày bắt đầu</string>
     <string name="select_end_date">Chọn ngày kết thúc</string>

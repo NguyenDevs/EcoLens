@@ -43,6 +43,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     val chatMessages: StateFlow<List<ChatMessage>> = chatManager.chatMessages
     val isStreamingActive: StateFlow<Boolean> = chatManager.isStreamingActive
     val allChatSessions: Flow<List<ChatSession>> = chatManager.allChatSessions
+    val totalHistoryCount: Flow<Int> = historyManager.getTotalHistoryCount()
 
     private var lastLanguageCode: String = "en"
     private var lastLat: Double = 16.0544

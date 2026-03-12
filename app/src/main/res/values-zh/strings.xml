@@ -131,15 +131,21 @@
     <string name="lists">历史记录</string>
 
     <!-- 按类型筛选 -->
-    <string name="history_chipAnimals">动物</string>
-    <string name="history_chipPlants">植物</string>
+    <string name="history_chipAnimals">🐾 动物</string>
+    <string name="history_chipPlants">🌿 植物</string>
+    <string name="history_chipFungi">🍄 真菌</string>
     <string name="history_chipAll">全部</string>
 
     <!-- ==================== 排序和筛选 ==================== -->
     <string name="sort_by">排序方式</string>
-    <string name="sort_newest_first">最新优先</string>
-    <string name="sort_oldest_first">最旧优先</string>
+    <string name="sort_newest_first">最新</string>
+    <string name="sort_oldest_first">最旧</string>
+    <string name="sort_az">名称 A-Z</string>
+    <string name="sort_confidence">置信度</string>
     <string name="sort">排序</string>
+    <string name="history_total_species_count">已保存 %d 个物种</string>
+    <string name="history_results_count">%d 个结果</string>
+    <string name="history_syncing">同步中…</string>
     <string name="filter_by_date">按日期筛选</string>
     <string name="select_start_date">选择开始日期</string>
     <string name="select_end_date">选择结束日期</string>

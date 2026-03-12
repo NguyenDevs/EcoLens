@@ -131,15 +131,21 @@
     <string name="lists">履歴</string>
 
     <!-- タイプでフィルタリング -->
-    <string name="history_chipAnimals">動物</string>
-    <string name="history_chipPlants">植物</string>
+    <string name="history_chipAnimals">🐾 動物</string>
+    <string name="history_chipPlants">🌿 植物</string>
+    <string name="history_chipFungi">🍄 菌類</string>
     <string name="history_chipAll">すべて</string>
 
     <!-- ==================== 並べ替えとフィルター ==================== -->
     <string name="sort_by">並べ替え</string>
-    <string name="sort_newest_first">新しい順</string>
-    <string name="sort_oldest_first">古い順</string>
+    <string name="sort_newest_first">最新</string>
+    <string name="sort_oldest_first">最古</string>
+    <string name="sort_az">名前 A-Z</string>
+    <string name="sort_confidence">信頼度</string>
     <string name="sort">並べ替え</string>
+    <string name="history_total_species_count">保存された%d種</string>
+    <string name="history_results_count">%d件の結果</string>
+    <string name="history_syncing">同期中…</string>
     <string name="filter_by_date">日付でフィルター</string>
     <string name="select_start_date">開始日を選択</string>
     <string name="select_end_date">終了日を選択</string>

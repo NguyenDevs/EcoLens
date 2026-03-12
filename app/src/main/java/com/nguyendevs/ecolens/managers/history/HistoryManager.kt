@@ -40,6 +40,10 @@ class HistoryManager(
                     historyRepository.getHistoryByDateRangeNewest(startDate, endDate, limit)
                 HistorySortOption.OLDEST_FIRST ->
                     historyRepository.getHistoryByDateRangeOldest(startDate, endDate, limit)
+                HistorySortOption.ALPHABETICAL ->
+                    historyRepository.getHistoryByDateRangeAlphabetical(startDate, endDate, limit)
+                HistorySortOption.CONFIDENCE_HIGH ->
+                    historyRepository.getHistoryByDateRangeConfidenceHigh(startDate, endDate, limit)
             }
         } else {
             when (sortOption) {
@@ -47,11 +51,17 @@ class HistoryManager(
                     historyRepository.getHistoryNewestFirst(limit)
                 HistorySortOption.OLDEST_FIRST ->
                     historyRepository.getHistoryOldestFirst(limit)
+                HistorySortOption.ALPHABETICAL ->
+                    historyRepository.getHistoryAlphabetical(limit)
+                HistorySortOption.CONFIDENCE_HIGH ->
+                    historyRepository.getHistoryConfidenceHigh(limit)
             }
         }
 
         return flow.flowOn(Dispatchers.IO)
     }
+
+    fun getTotalHistoryCount(): Flow<Int> = historyRepository.getTotalHistoryCount()
 
     suspend fun repairMissingImagesOnce() = withContext(Dispatchers.IO) {
         runCatching {

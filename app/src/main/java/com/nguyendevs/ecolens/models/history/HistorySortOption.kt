@@ -5,5 +5,7 @@ package com.nguyendevs.ecolens.models.history
  */
 enum class HistorySortOption {
     NEWEST_FIRST,
-    OLDEST_FIRST
+    OLDEST_FIRST,
+    ALPHABETICAL,
+    CONFIDENCE_HIGH
 }

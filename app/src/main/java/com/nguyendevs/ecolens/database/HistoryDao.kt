@@ -32,6 +32,12 @@ interface HistoryDao {
     @Query("SELECT * FROM history_table WHERE userId = :userId ORDER BY timestamp ASC")
     fun getAllHistoryOldestFirst(userId: String): Flow<List<HistoryEntry>>
 
+    @Query("SELECT * FROM history_table WHERE userId = :userId ORDER BY commonName ASC LIMIT :limit")
+    fun getHistoryAlphabetical(userId: String, limit: Int): Flow<List<HistoryEntry>>
+
+    @Query("SELECT * FROM history_table WHERE userId = :userId ORDER BY confidence DESC LIMIT :limit")
+    fun getHistoryConfidenceHigh(userId: String, limit: Int): Flow<List<HistoryEntry>>
+
     @Query("SELECT * FROM history_table WHERE id = :id LIMIT 1")
     suspend fun getHistoryById(id: Int): HistoryEntry?
 
@@ -55,6 +61,26 @@ interface HistoryDao {
             "SELECT * FROM history_table WHERE userId = :userId AND timestamp BETWEEN :startDate AND :endDate ORDER BY timestamp ASC LIMIT :limit"
     )
     fun getHistoryByDateRangeOldest(
+            userId: String,
+            startDate: Long,
+            endDate: Long,
+            limit: Int
+    ): Flow<List<HistoryEntry>>
+
+    @Query(
+            "SELECT * FROM history_table WHERE userId = :userId AND timestamp BETWEEN :startDate AND :endDate ORDER BY commonName ASC LIMIT :limit"
+    )
+    fun getHistoryByDateRangeAlphabetical(
+            userId: String,
+            startDate: Long,
+            endDate: Long,
+            limit: Int
+    ): Flow<List<HistoryEntry>>
+
+    @Query(
+            "SELECT * FROM history_table WHERE userId = :userId AND timestamp BETWEEN :startDate AND :endDate ORDER BY confidence DESC LIMIT :limit"
+    )
+    fun getHistoryByDateRangeConfidenceHigh(
             userId: String,
             startDate: Long,
             endDate: Long,
@@ -110,4 +136,7 @@ interface HistoryDao {
     @Query("DELETE FROM history_table") suspend fun deleteAll()
 
     @Query("DELETE FROM history_table WHERE id = :id") suspend fun deleteById(id: Int)
+
+    @Query("SELECT COUNT(*) FROM history_table WHERE userId = :userId")
+    fun getTotalHistoryCount(userId: String): Flow<Int>
 }

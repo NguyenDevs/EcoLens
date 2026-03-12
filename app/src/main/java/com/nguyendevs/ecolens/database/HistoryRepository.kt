@@ -21,6 +21,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -55,9 +56,23 @@ class HistoryRepository(
     fun getHistoryByDateRangeOldest(startDate: Long, endDate: Long, limit: Int) =
             historyDao.getHistoryByDateRangeOldest(getUserId(), startDate, endDate, limit)
 
+    fun getHistoryAlphabetical(limit: Int) =
+            historyDao.getHistoryAlphabetical(getUserId(), limit)
+
+    fun getHistoryConfidenceHigh(limit: Int) =
+            historyDao.getHistoryConfidenceHigh(getUserId(), limit)
+
+    fun getHistoryByDateRangeAlphabetical(startDate: Long, endDate: Long, limit: Int) =
+            historyDao.getHistoryByDateRangeAlphabetical(getUserId(), startDate, endDate, limit)
+
+    fun getHistoryByDateRangeConfidenceHigh(startDate: Long, endDate: Long, limit: Int) =
+            historyDao.getHistoryByDateRangeConfidenceHigh(getUserId(), startDate, endDate, limit)
+
     suspend fun getHistoryById(id: Int): HistoryEntry? {
         return historyDao.getHistoryById(id)
     }
+
+    fun getTotalHistoryCount(): Flow<Int> = historyDao.getTotalHistoryCount(getUserId())
 
     suspend fun insertLocal(entry: HistoryEntry): Long =
             withContext(Dispatchers.IO) {

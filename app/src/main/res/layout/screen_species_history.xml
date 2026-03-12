@@ -3,192 +3,246 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
         android:animateLayoutChanges="true"
+        android:layout_height="match_parent"
         android:orientation="vertical"
         android:background="@color/background">
 
-    <!-- ==================== HEADER ==================== -->
     <LinearLayout
+            android:id="@+id/stickyHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="@dimen/spacing_xxxs">
+            android:elevation="0dp">
 
-        <!-- Title Row with Search -->
         <LinearLayout
+                android:id="@+id/titleRow"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
+                android:orientation="horizontal"
                 android:paddingHorizontal="@dimen/padding_screen_horizontal"
-                android:paddingTop="@dimen/spacing_md">
+                android:paddingTop="@dimen/spacing_md"
+                android:gravity="center_vertical">
 
             <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/spacing_lg"
+                    android:layout_weight="1"
                     android:text="@string/history_title_label"
                     android:textColor="@color/primary"
                     android:textSize="30sp"
                     android:textStyle="bold"
                     android:letterSpacing="-0.02"/>
 
+            <TextView
+                    android:id="@+id/tvSpeciesCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="13sp"
+                    android:textColor="@color/text_tertiary"
+                    android:textStyle="bold"
+                    tools:text="32 loài"
+                    xmlns:tools="http://schemas.android.com/tools"/>
         </LinearLayout>
 
-        <!-- Divider -->
-        <View
+        <FrameLayout
                 android:layout_width="match_parent"
-                android:background="@color/border_normal"
-                android:layout_marginStart="@dimen/padding_screen_horizontal"
-                android:layout_marginEnd="@dimen/padding_screen_horizontal"
-                android:layout_marginBottom="@dimen/spacing_md"
-                android:layout_height="1dp"/>
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="@dimen/padding_screen_horizontal"
+                android:paddingTop="12dp">
 
-        <!-- Filter Chips -->
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:background="@drawable/bg_search_bar"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="14dp">
+
+                <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_search"
+                        app:tint="@color/text_tertiary"/>
+
+                <EditText
+                        android:id="@+id/etSearch"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:layout_marginHorizontal="8dp"
+                        android:background="@android:color/transparent"
+                        android:textColorHint="@color/text_tertiary"
+                        android:textColor="@color/text_primary"
+                        android:textSize="14sp"
+                        android:imeOptions="actionSearch"
+                        android:inputType="text"
+                        android:singleLine="true"/>
+
+                <ImageView
+                        android:id="@+id/ivSearchClear"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_close"
+                        app:tint="@color/text_tertiary"
+                        android:visibility="gone"
+                        android:padding="2dp"/>
+            </LinearLayout>
+        </FrameLayout>
+
         <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:scrollbars="none"
                 android:paddingHorizontal="@dimen/padding_screen_horizontal"
+                android:paddingTop="10dp"
                 android:clipToPadding="false">
 
             <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:animateLayoutChanges="true"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
-                <!-- Category Filter Group -->
                 <com.google.android.material.chip.ChipGroup
-                        android:id="@+id/chipGroupFilters"
+                        android:id="@+id/chipGroupCategory"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         app:singleSelection="true"
-                        app:chipSpacingHorizontal="@dimen/spacing_xs">
+                        app:chipSpacingHorizontal="6dp">
 
-                    <!-- All Chip -->
                     <com.google.android.material.chip.Chip
                             android:id="@+id/chipAll"
-                            android:layout_width="wrap_content"
-                            android:layout_height="45dp"
+                            android:layout_width="match_parent"
+                            android:layout_height="40dp"
                             android:text="@string/history_chipAll"
                             android:textColor="@color/white"
-                            android:textSize="@dimen/text_body_small"
+                            android:textSize="13sp"
                             android:textStyle="bold"
                             app:chipBackgroundColor="@color/primary"
                             app:chipStrokeWidth="0dp"
                             app:chipCornerRadius="@dimen/radius_full"
                             app:chipIcon="@drawable/ic_filter_first"
                             app:chipIconTint="@color/white"
-                            app:chipIconSize="16dp"
-                            app:chipStrokeColor="@color/border_normal"
+                            app:chipIconSize="14dp"
                             app:iconStartPadding="@dimen/spacing_xxs"/>
-
-                    <!-- Animals Chip -->
-                    <com.google.android.material.chip.Chip
-                            android:id="@+id/chipAnimals"
-                            android:layout_width="wrap_content"
-                            android:layout_height="45dp"
-                            android:text="@string/history_chipAnimals"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="@dimen/text_body_small"
-                            android:textStyle="bold"
-                            app:chipBackgroundColor="@color/surface"
-                            app:chipStrokeWidth="1dp"
-                            app:chipStrokeColor="@color/border_light"
-                            app:chipCornerRadius="@dimen/radius_full"/>
-
-                    <!-- Plants Chip -->
-                    <com.google.android.material.chip.Chip
-                            android:id="@+id/chipPlants"
-                            android:layout_width="wrap_content"
-                            android:layout_height="45dp"
-                            android:text="@string/history_chipPlants"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="@dimen/text_body_small"
-                            android:textStyle="bold"
-                            app:chipBackgroundColor="@color/surface"
-                            app:chipStrokeWidth="1dp"
-                            app:chipStrokeColor="@color/border_light"
-                            app:chipCornerRadius="@dimen/radius_full"/>
                 </com.google.android.material.chip.ChipGroup>
 
-                <!-- Divider -->
                 <View
                         android:layout_width="1dp"
-                        android:layout_height="match_parent"
-                        android:layout_marginHorizontal="@dimen/spacing_sm"
+                        android:layout_height="24dp"
+                        android:layout_marginHorizontal="10dp"
                         android:background="@color/border_normal"/>
 
-                <!-- Sort & Filter Actions -->
-                <LinearLayout
+                <com.google.android.material.chip.Chip
+                        android:id="@+id/btnFilterByDate"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:animateLayoutChanges="true"
-                        android:orientation="horizontal">
-
-                    <!-- Sort Chip -->
-                    <com.google.android.material.chip.Chip
-                            android:id="@+id/btnSort"
-                            android:layout_width="wrap_content"
-                            android:layout_height="45dp"
-                            android:text="@string/sort_newest_first"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="@dimen/text_body_small"
-                            android:textStyle="bold"
-                            app:chipBackgroundColor="@color/surface"
-                            app:chipStrokeWidth="1dp"
-                            app:chipStrokeColor="@color/border_light"
-                            app:chipCornerRadius="@dimen/radius_full"
-                            app:chipIcon="@drawable/ic_sort"
-                            app:chipIconTint="@color/text_secondary"
-                            app:chipIconSize="16dp"
-                            app:iconStartPadding="@dimen/spacing_xxs"/>
-
-                    <!-- Date Filter Chip -->
-                    <com.google.android.material.chip.Chip
-                            android:id="@+id/btnFilterByDate"
-                            android:layout_width="wrap_content"
-                            android:layout_height="45dp"
-                            android:layout_marginStart="@dimen/spacing_xs"
-                            android:text="@string/select_date"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="@dimen/text_body_small"
-                            android:textStyle="bold"
-                            app:chipBackgroundColor="@color/surface"
-                            app:chipStrokeWidth="1dp"
-                            app:chipStrokeColor="@color/border_light"
-                            app:chipCornerRadius="@dimen/radius_full"
-                            app:chipIcon="@drawable/ic_calendar"
-                            app:chipIconTint="@color/text_secondary"
-                            app:chipIconSize="16dp"
-                            app:iconStartPadding="@dimen/spacing_xxs"
-                            app:closeIcon="@drawable/ic_close"
-                            app:closeIconVisible="false"
-                            app:closeIconTint="@color/error"/>
-
-                </LinearLayout>
+                        android:layout_height="40dp"
+                        android:text="@string/select_date"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        app:chipBackgroundColor="@color/surface"
+                        app:chipStrokeWidth="1.5dp"
+                        app:chipStrokeColor="@color/border_light"
+                        app:chipCornerRadius="@dimen/radius_full"
+                        app:chipIcon="@drawable/ic_calendar"
+                        app:chipIconTint="@color/text_secondary"
+                        app:chipIconSize="14dp"
+                        app:iconStartPadding="@dimen/spacing_xxs"
+                        app:closeIcon="@drawable/ic_close"
+                        app:closeIconVisible="false"
+                        app:closeIconTint="@color/error"/>
             </LinearLayout>
         </HorizontalScrollView>
 
-        <!-- Divider -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:animateLayoutChanges="true"
+                android:paddingHorizontal="@dimen/padding_screen_horizontal"
+                android:paddingTop="6dp"
+                android:gravity="center_vertical">
+
+
+            <ImageButton
+                    android:id="@+id/btnViewList"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/bg_view_toggle"
+                    android:src="@drawable/ic_view_list"
+                    app:tint="@color/text_tertiary"
+                    android:scaleType="center"
+                    android:padding="7dp"/>
+
+            <ImageButton
+                    android:id="@+id/btnViewGrid"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="4dp"
+                    android:background="@drawable/bg_view_toggle_active"
+                    android:src="@drawable/ic_view_grid"
+                    app:tint="@color/white"
+                    android:scaleType="center"
+                    android:padding="7dp"/>
+
+            <TextView
+                    android:id="@+id/tvResultCount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="12sp"
+                    android:layout_marginStart="8dp"
+                    android:textColor="@color/text_tertiary"
+                    android:visibility="invisible"
+                    tools:text="32 kết quả"
+                    xmlns:tools="http://schemas.android.com/tools"/>
+
+            <LinearLayout
+                    android:id="@+id/btnSort"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp"
+                    android:background="@drawable/bg_sort_btn">
+
+                <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_sort"
+                        app:tint="@color/primary"/>
+
+                <TextView
+                        android:id="@+id/tvSortLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="@string/sort_newest_first"
+                        android:textSize="15sp"
+                        android:textColor="@color/primary"
+                        android:textStyle="bold"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <Space android:layout_width="match_parent" android:layout_height="10dp"/>
+
         <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="@color/border_normal"
-                android:layout_marginStart="@dimen/padding_screen_horizontal"
-                android:layout_marginEnd="@dimen/padding_screen_horizontal"
-                android:layout_marginTop="@dimen/spacing_md"/>
-
+                android:layout_marginHorizontal="@dimen/padding_screen_horizontal"
+                android:background="@color/border_normal"/>
     </LinearLayout>
 
-    <!-- ==================== CONTENT ==================== -->
     <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1">
 
-        <!-- SHIMMER LOADING -->
         <com.facebook.shimmer.ShimmerFrameLayout
                 android:id="@+id/shimmerViewContainer"
                 android:layout_width="match_parent"
@@ -200,11 +254,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingStart="@dimen/padding_screen_horizontal"
-                    android:paddingEnd="@dimen/padding_screen_horizontal">
+                    android:paddingHorizontal="@dimen/padding_screen_horizontal">
 
-                <include layout="@layout/item_species_history_skeleton"/>
-                <include layout="@layout/item_species_history_skeleton"/>
                 <include layout="@layout/item_species_history_skeleton"/>
                 <include layout="@layout/item_species_history_skeleton"/>
                 <include layout="@layout/item_species_history_skeleton"/>
@@ -213,20 +264,17 @@
             </LinearLayout>
         </com.facebook.shimmer.ShimmerFrameLayout>
 
-        <!-- HISTORY LIST -->
         <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvHistory"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingStart="@dimen/padding_screen_horizontal"
-                android:paddingEnd="@dimen/padding_screen_horizontal"
+                android:paddingHorizontal="@dimen/padding_screen_horizontal"
                 android:paddingBottom="84dp"
                 android:clipToPadding="false"
                 android:scrollbars="none"
                 android:overScrollMode="ifContentScrolls"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
-        <!-- EMPTY STATE -->
         <LinearLayout
                 android:id="@+id/emptyStateContainer"
                 android:layout_width="wrap_content"
@@ -234,21 +282,22 @@
                 android:layout_gravity="center"
                 android:orientation="vertical"
                 android:gravity="center_horizontal"
-                android:padding="@dimen/spacing_xl">
+                android:padding="@dimen/spacing_xl"
+                android:visibility="gone">
 
             <ImageView
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
                     android:src="@drawable/ic_history"
                     android:alpha="0.3"
-                    app:tint="@color/text_secondary"
-                    android:contentDescription="@string/history_empty"/>
+                    app:tint="@color/text_secondary"/>
 
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/history_empty"
-                    style="@style/TextAppearance.App.Headline3"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
                     android:textColor="@color/text_secondary"
                     android:layout_marginTop="@dimen/spacing_md"/>
 
@@ -256,10 +305,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/history_subtitle"
-                    style="@style/TextAppearance.App.Body2"
+                    android:textSize="13sp"
                     android:textColor="@color/text_tertiary"
                     android:layout_marginTop="@dimen/spacing_xs"
-                    android:textAlignment="center"/>
+                    android:textAlignment="center"
+                    android:lineSpacingMultiplier="1.5"/>
         </LinearLayout>
     </FrameLayout>
 
