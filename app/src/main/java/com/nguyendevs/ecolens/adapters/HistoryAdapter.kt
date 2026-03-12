@@ -47,7 +47,8 @@ class HistoryAdapter(
 
     private val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.getDefault())
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault())
-    private var isLoading = false
+    var isLoading = false
+        private set
     private var lastPosition = -1
     var viewMode: HistoryViewMode = HistoryViewMode.LIST
         set(value) {
@@ -57,6 +58,11 @@ class HistoryAdapter(
 
     init {
         setHasStableIds(true)
+    }
+
+    fun isDateHeader(position: Int): Boolean {
+        if (position >= currentList.size) return false
+        return currentList[position].isFirstOfDay
     }
 
     override fun getItemId(position: Int): Long {
@@ -231,17 +237,30 @@ class HistoryAdapter(
             b.tvHistoryTime.text = timeFormatter.format(dt)
             b.tvConfidence.text = "${entry.speciesInfo.confidence.toInt()}%"
 
-            if (uiModel.isFirstOfDay) {
-                b.tvDateHeader.visibility = View.VISIBLE
-                b.tvDateHeader.text = dateFormatter.format(dt).uppercase()
-            } else {
-                b.tvDateHeader.visibility = View.GONE
-            }
-
+            setupDateHeader(uiModel.isFirstOfDay, dt)
             setupConfidenceBadge(entry)
             loadImage(entry, b.ivHistoryImage)
 
             b.itemContainer.setOnClickListener { click(entry) }
+        }
+
+        private fun setupDateHeader(isFirst: Boolean, dt: java.time.ZonedDateTime) {
+            b.dateHeaderContainer.visibility = if (isFirst) View.VISIBLE else View.GONE
+            if (isFirst) {
+                b.tvDateHeader.text = when {
+                    isToday(dt) -> b.root.context.getString(R.string.today).uppercase()
+                    isYesterday(dt) -> b.root.context.getString(R.string.yesterday).uppercase()
+                    else -> dateFormatter.format(dt).uppercase()
+                }
+            }
+        }
+
+        private fun isToday(dt: java.time.ZonedDateTime): Boolean {
+            return dt.toLocalDate() == java.time.LocalDate.now()
+        }
+
+        private fun isYesterday(dt: java.time.ZonedDateTime): Boolean {
+            return dt.toLocalDate() == java.time.LocalDate.now().minusDays(1)
         }
 
         private fun setupConfidenceBadge(entry: HistoryEntry) {
@@ -270,7 +289,7 @@ class HistoryAdapter(
             }
             k.contains("fungi") || k.contains("nấm") -> {
                 tv.setBackgroundResource(R.drawable.bg_badge_fungi)
-                tv.setTextColor(0xFF7E22CE.toInt()) // purple-700
+                tv.setTextColor(0xFF7E22CE.toInt())
                 tv.text = tv.context.getString(R.string.history_chipFungi)
             }
             else -> {
