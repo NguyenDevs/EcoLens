@@ -138,8 +138,8 @@
 
     <!-- ==================== SẮP XẾP & LỌC ==================== -->
     <string name="sort_by">Sắp xếp theo</string>
-    <string name="sort_newest_first">Ngày mới nhất</string>
-    <string name="sort_oldest_first">Ngày cũ nhất</string>
+    <string name="sort_newest_first">Mới nhất</string>
+    <string name="sort_oldest_first">Cũ nhất</string>
     <string name="sort">Sắp xếp</string>
     <string name="filter_by_date">Lọc theo ngày</string>
     <string name="select_start_date">Chọn ngày bắt đầu</string>

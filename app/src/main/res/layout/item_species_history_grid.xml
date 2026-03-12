@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@android:color/transparent">
+
+    <TextView
+            android:id="@+id/tvDateHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="14dp"
+            android:paddingBottom="2dp"
+            android:textSize="12sp"
+            android:textColor="@color/text_secondary"
+            android:textStyle="bold"
+            android:letterSpacing="0.06"
+            android:textAllCaps="true"
+            android:visibility="gone"
+            tools:text="HÔM NAY"
+            tools:visibility="visible"/>
+
+    <androidx.cardview.widget.CardView
+            android:id="@+id/itemContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="@color/surface"
+            android:foreground="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true">
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+            <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="0"
+                    android:paddingBottom="0dp">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivHistoryImage"
+                        android:layout_width="match_parent"
+                        android:layout_height="130dp"
+                        android:scaleType="centerCrop"
+                        app:shapeAppearanceOverlay="@style/ShapeAppearance.App.GridImageTop"
+                        android:src="@mipmap/ic_launcher"/>
+
+                <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/badgeSuccess"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="bottom|end"
+                        android:layout_margin="6dp"
+                        app:cardBackgroundColor="@color/primary"
+                        app:cardElevation="2dp"
+                        app:cardCornerRadius="@dimen/radius_full">
+
+                    <ImageView
+                            android:id="@+id/ivBadgeIcon"
+                            android:layout_width="11dp"
+                            android:layout_height="11dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_check_circle"
+                            app:tint="@color/white"/>
+                </com.google.android.material.card.MaterialCardView>
+            </FrameLayout>
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                <TextView
+                        android:id="@+id/tvHistoryCommonName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textSize="13sp"
+                        android:textColor="@color/text_primary"
+                        android:textStyle="bold"
+                        tools:text="Sóc đỏ"/>
+
+                <TextView
+                        android:id="@+id/tvHistoryScientificName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="1dp"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textSize="11sp"
+                        android:textColor="@color/text_tertiary"
+                        android:fontFamily="serif"
+                        android:textStyle="italic"
+                        tools:text="Sciurus vulgaris"/>
+
+                <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="4dp">
+
+                    <TextView
+                            android:id="@+id/tvConfidence"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/primary"
+                            tools:text="97%"/>
+
+                    <TextView
+                            android:id="@+id/tvHistoryTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="10sp"
+                            android:textColor="@color/text_tertiary"
+                            tools:text="08:32"/>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+</LinearLayout>

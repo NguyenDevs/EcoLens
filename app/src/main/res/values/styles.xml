@@ -307,4 +307,13 @@
         <item name="cornerSize">16dp</item>
     </style>
 
+    <!-- Grid card image - bo góc trên, vuông góc dưới -->
+    <style name="ShapeAppearance.App.GridImageTop" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">@dimen/radius_md</item>
+        <item name="cornerSizeTopRight">@dimen/radius_md</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
 </resources>

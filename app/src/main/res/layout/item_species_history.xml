@@ -8,134 +8,153 @@
         android:orientation="vertical"
         android:background="@android:color/transparent">
 
-    <!-- DATE HEADER -->
     <TextView
             android:id="@+id/tvDateHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="@dimen/spacing_xxs"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:text="Hôm nay, 22/01/2026"
-            android:textSize="10sp"
-            android:textColor="@color/text_tertiary"
+            android:paddingHorizontal="4dp"
+            android:paddingTop="20dp"
+            android:paddingBottom="12dp"
+            android:textSize="12sp"
+            android:textColor="@color/text_secondary"
             android:textStyle="bold"
-            android:letterSpacing="0.15"
+            android:letterSpacing="0.06"
             android:textAllCaps="true"
+            android:drawableStart="@drawable/ic_dot_filled"
+            android:drawablePadding="10dp"
+            android:drawableTint="@color/primary_light"
             android:visibility="gone"
+            tools:text="HÔM NAY"
             tools:visibility="visible"/>
 
-    <!-- DIVIDER -->
     <View
             android:id="@+id/divider"
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_marginStart="@dimen/spacing_xxs"
-            android:layout_marginEnd="@dimen/spacing_xxs"
+            android:layout_marginHorizontal="4dp"
             android:background="@color/border_light"
             android:visibility="gone"/>
 
-    <!-- ITEM CARD -->
     <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/itemContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:clickable="true"
             android:focusable="true"
-            android:padding="10dp">
+            android:padding="10dp"
+            android:layout_marginStart="18dp"
+            android:layout_marginTop="0dp">
 
-        <!-- Avatar with Badge -->
-        <FrameLayout
-                android:id="@+id/avatarContainer"
-                android:layout_width="54dp"
-                android:layout_height="54dp"
+        <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivHistoryImage"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:scaleType="centerCrop"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.SmallComponent"
+                app:strokeWidth="1.5dp"
+                app:strokeColor="@color/primary_20"
+                android:src="@mipmap/ic_launcher"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent">
+                app:layout_constraintBottom_toBottomOf="parent"/>
 
-            <!-- IMAGE -->
-            <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/ivHistoryImage"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="fitCenter"
-                    android:padding="2dp"
-                    app:shapeAppearanceOverlay="@style/ShapeAppearance.App.SmallComponent"
-                    app:strokeWidth="1.5dp"
-                    app:strokeColor="@color/primary_20"
-                    android:src="@mipmap/ic_launcher"/>
-
-            <!-- Success Badge -->
-            <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/badgeSuccess"
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:layout_gravity="bottom|end"
-                    android:layout_marginEnd="2dp"
-                    android:layout_marginBottom="2dp"
-                    app:cardBackgroundColor="@color/primary"
-                    app:cardElevation="0dp"
-                    app:cardCornerRadius="@dimen/radius_full">
-
-                <ImageView
-                        android:id="@+id/ivBadgeIcon"
-                        android:layout_width="10dp"
-                        android:layout_height="10dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_check_circle"
-                        app:tint="@color/white"/>
-            </com.google.android.material.card.MaterialCardView>
-        </FrameLayout>
-
-        <!-- INFO SECTION -->
         <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/spacing_md"
-                android:layout_marginEnd="@dimen/spacing_xs"
                 android:orientation="vertical"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/tvHistoryTime"
-                app:layout_constraintStart_toEndOf="@+id/avatarContainer"
-                app:layout_constraintTop_toTopOf="parent">
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="8dp"
+                app:layout_constraintStart_toEndOf="@id/ivHistoryImage"
+                app:layout_constraintEnd_toStartOf="@id/tvHistoryTime"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent">
 
             <TextView
                     android:id="@+id/tvHistoryCommonName"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:text="@string/label_common_name"
-                    android:textSize="16sp"
+                    android:textSize="14sp"
                     android:textColor="@color/text_primary"
                     android:textStyle="bold"
-                    android:fontFamily="sans-serif-medium"/>
+                    tools:text="Sóc đỏ"/>
 
             <TextView
                     android:id="@+id/tvHistoryScientificName"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:text="@string/label_scientific_name"
-                    android:textSize="13sp"
-                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_tertiary"
                     android:fontFamily="serif"
-                    android:textStyle="italic"/>
+                    android:textStyle="italic"
+                    tools:text="Sciurus vulgaris"/>
+
+            <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="5dp">
+
+                <TextView
+                        android:id="@+id/tvCategoryBadge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="8dp"
+                        android:paddingVertical="2dp"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:background="@drawable/bg_badge_animal"
+                        tools:text="Động vật"/>
+
+                <TextView
+                        android:id="@+id/tvConfidence"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary"
+                        tools:text="97%"/>
+            </LinearLayout>
         </LinearLayout>
 
-        <!-- Time -->
         <TextView
                 android:id="@+id/tvHistoryTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="10:09"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 android:textColor="@color/text_tertiary"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"/>
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="08:32"/>
+
+        <com.google.android.material.card.MaterialCardView
+                android:id="@+id/badgeSuccess"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="2dp"
+                android:layout_marginBottom="2dp"
+                app:cardBackgroundColor="@color/primary"
+                app:cardElevation="0dp"
+                app:cardCornerRadius="@dimen/radius_full"
+                app:layout_constraintStart_toStartOf="@id/ivHistoryImage"
+                app:layout_constraintBottom_toBottomOf="@id/ivHistoryImage"
+                app:layout_constraintEnd_toEndOf="@id/ivHistoryImage"
+                app:layout_constraintHorizontal_bias="1.0">
+
+            <ImageView
+                    android:id="@+id/ivBadgeIcon"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_check_circle"
+                    app:tint="@color/white"/>
+        </com.google.android.material.card.MaterialCardView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

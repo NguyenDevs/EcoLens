@@ -185,4 +185,6 @@
     <color name="gray_light">@color/state_disabled</color>
     <color name="gray_light_f8">@color/surface_variant</color>
 
+    <color name="badge_animal_text">#92400E</color>
+    <color name="badge_plant_text">#065F46</color>
 </resources>
