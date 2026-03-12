@@ -217,6 +217,7 @@ class HistoryFragment : Fragment() {
     }
 
     private fun applyViewMode(mode: HistoryViewMode) {
+        val previousMode = adapter.viewMode
         adapter.viewMode = mode
         if (mode == HistoryViewMode.GRID) {
             binding.rvHistory.layoutManager = GridLayoutManager(requireContext(), 2).apply {
@@ -238,6 +239,10 @@ class HistoryFragment : Fragment() {
             binding.btnViewGrid.setBackgroundResource(R.drawable.bg_view_toggle)
             binding.btnViewGrid.setColorFilter(ContextCompat.getColor(requireContext(), R.color.text_tertiary))
         }
+        
+        if (previousMode != mode) {
+            observeHistory()
+        }
     }
 
     private fun updateCategoryFilter(category: CategoryFilter) {
@@ -257,7 +262,6 @@ class HistoryFragment : Fragment() {
         
         binding.chipAll.apply {
             text = getString(textRes)
-            // Use ic_filter_first for All, and null for others (using emojis in text)
             if (selected == CategoryFilter.ALL) {
                 setChipIconResource(R.drawable.ic_filter_first)
             } else {
@@ -321,11 +325,27 @@ class HistoryFragment : Fragment() {
                         hasMoreData = allList.size >= currentLimit
 
                         val uiModels = withContext(Dispatchers.Default) {
-                            filtered.mapIndexed { index, entry ->
-                                val isFirst = index == 0 || !isSameDay(entry.timestamp, filtered[index - 1].timestamp)
-                                val isLast = index == filtered.size - 1 || !isSameDay(entry.timestamp, filtered[index + 1].timestamp)
-                                HistoryUiModel(entry, isFirst, isLast)
+                            val models = mutableListOf<HistoryUiModel>()
+                            var i = 0
+                            while (i < filtered.size) {
+                                val entry = filtered[i]
+                                val isFirst = i == 0 || !isSameDay(entry.timestamp, filtered[i - 1].timestamp)
+                                val isLast = i == filtered.size - 1 || !isSameDay(entry.timestamp, filtered[i + 1].timestamp)
+                                
+                                models.add(HistoryUiModel(entry, isFirst, isLast))
+                                if (currentViewMode == HistoryViewMode.GRID && isLast) {
+                                    var dayStartIndex = i
+                                    while (dayStartIndex > 0 && isSameDay(filtered[dayStartIndex].timestamp, filtered[dayStartIndex - 1].timestamp)) {
+                                        dayStartIndex--
+                                    }
+                                    val itemsInDay = i - dayStartIndex + 1
+                                    if (itemsInDay % 2 != 0) {
+                                        models.add(HistoryUiModel(entry, isFirstOfDay = false, isLastOfDay = true, isPlaceholder = true))
+                                    }
+                                }
+                                i++
                             }
+                            models
                         }
                         adapter.submitList(uiModels)
                     }
