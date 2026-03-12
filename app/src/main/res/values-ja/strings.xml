@@ -143,6 +143,8 @@
     <string name="sort_az">名前 A-Z</string>
     <string name="sort_confidence">信頼度</string>
     <string name="sort">並べ替え</string>
+    <string name="history_total_species_count">保存された%d種</string>
+    <string name="history_results_count">%d件の結果</string>
     <string name="filter_by_date">日付でフィルター</string>
     <string name="select_start_date">開始日を選択</string>
     <string name="select_end_date">終了日を選択</string>

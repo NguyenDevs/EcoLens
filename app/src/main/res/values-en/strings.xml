@@ -143,6 +143,8 @@
     <string name="sort_az">Name A-Z</string>
     <string name="sort_confidence">Confidence</string>
     <string name="sort">Sort</string>
+    <string name="history_total_species_count">%d species saved</string>
+    <string name="history_results_count">%d results</string>
     <string name="filter_by_date">Filter by date</string>
     <string name="select_start_date">Select start date</string>
     <string name="select_end_date">Select end date</string>
