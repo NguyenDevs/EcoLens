@@ -237,20 +237,35 @@ class HistoryAdapter(
             b.tvHistoryTime.text = timeFormatter.format(dt)
             b.tvConfidence.text = "${entry.speciesInfo.confidence.toInt()}%"
 
-            setupDateHeader(uiModel.isFirstOfDay, dt)
+            setupDateHeader(uiModel, dt)
             setupConfidenceBadge(entry)
             loadImage(entry, b.ivHistoryImage)
 
             b.itemContainer.setOnClickListener { click(entry) }
         }
 
-        private fun setupDateHeader(isFirst: Boolean, dt: java.time.ZonedDateTime) {
-            b.dateHeaderContainer.visibility = if (isFirst) View.VISIBLE else View.GONE
-            if (isFirst) {
+        private fun setupDateHeader(uiModel: HistoryUiModel, dt: java.time.ZonedDateTime) {
+            val position = bindingAdapterPosition
+
+            if (uiModel.isFirstOfDay) {
+                b.dateHeaderContainer.visibility = View.VISIBLE
                 b.tvDateHeader.text = when {
                     isToday(dt) -> b.root.context.getString(R.string.today).uppercase()
                     isYesterday(dt) -> b.root.context.getString(R.string.yesterday).uppercase()
                     else -> dateFormatter.format(dt).uppercase()
+                }
+            } else {
+                val previousPosition = position - 1
+                if (previousPosition >= 0 && previousPosition < currentList.size) {
+                    val previousItem = currentList[previousPosition]
+                    if (previousItem.isFirstOfDay) {
+                        b.dateHeaderContainer.visibility = View.INVISIBLE
+                        b.tvDateHeader.text = ""
+                    } else {
+                        b.dateHeaderContainer.visibility = View.GONE
+                    }
+                } else {
+                    b.dateHeaderContainer.visibility = View.GONE
                 }
             }
         }
