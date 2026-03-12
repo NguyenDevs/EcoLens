@@ -91,9 +91,16 @@ class HistoryFragment : Fragment() {
 
     private fun observeTotalCount() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.totalHistoryCount.collect { count ->
-                binding.tvSpeciesCount.text = getString(R.string.history_total_species_count, count)
-            }
+            kotlinx.coroutines.flow.combine(
+                viewModel.totalHistoryCount,
+                viewModel.isHistoryLoading
+            ) { count, isLoading ->
+                if (count == 0 && isLoading) {
+                    binding.tvSpeciesCount.text = getString(R.string.history_syncing)
+                } else {
+                    binding.tvSpeciesCount.text = getString(R.string.history_total_species_count, count)
+                }
+            }.collect { }
         }
     }
 
