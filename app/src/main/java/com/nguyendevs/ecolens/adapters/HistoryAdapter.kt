@@ -159,6 +159,7 @@ class HistoryAdapter(
         fun bind(uiModel: HistoryUiModel, click: (HistoryEntry) -> Unit) {
             if (uiModel.isPlaceholder) {
                 b.root.visibility = View.GONE
+                b.dateHeaderContainer.visibility = View.GONE
                 b.root.layoutParams = RecyclerView.LayoutParams(0, 0)
                 return
             }
@@ -238,10 +239,17 @@ class HistoryAdapter(
         fun bind(uiModel: HistoryUiModel, click: (HistoryEntry) -> Unit) {
             if (uiModel.isPlaceholder) {
                 b.root.visibility = View.INVISIBLE
+                b.dateHeaderContainer.visibility = View.GONE
                 b.itemContainer.setOnClickListener(null)
                 return
             }
             b.root.visibility = View.VISIBLE
+            if (b.root.layoutParams.height == 0) {
+                b.root.layoutParams = RecyclerView.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+            }
 
             val entry = uiModel.entry
             val dt = Instant.ofEpochMilli(entry.timestamp).atZone(ZoneId.systemDefault())
