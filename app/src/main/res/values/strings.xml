@@ -146,6 +146,7 @@
     <string name="sort">Sắp xếp</string>
     <string name="history_total_species_count">%d loài đã lưu</string>
     <string name="history_results_count">%d kết quả</string>
+    <string name="history_syncing">Đang đồng bộ…</string>
     <string name="filter_by_date">Lọc theo ngày</string>
     <string name="select_start_date">Chọn ngày bắt đầu</string>
     <string name="select_end_date">Chọn ngày kết thúc</string>
