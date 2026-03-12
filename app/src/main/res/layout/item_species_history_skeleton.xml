@@ -4,68 +4,189 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:minHeight="120dp"
         android:orientation="vertical"
         android:background="@android:color/transparent">
 
-    <!-- DATE HEADER SKELETON -->
-    <View
-            android:layout_width="100dp"
-            android:layout_height="14dp"
-            android:layout_marginStart="@dimen/spacing_xxs"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:background="@drawable/bg_skeleton_rounded"/>
-
-    <!-- ITEM CARD SKELETON -->
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="10dp">
+            android:layout_height="wrap_content">
 
-        <!-- Avatar Skeleton -->
+        <!-- Timeline Line -->
         <View
-                android:id="@+id/avatarSkeleton"
-                android:layout_width="54dp"
-                android:layout_height="54dp"
-                android:background="@drawable/bg_skeleton_circle"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"/>
+                android:layout_width="2dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="6dp"
+                android:background="@color/primary_10"/>
 
-        <!-- INFO SECTION SKELETON -->
         <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/spacing_md"
-                android:layout_marginEnd="@dimen/spacing_xs"
-                android:orientation="vertical"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/timeSkeleton"
-                app:layout_constraintStart_toEndOf="@+id/avatarSkeleton"
-                app:layout_constraintTop_toTopOf="parent">
+                android:orientation="vertical">
 
-            <View
-                    android:layout_width="150dp"
-                    android:layout_height="16dp"
-                    android:background="@drawable/bg_skeleton_rounded"/>
+            <!-- DATE HEADER SKELETON -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="20dp"
+                    android:paddingBottom="12dp"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="20dp">
 
-            <View
-                    android:layout_width="100dp"
-                    android:layout_height="12dp"
-                    android:layout_marginTop="6dp"
-                    android:background="@drawable/bg_skeleton_rounded"/>
+                <!-- Dot trắng -->
+                <View
+                        android:id="@+id/dayDotWhiteSkeleton"
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        android:background="@drawable/circle_white"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintVertical_bias="0.428"/>
+
+                <!-- Dot xanh nhỏ hơn -->
+                <View
+                        android:id="@+id/dayDotSkeleton"
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:background="@drawable/bg_skeleton_circle"
+                        app:layout_constraintStart_toStartOf="@id/dayDotWhiteSkeleton"
+                        app:layout_constraintTop_toTopOf="@id/dayDotWhiteSkeleton"
+                        app:layout_constraintEnd_toEndOf="@id/dayDotWhiteSkeleton"
+                        app:layout_constraintBottom_toBottomOf="@id/dayDotWhiteSkeleton"/>
+
+                <!-- Date text skeleton -->
+                <View
+                        android:id="@+id/tvDateHeaderSkeleton"
+                        android:layout_width="80dp"
+                        android:layout_height="12dp"
+                        android:layout_marginStart="17dp"
+                        android:background="@drawable/bg_skeleton_rounded"
+                        app:layout_constraintStart_toEndOf="@id/dayDotWhiteSkeleton"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <!-- Divider line -->
+                <View
+                        android:layout_width="0dp"
+                        android:layout_height="1.2dp"
+                        android:layout_marginStart="17dp"
+                        android:background="@color/primary_10"
+                        app:layout_constraintStart_toEndOf="@id/tvDateHeaderSkeleton"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/tvDateHeaderSkeleton"
+                        app:layout_constraintBottom_toBottomOf="@id/tvDateHeaderSkeleton"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- ITEM CARD SKELETON -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="76dp"
+                    android:padding="10dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="0dp">
+
+                <!-- Image Skeleton with stroke -->
+                <View
+                        android:id="@+id/ivHistoryImageSkeleton"
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:background="@drawable/bg_skeleton_circle"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <!-- INFO SECTION SKELETON -->
+                <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="8dp"
+                        android:orientation="vertical"
+                        app:layout_constraintStart_toEndOf="@id/ivHistoryImageSkeleton"
+                        app:layout_constraintEnd_toStartOf="@+id/tvHistoryTimeSkeleton"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent">
+
+                    <!-- Common Name Skeleton -->
+                    <View
+                            android:layout_width="140dp"
+                            android:layout_height="14dp"
+                            android:background="@drawable/bg_skeleton_rounded"/>
+
+                    <!-- Scientific Name Skeleton -->
+                    <View
+                            android:layout_width="110dp"
+                            android:layout_height="12dp"
+                            android:layout_marginTop="2dp"
+                            android:background="@drawable/bg_skeleton_rounded"/>
+
+                    <!-- Badge + Confidence Container -->
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp">
+
+                        <!-- Category Badge Skeleton -->
+                        <View
+                                android:id="@+id/tvCategoryBadgeSkeleton"
+                                android:layout_width="70dp"
+                                android:layout_height="18dp"
+                                android:background="@drawable/bg_skeleton_rounded"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:layout_constraintBottom_toBottomOf="parent"/>
+
+                        <!-- Confidence Skeleton -->
+                        <View
+                                android:layout_width="35dp"
+                                android:layout_height="11dp"
+                                android:layout_marginStart="90dp"
+                                android:background="@drawable/bg_skeleton_rounded"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </LinearLayout>
+
+                <!-- Time Skeleton -->
+                <View
+                        android:id="@+id/tvHistoryTimeSkeleton"
+                        android:layout_width="35dp"
+                        android:layout_height="11dp"
+                        android:background="@drawable/bg_skeleton_rounded"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"/>
+
+                <!-- Badge Success Skeleton -->
+                <View
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginStart="2dp"
+                        android:layout_marginBottom="2dp"
+                        android:background="@drawable/bg_skeleton_circle"
+                        app:layout_constraintStart_toStartOf="@id/ivHistoryImageSkeleton"
+                        app:layout_constraintBottom_toBottomOf="@id/ivHistoryImageSkeleton"
+                        app:layout_constraintEnd_toEndOf="@id/ivHistoryImageSkeleton"
+                        app:layout_constraintHorizontal_bias="1.0"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
         </LinearLayout>
 
-        <!-- Time Skeleton -->
-        <View
-                android:id="@+id/timeSkeleton"
-                android:layout_width="40dp"
-                android:layout_height="12dp"
-                android:background="@drawable/bg_skeleton_rounded"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"/>
+    </FrameLayout>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Item Divider -->
+    <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="20dp"
+            android:background="@color/border_light"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"/>
 
 </LinearLayout>
