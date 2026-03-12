@@ -173,12 +173,26 @@ class HistoryAdapter(
         }
 
         private fun setupDateHeader(isFirst: Boolean, dt: java.time.ZonedDateTime) {
-            b.tvDateHeader.visibility = if (isFirst) View.VISIBLE else View.GONE
-            if (isFirst) b.tvDateHeader.text = dateFormatter.format(dt).uppercase()
+            b.dateHeaderContainer.visibility = if (isFirst) View.VISIBLE else View.GONE
+            if (isFirst) {
+                b.tvDateHeader.text = when {
+                    isToday(dt) -> b.root.context.getString(R.string.today).uppercase()
+                    isYesterday(dt) -> b.root.context.getString(R.string.yesterday).uppercase()
+                    else -> dateFormatter.format(dt).uppercase()
+                }
+            }
+            b.timelineLine.visibility = if (viewMode == HistoryViewMode.LIST) View.VISIBLE else View.GONE
+        }
+
+        private fun isToday(dt: java.time.ZonedDateTime): Boolean {
+            return dt.toLocalDate() == java.time.LocalDate.now()
+        }
+
+        private fun isYesterday(dt: java.time.ZonedDateTime): Boolean {
+            return dt.toLocalDate() == java.time.LocalDate.now().minusDays(1)
         }
 
         private fun setupCardAppearance(isFirst: Boolean, isLast: Boolean) {
-            b.divider.visibility = if (!isFirst) View.VISIBLE else View.GONE
             val bg = when {
                 isFirst && isLast -> R.drawable.bg_history_item_single
                 isFirst -> R.drawable.bg_history_item_top
@@ -252,6 +266,11 @@ class HistoryAdapter(
                 tv.setBackgroundResource(R.drawable.bg_badge_plant)
                 tv.setTextColor(0xFF065F46.toInt())
                 tv.text = tv.context.getString(R.string.history_chipPlants)
+            }
+            k.contains("fungi") || k.contains("nấm") -> {
+                tv.setBackgroundResource(R.drawable.bg_badge_fungi)
+                tv.setTextColor(0xFF7E22CE.toInt()) // purple-700
+                tv.text = tv.context.getString(R.string.history_chipFungi)
             }
             else -> {
                 tv.setBackgroundResource(R.drawable.bg_badge_animal)

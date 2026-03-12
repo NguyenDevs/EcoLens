@@ -55,6 +55,18 @@ class HistoryRepository(
     fun getHistoryByDateRangeOldest(startDate: Long, endDate: Long, limit: Int) =
             historyDao.getHistoryByDateRangeOldest(getUserId(), startDate, endDate, limit)
 
+    fun getHistoryAlphabetical(limit: Int) =
+            historyDao.getHistoryAlphabetical(getUserId(), limit)
+
+    fun getHistoryConfidenceHigh(limit: Int) =
+            historyDao.getHistoryConfidenceHigh(getUserId(), limit)
+
+    fun getHistoryByDateRangeAlphabetical(startDate: Long, endDate: Long, limit: Int) =
+            historyDao.getHistoryByDateRangeAlphabetical(getUserId(), startDate, endDate, limit)
+
+    fun getHistoryByDateRangeConfidenceHigh(startDate: Long, endDate: Long, limit: Int) =
+            historyDao.getHistoryByDateRangeConfidenceHigh(getUserId(), startDate, endDate, limit)
+
     suspend fun getHistoryById(id: Int): HistoryEntry? {
         return historyDao.getHistoryById(id)
     }

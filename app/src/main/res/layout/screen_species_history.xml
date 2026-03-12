@@ -114,7 +114,7 @@
                     <com.google.android.material.chip.Chip
                             android:id="@+id/chipAll"
                             android:layout_width="wrap_content"
-                            android:layout_height="36dp"
+                            android:layout_height="40dp"
                             android:text="@string/history_chipAll"
                             android:textColor="@color/white"
                             android:textSize="13sp"
@@ -130,7 +130,7 @@
                     <com.google.android.material.chip.Chip
                             android:id="@+id/chipAnimals"
                             android:layout_width="wrap_content"
-                            android:layout_height="36dp"
+                            android:layout_height="40dp"
                             android:text="@string/history_chipAnimals"
                             android:textColor="@color/text_secondary"
                             android:textSize="13sp"
@@ -143,7 +143,7 @@
                     <com.google.android.material.chip.Chip
                             android:id="@+id/chipPlants"
                             android:layout_width="wrap_content"
-                            android:layout_height="36dp"
+                            android:layout_height="40dp"
                             android:text="@string/history_chipPlants"
                             android:textColor="@color/text_secondary"
                             android:textSize="13sp"
@@ -163,7 +163,7 @@
                 <com.google.android.material.chip.Chip
                         android:id="@+id/btnFilterByDate"
                         android:layout_width="wrap_content"
-                        android:layout_height="36dp"
+                        android:layout_height="40dp"
                         android:text="@string/select_date"
                         android:textColor="@color/text_secondary"
                         android:textSize="13sp"
@@ -191,15 +191,6 @@
                 android:paddingTop="6dp"
                 android:gravity="center_vertical">
 
-            <TextView
-                    android:id="@+id/tvResultCount"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textSize="12sp"
-                    android:textColor="@color/text_tertiary"
-                    tools:text="32 kết quả"
-                    xmlns:tools="http://schemas.android.com/tools"/>
 
             <ImageButton
                     android:id="@+id/btnViewList"
@@ -221,6 +212,17 @@
                     app:tint="@color/white"
                     android:scaleType="center"
                     android:padding="7dp"/>
+
+            <TextView
+                    android:id="@+id/tvResultCount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="12sp"
+                    android:layout_marginStart="8dp"
+                    android:textColor="@color/text_tertiary"
+                    tools:text="32 kết quả"
+                    xmlns:tools="http://schemas.android.com/tools"/>
 
             <LinearLayout
                     android:id="@+id/btnSort"

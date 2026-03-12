@@ -8,26 +8,56 @@
         android:orientation="vertical"
         android:background="@android:color/transparent">
 
-    <TextView
-            android:id="@+id/tvDateHeader"
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/dateHeaderContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="14dp"
-            android:paddingBottom="2dp"
-            android:textSize="12sp"
-            android:textColor="@color/text_secondary"
-            android:textStyle="bold"
-            android:letterSpacing="0.06"
-            android:textAllCaps="true"
+            android:paddingBottom="6dp"
+            android:paddingEnd="4dp"
             android:visibility="gone"
-            tools:text="HÔM NAY"
-            tools:visibility="visible"/>
+            tools:visibility="visible">
+
+        <View
+                android:id="@+id/dayDot"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:background="@drawable/ic_dot_filled"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <TextView
+                android:id="@+id/tvDateHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:textSize="12sp"
+                android:textColor="@color/text_secondary"
+                android:textStyle="bold"
+                android:textAllCaps="true"
+                android:letterSpacing="0.06"
+                app:layout_constraintStart_toEndOf="@id/dayDot"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                tools:text="HÔM NAY"/>
+
+        <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginStart="10dp"
+                android:background="@color/border_normal"
+                app:layout_constraintStart_toEndOf="@id/tvDateHeader"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tvDateHeader"
+                app:layout_constraintBottom_toBottomOf="@id/tvDateHeader"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.cardview.widget.CardView
             android:id="@+id/itemContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="6dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="0dp"
             app:cardBackgroundColor="@color/surface"
@@ -42,17 +72,27 @@
 
             <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="0"
-                    android:paddingBottom="0dp">
+                    android:layout_height="wrap_content">
 
-                <com.google.android.material.imageview.ShapeableImageView
-                        android:id="@+id/ivHistoryImage"
+                <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="match_parent"
-                        android:layout_height="130dp"
-                        android:scaleType="centerCrop"
-                        app:shapeAppearanceOverlay="@style/ShapeAppearance.App.GridImageTop"
-                        android:src="@mipmap/ic_launcher"/>
+                        android:layout_height="wrap_content">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/ivHistoryImage"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:scaleType="centerCrop"
+                            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.GridImageTop"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintDimensionRatio="W,1:1"
+                            tools:background="@color/emerald_100"
+                            android:src="@mipmap/ic_launcher"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <com.google.android.material.card.MaterialCardView
                         android:id="@+id/badgeSuccess"
@@ -78,7 +118,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="10dp">
+                    android:paddingHorizontal="10dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="10dp">
 
                 <TextView
                         android:id="@+id/tvHistoryCommonName"

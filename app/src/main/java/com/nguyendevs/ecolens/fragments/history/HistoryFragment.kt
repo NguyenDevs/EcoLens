@@ -180,7 +180,7 @@ class HistoryFragment : Fragment() {
         }
         binding.btnSort.setOnClickListener {
             animationHandler.performConfirmFeedback(it)
-            toggleSortOption()
+            showFilterBottomSheet()
         }
         binding.btnFilterByDate.setOnClickListener {
             animationHandler.performConfirmFeedback(it)
@@ -266,6 +266,13 @@ class HistoryFragment : Fragment() {
                         }
                     }
 
+                    // Apply additional sorting
+                    filtered = when (currentSortOption) {
+                        HistorySortOption.ALPHABETICAL -> filtered.sortedBy { it.speciesInfo.commonName }
+                        HistorySortOption.CONFIDENCE_HIGH -> filtered.sortedByDescending { it.speciesInfo.confidence }
+                        else -> filtered // Handled by ViewModel mostly, but ALPHABETICAL/CONFIDENCE might be local or needs ViewModel update.
+                    }
+
                     binding.tvResultCount.text = "${filtered.size} kết quả"
                     binding.tvSpeciesCount.text = "${allList.size} loài"
 
@@ -312,17 +319,42 @@ class HistoryFragment : Fragment() {
         observeHistory()
     }
 
-    private fun toggleSortOption() {
-        currentSortOption = if (currentSortOption == HistorySortOption.NEWEST_FIRST)
-            HistorySortOption.OLDEST_FIRST else HistorySortOption.NEWEST_FIRST
-        updateSortUI()
-        currentLimit = pageSize
-        observeHistory()
+    private fun updateSortUI() {
+        binding.tvSortLabel.text = when (currentSortOption) {
+            HistorySortOption.NEWEST_FIRST -> getString(R.string.sort_newest_first)
+            HistorySortOption.OLDEST_FIRST -> getString(R.string.sort_oldest_first)
+            HistorySortOption.ALPHABETICAL -> getString(R.string.sort_az)
+            HistorySortOption.CONFIDENCE_HIGH -> getString(R.string.sort_confidence)
+        }
     }
 
-    private fun updateSortUI() {
-        binding.tvSortLabel.text = if (currentSortOption == HistorySortOption.NEWEST_FIRST)
-            getString(R.string.sort_newest_first) else getString(R.string.sort_oldest_first)
+    private fun showFilterBottomSheet() {
+        val sheet = FilterHistoryBottomSheet.newInstance(currentSortOption)
+        sheet.onApplyListener = { sort ->
+            currentSortOption = sort
+            updateSortUI()
+            currentLimit = pageSize
+            observeHistory()
+        }
+        sheet.show(parentFragmentManager, "FILTER_SHEET")
+    }
+
+    private fun updateDateFilterUI() {
+        if (filterStartDate != null || filterEndDate != null) {
+            val start = filterStartDate?.let { Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()) }
+            val end = filterEndDate?.let { Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()) }
+            
+            binding.btnFilterByDate.text = when {
+                start != null && end != null -> "${dateFormatter.format(start)} - ${dateFormatter.format(end)}"
+                start != null -> "Từ ${dateFormatter.format(start)}"
+                end != null -> "Đến ${dateFormatter.format(end)}"
+                else -> getString(R.string.select_date)
+            }
+            binding.btnFilterByDate.isCloseIconVisible = true
+            animationHandler.updateChipStyle(binding.btnFilterByDate, true)
+        } else {
+            clearDateFilter()
+        }
     }
 
     private fun showDateRangePickerDialog() {

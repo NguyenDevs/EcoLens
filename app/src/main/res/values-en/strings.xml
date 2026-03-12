@@ -131,14 +131,17 @@
     <string name="lists">HISTORY</string>
 
     <!-- Filter by Type -->
-    <string name="history_chipAnimals">Animals</string>
-    <string name="history_chipPlants">Plants</string>
+    <string name="history_chipAnimals">🐾 Animals</string>
+    <string name="history_chipPlants">🌿 Plants</string>
+    <string name="history_chipFungi">🍄 Fungi</string>
     <string name="history_chipAll">All</string>
 
     <!-- ==================== SORT & FILTER ==================== -->
     <string name="sort_by">Sort by</string>
-    <string name="sort_newest_first">Newest first</string>
-    <string name="sort_oldest_first">Oldest first</string>
+    <string name="sort_newest_first">Newest</string>
+    <string name="sort_oldest_first">Oldest</string>
+    <string name="sort_az">Name A-Z</string>
+    <string name="sort_confidence">Confidence</string>
     <string name="sort">Sort</string>
     <string name="filter_by_date">Filter by date</string>
     <string name="select_start_date">Select start date</string>
