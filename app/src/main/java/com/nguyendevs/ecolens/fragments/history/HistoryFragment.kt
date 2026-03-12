@@ -287,8 +287,11 @@ class HistoryFragment : Fragment() {
                         else -> filtered // Handled by ViewModel mostly, but ALPHABETICAL/CONFIDENCE might be local or needs ViewModel update.
                     }
 
-                    binding.tvResultCount.text = "${filtered.size} kết quả"
-                    binding.tvSpeciesCount.text = "${allList.size} loài"
+                    val isFiltering = searchQuery.isNotEmpty() || currentCategory != CategoryFilter.ALL || filterStartDate != null
+                    
+                    binding.tvResultCount.visibility = if (isFiltering) View.VISIBLE else View.GONE
+                    binding.tvResultCount.text = getString(R.string.history_results_count, filtered.size)
+                    binding.tvSpeciesCount.text = getString(R.string.history_total_species_count, allList.size)
 
                     if (filtered.size < pageSize && allList.size >= currentLimit) {
                         currentLimit += pageSize
