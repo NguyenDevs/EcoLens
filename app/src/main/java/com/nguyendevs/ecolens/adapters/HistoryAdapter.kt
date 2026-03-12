@@ -200,6 +200,7 @@ class HistoryAdapter(
                 else -> R.drawable.bg_history_item_middle
             }
             b.itemContainer.setBackgroundResource(bg)
+            b.itemDivider.visibility = if (isLast) View.GONE else View.VISIBLE
         }
 
         private fun setupConfidenceBadge(entry: HistoryEntry) {
