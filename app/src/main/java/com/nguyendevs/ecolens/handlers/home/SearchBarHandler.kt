@@ -62,6 +62,13 @@ class SearchBarHandler(
             }
         }
 
+        textInputLayoutSearch.setEndIconOnClickListener {
+            hideKeyboard()
+            etSearchQuery.postDelayed({
+                collapseSearchBar()
+            }, 500)
+        }
+
         etSearchQuery.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 performGoogleSearch()
@@ -165,7 +172,7 @@ class SearchBarHandler(
         onEnd: (() -> Unit)? = null
     ) {
         ValueAnimator.ofInt(from, to).apply {
-            duration = 320
+            duration = if (to > from) 320 else 450
             addUpdateListener { animation ->
                 val params = searchBarContainer.layoutParams
                 params.width = animation.animatedValue as Int

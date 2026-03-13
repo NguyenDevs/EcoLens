@@ -178,9 +178,7 @@ class HistoryFragment : Fragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
                 searchQuery = s?.toString()?.trim() ?: ""
-                // ivSearchClear acts as a close button when empty, so we keep it visible
-                binding.ivSearchClear.setImageResource(if (searchQuery.isNotEmpty()) R.drawable.ic_close else R.drawable.ic_close)
-                binding.ivSearchClear.alpha = if (searchQuery.isNotEmpty()) 1.0f else 0.6f
+                binding.ivSearchClear.visibility = if (searchQuery.isNotEmpty()) View.VISIBLE else View.GONE
                 currentLimit = pageSize
                 observeHistory()
             }
@@ -192,11 +190,10 @@ class HistoryFragment : Fragment() {
             } else false
         }
         binding.ivSearchClear.setOnClickListener {
-            if (binding.etSearch.text.isNullOrEmpty()) {
+            hideKeyboard()
+            binding.root.postDelayed({
                 toggleSearch(false)
-            } else {
-                binding.etSearch.text?.clear()
-            }
+            }, 500)
         }
     }
 
@@ -243,7 +240,11 @@ class HistoryFragment : Fragment() {
             if (binding.etSearch.visibility == View.GONE) {
                 toggleSearch(true)
             } else {
-                hideKeyboard()
+                if (binding.etSearch.text.isNullOrEmpty()) {
+                    toggleSearch(false)
+                } else {
+                    hideKeyboard()
+                }
             }
         }
     }
@@ -253,12 +254,12 @@ class HistoryFragment : Fragment() {
         val expandedWidth = binding.stickyHeader.width - (12 * 2 * resources.displayMetrics.density).toInt() // margins
 
         val widthAnimator = if (expand) {
-            ValueAnimator.ofInt(collapsedWidth, expandedWidth)
+            ValueAnimator.ofInt(binding.searchBarContainer.width, expandedWidth)
         } else {
-            ValueAnimator.ofInt(expandedWidth, collapsedWidth)
+            ValueAnimator.ofInt(binding.searchBarContainer.width, collapsedWidth)
         }
 
-        widthAnimator.duration = 300
+        widthAnimator.duration = if (expand) 320 else 450
         widthAnimator.interpolator = AccelerateDecelerateInterpolator()
         widthAnimator.addUpdateListener { animator: ValueAnimator ->
             val params = binding.searchBarContainer.layoutParams
