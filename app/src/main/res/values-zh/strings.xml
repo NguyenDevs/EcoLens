@@ -126,6 +126,7 @@
     <string name="history">历史</string>
     <string name="history_title_label">历史</string>
     <string name="history_placeholder">历史</string>
+    <string name="search_history_hint">搜索历史</string>
     <string name="history_subtitle">查看识别历史</string>
     <string name="history_empty">历史为空</string>
     <string name="lists">历史记录</string>

@@ -127,6 +127,7 @@
     <string name="history">Lịch sử</string>
     <string name="history_title_label">Lịch sử</string>
     <string name="history_placeholder">Lịch sử</string>
+    <string name="search_history_hint">Tìm kiếm lịch sử</string>
     <string name="history_subtitle">Xem lịch sử các loài đã nhận diện</string>
     <string name="history_empty">Chưa có lịch sử</string>
     <string name="lists">DANH SÁCH</string>

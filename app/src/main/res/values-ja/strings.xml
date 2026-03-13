@@ -126,6 +126,7 @@
     <string name="history">履歴</string>
     <string name="history_title_label">履歴</string>
     <string name="history_placeholder">履歴</string>
+    <string name="search_history_hint">履歴を検索</string>
     <string name="history_subtitle">識別履歴を表示</string>
     <string name="history_empty">履歴が空です</string>
     <string name="lists">履歴</string>
