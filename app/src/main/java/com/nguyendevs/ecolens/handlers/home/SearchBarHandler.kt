@@ -33,9 +33,18 @@ class SearchBarHandler(
     private val expandedWidthPx = (330 * context.resources.displayMetrics.density).toInt()
 
     private var isSearchBarExpanded = false
+    private val viewsToHide = mutableListOf<View>()
 
     init {
         setupClickListeners()
+    }
+
+    /**
+     * Set các views cần ẩn đi khi search bar expand
+     */
+    fun setViewsToHide(views: List<View>) {
+        viewsToHide.clear()
+        viewsToHide.addAll(views)
     }
 
     // ==================== SETUP ====================
@@ -165,6 +174,18 @@ class SearchBarHandler(
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator) {
                     onStart?.invoke()
+                    if (to > from) { // Expanding
+                        viewsToHide.forEach {
+                            it.animate().alpha(0f).setDuration(200).withEndAction { 
+                                it.visibility = View.INVISIBLE 
+                            }.start()
+                        }
+                    } else { // Collapsing
+                        viewsToHide.forEach {
+                            it.visibility = View.VISIBLE
+                            it.animate().alpha(1f).setDuration(200).start()
+                        }
+                    }
                 }
                 override fun onAnimationEnd(animation: Animator) {
                     onEnd?.invoke()

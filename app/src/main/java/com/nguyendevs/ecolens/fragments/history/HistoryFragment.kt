@@ -8,6 +8,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
+import android.content.Context
 import androidx.core.content.ContextCompat
 import androidx.core.util.Pair
 import androidx.fragment.app.Fragment
@@ -234,43 +238,69 @@ class HistoryFragment : Fragment() {
                 applyViewMode(currentViewMode)
             }
         }
-        binding.btnOpenSearch.setOnClickListener {
-            animationHandler.performConfirmFeedback(it)
-            toggleSearch(true)
+        binding.searchBarContainer.findViewById<View>(R.id.btnSearchIcon).setOnClickListener { view: View ->
+            animationHandler.performConfirmFeedback(view)
+            if (binding.etSearch.visibility == View.GONE) {
+                toggleSearch(true)
+            } else {
+                hideKeyboard()
+            }
         }
     }
 
     private fun toggleSearch(expand: Boolean) {
-        val transition = AutoTransition().apply {
-            duration = 250
-            interpolator = AccelerateDecelerateInterpolator()
+        val collapsedWidth = (48 * resources.displayMetrics.density).toInt()
+        val expandedWidth = binding.stickyHeader.width - (12 * 2 * resources.displayMetrics.density).toInt() // margins
+
+        val widthAnimator = if (expand) {
+            ValueAnimator.ofInt(collapsedWidth, expandedWidth)
+        } else {
+            ValueAnimator.ofInt(expandedWidth, collapsedWidth)
         }
-        TransitionManager.beginDelayedTransition(binding.stickyHeader, transition)
+
+        widthAnimator.duration = 300
+        widthAnimator.interpolator = AccelerateDecelerateInterpolator()
+        widthAnimator.addUpdateListener { animator: ValueAnimator ->
+            val params = binding.searchBarContainer.layoutParams
+            params.width = animator.animatedValue as Int
+            binding.searchBarContainer.layoutParams = params
+        }
 
         if (expand) {
             binding.titleRow.animate().alpha(0f).setDuration(200).withEndAction {
                 binding.titleRow.visibility = View.INVISIBLE
             }.start()
-            
-            binding.searchBarContainer.visibility = View.VISIBLE
-            binding.searchBarContainer.alpha = 0f
-            binding.searchBarContainer.animate().alpha(1f).setDuration(250).start()
-            
-            binding.etSearch.requestFocus()
-            showKeyboard()
+
+            widthAnimator.addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationStart(animation: Animator) {
+                    binding.etSearch.visibility = View.VISIBLE
+                    binding.ivSearchClear.visibility = View.VISIBLE
+                    binding.etSearch.alpha = 0f
+                    binding.ivSearchClear.alpha = 0f
+                    binding.etSearch.animate().alpha(1f).setDuration(200).setStartDelay(100).start()
+                    binding.ivSearchClear.animate().alpha(0.6f).setDuration(200).setStartDelay(100).start()
+                }
+                override fun onAnimationEnd(animation: Animator) {
+                    binding.etSearch.requestFocus()
+                    showKeyboard()
+                }
+            })
         } else {
             binding.etSearch.text?.clear()
-            
-            binding.searchBarContainer.animate().alpha(0f).setDuration(200).withEndAction {
-                binding.searchBarContainer.visibility = View.GONE
-            }.start()
-            
-            binding.titleRow.visibility = View.VISIBLE
-            binding.titleRow.alpha = 0f
-            binding.titleRow.animate().alpha(1f).setDuration(250).start()
-            
+            binding.etSearch.animate().alpha(0f).setDuration(150).start()
+            binding.ivSearchClear.animate().alpha(0f).setDuration(150).start()
+
+            widthAnimator.addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    binding.etSearch.visibility = View.GONE
+                    binding.ivSearchClear.visibility = View.GONE
+                    binding.titleRow.visibility = View.VISIBLE
+                    binding.titleRow.animate().alpha(1f).setDuration(200).start()
+                }
+            })
             hideKeyboard()
         }
+        widthAnimator.start()
     }
 
     private fun showKeyboard() {
