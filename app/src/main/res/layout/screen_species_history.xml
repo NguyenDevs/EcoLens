@@ -97,7 +97,7 @@
                             android:imeOptions="actionSearch"
                             android:inputType="text"
                             android:singleLine="true"
-                            android:hint="@string/search_hint"
+                            android:hint="@string/search_history_hint"
                             android:paddingEnd="8dp"
                             android:visibility="gone"/>
 
