@@ -9,28 +9,73 @@
         android:background="@android:color/transparent">
 
     <!-- DATE HEADER -->
-    <TextView
-            android:id="@+id/tvDateHeader"
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/dateHeaderContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="@dimen/spacing_xxs"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:text="@string/today"
-            android:textSize="10sp"
-            android:textColor="@color/text_tertiary"
-            android:textStyle="bold"
-            android:letterSpacing="0.15"
-            android:textAllCaps="true"
+            android:paddingTop="20dp"
+            android:paddingBottom="12dp"
+            android:paddingStart="0dp"
+            android:paddingEnd="20dp"
             android:visibility="gone"
-            tools:visibility="visible"/>
+            tools:visibility="visible">
+
+        <!-- Dot trắng lớn hơn - làm nền -->
+        <View
+                android:id="@+id/dayDotWhite"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:background="@drawable/circle_white"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintVertical_bias="0.428" />
+
+        <!-- Dot xanh nhỏ hơn -->
+        <View
+                android:id="@+id/dayDot"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:background="@drawable/ic_dot_filled"
+                app:layout_constraintStart_toStartOf="@id/dayDotWhite"
+                app:layout_constraintTop_toTopOf="@id/dayDotWhite"
+                app:layout_constraintEnd_toEndOf="@id/dayDotWhite"
+                app:layout_constraintBottom_toBottomOf="@id/dayDotWhite" />
+
+        <TextView
+                android:id="@+id/tvDateHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="17dp"
+                android:textSize="12sp"
+                android:textColor="@color/text_secondary"
+                android:textStyle="bold"
+                android:textAllCaps="true"
+                android:letterSpacing="0.06"
+                app:layout_constraintStart_toEndOf="@id/dayDotWhite"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                tools:text="HÔM NAY" />
+
+        <View
+                android:id="@+id/dayDivider"
+                android:layout_width="0dp"
+                android:layout_height="1.2dp"
+                android:layout_marginStart="17dp"
+                android:background="@color/primary_10"
+                app:layout_constraintStart_toEndOf="@id/tvDateHeader"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tvDateHeader"
+                app:layout_constraintBottom_toBottomOf="@id/tvDateHeader" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- CHAT SESSION CARD WITH BORDER -->
     <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/spacing_xs"
+            android:layout_marginBottom="@dimen/spacing_xxs"
             app:cardBackgroundColor="@color/surface"
             app:cardElevation="0dp"
             app:strokeWidth="1dp"
