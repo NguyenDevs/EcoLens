@@ -126,6 +126,7 @@
     <string name="history">历史</string>
     <string name="history_title_label">历史</string>
     <string name="history_placeholder">历史</string>
+    <string name="search_history_hint">搜索历史</string>
     <string name="history_subtitle">查看识别历史</string>
     <string name="history_empty">历史为空</string>
     <string name="lists">历史记录</string>
@@ -342,6 +343,7 @@
     <string name="label_include_image">包含图片</string>
     <string name="action_export">导出文件</string>
     <string name="action_save">保存</string>
+    <string name="btn_save_image">保存图片</string>
     <string name="dialog_save_picture_title">保存图片</string>
     <string name="dialog_save_picture_message">是否将此图片保存到相册？</string>
     <string name="save_success">图片已保存到相册</string>

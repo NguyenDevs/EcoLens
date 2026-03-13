@@ -126,6 +126,7 @@
     <string name="history">履歴</string>
     <string name="history_title_label">履歴</string>
     <string name="history_placeholder">履歴</string>
+    <string name="search_history_hint">履歴を検索</string>
     <string name="history_subtitle">識別履歴を表示</string>
     <string name="history_empty">履歴が空です</string>
     <string name="lists">履歴</string>
@@ -342,6 +343,7 @@
     <string name="label_include_image">画像を含める</string>
     <string name="action_export">ファイルをエクスポート</string>
     <string name="action_save">保存</string>
+    <string name="btn_save_image">画像を保存</string>
     <string name="dialog_save_picture_title">画像を保存</string>
     <string name="dialog_save_picture_message">この画像をギャラリーに保存しますか？</string>
     <string name="save_success">画像をギャラリーに保存しました</string>

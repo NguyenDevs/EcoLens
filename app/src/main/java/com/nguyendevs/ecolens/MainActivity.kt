@@ -367,7 +367,13 @@ class MainActivity : AppCompatActivity() {
                         binding.textInputLayoutSearch,
                         binding.etSearchQuery,
                         binding.btnSearchAction
-                )
+                ).apply {
+                    val homeRoot = binding.homeContainer.root
+                    setViewsToHide(listOf(
+                        homeRoot.findViewById(R.id.tvAppTitle),
+                        homeRoot.findViewById(R.id.tvGreeting)
+                    ))
+                }
 
         val btnZoomIn = homeRoot.findViewById<ImageView>(R.id.btnZoomIn)
 

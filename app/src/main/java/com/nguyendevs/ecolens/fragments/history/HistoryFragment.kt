@@ -8,6 +8,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
+import android.content.Context
 import androidx.core.content.ContextCompat
 import androidx.core.util.Pair
 import androidx.fragment.app.Fragment
@@ -34,8 +38,12 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.TimeZone
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.transition.TransitionManager
+import android.transition.AutoTransition
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -112,9 +120,20 @@ class HistoryFragment : Fragment() {
                     binding.shimmerViewContainer.visibility = View.VISIBLE
                     binding.rvHistory.visibility = View.GONE
                     binding.emptyStateContainer.visibility = View.GONE
+                    binding.btnViewList.isEnabled = false
+                    binding.btnViewGrid.isEnabled = false
+                    binding.btnViewList.alpha = 0.5f
+                    binding.btnViewGrid.alpha = 0.5f
                 } else {
                     binding.shimmerViewContainer.stopShimmer()
                     binding.shimmerViewContainer.visibility = View.GONE
+                    binding.btnViewList.isEnabled = true
+                    binding.btnViewGrid.isEnabled = true
+                    binding.btnViewList.alpha = 1.0f
+                    binding.btnViewGrid.alpha = 1.0f
+                    
+                    // Re-trigger history observation to check empty state after sync completes
+                    observeHistory()
                 }
             }
         }
@@ -171,8 +190,10 @@ class HistoryFragment : Fragment() {
             } else false
         }
         binding.ivSearchClear.setOnClickListener {
-            binding.etSearch.text?.clear()
             hideKeyboard()
+            binding.root.postDelayed({
+                toggleSearch(false)
+            }, 500)
         }
     }
 
@@ -214,6 +235,83 @@ class HistoryFragment : Fragment() {
                 applyViewMode(currentViewMode)
             }
         }
+        binding.searchBarContainer.findViewById<View>(R.id.btnSearchIcon).setOnClickListener { view: View ->
+            animationHandler.performConfirmFeedback(view)
+            if (binding.etSearch.visibility == View.GONE) {
+                toggleSearch(true)
+            } else {
+                if (binding.etSearch.text.isNullOrEmpty()) {
+                    toggleSearch(false)
+                } else {
+                    hideKeyboard()
+                }
+            }
+        }
+    }
+
+    private fun toggleSearch(expand: Boolean) {
+        val collapsedWidth = (48 * resources.displayMetrics.density).toInt()
+        val expandedWidth = binding.stickyHeader.width - (12 * 2 * resources.displayMetrics.density).toInt()
+
+        val widthAnimator = if (expand) {
+            ValueAnimator.ofInt(binding.searchBarContainer.width, expandedWidth)
+        } else {
+            ValueAnimator.ofInt(binding.searchBarContainer.width, collapsedWidth)
+        }
+
+        widthAnimator.duration = if (expand) 320 else 450
+        widthAnimator.interpolator = AccelerateDecelerateInterpolator()
+        widthAnimator.addUpdateListener { animator: ValueAnimator ->
+            val params = binding.searchBarContainer.layoutParams
+            params.width = animator.animatedValue as Int
+            binding.searchBarContainer.layoutParams = params
+        }
+
+        if (expand) {
+            binding.titleRow.animate().alpha(0f).setDuration(200).withEndAction {
+                binding.titleRow.visibility = View.INVISIBLE
+            }.start()
+
+            widthAnimator.addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationStart(animation: Animator) {
+                    binding.etSearch.visibility = View.VISIBLE
+                    binding.ivSearchClear.visibility = View.VISIBLE
+                    binding.etSearch.alpha = 0f
+                    binding.ivSearchClear.alpha = 0f
+                    binding.etSearch.animate().alpha(1f).setDuration(200).setStartDelay(100).start()
+                    binding.ivSearchClear.animate().alpha(0.6f).setDuration(200).setStartDelay(100).start()
+                }
+                override fun onAnimationEnd(animation: Animator) {
+                    binding.etSearch.requestFocus()
+                    showKeyboard()
+                }
+            })
+        } else {
+            binding.etSearch.animate().alpha(0f).setDuration(150).start()
+            binding.ivSearchClear.animate().alpha(0f).setDuration(150).start()
+
+            widthAnimator.addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationStart(animation: Animator) {
+                    binding.titleRow.visibility = View.VISIBLE
+                    binding.titleRow.alpha = 0f
+                    binding.titleRow.animate().alpha(1f).setDuration(250).start()
+                }
+                override fun onAnimationEnd(animation: Animator) {
+                    binding.etSearch.visibility = View.GONE
+                    binding.ivSearchClear.visibility = View.GONE
+                    binding.root.postDelayed({
+                        binding.etSearch.text?.clear()
+                    }, 500)
+                }
+            })
+            hideKeyboard()
+        }
+        widthAnimator.start()
+    }
+
+    private fun showKeyboard() {
+        val imm = ContextCompat.getSystemService(requireContext(), InputMethodManager::class.java)
+        imm?.showSoftInput(binding.etSearch, InputMethodManager.SHOW_IMPLICIT)
     }
 
     private fun applyViewMode(mode: HistoryViewMode) {
@@ -317,9 +415,18 @@ class HistoryFragment : Fragment() {
                     }
 
                     if (filtered.isEmpty()) {
+                        if (viewModel.isHistoryLoading.value) {
+                            // Still syncing, keep shimmer and don't show empty state yet
+                            return@collectLatest
+                        }
+                        binding.shimmerViewContainer.stopShimmer()
+                        binding.shimmerViewContainer.visibility = View.GONE
                         animationHandler.fadeOut(binding.rvHistory)
+                        animationHandler.fadeIn(binding.emptyStateContainer)
                         hasMoreData = false
                     } else {
+                        binding.shimmerViewContainer.stopShimmer()
+                        binding.shimmerViewContainer.visibility = View.GONE
                         animationHandler.fadeIn(binding.rvHistory)
                         animationHandler.fadeOut(binding.emptyStateContainer)
                         hasMoreData = allList.size >= currentLimit

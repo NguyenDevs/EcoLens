@@ -15,79 +15,104 @@
             android:orientation="vertical"
             android:elevation="0dp">
 
-        <LinearLayout
-                android:id="@+id/titleRow"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingHorizontal="@dimen/padding_screen_horizontal"
-                android:paddingTop="@dimen/spacing_md"
-                android:gravity="center_vertical">
-
-            <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/history_title_label"
-                    android:textColor="@color/primary"
-                    android:textSize="30sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="-0.02"/>
-
-            <TextView
-                    android:id="@+id/tvSpeciesCount"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="13sp"
-                    android:textColor="@color/text_tertiary"
-                    android:textStyle="bold"
-                    tools:text="32 loài"
-                    xmlns:tools="http://schemas.android.com/tools"/>
-        </LinearLayout>
-
         <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="@dimen/padding_screen_horizontal"
-                android:paddingTop="12dp">
+                android:layout_height="wrap_content">
 
             <LinearLayout
+                    android:id="@+id/titleRow"
                     android:layout_width="match_parent"
-                    android:layout_height="44dp"
-                    android:background="@drawable/bg_search_bar"
+                    android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="14dp">
+                    android:paddingHorizontal="@dimen/padding_screen_horizontal"
+                    android:paddingTop="@dimen/spacing_md"
+                    android:gravity="center_vertical">
 
-                <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_search"
-                        app:tint="@color/text_tertiary"/>
-
-                <EditText
-                        android:id="@+id/etSearch"
+                <TextView
                         android:layout_width="0dp"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginHorizontal="8dp"
-                        android:background="@android:color/transparent"
-                        android:textColorHint="@color/text_tertiary"
-                        android:textColor="@color/text_primary"
-                        android:textSize="14sp"
-                        android:imeOptions="actionSearch"
-                        android:inputType="text"
-                        android:singleLine="true"/>
+                        android:text="@string/history_title_label"
+                        android:textColor="@color/primary"
+                        android:textSize="30sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="-0.02"/>
 
-                <ImageView
-                        android:id="@+id/ivSearchClear"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_close"
-                        app:tint="@color/text_tertiary"
-                        android:visibility="gone"
-                        android:padding="2dp"/>
+                <TextView
+                        android:id="@+id/tvSpeciesCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="13sp"
+                        android:textColor="@color/text_tertiary"
+                        android:textStyle="bold"
+                        tools:text="32 loài"
+                        xmlns:tools="http://schemas.android.com/tools"/>
+                
+                <!-- Spacer for collapsed search bar -->
+                <View
+                        android:layout_width="56dp"
+                        android:layout_height="1dp"/>
             </LinearLayout>
+
+            <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/searchBarContainer"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center_vertical|end"
+                    android:layout_marginEnd="12dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="3dp"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="0dp"
+                    app:cardBackgroundColor="@color/surface"
+                    app:strokeWidth="@dimen/border_thin"
+                    app:strokeColor="@color/border_normal">
+
+                <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                    <ImageView
+                            android:id="@+id/btnSearchIcon"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:src="@drawable/ic_search"
+                            app:tint="@color/primary"
+                            android:padding="12dp"
+                            app:elevation="1dp"
+                            android:scaleType="centerInside"
+                            android:background="?attr/selectableItemBackgroundBorderless"/>
+
+                    <EditText
+                            android:id="@+id/etSearch"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:background="@android:color/transparent"
+                            android:textColorHint="@color/text_tertiary"
+                            android:textColor="@color/text_primary"
+                            android:textSize="14sp"
+                            android:imeOptions="actionSearch"
+                            android:inputType="text"
+                            android:singleLine="true"
+                            android:hint="@string/search_history_hint"
+                            android:paddingEnd="8dp"
+                            android:visibility="gone"/>
+
+                    <ImageView
+                            android:id="@+id/ivSearchClear"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:src="@drawable/ic_close"
+                            app:tint="@color/text_tertiary"
+                            android:padding="10dp"
+                            android:alpha="0.6"
+                            android:visibility="gone"
+                            android:background="?attr/selectableItemBackgroundBorderless"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
         </FrameLayout>
 
         <HorizontalScrollView

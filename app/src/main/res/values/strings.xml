@@ -127,6 +127,7 @@
     <string name="history">Lịch sử</string>
     <string name="history_title_label">Lịch sử</string>
     <string name="history_placeholder">Lịch sử</string>
+    <string name="search_history_hint">Tìm kiếm lịch sử</string>
     <string name="history_subtitle">Xem lịch sử các loài đã nhận diện</string>
     <string name="history_empty">Chưa có lịch sử</string>
     <string name="lists">DANH SÁCH</string>
@@ -343,6 +344,7 @@
     <string name="label_include_image">Bao gồm hình ảnh</string>
     <string name="action_export">Xuất file</string>
     <string name="action_save">Lưu</string>
+    <string name="btn_save_image">Lưu ảnh</string>
     <string name="dialog_save_picture_title">Lưu hình ảnh</string>
     <string name="dialog_save_picture_message">Bạn có muốn lưu hình ảnh này vào thư viện không?</string>
     <string name="save_success">Đã lưu ảnh vào thư viện</string>
