@@ -180,7 +180,7 @@ class HistoryAdapter(
             })
 
             b.tvHistoryTime.text = timeFormatter.format(dt)
-            b.tvConfidence.text = "${entry.speciesInfo.confidence.toInt()}%"
+            b.tvConfidence.text = String.format("%.2f%%", entry.speciesInfo.confidence)
 
             setupCategoryBadge(b.tvCategoryBadge, entry.speciesInfo.kingdom)
             setupDateHeader(uiModel.isFirstOfDay, dt)
@@ -262,7 +262,7 @@ class HistoryAdapter(
             })
 
             b.tvHistoryTime.text = timeFormatter.format(dt)
-            b.tvConfidence.text = "${entry.speciesInfo.confidence.toInt()}%"
+            b.tvConfidence.text = String.format("%.2f%%", entry.speciesInfo.confidence)
 
             setupDateHeader(uiModel, dt)
             setupConfidenceBadge(entry)

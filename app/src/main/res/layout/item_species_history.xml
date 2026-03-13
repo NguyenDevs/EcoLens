@@ -212,7 +212,7 @@
                         tools:text="97%"
                         app:layout_constraintTop_toBottomOf="@+id/tvHistoryTime"
                         app:layout_constraintStart_toEndOf="@+id/infoContainer" android:layout_marginTop="30dp"
-                        android:layout_marginStart="10dp"/>
+                        />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

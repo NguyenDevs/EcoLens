@@ -127,9 +127,13 @@ class ChatSessionAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(session: ChatSession, showHeader: Boolean, dateTime: java.time.ZonedDateTime) {
-            binding.tvDateHeader.visibility = if (showHeader) View.VISIBLE else View.GONE
+            binding.dateHeaderContainer.visibility = if (showHeader) View.VISIBLE else View.GONE
             if (showHeader) {
-                binding.tvDateHeader.text = dateFormatter.format(dateTime)
+                binding.tvDateHeader.text = when {
+                    isToday(dateTime) -> binding.root.context.getString(R.string.today).uppercase()
+                    isYesterday(dateTime) -> binding.root.context.getString(R.string.yesterday).uppercase()
+                    else -> dateFormatter.format(dateTime).uppercase()
+                }
             }
 
             binding.ivLoadingRing.visibility = View.INVISIBLE
@@ -142,6 +146,14 @@ class ChatSessionAdapter(
                 animateLoading()
                 onClick(session)
             }
+        }
+
+        private fun isToday(dt: java.time.ZonedDateTime): Boolean {
+            return dt.toLocalDate() == java.time.LocalDate.now()
+        }
+
+        private fun isYesterday(dt: java.time.ZonedDateTime): Boolean {
+            return dt.toLocalDate() == java.time.LocalDate.now().minusDays(1)
         }
 
         private fun animateLoading() {

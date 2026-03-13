@@ -273,9 +273,21 @@ class HistoryDetailFragment : Fragment() {
                     }
                 }
 
+                // If local path is missing or invalid, try remote URL
                 if (imageUri == null && !remoteUrl.isNullOrEmpty()) {
                     try {
-                        imageUri = Uri.parse(remoteUrl)
+                        val remoteUri = Uri.parse(remoteUrl)
+                        if (remoteUri.scheme == "http" || remoteUri.scheme == "https") {
+                            // Download remote image to cache for sharing
+                            val file = com.nguyendevs.ecolens.utils.ImageUtils.uriToFile(requireContext(), remoteUri, 1024)
+                            imageUri = FileProvider.getUriForFile(
+                                requireContext(),
+                                "${requireContext().packageName}.provider",
+                                file
+                            )
+                        } else {
+                            imageUri = remoteUri
+                        }
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }

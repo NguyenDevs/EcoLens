@@ -115,6 +115,13 @@ class HomeButtonHandler(
                         } catch (e: Exception) {
                             e.printStackTrace()
                             // Nếu tải thất bại, share text only
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.error_export_failed),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                             shareableUri = null
                         }
                     }
