@@ -62,7 +62,7 @@
                     android:layout_height="match_parent"
                     android:paddingStart="@dimen/padding_screen_horizontal"
                     android:paddingEnd="@dimen/padding_screen_horizontal"
-                    android:paddingBottom="76dp"
+                    android:paddingBottom="80dp"
                     android:clipToPadding="false"
                     android:scrollbars="none"
                     android:overScrollMode="ifContentScrolls"

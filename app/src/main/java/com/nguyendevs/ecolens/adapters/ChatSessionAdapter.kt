@@ -127,7 +127,7 @@ class ChatSessionAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(session: ChatSession, showHeader: Boolean, dateTime: java.time.ZonedDateTime) {
-            binding.tvDateHeader.visibility = if (showHeader) View.VISIBLE else View.GONE
+            binding.dateHeaderContainer.visibility = if (showHeader) View.VISIBLE else View.GONE
             if (showHeader) {
                 binding.tvDateHeader.text = when {
                     isToday(dateTime) -> binding.root.context.getString(R.string.today).uppercase()
