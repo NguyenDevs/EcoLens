@@ -248,14 +248,27 @@ class HistoryFragment : Fragment() {
         TransitionManager.beginDelayedTransition(binding.stickyHeader, transition)
 
         if (expand) {
-            binding.titleRow.visibility = View.GONE
+            binding.titleRow.animate().alpha(0f).setDuration(200).withEndAction {
+                binding.titleRow.visibility = View.INVISIBLE
+            }.start()
+            
             binding.searchBarContainer.visibility = View.VISIBLE
+            binding.searchBarContainer.alpha = 0f
+            binding.searchBarContainer.animate().alpha(1f).setDuration(250).start()
+            
             binding.etSearch.requestFocus()
             showKeyboard()
         } else {
             binding.etSearch.text?.clear()
+            
+            binding.searchBarContainer.animate().alpha(0f).setDuration(200).withEndAction {
+                binding.searchBarContainer.visibility = View.GONE
+            }.start()
+            
             binding.titleRow.visibility = View.VISIBLE
-            binding.searchBarContainer.visibility = View.GONE
+            binding.titleRow.alpha = 0f
+            binding.titleRow.animate().alpha(1f).setDuration(250).start()
+            
             hideKeyboard()
         }
     }
