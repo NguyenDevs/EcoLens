@@ -112,9 +112,17 @@ class HistoryFragment : Fragment() {
                     binding.shimmerViewContainer.visibility = View.VISIBLE
                     binding.rvHistory.visibility = View.GONE
                     binding.emptyStateContainer.visibility = View.GONE
+                    binding.btnViewList.isEnabled = false
+                    binding.btnViewGrid.isEnabled = false
+                    binding.btnViewList.alpha = 0.5f
+                    binding.btnViewGrid.alpha = 0.5f
                 } else {
                     binding.shimmerViewContainer.stopShimmer()
                     binding.shimmerViewContainer.visibility = View.GONE
+                    binding.btnViewList.isEnabled = true
+                    binding.btnViewGrid.isEnabled = true
+                    binding.btnViewList.alpha = 1.0f
+                    binding.btnViewGrid.alpha = 1.0f
                 }
             }
         }
@@ -315,6 +323,9 @@ class HistoryFragment : Fragment() {
                         loadNextPage()
                         return@collectLatest
                     }
+
+                    binding.shimmerViewContainer.stopShimmer()
+                    binding.shimmerViewContainer.visibility = View.GONE
 
                     if (filtered.isEmpty()) {
                         animationHandler.fadeOut(binding.rvHistory)
