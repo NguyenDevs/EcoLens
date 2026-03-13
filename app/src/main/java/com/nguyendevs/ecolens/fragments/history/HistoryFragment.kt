@@ -318,6 +318,7 @@ class HistoryFragment : Fragment() {
 
                     if (filtered.isEmpty()) {
                         animationHandler.fadeOut(binding.rvHistory)
+                        animationHandler.fadeIn(binding.emptyStateContainer)
                         hasMoreData = false
                     } else {
                         animationHandler.fadeIn(binding.rvHistory)
