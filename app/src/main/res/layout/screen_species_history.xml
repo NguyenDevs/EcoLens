@@ -43,13 +43,25 @@
                     android:textStyle="bold"
                     tools:text="32 loài"
                     xmlns:tools="http://schemas.android.com/tools"/>
+
+            <ImageButton
+                    android:id="@+id/btnOpenSearch"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/bg_sort_btn"
+                    android:src="@drawable/ic_search"
+                    android:padding="10dp"
+                    app:tint="@color/primary"/>
         </LinearLayout>
 
         <FrameLayout
+                android:id="@+id/searchBarContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="@dimen/padding_screen_horizontal"
-                android:paddingTop="12dp">
+                android:paddingTop="12dp"
+                android:visibility="gone">
 
             <LinearLayout
                     android:layout_width="match_parent"
@@ -85,7 +97,6 @@
                         android:layout_height="20dp"
                         android:src="@drawable/ic_close"
                         app:tint="@color/text_tertiary"
-                        android:visibility="gone"
                         android:padding="2dp"/>
             </LinearLayout>
         </FrameLayout>
