@@ -39,12 +39,13 @@ object ImageUtils {
             try {
                 val url = URL(uri.toString())
                 val connection = url.openConnection()
+                connection.setRequestProperty("User-Agent", "EcoLens-Android")
                 connection.connect()
-                
+
                 val inputStream = connection.getInputStream()
                 val bitmap = BitmapFactory.decodeStream(inputStream)
                 inputStream.close()
-                
+
                 if (bitmap != null) {
                     // Resize if needed
                     val scaledBitmap = if (bitmap.width > maxDimension || bitmap.height > maxDimension) {
@@ -58,19 +59,20 @@ object ImageUtils {
                     } else {
                         bitmap
                     }
-                    
+
                     FileOutputStream(file).use { out ->
-                        scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 80, out)
+                        scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
                     }
-                    
+
                     if (scaledBitmap != bitmap) bitmap.recycle()
                     scaledBitmap.recycle()
-                    
+
                     return file
                 } else {
                     throw Exception("Failed to decode bitmap from URL: $uri")
                 }
             } catch (e: Exception) {
+                e.printStackTrace()
                 throw Exception("Failed to download image from URL: $uri", e)
             }
         }
