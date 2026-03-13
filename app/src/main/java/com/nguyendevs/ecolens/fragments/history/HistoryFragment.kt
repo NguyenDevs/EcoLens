@@ -251,7 +251,7 @@ class HistoryFragment : Fragment() {
 
     private fun toggleSearch(expand: Boolean) {
         val collapsedWidth = (48 * resources.displayMetrics.density).toInt()
-        val expandedWidth = binding.stickyHeader.width - (12 * 2 * resources.displayMetrics.density).toInt() // margins
+        val expandedWidth = binding.stickyHeader.width - (12 * 2 * resources.displayMetrics.density).toInt()
 
         val widthAnimator = if (expand) {
             ValueAnimator.ofInt(binding.searchBarContainer.width, expandedWidth)
@@ -287,16 +287,21 @@ class HistoryFragment : Fragment() {
                 }
             })
         } else {
-            binding.etSearch.text?.clear()
             binding.etSearch.animate().alpha(0f).setDuration(150).start()
             binding.ivSearchClear.animate().alpha(0f).setDuration(150).start()
 
             widthAnimator.addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationStart(animation: Animator) {
+                    binding.titleRow.visibility = View.VISIBLE
+                    binding.titleRow.alpha = 0f
+                    binding.titleRow.animate().alpha(1f).setDuration(250).start()
+                }
                 override fun onAnimationEnd(animation: Animator) {
                     binding.etSearch.visibility = View.GONE
                     binding.ivSearchClear.visibility = View.GONE
-                    binding.titleRow.visibility = View.VISIBLE
-                    binding.titleRow.animate().alpha(1f).setDuration(200).start()
+                    binding.root.postDelayed({
+                        binding.etSearch.text?.clear()
+                    }, 500)
                 }
             })
             hideKeyboard()
