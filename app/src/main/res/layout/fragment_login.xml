@@ -97,6 +97,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
+                    android:animateLayoutChanges="true"
                     android:background="@drawable/bg_card_auth_gradient"
                     android:padding="0dp">
 
@@ -217,20 +218,6 @@
                                     android:textSize="13sp"
                                     android:minHeight="48dp"
                                     app:buttonTint="@color/checkbox_tint" />
-
-                            <com.google.android.material.button.MaterialButton
-                                    android:id="@+id/btnRegister"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="56dp"
-                                    android:layout_marginTop="12dp"
-                                    android:backgroundTint="@color/primary"
-                                    android:text="@string/register"
-                                    android:textAllCaps="false"
-                                    android:textSize="16sp"
-                                    android:textStyle="bold"
-                                    android:minHeight="56dp"
-                                    app:cornerRadius="28dp"
-                                    app:elevation="4dp" />
                         </LinearLayout>
                     </net.cachapa.expandablelayout.ExpandableLayout>
 
@@ -276,22 +263,43 @@
                                         android:paddingStart="12dp"
                                         android:paddingEnd="12dp" />
                             </LinearLayout>
-
-                            <com.google.android.material.button.MaterialButton
-                                    android:id="@+id/btnLogin"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="56dp"
-                                    android:layout_marginTop="12dp"
-                                    android:backgroundTint="@color/primary"
-                                    android:text="@string/login"
-                                    android:textAllCaps="false"
-                                    android:textSize="16sp"
-                                    android:textStyle="bold"
-                                    android:minHeight="56dp"
-                                    app:cornerRadius="28dp"
-                                    app:elevation="4dp" />
                         </LinearLayout>
                     </net.cachapa.expandablelayout.ExpandableLayout>
+
+                    <!-- Shared Action Button Slot -->
+                    <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp">
+
+                        <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnLogin"
+                                android:layout_width="match_parent"
+                                android:layout_height="56dp"
+                                android:backgroundTint="@color/primary"
+                                android:text="@string/login"
+                                android:textAllCaps="false"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:minHeight="56dp"
+                                app:cornerRadius="28dp"
+                                app:elevation="4dp" />
+
+                        <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnRegister"
+                                android:layout_width="match_parent"
+                                android:layout_height="56dp"
+                                android:backgroundTint="@color/primary"
+                                android:text="@string/register"
+                                android:textAllCaps="false"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:minHeight="56dp"
+                                android:visibility="gone"
+                                app:cornerRadius="28dp"
+                                app:elevation="4dp"
+                                tools:visibility="visible" />
+                    </FrameLayout>
 
                 </LinearLayout>
 

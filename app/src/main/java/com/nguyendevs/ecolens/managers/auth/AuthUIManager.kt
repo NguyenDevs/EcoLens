@@ -14,13 +14,39 @@ class AuthUIManager(private val binding: FragmentLoginBinding, private val conte
     private val tabTitles = arrayOf(R.string.login, R.string.register)
     private var isLoginMode = true
 
-    fun setupLayout() {
+    fun setupLayout(initialIsLogin: Boolean = true) {
         setupTabs()
-        updateTabTypeface(0)
         
-        // Initial state
-        binding.layoutLoginFields.alpha = 1f
-        binding.layoutRegisterFields.alpha = 0f
+        // Restore state
+        this.isLoginMode = initialIsLogin
+        val initialTabIndex = if (initialIsLogin) 0 else 1
+        
+        // Select tab without triggering listener repeatedly if possible, but select() is fine
+        binding.tabLayoutAuth.getTabAt(initialTabIndex)?.select()
+        updateTabTypeface(initialTabIndex)
+        
+        // Initial visibility/alpha states
+        if (initialIsLogin) {
+            binding.expandableLogin.setExpanded(true, false)
+            binding.expandableRegister.setExpanded(false, false)
+            binding.layoutLoginFields.alpha = 1f
+            binding.layoutRegisterFields.alpha = 0f
+            binding.btnLogin.visibility = View.VISIBLE
+            binding.btnLogin.alpha = 1f
+            binding.btnRegister.visibility = View.GONE
+            binding.btnRegister.alpha = 0f
+            binding.etPassword.imeOptions = android.view.inputmethod.EditorInfo.IME_ACTION_DONE
+        } else {
+            binding.expandableLogin.setExpanded(false, false)
+            binding.expandableRegister.setExpanded(true, false)
+            binding.layoutLoginFields.alpha = 0f
+            binding.layoutRegisterFields.alpha = 1f
+            binding.btnLogin.visibility = View.GONE
+            binding.btnLogin.alpha = 0f
+            binding.btnRegister.visibility = View.VISIBLE
+            binding.btnRegister.alpha = 1f
+            binding.etPassword.imeOptions = android.view.inputmethod.EditorInfo.IME_ACTION_NEXT
+        }
     }
 
     private fun setupTabs() {
@@ -53,9 +79,15 @@ class AuthUIManager(private val binding: FragmentLoginBinding, private val conte
             binding.expandableLogin.expand()
             binding.expandableRegister.collapse()
             
-            // Fade In Login / Fade Out Register
+            // Fade In Login Fields / Fade Out Register Fields
             binding.layoutLoginFields.animate().alpha(1f).setDuration(duration).start()
             binding.layoutRegisterFields.animate().alpha(0f).setDuration(duration).start()
+            
+            // Instant Button Toggle (No fade as requested)
+            binding.btnLogin.visibility = View.VISIBLE
+            binding.btnLogin.alpha = 1f
+            binding.btnRegister.visibility = View.GONE
+            binding.btnRegister.alpha = 0f
             
             binding.etPassword.imeOptions = android.view.inputmethod.EditorInfo.IME_ACTION_DONE
         } else {
@@ -63,9 +95,15 @@ class AuthUIManager(private val binding: FragmentLoginBinding, private val conte
             binding.expandableLogin.collapse()
             binding.expandableRegister.expand()
             
-            // Fade Out Login / Fade In Register
+            // Fade Out Login Fields / Fade In Register Fields
             binding.layoutLoginFields.animate().alpha(0f).setDuration(duration).start()
             binding.layoutRegisterFields.animate().alpha(1f).setDuration(duration).start()
+            
+            // Instant Button Toggle (No fade as requested)
+            binding.btnRegister.visibility = View.VISIBLE
+            binding.btnRegister.alpha = 1f
+            binding.btnLogin.visibility = View.GONE
+            binding.btnLogin.alpha = 0f
             
             binding.etPassword.imeOptions = android.view.inputmethod.EditorInfo.IME_ACTION_NEXT
         }
