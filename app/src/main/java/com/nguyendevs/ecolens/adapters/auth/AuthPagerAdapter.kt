@@ -68,31 +68,17 @@ class AuthPagerAdapter : RecyclerView.Adapter<AuthPagerAdapter.PageViewHolder>()
                                                         )
 
                                                         val targetHeight = child.measuredHeight
-                                                        if (viewPager.layoutParams.height ==
-                                                                        targetHeight
-                                                        )
-                                                                return@post
+                                                        if (viewPager.layoutParams.height == targetHeight) return@post
 
-                                                        val animator =
-                                                                ValueAnimator.ofInt(
-                                                                        viewPager.layoutParams
-                                                                                .height
-                                                                                .coerceAtLeast(0),
-                                                                        targetHeight
-                                                                )
-                                                        animator.duration = 400
-                                                        animator.interpolator =
-                                                                DecelerateInterpolator()
-                                                        animator.addUpdateListener { anim ->
-                                                                viewPager.layoutParams =
-                                                                        viewPager.layoutParams
-                                                                                .apply {
-                                                                                        height =
-                                                                                                anim.animatedValue as
-                                                                                                        Int
-                                                                                }
+                                                        val transition = android.transition.ChangeBounds().apply {
+                                                                duration = 400
+                                                                interpolator = androidx.interpolator.view.animation.FastOutSlowInInterpolator()
                                                         }
-                                                        animator.start()
+                                                        android.transition.TransitionManager.beginDelayedTransition(viewPager.parent as ViewGroup, transition)
+                                                        
+                                                        viewPager.layoutParams = viewPager.layoutParams.apply {
+                                                                height = targetHeight
+                                                        }
                                                 }
                                         }
                                 }

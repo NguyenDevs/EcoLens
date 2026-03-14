@@ -87,8 +87,8 @@ class AuthUIManager(private val binding: FragmentLoginBinding, private val conte
         binding.viewPagerAuth.beginFakeDrag()
 
         val animator = ValueAnimator.ofFloat(0f, pageWidth)
-        animator.duration = 400
-        animator.interpolator = DecelerateInterpolator(2f)
+        animator.duration = 450
+        animator.interpolator = androidx.interpolator.view.animation.FastOutSlowInInterpolator()
 
         var previousValue = 0f
         animator.addUpdateListener { anim ->
