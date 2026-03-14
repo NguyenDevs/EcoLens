@@ -17,6 +17,10 @@ class AuthUIManager(private val binding: FragmentLoginBinding, private val conte
     fun setupLayout() {
         setupTabs()
         updateTabTypeface(0)
+        
+        // Initial state
+        binding.layoutLoginFields.alpha = 1f
+        binding.layoutRegisterFields.alpha = 0f
     }
 
     private fun setupTabs() {
@@ -42,19 +46,36 @@ class AuthUIManager(private val binding: FragmentLoginBinding, private val conte
         if (this.isLoginMode == isLogin) return
         this.isLoginMode = isLogin
 
+        val duration = 400L
+
         if (isLogin) {
+            // Expand Login / Collapse Register
             binding.expandableLogin.expand()
             binding.expandableRegister.collapse()
+            
+            // Fade In Login / Fade Out Register
+            binding.layoutLoginFields.animate().alpha(1f).setDuration(duration).start()
+            binding.layoutRegisterFields.animate().alpha(0f).setDuration(duration).start()
+            
             binding.etPassword.imeOptions = android.view.inputmethod.EditorInfo.IME_ACTION_DONE
         } else {
+            // Collapse Login / Expand Register
             binding.expandableLogin.collapse()
             binding.expandableRegister.expand()
+            
+            // Fade Out Login / Fade In Register
+            binding.layoutLoginFields.animate().alpha(0f).setDuration(duration).start()
+            binding.layoutRegisterFields.animate().alpha(1f).setDuration(duration).start()
+            
             binding.etPassword.imeOptions = android.view.inputmethod.EditorInfo.IME_ACTION_NEXT
         }
         
-        // Refresh focused view to update keyboard action if needed
-        binding.etPassword.clearFocus()
-        binding.etPassword.requestFocus()
+        // Focus on Email field
+        binding.etEmail.requestFocus()
+        val text = binding.etEmail.text
+        if (text != null) {
+            binding.etEmail.setSelection(text.length)
+        }
     }
 
     private fun updateTabTypeface(selectedPosition: Int) {

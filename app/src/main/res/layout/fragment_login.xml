@@ -179,6 +179,7 @@
                             app:el_duration="400"
                             app:el_expanded="false">
                         <LinearLayout
+                                android:id="@+id/layoutRegisterFields"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:orientation="vertical">
@@ -241,6 +242,7 @@
                             app:el_duration="400"
                             app:el_expanded="true">
                         <LinearLayout
+                                android:id="@+id/layoutLoginFields"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:orientation="vertical">
