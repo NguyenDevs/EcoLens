@@ -52,7 +52,8 @@ class LoginFragment : Fragment() {
         googleSignInHandler =
                 GoogleSignInHandler(this, userRepository, lifecycleScope, languageManager)
 
-        authUIManager.setupViewPager()
+        val isLogin = savedInstanceState?.getBoolean("is_login", true) ?: true
+        authUIManager.setupLayout(isLogin)
 
         binding.root.post {
             setupPageListeners()
@@ -135,6 +136,13 @@ class LoginFragment : Fragment() {
         (activity as? AuthActivity)?.setFragmentLoading(isLoading)
         binding.btnGoogle.isEnabled = !isLoading
         authUIManager.setLoadingState(isLoading)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        if (::authUIManager.isInitialized) {
+            outState.putBoolean("is_login", authUIManager.isLoginMode())
+        }
     }
 
     override fun onDestroyView() {
