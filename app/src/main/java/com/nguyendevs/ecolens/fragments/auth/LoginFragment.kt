@@ -52,7 +52,7 @@ class LoginFragment : Fragment() {
         googleSignInHandler =
                 GoogleSignInHandler(this, userRepository, lifecycleScope, languageManager)
 
-        authUIManager.setupViewPager()
+        authUIManager.setupLayout()
 
         binding.root.post {
             setupPageListeners()
