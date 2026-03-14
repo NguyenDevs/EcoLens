@@ -427,7 +427,9 @@ class HistoryFragment : Fragment() {
                     } else {
                         binding.shimmerViewContainer.stopShimmer()
                         binding.shimmerViewContainer.visibility = View.GONE
-                        animationHandler.fadeIn(binding.rvHistory)
+                        if (binding.rvHistory.visibility != View.VISIBLE || binding.rvHistory.alpha < 1f) {
+                            animationHandler.fadeIn(binding.rvHistory)
+                        }
                         animationHandler.fadeOut(binding.emptyStateContainer)
                         hasMoreData = allList.size >= currentLimit
 

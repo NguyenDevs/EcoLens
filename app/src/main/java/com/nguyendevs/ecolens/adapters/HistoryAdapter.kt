@@ -141,8 +141,11 @@ class HistoryAdapter(
     private fun setAnimation(view: View, position: Int) {
         if (position > lastPosition) {
             val anim = AnimationUtils.loadAnimation(view.context, R.anim.slide_in_bottom)
+            anim.duration = 300
             view.startAnimation(anim)
             lastPosition = position
+        } else {
+            view.clearAnimation()
         }
     }
 
@@ -355,9 +358,10 @@ class HistoryAdapter(
         Glide.with(imageView)
             .load(model)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
-            .transition(DrawableTransitionOptions.withCrossFade(200))
+            .transition(DrawableTransitionOptions.withCrossFade(150))
             .centerCrop()
             .override(200, 200)
+            .thumbnail(0.1f)
             .placeholder(R.mipmap.ic_launcher)
             .error(R.mipmap.ic_launcher)
             .into(imageView)
