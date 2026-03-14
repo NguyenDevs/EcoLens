@@ -358,7 +358,7 @@ class HistoryAdapter(
         Glide.with(imageView)
             .load(model)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
-            .transition(DrawableTransitionOptions.withCrossFade(150))
+            .transition(DrawableTransitionOptions.withCrossFade(200))
             .centerCrop()
             .override(200, 200)
             .thumbnail(0.1f)
