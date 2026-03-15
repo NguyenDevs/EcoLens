@@ -147,9 +147,12 @@ class HistoryDetailFragment : Fragment() {
             binding.btnFavorite.setImageResource(R.drawable.ic_favorite)
             binding.btnFavorite.imageTintList =
                     ColorStateList.valueOf(
-                            ContextCompat.getColor(requireContext(), R.color.text_tertiary)
+                            ContextCompat.getColor(requireContext(), R.color.text_secondary)
                     )
-            binding.btnFavorite.backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
+            binding.btnFavorite.backgroundTintList =
+                    ColorStateList.valueOf(
+                            ContextCompat.getColor(requireContext(), R.color.border_light)
+                    )
         }
     }
 
