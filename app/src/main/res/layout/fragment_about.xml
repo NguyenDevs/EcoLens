@@ -79,7 +79,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_xs"
-                android:text="Version 1.0.0"
+                android:text="Version 1.0.1"
                 style="@style/TextAppearance.App.Body2"
                 android:background="@drawable/bg_flag_rounded"
                 android:backgroundTint="@color/border_normal"
@@ -106,7 +106,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="@dimen/spacing_xl"
-            android:text="© 2024 NguyenDevs"
+            android:text="© 2026 EcoLens powered by NguyenDevs"
             style="@style/TextAppearance.App.Caption"/>
 
 </LinearLayout>
