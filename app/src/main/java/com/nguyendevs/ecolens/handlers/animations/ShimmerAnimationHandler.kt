@@ -69,13 +69,13 @@ class ShimmerAnimationHandler(private val context: Context) {
                             fadeOut2 = Color.parseColor("#60141E37")
                             fadeOut1 = Color.parseColor("#20141E37")
                         } else {
-                            backgroundColor = Color.parseColor("#F9FAFB")
+                            backgroundColor = Color.parseColor("#ECEFF1")
                             transparent = Color.parseColor("#00F9FAFB")
-                            fadeIn1 = Color.parseColor("#40F7FBFF")
-                            fadeIn2 = Color.parseColor("#80F7FBFF")
-                            shimmerColor = Color.parseColor("#FFF7FBFF")
-                            fadeOut2 = Color.parseColor("#80F7FBFF")
-                            fadeOut1 = Color.parseColor("#40F7FBFF")
+                            fadeIn1 = Color.parseColor("#40F5F7F9")
+                            fadeIn2 = Color.parseColor("#80F8F9FB")
+                            shimmerColor = Color.parseColor("#FFFAFBFC")
+                            fadeOut2 = Color.parseColor("#80F8F9FB")
+                            fadeOut1 = Color.parseColor("#40F5F7F9")
                         }
 
                         val gradient =
