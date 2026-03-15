@@ -143,6 +143,7 @@
     <string name="sort_oldest_first">最旧</string>
     <string name="sort_az">名称 A-Z</string>
     <string name="sort_confidence">置信度</string>
+    <string name="sort_favorite">收藏</string>
     <string name="sort">排序</string>
     <string name="history_total_species_count">已保存 %d 个物种</string>
     <string name="history_results_count">%d 个结果</string>
