@@ -140,12 +140,18 @@ class HistoryAdapter(
 
     private fun setAnimation(view: View, position: Int) {
         if (position > lastPosition) {
-            val anim = AnimationUtils.loadAnimation(view.context, R.anim.slide_in_bottom)
-            anim.duration = 300
-            view.startAnimation(anim)
+            view.alpha = 0f
+            view.translationY = 100f
+            
+            view.animate()
+                .alpha(1f)
+                .translationY(0f)
+                .setDuration(600)
+                .setInterpolator(android.view.animation.DecelerateInterpolator())
+                .setStartDelay(position % 5 * 50L)
+                .start()
+                
             lastPosition = position
-        } else {
-            view.clearAnimation()
         }
     }
 
