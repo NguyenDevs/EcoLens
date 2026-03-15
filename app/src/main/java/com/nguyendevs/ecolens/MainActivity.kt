@@ -53,6 +53,7 @@ import com.nguyendevs.ecolens.utils.TextToSpeechGenerator
 import com.nguyendevs.ecolens.view.EcoLensViewModel
 import java.lang.ref.WeakReference
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.firstOrNull
 
 /** Activity chính của ứng dụng EcoLens. Quản lý navigation, nhận diện loài, và UI chính. */
 class MainActivity : AppCompatActivity() {
@@ -724,13 +725,27 @@ class MainActivity : AppCompatActivity() {
                     state.speciesInfo,
                     loadingStage,
                     state.isTaxonomyTranslating,
-                    state.images
+                    state.images,
+                    state.historyId,
+                    state.isFavorite,
+                    onFavoriteToggle = { id, favorite ->
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            val entry = viewModel.getHistoryBySortOption(com.nguyendevs.ecolens.models.history.HistorySortOption.NEWEST_FIRST)
+                                .firstOrNull()?.find { it.id == id }
+                            
+                            if (entry != null) {
+                                viewModel.toggleFavorite(entry)
+                            }
+                        }
+                    }
             )
 
             if (navigationHandler.isHomeTab()) {
                 if (loadingStage == LoadingStage.COMPLETE) {
-                    binding.fabSpeak.isVisible = true
-                    animationHandler.showFab(binding.fabSpeak)
+                    if (binding.fabSpeak.visibility != View.VISIBLE) {
+                        binding.fabSpeak.isVisible = true
+                        animationHandler.showFab(binding.fabSpeak)
+                    }
                 } else {
                     binding.fabSpeak.isVisible = false
                 }

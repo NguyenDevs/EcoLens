@@ -147,7 +147,15 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun toggleFavorite(entry: HistoryEntry) {
-        viewModelScope.launch { historyManager.toggleFavorite(entry) }
+        viewModelScope.launch {
+            historyManager.toggleFavorite(entry)
+            if (_uiState.value.historyId == entry.id) {
+                val nextState = !entry.isFavorite
+                _uiState.update { currentState ->
+                    currentState.copy(isFavorite = nextState)
+                }
+            }
+        }
     }
 
     fun deleteHistory(entry: HistoryEntry) {

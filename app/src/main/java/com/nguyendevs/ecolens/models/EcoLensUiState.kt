@@ -15,7 +15,9 @@ data class EcoLensUiState(
         val error: String? = null,
         val loadingStage: LoadingStage = LoadingStage.NONE,
         val isTaxonomyTranslating: Boolean = false,
-        val images: List<String> = emptyList()
+        val images: List<String> = emptyList(),
+        val historyId: Int? = null,
+        val isFavorite: Boolean = false
 )
 
 /** Các giai đoạn tải thông tin loài */
