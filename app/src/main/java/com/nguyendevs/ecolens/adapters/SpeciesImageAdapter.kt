@@ -154,6 +154,8 @@ class SpeciesImageAdapter :
                     }
                 )
                 .transition(DrawableTransitionOptions.withCrossFade())
+                .placeholder(R.drawable.bg_skeleton_transparent)
+                .error(R.drawable.bg_skeleton_rounded)
                 .into(binding.ivSpeciesImage)
         }
     }

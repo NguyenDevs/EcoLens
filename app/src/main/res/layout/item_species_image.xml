@@ -15,12 +15,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/ivSpeciesImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
-            android:background="@color/surface_variant" />
+            android:background="@color/surface_variant"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.MediumComponent" />
 
         <com.facebook.shimmer.ShimmerFrameLayout
             android:id="@+id/shimmerSpeciesImage"
@@ -29,10 +30,12 @@
             app:shimmer_auto_start="true"
             app:shimmer_duration="1500">
 
-            <View
+            <com.google.android.material.imageview.ShapeableImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@mipmap/ic_launcher" />
+                android:scaleType="centerCrop"
+                android:src="@drawable/splash"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.MediumComponent" />
         </com.facebook.shimmer.ShimmerFrameLayout>
     </FrameLayout>
 </com.google.android.material.card.MaterialCardView>
