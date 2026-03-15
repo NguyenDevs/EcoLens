@@ -487,6 +487,7 @@ class HistoryFragment : Fragment() {
             HistorySortOption.OLDEST_FIRST -> getString(R.string.sort_oldest_first)
             HistorySortOption.ALPHABETICAL -> getString(R.string.sort_az)
             HistorySortOption.CONFIDENCE_HIGH -> getString(R.string.sort_confidence)
+            HistorySortOption.FAVORITE -> getString(R.string.sort_favorite)
         }
     }
 

@@ -62,6 +62,9 @@ class HistoryRepository(
     fun getHistoryConfidenceHigh(limit: Int) =
             historyDao.getHistoryConfidenceHigh(getUserId(), limit)
 
+    fun getFavoriteHistory(limit: Int) =
+            historyDao.getFavoriteHistory(getUserId())
+
     fun getHistoryByDateRangeAlphabetical(startDate: Long, endDate: Long, limit: Int) =
             historyDao.getHistoryByDateRangeAlphabetical(getUserId(), startDate, endDate, limit)
 
@@ -113,10 +116,18 @@ class HistoryRepository(
                     conservationStatus = entry.speciesInfo.conservationStatus,
                     confidence = entry.speciesInfo.confidence,
                     timestamp = entry.timestamp,
+                    isFavorite = entry.isFavorite,
                     language = entry.language
             )
         }
         externalScope.launch { syncRemote(entry) }
+    }
+
+    suspend fun updateFavoriteStatus(entry: HistoryEntry, isFavorite: Boolean) {
+        withContext(Dispatchers.IO) {
+            historyDao.updateFavoriteStatus(entry.id, isFavorite)
+        }
+        externalScope.launch { syncRemote(entry.copy(isFavorite = isFavorite)) }
     }
 
     suspend fun syncRemote(entry: HistoryEntry) =

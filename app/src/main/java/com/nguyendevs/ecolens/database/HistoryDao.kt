@@ -89,6 +89,12 @@ interface HistoryDao {
 
     @Update suspend fun update(entry: HistoryEntry)
 
+    @Query("UPDATE history_table SET isFavorite = :isFavorite WHERE id = :id")
+    suspend fun updateFavoriteStatus(id: Int, isFavorite: Boolean)
+
+    @Query("SELECT * FROM history_table WHERE userId = :userId AND isFavorite = 1 ORDER BY timestamp DESC")
+    fun getFavoriteHistory(userId: String): Flow<List<HistoryEntry>>
+
     @Query(
             """
         UPDATE history_table 
@@ -108,6 +114,7 @@ interface HistoryDao {
             conservationStatus = :conservationStatus,
             confidence = :confidence,
             timestamp = :timestamp,
+            isFavorite = :isFavorite,
             language = :language
         WHERE id = :id
     """
@@ -130,6 +137,7 @@ interface HistoryDao {
             conservationStatus: String,
             confidence: Double,
             timestamp: Long,
+            isFavorite: Boolean,
             language: String
     )
 

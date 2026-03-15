@@ -16,7 +16,7 @@ import com.nguyendevs.ecolens.models.history.HistoryEntry
 @Database(
         entities =
                 [HistoryEntry::class, ChatSession::class, ChatMessage::class, ExploreItem::class],
-        version = 1,
+        version = 2,
         exportSchema = false
 )
 @TypeConverters(HistoryTypeConverters::class)

@@ -146,6 +146,10 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         return historyManager.getHistoryBySortOption(sortOption, startDate, endDate, limit)
     }
 
+    fun toggleFavorite(entry: HistoryEntry) {
+        viewModelScope.launch { historyManager.toggleFavorite(entry) }
+    }
+
     fun deleteHistory(entry: HistoryEntry) {
         viewModelScope.launch { historyManager.deleteHistory(entry) }
     }

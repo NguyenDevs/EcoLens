@@ -2,6 +2,7 @@ package com.nguyendevs.ecolens.fragments.history
 
 import android.content.ClipData
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Typeface
 import android.net.Uri
@@ -109,11 +110,43 @@ class HistoryDetailFragment : Fragment() {
         bindContent(info)
         setupFab(info)
         setupShareButton(info, entry.imagePath, entry.localImagePath)
+        setupFavoriteButton(entry)
         setupMoreOptionsButton()
         setupTranslateButton(entry)
 
         animationHandler.showFab(binding.fabSpeak)
         binding.fabSpeak.bringToFront()
+    }
+
+    private fun setupFavoriteButton(entry: HistoryEntry) {
+        updateFavoriteUI(entry.isFavorite)
+        binding.btnFavorite.setOnClickListener {
+            animationHandler.performConfirmFeedback(it)
+            viewModel.toggleFavorite(entry)
+            val nextState = !entry.isFavorite
+            updateFavoriteUI(nextState)
+        }
+    }
+
+    private fun updateFavoriteUI(isFavorite: Boolean) {
+        if (isFavorite) {
+            binding.btnFavorite.setImageResource(R.drawable.ic_favorite)
+            binding.btnFavorite.imageTintList =
+                    ColorStateList.valueOf(
+                            ContextCompat.getColor(requireContext(), R.color.primary)
+                    )
+            binding.btnFavorite.backgroundTintList =
+                    ColorStateList.valueOf(
+                            ContextCompat.getColor(requireContext(), R.color.surface_tint)
+                    )
+        } else {
+            binding.btnFavorite.setImageResource(R.drawable.ic_favorite)
+            binding.btnFavorite.imageTintList =
+                    ColorStateList.valueOf(
+                            ContextCompat.getColor(requireContext(), R.color.text_tertiary)
+                    )
+            binding.btnFavorite.backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
+        }
     }
 
     override fun onStop() {
@@ -279,12 +312,18 @@ class HistoryDetailFragment : Fragment() {
                         val remoteUri = Uri.parse(remoteUrl)
                         if (remoteUri.scheme == "http" || remoteUri.scheme == "https") {
                             // Download remote image to cache for sharing
-                            val file = com.nguyendevs.ecolens.utils.ImageUtils.uriToFile(requireContext(), remoteUri, 1024)
-                            imageUri = FileProvider.getUriForFile(
-                                requireContext(),
-                                "${requireContext().packageName}.provider",
-                                file
-                            )
+                            val file =
+                                    com.nguyendevs.ecolens.utils.ImageUtils.uriToFile(
+                                            requireContext(),
+                                            remoteUri,
+                                            1024
+                                    )
+                            imageUri =
+                                    FileProvider.getUriForFile(
+                                            requireContext(),
+                                            "${requireContext().packageName}.provider",
+                                            file
+                                    )
                         } else {
                             imageUri = remoteUri
                         }
@@ -580,40 +619,40 @@ class HistoryDetailFragment : Fragment() {
         binding.containerSections.removeAllViews()
 
         addSection(
-            binding.containerSections,
-            getString(R.string.section_description),
-            info.description,
-            iconRes = R.drawable.ic_desc_section
+                binding.containerSections,
+                getString(R.string.section_description),
+                info.description,
+                iconRes = R.drawable.ic_desc_section
         )
         addSection(
-            binding.containerSections,
-            getString(R.string.section_characteristics),
-            info.characteristics,
-            iconRes = R.drawable.ic_character_section
+                binding.containerSections,
+                getString(R.string.section_characteristics),
+                info.characteristics,
+                iconRes = R.drawable.ic_character_section
         )
         addSection(
-            binding.containerSections,
-            getString(R.string.section_distribution),
-            info.distribution,
-            iconRes = R.drawable.ic_distribution_section
+                binding.containerSections,
+                getString(R.string.section_distribution),
+                info.distribution,
+                iconRes = R.drawable.ic_distribution_section
         )
         addSection(
-            binding.containerSections,
-            getString(R.string.section_habitat),
-            info.habitat,
-            iconRes = R.drawable.ic_habitat_section
+                binding.containerSections,
+                getString(R.string.section_habitat),
+                info.habitat,
+                iconRes = R.drawable.ic_habitat_section
         )
 
-        val conservationContent = if (info.conservationStatus == "Vô hiệu")
-            getString(R.string.iucn_disabled_message)
-        else info.conservationStatus
+        val conservationContent =
+                if (info.conservationStatus == "Vô hiệu") getString(R.string.iucn_disabled_message)
+                else info.conservationStatus
 
         addSection(
-            binding.containerSections,
-            getString(R.string.section_conservation),
-            conservationContent,
-            isCenter = info.conservationStatus == "Vô hiệu",
-            iconRes = R.drawable.ic_conservation_section
+                binding.containerSections,
+                getString(R.string.section_conservation),
+                conservationContent,
+                isCenter = info.conservationStatus == "Vô hiệu",
+                iconRes = R.drawable.ic_conservation_section
         )
     }
 
@@ -635,38 +674,45 @@ class HistoryDetailFragment : Fragment() {
         val bottomMarginDivider = 12.dpToPx()
         val dividerHeight = 1.dpToPx()
 
-        val headerLayout = LinearLayout(context).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = android.view.Gravity.CENTER_VERTICAL
-            layoutParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            ).apply {
-                this.topMargin = topMargin
-                this.bottomMargin = bottomMarginTitle
-            }
-        }
+        val headerLayout =
+                LinearLayout(context).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    gravity = android.view.Gravity.CENTER_VERTICAL
+                    layoutParams =
+                            LinearLayout.LayoutParams(
+                                            ViewGroup.LayoutParams.MATCH_PARENT,
+                                            ViewGroup.LayoutParams.WRAP_CONTENT
+                                    )
+                                    .apply {
+                                        this.topMargin = topMargin
+                                        this.bottomMargin = bottomMarginTitle
+                                    }
+                }
 
         if (iconRes != 0) {
-            val iconView = android.widget.ImageView(context).apply {
-                setImageResource(iconRes)
-                layoutParams = LinearLayout.LayoutParams(28.dpToPx(), 28.dpToPx()).apply {
-                    marginEnd = 8.dpToPx()
-                }
-            }
+            val iconView =
+                    android.widget.ImageView(context).apply {
+                        setImageResource(iconRes)
+                        layoutParams =
+                                LinearLayout.LayoutParams(28.dpToPx(), 28.dpToPx()).apply {
+                                    marginEnd = 8.dpToPx()
+                                }
+                    }
             headerLayout.addView(iconView)
         }
 
-        val titleView = TextView(context).apply {
-            text = title
-            textSize = 20f
-            setTextColor(titleColor)
-            setTypeface(null, Typeface.BOLD)
-            layoutParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-        }
+        val titleView =
+                TextView(context).apply {
+                    text = title
+                    textSize = 20f
+                    setTextColor(titleColor)
+                    setTypeface(null, Typeface.BOLD)
+                    layoutParams =
+                            LinearLayout.LayoutParams(
+                                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                                    ViewGroup.LayoutParams.WRAP_CONTENT
+                            )
+                }
         headerLayout.addView(titleView)
 
         val divider =
