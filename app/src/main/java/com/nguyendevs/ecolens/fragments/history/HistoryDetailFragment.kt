@@ -122,8 +122,12 @@ class HistoryDetailFragment : Fragment() {
         updateFavoriteUI(entry.isFavorite)
         binding.btnFavorite.setOnClickListener {
             animationHandler.performConfirmFeedback(it)
-            viewModel.toggleFavorite(entry)
-            val nextState = !entry.isFavorite
+            val currentEntry = historyEntry ?: return@setOnClickListener
+            val nextState = !currentEntry.isFavorite
+            viewModel.toggleFavorite(currentEntry)
+            
+            // Update local state to reflect the change for subsequent clicks
+            historyEntry = currentEntry.copy(isFavorite = nextState)
             updateFavoriteUI(nextState)
         }
     }
