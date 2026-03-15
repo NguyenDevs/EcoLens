@@ -199,18 +199,16 @@ class MainActivity : AppCompatActivity() {
         val lastNavItem = navigationHandler.restoreLastTab(navigateToSettings)
 
         binding.bottomNavigation.selectedItemId = lastNavItem
-        binding.root.post {
-            navigationHandler.updateNavigationState(
-                    lastNavItem,
-                    uiStateChecker = {
-                        val state = viewModel.uiState.value
-                        val isComplete = state.loadingStage == LoadingStage.COMPLETE
-                        val hasInfo =
-                                state.speciesInfo != null && !state.isLoading && state.error == null
-                        Triple(state.loadingStage, speakerManager.isSpeaking(), hasInfo)
-                    }
-            )
-        }
+        navigationHandler.updateNavigationState(
+                lastNavItem,
+                uiStateChecker = {
+                    val state = viewModel.uiState.value
+                    val isComplete = state.loadingStage == LoadingStage.COMPLETE
+                    val hasInfo =
+                            state.speciesInfo != null && !state.isLoading && state.error == null
+                    Triple(state.loadingStage, speakerManager.isSpeaking(), hasInfo)
+                }
+        )
 
         preloadFragments()
         syncUserData()
