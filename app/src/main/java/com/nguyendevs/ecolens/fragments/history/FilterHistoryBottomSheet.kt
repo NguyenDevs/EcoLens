@@ -49,13 +49,12 @@ class FilterHistoryBottomSheet : BottomSheetDialogFragment() {
         binding.rowOldest.setOnClickListener { selectOption(HistorySortOption.OLDEST_FIRST) }
         binding.rowAlphabet.setOnClickListener { selectOption(HistorySortOption.ALPHABETICAL) }
         binding.rowConfidence.setOnClickListener { selectOption(HistorySortOption.CONFIDENCE_HIGH) }
+        binding.rowFavorite.setOnClickListener { selectOption(HistorySortOption.FAVORITE) }
     }
 
     private fun selectOption(option: HistorySortOption) {
         selectedSortOption = option
         updateSortUI()
-        // Wait a tiny bit for UI update feedback before closing?
-        // Or just apply and close.
         onApplyListener?.invoke(selectedSortOption)
         dismiss()
     }
@@ -65,12 +64,14 @@ class FilterHistoryBottomSheet : BottomSheetDialogFragment() {
         resetSortRow(binding.rowOldest, binding.indicatorOldest)
         resetSortRow(binding.rowAlphabet, binding.indicatorAlphabet)
         resetSortRow(binding.rowConfidence, binding.indicatorConfidence)
+        resetSortRow(binding.rowFavorite, binding.indicatorFavorite)
 
         when (selectedSortOption) {
             HistorySortOption.NEWEST_FIRST -> setActiveSortRow(binding.rowNewest, binding.indicatorNewest)
             HistorySortOption.OLDEST_FIRST -> setActiveSortRow(binding.rowOldest, binding.indicatorOldest)
             HistorySortOption.ALPHABETICAL -> setActiveSortRow(binding.rowAlphabet, binding.indicatorAlphabet)
             HistorySortOption.CONFIDENCE_HIGH -> setActiveSortRow(binding.rowConfidence, binding.indicatorConfidence)
+            HistorySortOption.FAVORITE -> setActiveSortRow(binding.rowFavorite, binding.indicatorFavorite)
         }
     }
 

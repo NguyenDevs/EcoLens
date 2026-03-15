@@ -114,6 +114,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:orientation="vertical"
+                                android:layout_marginStart="5dp"
                                 android:gravity="center_horizontal">
 
                                 <ImageView
@@ -129,12 +130,25 @@
                                         app:tint="@color/primary" />
 
                                 <ImageView
+                                        android:id="@+id/btnFavorite"
+                                        android:layout_width="@dimen/icon_xl"
+                                        android:layout_height="@dimen/icon_xl"
+                                        android:background="@drawable/bg_white_rounded"
+                                        android:backgroundTint="@color/surface_tint"
+                                        android:padding="10dp"
+                                        android:layout_marginTop="@dimen/spacing_xxs"
+                                        android:src="@drawable/ic_favorite"
+                                        android:visibility="gone"
+                                        app:tint="@color/primary" />
+
+
+                                <ImageView
                                         android:id="@+id/btnRetryIdentification"
                                         android:layout_width="@dimen/icon_xl"
                                         android:layout_height="@dimen/icon_xl"
-                                        android:layout_marginTop="@dimen/spacing_xs"
+                                        android:layout_marginTop="@dimen/spacing_xxs"
                                         android:background="@drawable/bg_white_rounded"
-                                        android:backgroundTint="@color/surface_tint"
+                                        android:backgroundTint="@color/retry_surface"
                                         android:padding="10dp"
                                         android:src="@drawable/ic_rotate"
                                         android:contentDescription="@string/btn_retry_identification"

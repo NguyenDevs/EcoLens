@@ -144,6 +144,7 @@
     <string name="sort_oldest_first">Cũ nhất</string>
     <string name="sort_az">Tên A → Z</string>
     <string name="sort_confidence">Độ chính xác</string>
+    <string name="sort_favorite">Ưa thích</string>
     <string name="sort">Sắp xếp</string>
     <string name="history_total_species_count">%d loài đã lưu</string>
     <string name="history_results_count">%d kết quả</string>

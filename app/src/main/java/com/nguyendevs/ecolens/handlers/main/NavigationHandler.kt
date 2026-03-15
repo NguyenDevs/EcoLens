@@ -69,9 +69,14 @@ class NavigationHandler(
 
     /** Cập nhật trạng thái navigation dựa trên tab được chọn */
     fun updateNavigationState(
-            itemId: Int,
-            uiStateChecker: (() -> Triple<LoadingStage, Boolean, Boolean>)? = null
+        itemId: Int,
+        uiStateChecker: (() -> Triple<LoadingStage, Boolean, Boolean>)? = null
     ) {
+        val currentTab = binding.bottomNavigation.selectedItemId
+        if (currentTab == itemId && uiStateChecker == null && binding.homeContainer.root.visibility == View.VISIBLE) {
+            return
+        }
+
         val transition = Fade()
         transition.duration = TRANSITION_DURATION_MS
         TransitionManager.beginDelayedTransition(binding.mainContent, transition)

@@ -390,7 +390,9 @@ class SpeciesIdentificationManager(
                                 isLoading = false,
                                 speciesInfo = currentSpeciesInfo,
                                 loadingStage = LoadingStage.COMPLETE,
-                                images = fetchedImages
+                                images = fetchedImages,
+                                historyId = currentHistoryEntryId,
+                                isFavorite = false
                         )
                 )
             }

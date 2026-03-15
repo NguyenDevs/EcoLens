@@ -152,6 +152,8 @@ class HistoryFragment : Fragment() {
         })
         binding.rvHistory.adapter = adapter
         binding.rvHistory.itemAnimator = null
+        binding.rvHistory.setItemViewCacheSize(20)
+        binding.rvHistory.setHasFixedSize(true)
 
         binding.rvHistory.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -374,33 +376,35 @@ class HistoryFragment : Fragment() {
         observeJob = viewLifecycleOwner.lifecycleScope.launch {
             viewModel.getHistoryBySortOption(currentSortOption, filterStartDate, filterEndDate, currentLimit)
                 .collectLatest { allList ->
-                    var filtered = when (currentCategory) {
-                        CategoryFilter.ALL -> allList
-                        CategoryFilter.ANIMALS -> allList.filter {
-                            val k = it.speciesInfo.kingdom.lowercase()
-                            k.contains("animal") || k.contains("động vật")
+                    val filtered = withContext(Dispatchers.Default) {
+                        var list = when (currentCategory) {
+                            CategoryFilter.ALL -> allList
+                            CategoryFilter.ANIMALS -> allList.filter {
+                                val k = it.speciesInfo.kingdom.lowercase()
+                                k.contains("animal") || k.contains("động vật")
+                            }
+                            CategoryFilter.PLANTS -> allList.filter {
+                                val k = it.speciesInfo.kingdom.lowercase()
+                                k.contains("plant") || k.contains("thực vật")
+                            }
+                            CategoryFilter.FUNGI -> allList.filter {
+                                val k = it.speciesInfo.kingdom.lowercase()
+                                k.contains("fungi") || k.contains("nấm")
+                            }
                         }
-                        CategoryFilter.PLANTS -> allList.filter {
-                            val k = it.speciesInfo.kingdom.lowercase()
-                            k.contains("plant") || k.contains("thực vật")
-                        }
-                        CategoryFilter.FUNGI -> allList.filter {
-                            val k = it.speciesInfo.kingdom.lowercase()
-                            k.contains("fungi") || k.contains("nấm")
-                        }
-                    }
 
-                    if (searchQuery.isNotEmpty()) {
-                        filtered = filtered.filter {
-                            it.speciesInfo.commonName.contains(searchQuery, ignoreCase = true) ||
-                                    it.speciesInfo.scientificName.contains(searchQuery, ignoreCase = true)
+                        if (searchQuery.isNotEmpty()) {
+                            list = list.filter {
+                                it.speciesInfo.commonName.contains(searchQuery, ignoreCase = true) ||
+                                        it.speciesInfo.scientificName.contains(searchQuery, ignoreCase = true)
+                            }
                         }
-                    }
 
-                    filtered = when (currentSortOption) {
-                        HistorySortOption.ALPHABETICAL -> filtered.sortedBy { it.speciesInfo.commonName }
-                        HistorySortOption.CONFIDENCE_HIGH -> filtered.sortedByDescending { it.speciesInfo.confidence }
-                        else -> filtered
+                        when (currentSortOption) {
+                            HistorySortOption.ALPHABETICAL -> list.sortedBy { it.speciesInfo.commonName }
+                            HistorySortOption.CONFIDENCE_HIGH -> list.sortedByDescending { it.speciesInfo.confidence }
+                            else -> list
+                        }
                     }
 
                     val isFiltering = searchQuery.isNotEmpty() || currentCategory != CategoryFilter.ALL || filterStartDate != null
@@ -416,7 +420,6 @@ class HistoryFragment : Fragment() {
 
                     if (filtered.isEmpty()) {
                         if (viewModel.isHistoryLoading.value) {
-                            // Still syncing, keep shimmer and don't show empty state yet
                             return@collectLatest
                         }
                         binding.shimmerViewContainer.stopShimmer()
@@ -484,6 +487,7 @@ class HistoryFragment : Fragment() {
             HistorySortOption.OLDEST_FIRST -> getString(R.string.sort_oldest_first)
             HistorySortOption.ALPHABETICAL -> getString(R.string.sort_az)
             HistorySortOption.CONFIDENCE_HIGH -> getString(R.string.sort_confidence)
+            HistorySortOption.FAVORITE -> getString(R.string.sort_favorite)
         }
     }
 

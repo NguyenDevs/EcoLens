@@ -38,23 +38,35 @@ class HistoryManager(
             when (sortOption) {
                 HistorySortOption.NEWEST_FIRST ->
                     historyRepository.getHistoryByDateRangeNewest(startDate, endDate, limit)
+
                 HistorySortOption.OLDEST_FIRST ->
                     historyRepository.getHistoryByDateRangeOldest(startDate, endDate, limit)
+
                 HistorySortOption.ALPHABETICAL ->
                     historyRepository.getHistoryByDateRangeAlphabetical(startDate, endDate, limit)
+
                 HistorySortOption.CONFIDENCE_HIGH ->
                     historyRepository.getHistoryByDateRangeConfidenceHigh(startDate, endDate, limit)
+
+                HistorySortOption.FAVORITE ->
+                    historyRepository.getFavoriteHistory(limit)
             }
         } else {
             when (sortOption) {
                 HistorySortOption.NEWEST_FIRST ->
                     historyRepository.getHistoryNewestFirst(limit)
+
                 HistorySortOption.OLDEST_FIRST ->
                     historyRepository.getHistoryOldestFirst(limit)
+
                 HistorySortOption.ALPHABETICAL ->
                     historyRepository.getHistoryAlphabetical(limit)
+
                 HistorySortOption.CONFIDENCE_HIGH ->
                     historyRepository.getHistoryConfidenceHigh(limit)
+
+                HistorySortOption.FAVORITE ->
+                    historyRepository.getFavoriteHistory(limit)
             }
         }
 
@@ -159,5 +171,10 @@ class HistoryManager(
                 file.delete()
             }
         }
+    }
+
+    suspend fun toggleFavorite(entry: HistoryEntry) {
+        val newFavoriteStatus = !entry.isFavorite
+        historyRepository.updateFavoriteStatus(entry, newFavoriteStatus)
     }
 }

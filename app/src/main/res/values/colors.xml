@@ -27,6 +27,7 @@
     <color name="surface">#FFFFFF</color>
     <color name="surface_variant">#F9FAFB</color>    <!-- HTML background-light -->
     <color name="surface_tint">#ECFDF5</color>    <!-- emerald-50 tint -->
+    <color name="retry_surface">#FFF7ED</color>
     <color name="background">#F9FAFB</color>   <!-- Match HTML bg-background-light -->
     <color name="shimmer">#f7fbff</color>
     <color name="background_dark">#0F172A</color>    <!-- HTML bg-background-dark (slate-900) -->

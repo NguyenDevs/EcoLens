@@ -143,6 +143,7 @@
     <string name="sort_oldest_first">Oldest</string>
     <string name="sort_az">Name A-Z</string>
     <string name="sort_confidence">Confidence</string>
+    <string name="sort_favorite">Favorite</string>
     <string name="sort">Sort</string>
     <string name="history_total_species_count">%d species saved</string>
     <string name="history_results_count">%d results</string>

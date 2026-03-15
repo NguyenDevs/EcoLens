@@ -7,5 +7,6 @@ enum class HistorySortOption {
     NEWEST_FIRST,
     OLDEST_FIRST,
     ALPHABETICAL,
-    CONFIDENCE_HIGH
+    CONFIDENCE_HIGH,
+    FAVORITE
 }

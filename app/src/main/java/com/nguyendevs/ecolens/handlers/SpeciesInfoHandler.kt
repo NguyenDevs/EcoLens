@@ -90,7 +90,10 @@ class SpeciesInfoHandler(
             info: SpeciesInfo,
             stage: LoadingStage,
             isTaxonomyTranslating: Boolean = false,
-            images: List<String> = emptyList()
+            images: List<String> = emptyList(),
+            historyId: Int? = null,
+            isFavorite: Boolean = false,
+            onFavoriteToggle: (Int, Boolean) -> Unit = { _, _ -> }
     ) {
         if (stage == LoadingStage.NONE) {
             handlerScope.coroutineContext.cancelChildren()
@@ -279,6 +282,7 @@ class SpeciesInfoHandler(
                 homeButtonHandler.setupShareButton(info, currentImageUri)
                 homeButtonHandler.showShareButton()
                 homeButtonHandler.setupCopyButton(info)
+                homeButtonHandler.setupFavoriteButton(historyId, isFavorite, onFavoriteToggle)
 
                 if (info.confidence < 50.0) {
                     homeButtonHandler.showRetryButton()

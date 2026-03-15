@@ -1,15 +1,14 @@
 package com.nguyendevs.ecolens.handlers.home
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.content.Intent
+import android.content.*
+import android.content.res.ColorStateList
 import android.net.Uri
 import android.view.HapticFeedbackConstants
+import androidx.core.content.ContextCompat
+import com.nguyendevs.ecolens.R
 import android.view.View
 import android.widget.Toast
 import androidx.core.content.FileProvider
-import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemCardSpeciesInfoBinding
 import com.nguyendevs.ecolens.handlers.animations.HomeAnimationHandler
 import com.nguyendevs.ecolens.handlers.util.TextFormatter
@@ -38,10 +37,12 @@ class HomeButtonHandler(
     }
 
     fun showShareButton() {
+        if (infoBinding.btnShareInfo.visibility == View.VISIBLE) return
         homeAnimationHandler.scaleInAnimation(infoBinding.btnShareInfo, duration = 400)
     }
 
     fun showRetryButton() {
+        if (infoBinding.btnRetryIdentification.visibility == View.VISIBLE) return
         handlerScope.launch {
             withContext(Dispatchers.Main) {
                 homeAnimationHandler.scaleInAnimation(
@@ -59,11 +60,49 @@ class HomeButtonHandler(
     }
 
     fun showCopyButton() {
+        if (infoBinding.btnCopyScientificName.visibility == View.VISIBLE) return
         homeAnimationHandler.scaleInAnimation(
                 infoBinding.btnCopyScientificName,
                 duration = 400,
                 delay = 100
         )
+    }
+
+    fun setupFavoriteButton(historyId: Int?, isFavorite: Boolean, onFavoriteToggle: (Int, Boolean) -> Unit) {
+        if (historyId == null) {
+            infoBinding.btnFavorite.visibility = View.GONE
+            return
+        }
+
+        updateFavoriteUI(isFavorite)
+        if (infoBinding.btnFavorite.visibility != View.VISIBLE) {
+            homeAnimationHandler.scaleInAnimation(infoBinding.btnFavorite, duration = 400, delay = 150)
+        }
+
+        infoBinding.btnFavorite.setOnClickListener {
+            infoBinding.btnFavorite.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+            val newState = !isFavorite
+            onFavoriteToggle(historyId, newState)
+            updateFavoriteUI(newState)
+
+            setupFavoriteButton(historyId, newState, onFavoriteToggle)
+        }
+    }
+
+    private fun updateFavoriteUI(isFavorite: Boolean) {
+        if (isFavorite) {
+            infoBinding.btnFavorite.setImageResource(R.drawable.ic_favorite)
+            infoBinding.btnFavorite.imageTintList =
+                ColorStateList.valueOf(ContextCompat.getColor(context, R.color.primary))
+            infoBinding.btnFavorite.backgroundTintList =
+                ColorStateList.valueOf(ContextCompat.getColor(context, R.color.surface_tint))
+        } else {
+            infoBinding.btnFavorite.setImageResource(R.drawable.ic_favorite)
+            infoBinding.btnFavorite.imageTintList =
+                ColorStateList.valueOf(ContextCompat.getColor(context, R.color.text_secondary))
+            infoBinding.btnFavorite.backgroundTintList =
+                ColorStateList.valueOf(ContextCompat.getColor(context, R.color.border_light))
+        }
     }
 
     fun setupCopyButton(info: SpeciesInfo) {
