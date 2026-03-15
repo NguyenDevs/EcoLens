@@ -61,16 +61,16 @@ class ShimmerAnimationHandler(private val context: Context) {
                         val fadeOut1: Int
 
                         if (isDarkMode) {
-                            backgroundColor = Color.parseColor("#2C2C2C")
-                            transparent = Color.parseColor("#002C2C2C")
-                            fadeIn1 = Color.parseColor("#20454545")
-                            fadeIn2 = Color.parseColor("#60454545")
-                            shimmerColor = Color.parseColor("#FF454545")
-                            fadeOut2 = Color.parseColor("#60454545")
-                            fadeOut1 = Color.parseColor("#20454545")
+                            backgroundColor = Color.parseColor("#0F172A")
+                            transparent = Color.parseColor("#000F172A")
+                            fadeIn1 = Color.parseColor("#20141E37")
+                            fadeIn2 = Color.parseColor("#60141E37")
+                            shimmerColor = Color.parseColor("#FF141E37")
+                            fadeOut2 = Color.parseColor("#60141E37")
+                            fadeOut1 = Color.parseColor("#20141E37")
                         } else {
                             backgroundColor = Color.parseColor("#ECEFF1")
-                            transparent = Color.parseColor("#00ECEFF1")
+                            transparent = Color.parseColor("#00F9FAFB")
                             fadeIn1 = Color.parseColor("#40F5F7F9")
                             fadeIn2 = Color.parseColor("#80F8F9FB")
                             shimmerColor = Color.parseColor("#FFFAFBFC")

@@ -17,7 +17,7 @@
             android:orientation="vertical"
             android:padding="@dimen/spacing_sm">
 
-        <!-- Image section (giữ nguyên như bạn đã có) -->
+        <!-- Image section -->
         <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/card_explore_image_height">
@@ -45,7 +45,7 @@
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
                         app:shapeAppearanceOverlay="@style/ShapeAppearance.App.MediumComponent"
-                        android:background="@mipmap/ic_launcher" />
+                        android:background="@drawable/splash" />
 
             </com.facebook.shimmer.ShimmerFrameLayout>
 
