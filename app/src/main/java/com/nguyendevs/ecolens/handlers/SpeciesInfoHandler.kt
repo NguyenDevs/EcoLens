@@ -351,11 +351,11 @@ class SpeciesInfoHandler(
     private fun displayScientificName(info: SpeciesInfo) {
         infoBinding.tvScientificName.apply {
             textFormatter.setHtml(this, info.scientificName)
-            homeAnimationHandler.slideAndFadeIn(this, duration = 500, delay = 100)
+            homeAnimationHandler.slideAndFadeIn(this, duration = 800, delay = 100)
         }
         homeAnimationHandler.slideAndFadeIn(
                 infoBinding.btnCopyScientificName,
-                duration = 500,
+                duration = 800,
                 delay = 150
         )
     }
@@ -389,7 +389,7 @@ class SpeciesInfoHandler(
                 textFormatter.setHtml(view, capitalizedCommonName)
 
                 if (lastDisplayedCommonName != info.commonName) {
-                    homeAnimationHandler.slideAndFadeIn(view, duration = 600)
+                    homeAnimationHandler.slideAndFadeIn(view, duration = 1000)
                 } else if (view.visibility != View.VISIBLE) {
                     view.visibility = View.VISIBLE
                     view.alpha = 1f
