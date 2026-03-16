@@ -197,4 +197,10 @@ dependencies {
 
     // Expandable Layout
     implementation("com.github.cachapa:ExpandableLayout:2.9.2")
+
+    //Marquee
+    implementation("io.github.chayanforyou:marquee:1.0.0")
+
+    //Ticker
+    implementation("com.robinhood.ticker:ticker:2.0.4")
 }
