@@ -26,7 +26,7 @@ class HomeAnimationHandler {
         if (view.visibility == View.VISIBLE && view.alpha == 1f) return
 
         view.alpha = 0f
-        view.translationY = 50f
+        view.translationY = 30f
         view.visibility = View.VISIBLE
 
         view.animate()
@@ -34,7 +34,7 @@ class HomeAnimationHandler {
                 .translationY(0f)
                 .setDuration(duration)
                 .setStartDelay(delay)
-                .setInterpolator(DecelerateInterpolator(1.5f))
+                .setInterpolator(DecelerateInterpolator(2.2f))
                 .start()
     }
 
