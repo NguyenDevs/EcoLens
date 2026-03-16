@@ -1,13 +1,18 @@
 package com.nguyendevs.ecolens.handlers.home
 
+import android.animation.ArgbEvaluator
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.drawable.ColorDrawable
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemCardSpeciesInfoBinding
 import com.nguyendevs.ecolens.handlers.animations.HomeAnimationHandler
 import com.nguyendevs.ecolens.models.SpeciesInfo
+import com.robinhood.ticker.TickerUtils
+import com.robinhood.ticker.TickerView
 
 /** Xử lý hiển thị độ tin cậy (confidence) của kết quả nhận dạng loài. */
 class ConfidenceDisplayHandler(
@@ -16,8 +21,17 @@ class ConfidenceDisplayHandler(
         private val homeAnimationHandler: HomeAnimationHandler
 ) {
     private var lastConfidenceValue: String? = null
+    private var colorAnimator: ValueAnimator? = null
     private val infoBinding
         get() = binding
+
+    init {
+        setupTickerView()
+    }
+
+    private fun setupTickerView() {
+        binding.tvConfidence.setCharacterLists(TickerUtils.provideNumberList())
+    }
 
     @SuppressLint("StringFormatInvalid")
     fun displayConfidence(info: SpeciesInfo, isWaiting: Boolean) {
@@ -28,14 +42,16 @@ class ConfidenceDisplayHandler(
         if (isWaiting) {
             lastConfidenceValue = "loading"
 
-            tvConfidence.text = context.getString(R.string.confidence, "...%")
-            tvConfidence.textSize = 13f
+            // Set text instantly without animation for the loading placeholder
+            tvConfidence.setText(context.getString(R.string.confidence_format, "--.--"), false)
 
             iconConfidence.setImageResource(R.drawable.ic_rotate)
             iconConfidence.imageTintList =
                     ContextCompat.getColorStateList(context, R.color.text_secondary)
+            
+            // Set static color for waiting state as requested
             confidenceCard.setCardBackgroundColor(
-                    ContextCompat.getColor(context, R.color.gray_light)
+                    ContextCompat.getColor(context, R.color.surface_tint)
             )
             tvConfidence.setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
 
@@ -46,6 +62,7 @@ class ConfidenceDisplayHandler(
                 }
             }
 
+            // Restore rotation during recognition phase
             homeAnimationHandler.startConfidenceRotation(iconConfidence)
         } else {
             homeAnimationHandler.stopConfidenceRotation(iconConfidence)
@@ -61,7 +78,11 @@ class ConfidenceDisplayHandler(
                 return
             }
 
-            tvConfidence.text = newText
+            // If moving from loading to result, start from 00.00
+            if (lastConfidenceValue == "loading") {
+                tvConfidence.setText(context.getString(R.string.confidence_format, "00.00"), false)
+            }
+            tvConfidence.setText(newText)
 
             val (icon, tint, bg, text) =
                     when {
@@ -90,23 +111,35 @@ class ConfidenceDisplayHandler(
 
             iconConfidence.setImageResource(icon)
             iconConfidence.imageTintList = ContextCompat.getColorStateList(context, tint)
-            confidenceCard.setCardBackgroundColor(ContextCompat.getColor(context, bg))
+            
+            // Smooth color transition
+            animateBackgroundColor(ContextCompat.getColor(context, bg))
             tvConfidence.setTextColor(ContextCompat.getColor(context, text))
 
             confidenceCard.let { card ->
-                if (lastConfidenceValue != newText) {
-                    homeAnimationHandler.popInAnimation(card)
-                } else {
-                    if (card.visibility != View.VISIBLE || card.alpha < 1f) {
-                        card.visibility = View.VISIBLE
-                        card.alpha = 1f
-                        card.scaleX = 1f
-                        card.scaleY = 1f
-                    }
+                if (card.visibility != View.VISIBLE || card.alpha < 1f) {
+                    card.visibility = View.VISIBLE
+                    card.alpha = 1f
+                    card.scaleX = 1f
+                    card.scaleY = 1f
                 }
             }
 
             lastConfidenceValue = newText
+        }
+    }
+
+    private fun animateBackgroundColor(targetColor: Int) {
+        val currentColor = (infoBinding.confidenceCard.background as? ColorDrawable)?.color
+                ?: ContextCompat.getColor(context, R.color.surface_tint)
+        
+        colorAnimator?.cancel()
+        colorAnimator = ValueAnimator.ofObject(ArgbEvaluator(), currentColor, targetColor).apply {
+            duration = 500
+            addUpdateListener { animator ->
+                infoBinding.confidenceCard.setCardBackgroundColor(animator.animatedValue as Int)
+            }
+            start()
         }
     }
 
