@@ -197,4 +197,7 @@ dependencies {
 
     // Expandable Layout
     implementation("com.github.cachapa:ExpandableLayout:2.9.2")
+
+    //Ticker
+    implementation("com.robinhood.ticker:ticker:2.0.4")
 }
