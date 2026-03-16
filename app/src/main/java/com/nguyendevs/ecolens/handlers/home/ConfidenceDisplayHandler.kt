@@ -41,15 +41,11 @@ class ConfidenceDisplayHandler(
 
         if (isWaiting) {
             lastConfidenceValue = "loading"
-
-            // Set text instantly without animation for the loading placeholder
             tvConfidence.setText(context.getString(R.string.confidence_format, "--.--"), false)
 
             iconConfidence.setImageResource(R.drawable.ic_rotate)
             iconConfidence.imageTintList =
                     ContextCompat.getColorStateList(context, R.color.text_secondary)
-            
-            // Set static color for waiting state as requested
             confidenceCard.setCardBackgroundColor(
                     ContextCompat.getColor(context, R.color.surface_tint)
             )
@@ -61,8 +57,6 @@ class ConfidenceDisplayHandler(
                     it.alpha = 1f
                 }
             }
-
-            // Restore rotation during recognition phase
             homeAnimationHandler.startConfidenceRotation(iconConfidence)
         } else {
             homeAnimationHandler.stopConfidenceRotation(iconConfidence)
@@ -78,7 +72,6 @@ class ConfidenceDisplayHandler(
                 return
             }
 
-            // If moving from loading to result, start from 00.00
             if (lastConfidenceValue == "loading") {
                 tvConfidence.setText(context.getString(R.string.confidence_format, "00.00"), false)
             }
