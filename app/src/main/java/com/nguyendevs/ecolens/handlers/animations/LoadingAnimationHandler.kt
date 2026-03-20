@@ -12,9 +12,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-/**
- * Handler tạo hiệu ứng loading với animated dots (...)
- */
+/** Tạo hiệu ứng loading text với dấu chấm (...) nhấp nháy. */
 class LoadingAnimationHandler(
     private val tvLoading: TextView,
     private val coroutineScope: CoroutineScope
@@ -24,8 +22,7 @@ class LoadingAnimationHandler(
     private var currentTextResId: Int = R.string.analyzing_text
     private val transparentSpan = ForegroundColorSpan(Color.TRANSPARENT)
 
-    // ==================== PUBLIC METHODS ====================
-
+    /** Cập nhật text resource và restart animation nếu đang chạy. */
     fun setText(resId: Int) {
         if (currentTextResId != resId) {
             currentTextResId = resId
@@ -36,6 +33,7 @@ class LoadingAnimationHandler(
         }
     }
 
+    /** Bắt đầu animation nhấp nháy dấu chấm. */
     fun start() {
         if (loadingTextJob?.isActive == true) return
 
@@ -53,13 +51,13 @@ class LoadingAnimationHandler(
         }
     }
 
+    /** Dừng animation và hủy coroutine job. */
     fun stop() {
         loadingTextJob?.cancel()
         loadingTextJob = null
     }
 
-    // ==================== PRIVATE METHODS ====================
-
+    /** Ẩn một số dấu chấm theo thứ tự vòng lặp để tạo hiệu ứng nhấp nháy. */
     private fun animateDots(spannable: SpannableString, fullText: String, loopCount: Int) {
         spannable.removeSpan(transparentSpan)
 

@@ -19,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/** Handler quản lý các nút thao tác trên card thông tin loài (share, copy, favorite, retry). */
 class HomeButtonHandler(
     private val context: Context,
     private val binding: ItemCardSpeciesInfoBinding,
@@ -31,16 +32,19 @@ class HomeButtonHandler(
     private val infoBinding
         get() = binding
 
+    /** Ẩn tất cả các nút share và retry. */
     fun hideButtons() {
         infoBinding.btnShareInfo.visibility = View.GONE
         infoBinding.btnRetryIdentification.visibility = View.GONE
     }
 
+    /** Hiển thị nút share với animation scale. */
     fun showShareButton() {
         if (infoBinding.btnShareInfo.visibility == View.VISIBLE) return
         homeAnimationHandler.scaleInAnimation(infoBinding.btnShareInfo, duration = 400)
     }
 
+    /** Hiển thị nút retry với animation delay. */
     fun showRetryButton() {
         if (infoBinding.btnRetryIdentification.visibility == View.VISIBLE) return
         handlerScope.launch {
@@ -55,10 +59,12 @@ class HomeButtonHandler(
         }
     }
 
+    /** Ẩn nút retry. */
     fun hideRetryButton() {
         infoBinding.btnRetryIdentification.visibility = View.GONE
     }
 
+    /** Hiển thị nút copy tên khoa học với animation. */
     fun showCopyButton() {
         if (infoBinding.btnCopyScientificName.visibility == View.VISIBLE) return
         homeAnimationHandler.scaleInAnimation(
@@ -68,6 +74,7 @@ class HomeButtonHandler(
         )
     }
 
+    /** Thiết lập nút favorite, cập nhật UI và xử lý toggle. */
     fun setupFavoriteButton(historyId: Int?, isFavorite: Boolean, onFavoriteToggle: (Int, Boolean) -> Unit) {
         if (historyId == null) {
             infoBinding.btnFavorite.visibility = View.GONE
@@ -89,6 +96,7 @@ class HomeButtonHandler(
         }
     }
 
+    /** Cập nhật giao diện nút favorite theo trạng thái. */
     private fun updateFavoriteUI(isFavorite: Boolean) {
         if (isFavorite) {
             infoBinding.btnFavorite.setImageResource(R.drawable.ic_favorite)
@@ -105,6 +113,7 @@ class HomeButtonHandler(
         }
     }
 
+    /** Thiết lập nút copy để sao chép tên khoa học vào clipboard. */
     fun setupCopyButton(info: SpeciesInfo) {
         infoBinding.btnCopyScientificName.setOnClickListener {
             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -114,6 +123,7 @@ class HomeButtonHandler(
         }
     }
 
+    /** Thiết lập nút share với xử lý chuyển đổi URI ảnh. */
     fun setupShareButton(info: SpeciesInfo, imageUri: Uri?) {
         infoBinding.btnShareInfo.setOnClickListener {
             infoBinding.btnShareInfo.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
@@ -122,7 +132,6 @@ class HomeButtonHandler(
                 var shareableUri = imageUri
 
                 if (shareableUri != null) {
-                    // Nếu là file URI hoặc đường dẫn file
                     if (shareableUri.scheme == "file" || shareableUri.path?.startsWith("/") == true) {
                         try {
                             val path = shareableUri.path
@@ -140,10 +149,7 @@ class HomeButtonHandler(
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
-                    }
-                    // Nếu là content URI (ví dụ từ thư viện ảnh) thì giữ nguyên
-                    // Nếu là http/https URL (từ Explore) thì cần tải về trước khi share
-                    else if (shareableUri.scheme == "http" || shareableUri.scheme == "https") {
+                    } else if (shareableUri.scheme == "http" || shareableUri.scheme == "https") {
                         try {
                             val file = com.nguyendevs.ecolens.utils.ImageUtils.uriToFile(context, shareableUri, 1024)
                             shareableUri = FileProvider.getUriForFile(
@@ -153,7 +159,6 @@ class HomeButtonHandler(
                             )
                         } catch (e: Exception) {
                             e.printStackTrace()
-                            // Nếu tải thất bại, share text only
                             withContext(Dispatchers.Main) {
                                 Toast.makeText(
                                     context,
@@ -170,6 +175,7 @@ class HomeButtonHandler(
         }
     }
 
+    /** Thiết lập nút retry để nhận diện lại. */
     private fun setupRetryButton() {
         infoBinding.btnRetryIdentification.setOnClickListener {
             it.visibility = View.GONE
@@ -177,6 +183,7 @@ class HomeButtonHandler(
         }
     }
 
+    /** Xây dựng nội dung share và khởi chạy Intent chia sẻ. */
     private fun shareSpeciesInfo(info: SpeciesInfo, imageUri: Uri?) {
         val confidencePercent =
                 String.format(
@@ -253,7 +260,6 @@ class HomeButtonHandler(
                         if (imageUri != null) {
                             type = "image/*"
                             putExtra(Intent.EXTRA_STREAM, imageUri)
-                            // Sử dụng newUri thay vì newRawUri để hỗ trợ ContentResolver
                             clipData = ClipData.newUri(context.contentResolver, "Image", imageUri)
                             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         } else {

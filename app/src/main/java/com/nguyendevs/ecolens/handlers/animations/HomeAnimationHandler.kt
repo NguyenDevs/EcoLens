@@ -6,22 +6,11 @@ import android.view.animation.DecelerateInterpolator
 import android.view.animation.LinearInterpolator
 import android.view.animation.OvershootInterpolator
 
-/**
- * Handler quản lý các hiệu ứng animation cho Views trong ứng dụng.
- */
+/** Quản lý các hiệu ứng animation cho Views trong màn hình chính. */
 class HomeAnimationHandler {
     private var confidenceRotationAnimator: ObjectAnimator? = null
 
-    /**
-     * Animation trượt từ dưới lên kết hợp với fade in.
-     *
-     * View sẽ di chuyển từ vị trí bên dưới (50dp) lên vị trí gốc, đồng thời tăng dần độ trong suốt
-     * từ 0 đến 1.
-     *
-     * @param view View cần áp dụng animation
-     * @param duration Thời gian animation tính bằng milliseconds, mặc định 500ms
-     * @param delay Độ trễ trước khi bắt đầu animation, mặc định 0ms
-     */
+    /** Trượt view từ dưới lên kết hợp fade-in. */
     fun slideAndFadeIn(view: View, duration: Long = 500, delay: Long = 0) {
         if (view.visibility == View.VISIBLE && view.alpha == 1f) return
 
@@ -38,14 +27,7 @@ class HomeAnimationHandler {
                 .start()
     }
 
-    /**
-     * Animation fade in.
-     *
-     * Tăng dần độ trong suốt của view từ trạng thái hiện tại đến 1.
-     *
-     * @param view View cần áp dụng animation
-     * @param durationMs Thời gian animation tính bằng milliseconds
-     */
+    /** Tăng dần độ mờ của view đến 1. */
     fun fadeIn(view: View, durationMs: Long) {
         view.animate()
                 .alpha(1f)
@@ -54,14 +36,7 @@ class HomeAnimationHandler {
                 .start()
     }
 
-    /**
-     * Bắt đầu animation xoay vòng liên tục cho view confidence.
-     *
-     * View sẽ xoay 360 độ trong 1 giây và lặp lại vô hạn. Thường dùng để hiển thị trạng thái đang
-     * xử lý/loading.
-     *
-     * @param view View cần áp dụng animation xoay
-     */
+    /** Bắt đầu animation xoay vòng liên tục cho biểu tượng confidence. */
     fun startConfidenceRotation(view: View) {
         if (confidenceRotationAnimator != null) return
 
@@ -74,28 +49,14 @@ class HomeAnimationHandler {
                 }
     }
 
-    /**
-     * Dừng animation xoay và reset view về vị trí ban đầu.
-     *
-     * Hủy animator đang chạy và đặt lại góc xoay về 0 độ.
-     *
-     * @param view View cần dừng animation xoay
-     */
+    /** Dừng animation xoay và reset góc về 0. */
     fun stopConfidenceRotation(view: View) {
         confidenceRotationAnimator?.cancel()
         confidenceRotationAnimator = null
         view.rotation = 0f
     }
 
-    /**
-     * Animation phóng to kết hợp với fade in.
-     *
-     * View sẽ phóng to từ 80% lên 100% kích thước gốc, đồng thời tăng dần độ trong suốt từ 0 đến 1.
-     *
-     * @param view View cần áp dụng animation
-     * @param duration Thời gian animation tính bằng milliseconds, mặc định 400ms
-     * @param delay Độ trễ trước khi bắt đầu animation, mặc định 0ms
-     */
+    /** Phóng to view từ 80% kết hợp fade-in. */
     fun scaleInAnimation(view: View, duration: Long = 400, delay: Long = 0) {
         view.apply {
             visibility = View.VISIBLE
@@ -113,15 +74,7 @@ class HomeAnimationHandler {
         }
     }
 
-    /**
-     * Animation pop in với hiệu ứng overshoot.
-     *
-     * View sẽ phóng to từ 50% lên kích thước lớn hơn 100% rồi co lại về 100%, tạo hiệu ứng "bật ra"
-     * sống động. Đồng thời tăng dần độ trong suốt.
-     *
-     * @param view View cần áp dụng animation
-     * @param duration Thời gian animation tính bằng milliseconds, mặc định 500ms
-     */
+    /** Animation bật ra với hiệu ứng overshoot từ 50%. */
     fun popInAnimation(view: View, duration: Long = 500) {
         view.apply {
             visibility = View.VISIBLE
@@ -139,12 +92,7 @@ class HomeAnimationHandler {
         }
     }
 
-    /**
-     * Giải phóng tài nguyên và hủy tất cả các animator.
-     *
-     * Phương thức này nên được gọi khi không còn sử dụng handler nữa, ví dụ trong onDestroy() của
-     * Activity hoặc onDestroyView() của Fragment.
-     */
+    /** Hủy tất cả animator và giải phóng tài nguyên. */
     fun destroy() {
         confidenceRotationAnimator?.cancel()
         confidenceRotationAnimator = null

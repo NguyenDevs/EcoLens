@@ -29,10 +29,12 @@ class ConfidenceDisplayHandler(
         setupTickerView()
     }
 
+    /** Khởi tạo TickerView với danh sách ký tự số. */
     private fun setupTickerView() {
         binding.tvConfidence.setCharacterLists(TickerUtils.provideNumberList())
     }
 
+    /** Hiển thị độ tin cậy kết quả nhận dạng, hỗ trợ trạng thái chờ và hoàn thành. */
     @SuppressLint("StringFormatInvalid")
     fun displayConfidence(info: SpeciesInfo, isWaiting: Boolean) {
         val tvConfidence = infoBinding.tvConfidence
@@ -104,8 +106,6 @@ class ConfidenceDisplayHandler(
 
             iconConfidence.setImageResource(icon)
             iconConfidence.imageTintList = ContextCompat.getColorStateList(context, tint)
-            
-            // Smooth color transition
             animateBackgroundColor(ContextCompat.getColor(context, bg))
             tvConfidence.setTextColor(ContextCompat.getColor(context, text))
 
@@ -122,6 +122,7 @@ class ConfidenceDisplayHandler(
         }
     }
 
+    /** Chuyển màu nền card confidence mượt mà bằng ValueAnimator. */
     private fun animateBackgroundColor(targetColor: Int) {
         val currentColor = (infoBinding.confidenceCard.background as? ColorDrawable)?.color
                 ?: ContextCompat.getColor(context, R.color.surface_tint)
@@ -136,6 +137,7 @@ class ConfidenceDisplayHandler(
         }
     }
 
+    /** Reset trạng thái đã hiển thị confidence trước đó. */
     fun clearState() {
         lastConfidenceValue = null
     }
