@@ -7,14 +7,14 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.database.FirebaseDatabase
 import com.nguyendevs.ecolens.network.RetrofitClient
 
-/** Application class chính của EcoLens. Khởi tạo các cấu hình toàn cục khi app start. */
+/** Application class chính của EcoLens, khởi tạo cấu hình toàn cục khi app khởi động. */
 class EcoLensApplication : Application() {
 
     companion object {
         @Volatile private var firebaseInitialized = false
     }
 
-    /** Khởi tạo app: theme, Retrofit, Firebase. */
+    /** Khởi tạo theme, Retrofit và Firebase khi app start. */
     override fun onCreate() {
         super.onCreate()
         setupTheme()
@@ -23,7 +23,7 @@ class EcoLensApplication : Application() {
         initFirebasePersistence()
     }
 
-    /** Thiết lập theme sáng/tối từ preferences. */
+    /** Áp dụng chế độ sáng/tối từ SharedPreferences. */
     private fun setupTheme() {
         val themePref = getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         val isDarkMode = themePref.getBoolean("dark_mode", false)
@@ -36,9 +36,7 @@ class EcoLensApplication : Application() {
         AppCompatDelegate.setDefaultNightMode(nightMode)
     }
 
-    /**
-     * Khởi tạo Firebase persistence với double-checked locking.
-     */
+    /** Kích hoạt Firebase offline persistence với double-checked locking. */
     private fun initFirebasePersistence() {
         if (!firebaseInitialized) {
             synchronized(this) {
