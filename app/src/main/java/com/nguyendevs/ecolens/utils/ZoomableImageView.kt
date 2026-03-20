@@ -9,6 +9,7 @@ import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
 
+/** Tùy biến vùng xem tổng hợp để hỗ trợ phóng to và thu nhỏ linh hoạt. */
 class ZoomableImageView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -22,12 +23,10 @@ class ZoomableImageView @JvmOverloads constructor(
     private val mMatrixValues = FloatArray(9)
     private var mMode = NONE
 
-    // Scales
     private var mSaveScale = 1f
     private var mMinScale = 1f
     private var mMaxScale = 3f
 
-    // View dimensions
     private var origWidth = 0f
     private var origHeight = 0f
     private var viewWidth = 0
@@ -69,7 +68,6 @@ class ZoomableImageView @JvmOverloads constructor(
 
             mMatrix.setScale(scale, scale)
 
-            // Center the image
             var redundantYSpace = viewHeight.toFloat() - (scale * drawableHeight.toFloat())
             var redundantXSpace = viewWidth.toFloat() - (scale * drawableWidth.toFloat())
 
@@ -114,7 +112,7 @@ class ZoomableImageView @JvmOverloads constructor(
             }
         }
         imageMatrix = mMatrix
-        return true // indicate event was handled
+        return true
     }
 
     private inner class ScaleListener : ScaleGestureDetector.SimpleOnScaleGestureListener() {
