@@ -7,10 +7,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.nguyendevs.ecolens.BuildConfig
 import java.util.Locale
 
-/**
- * Manager quản lý ngôn ngữ ứng dụng Hỗ trợ lưu preference local và đồng bộ lên Firebase Tự động
- * apply locale cho Context
- */
+/** Quản lý ngôn ngữ ứng dụng và tự động đồng bộ cấu hình người dùng. */
 class LanguageManager(private val context: Context) {
 
     companion object {
@@ -28,19 +25,13 @@ class LanguageManager(private val context: Context) {
     private val database = FirebaseDatabase.getInstance(BuildConfig.FIREBASE_DATABASE_URL)
     private val auth = FirebaseAuth.getInstance()
 
-    // ==================== GET & SET LANGUAGE ====================
-
-    /**
-     * Lấy ngôn ngữ hiện tại từ SharedPreferences
-     * @return Language code (vi hoặc en), default là vi
-     */
+    /** Lấy mã ngôn ngữ hiện hành trong máy hoặc định dạng mặc định. */
     fun getLanguage(): String {
         val savedLang = prefs.getString(KEY_LANG, null)
         if (savedLang != null) {
             return savedLang
         }
 
-        // Detect device language on first launch
         val systemLocale =
                 androidx.core.os.ConfigurationCompat.getLocales(
                         android.content.res.Resources.getSystem().configuration
@@ -53,18 +44,17 @@ class LanguageManager(private val context: Context) {
                     else -> LANG_EN
                 }
 
-        // Save for future launches
         prefs.edit().putString(KEY_LANG, defaultLang).apply()
         return defaultLang
     }
 
-    /** Set ngôn ngữ mới Tự động lưu vào SharedPreferences và đồng bộ lên Firebase */
+    /** Lưu cấu hình ngôn ngữ mới và đẩy lên hệ thống đám mây. */
     fun setLanguage(langCode: String) {
         prefs.edit().putString(KEY_LANG, langCode).apply()
         updateUserLanguage(langCode)
     }
 
-    /** Đồng bộ language setting lên Firebase (nếu đã đăng nhập) */
+    /** Cập nhật biến số bản địa hóa cá nhân lên Firebase. */
     private fun updateUserLanguage(langCode: String) {
         val uid = auth.currentUser?.uid
         if (uid != null) {
@@ -76,9 +66,7 @@ class LanguageManager(private val context: Context) {
         }
     }
 
-    // ==================== CONTEXT CONFIGURATION ====================
-
-    /** Tạo Context mới với locale đã được cấu hình Dùng để apply ngôn ngữ cho toàn bộ app */
+    /** Cấy cấu hình ngôn ngữ xuyên suốt quy mô toàn ứng dụng. */
     fun updateBaseContext(context: Context): Context {
         val lang = getLanguage()
         val locale = Locale(lang)

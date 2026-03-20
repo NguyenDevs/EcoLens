@@ -8,11 +8,7 @@ import android.util.Log
 import com.nguyendevs.ecolens.managers.setting.LanguageManager
 import java.util.Locale
 
-/**
- * Manager quản lý Text-to-Speech (TTS)
- * Hỗ trợ đọc text từng câu với pause/resume và cleanup text
- * Tự động điều chỉnh tốc độ đọc theo ngôn ngữ
- */
+/** Quản lý cơ chế đọc văn bản và điều phối tốc độ phát ngôn. */
 class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
 
     private val appContext = context.applicationContext
@@ -44,11 +40,7 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
         initializeTextToSpeech()
     }
 
-    // ==================== INITIALIZATION ====================
-
-    /**
-     * Khởi tạo TextToSpeech engine và setup listeners
-     */
+    /** Nạp thư viện TTS cốt lõi và cài đặt bộ lắng nghe ngữ âm. */
     private fun initializeTextToSpeech() {
         textToSpeech = TextToSpeech(appContext, this)
         textToSpeech?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
@@ -62,9 +54,7 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
         })
     }
 
-    /**
-     * Callback khi TTS engine khởi tạo xong
-     */
+    /** Thao tác bước kế tiếp khi hệ thống giọng nói được thiết lập sẵn sàng. */
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
             val languageManager = LanguageManager(appContext)
@@ -76,12 +66,7 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
         }
     }
 
-    // ==================== LANGUAGE CONFIGURATION ====================
-
-    /**
-     * Set ngôn ngữ cho TTS
-     * Tự động điều chỉnh speech rate cho tiếng Việt (1.05x)
-     */
+    /** Chuyển đổi ngôn ngữ phát và tự động hóa điều hướng vận tốc. */
     fun setLanguage(langCode: String) {
         val locale = Locale(langCode)
         val result = textToSpeech?.setLanguage(locale)
@@ -93,9 +78,7 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
         }
     }
 
-    /**
-     * Áp dụng speech rate phù hợp với ngôn ngữ
-     */
+    /** Phân phối tốc độ đọc riêng biệt tương thích đặc thù vùng. */
     private fun applySpeechRate(langCode: String) {
         if (langCode == "vi") {
             textToSpeech?.setSpeechRate(RATE_VIETNAMESE)
@@ -106,13 +89,7 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
         }
     }
 
-    // ==================== SPEECH CONTROL ====================
-
-    /**
-     * Đọc text
-     * Nếu đang pause và text giống nhau, sẽ resume từ câu hiện tại
-     * Nếu text mới, sẽ cleanup và split thành sentences
-     */
+    /** Đẩy lệnh diễn đọc mới hoặc nối tiếp văn bản tạm dừng từ trước. */
     fun speak(text: String) {
         if (!isLoaded) return
 
@@ -124,18 +101,13 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
         startNewSpeech(text)
     }
 
-    /**
-     * Resume speech từ câu hiện tại
-     */
+    /** Trở lại chu trình diễn xuất cho dòng nội dung đang dang dở. */
     private fun resumeSpeech() {
         isPaused = false
         speakCurrentSentence(TextToSpeech.QUEUE_FLUSH)
     }
 
-    /**
-     * Bắt đầu đọc text mới
-     * Cleanup text, split thành sentences và bắt đầu từ câu đầu tiên
-     */
+    /** Cắt vỡ cụm từ ngữ và đẩy phát sinh phiên đọc mới. */
     private fun startNewSpeech(text: String) {
         isPaused = false
         currentRawText = text
@@ -155,9 +127,7 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
         speakCurrentSentence(TextToSpeech.QUEUE_ADD)
     }
 
-    /**
-     * Play silence trước khi đọc (để tránh bị cắt đầu câu)
-     */
+    /** Ngắt chừng nhẹ trước đoạn phát chống hao hụt âm thanh đầu. */
     private fun playSilencePrefix() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             textToSpeech?.playSilentUtterance(
@@ -168,9 +138,7 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
         }
     }
 
-    /**
-     * Pause speech hiện tại
-     */
+    /** Đóng bằng luồng đọc nội dung. */
     fun pause() {
         if (isSpeaking()) {
             isPaused = true
@@ -178,27 +146,18 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
         }
     }
 
-    /**
-     * Kiểm tra xem có đang đọc không
-     */
+    /** Tra cứu tiến trình đang đọc diễn ra không. */
     fun isSpeaking(): Boolean {
         return textToSpeech?.isSpeaking == true
     }
 
-    /**
-     * Shutdown TTS engine
-     */
+    /** Triệt tiêu đối tượng và giải phóng hoàn toàn bộ nhớ máy đọc. */
     fun shutdown() {
         textToSpeech?.stop()
         textToSpeech?.shutdown()
     }
 
-    // ==================== UTTERANCE HANDLING ====================
-
-    /**
-     * Xử lý khi một utterance đọc xong
-     * Tự động chuyển sang câu tiếp theo hoặc kết thúc
-     */
+    /** Xử lý tự động chuyển câu nói ngay luồng trước kết thúc. */
     private fun handleUtteranceDone(utteranceId: String?) {
         if (utteranceId == "SILENCE_PREFIX") return
 
@@ -212,17 +171,13 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
         }
     }
 
-    /**
-     * Kết thúc speech và reset state
-     */
+    /** Đưa hệ thống tiến trình về không và xuất lệnh hoàn tất. */
     private fun finishSpeech() {
         currentSentenceIndex = 0
         onSpeechFinished?.invoke()
     }
 
-    /**
-     * Đọc câu hiện tại
-     */
+    /** Yêu cầu máy phát một mẩu phân đoạn trích sẵn. */
     private fun speakCurrentSentence(queueMode: Int) {
         if (currentSentenceIndex < sentenceList.size) {
             val sentence = sentenceList[currentSentenceIndex]
@@ -235,12 +190,7 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
         }
     }
 
-    // ==================== TEXT PROCESSING ====================
-
-    /**
-     * Cleanup text trước khi đọc
-     * Loại bỏ parentheses tiếng Việt, taxonomy terms, symbols, etc.
-     */
+    /** Thanh lọc các ký tự đặc thù tránh trình trạng đọc dính âm lạ. */
     private fun cleanupForSpeech(text: String): String {
         var result = text
 
@@ -253,9 +203,7 @@ class SpeakerManager(context: Context) : TextToSpeech.OnInitListener {
         return result.trim()
     }
 
-    /**
-     * Split text thành sentences dựa trên dấu câu
-     */
+    /** Bẻ nhỏ chuỗi văn bản lớn dựa vào cấu trúc câu điển hình. */
     private fun splitTextToSentences(text: String): List<String> {
         return text.split(REGEX_SENTENCE_SPLIT)
             .filter { it.isNotBlank() }
