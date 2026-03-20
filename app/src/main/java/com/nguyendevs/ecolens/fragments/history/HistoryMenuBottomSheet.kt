@@ -8,6 +8,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.LayoutBottomSheetHistoryMenuBinding
 
+/** Bottom sheet menu cho chi tiết lịch sử: xóa, tải ảnh, xuất file. */
 class HistoryMenuBottomSheet : BottomSheetDialogFragment() {
 
     private var _binding: LayoutBottomSheetHistoryMenuBinding? = null
@@ -18,6 +19,7 @@ class HistoryMenuBottomSheet : BottomSheetDialogFragment() {
     var onDownloadClicked: (() -> Unit)? = null
     var onExportClicked: (() -> Unit)? = null
 
+    /** Inflate layout của bottom sheet. */
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
@@ -27,6 +29,7 @@ class HistoryMenuBottomSheet : BottomSheetDialogFragment() {
         return binding.root
     }
 
+    /** Thiết lập listener cho các nút xóa, tải ảnh và xuất file. */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -53,6 +56,8 @@ class HistoryMenuBottomSheet : BottomSheetDialogFragment() {
 
     companion object {
         const val TAG = "HistoryMenuBottomSheet"
+
+        /** Tạo instance mới của HistoryMenuBottomSheet. */
         fun newInstance() = HistoryMenuBottomSheet()
     }
 }

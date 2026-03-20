@@ -15,10 +15,7 @@ import com.nguyendevs.ecolens.databinding.FragmentLanguageSelectionBinding
 import com.nguyendevs.ecolens.managers.setting.LanguageManager
 import com.nguyendevs.ecolens.models.Language
 
-/**
- * Fragment cho phép người dùng chọn ngôn ngữ ứng dụng
- * Khi chọn ngôn ngữ mới, app sẽ restart để áp dụng thay đổi
- */
+/** Fragment chọn ngôn ngữ ứng dụng, restart app khi thay đổi ngôn ngữ. */
 class LanguageSelectionFragment : Fragment() {
 
     private var _binding: FragmentLanguageSelectionBinding? = null
@@ -27,8 +24,7 @@ class LanguageSelectionFragment : Fragment() {
     private lateinit var languageAdapter: LanguageAdapter
     private lateinit var languageManager: LanguageManager
 
-    // ==================== LIFECYCLE ====================
-
+    /** Inflate layout của fragment. */
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -38,11 +34,11 @@ class LanguageSelectionFragment : Fragment() {
         return binding.root
     }
 
+    /** Khởi tạo language manager và danh sách ngôn ngữ. */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         languageManager = LanguageManager(requireContext())
         setupLanguageList()
-        //setupListeners()
     }
 
     override fun onDestroyView() {
@@ -50,8 +46,7 @@ class LanguageSelectionFragment : Fragment() {
         _binding = null
     }
 
-    // ==================== UI SETUP ====================
-
+    /** Thiết lập RecyclerView hiển thị danh sách ngôn ngữ khả dụng. */
     private fun setupLanguageList() {
         val currentLang = languageManager.getLanguage()
 
@@ -93,20 +88,7 @@ class LanguageSelectionFragment : Fragment() {
         }
     }
 
-    /*private fun setupListeners() {
-        binding.btnBack.setOnClickListener {
-            closeFragment()
-        }
-    }
-
-     */
-
-    // ==================== LANGUAGE SELECTION ====================
-
-    /**
-     * Xử lý khi người dùng chọn ngôn ngữ mới
-     * Restart app để áp dụng thay đổi và quay về Settings
-     */
+    /** Lưu ngôn ngữ mới và restart app để áp dụng thay đổi. */
     private fun onLanguageSelected(language: Language) {
         if (language.code != languageManager.getLanguage()) {
             languageManager.setLanguage(language.code)
@@ -120,8 +102,7 @@ class LanguageSelectionFragment : Fragment() {
         }
     }
 
-    // ==================== NAVIGATION ====================
-
+    /** Quay lại fragment trước. */
     private fun closeFragment() {
         parentFragmentManager.popBackStack()
     }
