@@ -13,11 +13,13 @@ import com.nguyendevs.ecolens.database.UserRepository
 import com.nguyendevs.ecolens.databinding.ActivityAuthBinding
 import com.nguyendevs.ecolens.managers.setting.LanguageManager
 
+/** Base activity cho màn hình xác thực, cung cấp binding và các hàm dùng chung. */
 abstract class BaseAuthActivity : AppCompatActivity() {
 
     protected lateinit var binding: ActivityAuthBinding
     protected val userRepository = UserRepository()
 
+    /** Khởi tạo binding, theme và edge-to-edge. */
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_EcoLens)
         super.onCreate(savedInstanceState)
@@ -28,6 +30,7 @@ abstract class BaseAuthActivity : AppCompatActivity() {
         setupEdgeToEdge()
     }
 
+    /** Áp dụng ngôn ngữ đã chọn cho context. */
     override fun attachBaseContext(newBase: Context?) {
         if (newBase != null) {
             val languageManager = LanguageManager(newBase)
@@ -37,6 +40,7 @@ abstract class BaseAuthActivity : AppCompatActivity() {
         }
     }
 
+    /** Thiết lập giao diện edge-to-edge, trong suốt status bar và nav bar. */
     private fun setupEdgeToEdge() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.statusBarColor = android.graphics.Color.TRANSPARENT
@@ -54,6 +58,7 @@ abstract class BaseAuthActivity : AppCompatActivity() {
         }
     }
 
+    /** Áp dụng theme sáng/tối và lưu vào preferences. */
     protected fun applyUserTheme(isDarkMode: Boolean) {
         val sharedPref = getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         sharedPref.edit().putBoolean("dark_mode", isDarkMode).apply()
@@ -66,11 +71,13 @@ abstract class BaseAuthActivity : AppCompatActivity() {
         AppCompatDelegate.setDefaultNightMode(nightMode)
     }
 
+    /** Lưu trạng thái remember me vào preferences. */
     protected fun saveRememberMe(isRemember: Boolean) {
         val sharedPref = getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         sharedPref.edit().putBoolean("remember_me", isRemember).apply()
     }
 
+    /** Hiển thị hoặc ẩn overlay loading. */
     protected fun setLoading(isLoading: Boolean) {
         binding.loadingOverlay.visibility = if (isLoading) View.VISIBLE else View.GONE
     }
