@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.nguyendevs.ecolens.databinding.LayoutBottomSheetChatMenuBinding
 
+/** Bottom sheet menu cho chat, chứa tùy chọn xóa phiên chat. */
 class ChatMenuBottomSheet : BottomSheetDialogFragment() {
 
     private var _binding: LayoutBottomSheetChatMenuBinding? = null
@@ -15,6 +16,7 @@ class ChatMenuBottomSheet : BottomSheetDialogFragment() {
 
     var onDeleteClicked: (() -> Unit)? = null
 
+    /** Inflate layout của bottom sheet. */
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
@@ -24,6 +26,7 @@ class ChatMenuBottomSheet : BottomSheetDialogFragment() {
         return binding.root
     }
 
+    /** Thiết lập listener cho nút xóa. */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -40,6 +43,8 @@ class ChatMenuBottomSheet : BottomSheetDialogFragment() {
 
     companion object {
         const val TAG = "ChatMenuBottomSheet"
+
+        /** Tạo instance mới của ChatMenuBottomSheet. */
         fun newInstance() = ChatMenuBottomSheet()
     }
 }

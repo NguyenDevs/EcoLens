@@ -26,6 +26,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
 
+/** Model UI cho một item lịch sử, bao gồm thông tin ngày nhóm và trạng thái placeholder. */
 data class HistoryUiModel(
     val entry: HistoryEntry,
     val isFirstOfDay: Boolean,
@@ -33,8 +34,10 @@ data class HistoryUiModel(
     val isPlaceholder: Boolean = false
 )
 
+/** Kiểu hiển thị danh sách lịch sử: dọc hoặc lưới. */
 enum class HistoryViewMode { LIST, GRID }
 
+/** Adapter hiển thị lịch sử nhận diện dạng list hoặc grid, với phân nhóm theo ngày. */
 class HistoryAdapter(
     private val markwon: Markwon,
     private val clickListener: (HistoryEntry) -> Unit
@@ -61,6 +64,7 @@ class HistoryAdapter(
         setHasStableIds(true)
     }
 
+    /** Kiểm tra item ở vị trí có phải là header ngày không. */
     fun isDateHeader(position: Int): Boolean {
         if (position >= currentList.size) return false
         return currentList[position].isFirstOfDay
@@ -71,6 +75,7 @@ class HistoryAdapter(
         return getItem(position).entry.id.toLong()
     }
 
+    /** Đặt trạng thái loading và cập nhật RecyclerView. */
     fun setLoading(loading: Boolean) {
         if (isLoading == loading) return
         isLoading = loading
@@ -85,6 +90,7 @@ class HistoryAdapter(
         return if (viewMode == HistoryViewMode.LIST) VIEW_TYPE_LIST else VIEW_TYPE_GRID
     }
 
+    /** Tạo ViewHolder phù hợp theo loại view (list, grid, loading). */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
             VIEW_TYPE_LOADING -> {
@@ -125,6 +131,7 @@ class HistoryAdapter(
         }
     }
 
+    /** Bind dữ liệu và chạy animation xuất hiện cho item. */
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is ListViewHolder -> {
@@ -138,6 +145,7 @@ class HistoryAdapter(
         }
     }
 
+    /** Chạy animation trượt lên khi item xuất hiện lần đầu. */
     private fun setAnimation(view: View, position: Int) {
         if (position > lastPosition) {
             view.alpha = 0f
@@ -155,6 +163,7 @@ class HistoryAdapter(
         }
     }
 
+    /** DiffCallback so sánh history items. */
     object HistoryDiffCallback : DiffUtil.ItemCallback<HistoryUiModel>() {
         override fun areItemsTheSame(o: HistoryUiModel, n: HistoryUiModel) = o.entry.id == n.entry.id
         override fun areContentsTheSame(o: HistoryUiModel, n: HistoryUiModel) = o == n
@@ -162,9 +171,11 @@ class HistoryAdapter(
             if (o.entry.id == n.entry.id) n else null
     }
 
+    /** ViewHolder hiển thị lịch sử dạng danh sách dọc. */
     inner class ListViewHolder(private val b: ItemSpeciesHistoryBinding) :
         RecyclerView.ViewHolder(b.root) {
 
+        /** Bind thông tin lịch sử vào view list. */
         fun bind(uiModel: HistoryUiModel, click: (HistoryEntry) -> Unit) {
             if (uiModel.isPlaceholder) {
                 b.root.visibility = View.GONE
@@ -200,6 +211,7 @@ class HistoryAdapter(
             b.itemContainer.setOnClickListener { click(entry) }
         }
 
+        /** Hiển thị hoặc ẩn header ngày tháng. */
         private fun setupDateHeader(isFirst: Boolean, dt: java.time.ZonedDateTime) {
             b.dateHeaderContainer.visibility = if (isFirst) View.VISIBLE else View.GONE
             if (isFirst) {
@@ -212,14 +224,17 @@ class HistoryAdapter(
             b.timelineLine.visibility = if (viewMode == HistoryViewMode.LIST) View.VISIBLE else View.GONE
         }
 
+        /** Kiểm tra ngày có phải hôm nay không. */
         private fun isToday(dt: java.time.ZonedDateTime): Boolean {
             return dt.toLocalDate() == java.time.LocalDate.now()
         }
 
+        /** Kiểm tra ngày có phải hôm qua không. */
         private fun isYesterday(dt: java.time.ZonedDateTime): Boolean {
             return dt.toLocalDate() == java.time.LocalDate.now().minusDays(1)
         }
 
+        /** Đặt góc bo tròn card phù hợp với vị trí trong nhóm ngày. */
         private fun setupCardAppearance(isFirst: Boolean, isLast: Boolean) {
             val bg = when {
                 isFirst && isLast -> R.drawable.bg_history_item_single
@@ -231,6 +246,7 @@ class HistoryAdapter(
             b.itemDivider.visibility = if (isLast) View.GONE else View.VISIBLE
         }
 
+        /** Hiển thị badge độ tin cậy với màu và icon tương ứng. */
         private fun setupConfidenceBadge(entry: HistoryEntry) {
             val (colorRes, iconRes) = when {
                 entry.speciesInfo.confidence >= 50 -> Pair(R.color.confidence_high, R.drawable.ic_check_circle)
@@ -242,9 +258,11 @@ class HistoryAdapter(
         }
     }
 
+    /** ViewHolder hiển thị lịch sử dạng lưới. */
     inner class GridViewHolder(private val b: ItemSpeciesHistoryGridBinding) :
         RecyclerView.ViewHolder(b.root) {
 
+        /** Bind thông tin lịch sử vào view grid. */
         fun bind(uiModel: HistoryUiModel, click: (HistoryEntry) -> Unit) {
             if (uiModel.isPlaceholder) {
                 b.root.visibility = View.INVISIBLE
@@ -280,6 +298,7 @@ class HistoryAdapter(
             b.itemContainer.setOnClickListener { click(entry) }
         }
 
+        /** Hiển thị hoặc ẩn header ngày trong chế độ grid. */
         private fun setupDateHeader(uiModel: HistoryUiModel, dt: java.time.ZonedDateTime) {
             val position = bindingAdapterPosition
 
@@ -306,14 +325,17 @@ class HistoryAdapter(
             }
         }
 
+        /** Kiểm tra ngày có phải hôm nay không. */
         private fun isToday(dt: java.time.ZonedDateTime): Boolean {
             return dt.toLocalDate() == java.time.LocalDate.now()
         }
 
+        /** Kiểm tra ngày có phải hôm qua không. */
         private fun isYesterday(dt: java.time.ZonedDateTime): Boolean {
             return dt.toLocalDate() == java.time.LocalDate.now().minusDays(1)
         }
 
+        /** Hiển thị badge độ tin cậy với màu và icon tương ứng. */
         private fun setupConfidenceBadge(entry: HistoryEntry) {
             val (colorRes, iconRes) = when {
                 entry.speciesInfo.confidence >= 50 -> Pair(R.color.confidence_high, R.drawable.ic_check_circle)
@@ -325,6 +347,7 @@ class HistoryAdapter(
         }
     }
 
+    /** Hiển thị badge vương quốc sinh học (động vật, thực vật, nấm). */
     private fun setupCategoryBadge(tv: TextView, kingdom: String) {
         val k = kingdom.lowercase()
         when {
@@ -351,6 +374,7 @@ class HistoryAdapter(
         }
     }
 
+    /** Tải ảnh lịch sử từ local hoặc remote vào ImageView. */
     private fun loadImage(entry: HistoryEntry, imageView: com.google.android.material.imageview.ShapeableImageView) {
         val localPath = entry.localImagePath
         var model: Any? = null

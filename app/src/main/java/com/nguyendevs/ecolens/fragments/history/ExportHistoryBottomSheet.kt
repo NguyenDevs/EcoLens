@@ -11,6 +11,7 @@ import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.LayoutBottomSheetExportHistoryBinding
 import com.nguyendevs.ecolens.utils.ExportUtils.ExportFormat
 
+/** Bottom sheet chọn định dạng xuất lịch sử (DOCX, XLSX, PDF, JSON). */
 class ExportHistoryBottomSheet : BottomSheetDialogFragment() {
 
     private var _binding: LayoutBottomSheetExportHistoryBinding? = null
@@ -19,7 +20,7 @@ class ExportHistoryBottomSheet : BottomSheetDialogFragment() {
 
     var onExportConfirmed: ((ExportFormat, Boolean) -> Unit)? = null
 
-
+    /** Inflate layout của bottom sheet. */
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
@@ -29,15 +30,16 @@ class ExportHistoryBottomSheet : BottomSheetDialogFragment() {
         return binding.root
     }
 
+    /** Mở rộng bottom sheet và thiết lập các listener lựa chọn. */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Expand bottom sheet fully
         (dialog as? BottomSheetDialog)?.behavior?.state = BottomSheetBehavior.STATE_EXPANDED
 
         setupListeners()
     }
 
+    /** Thiết lập listener cho radio format và checkbox kèm ảnh. */
     private fun setupListeners() {
 
         binding.radioGroupFormat.setOnCheckedChangeListener { _, checkedId ->
@@ -87,6 +89,8 @@ class ExportHistoryBottomSheet : BottomSheetDialogFragment() {
 
     companion object {
         const val TAG = "ExportHistoryBottomSheet"
+
+        /** Tạo instance mới của ExportHistoryBottomSheet. */
         fun newInstance() = ExportHistoryBottomSheet()
     }
 }

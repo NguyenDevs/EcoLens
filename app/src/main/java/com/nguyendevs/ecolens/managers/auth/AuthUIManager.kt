@@ -9,23 +9,21 @@ import com.google.android.material.tabs.TabLayout
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.FragmentLoginBinding
 
+/** Manager quản lý chuyển đổi giao diện màn hình đăng nhập và đăng ký. */
 class AuthUIManager(private val binding: FragmentLoginBinding, private val context: Context) {
 
     private val tabTitles = arrayOf(R.string.login, R.string.register)
     private var isLoginMode = true
 
+    /** Cấu hình bố cục mặc định khi mở màn hình. */
     fun setupLayout(initialIsLogin: Boolean = true) {
         setupTabs()
-        
-        // Restore state
         this.isLoginMode = initialIsLogin
         val initialTabIndex = if (initialIsLogin) 0 else 1
         
-        // Select tab without triggering listener repeatedly if possible, but select() is fine
         binding.tabLayoutAuth.getTabAt(initialTabIndex)?.select()
         updateTabTypeface(initialTabIndex)
         
-        // Initial visibility/alpha states
         if (initialIsLogin) {
             binding.expandableLogin.setExpanded(true, false)
             binding.expandableRegister.setExpanded(false, false)
@@ -68,6 +66,7 @@ class AuthUIManager(private val binding: FragmentLoginBinding, private val conte
         )
     }
 
+    /** Kích hoạt đóng/mở giao diện theo trạng thái form. */
     private fun toggleMode(isLogin: Boolean) {
         if (this.isLoginMode == isLogin) return
         this.isLoginMode = isLogin
@@ -75,15 +74,12 @@ class AuthUIManager(private val binding: FragmentLoginBinding, private val conte
         val duration = 400L
 
         if (isLogin) {
-            // Expand Login / Collapse Register
             binding.expandableLogin.expand()
             binding.expandableRegister.collapse()
             
-            // Fade In Login Fields / Fade Out Register Fields
             binding.layoutLoginFields.animate().alpha(1f).setDuration(duration).start()
             binding.layoutRegisterFields.animate().alpha(0f).setDuration(duration).start()
             
-            // Instant Button Toggle (No fade as requested)
             binding.btnLogin.visibility = View.VISIBLE
             binding.btnLogin.alpha = 1f
             binding.btnRegister.visibility = View.GONE
@@ -91,15 +87,12 @@ class AuthUIManager(private val binding: FragmentLoginBinding, private val conte
             
             binding.etPassword.imeOptions = android.view.inputmethod.EditorInfo.IME_ACTION_DONE
         } else {
-            // Collapse Login / Expand Register
             binding.expandableLogin.collapse()
             binding.expandableRegister.expand()
             
-            // Fade Out Login Fields / Fade In Register Fields
             binding.layoutLoginFields.animate().alpha(0f).setDuration(duration).start()
             binding.layoutRegisterFields.animate().alpha(1f).setDuration(duration).start()
             
-            // Instant Button Toggle (No fade as requested)
             binding.btnRegister.visibility = View.VISIBLE
             binding.btnRegister.alpha = 1f
             binding.btnLogin.visibility = View.GONE
@@ -108,7 +101,6 @@ class AuthUIManager(private val binding: FragmentLoginBinding, private val conte
             binding.etPassword.imeOptions = android.view.inputmethod.EditorInfo.IME_ACTION_NEXT
         }
         
-        // Focus on Email field
         binding.etEmail.requestFocus()
         val text = binding.etEmail.text
         if (text != null) {

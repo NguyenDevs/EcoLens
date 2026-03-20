@@ -20,10 +20,7 @@ import com.nguyendevs.ecolens.models.SpeciesInfo
 import java.util.Locale
 import kotlinx.coroutines.*
 
-/**
- * Main coordinator cho việc hiển thị thông tin loài sinh vật Điều phối các handler con để xử lý
- * từng phần riêng biệt
- */
+/** Coordinator điều phối hiển thị thẻ thông tin chi tiết các loài sinh vật. */
 class SpeciesInfoHandler(
         private val context: Context,
         private val binding: ItemCardSpeciesInfoBinding,
@@ -39,7 +36,7 @@ class SpeciesInfoHandler(
     private val infoBinding
         get() = binding
 
-    /** Thiết lập URI hình ảnh để sử dụng khi chia sẻ */
+    /** Gán URI của ảnh để sử dụng cho tính năng chia sẻ. */
     fun setImageUri(uri: Uri?) {
         currentImageUri = uri
     }
@@ -85,7 +82,7 @@ class SpeciesInfoHandler(
         }
     }
 
-    /** Hiển thị thông tin loài theo từng giai đoạn loading */
+    /** Hiển thị thông tin sinh vật tùy chỉnh theo từng giai đoạn tải (LoadingStage). */
     fun displaySpeciesInfo(
             info: SpeciesInfo,
             stage: LoadingStage,
@@ -114,7 +111,6 @@ class SpeciesInfoHandler(
             confidenceDisplayHandler.displayConfidence(info, isWaiting = false)
         }
 
-        // Handle Taxonomy Translating State
         taxonomyDisplayHandler.setTaxonomyTranslating(isTaxonomyTranslating)
 
         if (images.isNotEmpty()) {
@@ -150,7 +146,6 @@ class SpeciesInfoHandler(
                 taxonomyDisplayHandler.stopShimmer()
                 taxonomyDisplayHandler.displayTaxonomyWaterfall(info)
 
-                // Pre-render empty sections (headers only, collapsed)
                 sectionDisplayHandler.displaySection(
                         R.id.sectionDescription,
                         R.id.tvDescription,
@@ -271,12 +266,11 @@ class SpeciesInfoHandler(
                 displayConservationStatus(info.conservationStatus, shouldScroll = false)
                 allSectionsRendered = true
 
-                // Expand images section automatically after other sections
                 if (!binding.expandableImages.isExpanded && imagesAdapter.itemCount > 0) {
                     binding.headerImages.postDelayed(
                             { toggleImagesExpand() },
                             2500L
-                    ) // Delay matches the cascading effect of the other sections
+                    )
                 }
 
                 homeButtonHandler.setupShareButton(info, currentImageUri)
@@ -299,7 +293,7 @@ class SpeciesInfoHandler(
         handlerScope.cancel()
     }
 
-    /** Xóa toàn bộ views và reset trạng thái */
+    /** Dọn dẹp sạch giao diện và đưa các thẻ về trạng thái ẩn. */
     private fun clearAllViews() {
         lastDisplayedCommonName = null
         confidenceDisplayHandler.clearState()
@@ -322,7 +316,7 @@ class SpeciesInfoHandler(
         }
     }
 
-    /** Kiểm tra xem tất cả sections đã được render chưa */
+    /** Quét và tính toán xem toàn bộ dữ liệu đã được gán lên lưới giao diện chưa. */
     private fun checkIfAllSectionsRendered(info: SpeciesInfo) {
         val sectionsWithContent = mutableSetOf<Int>()
 
@@ -347,7 +341,7 @@ class SpeciesInfoHandler(
         }
     }
 
-    /** Hiển thị tên khoa học */
+    /** Hiển thị tên khoa học với hiệu ứng slide & fade-in. */
     private fun displayScientificName(info: SpeciesInfo) {
         infoBinding.tvScientificName.apply {
             textFormatter.setHtml(this, info.scientificName)
@@ -360,7 +354,7 @@ class SpeciesInfoHandler(
         )
     }
 
-    /** Hiển thị tên thông thường */
+    /** Chỉnh màu chủ đạo và hiển thị tên thông thường với hiệu ứng nổi bật. */
     private fun displayCommonName(info: SpeciesInfo) {
         infoBinding.tvCommonName.let { view ->
             if (lastDisplayedCommonName == info.commonName &&
@@ -399,7 +393,7 @@ class SpeciesInfoHandler(
         }
     }
 
-    /** Hiển thị trạng thái bảo tồn */
+    /** Hiển thị thẻ tình trạng bảo tồn nếu tính năng IUCN được bật. */
     private fun displayConservationStatus(status: String, shouldScroll: Boolean = true) {
         val sharedPref = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         val isIucnEnabled = sharedPref.getBoolean("iucn_mode", true)

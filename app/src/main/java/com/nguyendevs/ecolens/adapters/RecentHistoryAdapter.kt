@@ -22,6 +22,7 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
+/** Adapter hiển thị danh sách lịch sử nhận diện gần đây dạng compact. */
 class RecentHistoryAdapter(private val onItemClick: (HistoryEntry) -> Unit) :
     ListAdapter<HistoryEntry, RecentHistoryAdapter.RecentHistoryViewHolder>(DiffCallback) {
 
@@ -37,20 +38,24 @@ class RecentHistoryAdapter(private val onItemClick: (HistoryEntry) -> Unit) :
         }
     }
 
+    /** Tạo ViewHolder cho item lịch sử gần đây. */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecentHistoryViewHolder {
         val binding = ItemRecentHistoryBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return RecentHistoryViewHolder(binding)
     }
 
+    /** Bind dữ liệu vào ViewHolder. */
     override fun onBindViewHolder(holder: RecentHistoryViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
 
+    /** ViewHolder cho một item lịch sử gần đây. */
     inner class RecentHistoryViewHolder(private val binding: ItemRecentHistoryBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         private val context get() = binding.root.context
 
+        /** Bind thông tin lịch sử vào view, hỗ trợ trạng thái placeholder. */
         fun bind(entry: HistoryEntry) {
             val isPlaceholder = entry.id < 0
 
@@ -81,6 +86,7 @@ class RecentHistoryAdapter(private val onItemClick: (HistoryEntry) -> Unit) :
             loadImageWithShimmer(entry)
         }
 
+        /** Bật shimmer loading cho tất cả views. */
         private fun startAllShimmers() {
             listOf(
                 binding.shimmerThumbnail,
@@ -92,6 +98,7 @@ class RecentHistoryAdapter(private val onItemClick: (HistoryEntry) -> Unit) :
             }
         }
 
+        /** Tắt shimmer cho các views text. */
         private fun stopTextShimmers() {
             listOf(
                 binding.shimmerCommonName,
@@ -102,6 +109,7 @@ class RecentHistoryAdapter(private val onItemClick: (HistoryEntry) -> Unit) :
             }
         }
 
+        /** Tắt shimmer cho ảnh thumbnail. */
         private fun stopImageShimmer() {
             binding.shimmerThumbnail.apply {
                 stopShimmer()
@@ -109,6 +117,7 @@ class RecentHistoryAdapter(private val onItemClick: (HistoryEntry) -> Unit) :
             }
         }
 
+        /** Hiển thị nội dung thực sau khi tắt placeholder. */
         private fun showRealContent() {
             binding.imgThumbnail.visibility = View.VISIBLE
             binding.tvCommonName.visibility = View.VISIBLE
@@ -116,6 +125,7 @@ class RecentHistoryAdapter(private val onItemClick: (HistoryEntry) -> Unit) :
             binding.timeContainer.visibility = View.VISIBLE
         }
 
+        /** Tải ảnh thumbnail với shimmer, ưu tiên local path. */
         private fun loadImageWithShimmer(entry: HistoryEntry) {
             binding.shimmerThumbnail.visibility = View.VISIBLE
             binding.shimmerThumbnail.startShimmer()
@@ -164,6 +174,7 @@ class RecentHistoryAdapter(private val onItemClick: (HistoryEntry) -> Unit) :
             }
         }
 
+        /** Hiển thị nhãn thời gian tương đối (hôm nay, hôm qua, ngày trong tuần). */
         private fun setupTime(timestamp: Long) {
             val dateTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault())
             val now = ZonedDateTime.now()

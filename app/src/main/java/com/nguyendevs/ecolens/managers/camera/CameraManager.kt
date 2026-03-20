@@ -19,12 +19,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.nguyendevs.ecolens.R
 import java.util.concurrent.TimeUnit
 
-/**
- * Quản lý các thao tác với camera
- * - Khởi tạo và binding camera
- * - Zoom, focus, flash
- * - Chuyển đổi camera trước/sau
- */
+/** Quản lý các thao tác tương tác và vòng đời của camera. */
 class CameraManager(
     private val context: Context,
     private val lifecycleOwner: LifecycleOwner,
@@ -48,6 +43,7 @@ class CameraManager(
         this.callback = callback
     }
 
+    /** Khởi động hệ thống camera từ đầu. */
     fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
 
@@ -88,6 +84,7 @@ class CameraManager(
         }, ContextCompat.getMainExecutor(context))
     }
 
+    /** Nhảy đổi chéo ống kính camera mặt trước và sau. */
     fun toggleCamera() {
         lensFacing = if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
             CameraSelector.LENS_FACING_BACK
@@ -97,6 +94,7 @@ class CameraManager(
         startCamera()
     }
 
+    /** Cấu hình sự kiện tương tác zoom và focus thủ công trên màn hình ảnh. */
     fun setupZoomAndFocus(onFocusPerformed: (x: Float, y: Float) -> Unit): View.OnTouchListener {
         val scaleListener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
             override fun onScale(detector: ScaleGestureDetector): Boolean {

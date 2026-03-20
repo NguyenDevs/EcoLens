@@ -20,12 +20,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/**
- * Handler quản lý logout và delete account. Xử lý: confirm dialogs, clear local data, Firebase sign
- * out, navigation.
- */
+/** Handler quản lý đăng xuất, xóa tài khoản và xóa dữ liệu liên quan. */
 class LogoutHandler(private val activity: AppCompatActivity) {
 
+    /** Hiển thị hộp thoại xác nhận đăng xuất. */
     fun showLogoutConfirmDialog() {
         com.nguyendevs.ecolens.utils.CustomDialogUtils.showConfirmationDialog(
                 context = activity,
@@ -36,6 +34,7 @@ class LogoutHandler(private val activity: AppCompatActivity) {
         )
     }
 
+    /** Hiển thị hộp thoại xác nhận xóa tài khoản. */
     fun showDeleteAccountConfirmDialog() {
         com.nguyendevs.ecolens.utils.CustomDialogUtils.showConfirmationDialog(
                 context = activity,
@@ -46,6 +45,7 @@ class LogoutHandler(private val activity: AppCompatActivity) {
         )
     }
 
+    /** Yêu cầu xác thực sinh trắc học trước khi thao tác quan trọng. */
     private fun authenticateWithBiometrics(onSuccess: () -> Unit) {
         val biometricManager = BiometricManager.from(activity)
         if (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) !=
@@ -109,6 +109,7 @@ class LogoutHandler(private val activity: AppCompatActivity) {
         biometricPrompt.authenticate(promptInfo)
     }
 
+    /** Xóa dữ liệu cục bộ và tài khoản Firebase. */
     private fun deleteAccount() {
         activity.lifecycleScope.launch {
             try {
@@ -141,6 +142,7 @@ class LogoutHandler(private val activity: AppCompatActivity) {
         }
     }
 
+    /** Xóa cache room database, sign out và chuyển về màn hình đăng nhập. */
     private fun logout() {
         activity.lifecycleScope.launch {
             withContext(Dispatchers.IO) {

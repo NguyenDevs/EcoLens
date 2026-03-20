@@ -26,21 +26,27 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.view.Window
 
+/** Adapter hiển thị danh sách ảnh của loài, hỗ trợ xem toàn màn hình và lưu ảnh. */
 class SpeciesImageAdapter :
     ListAdapter<String, SpeciesImageAdapter.ImageViewHolder>(ImageDiffCallback()) {
 
+    /** Tạo ViewHolder cho item ảnh loài. */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
         val binding =
             ItemSpeciesImageBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ImageViewHolder(binding)
     }
 
+    /** Bind URL ảnh vào ViewHolder. */
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
         holder.bind(getItem(position), position == itemCount - 1)
     }
 
+    /** ViewHolder cho một ảnh loài với shimmer và dialog xem toàn màn hình. */
     class ImageViewHolder(private val binding: ItemSpeciesImageBinding) :
         RecyclerView.ViewHolder(binding.root) {
+
+        /** Tải ảnh từ URL vào view, hiển thị shimmer trong khi chờ. */
         fun bind(url: String, isLastItem: Boolean) {
             val params = binding.root.layoutParams as ViewGroup.MarginLayoutParams
             if (isLastItem) {
@@ -160,6 +166,7 @@ class SpeciesImageAdapter :
         }
     }
 
+    /** DiffCallback so sánh URL ảnh. */
     class ImageDiffCallback : DiffUtil.ItemCallback<String>() {
         override fun areItemsTheSame(oldItem: String, newItem: String): Boolean {
             return oldItem == newItem

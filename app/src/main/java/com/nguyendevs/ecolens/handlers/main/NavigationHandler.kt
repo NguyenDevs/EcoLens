@@ -13,10 +13,7 @@ import com.nguyendevs.ecolens.fragments.chat.ChatHistoryFragment
 import com.nguyendevs.ecolens.fragments.history.HistoryFragment
 import com.nguyendevs.ecolens.models.LoadingStage
 
-/**
- * Handler quản lý Bottom Navigation và trạng thái các containers. Xử lý: tab switching, container
- * visibility, save/restore last tab.
- */
+/** Handler quản lý Bottom Navigation và hiển thị các container tương ứng. */
 class NavigationHandler(
         private val activity: AppCompatActivity,
         private val binding: ActivityMainBinding,
@@ -31,7 +28,7 @@ class NavigationHandler(
         private const val TRANSITION_DURATION_MS = 120L
     }
 
-    /** Setup bottom navigation listener */
+    /** Thiết lập listener cho Bottom Navigation, lưu lại tab được chọn. */
     fun setup() {
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             binding.bottomNavigation.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
@@ -50,15 +47,15 @@ class NavigationHandler(
         }
     }
 
-    /** Navigate to specific tab */
+    /** Điều hướng đến tab cụ thể. */
     fun navigateTo(itemId: Int) {
         binding.bottomNavigation.selectedItemId = itemId
     }
 
-    /** Get current selected tab */
+    /** Lấy tab đang được chọn hiện tại. */
     fun getCurrentTab(): Int = binding.bottomNavigation.selectedItemId
 
-    /** Restore last selected tab */
+    /** Khôi phục tab đã chọn cuối cùng từ SharedPreferences. */
     fun restoreLastTab(navigateToSettings: Boolean = false): Int {
         return if (navigateToSettings) {
             R.id.nav_settings
@@ -100,12 +97,11 @@ class NavigationHandler(
                     val (loadingStage, _, hasInfo) = checker()
                     val isComplete = loadingStage == LoadingStage.COMPLETE
 
-                    // Chỉ hiển thị nút khi đã tải xong và có thông tin
-                    if (isComplete && hasInfo) {
-                        binding.fabSpeak.visibility = View.VISIBLE
-                    } else {
-                        binding.fabSpeak.visibility = View.GONE
-                    }
+                if (isComplete && hasInfo) {
+                    binding.fabSpeak.visibility = View.VISIBLE
+                } else {
+                    binding.fabSpeak.visibility = View.GONE
+                }
                 }
             }
             R.id.nav_history -> {
@@ -134,5 +130,6 @@ class NavigationHandler(
         onTabChanged(itemId)
     }
 
+    /** Kiểm tra tab hiện tại có phải Home không. */
     fun isHomeTab(): Boolean = binding.bottomNavigation.selectedItemId == R.id.nav_home
 }

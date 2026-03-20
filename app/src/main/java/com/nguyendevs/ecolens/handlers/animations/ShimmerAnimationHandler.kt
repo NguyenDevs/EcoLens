@@ -17,14 +17,11 @@ import android.view.animation.LinearInterpolator
 import androidx.core.content.ContextCompat
 import com.nguyendevs.ecolens.R
 
-/**
- * Handler quản lý hiệu ứng shimmer cho các View.
- *
- * @property context Context của ứng dụng, dùng để truy cập resources và cấu hình theme
- */
+/** Quản lý hiệu ứng shimmer gradient cho taxonomy container. */
 class ShimmerAnimationHandler(private val context: Context) {
     private var taxonomyShimmerAnimator: ValueAnimator? = null
 
+    /** Bắt đầu hiệu ứng shimmer chạy vô hạn trên view, hỗ trợ dark/light mode. */
     fun startTaxonomyShimmer(view: View?) {
         if (view == null || taxonomyShimmerAnimator != null) return
 
@@ -141,11 +138,7 @@ class ShimmerAnimationHandler(private val context: Context) {
                 }
     }
 
-    /**
-     * Dừng hiệu ứng shimmer và khôi phục background gốc cho view.
-     *
-     * @param view View cần dừng hiệu ứng shimmer
-     */
+    /** Dừng hiệu ứng shimmer và khôi phục background gốc. */
     fun stopTaxonomyShimmer(view: View) {
         taxonomyShimmerAnimator?.cancel()
         taxonomyShimmerAnimator = null
@@ -153,21 +146,12 @@ class ShimmerAnimationHandler(private val context: Context) {
         view.backgroundTintList = ContextCompat.getColorStateList(context, R.color.surface_variant)
     }
 
-    /**
-     * Giải phóng tài nguyên và hủy tất cả các animator.
-     *
-     * Phương thức này nên được gọi khi không còn sử dụng handler nữa, ví dụ trong onDestroy() của
-     * Activity hoặc onDestroyView() của Fragment.
-     */
+    /** Hủy animator và giải phóng tài nguyên. */
     fun destroy() {
         taxonomyShimmerAnimator?.cancel()
         taxonomyShimmerAnimator = null
     }
 
-    /**
-     * Extension function chuyển đổi giá trị dp sang pixel.
-     *
-     * @return Giá trị pixel tương ứng với giá trị dp của Float này
-     */
+    /** Chuyển đổi dp sang pixel. */
     private fun Float.dpToPx(): Float = this * context.resources.displayMetrics.density
 }

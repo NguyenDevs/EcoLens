@@ -17,6 +17,7 @@ import com.nguyendevs.ecolens.handlers.auth.RegisterHandler
 import com.nguyendevs.ecolens.managers.auth.AuthUIManager
 import com.nguyendevs.ecolens.managers.setting.LanguageManager
 
+/** Fragment màn hình đăng nhập/đăng ký, chứa form xác thực và nút đăng nhập Google. */
 class LoginFragment : Fragment() {
 
     private var _binding: FragmentLoginBinding? = null
@@ -29,6 +30,7 @@ class LoginFragment : Fragment() {
     private lateinit var registerHandler: RegisterHandler
     private lateinit var googleSignInHandler: GoogleSignInHandler
 
+    /** Inflate layout của fragment. */
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
@@ -38,6 +40,7 @@ class LoginFragment : Fragment() {
         return binding.root
     }
 
+    /** Khởi tạo các handler và thiết lập layout theo chế độ login/register. */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -62,6 +65,7 @@ class LoginFragment : Fragment() {
         }
     }
 
+    /** Thiết lập listener cho các nút đăng nhập, đăng ký và quên mật khẩu. */
     private fun setupPageListeners() {
         authUIManager.setForgotPasswordClickListener {
             (activity as? AuthActivity)?.navigateToForgotPassword()
@@ -93,6 +97,7 @@ class LoginFragment : Fragment() {
         }
     }
 
+    /** Chạy animation xuất hiện khi fragment được hiển thị. */
     private fun playEntranceAnimations() {
         val logoAnim = AnimationUtils.loadAnimation(requireContext(), R.anim.auth_logo_scale_in)
         val titleAnim = AnimationUtils.loadAnimation(requireContext(), R.anim.auth_slide_up_fade_in)
@@ -122,6 +127,7 @@ class LoginFragment : Fragment() {
         binding.layoutSocialButtons.startAnimation(socialAnim)
     }
 
+    /** Thiết lập Google Sign-In và listener cho nút Google. */
     private fun setupGoogleSignIn() {
         googleSignInHandler.setup(
                 rememberMe = authUIManager.isRememberMeChecked(),
@@ -132,6 +138,7 @@ class LoginFragment : Fragment() {
         binding.btnGoogle.setOnClickListener { googleSignInHandler.signIn() }
     }
 
+    /** Đặt trạng thái loading cho toàn bộ form. */
     private fun setLoading(isLoading: Boolean) {
         (activity as? AuthActivity)?.setFragmentLoading(isLoading)
         binding.btnGoogle.isEnabled = !isLoading

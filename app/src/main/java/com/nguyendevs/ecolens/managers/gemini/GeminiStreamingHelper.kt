@@ -13,10 +13,7 @@ import java.io.IOException
 
 class GeoBlockedException : IOException("Geo blocked")
 
-/**
- * Helper class xử lý streaming responses từ Gemini API
- * Hỗ trợ stream details thông tin loài với real-time UI updates
- */
+/** Xử lý luồng dữ liệu trả lời dạng stream qua Gemini API. */
 class GeminiStreamingHelper(
     private val apiService: INaturalistApi,
     private val gson: Gson
@@ -30,11 +27,7 @@ class GeminiStreamingHelper(
         private const val DETAILS_DELAY = 200L
     }
 
-    // ==================== PUBLIC METHODS ====================
-
-    /**
-     * Lấy tên thường gọi từ Gemini (Non-streaming)
-     */
+    /** Lấy tên thường gọi chuẩn chỉnh từ Gemini. */
     suspend fun getCommonName(
         scientificName: String,
         languageCode: String
@@ -56,9 +49,7 @@ class GeminiStreamingHelper(
         return@withContext null
     }
 
-    /**
-     * Dịch taxonomy sang tiếng Việt (Non-streaming)
-     */
+    /** Dịch bộ thông tin phân loại sinh học chuẩn xác ngô ngữ. */
     suspend fun translateTaxonomy(
         kingdom: String,
         phylum: String,
@@ -86,10 +77,7 @@ class GeminiStreamingHelper(
         return@withContext null
     }
 
-    /**
-     * Stream details information (mô tả, đặc điểm, phân bố) từ Gemini
-     * Update UI real-time khi nhận từng phần thông tin
-     */
+    /** Nhận luồng chi tiết về đặc điểm phân bố của sinh vật. */
     suspend fun streamDetails(
         scientificName: String,
         confidence: Double,
@@ -111,11 +99,10 @@ class GeminiStreamingHelper(
         } catch (e: Exception) {
             Log.e(TAG, "StreamDetails Error: ${e.message}")
         }
+        Unit
     }
 
-    /**
-     * Stream conservation status description
-     */
+    /** Gọi API stream nội dung báo cáo tính trạng bảo tồn hệ sinh thái. */
     suspend fun streamConservation(
         scientificName: String,
         iucnCode: String,
@@ -137,13 +124,10 @@ class GeminiStreamingHelper(
         } catch (e: Exception) {
             Log.e(TAG, "StreamConservation Error: ${e.message}")
         }
+        Unit
     }
 
-    // ==================== REQUEST & RESPONSE PROCESSING ====================
-
-    /**
-     * Tạo GeminiRequest từ prompt
-     */
+    /** Gói dữ liệu Prompt tạo mới request cho Gemini. */
     private fun createGeminiRequest(prompt: String): GeminiRequest {
         return GeminiRequest(
             contents = listOf(
@@ -155,10 +139,7 @@ class GeminiStreamingHelper(
         )
     }
 
-    /**
-     * Xử lý streaming response từ Gemini
-     * Parse JSON chunks và gọi callback khi có data hợp lệ
-     */
+    /** Tách và xử lý luồng sự kiện phân đoạn JSON. */
     private suspend fun <T> processStreamResponse(
         response: Response<ResponseBody>,
         type: Class<T>,
@@ -183,9 +164,7 @@ class GeminiStreamingHelper(
         }
     }
 
-    /**
-     * Xử lý một dòng data từ stream
-     */
+    /** Giải quyết nội dung truyền tải trực tiếp qua stream dòng dữ liệu. */
     private suspend fun <T> processDataLine(
         line: String,
         accumulatedJson: StringBuilder,
@@ -209,9 +188,7 @@ class GeminiStreamingHelper(
         }
     }
 
-    /**
-     * Thử parse JSON accumulated và gọi callback nếu parse thành công
-     */
+    /** Parse dòng cập nhật JSON hoàn tất. */
     private suspend fun <T> tryParseAndUpdate(
         json: String,
         type: Class<T>,
@@ -222,13 +199,10 @@ class GeminiStreamingHelper(
             val result = gson.fromJson(cleanedJson, type)
             onUpdate(result)
         } catch (e: Exception) {
-            // JSON chưa đầy đủ, bỏ qua
         }
     }
 
-    /**
-     * Làm sạch JSON string từ markdown code blocks
-     */
+    /** Thanh lọc JSON khỏi các thẻ đánh dấu Markdown phức tạp. */
     private fun cleanJsonString(json: String): String {
         val firstBrace = json.indexOf('{')
         val lastBrace = json.lastIndexOf('}')
@@ -241,11 +215,7 @@ class GeminiStreamingHelper(
         }
     }
 
-    // ==================== UI UPDATE METHODS ====================
-
-    /**
-     * Update UI với details information theo từng bước
-     */
+    /** Cập nhật UI ngay khi nội dung mô tả của loài đã đủ kiện đồng bộ. */
     private suspend fun updateDetailsUISync(
         details: DetailsResponse,
         isVietnamese: Boolean,
@@ -293,9 +263,7 @@ class GeminiStreamingHelper(
         }
     }
 
-    /**
-     * Update UI với conservation information
-     */
+    /** Cập nhật trình bày khung bảo tồn. */
     private suspend fun updateConservationUISync(
         conservation: ConservationResponse,
         isVietnamese: Boolean,
@@ -314,7 +282,7 @@ class GeminiStreamingHelper(
         }
     }
 
-    // ==================== DATA CLASSES ====================
+
 
     data class CommonNameResponse(
         val commonName: String? = null

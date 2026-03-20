@@ -8,26 +8,15 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.chip.Chip
 import com.nguyendevs.ecolens.R
 
-/**
- * Animation handler cho HistoryFragment
- * - Chip style animations (category filters)
- * - Sort button ripple effects
- * - Haptic feedback
- * - View visibility animations
- */
+/** Quản lý animation chip, haptic feedback và visibility cho HistoryFragment. */
 class HistoryAnimationHandler(private val context: Context) {
 
-    // ==================== HAPTIC FEEDBACK ====================
-
+    /** Thực hiện haptic feedback xác nhận. */
     fun performConfirmFeedback(view: View) {
         view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
     }
 
-    // ==================== CHIP ANIMATIONS ====================
-
-    /**
-     * Update chip style dựa trên active state
-     */
+    /** Cập nhật style chip theo trạng thái active/inactive. */
     fun updateChipStyle(chip: Chip, isActive: Boolean) {
         if (isActive) {
             setActiveChipStyle(chip)
@@ -36,15 +25,14 @@ class HistoryAnimationHandler(private val context: Context) {
         }
     }
 
-    /**
-     * Batch update multiple chips cùng lúc
-     */
+    /** Cập nhật style cho nhiều chip cùng lúc. */
     fun updateMultipleChips(vararg chips: Pair<Chip, Boolean>) {
         chips.forEach { (chip, isActive) ->
             updateChipStyle(chip, isActive)
         }
     }
 
+    /** Áp dụng style active (màu primary) cho chip. */
     private fun setActiveChipStyle(chip: Chip) {
         val primaryColor = ContextCompat.getColor(context, R.color.primary)
         val whiteColor = ContextCompat.getColor(context, R.color.white)
@@ -58,11 +46,12 @@ class HistoryAnimationHandler(private val context: Context) {
         }
     }
 
+    /** Áp dụng style inactive (màu surface) cho chip. */
     private fun setInactiveChipStyle(chip: Chip) {
         val surfaceColor = ContextCompat.getColor(context, R.color.surface)
         val secondaryTextColor = ContextCompat.getColor(context, R.color.text_secondary)
         val errorColor = ContextCompat.getColor(context, R.color.error)
-        val strokeWidth = context.resources.displayMetrics.density * 1 // 1dp
+        val strokeWidth = context.resources.displayMetrics.density * 1
 
         chip.apply {
             chipBackgroundColor = ColorStateList.valueOf(surfaceColor)
@@ -73,11 +62,7 @@ class HistoryAnimationHandler(private val context: Context) {
         }
     }
 
-    // ==================== SORT BUTTON RIPPLE ====================
-
-    /**
-     * Setup ripple effect cho sort button
-     */
+    /** Thiết lập hiệu ứng ripple cho nút sort. */
     fun setupSortButtonRipple(chip: Chip) {
         val primary = ContextCompat.getColor(context, R.color.primary)
         val surface = ContextCompat.getColor(context, R.color.surface)
@@ -97,11 +82,7 @@ class HistoryAnimationHandler(private val context: Context) {
         }
     }
 
-    // ==================== VIEW VISIBILITY ANIMATIONS ====================
-
-    /**
-     * Fade out view
-     */
+    /** Ẩn dần view với animation fade out. */
     fun fadeOut(view: View, duration: Long = 300L) {
         view.animate()
             .alpha(0f)
@@ -112,9 +93,7 @@ class HistoryAnimationHandler(private val context: Context) {
             .start()
     }
 
-    /**
-     * Fade in view
-     */
+    /** Hiện dần view với animation fade in. */
     fun fadeIn(view: View, duration: Long = 300L) {
         view.alpha = 0f
         view.visibility = View.VISIBLE

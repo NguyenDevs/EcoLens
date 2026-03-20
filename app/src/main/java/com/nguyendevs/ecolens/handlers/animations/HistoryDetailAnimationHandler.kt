@@ -13,30 +13,19 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.nguyendevs.ecolens.R
 import java.io.File
 
-/**
- * Animation handler dành riêng cho HistoryDetailFragment
- * - Image loading animations
- * - FAB state animations (speak/mute)
- * - Haptic feedback
- */
+/** Quản lý animation image loading, FAB state và haptic feedback cho HistoryDetailFragment. */
 class HistoryDetailAnimationHandler(private val context: Context) {
 
     companion object {
         private const val ANIMATION_DURATION = 150L
     }
 
-    // ==================== HAPTIC FEEDBACK ====================
-
+    /** Thực hiện haptic feedback xác nhận. */
     fun performConfirmFeedback(view: View) {
         view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
     }
 
-    // ==================== IMAGE LOADING ANIMATIONS ====================
-
-    /**
-     * Load image với fade-in animation
-     * Ưu tiên local file, fallback về remote URL
-     */
+    /** Tải ảnh vào ImageView với animation fade-in, ưu tiên local file trước remote URL. */
     fun loadImageWithFadeIn(
         imageView: ImageView,
         localPath: String?,
@@ -64,11 +53,7 @@ class HistoryDetailAnimationHandler(private val context: Context) {
         glideRequest.into(imageView)
     }
 
-    // ==================== FAB ANIMATIONS ====================
-
-    /**
-     * Show FAB với scale animation
-     */
+    /** Hiển thị FAB với animation scale và fade-in. */
     fun showFab(fab: FloatingActionButton) {
         fab.show()
         fab.alpha = 0f
@@ -82,12 +67,7 @@ class HistoryDetailAnimationHandler(private val context: Context) {
             .start()
     }
 
-    /**
-     * Animate FAB state change (speaking/not speaking)
-     *
-     * @param fab FloatingActionButton
-     * @param isSpeaking True nếu đang nói (active state)
-     */
+    /** Chuyển đổi trạng thái FAB (đang đọc/dừng) với animation scale. */
     fun animateFabState(fab: FloatingActionButton, isSpeaking: Boolean) {
         fab.animate()
             .scaleX(0.8f)

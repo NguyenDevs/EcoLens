@@ -4,6 +4,7 @@ import com.nguyendevs.ecolens.api.GeminiContent
 import com.nguyendevs.ecolens.api.GeminiPart
 import com.nguyendevs.ecolens.managers.setting.LanguageManager
 
+/** Tiện ích khởi tạo các chuỗi lệnh truy vấn gửi tới hệ thống AI. */
 object PromptBuilder {
 
     fun buildCommonNamePrompt(scientificName: String, languageCode: String): String {
@@ -72,10 +73,6 @@ object PromptBuilder {
             genus: String,
             species: String
     ): String {
-        /*
-        Dịch các thuật ngữ phân loại sinh học sau sang Tiếng Việt chuẩn xác nhất.
-        Nếu không có tên tiếng Việt chính xác, hãy giữ nguyên tên khoa học hoặc phiên âm phù hợp.
-         */
         return """
             Translate the following biological taxonomic terms into the most accurate Vietnamese possible.
             If an exact Vietnamese name is unavailable, retain the scientific name or use a suitable transliteration.
@@ -95,26 +92,6 @@ object PromptBuilder {
             RETURN ONLY JSON. NO MARKDOWN.
         """.trimIndent()
     }
-
-    // ==================== VIETNAMESE PROMPTS ====================
-    /*
-    Cung cấp thông tin chi tiết về "$scientificName" bằng Tiếng Việt.
-
-        QUY TẮC FORMAT:
-        • Dùng **text** để in đậm từ khóa quan trọng
-        • Dùng ##text## để highlight xanh cho địa danh, tên riêng, số đo
-        • Dùng • cho bullet points
-
-        JSON FORMAT:
-        {
-          "description": "Tổng quan 4-5 câu đầy đủ. Dùng **in đậm** và ##xanh## cho đặc điểm nổi bật, địa danh và số đo.",
-          "characteristics": "Danh sách gạch đầu dòng, mỗi dòng bắt đầu với dấu •:\n• Hình thái cơ thể\n• Cấu trúc cơ thể\n• Kích thước (dùng ##số đo##)\n• Màu sắc\n• Đặc điểm nhận dạng\n• Đặc điểm sinh học đặc biệt",
-          "distribution": "Ưu tiên Việt Nam trước (nếu có), sau đó toàn cầu. Dùng ##xanh đậm## cho tên địa danh.",
-          "habitat": "Mô tả chi tiết môi trường sống: độ cao, khí hậu, thảm thực vật, nguồn thức ăn."
-        }
-
-        CHỈ TRẢ VỀ JSON.
-     */
 
     private fun buildVietnameseDetailsPrompt(scientificName: String): String =
             """
@@ -136,32 +113,6 @@ object PromptBuilder {
         RETURN ONLY JSON.
     """.trimIndent()
 
-    /*
-    Phân tích tình trạng bảo tồn IUCN "$codeToUse" cho loài "$scientificName" bằng Tiếng Việt.
-
-            Yêu cầu định dạng kết quả trong JSON (sử dụng \n để xuống dòng):
-            • **Tình trạng bảo tồn:** $codeToUse (Giải nghĩa ngắn gọn)
-            • **Giải thích tình trạng:** (Mô tả ngắn gọn về tình trạng này đối với loài)
-            • **Các mối đe doạ chính:** (Liệt kê các mối đe dọa chính)
-
-            Trả về JSON:
-            { "conservationStatus": "Nội dung đã định dạng..." }
-
-            CHỈ TRẢ VỀ JSON.
-
-
-            Hãy xác định tình trạng bảo tồn IUCN cho loài "$scientificName" bằng Tiếng Việt.
-
-            Yêu cầu định dạng kết quả trong JSON (sử dụng \n để xuống dòng):
-            • **Tình trạng bảo tồn:** [Mã IUCN tìm được] (Giải nghĩa ngắn gọn)
-            • **Giải thích tình trạng:** (Mô tả ngắn gọn về tình trạng này đối với loài)
-            • **Các mối đe doạ chính:** (Liệt kê các mối đe dọa chính)
-
-            Trả về JSON:
-            { "conservationStatus": "Nội dung đã định dạng..." }
-
-            CHỈ TRẢ VỀ JSON.
-     */
     private fun buildVietnameseConservationPrompt(
             scientificName: String,
             codeToUse: String,

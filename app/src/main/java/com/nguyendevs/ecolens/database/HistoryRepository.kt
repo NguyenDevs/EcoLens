@@ -26,6 +26,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
+/** Quản lý dữ liệu lịch sử, đồng bộ cả local Room và Firebase. */
 class HistoryRepository(
         private val historyDao: HistoryDao,
         private val context: Context,
@@ -36,47 +37,63 @@ class HistoryRepository(
     private val storage = FirebaseStorage.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
+    /** Trả về UID của người dùng. */
     private fun getUserId(): String {
         return auth.currentUser?.uid ?: "anonymous"
     }
 
+    /** Trả về nhánh tham chiếu dữ liệu lịch sử trên Firebase. */
     private fun getHistoryRef() = database.getReference("history").child(getUserId())
 
+    /** Trả về nhánh tham chiếu dữ liệu hình ảnh trên Firebase Storage. */
     private fun getStorageRef() = storage.reference.child("users").child(getUserId())
 
+    /** Lấy toàn bộ lịch sử mới nhất. */
     fun getAllHistoryNewestFirst() = historyDao.getAllHistoryNewestFirst(getUserId())
 
+    /** Lấy lịch sử mới nhất theo giới hạn. */
     fun getHistoryNewestFirst(limit: Int) = historyDao.getHistoryNewestFirst(getUserId(), limit)
 
+    /** Lấy lịch sử cũ nhất theo giới hạn. */
     fun getHistoryOldestFirst(limit: Int) = historyDao.getHistoryOldestFirst(getUserId(), limit)
 
+    /** Lấy lịch sử mới nhất trong khoảng thời gian. */
     fun getHistoryByDateRangeNewest(startDate: Long, endDate: Long, limit: Int) =
             historyDao.getHistoryByDateRangeNewest(getUserId(), startDate, endDate, limit)
 
+    /** Lấy lịch sử cũ nhất trong khoảng thời gian. */
     fun getHistoryByDateRangeOldest(startDate: Long, endDate: Long, limit: Int) =
             historyDao.getHistoryByDateRangeOldest(getUserId(), startDate, endDate, limit)
 
+    /** Lấy lịch sử theo Alpha B. */
     fun getHistoryAlphabetical(limit: Int) =
             historyDao.getHistoryAlphabetical(getUserId(), limit)
 
+    /** Lấy lịch sử có độ xác tín cao. */
     fun getHistoryConfidenceHigh(limit: Int) =
             historyDao.getHistoryConfidenceHigh(getUserId(), limit)
 
+    /** Lấy lịch sử yêu thích. */
     fun getFavoriteHistory(limit: Int) =
             historyDao.getFavoriteHistory(getUserId())
 
+    /** Lấy lịch sử theo Alpha B trong khoảng thời gian. */
     fun getHistoryByDateRangeAlphabetical(startDate: Long, endDate: Long, limit: Int) =
             historyDao.getHistoryByDateRangeAlphabetical(getUserId(), startDate, endDate, limit)
 
+    /** Lấy lịch sử có độ xác tín cao trong khoảng thời gian. */
     fun getHistoryByDateRangeConfidenceHigh(startDate: Long, endDate: Long, limit: Int) =
             historyDao.getHistoryByDateRangeConfidenceHigh(getUserId(), startDate, endDate, limit)
 
+    /** Truy tìm lịch sử dựa theo ID. */
     suspend fun getHistoryById(id: Int): HistoryEntry? {
         return historyDao.getHistoryById(id)
     }
 
+    /** Trả về tổng lượng mục lịch sử của người dùng. */
     fun getTotalHistoryCount(): Flow<Int> = historyDao.getTotalHistoryCount(getUserId())
 
+    /** Cấy bản ghi lịch sử vào bộ nhớ cục bộ. */
     suspend fun insertLocal(entry: HistoryEntry): Long =
             withContext(Dispatchers.IO) {
                 val maxId = historyDao.getMaxId() ?: 0
@@ -86,6 +103,7 @@ class HistoryRepository(
                 newId.toLong()
             }
 
+    /** Cấy bản ghi lịch sử vào cục bộ lẫn Firebase. */
     suspend fun insert(entry: HistoryEntry): Long {
         val id = insertLocal(entry)
         val entryWithId = entry.copy(id = id.toInt(), userId = getUserId())
@@ -93,9 +111,11 @@ class HistoryRepository(
         return id
     }
 
+    /** Cập nhật bản ghi trong Room cục bộ. */
     suspend fun updateLocal(entry: HistoryEntry) =
             withContext(Dispatchers.IO) { historyDao.update(entry) }
 
+    /** Đồng bộ thông tin sinh vật mới cập nhật lên mọi kho lưu trữ. */
     suspend fun update(entry: HistoryEntry) {
         withContext(Dispatchers.IO) {
             historyDao.updateSpeciesDetails(
@@ -123,6 +143,7 @@ class HistoryRepository(
         externalScope.launch { syncRemote(entry) }
     }
 
+    /** Cập nhật trạng thái đánh dấu sao yêu thích của bản ghi. */
     suspend fun updateFavoriteStatus(entry: HistoryEntry, isFavorite: Boolean) {
         withContext(Dispatchers.IO) {
             historyDao.updateFavoriteStatus(entry.id, isFavorite)
@@ -130,6 +151,7 @@ class HistoryRepository(
         externalScope.launch { syncRemote(entry.copy(isFavorite = isFavorite)) }
     }
 
+    /** Thực hiện đẩy file ảnh và thông tin của bản ghi lên đám mây. */
     suspend fun syncRemote(entry: HistoryEntry) =
             withContext(Dispatchers.IO) {
                 var entryToSync = entry
@@ -201,8 +223,8 @@ class HistoryRepository(
                 }
             }
 
+    /** Xóa toàn bộ dữ liệu lịch sử trên hệ thống máy chủ. */
     suspend fun deleteAll() {
-        // historyDao.deleteAll() // Dangerous to delete all rows
         try {
             getHistoryRef().removeValue().await()
         } catch (e: Exception) {
@@ -210,6 +232,7 @@ class HistoryRepository(
         }
     }
 
+    /** Rút gọn dữ liệu trên cả thiết bị và đám mây đối với bản ghi cấp định. */
     suspend fun delete(entry: HistoryEntry) {
         val idToDelete = entry.id
         historyDao.deleteById(idToDelete)
@@ -229,15 +252,14 @@ class HistoryRepository(
                 e.printStackTrace()
             }
         }
-
-        // reorderIds(idToDelete)
     }
 
+    /** Sắp xếp lại ID cho bảng (hiện tại tính năng bị vô hiệu). */
     private suspend fun reorderIds(deletedId: Int) =
             withContext(Dispatchers.IO) {
-                // Reorder logic disabled to prevent multi-user ID collision
             }
 
+    /** Tải chép lại toàn bộ danh sách lịch sử từ máy chủ Firebase. */
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun fetchHistory() =
             withContext(Dispatchers.IO) {
@@ -316,6 +338,7 @@ class HistoryRepository(
                 }
             }
 
+    /** Tính tỷ lệ nén phục vụ việc thay đổi kích cỡ ảnh bitmap. */
     private fun calculateInSampleSize(
             options: BitmapFactory.Options,
             reqWidth: Int,
@@ -336,6 +359,7 @@ class HistoryRepository(
         return inSampleSize
     }
 
+    /** Mồi nền tải ảnh trên mạng qua cấu trúc Glide và lưu trữ vào ổ. */
     private suspend fun downloadImageToLocal(url: String, id: Int): String? =
             withContext(Dispatchers.IO) {
                 try {
@@ -358,6 +382,7 @@ class HistoryRepository(
                 }
             }
 
+    /** Giải phóng những luồng xử lý không đồng bộ ngoại biên. */
     fun cleanup() {
         externalScope.coroutineContext.cancelChildren()
     }

@@ -19,10 +19,7 @@ import com.nguyendevs.ecolens.fragments.setting.AboutFragment
 import com.nguyendevs.ecolens.managers.setting.LanguageManager
 import com.nguyendevs.ecolens.models.Language
 
-/**
- * Handler quản lý social links, email feedback, navigation và language display. Xử lý: open URLs,
- * send email, open fragments, update language display.
- */
+/** Handler xử lý social links, gửi email, chọn ngôn ngữ và điều hướng trang about. */
 class SocialLinksHandler(
         private val activity: AppCompatActivity,
         private val binding: ScreenSettingsBinding,
@@ -33,7 +30,7 @@ class SocialLinksHandler(
         updateLanguageDisplay()
     }
 
-    /** Setup click listeners cho social links và navigation options */
+    /** Thiết lập click listeners cho các nút liên kết mạng xã hội và thông tin. */
     fun setupClickListeners(
             onLanguageClick: () -> Unit = {
                 showLanguageSelectionDialog()
@@ -49,6 +46,7 @@ class SocialLinksHandler(
         binding.btnTiktok.setOnClickListener { openUrl("https://www.tiktok.com/@nguyendevs/") }
     }
 
+    /** Hiển thị dialog chọn ngôn ngữ ứng dụng. */
     private fun showLanguageSelectionDialog() {
         val dialog = BottomSheetDialog(activity)
         val view = LayoutInflater.from(activity).inflate(R.layout.fragment_language_selection, null)
@@ -100,6 +98,7 @@ class SocialLinksHandler(
         dialog.show()
     }
 
+    /** Khởi động lại ứng dụng khi thay đổi ngôn ngữ. */
     private fun restartApp() {
         val intent = Intent(activity, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -109,7 +108,7 @@ class SocialLinksHandler(
         activity.overridePendingTransition(R.anim.fade_in_2, R.anim.fade_out_2)
     }
 
-    /** Cập nhật hiển thị ngôn ngữ hiện tại */
+    /** Cập nhật hiển thị tên ngôn ngữ hiện tại. */
     fun updateLanguageDisplay() {
         val currentLang = languageManager.getLanguage()
         binding.tvCurrentLanguage.text =
@@ -122,7 +121,7 @@ class SocialLinksHandler(
                 }
     }
 
-    /** Mở fragment mới */
+    /** Thay thế và hiển thị một Fragment mới. */
     fun openFragment(fragment: Fragment, tag: String) {
         val fragmentContainer = activity.findViewById<FrameLayout>(R.id.fragmentContainer)
         fragmentContainer.visibility = View.VISIBLE
@@ -140,7 +139,7 @@ class SocialLinksHandler(
                 .commit()
     }
 
-    /** Mở URL trong browser */
+    /** Mở trình duyệt với URL được truyền vào. */
     fun openUrl(url: String) {
         runCatching {
             val intent = Intent(Intent.ACTION_VIEW, url.toUri())
@@ -156,7 +155,7 @@ class SocialLinksHandler(
                 }
     }
 
-    /** Mở email app để gửi feedback */
+    /** Mở ứng dụng email để gửi hỗ trợ. */
     fun sendEmail() {
         runCatching {
             val intent =

@@ -21,10 +21,7 @@ import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-/**
- * Fragment hiển thị danh sách các phiên chat Hỗ trợ tạo chat mới và mở lại chat cũ Tự động hiển thị
- * empty state khi không có chat
- */
+/** Fragment danh sách các phiên chat, hỗ trợ phân trang và tạo chat mới. */
 class ChatHistoryFragment : Fragment() {
 
     private val viewModel: EcoLensViewModel by activityViewModels()
@@ -38,8 +35,7 @@ class ChatHistoryFragment : Fragment() {
     private var isLoadingMore = false
     private val pageSize = 20
 
-    // ==================== LIFECYCLE ====================
-
+    /** Inflate layout của fragment. */
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
@@ -49,6 +45,7 @@ class ChatHistoryFragment : Fragment() {
         return binding.root
     }
 
+    /** Khởi tạo RecyclerView, observer và FAB listener. */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
@@ -61,9 +58,7 @@ class ChatHistoryFragment : Fragment() {
         _binding = null
     }
 
-    // ==================== UI SETUP ====================
-
-    /** Cấu hình RecyclerView hiển thị danh sách chat sessions */
+    /** Cấu hình RecyclerView với phân trang khi scroll đến cuối. */
     private fun setupRecyclerView() {
         adapter =
                 ChatSessionAdapter(mutableListOf()) { session ->
@@ -92,7 +87,7 @@ class ChatHistoryFragment : Fragment() {
         }
     }
 
-    /** Cấu hình FAB để tạo chat mới */
+    /** Thiết lập FAB để tạo chat session mới. */
     private fun setupFabListener() {
         binding.fabNewChat.setOnClickListener {
             binding.fabNewChat.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
@@ -102,11 +97,7 @@ class ChatHistoryFragment : Fragment() {
         }
     }
 
-    // ==================== VIEWMODEL OBSERVERS ====================
-
-    /**
-     * Observe danh sách chat sessions từ ViewModel Tự động toggle giữa RecyclerView và empty state
-     */
+    /** Observe danh sách chat sessions, toggle empty state khi cần. */
     private fun observeChatSessions() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.allChatSessions.collectLatest { list ->
@@ -126,12 +117,7 @@ class ChatHistoryFragment : Fragment() {
         }
     }
 
-    // ==================== NAVIGATION ====================
-
-    /**
-     * Mở màn hình chat
-     * @param sessionId ID của session cũ, hoặc null để tạo session mới
-     */
+    /** Mở màn hình chat theo sessionId, hoặc tạo mới nếu null. */
     private fun openChatScreen(sessionId: Long?) {
         val fragment = ChatFragment.newInstance(sessionId)
 
@@ -148,7 +134,7 @@ class ChatHistoryFragment : Fragment() {
                 .commit()
     }
 
-    /** Tải trang tiếp theo của danh sách chat */
+    /** Tải trang tiếp theo của danh sách chat (lazy loading). */
     private fun loadNextPage() {
         val start = (currentPage + 1) * pageSize
         if (start >= fullChatList.size) return

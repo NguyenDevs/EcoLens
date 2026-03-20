@@ -24,16 +24,7 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-/**
- * Activity quản lý camera để chụp ảnh hoặc chọn ảnh từ thư viện
- * Sử dụng các helper classes:
- * - CameraManager: Quản lý camera operations
- * - PhotoCaptureHandler: Xử lý chụp và lưu ảnh
- * - CameraAnimationHandler: Quản lý animations và haptic feedback
- *
- * Khi chụp ảnh: lấy GPS thực (KEY_LAT, KEY_LNG trong result Intent)
- * Khi upload từ gallery: lat/lng = null → MainActivity sẽ dùng tọa độ Đà Nẵng mặc định
- */
+/** Quản lý camera để chụp hoặc chọn ảnh, đồng thời lấy tọa độ GPS nếu có. */
 class CameraActivity : AppCompatActivity() {
 
     companion object {
@@ -84,7 +75,6 @@ class CameraActivity : AppCompatActivity() {
     private fun setupCallbacks() {
         cameraManager.setCallback(object : CameraManager.CameraCallback {
             override fun onCameraReady(camera: Camera, imageCapture: ImageCapture) {
-                // Camera is ready
             }
 
             override fun onCameraError(exception: Exception) {
@@ -108,7 +98,6 @@ class CameraActivity : AppCompatActivity() {
         photoCaptureHandler.setCallback(object : PhotoCaptureHandler.PhotoCaptureCallback {
             override fun onPhotoSaved(uriString: String) {
                 runOnUiThread {
-                    // Ảnh chụp từ camera — lấy vị trí GPS thực trước khi trả về result
                     returnCameraResult(uriString)
                 }
             }
@@ -121,10 +110,7 @@ class CameraActivity : AppCompatActivity() {
         })
     }
 
-    /**
-     * Lấy GPS thực khi chụp ảnh, rồi trả về result với tọa độ
-     * Nếu không có quyền location → trả về result không có lat/lng (sẽ dùng Đà Nẵng mặc định)
-     */
+    /** Lấy GPS thực khi chụp ảnh và trả về Intent chứa tọa độ. */
     private fun returnCameraResult(uriString: String) {
         val hasLocation = ContextCompat.checkSelfPermission(
             this, android.Manifest.permission.ACCESS_FINE_LOCATION
@@ -146,7 +132,6 @@ class CameraActivity : AppCompatActivity() {
                 closeCamera()
             }
         } else {
-            // Không có quyền location → trả về không có tọa độ
             val resultIntent = Intent().apply {
                 putExtra(KEY_IMAGE_URI, uriString)
                 putExtra(KEY_IS_FROM_CAMERA, true)
@@ -222,13 +207,11 @@ class CameraActivity : AppCompatActivity() {
         photoCaptureHandler.handleSelectedImage(uri, object : PhotoCaptureHandler.PhotoCaptureCallback {
             override fun onPhotoSaved(uriString: String) {
                 runOnUiThread {
-                    // Ảnh từ gallery — KHÔNG lấy GPS, để MainActivity dùng tọa độ Đà Nẵng mặc định
                     val resultIntent = Intent().apply {
                         data = uri
                         flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
                         putExtra(KEY_IMAGE_URI, uriString)
                         putExtra(KEY_IS_FROM_CAMERA, false)
-                        // Không truyền KEY_LAT / KEY_LNG → MainActivity sẽ dùng default
                     }
                     setResult(RESULT_OK, resultIntent)
                     closeCamera()

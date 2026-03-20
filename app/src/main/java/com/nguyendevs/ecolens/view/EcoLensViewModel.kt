@@ -18,6 +18,7 @@ import com.nguyendevs.ecolens.models.history.HistorySortOption
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
+/** ViewModel chính quản lý trạng thái UI, lịch sử nhận diện và chat AI. */
 class EcoLensViewModel(application: Application) : AndroidViewModel(application) {
 
     private val historyDao by lazy { HistoryDatabase.getDatabase(application).historyDao() }
@@ -54,6 +55,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     private val _isHistoryLoading = MutableStateFlow(false)
     val isHistoryLoading: StateFlow<Boolean> = _isHistoryLoading.asStateFlow()
 
+    /** Khởi tạo ViewModel, tải lịch sử và session chat. */
     init {
         viewModelScope.launch {
             _isHistoryLoading.value = true
@@ -65,6 +67,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch { chatRepository.fetchSessionsAndMessages() }
     }
 
+    /** Lấy bản dịch ngôn ngữ đã lưu trong cache. */
     fun getCachedTranslation(historyId: Int, targetLang: String): SpeciesInfo? {
         val cached = translationCache[historyId]
         return if (cached != null && cached.first == targetLang) {
@@ -74,10 +77,12 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    /** Lưu bản dịch mới vào cache. */
     fun saveTranslationToCache(historyId: Int, language: String, info: SpeciesInfo) {
         translationCache[historyId] = language to info
     }
 
+    /** Bắt đầu nhận diện loài từ ảnh. */
     fun identifySpecies(
             imageUri: Uri,
             languageCode: String,
@@ -101,6 +106,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    /** Thử lại quá trình nhận diện với ảnh và cấu hình trước đó. */
     fun retryIdentification() {
         speciesManager.currentImageUri?.let { uri ->
             identifySpecies(
@@ -113,30 +119,37 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    /** Khởi tạo một phiên chat mới với tin nhắn chào mừng. */
     fun initNewChatSession(welcomeMessage: String, defaultTitle: String) {
         viewModelScope.launch { chatManager.initNewChatSession(welcomeMessage, defaultTitle) }
     }
 
+    /** Tải lại phiên chat theo ID. */
     fun loadChatSession(sessionId: Long) {
         chatManager.loadChatSession(sessionId)
     }
 
+    /** Gửi tin nhắn mới của người dùng vào chat. */
     fun sendChatMessage(userMessage: String, defaultTitle: String) {
         viewModelScope.launch { chatManager.sendChatMessage(userMessage, defaultTitle) }
     }
 
+    /** Yêu cầu AI tạo lại phản hồi mới. */
     fun renewAiResponse(aiMessage: ChatMessage) {
         viewModelScope.launch { chatManager.renewAiResponse(aiMessage) }
     }
 
+    /** Xóa một phiên chat. */
     fun deleteChatSession(sessionId: Long) {
         viewModelScope.launch { chatManager.deleteChatSession(sessionId) }
     }
 
+    /** Bắt đầu phiên chat hoàn toàn mới. */
     fun startNewChatSession() {
         chatManager.startNewChatSession()
     }
 
+    /** Truy xuất lịch sử theo tùy chọn sắp xếp và khoảng thời gian. */
     fun getHistoryBySortOption(
             sortOption: HistorySortOption,
             startDate: Long? = null,
@@ -146,6 +159,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         return historyManager.getHistoryBySortOption(sortOption, startDate, endDate, limit)
     }
 
+    /** Thay đổi trạng thái yêu thích của mục lịch sử. */
     fun toggleFavorite(entry: HistoryEntry) {
         viewModelScope.launch {
             historyManager.toggleFavorite(entry)
@@ -158,14 +172,17 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    /** Xóa một mục lịch sử. */
     fun deleteHistory(entry: HistoryEntry) {
         viewModelScope.launch { historyManager.deleteHistory(entry) }
     }
 
+    /** Xóa toàn bộ lịch sử. */
     fun deleteAllHistory() {
         viewModelScope.launch { historyManager.deleteAllHistory() }
     }
 
+    /** Đặt lại trạng thái màn hình về mặc định. */
     fun resetState() {
         _uiState.value = EcoLensUiState()
         currentImageUri = null

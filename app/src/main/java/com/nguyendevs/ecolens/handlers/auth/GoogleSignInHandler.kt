@@ -18,7 +18,7 @@ import com.nguyendevs.ecolens.database.UserRepository
 import com.nguyendevs.ecolens.managers.setting.LanguageManager
 import kotlinx.coroutines.launch
 
-/** Handler cho Google Sign-In Quản lý flow đăng nhập với Google */
+/** Handler quản lý luồng đăng nhập bằng Google Sign-In. */
 class GoogleSignInHandler(
         private val fragment: Fragment,
         private val userRepository: UserRepository,
@@ -62,6 +62,7 @@ class GoogleSignInHandler(
                 }
     }
 
+    /** Khởi tạo GoogleSignInClient với các tùy chọn đăng nhập. */
     fun setup(rememberMe: Boolean, onLoadingChange: (Boolean) -> Unit, onSuccess: () -> Unit) {
         this.rememberMe = rememberMe
         this.onLoadingChange = onLoadingChange
@@ -76,11 +77,13 @@ class GoogleSignInHandler(
         googleSignInClient = GoogleSignIn.getClient(fragment.requireActivity(), gso)
     }
 
+    /** Khởi chạy màn hình đăng nhập Google. */
     fun signIn() {
         val signInIntent = googleSignInClient.signInIntent
         googleSignInLauncher.launch(signInIntent)
     }
 
+    /** Xác thực với Firebase bằng Google ID token. */
     private fun firebaseAuthWithGoogle(
             idToken: String,
             rememberMe: Boolean,
@@ -123,6 +126,7 @@ class GoogleSignInHandler(
         }
     }
 
+    /** Lưu trạng thái nhớ đăng nhập vào SharedPreferences. */
     private fun saveRememberMe(isRemember: Boolean) {
         val sharedPref =
                 fragment.requireActivity()
@@ -130,6 +134,7 @@ class GoogleSignInHandler(
         sharedPref.edit().putBoolean("remember_me", isRemember).apply()
     }
 
+    /** Lưu chế độ giao diện vào SharedPreferences. */
     private fun applyUserTheme(isDarkMode: Boolean) {
         val sharedPref =
                 fragment.requireActivity()

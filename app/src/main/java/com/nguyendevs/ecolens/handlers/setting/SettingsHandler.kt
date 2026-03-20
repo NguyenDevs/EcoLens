@@ -10,13 +10,7 @@ import com.nguyendevs.ecolens.databinding.ScreenSettingsBinding
 import com.nguyendevs.ecolens.managers.setting.LanguageManager
 import kotlinx.coroutines.launch
 
-/**
- * Coordinator handler cho Settings screen. Delegates các chức năng cụ thể cho các handler con:
- * - ThemeHandler: Dark mode, theme transitions
- * - AccountDetailsHandler: Expand/collapse account section
- * - LogoutHandler: Logout, delete account
- * - SocialLinksHandler: Social links, email, language, navigation
- */
+/** Coordinator quản lý Settings screen, ủy quyền chức năng cho các handler con. */
 class SettingsHandler(
     private val activity: AppCompatActivity,
     private val languageManager: LanguageManager,
@@ -34,38 +28,33 @@ class SettingsHandler(
     private val accountUpdateHandler: AccountUpdateHandler
 
     init {
-        themeHandler =
-                ThemeHandler(
-                        activity = activity,
-                        binding = binding,
-                        onTransitionStart = { isTransitioning = true },
-                        onTransitionEnd = { isTransitioning = false }
-                )
+        themeHandler = ThemeHandler(
+            activity = activity,
+            binding = binding,
+            onTransitionStart = { isTransitioning = true },
+            onTransitionEnd = { isTransitioning = false }
+        )
 
-        accountDetailsHandler =
-                AccountDetailsHandler(
-                        binding = binding,
-                        isTransitioning = { isTransitioning || themeHandler.isTransitioning() },
-                        setTransitioning = { isTransitioning = it }
-                )
+        accountDetailsHandler = AccountDetailsHandler(
+            binding = binding,
+            isTransitioning = { isTransitioning || themeHandler.isTransitioning() },
+            setTransitioning = { isTransitioning = it }
+        )
 
         logoutHandler = LogoutHandler(activity)
 
-        socialLinksHandler =
-                SocialLinksHandler(
-                        activity = activity,
-                        binding = binding,
-                        languageManager = languageManager
-                )
+        socialLinksHandler = SocialLinksHandler(
+            activity = activity,
+            binding = binding,
+            languageManager = languageManager
+        )
 
         accountUpdateHandler = AccountUpdateHandler(activity, onUsernameChanged)
 
         setupClickListeners()
     }
 
-    // ==================== SETUP ====================
-
-    /** Cấu hình tất cả click listeners cho settings options */
+    /** Cấu hình click listeners cho tất cả tùy chọn settings. */
     private fun setupClickListeners() {
         socialLinksHandler.setupClickListeners()
 
@@ -93,7 +82,6 @@ class SettingsHandler(
 
         binding.logoutOption.setOnClickListener { logoutHandler.showLogoutConfirmDialog() }
 
-        // IUCN Mode
         val sharedPref = activity.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         binding.switchIUCNMode.isChecked = sharedPref.getBoolean("iucn_mode", true)
 
@@ -108,7 +96,6 @@ class SettingsHandler(
             binding.switchIUCNMode.toggle()
         }
 
-        // Taxonomy Mode
         val isVietnamese = languageManager.getLanguage() == LanguageManager.LANG_VI
         binding.switchTaxoMode.isChecked = sharedPref.getBoolean("taxo_mode", false)
         binding.switchTaxoMode.isEnabled = isVietnamese
@@ -134,18 +121,19 @@ class SettingsHandler(
 
     // ==================== PUBLIC METHODS ====================
 
+    /** Đăng ký callback Google re-auth cho AccountUpdateHandler. */
     fun setGoogleReAuthRequest(callback: () -> Unit) {
         accountUpdateHandler.setGoogleReAuthRequest(callback)
     }
 
+    /** Thông báo xác thực lại Google thành công. */
     fun onGoogleReAuthSuccess() {
         accountUpdateHandler.onGoogleReAuthSuccess()
     }
 
+    /** Cập nhật hiển thị ngôn ngữ và trạng thái Taxo Mode theo ngôn ngữ hiện tại. */
     fun updateLanguageDisplay() {
         socialLinksHandler.updateLanguageDisplay()
-        
-        // Update Taxonomy Mode state when language changes
         val isVietnamese = languageManager.getLanguage() == LanguageManager.LANG_VI
         binding.switchTaxoMode.isEnabled = isVietnamese
         if (!isVietnamese) {
@@ -161,10 +149,7 @@ class SettingsHandler(
         }
     }
 
-    /**
-     * Làm mới trạng thái UI từ SharedPreferences mà không kích hoạt sự kiện lưu lên Firebase
-     * Được gọi khi dữ liệu người dùng vừa được đồng bộ từ Firebase về
-     */
+    /** Làm mới trạng thái UI từ SharedPreferences mà không khởi động lưu lên Firebase. */
     fun refreshSettingsState() {
         val sharedPref = activity.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
 

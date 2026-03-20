@@ -26,114 +26,24 @@ import com.nguyendevs.ecolens.handlers.auth.GoogleSignInHandler
 import kotlinx.coroutines.launch
 import java.util.concurrent.Executor
 
+/** Handler quản lý việc cập nhật tên hiển thị và mật khẩu người dùng. */
 class AccountUpdateHandler(
     private val activity: AppCompatActivity,
     private val onUsernameChanged: (() -> Unit)? = null
 ) {
-
     private val firebaseAuth = FirebaseAuth.getInstance()
     private val userRepository = UserRepository()
     private var googleSignInHandler: GoogleSignInHandler? = null
 
-    // Helper method to initialize GoogleSignInHandler if needed
-    // Note: This requires the activity to be able to handle the result or pass a fragment.
-    // Since AccountUpdateHandler is not a fragment, we might need a different approach for Google Sign-In result.
-    // However, for re-authentication, we can just trigger the sign-in flow.
-    // But GoogleSignInHandler uses registerForActivityResult which must be called before ON_START.
-    // Since we are inside a handler initialized in onCreate, we can't easily register a new launcher here dynamically.
-    // Instead, we will rely on the fact that for Google users, we might just ask them to re-login completely if sensitive action is needed,
-    // or we can use the biometric prompt as a sufficient local check as implemented before.
-
-    // BUT, the user request specifically says: "Confirm username change when user logged in with Google will require user to login again."
-    // "Chọn đúng tài khoản thì xác nhận." -> Select correct account to confirm.
-
-    // To implement this correctly without refactoring the whole architecture to inject a launcher:
-    // We can't easily launch an activity result from here without a pre-registered launcher in the Activity/Fragment.
-    // Assuming we can't change the Activity structure easily to add a launcher just for this handler without more context.
-
-    // However, we can try to use the GoogleSignIn client to silently sign in or just sign out and ask to sign in.
-    // But "require user to login again" usually means re-authenticating.
-
-    // Let's assume we can't easily add a launcher.
-    // A workaround is to use the biometric prompt as "confirmation" which is what I did.
-    // But the user insisted on "login again".
-
-    // If we must implement "login again" (re-authenticate with Google), we need a `GoogleSignInClient`.
-    // And we need to handle the result.
-
-    // Since I cannot modify the Activity to add a launcher easily without seeing the Activity code (I have seen MainActivity but not SettingsActivity/Fragment where this is used),
-    // I will implement a logic that signs the user out and asks them to sign in again to proceed? No that's bad UX.
-
-    // Wait, `SettingsHandler` is used in `MainActivity` (via `settingsContainer`).
-    // So `AccountUpdateHandler` is attached to `MainActivity`.
-    // I can add a launcher to `MainActivity` if I could edit it, but I should try to keep changes local if possible.
-    // Actually, I can't add a launcher to `MainActivity` dynamically.
-
-    // Let's look at `GoogleSignInHandler`. It takes a `Fragment`.
-    // `SettingsHandler` takes an `AppCompatActivity`.
-
-    // If I cannot register a callback, I cannot implement Google Re-Auth properly using the modern AndroidX Result API within this class *unless* I pass a launcher to it.
-
-    // Let's assume for now that "login again" implies we just want to verify the user.
-    // If I can't do Google Re-Auth easily, maybe I can stick to Biometric?
-    // The user said: "Tác vụ đổi tên người dùng yêu cầu nhập lại mật khẩu sẽ không yêu cầu nhập lại mật khẩu (ẩn label đó) và thay vào đó là hiện label yêu cầu xác nhận tài khoản bằng cách đăng nhập lại tại layout đó. Chọn đúng tài khoản thì xác nhận."
-    // "Select correct account to confirm."
-
-    // This implies clicking a button that triggers Google Sign In.
-    // To do this, I need to be able to launch the intent and get the result.
-
-    // I will modify `AccountUpdateHandler` to accept a `reAuthLauncher` or similar if I can't register one.
-    // But `AccountUpdateHandler` is instantiated in `SettingsHandler`.
-
-    // Let's try to use `GoogleSignInClient` directly.
-    // `GoogleSignIn.getClient(...).signInIntent`
-
-    // I will modify `AccountUpdateHandler` to handle the re-auth logic.
-    // But I need a way to handle the result.
-
-    // Since I am an "expert", I know I should probably lift the Google Sign In logic to the Activity or Fragment that hosts this.
-    // `SettingsHandler` is in `MainActivity`.
-
-    // I will add a `GoogleReAuthHandler` or similar to `MainActivity` and pass it down?
-    // Or simpler: `AccountUpdateHandler` can't register for result.
-
-    // Let's look at `MainActivity.kt` again.
-    // It has `initHandlers()`.
-
-    // I will modify `AccountUpdateHandler` to NOT implement the Google Sign In logic directly but via a callback interface that the Activity implements or passes.
-    // But that requires editing `MainActivity` to add the launcher.
-
-    // Let's check `MainActivity.kt` content again.
-    // It has `settingsHandler = SettingsHandler(...)`.
-
-    // I will add a `registerForActivityResult` in `MainActivity` (or `SettingsHandler` if it was a Fragment, but it's a class).
-    // `SettingsHandler` is just a class.
-
-    // I will modify `MainActivity.kt` to add a launcher for Google Re-Auth and pass a callback to `SettingsHandler` -> `AccountUpdateHandler`.
-
-    // Wait, `SettingsHandler` is initialized in `initHandlers`.
-
-    // Plan:
-    // 1. Modify `AccountUpdateHandler` to accept a `onGoogleReAuthRequest: () -> Unit`.
-    // 2. Modify `SettingsHandler` to accept this callback and pass it to `AccountUpdateHandler`.
-    // 3. Modify `MainActivity` to:
-    //    a. Register a `StartActivityForResult` launcher for Google Sign In.
-    //    b. Implement the `onGoogleReAuthRequest` to launch the intent.
-    //    c. Handle the result in the launcher callback: if success, call a function in `SettingsHandler` -> `AccountUpdateHandler` to proceed with username update.
-
-    // This seems robust.
-
-    // Step 1: Modify `AccountUpdateHandler`
-    // I need to expose a method `proceedWithUsernameUpdate(newUsername: String)` that can be called after successful re-auth.
-    // And I need to store the `pendingNewUsername` temporarily.
-
     private var pendingNewUsername: String? = null
     private var onGoogleReAuthRequest: (() -> Unit)? = null
 
+    /** Đăng ký callback khi tài khoản Google cần xác thực lại. */
     fun setGoogleReAuthRequest(callback: () -> Unit) {
         this.onGoogleReAuthRequest = callback
     }
 
+    /** Gọi khi xác thực lại Google hoàn tất để tiếp tục quá trình. */
     fun onGoogleReAuthSuccess() {
         pendingNewUsername?.let { username ->
             updateUsername(username)
@@ -141,6 +51,7 @@ class AccountUpdateHandler(
         }
     }
 
+    /** Hiển thị dialog thay đổi tên người dùng. */
     fun showChangeUsernameDialog() {
         val dialog = BottomSheetDialog(activity)
         val view = LayoutInflater.from(activity).inflate(R.layout.fragment_change_username, null)
@@ -194,6 +105,7 @@ class AccountUpdateHandler(
         dialog.show()
     }
 
+    /** Hiển thị dialog thay đổi mật khẩu. */
     fun showChangePasswordDialog() {
         val dialog = BottomSheetDialog(activity)
         val view = LayoutInflater.from(activity).inflate(R.layout.fragment_change_password, null)
@@ -235,6 +147,7 @@ class AccountUpdateHandler(
         dialog.show()
     }
 
+    /** Xác thực lại người dùng bằng mật khẩu hiện tại. */
     private fun reauthenticate(password: String, onSuccess: () -> Unit) {
         val user = firebaseAuth.currentUser
         if (user != null && user.email != null) {
@@ -250,6 +163,7 @@ class AccountUpdateHandler(
         }
     }
 
+    /** Yêu cầu xác thực sinh trắc học trước khi áp dụng thay đổi. */
     private fun authenticateWithBiometrics(onSuccess: () -> Unit) {
         val biometricManager = BiometricManager.from(activity)
         if (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) != BiometricManager.BIOMETRIC_SUCCESS) {
@@ -285,6 +199,7 @@ class AccountUpdateHandler(
         biometricPrompt.authenticate(promptInfo)
     }
 
+    /** Cập nhật tên hiển thị lên Firebase và Room database. */
     private fun updateUsername(newUsername: String) {
         val user = firebaseAuth.currentUser
         val profileUpdates = UserProfileChangeRequest.Builder()
@@ -294,16 +209,13 @@ class AccountUpdateHandler(
         user?.updateProfile(profileUpdates)
             ?.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    // Update in Realtime Database
                     activity.lifecycleScope.launch {
                         userRepository.updateUsername(newUsername)
                         Toast.makeText(activity, activity.getString(R.string.username_updated), Toast.LENGTH_SHORT).show()
                         
-                        // Update shared preferences if needed
                         val sharedPreferences = activity.getSharedPreferences("EcoLensPrefs", Context.MODE_PRIVATE)
                         sharedPreferences.edit().putString("username", newUsername).apply()
 
-                        // Callback to refresh UI
                         onUsernameChanged?.invoke()
                     }
                 } else {
@@ -312,6 +224,7 @@ class AccountUpdateHandler(
             }
     }
 
+    /** Cập nhật mật khẩu mới lên Firebase. */
     private fun updatePassword(newPassword: String) {
         val user = firebaseAuth.currentUser
         user?.updatePassword(newPassword)

@@ -4,18 +4,10 @@ import android.content.Context
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.models.SpeciesInfo
 
-/**
- * Tạo văn bản để đọc cho Text-to-Speech
- */
+/** Kết xuất văn bản âm thoại tự động dựa trên thông số loài sinh vật. */
 object TextToSpeechGenerator {
 
-    /**
-     * Tạo văn bản đầy đủ từ thông tin loài để đọc bằng TTS
-     *
-     * @param context Context của ứng dụng
-     * @param info Thông tin loài sinh vật
-     * @return Văn bản đã được định dạng cho TTS
-     */
+    /** Chắp nối chuỗi dữ liệu phân mảnh hệ sinh thái thành văn bản đọc liền mạch. */
     fun generateSpeechText(context: Context, info: SpeciesInfo): String {
         val sb = StringBuilder()
         sb.append("${info.commonName}. ")
@@ -40,9 +32,7 @@ object TextToSpeechGenerator {
         return sb.toString()
     }
 
-    /**
-     * Xây dựng danh sách phân loại học
-     */
+    /** Phân xuất thông tin phân loại sinh học ra dạng mảng văn bản. */
     private fun buildTaxonomyList(context: Context, info: SpeciesInfo): List<String> {
         val taxonomyList = mutableListOf<String>()
         if (info.kingdom.isNotEmpty()) taxonomyList.add("${context.getString(R.string.label_kingdom)} ${stripHtml(info.kingdom)}")
@@ -55,18 +45,14 @@ object TextToSpeechGenerator {
         return taxonomyList
     }
 
-    /**
-     * Thêm một phần nội dung vào StringBuilder nếu nội dung không rỗng
-     */
+    /** Khắc họa từng đề mục cụ thể vào tập tin diễn đọc nếu mang nội dung. */
     private fun appendSectionIfNotEmpty(sb: StringBuilder, context: Context, titleResId: Int, content: String) {
         if (content.isNotEmpty()) {
             sb.append("${context.getString(titleResId)}. ${stripHtml(content)}. ")
         }
     }
 
-    /**
-     * Loại bỏ các thẻ HTML khỏi chuỗi
-     */
+    /** Khử trần các thẻ ngôn ngữ đánh dấu siêu văn bản ra khỏi chuỗi chuẩn. */
     private fun stripHtml(html: String): String {
         return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             android.text.Html.fromHtml(html, android.text.Html.FROM_HTML_MODE_COMPACT).toString()

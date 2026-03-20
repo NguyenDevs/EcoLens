@@ -8,7 +8,7 @@ import com.nguyendevs.ecolens.database.UserRepository
 import com.nguyendevs.ecolens.managers.setting.LanguageManager
 import kotlinx.coroutines.launch
 
-/** Handler cho register logic Xử lý đăng ký tài khoản mới với email/password */
+/** Handler xử lý đăng ký tài khoản mới bằng email và mật khẩu. */
 class RegisterHandler(
         private val context: Context,
         private val userRepository: UserRepository,
@@ -16,6 +16,7 @@ class RegisterHandler(
         private val languageManager: LanguageManager
 ) {
 
+    /** Thực hiện đăng ký sau khi validate input, mật khẩu khớp và đồng ý điều khoản. */
     fun handleRegister(
             email: String,
             password: String,
@@ -85,11 +86,13 @@ class RegisterHandler(
         }
     }
 
+    /** Lưu trạng thái nhớ đăng nhập vào SharedPreferences. */
     private fun saveRememberMe(isRemember: Boolean) {
         val sharedPref = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         sharedPref.edit().putBoolean("remember_me", isRemember).apply()
     }
 
+    /** Lưu chế độ giao diện vào SharedPreferences. */
     private fun applyUserTheme(isDarkMode: Boolean) {
         val sharedPref = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         sharedPref.edit().putBoolean("dark_mode", isDarkMode).apply()

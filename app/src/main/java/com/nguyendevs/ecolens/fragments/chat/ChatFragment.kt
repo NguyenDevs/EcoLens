@@ -17,10 +17,7 @@ import com.nguyendevs.ecolens.view.EcoLensViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-/**
- * Fragment hiển thị giao diện chat với AI Hỗ trợ streaming response, copy, share và renew messages
- * Tự động scroll và disable UI khi đang streaming
- */
+/** Fragment giao diện chat với AI, hỗ trợ streaming, copy, share và tạo lại response. */
 class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
 
     private val viewModel: EcoLensViewModel by activityViewModels()
@@ -37,6 +34,7 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         private val REGEX_HEADER = Regex("##(.*?)##")
         private val REGEX_STRIKE = Regex("~~(.*?)~~")
 
+        /** Tạo instance mới của ChatFragment, optionally với sessionId đã tồn tại. */
         fun newInstance(sessionId: Long? = null): ChatFragment {
             return ChatFragment().apply {
                 arguments = Bundle().apply { sessionId?.let { putLong(ARG_SESSION_ID, it) } }
@@ -44,13 +42,12 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         }
     }
 
-    // ==================== LIFECYCLE ====================
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         currentSessionId = arguments?.getLong(ARG_SESSION_ID, -1L)?.takeIf { it != -1L }
     }
 
+    /** Inflate layout của fragment. */
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
@@ -60,6 +57,7 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         return binding.root
     }
 
+    /** Khởi tạo adapter, RecyclerView, listener và observer. */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         adapter = ChatAdapter(this)
@@ -76,9 +74,7 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         _binding = null
     }
 
-    // ==================== INITIALIZATION ====================
-
-    /** Khởi tạo hoặc load chat session Load session cũ nếu có sessionId, tạo mới nếu không */
+    /** Load session cũ nếu có sessionId, hoặc tạo chat session mới. */
     private fun initializeSession() {
         if (currentSessionId != null) {
             viewModel.loadChatSession(currentSessionId!!)
@@ -90,9 +86,7 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         }
     }
 
-    // ==================== UI SETUP ====================
-
-    /** Cấu hình RecyclerView cho chat messages */
+    /** Cấu hình RecyclerView cho danh sách tin nhắn. */
     private fun setupRecyclerView() {
         val layoutManager = LinearLayoutManager(requireContext()).apply { stackFromEnd = true }
         binding.rvChat.layoutManager = layoutManager
@@ -100,7 +94,7 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         binding.rvChat.itemAnimator = null
     }
 
-    /** Cấu hình click listeners cho UI elements */
+    /** Thiết lập listener cho nút gửi, back và menu. */
     private fun setupListeners() {
         binding.btnSend.setOnClickListener {
             val text = binding.etChatInput.text.toString().trim()
@@ -116,9 +110,7 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         binding.btnMenu.setOnClickListener { showMenuPopup(it) }
     }
 
-    // ==================== CHAT ADAPTER CALLBACKS ====================
-
-    /** Sao chép nội dung tin nhắn vào clipboard */
+    /** Sao chép nội dung tin nhắn vào clipboard. */
     override fun onCopy(text: String) {
         performHapticFeedback()
         val clipboard =
@@ -129,7 +121,7 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         Toast.makeText(requireContext(), "Đã sao chép", Toast.LENGTH_SHORT).show()
     }
 
-    /** Chia sẻ nội dung tin nhắn */
+    /** Chia sẻ nội dung tin nhắn qua Intent. */
     override fun onShare(text: String) {
         val cleanText = stripHtml(text)
         val intent =
@@ -140,21 +132,20 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         startActivity(Intent.createChooser(intent, "Chia sẻ tin nhắn"))
     }
 
-    /** Tạo lại response từ AI cho tin nhắn này */
+    /** Yêu cầu AI tạo lại response cho tin nhắn được chọn. */
     override fun onRenew(position: Int, message: ChatMessage) {
         performHapticFeedback()
         viewModel.renewAiResponse(message)
     }
 
-    // ==================== MENU & DIALOGS ====================
-
+    /** Hiển thị bottom sheet menu cho chat. */
     private fun showMenuPopup(anchor: View) {
         val bottomSheet = ChatMenuBottomSheet.newInstance()
         bottomSheet.onDeleteClicked = { showDeleteConfirmDialog() }
         bottomSheet.show(childFragmentManager, ChatMenuBottomSheet.TAG)
     }
 
-    /** Hiển thị dialog xác nhận xóa chat */
+    /** Hiển thị dialog xác nhận xóa chat session. */
     private fun showDeleteConfirmDialog() {
         com.nguyendevs.ecolens.utils.CustomDialogUtils.showConfirmationDialog(
                 context = requireContext(),
@@ -170,11 +161,7 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         )
     }
 
-    // ==================== VIEWMODEL OBSERVERS ====================
-
-    /**
-     * Observe các state từ ViewModel Cập nhật UI khi có messages mới hoặc streaming state thay đổi
-     */
+    /** Observe danh sách tin nhắn và trạng thái streaming từ ViewModel. */
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.chatMessages.collectLatest { messages -> handleMessagesUpdate(messages) }
@@ -187,9 +174,7 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         }
     }
 
-    /**
-     * Xử lý cập nhật danh sách messages Tự động scroll xuống khi có message mới hoặc đang ở bottom
-     */
+    /** Cập nhật adapter và tự động scroll xuống khi có tin nhắn mới. */
     private fun handleMessagesUpdate(messages: List<ChatMessage>) {
         val isNewMessageAdded = messages.size > adapter.itemCount
         val layoutManager = binding.rvChat.layoutManager as LinearLayoutManager
@@ -210,7 +195,7 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         }
     }
 
-    /** Cập nhật UI dựa trên trạng thái streaming Disable input và buttons khi đang streaming */
+    /** Vô hiệu hóa input và các nút khi đang streaming response. */
     private fun updateUIForStreamingState(isStreaming: Boolean) {
         val alpha = if (isStreaming) 0.5f else 1f
         val enabled = !isStreaming
@@ -232,14 +217,12 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
                 }
     }
 
-    // ==================== HELPER METHODS ====================
-
-    /** Thực hiện haptic feedback */
+    /** Thực hiện haptic feedback. */
     private fun performHapticFeedback() {
         binding.root.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
     }
 
-    /** Loại bỏ HTML tags và markdown formatting khỏi text */
+    /** Xóa HTML tags và markdown formatting khỏi text. */
     private fun stripHtml(html: String): String {
         var text =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {

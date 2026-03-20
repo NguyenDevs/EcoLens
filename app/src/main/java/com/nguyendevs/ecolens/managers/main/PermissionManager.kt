@@ -8,20 +8,13 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import com.nguyendevs.ecolens.R
 
-/**
- * Manager quản lý runtime permissions
- * Xử lý Camera, Storage và Location permissions với version-specific logic
- */
+/** Quản lý yêu cầu quyền truy cập phần cứng và tập tin hệ thống. */
 class PermissionManager(
         private val context: Context,
         private val permissionLauncher: ActivityResultLauncher<Array<String>>
 ) {
 
-    /**
-     * Required permissions dựa trên Android version
-     * - API 33+: CAMERA, READ_MEDIA_IMAGES, ACCESS_FINE_LOCATION
-     * - API < 33: CAMERA, READ_EXTERNAL_STORAGE, ACCESS_FINE_LOCATION
-     */
+    /** Danh sách quyền bắt buộc theo phiên bản Android đang thông hành. */
     private val requiredPermissions =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 arrayOf(
@@ -37,12 +30,7 @@ class PermissionManager(
                 )
             }
 
-    // ==================== PERMISSION CHECK ====================
-
-    /**
-     * Kiểm tra xem tất cả required permissions đã được cấp chưa
-     * @return true nếu tất cả permissions đã được cấp
-     */
+    /** Đánh giá toàn bộ các quyền cơ bản đáp ứng đủ chưa. */
     fun hasPermissions(): Boolean {
         return requiredPermissions.all { permission ->
             ContextCompat.checkSelfPermission(context, permission) ==
@@ -50,19 +38,13 @@ class PermissionManager(
         }
     }
 
-    /**
-     * Kiểm tra riêng camera permission
-     * @return true nếu camera permission đã được cấp
-     */
+    /** Xác thực quyền tương tác với ống kính Camera. */
     fun hasCameraPermission(): Boolean {
         return ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
                 PackageManager.PERMISSION_GRANTED
     }
 
-    /**
-     * Kiểm tra riêng location permission
-     * @return true nếu location permission đã được cấp
-     */
+    /** Rà soát cấp thẩm quyền định vị hiện trường qua GPS. */
     fun hasLocationPermission(): Boolean {
         return ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
                 PackageManager.PERMISSION_GRANTED ||
@@ -70,16 +52,12 @@ class PermissionManager(
                 PackageManager.PERMISSION_GRANTED
     }
 
-    // ==================== PERMISSION REQUEST ====================
-
-    /** Request tất cả required permissions */
+    /** Gửi thông điệp đòi cấp quyền gốc trong hệ sinh thái Android. */
     fun requestPermissions() {
         permissionLauncher.launch(requiredPermissions)
     }
 
-    // ==================== DIALOGS ====================
-
-    /** Hiển thị dialog thông báo khi permissions bị từ chối */
+    /** Phát màn hình cảnh báo khi người dùng khước từ thẩm quyền. */
     fun showPermissionDeniedDialog() {
         com.nguyendevs.ecolens.utils.CustomDialogUtils.showConfirmationDialog(
                 context = context,

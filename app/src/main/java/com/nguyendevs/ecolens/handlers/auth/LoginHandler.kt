@@ -11,7 +11,7 @@ import com.nguyendevs.ecolens.database.UserRepository
 import com.nguyendevs.ecolens.managers.setting.LanguageManager
 import kotlinx.coroutines.launch
 
-/** Handler cho login logic Xử lý email/password login */
+/** Handler xử lý đăng nhập bằng email và mật khẩu. */
 class LoginHandler(
         private val context: Context,
         private val userRepository: UserRepository,
@@ -19,6 +19,7 @@ class LoginHandler(
         private val languageManager: LanguageManager
 ) {
 
+    /** Thực hiện đăng nhập sau khi validate input. */
     fun handleLogin(
             email: String,
             password: String,
@@ -71,17 +72,20 @@ class LoginHandler(
         }
     }
 
+    /** Lưu trạng thái nhớ đăng nhập vào SharedPreferences. */
     private fun saveRememberMe(isRemember: Boolean) {
         val sharedPref = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         sharedPref.edit().putBoolean("remember_me", isRemember).apply()
     }
 
+    /** Lưu chế độ giao diện từ cài đặt tài khoản. */
     private fun applyUserTheme(isDarkMode: Boolean) {
         val sharedPref = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         sharedPref.edit().putBoolean("dark_mode", isDarkMode).apply()
     }
 
     companion object {
+        /** Điều hướng đến màn hình chính và đóng AuthActivity. */
         fun navigateToMain(context: Context) {
             val intent = Intent(context, MainActivity::class.java)
             context.startActivity(intent)

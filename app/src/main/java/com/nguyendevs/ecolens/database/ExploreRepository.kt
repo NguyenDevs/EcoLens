@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
+/** Quản lý dữ liệu explore items từ Firebase, có cache trong bộ nhớ. */
 class ExploreRepository {
 
     private val firebaseDatabase: FirebaseDatabase =
@@ -19,7 +20,7 @@ class ExploreRepository {
         private var displayedItemsCache: List<ExploreItem> = emptyList()
     }
 
-    /** Lấy ngẫu nhiên [count] items. Nếu chưa có cache thì fetch từ Firebase. Lưu cache vào RAM. */
+    /** Lấy ngẫu nhiên [count] items, ưu tiên dùng cache nếu đã có. */
     suspend fun getRandomExploreItems(count: Int): List<ExploreItem> =
             withContext(Dispatchers.IO) {
                 if (displayedItemsCache.isNotEmpty()) {
@@ -39,6 +40,7 @@ class ExploreRepository {
                 return@withContext items
             }
 
+    /** Tải toàn bộ explore items từ Firebase và lưu vào cache. */
     private suspend fun fetchFromFirebase() {
         try {
             val snapshot = exploreRef.get().await()

@@ -2,6 +2,7 @@ package com.nguyendevs.ecolens.api
 
 import com.google.gson.annotations.SerializedName
 
+/** Response từ GBIF chứa thông tin phân loại học của loài. */
 data class GbifResponse(
     val kingdom: String? = null,
     val phylum: String? = null,

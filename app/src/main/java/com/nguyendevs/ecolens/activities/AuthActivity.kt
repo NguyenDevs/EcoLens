@@ -9,6 +9,7 @@ import com.nguyendevs.ecolens.fragments.auth.LoginFragment
 import com.nguyendevs.ecolens.managers.auth.AutoLoginManager
 import com.nguyendevs.ecolens.managers.setting.LanguageManager
 
+/** Activity xác thực, chứa các fragment đăng nhập và quên mật khẩu. */
 class AuthActivity : BaseAuthActivity() {
 
     private lateinit var autoLoginManager: AutoLoginManager
@@ -30,6 +31,7 @@ class AuthActivity : BaseAuthActivity() {
                     LanguageManager.LANG_JP to "JP"
             )
 
+    /** Khởi tạo activity, kiểm tra auto-login và hiển thị màn hình đăng nhập. */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -47,16 +49,19 @@ class AuthActivity : BaseAuthActivity() {
         }
     }
 
+    /** Thiết lập nút chuyển ngôn ngữ. */
     private fun setupLanguageButton() {
         updateLanguageLabel()
         binding.btnLanguage.setOnClickListener { cycleLanguage() }
     }
 
+    /** Cập nhật nhãn ngôn ngữ hiện tại trên nút. */
     private fun updateLanguageLabel() {
         val currentLang = languageManager.getLanguage()
         binding.tvLanguageLabel.text = languageLabels[currentLang] ?: "VI"
     }
 
+    /** Chuyển sang ngôn ngữ tiếp theo trong danh sách và khởi động lại activity. */
     private fun cycleLanguage() {
         val currentLang = languageManager.getLanguage()
         val currentIndex = languageCycle.indexOf(currentLang)
@@ -67,10 +72,12 @@ class AuthActivity : BaseAuthActivity() {
         recreate()
     }
 
+    /** Nạp một fragment vào container. */
     private fun loadFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction().replace(R.id.fragmentContainer, fragment).commit()
     }
 
+    /** Chuyển sang màn hình quên mật khẩu. */
     fun navigateToForgotPassword() {
         supportFragmentManager
                 .beginTransaction()
@@ -85,10 +92,12 @@ class AuthActivity : BaseAuthActivity() {
                 .commit()
     }
 
+    /** Quay lại màn hình đăng nhập. */
     fun navigateBackToLogin() {
         supportFragmentManager.popBackStack()
     }
 
+    /** Đặt trạng thái loading cho fragment hiện tại. */
     fun setFragmentLoading(isLoading: Boolean) {
         setLoading(isLoading)
     }

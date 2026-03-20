@@ -9,22 +9,14 @@ import com.nguyendevs.ecolens.BuildConfig
 import com.nguyendevs.ecolens.models.User
 import kotlinx.coroutines.tasks.await
 
-/**
- * Repository quản lý xác thực và thông tin người dùng Tích hợp Firebase Authentication và Realtime
- * Database
- */
+/** Quản lý xác thực và thông tin người dùng qua Firebase Auth và Realtime Database. */
 class UserRepository {
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val database = FirebaseDatabase.getInstance(BuildConfig.FIREBASE_DATABASE_URL)
     private val usersRef = database.getReference("users")
 
-    // ==================== AUTHENTICATION - REGISTER ====================
-
-    /**
-     * Đăng ký người dùng mới với email và password Tự động tạo profile trong Realtime Database
-     * @return true nếu đăng ký thành công, false nếu thất bại
-     */
+    /** Đăng ký tài khoản mới với email, mật khẩu và username. */
     suspend fun registerUser(email: String, password: String, username: String): Boolean {
         return try {
             val authResult = auth.createUserWithEmailAndPassword(email, password).await()
@@ -42,7 +34,6 @@ class UserRepository {
 
             usersRef.child(firebaseUser.uid).setValue(newUser).await()
 
-            // Update display name in Firebase Auth
             val profileUpdates = UserProfileChangeRequest.Builder().setDisplayName(username).build()
             firebaseUser.updateProfile(profileUpdates).await()
 
@@ -53,12 +44,7 @@ class UserRepository {
         }
     }
 
-    // ==================== AUTHENTICATION - LOGIN ====================
-
-    /**
-     * Đăng nhập với email và password
-     * @return FirebaseUser nếu thành công, null nếu thất bại
-     */
+    /** Đăng nhập bằng email và mật khẩu. */
     suspend fun loginUser(email: String, password: String): FirebaseUser? {
         return try {
             val authResult = auth.signInWithEmailAndPassword(email, password).await()
@@ -69,11 +55,7 @@ class UserRepository {
         }
     }
 
-    /**
-     * Đăng nhập với credential (Google, Facebook, etc.) Tự động tạo profile nếu là lần đầu đăng
-     * nhập
-     * @return FirebaseUser nếu thành công, null nếu thất bại
-     */
+    /** Đăng nhập bằng credential (Google, v.v.), tự tạo profile nếu lần đầu. */
     suspend fun signInWithCredential(credential: AuthCredential): FirebaseUser? {
         return try {
             val authResult = auth.signInWithCredential(credential).await()
@@ -103,7 +85,7 @@ class UserRepository {
         }
     }
 
-    /** Xác thực lại người dùng với credential */
+    /** Xác thực lại người dùng bằng credential. */
     fun reauthenticateUser(credential: AuthCredential, onResult: (Boolean) -> Unit) {
         val user = auth.currentUser
         user?.reauthenticate(credential)?.addOnCompleteListener { task ->
@@ -111,24 +93,17 @@ class UserRepository {
         }
     }
 
-    // ==================== AUTHENTICATION - LOGOUT ====================
-
-    /** Kiểm tra xem người dùng đã đăng nhập hay chưa */
+    /** Kiểm tra người dùng hiện tại đã đăng nhập chưa. */
     fun isUserLoggedIn(): Boolean {
         return auth.currentUser != null
     }
 
-    /** Đăng xuất người dùng hiện tại */
+    /** Đăng xuất người dùng hiện tại. */
     fun logout() {
         auth.signOut()
     }
 
-    // ==================== USER DATA - READ ====================
-
-    /**
-     * Lấy thông tin chi tiết của người dùng hiện tại từ Database
-     * @return User object nếu tìm thấy, null nếu không
-     */
+    /** Lấy thông tin chi tiết người dùng hiện tại từ Database. */
     suspend fun getCurrentUserDetails(): User? {
         val uid = auth.currentUser?.uid ?: return null
         return try {
@@ -140,9 +115,7 @@ class UserRepository {
         }
     }
 
-    // ==================== USER DATA - UPDATE ====================
-
-    /** Cập nhật toàn bộ thông tin người dùng */
+    /** Cập nhật toàn bộ thông tin người dùng. */
     suspend fun updateUser(user: User) {
         val uid = auth.currentUser?.uid ?: return
         try {
@@ -152,7 +125,7 @@ class UserRepository {
         }
     }
 
-    /** Cập nhật tên người dùng */
+    /** Cập nhật tên hiển thị của người dùng. */
     suspend fun updateUsername(newUsername: String) {
         val uid = auth.currentUser?.uid ?: return
         try {
@@ -162,7 +135,7 @@ class UserRepository {
         }
     }
 
-    /** Cập nhật chế độ dark mode của người dùng */
+    /** Cập nhật chế độ dark mode. */
     suspend fun updateDarkMode(isDarkMode: Boolean) {
         val uid = auth.currentUser?.uid ?: return
         try {
@@ -172,6 +145,7 @@ class UserRepository {
         }
     }
 
+    /** Cập nhật ngôn ngữ của người dùng. */
     suspend fun updateLanguage(language: String) {
         val uid = auth.currentUser?.uid ?: return
         try {
@@ -181,7 +155,7 @@ class UserRepository {
         }
     }
 
-    /** Cập nhật chế độ IUCN của người dùng */
+    /** Cập nhật chế độ IUCN. */
     suspend fun updateIucnMode(isEnabled: Boolean) {
         val uid = auth.currentUser?.uid ?: return
         try {
@@ -191,7 +165,7 @@ class UserRepository {
         }
     }
 
-    /** Cập nhật chế độ Taxonomy Translation của người dùng */
+    /** Cập nhật chế độ dịch phân loại học. */
     suspend fun updateTaxoMode(isEnabled: Boolean) {
         val uid = auth.currentUser?.uid ?: return
         try {

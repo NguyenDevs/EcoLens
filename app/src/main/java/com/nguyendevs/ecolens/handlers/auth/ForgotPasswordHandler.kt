@@ -9,10 +9,7 @@ import com.nguyendevs.ecolens.R
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-/**
- * Handler cho Forgot Password
- * Xử lý việc gửi email reset password
- */
+/** Handler gửi email đặt lại mật khẩu qua Firebase Auth. */
 class ForgotPasswordHandler(
     private val context: Context,
     private val lifecycleScope: LifecycleCoroutineScope
@@ -20,12 +17,7 @@ class ForgotPasswordHandler(
 
     private val auth = FirebaseAuth.getInstance()
 
-    /**
-     * Gửi email reset password
-     * @param email Email của người dùng
-     * @param onLoadingChange Callback để bật/tắt loading
-     * @param onSuccess Callback khi gửi email thành công
-     */
+    /** Gửi email reset mật khẩu sau khi validate định dạng email. */
     fun sendPasswordResetEmail(
         email: String,
         onLoadingChange: (Boolean) -> Unit,
@@ -71,10 +63,12 @@ class ForgotPasswordHandler(
         }
     }
 
+    /** Kiểm tra định dạng email hợp lệ. */
     private fun isValidEmail(email: String): Boolean {
         return Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 
+    /** Xử lý lỗi và hiển thị thông báo phù hợp. */
     private fun handleError(exception: Exception) {
         val errorMessage = when {
             exception.message?.contains("network", ignoreCase = true) == true -> {

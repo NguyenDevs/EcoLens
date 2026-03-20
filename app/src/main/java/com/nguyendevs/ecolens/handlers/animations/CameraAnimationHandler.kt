@@ -8,17 +8,12 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import com.nguyendevs.ecolens.R
 
-/**
- * Quản lý các animation và haptic feedback cho camera UI
- * - Button animations
- * - Focus indicator
- * - Border animation
- * - Haptic feedback
- */
+/** Quản lý animation và haptic feedback cho giao diện camera. */
 class CameraAnimationHandler(private val context: Context) {
 
     private var rotateAnimation: Animation? = null
 
+    /** Chạy animation nhấn thu phóng cho nút chụp. */
     fun animateCaptureButton(captureButton: View) {
         captureButton.animate()
             .scaleX(0.85f)
@@ -34,14 +29,17 @@ class CameraAnimationHandler(private val context: Context) {
             .start()
     }
 
+    /** Thực hiện haptic feedback khi chụp ảnh. */
     fun performCaptureHapticFeedback(view: View) {
         view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
     }
 
+    /** Thực hiện haptic feedback xác nhận. */
     fun performConfirmHapticFeedback(view: View) {
         view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
     }
 
+    /** Hiển thị chỉ báo focus tại vị trí chạm màn hình. */
     fun showFocusIndicator(
         focusIndicator: View,
         x: Float,
@@ -74,23 +72,27 @@ class CameraAnimationHandler(private val context: Context) {
         }
     }
 
+    /** Bắt đầu animation viền xoay vòng lặp. */
     fun startBorderAnimation(borderView: View) {
         rotateAnimation = AnimationUtils.loadAnimation(context, R.anim.rotate_infinite)
         borderView.visibility = View.VISIBLE
         borderView.startAnimation(rotateAnimation)
     }
 
+    /** Dừng animation viền xoay và ẩn view. */
     fun stopBorderAnimation(borderView: View) {
         rotateAnimation?.cancel()
         borderView.clearAnimation()
         borderView.visibility = View.GONE
     }
 
+    /** Chạy animation xoay một vòng duy nhất. */
     fun animateRotateOnce(view: View) {
         val rotateOnce = AnimationUtils.loadAnimation(context, R.anim.rotate_once)
         view.startAnimation(rotateOnce)
     }
 
+    /** Hủy animation và giải phóng tài nguyên. */
     fun cleanup() {
         rotateAnimation?.cancel()
         rotateAnimation = null

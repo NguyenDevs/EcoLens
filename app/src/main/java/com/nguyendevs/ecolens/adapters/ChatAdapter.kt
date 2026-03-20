@@ -28,9 +28,11 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/** Adapter hiển thị danh sách tin nhắn chat, hỗ trợ streaming và loading state. */
 class ChatAdapter(private val actionListener: OnChatActionListener) :
         RecyclerView.Adapter<ChatAdapter.ChatViewHolder>() {
 
+    /** Interface lắng nghe các hành động của người dùng trên tin nhắn. */
     interface OnChatActionListener {
         fun onCopy(text: String)
         fun onShare(text: String)
@@ -42,6 +44,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
     private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
     private var expandedPosition = -1
 
+    /** Thu gọn thanh action đang mở (nếu có). */
     fun collapseExpandedActions() {
         if (expandedPosition != -1) {
             val prev = expandedPosition
@@ -50,6 +53,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
         }
     }
 
+    /** Tạo ViewHolder mới và khởi tạo Markwon nếu chưa có. */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
         if (!::markwon.isInitialized) {
             markwon =
@@ -78,6 +82,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
         return ChatViewHolder(binding)
     }
 
+    /** Xử lý partial bind với payload (chỉ toggle action bar). */
     override fun onBindViewHolder(
             holder: ChatViewHolder,
             position: Int,
@@ -91,10 +96,12 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
         }
     }
 
+    /** Bind dữ liệu vào ViewHolder. */
     override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
         holder.bind(messages[position], position)
     }
 
+    /** Dừng animation khi ViewHolder bị recycle. */
     override fun onViewRecycled(holder: ChatViewHolder) {
         super.onViewRecycled(holder)
         holder.stopAnimation()
@@ -102,6 +109,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
 
     override fun getItemCount(): Int = messages.size
 
+    /** Cập nhật danh sách tin nhắn và thông báo thay đổi hiệu quả. */
     fun submitList(newMessages: List<ChatMessage>) {
         val oldSize = messages.size
         val newSize = newMessages.size
@@ -124,6 +132,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
         }
     }
 
+    /** ViewHolder cho một tin nhắn chat, hỗ trợ nhiều trạng thái hiển thị. */
     inner class ChatViewHolder(val binding: ItemChatMessageBinding) :
             RecyclerView.ViewHolder(binding.root) {
 
@@ -145,6 +154,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
         private var loopCount = 0
         private var typingAnimatorSet: android.animation.AnimatorSet? = null
 
+        /** Lấy màu từ theme attribute. */
         private fun getThemeColor(attr: Int): Int {
             val typedValue = TypedValue()
             itemView.context.theme.resolveAttribute(attr, typedValue, true)
@@ -186,12 +196,14 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
                     }
                 }
 
+        /** Dừng tất cả animation đang chạy. */
         fun stopAnimation() {
             handler.removeCallbacks(loadingAnimateRunnable)
             stopTypingAnimation()
             binding.tvMessage.alpha = 1f
         }
 
+        /** Bind tin nhắn vào view theo trạng thái hiện tại. */
         fun bind(message: ChatMessage, position: Int) {
             stopAnimation()
             resetViews()
@@ -208,6 +220,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
             }
         }
 
+        /** Reset tất cả views về trạng thái mặc định trước khi bind. */
         private fun resetViews() {
             binding.tvMessage.visibility = View.VISIBLE
             binding.layoutTypingIndicator.visibility = View.GONE
@@ -225,11 +238,13 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
             binding.layoutActions.setExpanded(false, false)
         }
 
+        /** Hiển thị timestamp của tin nhắn. */
         private fun showTimestamp(message: ChatMessage) {
             binding.tvTimestamp.visibility = View.VISIBLE
             binding.tvTimestamp.text = timeFormat.format(Date(message.timestamp))
         }
 
+        /** Cấu hình layout cho tin nhắn AI (bên trái). */
         private fun configureAiLayout() {
             binding.cardMiniAvatar.visibility = View.VISIBLE
             binding.spacerEnd.visibility = View.VISIBLE
@@ -273,6 +288,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
             binding.layoutMessageContent.background = leftBorderDrawable
         }
 
+        /** Cấu hình layout cho tin nhắn của user (bên phải). */
         private fun configureUserLayout() {
             binding.cardMiniAvatar.visibility = View.GONE
             binding.spacerEnd.visibility = View.GONE
@@ -292,6 +308,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
             binding.cardMessage.strokeWidth = 0
         }
 
+        /** Hiển thị trạng thái loading (dấu chấm nhấp nháy). */
         private fun bindLoadingState(bgColor: Int, textColor: Int) {
             configureAiLayout()
             binding.cardMessage.setCardBackgroundColor(bgColor)
@@ -302,6 +319,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
             loadingAnimateRunnable.run()
         }
 
+        /** Hiển thị trạng thái streaming (typing indicator). */
         private fun bindStreamingState(bgColor: Int, textColor: Int) {
             configureAiLayout()
             binding.cardMessage.setCardBackgroundColor(bgColor)
@@ -311,6 +329,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
             startTypingAnimation()
         }
 
+        /** Bind tin nhắn của người dùng. */
         private fun bindUserMessage(message: ChatMessage, position: Int) {
             configureUserLayout()
             markwon.setMarkdown(binding.tvMessage, message.content)
@@ -343,6 +362,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
             binding.tvMessage.setOnClickListener(collapseListener)
         }
 
+        /** Bind tin nhắn AI với hành động copy/share/regenerate. */
         private fun bindAiMessage(
                 message: ChatMessage,
                 position: Int,
@@ -439,6 +459,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
             }
         }
 
+        /** Bắt đầu animation typing (3 chấm nhảy). */
         private fun startTypingAnimation() {
             binding.layoutTypingIndicator.visibility = View.VISIBLE
             binding.tvMessage.visibility = View.GONE
@@ -460,6 +481,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
                     }
         }
 
+        /** Dừng animation typing và reset các chấm về vị trí ban đầu. */
         private fun stopTypingAnimation() {
             binding.layoutTypingIndicator.visibility = View.GONE
             binding.tvMessage.visibility = View.VISIBLE
@@ -473,6 +495,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
             binding.dot3.alpha = 1f
         }
 
+        /** Tạo animator chuyển động nảy cho một chấm typing. */
         private fun createBounceAnimator(target: View, startDelayMs: Long): ValueAnimator {
             val distancePx = -6f * target.context.resources.displayMetrics.density
             return ValueAnimator.ofFloat(0f, 1f).apply {

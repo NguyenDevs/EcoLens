@@ -18,15 +18,18 @@ import com.nguyendevs.ecolens.databinding.ItemQuickExploreBinding
 import com.nguyendevs.ecolens.models.ExploreItem
 import java.util.Locale
 
+/** Adapter hiển thị danh sách explore items, hỗ trợ placeholder shimmer. */
 class ExploreAdapter(private val onItemClick: (ExploreItem) -> Unit) :
     ListAdapter<ExploreItem, ExploreAdapter.ExploreViewHolder>(ExploreDiffCallback()) {
 
+    /** Tạo ViewHolder cho explore item. */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ExploreViewHolder {
         val binding =
             ItemQuickExploreBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ExploreViewHolder(binding, onItemClick)
     }
 
+    /** Bind item với margin phù hợp cho vị trí đầu tiên. */
     override fun onBindViewHolder(holder: ExploreViewHolder, position: Int) {
         val layoutParams = holder.itemView.layoutParams as ViewGroup.MarginLayoutParams
         val context = holder.itemView.context
@@ -42,11 +45,13 @@ class ExploreAdapter(private val onItemClick: (ExploreItem) -> Unit) :
         holder.bind(getItem(position))
     }
 
+    /** ViewHolder cho một explore item. */
     class ExploreViewHolder(
         private val binding: ItemQuickExploreBinding,
         private val onItemClick: (ExploreItem) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 
+        /** Hiển thị thông tin item hoặc trạng thái placeholder shimmer. */
         fun bind(item: ExploreItem) {
             val context = binding.root.context
             val isPlaceholder = item.id.startsWith("placeholder_")
@@ -87,6 +92,7 @@ class ExploreAdapter(private val onItemClick: (ExploreItem) -> Unit) :
             loadImageWithShimmer(item)
         }
 
+        /** Bật shimmer cho tất cả các views. */
         private fun startAllShimmers() {
             listOfNotNull(
                 binding.shimmerViewContainer,
@@ -98,6 +104,7 @@ class ExploreAdapter(private val onItemClick: (ExploreItem) -> Unit) :
             }
         }
 
+        /** Tắt shimmer và ẩn tất cả. */
         private fun stopAllShimmers() {
             listOfNotNull(
                 binding.shimmerViewContainer,
@@ -109,6 +116,7 @@ class ExploreAdapter(private val onItemClick: (ExploreItem) -> Unit) :
             }
         }
 
+        /** Hiển thị nội dung thực sau placeholder. */
         private fun showRealContent() {
             binding.imgExplore.visibility = View.VISIBLE
             binding.tvExploreName.visibility = View.VISIBLE
@@ -116,6 +124,7 @@ class ExploreAdapter(private val onItemClick: (ExploreItem) -> Unit) :
             binding.root.alpha = 1f
         }
 
+        /** Tải ảnh từ URL với shimmer trong khi chờ. */
         private fun loadImageWithShimmer(item: ExploreItem) {
             binding.shimmerViewContainer?.apply {
                 visibility = View.VISIBLE
@@ -160,6 +169,7 @@ class ExploreAdapter(private val onItemClick: (ExploreItem) -> Unit) :
         }
     }
 
+    /** DiffCallback so sánh explore items theo ID. */
     class ExploreDiffCallback : DiffUtil.ItemCallback<ExploreItem>() {
         override fun areItemsTheSame(oldItem: ExploreItem, newItem: ExploreItem): Boolean {
             return oldItem.id == newItem.id
