@@ -8,45 +8,59 @@ import androidx.room.Update
 import com.nguyendevs.ecolens.models.history.HistoryEntry
 import kotlinx.coroutines.flow.Flow
 
+/** DAO hỗ trợ thao tác truy vấn dữ liệu lịch sử nhận diện. */
 @Dao
 interface HistoryDao {
 
+    /** Thêm mới một bản ghi lịch sử. */
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insert(entry: HistoryEntry): Long
 
+    /** Thêm nhiều bản ghi lịch sử cùng lúc. */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(entries: List<HistoryEntry>)
 
+    /** Lấy ID cao nhất trong bảng lịch sử. */
     @Query("SELECT MAX(id) FROM history_table") suspend fun getMaxId(): Int?
 
+    /** Lấy danh sách lịch sử mới nhất theo giới hạn. */
     @Query(
             "SELECT * FROM history_table WHERE userId = :userId ORDER BY timestamp DESC LIMIT :limit"
     )
     fun getHistoryNewestFirst(userId: String, limit: Int): Flow<List<HistoryEntry>>
 
+    /** Lấy danh sách lịch sử cũ nhất theo giới hạn. */
     @Query("SELECT * FROM history_table WHERE userId = :userId ORDER BY timestamp ASC LIMIT :limit")
     fun getHistoryOldestFirst(userId: String, limit: Int): Flow<List<HistoryEntry>>
 
+    /** Lấy toàn bộ danh sách lịch sử từ mới nhất. */
     @Query("SELECT * FROM history_table WHERE userId = :userId ORDER BY timestamp DESC")
     fun getAllHistoryNewestFirst(userId: String): Flow<List<HistoryEntry>>
 
+    /** Lấy toàn bộ danh sách lịch sử từ cũ nhất. */
     @Query("SELECT * FROM history_table WHERE userId = :userId ORDER BY timestamp ASC")
     fun getAllHistoryOldestFirst(userId: String): Flow<List<HistoryEntry>>
 
+    /** Lấy lịch sử sắp xếp theo tên (A-Z). */
     @Query("SELECT * FROM history_table WHERE userId = :userId ORDER BY commonName ASC LIMIT :limit")
     fun getHistoryAlphabetical(userId: String, limit: Int): Flow<List<HistoryEntry>>
 
+    /** Lấy lịch sử có độ tin cậy cao nhất. */
     @Query("SELECT * FROM history_table WHERE userId = :userId ORDER BY confidence DESC LIMIT :limit")
     fun getHistoryConfidenceHigh(userId: String, limit: Int): Flow<List<HistoryEntry>>
 
+    /** Tìm lịch sử theo ID. */
     @Query("SELECT * FROM history_table WHERE id = :id LIMIT 1")
     suspend fun getHistoryById(id: Int): HistoryEntry?
 
+    /** Tìm lịch sử theo thời gian tạo. */
     @Query("SELECT * FROM history_table WHERE timestamp = :timestamp LIMIT 1")
     suspend fun getHistoryByTimestamp(timestamp: Long): HistoryEntry?
 
+    /** Lấy các bản ghi lịch sử có ID lớn hơn ngưỡng cho trước. */
     @Query("SELECT * FROM history_table WHERE id > :id ORDER BY id ASC")
     suspend fun getEntriesWithIdGreaterThan(id: Int): List<HistoryEntry>
 
+    /** Lấy lịch sử mới nhất trong khoảng thời gian. */
     @Query(
             "SELECT * FROM history_table WHERE userId = :userId AND timestamp BETWEEN :startDate AND :endDate ORDER BY timestamp DESC LIMIT :limit"
     )
@@ -57,6 +71,7 @@ interface HistoryDao {
             limit: Int
     ): Flow<List<HistoryEntry>>
 
+    /** Lấy lịch sử cũ nhất trong khoảng thời gian. */
     @Query(
             "SELECT * FROM history_table WHERE userId = :userId AND timestamp BETWEEN :startDate AND :endDate ORDER BY timestamp ASC LIMIT :limit"
     )
@@ -67,6 +82,7 @@ interface HistoryDao {
             limit: Int
     ): Flow<List<HistoryEntry>>
 
+    /** Lấy lịch sử theo Alpha B trong khoảng thời gian. */
     @Query(
             "SELECT * FROM history_table WHERE userId = :userId AND timestamp BETWEEN :startDate AND :endDate ORDER BY commonName ASC LIMIT :limit"
     )
@@ -77,6 +93,7 @@ interface HistoryDao {
             limit: Int
     ): Flow<List<HistoryEntry>>
 
+    /** Lấy lịch sử có độ tin cậy cao trong khoảng thời gian. */
     @Query(
             "SELECT * FROM history_table WHERE userId = :userId AND timestamp BETWEEN :startDate AND :endDate ORDER BY confidence DESC LIMIT :limit"
     )
@@ -87,14 +104,18 @@ interface HistoryDao {
             limit: Int
     ): Flow<List<HistoryEntry>>
 
+    /** Cập nhật một bản ghi lịch sử. */
     @Update suspend fun update(entry: HistoryEntry)
 
+    /** Cập nhật trạng thái yêu thích của bản ghi. */
     @Query("UPDATE history_table SET isFavorite = :isFavorite WHERE id = :id")
     suspend fun updateFavoriteStatus(id: Int, isFavorite: Boolean)
 
+    /** Lấy danh sách lịch sử được yêu thích. */
     @Query("SELECT * FROM history_table WHERE userId = :userId AND isFavorite = 1 ORDER BY timestamp DESC")
     fun getFavoriteHistory(userId: String): Flow<List<HistoryEntry>>
 
+    /** Cập nhật thông tin chi tiết sinh vật của bản ghi. */
     @Query(
             """
         UPDATE history_table 
@@ -141,10 +162,13 @@ interface HistoryDao {
             language: String
     )
 
+    /** Xóa toàn bộ lịch sử. */
     @Query("DELETE FROM history_table") suspend fun deleteAll()
 
+    /** Xóa một lịch sử theo id. */
     @Query("DELETE FROM history_table WHERE id = :id") suspend fun deleteById(id: Int)
 
+    /** Đếm tổng số bản ghi lịch sử của người dùng. */
     @Query("SELECT COUNT(*) FROM history_table WHERE userId = :userId")
     fun getTotalHistoryCount(userId: String): Flow<Int>
 }

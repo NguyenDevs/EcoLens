@@ -11,41 +11,29 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
-/**
- * Repository quản lý dữ liệu chat với tích hợp Firebase Đồng bộ dữ liệu giữa local Room Database và
- * Firebase Realtime Database
- */
+/** Quản lý dữ liệu chat, đồng bộ giữa Room Database và Firebase Realtime Database. */
 class ChatRepository(private val chatDao: ChatDao, private val context: Context) {
 
     private val database = FirebaseDatabase.getInstance(BuildConfig.FIREBASE_DATABASE_URL)
     private val auth = FirebaseAuth.getInstance()
 
-    // ==================== FIREBASE REFERENCES ====================
-
-    /** Lấy UID của người dùng hiện tại từ Firebase Auth */
+    /** Trả về UID người dùng hiện tại. */
     private fun getUserId(): String {
         return auth.currentUser?.uid ?: "anonymous"
     }
 
-    /** Lấy reference đến node chat sessions của user trong Firebase Database */
+    /** Trả về reference đến node chat sessions của user trên Firebase. */
     private fun getSessionsRef() = database.getReference("chat_sessions").child(getUserId())
 
-    /** Lấy reference đến node chat messages của user trong Firebase Database */
+    /** Trả về reference đến node chat messages của user trên Firebase. */
     private fun getMessagesRef() = database.getReference("chat_messages").child(getUserId())
 
-    // ==================== CHAT SESSION - QUERY ====================
-
-    /** Lấy tất cả phiên chat của user hiện tại */
+    /** Lấy tất cả phiên chat của user hiện tại. */
     fun getAllSessions(): kotlinx.coroutines.flow.Flow<List<ChatSession>> {
         return chatDao.getAllSessions(getUserId())
     }
 
-    // ==================== CHAT SESSION - INSERT & UPDATE ====================
-
-    /**
-     * Thêm phiên chat mới vào cả local và Firebase
-     * @return ID của phiên chat vừa tạo
-     */
+    /** Thêm phiên chat mới vào local và Firebase, trả về ID mới tạo. */
     suspend fun insertSession(session: ChatSession): Long {
         val sessionWithUserId = session.copy(userId = getUserId())
         val id = chatDao.insertSession(sessionWithUserId)
@@ -58,7 +46,7 @@ class ChatRepository(private val chatDao: ChatDao, private val context: Context)
         return id
     }
 
-    /** Cập nhật phiên chat vào cả local và Firebase */
+    /** Cập nhật phiên chat vào local và Firebase. */
     suspend fun updateSession(session: ChatSession) {
         val sessionWithUserId = session.copy(userId = getUserId())
         chatDao.updateSession(sessionWithUserId)
@@ -69,41 +57,26 @@ class ChatRepository(private val chatDao: ChatDao, private val context: Context)
         }
     }
 
-    // ==================== CHAT SESSION - DELETE ====================
-
-    /**
-     * Xóa phiên chat khỏi cả local và Firebase Tự động xóa tất cả tin nhắn liên quan và sắp xếp lại
-     * ID
-     */
+    /** Xóa phiên chat và tất cả tin nhắn liên quan khỏi local và Firebase. */
     suspend fun deleteSession(id: Long) {
         chatDao.deleteSession(id)
         try {
             getSessionsRef().child(id.toString()).removeValue().await()
             getMessagesRef().child(id.toString()).removeValue().await()
-            // reorderSessionIds(id)
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    /**
-     * Sắp xếp lại ID các phiên chat sau khi xóa Giảm ID của các phiên có ID lớn hơn phiên đã xóa
-     */
+    /** Sắp xếp lại ID phiên chat sau khi xóa (hiện tại bị tắt). */
     private suspend fun reorderSessionIds(deletedId: Long) {
-        // Reorder disabled
     }
 
-    /** Di chuyển tất cả tin nhắn từ phiên cũ sang phiên mới Dùng khi reorder session IDs */
+    /** Di chuyển tin nhắn sang phiên mới khi reorder (hiện tại bị tắt). */
     private suspend fun moveMessagesToNewSessionId(oldSessionId: Long, newSessionId: Long) {
-        // Disabled
     }
 
-    // ==================== CHAT MESSAGE - INSERT & UPDATE ====================
-
-    /**
-     * Thêm tin nhắn mới vào cả local và Firebase
-     * @return ID của tin nhắn vừa tạo
-     */
+    /** Thêm tin nhắn mới vào local và Firebase, trả về ID mới tạo. */
     suspend fun insertMessage(message: ChatMessage): Long {
         val messageWithUserId = message.copy(userId = getUserId())
         val id =
@@ -127,7 +100,7 @@ class ChatRepository(private val chatDao: ChatDao, private val context: Context)
         return id
     }
 
-    /** Cập nhật toàn bộ tin nhắn vào cả local và Firebase */
+    /** Cập nhật toàn bộ tin nhắn vào local và Firebase. */
     suspend fun updateMessage(message: ChatMessage) {
         val messageWithUserId = message.copy(userId = getUserId())
         chatDao.updateMessage(messageWithUserId)
@@ -142,7 +115,7 @@ class ChatRepository(private val chatDao: ChatDao, private val context: Context)
         }
     }
 
-    /** Cập nhật chỉ nội dung tin nhắn vào cả local và Firebase */
+    /** Cập nhật chỉ nội dung tin nhắn vào local và Firebase. */
     suspend fun updateMessageContent(messageId: Long, content: String, sessionId: Long) {
         chatDao.updateMessageContent(messageId, content)
         try {
@@ -157,12 +130,7 @@ class ChatRepository(private val chatDao: ChatDao, private val context: Context)
         }
     }
 
-    // ==================== CHAT MESSAGE - DELETE ====================
-
-    /**
-     * Xóa tin nhắn khỏi cả local và Firebase
-     * @param reorder Có sắp xếp lại ID các tin nhắn sau khi xóa hay không
-     */
+    /** Xóa tin nhắn khỏi local và Firebase. */
     suspend fun deleteMessage(message: ChatMessage, reorder: Boolean = true) {
         chatDao.deleteMessageById(message.id)
         try {
@@ -171,26 +139,16 @@ class ChatRepository(private val chatDao: ChatDao, private val context: Context)
                     .child(message.id.toString())
                     .removeValue()
                     .await()
-
-            if (reorder) {
-                // reorderMessageIds(message.sessionId, message.id)
-            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    /**
-     * Sắp xếp lại ID các tin nhắn trong một phiên sau khi xóa Giảm ID của các tin nhắn có ID lớn
-     * hơn tin nhắn đã xóa
-     */
+    /** Sắp xếp lại ID tin nhắn sau khi xóa (hiện tại bị tắt). */
     private suspend fun reorderMessageIds(sessionId: Long, deletedMessageId: Long) {
-        // Disabled
     }
 
-    // ==================== SYNC METHODS ====================
-
-    // Tải toàn bộ dữ liệu chat từ Firebase về Local
+    /** Tải toàn bộ sessions và messages từ Firebase về local. */
     suspend fun fetchSessionsAndMessages() =
             withContext(kotlinx.coroutines.Dispatchers.IO) {
                 if (auth.currentUser == null) return@withContext
