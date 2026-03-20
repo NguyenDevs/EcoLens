@@ -48,6 +48,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/** Fragment hiển thị lịch sử nhận diện, hỗ trợ lọc, sắp xếp, tìm kiếm và phân trang. */
 class HistoryFragment : Fragment() {
 
     private val viewModel: EcoLensViewModel by activityViewModels()
@@ -78,11 +79,13 @@ class HistoryFragment : Fragment() {
         animationHandler = HistoryAnimationHandler(requireContext())
     }
 
+    /** Inflate layout của fragment. */
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = ScreenSpeciesHistoryBinding.inflate(inflater, container, false)
         return binding.root
     }
 
+    /** Khởi tạo adapter, search, click listeners, và observer. */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupAdapter()
@@ -97,6 +100,7 @@ class HistoryFragment : Fragment() {
         observeLoadingState()
     }
 
+    /** Observe tổng số loài và cập nhật text đếm. */
     private fun observeTotalCount() {
         viewLifecycleOwner.lifecycleScope.launch {
             kotlinx.coroutines.flow.combine(
@@ -112,6 +116,7 @@ class HistoryFragment : Fragment() {
         }
     }
 
+    /** Observe trạng thái loading và toggle shimmer. */
     private fun observeLoadingState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isHistoryLoading.collectLatest { isLoading ->
@@ -131,8 +136,6 @@ class HistoryFragment : Fragment() {
                     binding.btnViewGrid.isEnabled = true
                     binding.btnViewList.alpha = 1.0f
                     binding.btnViewGrid.alpha = 1.0f
-                    
-                    // Re-trigger history observation to check empty state after sync completes
                     observeHistory()
                 }
             }
@@ -144,6 +147,7 @@ class HistoryFragment : Fragment() {
         _binding = null
     }
 
+    /** Khởi tạo adapter lịch sử với Markwon renderer và scroll listener phân trang. */
     private fun setupAdapter() {
         val markwon = Markwon.builder(requireContext()).usePlugin(HtmlPlugin.create()).build()
         adapter = HistoryAdapter(markwon = markwon, clickListener = { entry ->
@@ -174,6 +178,7 @@ class HistoryFragment : Fragment() {
         })
     }
 
+    /** Thiết lập thanh tìm kiếm với debounce khi nhập text. */
     private fun setupSearch() {
         binding.etSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -199,11 +204,13 @@ class HistoryFragment : Fragment() {
         }
     }
 
+    /** Ẩn bàn phím ảo. */
     private fun hideKeyboard() {
         val imm = ContextCompat.getSystemService(requireContext(), InputMethodManager::class.java)
         imm?.hideSoftInputFromWindow(binding.etSearch.windowToken, 0)
     }
 
+    /** Thiết lập listener cho chip filter, nút sắp xếp, lọc ngày và toggle view mode. */
     private fun setupClickListeners() {
         binding.chipAll.setOnClickListener {
             animationHandler.performConfirmFeedback(it)
@@ -251,6 +258,7 @@ class HistoryFragment : Fragment() {
         }
     }
 
+    /** Animation mở rộng/thu hẹp thanh tìm kiếm. */
     private fun toggleSearch(expand: Boolean) {
         val collapsedWidth = (48 * resources.displayMetrics.density).toInt()
         val expandedWidth = binding.stickyHeader.width - (12 * 2 * resources.displayMetrics.density).toInt()
@@ -311,11 +319,13 @@ class HistoryFragment : Fragment() {
         widthAnimator.start()
     }
 
+    /** Hiển thị bàn phím ảo. */
     private fun showKeyboard() {
         val imm = ContextCompat.getSystemService(requireContext(), InputMethodManager::class.java)
         imm?.showSoftInput(binding.etSearch, InputMethodManager.SHOW_IMPLICIT)
     }
 
+    /** Áp dụng chế độ xem list hoặc grid và cập nhật LayoutManager. */
     private fun applyViewMode(mode: HistoryViewMode) {
         val previousMode = adapter.viewMode
         adapter.viewMode = mode
@@ -339,12 +349,13 @@ class HistoryFragment : Fragment() {
             binding.btnViewGrid.setBackgroundResource(R.drawable.bg_view_toggle)
             binding.btnViewGrid.setColorFilter(ContextCompat.getColor(requireContext(), R.color.text_tertiary))
         }
-        
+
         if (previousMode != mode) {
             observeHistory()
         }
     }
 
+    /** Cập nhật bộ lọc category hiện tại. */
     private fun updateCategoryFilter(category: CategoryFilter) {
         currentCategory = category
         updateCategoryChipsUI(category)
@@ -352,6 +363,7 @@ class HistoryFragment : Fragment() {
         observeHistory()
     }
 
+    /** Cập nhật text của chip filter theo category đang chọn. */
     private fun updateCategoryChipsUI(selected: CategoryFilter) {
         val textRes = when (selected) {
             CategoryFilter.ALL -> R.string.history_chipAll
@@ -359,7 +371,7 @@ class HistoryFragment : Fragment() {
             CategoryFilter.PLANTS -> R.string.history_chipPlants
             CategoryFilter.FUNGI -> R.string.history_chipFungi
         }
-        
+
         binding.chipAll.apply {
             text = getString(textRes)
             if (selected == CategoryFilter.ALL) {
@@ -371,6 +383,7 @@ class HistoryFragment : Fragment() {
         }
     }
 
+    /** Observe và lọc danh sách lịch sử theo category, search query và sort option. */
     private fun observeHistory() {
         observeJob?.cancel()
         observeJob = viewLifecycleOwner.lifecycleScope.launch {
@@ -408,7 +421,7 @@ class HistoryFragment : Fragment() {
                     }
 
                     val isFiltering = searchQuery.isNotEmpty() || currentCategory != CategoryFilter.ALL || filterStartDate != null
-                    
+
                     binding.tvResultCount.visibility = if (isFiltering) View.VISIBLE else View.INVISIBLE
                     binding.tvResultCount.text = getString(R.string.history_results_count, filtered.size)
 
@@ -443,7 +456,7 @@ class HistoryFragment : Fragment() {
                                 val entry = filtered[i]
                                 val isFirst = i == 0 || !isSameDay(entry.timestamp, filtered[i - 1].timestamp)
                                 val isLast = i == filtered.size - 1 || !isSameDay(entry.timestamp, filtered[i + 1].timestamp)
-                                
+
                                 models.add(HistoryUiModel(entry, isFirst, isLast))
                                 if (currentViewMode == HistoryViewMode.GRID && isLast) {
                                     var dayStartIndex = i
@@ -468,12 +481,14 @@ class HistoryFragment : Fragment() {
         }
     }
 
+    /** Kiểm tra hai timestamp có cùng ngày không. */
     private fun isSameDay(t1: Long, t2: Long): Boolean {
         val d1 = Instant.ofEpochMilli(t1).atZone(ZoneId.systemDefault()).toLocalDate()
         val d2 = Instant.ofEpochMilli(t2).atZone(ZoneId.systemDefault()).toLocalDate()
         return d1 == d2
     }
 
+    /** Tải trang tiếp theo của danh sách lịch sử. */
     private fun loadNextPage() {
         isLoadingMore = true
         adapter.setLoading(true)
@@ -481,6 +496,7 @@ class HistoryFragment : Fragment() {
         observeHistory()
     }
 
+    /** Cập nhật nhãn sắp xếp hiện tại. */
     private fun updateSortUI() {
         binding.tvSortLabel.text = when (currentSortOption) {
             HistorySortOption.NEWEST_FIRST -> getString(R.string.sort_newest_first)
@@ -491,6 +507,7 @@ class HistoryFragment : Fragment() {
         }
     }
 
+    /** Hiển thị bottom sheet chọn thứ tự sắp xếp. */
     private fun showFilterBottomSheet() {
         val sheet = FilterHistoryBottomSheet.newInstance(currentSortOption)
         sheet.onApplyListener = { sort ->
@@ -502,11 +519,12 @@ class HistoryFragment : Fragment() {
         sheet.show(parentFragmentManager, "FILTER_SHEET")
     }
 
+    /** Cập nhật UI chip filter ngày theo range đang chọn. */
     private fun updateDateFilterUI() {
         if (filterStartDate != null || filterEndDate != null) {
             val start = filterStartDate?.let { Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()) }
             val end = filterEndDate?.let { Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()) }
-            
+
             binding.btnFilterByDate.text = when {
                 start != null && end != null -> "${dateFormatter.format(start)} - ${dateFormatter.format(end)}"
                 start != null -> "Từ ${dateFormatter.format(start)}"
@@ -520,6 +538,7 @@ class HistoryFragment : Fragment() {
         }
     }
 
+    /** Hiển thị date range picker để lọc theo ngày. */
     private fun showDateRangePickerDialog() {
         val picker = MaterialDatePicker.Builder.dateRangePicker()
             .setTitleText(R.string.select_date)
@@ -533,6 +552,7 @@ class HistoryFragment : Fragment() {
         picker.addOnPositiveButtonClickListener { applyDateFilter(it) }
     }
 
+    /** Áp dụng bộ lọc theo khoảng ngày được chọn. */
     private fun applyDateFilter(selection: Pair<Long, Long>) {
         val offset = TimeZone.getDefault().getOffset(selection.first)
         filterStartDate = selection.first - offset
@@ -547,6 +567,7 @@ class HistoryFragment : Fragment() {
         observeHistory()
     }
 
+    /** Xóa bộ lọc ngày và reset về mặc định. */
     private fun clearDateFilter() {
         filterStartDate = null
         filterEndDate = null
@@ -557,6 +578,7 @@ class HistoryFragment : Fragment() {
         observeHistory()
     }
 
+    /** Điều hướng đến màn hình chi tiết lịch sử. */
     private fun navigateToDetail(entry: HistoryEntry) {
         val fragment = HistoryDetailFragment().apply {
             arguments = Bundle().apply { putString("HISTORY_ENTRY_JSON", Gson().toJson(entry)) }
