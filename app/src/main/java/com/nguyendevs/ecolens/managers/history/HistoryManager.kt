@@ -16,6 +16,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
+/** Manager quản lý lịch sử tra cứu của người dùng. */
 class HistoryManager(
     private val context: Context,
     private val historyRepository: HistoryRepository
@@ -28,6 +29,7 @@ class HistoryManager(
 
     private val downloadingImages = ConcurrentHashMap<Int, Boolean>()
 
+    /** Truy xuất lịch sử theo tiêu chí sắp xếp và thời gian có sẵn. */
     fun getHistoryBySortOption(
         sortOption: HistorySortOption,
         startDate: Long? = null,
@@ -73,8 +75,10 @@ class HistoryManager(
         return flow.flowOn(Dispatchers.IO)
     }
 
+    /** Trích đếm tổng lượng mục lịch sử đã lưu. */
     fun getTotalHistoryCount(): Flow<Int> = historyRepository.getTotalHistoryCount()
 
+    /** Cố gắng sửa chữa các hình ảnh bị thất lạc trong danh sách. */
     suspend fun repairMissingImagesOnce() = withContext(Dispatchers.IO) {
         runCatching {
             val entries = collectAllEntries()
@@ -88,6 +92,7 @@ class HistoryManager(
         }
     }
 
+    /** Ánh xạ toàn bộ lịch sử thành danh sách liền mạch để kiểm tra. */
     private suspend fun collectAllEntries(): List<HistoryEntry> {
         val allEntries = historyRepository.getAllHistoryNewestFirst()
         val entries = mutableListOf<HistoryEntry>()
@@ -100,6 +105,7 @@ class HistoryManager(
         return entries
     }
 
+    /** Kiểm định và nối lại dòng ảnh hỏng tương ứng một bản ghi lịch sử. */
     private suspend fun repairSingleImage(entry: HistoryEntry) {
         if (downloadingImages.containsKey(entry.id)) {
             return
@@ -133,6 +139,7 @@ class HistoryManager(
         }
     }
 
+    /** Xóa mục lịch sử đơn lẻ. */
     suspend fun deleteHistory(entry: HistoryEntry) {
         withContext(Dispatchers.IO) {
             runCatching {
@@ -144,6 +151,7 @@ class HistoryManager(
         }
     }
 
+    /** Xóa trắng toàn bộ dữ liệu lịch sử trên ứng dụng. */
     suspend fun deleteAllHistory() {
         withContext(Dispatchers.IO) {
             runCatching {
@@ -173,6 +181,7 @@ class HistoryManager(
         }
     }
 
+    /** Bật/tắt trạng thái yêu thích của mục lịch sử. */
     suspend fun toggleFavorite(entry: HistoryEntry) {
         val newFavoriteStatus = !entry.isFavorite
         historyRepository.updateFavoriteStatus(entry, newFavoriteStatus)

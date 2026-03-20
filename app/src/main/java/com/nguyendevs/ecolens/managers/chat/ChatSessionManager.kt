@@ -28,10 +28,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
 
-/**
- * Manager quản lý chat sessions và streaming responses từ Gemini API Hỗ trợ tạo session mới, gửi
- * tin nhắn, streaming response và renew AI messages
- */
+/** Quản lý phiên trò chuyện và tương tác với AI qua API. */
 class ChatSessionManager(
         private val chatRepository: ChatRepository,
         private val chatDao: ChatDao,
@@ -65,12 +62,7 @@ class ChatSessionManager(
         private const val STREAM_UPDATE_DELAY = 50L
     }
 
-    // ==================== SESSION MANAGEMENT ====================
-
-    /**
-     * Khởi tạo chat session mới với welcome message Reuse session trống nếu có, nếu không tạo
-     * session mới
-     */
+    /** Khởi tạo phiên trò chuyện mới. */
     suspend fun initNewChatSession(welcomeMessage: String, defaultTitle: String) {
         currentSessionId = null
         messageCollectionJob?.cancel()
@@ -99,7 +91,7 @@ class ChatSessionManager(
         }
     }
 
-    /** Tạo session mới với welcome message */
+    /** Tạo phiên mới với nội dung lời chào mở đầu. */
     private suspend fun createNewSession(welcomeMessage: String, defaultTitle: String) {
         val newSession =
                 ChatSession(
@@ -122,20 +114,20 @@ class ChatSessionManager(
         withContext(Dispatchers.Main) { startMessageCollection(newId) }
     }
 
-    /** Load session đã tồn tại */
+    /** Tải dữ liệu của phiên hiện tại. */
     fun loadChatSession(sessionId: Long) {
         currentSessionId = sessionId
         startMessageCollection(sessionId)
     }
 
-    /** Bắt đầu session mới (reset state) */
+    /** Bắt đầu một phiên trò chuyện trống không tì vết. */
     fun startNewChatSession() {
         currentSessionId = null
         messageCollectionJob?.cancel()
         _chatMessages.value = emptyList()
     }
 
-    /** Xóa chat session và tất cả messages liên quan */
+    /** Xóa phiên và toàn bộ tin nhắn liên quan lưu trong máy. */
     suspend fun deleteChatSession(sessionId: Long) {
         withContext(Dispatchers.IO) {
             try {
@@ -153,9 +145,7 @@ class ChatSessionManager(
         }
     }
 
-    // ==================== MESSAGE OPERATIONS ====================
-
-    /** Gửi tin nhắn từ user và nhận streaming response từ AI */
+    /** Gửi thông điệp từ người dùng và tính toán phản hồi từ AI. */
     suspend fun sendChatMessage(userMessage: String, defaultTitle: String) {
         if (userMessage.isBlank()) return
         val sessionId = currentSessionId ?: return
@@ -176,10 +166,13 @@ class ChatSessionManager(
         }
     }
 
-    /** Tạo lại AI response cho một message */
+    /** Bỏ qua tin cũ và yêu cầu trả lời lại dạng stream. */
     suspend fun renewAiResponse(aiMessage: ChatMessage) {
         if (isGenerating.getAndSet(true)) return
-        val sessionId = currentSessionId ?: return.also { isGenerating.set(false) }
+        val sessionId = currentSessionId ?: run {
+            isGenerating.set(false)
+            return
+        }
 
         withContext(Dispatchers.IO) {
             try {
@@ -193,7 +186,7 @@ class ChatSessionManager(
         }
     }
 
-    /** Bắt đầu collect messages từ database cho session */
+    /** Mở công việc đồng bộ hóa dữ liệu tin nhắn. */
     private fun startMessageCollection(sessionId: Long) {
         messageCollectionJob?.cancel()
         messageCollectionJob =
@@ -205,9 +198,7 @@ class ChatSessionManager(
                 }
     }
 
-    // ==================== GEMINI STREAMING ====================
-
-    /** Thực hiện streaming call đến Gemini API Stream response và update message real-time */
+    /** Thực hiện gọi API lấy luồng tin nhắn trả về real-time. */
     private suspend fun executeGeminiStreamingFlow(sessionId: Long, reuseMessageId: Long? = null) {
         _isStreamingActive.value = true
 
@@ -256,7 +247,7 @@ class ChatSessionManager(
         }
     }
 
-    /** Build conversation history để gửi lên Gemini API */
+    /** Phân tích và nén lịch sử theo định dạng chuẩn gửi đi Gemini. */
     private suspend fun buildConversationHistory(sessionId: Long): List<GeminiContent> {
         val currentHistory =
                 chatDao.getMessagesBySession(sessionId).first().filter { !it.isStreaming }
@@ -267,7 +258,7 @@ class ChatSessionManager(
         }
     }
 
-    /** Xử lý streaming response từ Gemini API Parse từng chunk và update message real-time */
+    /** Lần theo và xử lý luồng stream nội dung văn bản AI. */
     private suspend fun processStreamingResponse(
             responseBody: ResponseBody,
             sessionId: Long,
@@ -291,7 +282,7 @@ class ChatSessionManager(
         finalizeStreamingMessage(accumulatedText, sessionId, messageId)
     }
 
-    /** Xử lý một chunk từ streaming response */
+    /** Phân giải thông tin rời rạc trong Stream dữ liệu. */
     private suspend fun processStreamChunk(
             jsonData: String,
             accumulatedText: StringBuilder,
@@ -313,7 +304,7 @@ class ChatSessionManager(
         }
     }
 
-    /** Finalize streaming message sau khi nhận đủ response */
+    /** Gói gọn phản hồi stream và đánh dấu dừng quá trình. */
     private suspend fun finalizeStreamingMessage(
             accumulatedText: StringBuilder,
             sessionId: Long,
@@ -342,7 +333,7 @@ class ChatSessionManager(
         }
     }
 
-    /** Xử lý lỗi khi streaming */
+    /** Bắt và phân loại lỗi kết nối luồng chat. */
     private suspend fun handleStreamingError(e: Exception, sessionId: Long, messageId: Long) {
         e.printStackTrace()
         val errorMsg = "Lỗi kết nối: ${e.message}"
@@ -358,9 +349,7 @@ class ChatSessionManager(
         )
     }
 
-    // ==================== HELPER METHODS ====================
-
-    /** Cập nhật title và preview của session */
+    /** Cập nhật thanh tiêu đề phiên và xem trước tin nhắn ngắn gọn. */
     private suspend fun updateSessionTitleAndPreview(
             sessionId: Long,
             userMessage: String,

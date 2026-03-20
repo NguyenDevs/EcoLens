@@ -8,19 +8,13 @@ import com.nguyendevs.ecolens.MainActivity
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.database.UserRepository
 
-/**
- * Manager cho auto login
- * Kiểm tra và tự động đăng nhập nếu có "Remember Me"
- */
+/** Quản lý quá trình tự động đăng nhập khi khởi động. */
 class AutoLoginManager(
     private val activity: AppCompatActivity,
     private val userRepository: UserRepository
 ) {
 
-    /**
-     * Kiểm tra và tự động đăng nhập
-     * @return true nếu đã auto login và finish activity
-     */
+    /** Kiểm tra và tự động đăng nhập nếu tùy chọn ghi nhớ được cấu hình. */
     fun checkAndAutoLogin(): Boolean {
         if (userRepository.isUserLoggedIn()) {
             val sharedPref = activity.getSharedPreferences("app_settings", Context.MODE_PRIVATE)

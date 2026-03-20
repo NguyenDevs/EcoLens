@@ -20,11 +20,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 
-/**
- * Manager xử lý nhận diện loài từ ảnh Flow: iNaturalist API → Gemini (Common Name) → Parallel(GBIF
- * + IUCN + Gemini Details) → Gemini Conservation → Save to history Hỗ trợ update existing history
- * entry hoặc tạo mới
- */
+/** Quản lý quá trình nhận diện và xử lý luồng dữ liệu phân loại sinh vật qua API. */
 class SpeciesIdentificationManager(
         private val context: Context,
         private val historyRepository: HistoryRepository
@@ -47,17 +43,7 @@ class SpeciesIdentificationManager(
 
     private var currentSpeciesInfo: SpeciesInfo? = null
 
-    // ==================== IDENTIFICATION FLOW ====================
-
-    /**
-     * Nhận diện loài từ ảnh Flow: Prepare image → iNaturalist API → Gemini (Common Name) →
-     * Parallel(GBIF + IUCN + Gemini Details) → Gemini Conservation → Save history
-     *
-     * @param imageUri URI của ảnh cần nhận diện
-     * @param languageCode Ngôn ngữ cho kết quả (vi/en)
-     * @param existingHistoryId ID của history entry cần update (null nếu tạo mới)
-     * @param onStateUpdate Callback để update UI state
-     */
+    /** Đẩy hình ảnh qua mô hình để chạy phân tích và đồng bộ các luồng thông tin thu được. */
     suspend fun identifySpecies(
             imageUri: Uri,
             languageCode: String,
@@ -99,9 +85,7 @@ class SpeciesIdentificationManager(
         }
     }
 
-    // ==================== IMAGE PREPARATION ====================
-
-    /** Chuẩn bị image file từ URI Resize về max 1024px và validate file existence */
+    /** Chuyển đổi và định cỡ lại bức ảnh từ URI xuống kích cỡ hợp lệ. */
     private suspend fun prepareImageFile(imageUri: Uri): File {
         val imageFile =
                 withContext(Dispatchers.Default) {
@@ -117,18 +101,13 @@ class SpeciesIdentificationManager(
         return imageFile
     }
 
-    /** Tạo MultipartBody.Part từ image file */
+    /** Chuyển hóa tệp bức ảnh thành phần cấu thành dạng thức multipart. */
     private fun createImagePart(file: File): MultipartBody.Part {
         val requestFile = file.asRequestBody(MIME_TYPE_JPEG.toMediaTypeOrNull())
         return MultipartBody.Part.createFormData(PART_NAME_IMAGE, file.name, requestFile)
     }
 
-    // ==================== API CALLS ====================
-
-    /**
-     * Gọi iNaturalist API để nhận diện loài
-     * @return Top result hoặc null nếu không có kết quả
-     */
+    /** Gọi iNaturalist API nhằm xác định ra loài sinh vật có mức tin cậy cao nhất. */
     private suspend fun callINaturalistAPI(
             imageFile: File,
             languageCode: String,
@@ -145,14 +124,7 @@ class SpeciesIdentificationManager(
         return response.results.firstOrNull()
     }
 
-    // ==================== RESULT PROCESSING ====================
-
-    /**
-     * Xử lý kết quả nhận diện
-     * 1. Lấy Common Name từ Gemini
-     * 2. Gọi song song GBIF, IUCN và Gemini Details
-     * 3. Sau khi Details xong, gọi Gemini Conservation
-     */
+    /** Phát luồng lấy chi tiết GBIF, phân bố bổ sung và kiểm tra cấp độ bảo tồn. */
     private suspend fun processIdentificationResult(
             result: IdentificationResult,
             languageCode: String,
@@ -163,7 +135,6 @@ class SpeciesIdentificationManager(
         val scientificName = result.taxon.name
         val confidence = result.combined_score
 
-        // Check IUCN Mode
         val sharedPref = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         val isIucnEnabled = sharedPref.getBoolean("iucn_mode", true)
         val isTaxoModeEnabled = sharedPref.getBoolean("taxo_mode", false)
@@ -304,7 +275,6 @@ class SpeciesIdentificationManager(
                     updateTaxonomyFromGbif(gbifResult, onStateUpdate)
                 }
 
-                // Taxonomy Translation Logic (Only for Vietnamese)
                 if (isTaxoModeEnabled &&
                                 gbifResult != null &&
                                 languageCode == LanguageManager.LANG_VI
@@ -379,7 +349,6 @@ class SpeciesIdentificationManager(
                         onStateUpdate(state.copy(images = fetchedImages))
                     }
                 } else {
-                    // IUCN Disabled
                     currentSpeciesInfo = currentSpeciesInfo?.copy(conservationStatus = "Vô hiệu")
                 }
 
@@ -455,7 +424,6 @@ class SpeciesIdentificationManager(
                 fun format(value: String?): String {
                     if (value == null) return ""
 
-                    // Clean up prefixes
                     var cleaned = value.trim()
                     val prefixes = listOf("Giới ", "Ngành ", "Lớp ", "Bộ ", "Họ ", "Chi ", "Loài ")
                     for (prefix in prefixes) {
@@ -489,9 +457,7 @@ class SpeciesIdentificationManager(
                 )
             }
 
-    // ==================== HISTORY MANAGEMENT ====================
-
-    /** Lưu kết quả vào history Update existing entry nếu có, nếu không tạo mới */
+    /** Ghi log lại cấu trúc loài sinh vật đã duyệt xong xuống cơ sở dữ liệu. */
     private suspend fun saveToHistory(
             existingHistoryId: Int?,
             imageFile: File,
@@ -510,7 +476,7 @@ class SpeciesIdentificationManager(
         }
     }
 
-    /** Update existing history entry */
+    /** Nối chi tiết vừa tra cứu cập nhật lên nhật ký khám phá cũ. */
     private suspend fun updateExistingHistory(
             historyId: Int,
             info: SpeciesInfo,
@@ -524,7 +490,7 @@ class SpeciesIdentificationManager(
         }
     }
 
-    /** Tạo history entry mới */
+    /** Thiết lập thông số và phát sinh lịch sử rà soát loài mới. */
     private suspend fun createNewHistory(imageFile: File, info: SpeciesInfo, languageCode: String) {
         val localImagePath =
                 if (currentImageUri != null && currentImageUri!!.scheme == "file") {
@@ -550,7 +516,7 @@ class SpeciesIdentificationManager(
         }
     }
 
-    /** Validate xem info có hợp lệ để save không */
+    /** Rà soát logic loại trừ các phản hồi mập mờ khỏi bản ghi lưu trữ. */
     private fun isValidInfo(info: SpeciesInfo): Boolean {
         return info.commonName.isNotEmpty() &&
                 info.commonName != "..." &&
@@ -559,9 +525,7 @@ class SpeciesIdentificationManager(
                 !info.description.contains("Đã xảy ra lỗi", ignoreCase = true)
     }
 
-    // ==================== ERROR HANDLING ====================
-
-    /** Xử lý lỗi và trả về error message phù hợp */
+    /** Bắt và biến đổi các ngoại lệ kỹ thuật thành lời nhắn chuẩn giao diện. */
     private fun handleError(e: Exception, onStateUpdate: (EcoLensUiState) -> Unit) {
         val errorMsg =
                 when {
@@ -573,7 +537,7 @@ class SpeciesIdentificationManager(
         onStateUpdate(EcoLensUiState(isLoading = false, error = errorMsg))
     }
 
-    /** Helper để lấy string resource theo ngôn ngữ hiện tại (currentLanguageCode) */
+    /** Rút chuỗi địa phương từ kho resource theo ngôn ngữ tương thích. */
     private fun getLocalizedString(resId: Int, vararg args: Any?): String {
         val locale = java.util.Locale(currentLanguageCode)
         val config = android.content.res.Configuration(context.resources.configuration)
