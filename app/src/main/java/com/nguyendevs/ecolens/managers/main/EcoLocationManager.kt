@@ -31,7 +31,7 @@ object EcoLocationManager {
 
     val defaultCoordinates = Coordinates(DEFAULT_LAT, DEFAULT_LNG)
 
-    // Cache trong RAM — sống suốt vòng đời app, clear khi app bị kill
+    /** Lưu đệm tọa độ tạm thời trong phiên hoạt động. */
     private var cachedLocation: Coordinates? = null
     private var cachedAt: Long = 0L
 
