@@ -17,10 +17,7 @@ import com.google.android.material.card.MaterialCardView
 import com.google.android.material.textfield.TextInputLayout
 import com.nguyendevs.ecolens.R
 
-/**
- * Handler quản lý search bar có thể expand/collapse
- * Hỗ trợ Google search với animation mượt mà
- */
+/** Handler quản lý thanh tìm kiếm có thể mở rộng/thu gọn, hỗ trợ Google search. */
 class SearchBarHandler(
     private val context: Context,
     private val searchBarContainer: MaterialCardView,
@@ -39,19 +36,13 @@ class SearchBarHandler(
         setupClickListeners()
     }
 
-    /**
-     * Set các views cần ẩn đi khi search bar expand
-     */
+    /** Đăng ký danh sách view cần ẩn khi thanh tìm kiếm mở rộng. */
     fun setViewsToHide(views: List<View>) {
         viewsToHide.clear()
         viewsToHide.addAll(views)
     }
 
-    // ==================== SETUP ====================
-
-    /**
-     * Cấu hình click listeners cho search button và IME action
-     */
+    /** Thiết lập listener cho nút tìm kiếm và phím IME Action. */
     private fun setupClickListeners() {
         btnSearchAction.setOnClickListener {
             btnSearchAction.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
@@ -79,12 +70,7 @@ class SearchBarHandler(
         }
     }
 
-    // ==================== PUBLIC METHODS ====================
-
-    /**
-     * Expand search bar với text tùy chọn
-     * Tự động focus và hiển thị bàn phím
-     */
+    /** Mở rộng thanh tìm kiếm với text tùy chọn và focus bàn phím. */
     fun expandSearchBar(text: String = "") {
         if (!isSearchBarExpanded) {
             animateWidth(
@@ -111,10 +97,7 @@ class SearchBarHandler(
         }
     }
 
-    /**
-     * Collapse search bar
-     * Tự động clear text và ẩn bàn phím
-     */
+    /** Thu gọn thanh tìm kiếm và xóa text. */
     fun collapseSearchBar() {
         if (isSearchBarExpanded) {
             animateWidth(
@@ -130,17 +113,10 @@ class SearchBarHandler(
         }
     }
 
-    /**
-     * Kiểm tra xem search bar có đang expanded không
-     */
+    /** Kiểm tra thanh tìm kiếm có đang mở rộng không. */
     fun isExpanded() = isSearchBarExpanded
 
-    // ==================== PRIVATE METHODS ====================
-
-    /**
-     * Thực hiện Google search với query từ EditText
-     * Collapse search bar nếu query rỗng
-     */
+    /** Thực hiện Google search với query từ EditText. */
     private fun performGoogleSearch() {
         val query = etSearchQuery.text.toString().trim()
         if (query.isNotEmpty()) {
@@ -162,9 +138,7 @@ class SearchBarHandler(
         }
     }
 
-    /**
-     * Animate width của search bar container
-     */
+    /** Animation thay đổi chiều rộng của thanh tìm kiếm. */
     private fun animateWidth(
         from: Int,
         to: Int,
@@ -181,13 +155,13 @@ class SearchBarHandler(
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator) {
                     onStart?.invoke()
-                    if (to > from) { // Expanding
+                    if (to > from) {
                         viewsToHide.forEach {
-                            it.animate().alpha(0f).setDuration(200).withEndAction { 
-                                it.visibility = View.INVISIBLE 
+                            it.animate().alpha(0f).setDuration(200).withEndAction {
+                                it.visibility = View.INVISIBLE
                             }.start()
                         }
-                    } else { // Collapsing
+                    } else {
                         viewsToHide.forEach {
                             it.visibility = View.VISIBLE
                             it.animate().alpha(1f).setDuration(200).start()
@@ -202,11 +176,13 @@ class SearchBarHandler(
         }
     }
 
+    /** Hiển thị bàn phím ảo. */
     private fun showKeyboard() {
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.showSoftInput(etSearchQuery, InputMethodManager.SHOW_IMPLICIT)
     }
 
+    /** Ẩn bàn phím ảo. */
     private fun hideKeyboard() {
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(etSearchQuery.windowToken, 0)

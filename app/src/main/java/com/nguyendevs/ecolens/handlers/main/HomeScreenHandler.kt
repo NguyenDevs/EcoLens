@@ -20,6 +20,7 @@ import com.nguyendevs.ecolens.models.history.HistoryEntry
 import java.util.Calendar
 import kotlinx.coroutines.launch
 
+/** Handler khởi tạo màn hình chính: greeting, explore nhanh, lịch sử gần đây. */
 class HomeScreenHandler(
     private val activity: AppCompatActivity,
     private val binding: ActivityMainBinding,
@@ -38,6 +39,7 @@ class HomeScreenHandler(
     private lateinit var exploreAdapter: ExploreAdapter
     private var hasFetchedExplore = false
 
+    /** Lấy ngẫu nhiên 5 item explore nếu chưa fetch. */
     fun fetchExploreData() {
         if (hasFetchedExplore) return
         activity.lifecycleScope.launch {
@@ -49,6 +51,7 @@ class HomeScreenHandler(
         }
     }
 
+    /** Khởi tạo toàn bộ góc home: greeting, nút hero, lịch sử, explore. */
     fun setup() {
         setupGreeting()
         setupHeroCardButton()
@@ -57,6 +60,7 @@ class HomeScreenHandler(
         fetchExploreData()
     }
 
+    /** Thiết lập nút "Bắt đầu ngay" mở camera. */
     private fun setupHeroCardButton() {
         val homeRoot = binding.homeContainer.root
         homeRoot.findViewById<View>(R.id.btnStartNow)?.setOnClickListener {
@@ -64,6 +68,7 @@ class HomeScreenHandler(
         }
     }
 
+    /** Hiển thị lời chào theo giờ và tên người dùng từ Firebase. */
     fun setupGreeting() {
         val homeRoot = binding.homeContainer.root
         val tvGreeting = homeRoot.findViewById<TextView>(R.id.tvGreeting) ?: return
@@ -101,6 +106,7 @@ class HomeScreenHandler(
         }
     }
 
+    /** Thiết lập RecyclerView lịch sử gần đây và nút expand. */
     private fun setupRecentHistory() {
         val homeRoot = binding.homeContainer.root
         val rvRecentHistory = homeRoot.findViewById<androidx.recyclerview.widget.RecyclerView>(
@@ -129,6 +135,7 @@ class HomeScreenHandler(
         loadRecentHistory(emptyRecentState)
     }
 
+    /** Toggle expand/collapse section lịch sử gần đây. */
     private fun toggleRecentExpansion(
         container: net.cachapa.expandablelayout.ExpandableLayout?,
         expandIcon: ImageView?
@@ -157,6 +164,7 @@ class HomeScreenHandler(
         }
     }
 
+    /** Tải và hiển thị tữ lịch sử, cập nhật empty state. */
     private fun loadRecentHistory(emptyState: View?) {
         activity.lifecycleScope.launch {
             val placeholders = List(3) { i ->
@@ -175,6 +183,7 @@ class HomeScreenHandler(
         }
     }
 
+    /** Thiết lập RecyclerView explore ngang với placeholder loading. */
     private fun setupQuickExplore() {
         val homeRoot = binding.homeContainer.root
         val rvQuickExplore = homeRoot.findViewById<androidx.recyclerview.widget.RecyclerView>(

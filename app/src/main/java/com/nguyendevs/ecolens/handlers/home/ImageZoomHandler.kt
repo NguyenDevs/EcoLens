@@ -5,10 +5,7 @@ import android.view.View
 import android.widget.ImageView
 import com.bumptech.glide.Glide
 
-/**
- * Handler quản lý zoom ảnh với chế độ fullscreen
- * Hỗ trợ zoom in/out với fade animation mượt mà
- */
+/** Handler quản lý zoom ảnh fullscreen với animation fade. */
 class ImageZoomHandler(
     private val btnZoomIn: ImageView,
     private val btnZoomOut: ImageView,
@@ -22,8 +19,7 @@ class ImageZoomHandler(
         setupClickListeners()
     }
 
-    // ==================== SETUP ====================
-
+    /** Thiết lập listener cho nút zoom in, zoom out và tap vùng fullscreen. */
     private fun setupClickListeners() {
         btnZoomIn.setOnClickListener {
             currentImageUri?.let { uri ->
@@ -40,25 +36,16 @@ class ImageZoomHandler(
         }
     }
 
-    // ==================== PUBLIC METHODS ====================
-
-    /**
-     * Set URI của ảnh cần zoom
-     * Tự động hiển thị/ẩn button zoom in
-     */
+    /** Cập nhật URI ảnh và hiển thị/ẩn nút zoom in. */
     fun setImageUri(uri: Uri?) {
         currentImageUri = uri
         btnZoomIn.visibility = if (uri != null) View.VISIBLE else View.GONE
     }
 
-    /**
-     * Kiểm tra xem fullscreen có đang hiển thị không
-     */
+    /** Kiểm tra fullscreen có đang hiển thị không. */
     fun isFullScreenVisible() = fullScreenContainer.visibility == View.VISIBLE
 
-    /**
-     * Ẩn fullscreen view với fade animation
-     */
+    /** Ẩn fullscreen view với animation fade out. */
     fun hideFullScreen() {
         if (isFullScreenVisible()) {
             fullScreenContainer.animate()
@@ -69,11 +56,7 @@ class ImageZoomHandler(
         }
     }
 
-    // ==================== PRIVATE METHODS ====================
-
-    /**
-     * Hiển thị ảnh ở chế độ fullscreen với fade in animation
-     */
+    /** Hiển thị ảnh fullscreen với animation fade in. */
     private fun showFullScreen(uri: Uri) {
         fullScreenContainer.alpha = 0f
         fullScreenContainer.visibility = View.VISIBLE

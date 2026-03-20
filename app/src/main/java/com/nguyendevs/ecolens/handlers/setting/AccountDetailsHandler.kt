@@ -6,10 +6,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.nguyendevs.ecolens.databinding.ScreenSettingsBinding
 
-/**
- * Handler quản lý expand/collapse của account details section. Xử lý: toggle visibility, staggered
- * animations cho các option items.
- */
+/** Handler quản lý mở/đóng chi tiết tài khoản với hiệu ứng animation. */
 class AccountDetailsHandler(
         private val binding: ScreenSettingsBinding,
         private val isTransitioning: () -> Boolean,
@@ -18,8 +15,8 @@ class AccountDetailsHandler(
 
     private val firebaseAuth = FirebaseAuth.getInstance()
 
+    /** Mở hoặc đóng section chi tiết tài khoản. */
     fun toggleAccountDetails() {
-        // Prevent toggling while a transition is occurring immediately
         if (isTransitioning()) return
 
         setTransitioning(true)
@@ -31,6 +28,7 @@ class AccountDetailsHandler(
         }
     }
 
+    /** Animation mở rộng giao diện và hiển thị thông tin. */
     private fun expandAccountDetails() {
         val user = firebaseAuth.currentUser
         val isGoogleUser =
@@ -38,7 +36,6 @@ class AccountDetailsHandler(
 
         binding.dividerUsername.visibility = View.VISIBLE
 
-        // Hide Change Password and Link Google if user is logged in with Google
         if (isGoogleUser) {
             binding.dividerChangepassword.visibility = View.GONE
             binding.dividerLinkgoogle.visibility = View.GONE
@@ -48,7 +45,6 @@ class AccountDetailsHandler(
             binding.dividerChangepassword.visibility = View.VISIBLE
             binding.dividerLinkgoogle.visibility = View.VISIBLE
 
-            // Need to set alpha back to 1 if we're migrating from stagger animation
             binding.changePasswordOption.alpha = 1f
             binding.linkGoogleOption.alpha = 1f
 
@@ -74,6 +70,7 @@ class AccountDetailsHandler(
                 .start()
     }
 
+    /** Animation thu gọn giao diện chi tiết tài khoản. */
     private fun collapseAccountDetails() {
         binding.accountDetailsContainer.collapse()
 

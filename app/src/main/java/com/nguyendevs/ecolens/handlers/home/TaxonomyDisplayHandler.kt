@@ -66,7 +66,6 @@ class TaxonomyDisplayHandler(
             val rowId = rowView.id
 
             if (hasData) {
-                // Always update text content
                 textFormatter.setHtml(textView, text)
 
                 if (!displayedRows.contains(rowId)) {
