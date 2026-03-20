@@ -41,13 +41,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/**
- * Fragment hiển thị chi tiết lịch sử nhận diện loài
- *
- * Sử dụng animation helpers:
- * - ImageLoadAnimationHelper: Xử lý image loading animations
- * - ViewAnimationHelper: Xử lý FAB animations và haptic feedback
- */
+/** Fragment hiển thị chi tiết lịch sử nhận diện loài với hỗ trợ dịch thuật, TTS và chia sẻ. */
 class HistoryDetailFragment : Fragment() {
 
     private var _binding: FragmentSpeciesHistoryDetailBinding? = null
@@ -58,7 +52,6 @@ class HistoryDetailFragment : Fragment() {
     private lateinit var speakerManager: SpeakerManager
     private lateinit var languageManager: LanguageManager
 
-    // Animation Handler
     private lateinit var animationHandler: HistoryDetailAnimationHandler
 
     private var historyEntry: HistoryEntry? = null
@@ -74,7 +67,7 @@ class HistoryDetailFragment : Fragment() {
         private val REGEX_CODE = Regex("`(.+?)`")
     }
 
-    // ==================== LIFECYCLE ====================
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -118,6 +111,7 @@ class HistoryDetailFragment : Fragment() {
         binding.fabSpeak.bringToFront()
     }
 
+    /** Thiết lập nút yêu thích và cập nhật trạng thái khi click. */
     private fun setupFavoriteButton(entry: HistoryEntry) {
         updateFavoriteUI(entry.isFavorite)
         binding.btnFavorite.setOnClickListener {
@@ -125,13 +119,12 @@ class HistoryDetailFragment : Fragment() {
             val currentEntry = historyEntry ?: return@setOnClickListener
             val nextState = !currentEntry.isFavorite
             viewModel.toggleFavorite(currentEntry)
-            
-            // Update local state to reflect the change for subsequent clicks
             historyEntry = currentEntry.copy(isFavorite = nextState)
             updateFavoriteUI(nextState)
         }
     }
 
+    /** Cập nhật giao diện nút yêu thích theo trạng thái. */
     private fun updateFavoriteUI(isFavorite: Boolean) {
         if (isFavorite) {
             binding.btnFavorite.setImageResource(R.drawable.ic_favorite)
@@ -174,8 +167,9 @@ class HistoryDetailFragment : Fragment() {
         _binding = null
     }
 
-    // ==================== UI SETUP ====================
 
+
+    /** Thiết lập nút back và transparent scrim cho collapsing toolbar. */
     private fun setupBackButton() {
         binding.btnBack.setOnClickListener {
             animationHandler.performConfirmFeedback(it)
@@ -186,6 +180,7 @@ class HistoryDetailFragment : Fragment() {
         binding.collapsingToolbar.setStatusBarScrimColor(Color.TRANSPARENT)
     }
 
+    /** Thiết lập nút more options để mở history menu. */
     private fun setupMoreOptionsButton() {
         binding.btnMoreOptions.setOnClickListener {
             animationHandler.performConfirmFeedback(it)
@@ -193,6 +188,7 @@ class HistoryDetailFragment : Fragment() {
         }
     }
 
+    /** Hiển thị bottom sheet menu với tùy chọn xóa, tải ảnh, xuất file. */
     private fun showHistoryMenu() {
         val bottomSheet = HistoryMenuBottomSheet.newInstance()
         bottomSheet.onDeleteClicked = { showDeleteConfirmDialog() }
@@ -214,6 +210,7 @@ class HistoryDetailFragment : Fragment() {
         bottomSheet.show(childFragmentManager, HistoryMenuBottomSheet.TAG)
     }
 
+    /** Hiển thị dialog xác nhận lưu ảnh vào thư viện. */
     private fun showDownloadConfirmation(imagePath: String) {
         CustomDialogUtils.showConfirmationDialog(
                 context = requireContext(),
@@ -240,6 +237,7 @@ class HistoryDetailFragment : Fragment() {
         )
     }
 
+    /** Hiển thị bottom sheet chọn định dạng xuất file. */
     private fun showExportOptions() {
         val exportSheet = ExportHistoryBottomSheet.newInstance()
         exportSheet.onExportConfirmed = { format, includeImage ->
@@ -266,6 +264,7 @@ class HistoryDetailFragment : Fragment() {
         exportSheet.show(childFragmentManager, ExportHistoryBottomSheet.TAG)
     }
 
+    /** Hiển thị dialog xác nhận xóa lịch sử. */
     private fun showDeleteConfirmDialog() {
         CustomDialogUtils.showConfirmationDialog(
                 context = requireContext(),
@@ -287,8 +286,7 @@ class HistoryDetailFragment : Fragment() {
         )
     }
 
-    // ==================== SHARE FUNCTIONALITY ====================
-
+    /** Thiết lập nút share, tải ảnh local hoặc remote để đính kèm. */
     private fun setupShareButton(info: SpeciesInfo, remoteUrl: String?, localImagePath: String?) {
         binding.btnShareInfo.setOnClickListener {
             if (isTranslating) return@setOnClickListener
@@ -313,12 +311,10 @@ class HistoryDetailFragment : Fragment() {
                     }
                 }
 
-                // If local path is missing or invalid, try remote URL
                 if (imageUri == null && !remoteUrl.isNullOrEmpty()) {
                     try {
                         val remoteUri = Uri.parse(remoteUrl)
                         if (remoteUri.scheme == "http" || remoteUri.scheme == "https") {
-                            // Download remote image to cache for sharing
                             val file =
                                     com.nguyendevs.ecolens.utils.ImageUtils.uriToFile(
                                             requireContext(),
@@ -344,6 +340,7 @@ class HistoryDetailFragment : Fragment() {
         }
     }
 
+    /** Chia sẻ thông tin loài qua Intent, có thể kèm ảnh. */
     private fun shareSpeciesInfo(info: SpeciesInfo, imageUri: Uri?) {
         val confidencePercent =
                 String.format(
@@ -443,8 +440,7 @@ class HistoryDetailFragment : Fragment() {
         }
     }
 
-    // ==================== TRANSLATE FUNCTIONALITY ====================
-
+    /** Thiết lập nút dịch, hiển thị khi ngôn ngữ entry khác ngôn ngữ hiện tại. */
     private fun setupTranslateButton(entry: HistoryEntry) {
         val currentLang = languageManager.getLanguage()
         if (entry.language != currentLang) {
@@ -459,6 +455,7 @@ class HistoryDetailFragment : Fragment() {
         }
     }
 
+    /** Xử lý click dịch: toggle về bản gốc hoặc dùng cache/dịch mới. */
     private fun handleTranslateClick(entry: HistoryEntry, targetLang: String) {
         if (isTranslated) {
             isTranslated = false
@@ -471,17 +468,16 @@ class HistoryDetailFragment : Fragment() {
                 isTranslated = true
                 translatedLanguage = targetLang
                 updateUI(cached)
-                // binding.btnTranslate.setImageResource(R.drawable.ic_undo)
             } else if (cachedTranslatedInfo != null && translatedLanguage == targetLang) {
                 isTranslated = true
                 updateUI(cachedTranslatedInfo!!)
-                // binding.btnTranslate.setImageResource(R.drawable.ic_undo)
             } else {
                 performTranslation(entry, targetLang)
             }
         }
     }
 
+    /** Thực hiện dịch thông tin loài qua Gemini API và cập nhật UI. */
     private fun performTranslation(entry: HistoryEntry, targetLang: String) {
         isTranslating = true
         setButtonsEnabled(false)
@@ -532,7 +528,6 @@ class HistoryDetailFragment : Fragment() {
 
                 withContext(Dispatchers.Main) {
                     updateUI(translatedInfo)
-                    // binding.btnTranslate.setImageResource(R.drawable.ic_undo)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -555,6 +550,7 @@ class HistoryDetailFragment : Fragment() {
         }
     }
 
+    /** Bật/tắt tất cả các nút tương tác khi đang dịch. */
     private fun setButtonsEnabled(enabled: Boolean) {
         binding.btnBack.isEnabled = enabled
         binding.btnMoreOptions.isEnabled = enabled
@@ -563,14 +559,14 @@ class HistoryDetailFragment : Fragment() {
         binding.btnTranslate.isEnabled = enabled
     }
 
+    /** Cập nhật toàn bộ UI với thông tin loài mới. */
     private fun updateUI(info: SpeciesInfo) {
         bindHeader(historyEntry!!, info)
         bindTaxonomy(info)
         bindContent(info)
     }
 
-    // ==================== DATA BINDING ====================
-
+    /** Hiển thị ảnh, tên phổ thông, khoa học và các tag kingdom/family/species. */
     private fun bindHeader(entry: HistoryEntry, info: SpeciesInfo) {
         animationHandler.loadImageWithFadeIn(
                 imageView = binding.ivDetailImage,
@@ -604,6 +600,7 @@ class HistoryDetailFragment : Fragment() {
         }
     }
 
+    /** Hiển thị thông tin phân loại học vào các TextView tương ứng. */
     private fun bindTaxonomy(info: SpeciesInfo) {
         fun TextView.bindValue(value: String) {
             if (value.isNotEmpty()) {
@@ -622,6 +619,7 @@ class HistoryDetailFragment : Fragment() {
         binding.layoutTaxonomy.tvSpecies.bindValue(info.species)
     }
 
+    /** Tạo và hiển thị các section nội dung (mô tả, đặc điểm, phân bố, sinh cảnh, bảo tồn). */
     private fun bindContent(info: SpeciesInfo) {
         binding.containerSections.removeAllViews()
 
@@ -663,6 +661,7 @@ class HistoryDetailFragment : Fragment() {
         )
     }
 
+    /** Thêm một section nội dung vào container với tiêu đề, divider và text. */
     private fun addSection(
             container: LinearLayout,
             title: String,
@@ -751,8 +750,7 @@ class HistoryDetailFragment : Fragment() {
         container.addView(contentView)
     }
 
-    // ==================== TEXT-TO-SPEECH ====================
-
+    /** Thiết lập FAB text-to-speech, toggle đọc/dừng khi click. */
     private fun setupFab(info: SpeciesInfo) {
         speakerManager.onSpeechFinished = { activity?.runOnUiThread { updateFabUI(false) } }
 
@@ -765,7 +763,6 @@ class HistoryDetailFragment : Fragment() {
                     speakerManager.pause()
                     withContext(Dispatchers.Main) { updateFabUI(false) }
                 } else {
-                    // Use translated info if available and active
                     val infoToSpeak =
                             if (isTranslated && cachedTranslatedInfo != null) cachedTranslatedInfo!!
                             else info
@@ -773,7 +770,6 @@ class HistoryDetailFragment : Fragment() {
                             if (isTranslated && translatedLanguage != null) translatedLanguage!!
                             else historyEntry?.language ?: "vi"
 
-                    // Update speaker language
                     speakerManager.setLanguage(langToSpeak)
 
                     val speechText =
@@ -787,13 +783,13 @@ class HistoryDetailFragment : Fragment() {
         }
     }
 
+    /** Cập nhật giao diện FAB theo trạng thái đang đọc/dừng. */
     private fun updateFabUI(speaking: Boolean) {
         isSpeaking = speaking
         animationHandler.animateFabState(binding.fabSpeak, speaking)
     }
 
-    // ==================== UTILITY FUNCTIONS ====================
-
+    /** Extension function để set text từ HTML vào TextView. */
     private fun TextView.setHtml(html: String) {
         text =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -803,6 +799,7 @@ class HistoryDetailFragment : Fragment() {
                 }
     }
 
+    /** Xóa HTML tags và markdown formatting khỏi chuỗi text. */
     private fun stripHtml(html: String): String {
         var text =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -818,6 +815,7 @@ class HistoryDetailFragment : Fragment() {
         return text.trim()
     }
 
+    /** Chuyển đổi dp sang px. */
     private fun Int.dpToPx(): Int {
         return TypedValue.applyDimension(
                         TypedValue.COMPLEX_UNIT_DIP,

@@ -11,6 +11,7 @@ import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.LayoutBottomSheetFilterHistoryBinding
 import com.nguyendevs.ecolens.models.history.HistorySortOption
 
+/** Bottom sheet chọn thứ tự sắp xếp lịch sử nhận diện. */
 class FilterHistoryBottomSheet : BottomSheetDialogFragment() {
 
     private var _binding: LayoutBottomSheetFilterHistoryBinding? = null
@@ -20,15 +21,17 @@ class FilterHistoryBottomSheet : BottomSheetDialogFragment() {
 
     var onApplyListener: ((HistorySortOption) -> Unit)? = null
 
+    /** Đặt style và khôi phục sort option từ arguments. */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setStyle(STYLE_NORMAL, R.style.CustomBottomSheetDialogTheme)
-        
+
         arguments?.let {
             selectedSortOption = HistorySortOption.valueOf(it.getString(ARG_SORT, "NEWEST_FIRST"))
         }
     }
 
+    /** Inflate layout của bottom sheet. */
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -38,12 +41,14 @@ class FilterHistoryBottomSheet : BottomSheetDialogFragment() {
         return binding.root
     }
 
+    /** Cập nhật UI và thiết lập listener cho các option. */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         updateSortUI()
         setupListeners()
     }
 
+    /** Thiết lập listener cho từng option sắp xếp. */
     private fun setupListeners() {
         binding.rowNewest.setOnClickListener { selectOption(HistorySortOption.NEWEST_FIRST) }
         binding.rowOldest.setOnClickListener { selectOption(HistorySortOption.OLDEST_FIRST) }
@@ -52,6 +57,7 @@ class FilterHistoryBottomSheet : BottomSheetDialogFragment() {
         binding.rowFavorite.setOnClickListener { selectOption(HistorySortOption.FAVORITE) }
     }
 
+    /** Chọn option sắp xếp, cập nhật UI và dismiss. */
     private fun selectOption(option: HistorySortOption) {
         selectedSortOption = option
         updateSortUI()
@@ -59,6 +65,7 @@ class FilterHistoryBottomSheet : BottomSheetDialogFragment() {
         dismiss()
     }
 
+    /** Cập nhật giao diện để đánh dấu option đang chọn. */
     private fun updateSortUI() {
         resetSortRow(binding.rowNewest, binding.indicatorNewest)
         resetSortRow(binding.rowOldest, binding.indicatorOldest)
@@ -75,6 +82,7 @@ class FilterHistoryBottomSheet : BottomSheetDialogFragment() {
         }
     }
 
+    /** Reset giao diện một dòng option về trạng thái bình thường. */
     private fun resetSortRow(row: View, indicator: View) {
         row.setBackgroundResource(R.drawable.bg_sort_option_normal)
         indicator.setBackgroundResource(R.drawable.ic_radio_unchecked)
@@ -83,6 +91,7 @@ class FilterHistoryBottomSheet : BottomSheetDialogFragment() {
         tv?.setTypeface(null, android.graphics.Typeface.NORMAL)
     }
 
+    /** Đánh dấu một dòng option là đang được chọn. */
     private fun setActiveSortRow(row: View, indicator: View) {
         row.setBackgroundResource(R.drawable.bg_sort_option_active)
         indicator.setBackgroundResource(R.drawable.ic_radio_checked)
@@ -100,6 +109,7 @@ class FilterHistoryBottomSheet : BottomSheetDialogFragment() {
         const val TAG = "FilterHistoryBottomSheet"
         private const val ARG_SORT = "arg_sort"
 
+        /** Tạo instance với sort option được truyền vào. */
         fun newInstance(sort: HistorySortOption): FilterHistoryBottomSheet {
             return FilterHistoryBottomSheet().apply {
                 arguments = Bundle().apply {
