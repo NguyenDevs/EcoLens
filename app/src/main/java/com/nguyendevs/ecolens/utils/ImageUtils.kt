@@ -15,26 +15,15 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.net.URL
 
-/**
- * Tiện ích xử lý ảnh
- * Bao gồm chuyển đổi, nén, xoay, và lưu trữ ảnh
- */
+/** Cung cấp bộ công cụ xử lý kích thước, xoay, và lưu ảnh. */
 object ImageUtils {
 
-    /**
-     * Chuyển đổi URI thành File với kích thước tối đa
-     *
-     * @param context Context của ứng dụng
-     * @param uri URI của ảnh
-     * @param maxDimension Kích thước tối đa cho chiều rộng/cao
-     * @return File ảnh đã được xử lý
-     */
+    /** Ép định dạng tệp ảnh từ URI sang nội bộ với kích thước giới hạn. */
     @Throws(Exception::class)
     fun uriToFile(context: Context, uri: Uri, maxDimension: Int): File {
         val cacheDir = context.cacheDir
         val file = File(cacheDir, "temp_image_${System.currentTimeMillis()}.jpg")
 
-        // Check if URI is a web URL
         if (uri.scheme == "http" || uri.scheme == "https") {
             try {
                 val url = URL(uri.toString())
@@ -47,7 +36,6 @@ object ImageUtils {
                 inputStream.close()
 
                 if (bitmap != null) {
-                    // Resize if needed
                     val scaledBitmap = if (bitmap.width > maxDimension || bitmap.height > maxDimension) {
                         val ratio = Math.min(
                             maxDimension.toFloat() / bitmap.width,
@@ -126,9 +114,7 @@ object ImageUtils {
         return file
     }
 
-    /**
-     * Xoay ảnh nếu cần dựa trên thông tin EXIF
-     */
+    /** Triển khai phục hồi hướng xoay ảnh bằng dữ liệu EXIF. */
     private fun rotateImageIfRequired(context: Context, bitmap: Bitmap, uri: Uri): Bitmap {
         var inputStream: InputStream? = null
         try {
@@ -152,20 +138,14 @@ object ImageUtils {
         }
     }
 
-    /**
-     * Xoay bitmap theo góc độ
-     */
+    /** Xoay dữ liệu thô của Bitmap theo quỹ đạo góc chỉ định. */
     private fun rotateBitmap(bitmap: Bitmap, degree: Float): Bitmap {
         val matrix = Matrix()
         matrix.postRotate(degree)
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
 
-    /**
-     * Lưu Bitmap vào bộ nhớ trong
-     *
-     * @return Đường dẫn tuyệt đối của file đã lưu, hoặc null nếu thất bại
-     */
+    /** Lưu đệm dữ liệu Bitmap vào vùng nhớ cục bộ hệ thống. */
     fun saveBitmapToInternalStorage(context: Context, bitmap: Bitmap): String? {
         return try {
             val filename = "species_${System.currentTimeMillis()}.jpg"
@@ -180,11 +160,7 @@ object ImageUtils {
         }
     }
 
-    /**
-     * Sao chép file vào bộ nhớ trong
-     *
-     * @return Đường dẫn tuyệt đối của file đã lưu, hoặc null nếu thất bại
-     */
+    /** Bản sao chép tập tin ảnh nguyên bản vào bộ nhớ lưu trữ ứng dụng. */
     fun saveFileToInternalStorage(context: Context, sourceFile: File): String? {
         return try {
             val filename = "species_${System.currentTimeMillis()}.jpg"
@@ -197,11 +173,7 @@ object ImageUtils {
         }
     }
 
-    /**
-     * Tải ảnh từ URL và lưu vào bộ nhớ trong
-     *
-     * @return Đường dẫn tuyệt đối của file đã lưu, hoặc null nếu thất bại
-     */
+    /** Tải bản thể tệp từ đám mây và lưu giữ cố định trên thiết bị. */
     fun downloadImageToInternalStorage(context: Context, imageUrl: String): String? {
         return try {
             val url = URL(imageUrl)
@@ -213,11 +185,7 @@ object ImageUtils {
         }
     }
 
-    /**
-     * Lưu ảnh vào bộ nhớ ngoài (thư mục Pictures/EcoLens)
-     *
-     * @return URI string của ảnh đã lưu, hoặc null nếu thất bại
-     */
+    /** Chuyển lưu hình ảnh ra thư mục Public Gallery lưu giữ lâu dài. */
     fun saveImageToPublicStorage(context: Context, sourceFile: File): String? {
         val filename = "species_${System.currentTimeMillis()}.jpg"
         val contentValues = ContentValues().apply {

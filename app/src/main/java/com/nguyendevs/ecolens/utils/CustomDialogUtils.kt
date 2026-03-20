@@ -9,8 +9,10 @@ import android.widget.Button
 import android.widget.TextView
 import com.nguyendevs.ecolens.R
 
+/** Tiện ích hiển thị hộp thoại xác nhận tùy chỉnh trên toàn hệ thống. */
 object CustomDialogUtils {
 
+    /** Cấu hình và hiển thị hộp thoại xác nhận với các tham số truyền vào. */
     fun showConfirmationDialog(
         context: Context,
         title: String,

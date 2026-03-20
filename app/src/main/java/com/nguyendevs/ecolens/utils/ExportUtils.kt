@@ -28,6 +28,7 @@ import java.io.FileOutputStream
 import java.io.OutputStream
 import java.util.regex.Pattern
 
+/** Cung cấp tùy chọn xuất dữ liệu đa định dạng từ DOCX đến JSON. */
 object ExportUtils {
 
     enum class ExportFormat {
@@ -835,7 +836,6 @@ object ExportUtils {
         try {
             val info = entry.speciesInfo
 
-            // Tạo object JSON với text đã được làm sạch
             val cleanedData = mapOf(
                 "title" to context.getString(R.string.share_title),
                 "timestamp" to entry.timestamp,
