@@ -107,8 +107,6 @@ class MainActivity : AppCompatActivity() {
                     if (uriString != null) {
                         val lat = result.data?.getDoubleExtra(CameraActivity.KEY_LAT, Double.MIN_VALUE)
                         val lng = result.data?.getDoubleExtra(CameraActivity.KEY_LNG, Double.MIN_VALUE)
-                        // Nếu lat/lng hợp lệ (ảnh chụp từ camera có GPS) → dùng vị trí thực
-                        // Nếu không có (upload từ gallery hoặc không có quyền) → dùng Đà Nẵng mặc định
                         val hasValidCoords = lat != null && lat != Double.MIN_VALUE &&
                                 lng != null && lng != Double.MIN_VALUE
                         if (hasValidCoords) {
@@ -124,7 +122,6 @@ class MainActivity : AppCompatActivity() {
     private val permissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
                     permissions ->
-                // Chỉ mở CameraActivity khi TẤT CẢ permissions được cấp
                 if (permissions.values.all { it }) {
                     cameraActivityLauncher.launch(CameraActivity.newIntent(this))
                     overridePendingTransition(R.anim.slide_in_bottom, R.anim.hold)
@@ -823,7 +820,7 @@ class MainActivity : AppCompatActivity() {
         animator.start()
     }
 
-    /** Navigate to History Detail Fragment */
+    /** Chuyển hướng tới màn hình chi tiết lịch sử. */
     private fun navigateToHistoryDetail(entry: com.nguyendevs.ecolens.models.history.HistoryEntry) {
         val jsonEntry = com.google.gson.Gson().toJson(entry)
         val fragment =

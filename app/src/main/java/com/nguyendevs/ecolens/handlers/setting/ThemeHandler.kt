@@ -12,10 +12,7 @@ import com.nguyendevs.ecolens.database.UserRepository
 import com.nguyendevs.ecolens.databinding.ScreenSettingsBinding
 import kotlinx.coroutines.launch
 
-/**
- * Handler quản lý dark mode theme transitions. Xử lý: toggle switch, save preference, smooth theme
- * transition với bitmap overlay.
- */
+/** Handler quản lý chuyển đổi giao diện sáng/tối với hiệu ứng đổi theme mượt mà. */
 class ThemeHandler(
         private val activity: AppCompatActivity,
         private val binding: ScreenSettingsBinding,
@@ -30,7 +27,7 @@ class ThemeHandler(
         setupDarkModeSwitch()
     }
 
-    /** Cấu hình dark mode switch với state từ SharedPreferences */
+    /** Cấu hình switch chuyển đổi giao diện từ cấu hình đã lưu. */
     fun setupDarkModeSwitch() {
         val sharedPref =
                 activity.getSharedPreferences("app_settings", AppCompatActivity.MODE_PRIVATE)
@@ -68,20 +65,17 @@ class ThemeHandler(
         }
     }
 
-    /** Toggle dark mode từ bên ngoài*/
+    /** Kích hoạt chuyển đổi giao diện sáng/tối. */
     fun toggleDarkMode() {
         if (!isTransitioning) {
             binding.switchDarkMode.toggle()
         }
     }
 
-    /** Kiểm tra trạng thái transitioning */
+    /** Kiểm tra xem quá trình chuyển vị đã xong chưa. */
     fun isTransitioning(): Boolean = isTransitioning
 
-    /**
-     * Áp dụng dark mode với smooth transition Chụp bitmap của view hiện tại để tạo transition
-     * effect
-     */
+    /** Áp dụng giao diện kèm hiệu ứng mượt bằng bitmap overlay. */
     private fun applyThemeSmoothly(isDarkMode: Boolean) {
         saveDarkModePreference(isDarkMode)
         updateDarkModeIcon(isDarkMode, true)
@@ -110,7 +104,7 @@ class ThemeHandler(
         AppCompatDelegate.setDefaultNightMode(nightMode)
     }
 
-    /** Tạo bitmap từ view để dùng cho transition effect */
+    /** Tạo bitmap hiển thị tạm trong lúc đổi màn hình nền. */
     private fun createBitmapFromView(view: View): Bitmap? {
         return try {
             val scale = 1.0f
@@ -133,14 +127,14 @@ class ThemeHandler(
         }
     }
 
-    /** Lưu dark mode preference vào SharedPreferences */
+    /** Ghi nhận lại chế độ nền cho lần mở sau. */
     private fun saveDarkModePreference(isDarkMode: Boolean) {
         val sharedPref =
                 activity.getSharedPreferences("app_settings", AppCompatActivity.MODE_PRIVATE)
         sharedPref.edit().putBoolean("dark_mode", isDarkMode).apply()
     }
 
-    /** Cập nhật icon dark mode (sun/moon) với animation */
+    /** Đổi đồ họa icon mặt trời/trăng với animate mờ dần. */
     private fun updateDarkModeIcon(isDarkMode: Boolean, animate: Boolean) {
         val targetIcon = if (isDarkMode) R.drawable.ic_sun else R.drawable.ic_moon
 
