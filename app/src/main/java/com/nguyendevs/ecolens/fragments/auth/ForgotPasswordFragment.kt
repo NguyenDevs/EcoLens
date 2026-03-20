@@ -12,6 +12,7 @@ import com.nguyendevs.ecolens.activities.AuthActivity
 import com.nguyendevs.ecolens.databinding.FragmentForgotPasswordBinding
 import com.nguyendevs.ecolens.handlers.auth.ForgotPasswordHandler
 
+/** Fragment màn hình quên mật khẩu, gửi email đặt lại mật khẩu. */
 class ForgotPasswordFragment : Fragment() {
 
     private var _binding: FragmentForgotPasswordBinding? = null
@@ -20,6 +21,7 @@ class ForgotPasswordFragment : Fragment() {
 
     private lateinit var forgotPasswordHandler: ForgotPasswordHandler
 
+    /** Inflate layout của fragment. */
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
@@ -29,6 +31,7 @@ class ForgotPasswordFragment : Fragment() {
         return binding.root
     }
 
+    /** Khởi tạo handler và thiết lập UI. */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -38,6 +41,7 @@ class ForgotPasswordFragment : Fragment() {
         playEntranceAnimations()
     }
 
+    /** Thiết lập các listener cho nút back và gửi link đặt lại. */
     private fun setupUI() {
         binding.btnBack.setOnClickListener { (activity as? AuthActivity)?.navigateBackToLogin() }
 
@@ -66,6 +70,7 @@ class ForgotPasswordFragment : Fragment() {
         }
     }
 
+    /** Chạy các animation xuất hiện khi mở fragment. */
     private fun playEntranceAnimations() {
         val logoAnim = AnimationUtils.loadAnimation(requireContext(), R.anim.auth_logo_scale_in)
         val titleAnim =
@@ -92,6 +97,7 @@ class ForgotPasswordFragment : Fragment() {
         binding.layoutBackToLogin.startAnimation(backLinkAnim)
     }
 
+    /** Đặt trạng thái loading, vô hiệu hóa các nút khi đang xử lý. */
     private fun setLoading(isLoading: Boolean) {
         (activity as? AuthActivity)?.setFragmentLoading(isLoading)
         binding.btnSendResetLink.isEnabled = !isLoading
