@@ -17,6 +17,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+/** Adapter hiển thị danh sách phiên chat với phân nhóm theo ngày. */
 class ChatSessionAdapter(
     private var sessions: MutableList<ChatSession>,
     private val onClick: (ChatSession) -> Unit
@@ -33,18 +34,21 @@ class ChatSessionAdapter(
     private lateinit var markwon: Markwon
     private var isLoading = false
 
+    /** Cập nhật toàn bộ danh sách phiên chat. */
     fun updateList(newList: List<ChatSession>) {
         sessions.clear()
         sessions.addAll(newList)
         notifyDataSetChanged()
     }
 
+    /** Thêm các phiên chat mới vào cuối danh sách. */
     fun addItems(newItems: List<ChatSession>) {
         val startPosition = sessions.size
         sessions.addAll(newItems)
         notifyItemRangeInserted(startPosition, newItems.size)
     }
 
+    /** Đặt trạng thái loading và thêm/xóa item loading indicator. */
     fun setLoading(loading: Boolean) {
         if (isLoading == loading) return
         isLoading = loading
@@ -59,6 +63,7 @@ class ChatSessionAdapter(
         return if (isLoading && position == sessions.size) VIEW_TYPE_LOADING else VIEW_TYPE_ITEM
     }
 
+    /** Tạo ViewHolder phù hợp (item hoặc loading). */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         if (viewType == VIEW_TYPE_LOADING) {
             val context = parent.context
@@ -102,6 +107,7 @@ class ChatSessionAdapter(
         return ChatSessionViewHolder(binding)
     }
 
+    /** Bind dữ liệu phiên chat, bao gồm header ngày nếu là phiên đầu trong ngày. */
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is ChatSessionViewHolder) {
             val session = sessions[position]
@@ -122,10 +128,12 @@ class ChatSessionAdapter(
 
     override fun getItemCount() = sessions.size + if (isLoading) 1 else 0
 
+    /** ViewHolder cho một phiên chat, có animation loading khi click. */
     inner class ChatSessionViewHolder(
         private val binding: ItemChatHistoryBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
+        /** Hiển thị thông tin phiên chat và header ngày nếu cần. */
         fun bind(session: ChatSession, showHeader: Boolean, dateTime: java.time.ZonedDateTime) {
             binding.dateHeaderContainer.visibility = if (showHeader) View.VISIBLE else View.GONE
             if (showHeader) {
@@ -148,14 +156,17 @@ class ChatSessionAdapter(
             }
         }
 
+        /** Kiểm tra ngày có phải hôm nay không. */
         private fun isToday(dt: java.time.ZonedDateTime): Boolean {
             return dt.toLocalDate() == java.time.LocalDate.now()
         }
 
+        /** Kiểm tra ngày có phải hôm qua không. */
         private fun isYesterday(dt: java.time.ZonedDateTime): Boolean {
             return dt.toLocalDate() == java.time.LocalDate.now().minusDays(1)
         }
 
+        /** Chạy animation loading ring khi click vào phiên chat. */
         private fun animateLoading() {
             binding.ivLoadingRing.apply {
                 visibility = View.VISIBLE

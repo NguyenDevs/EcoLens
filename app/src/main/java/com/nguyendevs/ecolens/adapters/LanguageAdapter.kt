@@ -8,11 +8,13 @@ import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemLanguagesBinding
 import com.nguyendevs.ecolens.models.Language
 
+/** Adapter hiển thị danh sách ngôn ngữ có thể chọn. */
 class LanguageAdapter(
     private var languages: List<Language>,
     private val onLanguageClick: (Language) -> Unit
 ) : RecyclerView.Adapter<LanguageAdapter.LanguageViewHolderModern>() {
 
+    /** Tạo ViewHolder cho item ngôn ngữ. */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LanguageViewHolderModern {
         val binding = ItemLanguagesBinding.inflate(
             LayoutInflater.from(parent.context),
@@ -22,17 +24,20 @@ class LanguageAdapter(
         return LanguageViewHolderModern(binding)
     }
 
+    /** Bind dữ liệu vào ViewHolder. */
     override fun onBindViewHolder(holder: LanguageViewHolderModern, position: Int) {
         holder.bind(languages[position])
     }
 
     override fun getItemCount() = languages.size
 
+    /** Cập nhật danh sách ngôn ngữ mới. */
     fun updateList(newLanguages: List<Language>) {
         languages = newLanguages
         notifyDataSetChanged()
     }
 
+    /** ViewHolder hiển thị một item ngôn ngữ với icon cờ và tên. */
     inner class LanguageViewHolderModern(
         private val binding: ItemLanguagesBinding
     ) : RecyclerView.ViewHolder(binding.root) {
@@ -51,6 +56,7 @@ class LanguageAdapter(
             }
         }
 
+        /** Hiển thị thông tin ngôn ngữ và đánh dấu nếu đang được chọn. */
         fun bind(language: Language) {
             binding.ivFlag.setImageResource(language.flagDrawable)
             binding.tvLanguageName.text = language.name
