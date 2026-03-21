@@ -30,7 +30,7 @@ import java.util.Locale
 
 /** Adapter hiển thị danh sách tin nhắn chat, hỗ trợ streaming và loading state. */
 class ChatAdapter(private val actionListener: OnChatActionListener) :
-        RecyclerView.Adapter<ChatAdapter.ChatViewHolder>() {
+        androidx.recyclerview.widget.ListAdapter<ChatMessage, ChatAdapter.ChatViewHolder>(ChatDiffCallback()) {
 
     /** Interface lắng nghe các hành động của người dùng trên tin nhắn. */
     interface OnChatActionListener {
@@ -39,7 +39,23 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
         fun onRenew(position: Int, message: ChatMessage)
     }
 
-    private val messages = mutableListOf<ChatMessage>()
+    class ChatDiffCallback : androidx.recyclerview.widget.DiffUtil.ItemCallback<ChatMessage>() {
+        override fun areItemsTheSame(oldItem: ChatMessage, newItem: ChatMessage): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: ChatMessage, newItem: ChatMessage): Boolean {
+            return oldItem == newItem
+        }
+
+        override fun getChangePayload(oldItem: ChatMessage, newItem: ChatMessage): Any? {
+            if (newItem.isStreaming && oldItem.isStreaming) {
+                return "STREAMING"
+            }
+            return super.getChangePayload(oldItem, newItem)
+        }
+    }
+
     private lateinit var markwon: Markwon
     private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
     private var expandedPosition = -1
@@ -98,38 +114,13 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
 
     /** Bind dữ liệu vào ViewHolder. */
     override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
-        holder.bind(messages[position], position)
+        holder.bind(getItem(position), position)
     }
 
     /** Dừng animation khi ViewHolder bị recycle. */
     override fun onViewRecycled(holder: ChatViewHolder) {
         super.onViewRecycled(holder)
         holder.stopAnimation()
-    }
-
-    override fun getItemCount(): Int = messages.size
-
-    /** Cập nhật danh sách tin nhắn và thông báo thay đổi hiệu quả. */
-    fun submitList(newMessages: List<ChatMessage>) {
-        val oldSize = messages.size
-        val newSize = newMessages.size
-
-        messages.clear()
-        messages.addAll(newMessages)
-
-        if (newSize > oldSize) {
-            notifyItemRangeInserted(oldSize, newSize - oldSize)
-            if (oldSize > 0) notifyItemChanged(oldSize - 1)
-        } else if (newSize == oldSize && newSize > 0) {
-            val lastMsg = messages[newSize - 1]
-            if (lastMsg.isStreaming) {
-                notifyItemChanged(newSize - 1, "STREAMING")
-            } else {
-                notifyItemChanged(newSize - 1)
-            }
-        } else {
-            notifyDataSetChanged()
-        }
     }
 
     /** ViewHolder cho một tin nhắn chat, hỗ trợ nhiều trạng thái hiển thị. */
@@ -168,6 +159,28 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
                         .setBottomRightCorner(CornerFamily.ROUNDED, radiusMd)
                         .setBottomLeftCorner(CornerFamily.ROUNDED, radiusMd)
                         .build()
+
+        private val cachedLeftBorderDrawable: android.graphics.drawable.Drawable by lazy {
+            val leftBorderWidthPx = 3f * itemView.resources.displayMetrics.density
+            object : android.graphics.drawable.Drawable() {
+                val shapeDrawable = com.google.android.material.shape.MaterialShapeDrawable(aiBubbleShape).apply {
+                    fillColor = android.content.res.ColorStateList.valueOf(colorPrimaryLight)
+                }
+
+                override fun draw(canvas: android.graphics.Canvas) {
+                    shapeDrawable.bounds = bounds
+                    canvas.save()
+                    canvas.clipRect(0f, 0f, leftBorderWidthPx, bounds.height().toFloat())
+                    shapeDrawable.draw(canvas)
+                    canvas.restore()
+                }
+
+                override fun setAlpha(alpha: Int) {}
+                override fun setColorFilter(colorFilter: android.graphics.ColorFilter?) {}
+                @Suppress("DEPRECATION")
+                override fun getOpacity(): Int = android.graphics.PixelFormat.TRANSLUCENT
+            }
+        }
 
         private val userBubbleShape =
                 ShapeAppearanceModel.builder()
@@ -258,34 +271,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
             binding.cardMessage.strokeWidth = 1
             binding.cardMessage.strokeColor = colorBorderLight
 
-            val leftBorderWidthPx = 3f * itemView.resources.displayMetrics.density
-            val leftBorderDrawable =
-                    object : android.graphics.drawable.Drawable() {
-                        val shapeDrawable =
-                                com.google.android.material.shape.MaterialShapeDrawable(
-                                                aiBubbleShape
-                                        )
-                                        .apply {
-                                            fillColor =
-                                                    android.content.res.ColorStateList.valueOf(
-                                                            colorPrimaryLight
-                                                    )
-                                        }
-
-                        override fun draw(canvas: android.graphics.Canvas) {
-                            shapeDrawable.bounds = bounds
-                            canvas.save()
-                            canvas.clipRect(0f, 0f, leftBorderWidthPx, bounds.height().toFloat())
-                            shapeDrawable.draw(canvas)
-                            canvas.restore()
-                        }
-
-                        override fun setAlpha(alpha: Int) {}
-                        override fun setColorFilter(colorFilter: android.graphics.ColorFilter?) {}
-                        @Suppress("DEPRECATION")
-                        override fun getOpacity(): Int = android.graphics.PixelFormat.TRANSLUCENT
-                    }
-            binding.layoutMessageContent.background = leftBorderDrawable
+            binding.layoutMessageContent.background = cachedLeftBorderDrawable
         }
 
         /** Cấu hình layout cho tin nhắn của user (bên phải). */
@@ -444,7 +430,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
                     binding.layoutActions.collapse()
                 }
 
-                if (position == messages.size - 1) {
+                if (position == itemCount - 1) {
                     binding.btnRegenerate.visibility = View.VISIBLE
                     binding.btnRegenerate.setOnClickListener {
                         actionListener.onRenew(position, message)
@@ -464,21 +450,48 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
             binding.layoutTypingIndicator.visibility = View.VISIBLE
             binding.tvMessage.visibility = View.GONE
 
-            if (typingAnimatorSet?.isRunning == true) return
+            if (typingAnimatorSet != null) return
 
-            val dot1 = binding.dot1
-            val dot2 = binding.dot2
-            val dot3 = binding.dot3
+            val distancePx = -6f * binding.root.context.resources.displayMetrics.density
 
-            val bounceAnim1 = createBounceAnimator(dot1, 0)
-            val bounceAnim2 = createBounceAnimator(dot2, 200)
-            val bounceAnim3 = createBounceAnimator(dot3, 400)
+            val animator = android.animation.ValueAnimator.ofFloat(0f, 1f).apply {
+                duration = 1200
+                repeatCount = android.animation.ValueAnimator.INFINITE
+                addUpdateListener { anim ->
+                    val fraction = anim.animatedValue as Float
+                    updateDot(binding.dot1, fraction, 0.0f, distancePx)
+                    updateDot(binding.dot2, fraction, 0.16f, distancePx)
+                    updateDot(binding.dot3, fraction, 0.32f, distancePx)
+                }
+            }
 
             typingAnimatorSet =
                     android.animation.AnimatorSet().apply {
-                        playTogether(bounceAnim1, bounceAnim2, bounceAnim3)
+                        play(animator)
                         start()
                     }
+        }
+
+        /** Cập nhật thông số chấm nảy theo thời gian toàn cục toàn khối animator. */
+        private fun updateDot(target: View, globalFraction: Float, phaseStart: Float, distancePx: Float) {
+            val phaseDuration = 0.5f
+            val localFraction = globalFraction - phaseStart
+
+            if (localFraction in 0f..phaseDuration) {
+                val progress = localFraction / phaseDuration
+                if (progress <= 0.5f) {
+                    val p = progress / 0.5f
+                    target.translationY = distancePx * p
+                    target.alpha = 0.5f + (0.5f * p)
+                } else {
+                    val p = (progress - 0.5f) / 0.5f
+                    target.translationY = distancePx * (1f - p)
+                    target.alpha = 1f - (0.5f * p)
+                }
+            } else {
+                target.translationY = 0f
+                target.alpha = 0.5f
+            }
         }
 
         /** Dừng animation typing và reset các chấm về vị trí ban đầu. */
@@ -493,34 +506,6 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
             binding.dot1.alpha = 1f
             binding.dot2.alpha = 1f
             binding.dot3.alpha = 1f
-        }
-
-        /** Tạo animator chuyển động nảy cho một chấm typing. */
-        private fun createBounceAnimator(target: View, startDelayMs: Long): ValueAnimator {
-            val distancePx = -6f * target.context.resources.displayMetrics.density
-            return ValueAnimator.ofFloat(0f, 1f).apply {
-                duration = 1200
-                repeatCount = ValueAnimator.INFINITE
-                startDelay = startDelayMs
-                addUpdateListener { animator ->
-                    val fraction = animator.animatedValue as Float
-                    var ty = 0f
-                    var alpha = 0.5f
-
-                    if (fraction <= 0.4f) {
-                        val progress = fraction / 0.4f
-                        ty = distancePx * progress
-                        alpha = 0.5f + (0.5f * progress)
-                    } else if (fraction <= 0.8f) {
-                        val progress = (fraction - 0.4f) / 0.4f
-                        ty = distancePx * (1f - progress)
-                        alpha = 1f - (0.5f * progress)
-                    }
-
-                    target.translationY = ty
-                    target.alpha = alpha
-                }
-            }
         }
     }
 }

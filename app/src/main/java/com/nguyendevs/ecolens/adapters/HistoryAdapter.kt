@@ -145,18 +145,19 @@ class HistoryAdapter(
         }
     }
 
-    /** Chạy animation trượt lên khi item xuất hiện lần đầu. */
     private fun setAnimation(view: View, position: Int) {
         if (position > lastPosition) {
             view.alpha = 0f
             view.translationY = 100f
             
+            val delay = if (position < 10) (10 - position) * 40L else 0L
+
             view.animate()
                 .alpha(1f)
                 .translationY(0f)
-                .setDuration(600)
+                .setDuration(550)
                 .setInterpolator(android.view.animation.DecelerateInterpolator())
-                .setStartDelay(position % 5 * 50L)
+                .setStartDelay(delay)
                 .start()
                 
             lastPosition = position
@@ -365,6 +366,16 @@ class HistoryAdapter(
                 tv.setBackgroundResource(R.drawable.bg_badge_fungi)
                 tv.setTextColor(0xFF7E22CE.toInt())
                 tv.text = tv.context.getString(R.string.history_chipFungi)
+            }
+            k.contains("protozoa") || k.contains("nguyên sinh") -> {
+                tv.setBackgroundResource(R.drawable.bg_badge_protozoa)
+                tv.setTextColor(0xFF155E75.toInt())
+                tv.text = tv.context.getString(R.string.history_chipProtozoa)
+            }
+            k.contains("chromista") || k.contains("sắc tảo") -> {
+                tv.setBackgroundResource(R.drawable.bg_badge_chromista)
+                tv.setTextColor(0xFF9A3412.toInt())
+                tv.text = tv.context.getString(R.string.history_chipChromista)
             }
             else -> {
                 tv.setBackgroundResource(R.drawable.bg_badge_animal)

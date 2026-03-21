@@ -34,41 +34,43 @@ class HistoryManager(
         sortOption: HistorySortOption,
         startDate: Long? = null,
         endDate: Long? = null,
-        limit: Int = 20
+        limit: Int = 20,
+        category: String = "",
+        search: String = ""
     ): Flow<List<HistoryEntry>> {
         val flow = if (startDate != null && endDate != null) {
             when (sortOption) {
                 HistorySortOption.NEWEST_FIRST ->
-                    historyRepository.getHistoryByDateRangeNewest(startDate, endDate, limit)
+                    historyRepository.getHistoryByDateRangeNewest(startDate, endDate, limit, category, search)
 
                 HistorySortOption.OLDEST_FIRST ->
-                    historyRepository.getHistoryByDateRangeOldest(startDate, endDate, limit)
+                    historyRepository.getHistoryByDateRangeOldest(startDate, endDate, limit, category, search)
 
                 HistorySortOption.ALPHABETICAL ->
-                    historyRepository.getHistoryByDateRangeAlphabetical(startDate, endDate, limit)
+                    historyRepository.getHistoryByDateRangeAlphabetical(startDate, endDate, limit, category, search)
 
                 HistorySortOption.CONFIDENCE_HIGH ->
-                    historyRepository.getHistoryByDateRangeConfidenceHigh(startDate, endDate, limit)
+                    historyRepository.getHistoryByDateRangeConfidenceHigh(startDate, endDate, limit, category, search)
 
                 HistorySortOption.FAVORITE ->
-                    historyRepository.getFavoriteHistory(limit)
+                    historyRepository.getFavoriteHistory(limit, category, search)
             }
         } else {
             when (sortOption) {
                 HistorySortOption.NEWEST_FIRST ->
-                    historyRepository.getHistoryNewestFirst(limit)
+                    historyRepository.getHistoryNewestFirst(limit, category, search)
 
                 HistorySortOption.OLDEST_FIRST ->
-                    historyRepository.getHistoryOldestFirst(limit)
+                    historyRepository.getHistoryOldestFirst(limit, category, search)
 
                 HistorySortOption.ALPHABETICAL ->
-                    historyRepository.getHistoryAlphabetical(limit)
+                    historyRepository.getHistoryAlphabetical(limit, category, search)
 
                 HistorySortOption.CONFIDENCE_HIGH ->
-                    historyRepository.getHistoryConfidenceHigh(limit)
+                    historyRepository.getHistoryConfidenceHigh(limit, category, search)
 
                 HistorySortOption.FAVORITE ->
-                    historyRepository.getFavoriteHistory(limit)
+                    historyRepository.getFavoriteHistory(limit, category, search)
             }
         }
 

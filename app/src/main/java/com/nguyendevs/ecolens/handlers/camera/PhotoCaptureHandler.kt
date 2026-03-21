@@ -77,22 +77,28 @@ class PhotoCaptureHandler(
         }
     }
 
-    /** Xử lý ảnh được chọn từ thư viện, lưu vào bộ nhớ trong và trả URI. */
+    /** Xử lý ảnh được chọn từ thư viện, lưu vào bộ nhớ trong và trả URI trên background thread. */
     fun handleSelectedImage(uri: Uri, callback: PhotoCaptureCallback) {
-        try {
-            val tempFile = ImageUtils.uriToFile(context, uri, 1080)
-            val internalPath = ImageUtils.saveFileToInternalStorage(context, tempFile)
+        cameraExecutor.execute {
+            try {
+                val tempFile = ImageUtils.uriToFile(context, uri, 1080)
+                val internalPath = ImageUtils.saveFileToInternalStorage(context, tempFile)
 
-            val finalUriString = if (internalPath != null) {
-                Uri.fromFile(File(internalPath)).toString()
-            } else {
-                uri.toString()
+                val finalUriString = if (internalPath != null) {
+                    Uri.fromFile(File(internalPath)).toString()
+                } else {
+                    uri.toString()
+                }
+
+                (context as? android.app.Activity)?.runOnUiThread {
+                    callback.onPhotoSaved(finalUriString)
+                } ?: callback.onPhotoSaved(finalUriString)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                (context as? android.app.Activity)?.runOnUiThread {
+                    callback.onPhotoError("Lỗi xử lý ảnh: ${e.message}")
+                } ?: callback.onPhotoError("Lỗi xử lý ảnh: ${e.message}")
             }
-
-            callback.onPhotoSaved(finalUriString)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            callback.onPhotoError("Lỗi xử lý ảnh: ${e.message}")
         }
     }
 }

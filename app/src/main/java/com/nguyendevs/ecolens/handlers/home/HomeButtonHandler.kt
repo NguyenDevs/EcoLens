@@ -32,10 +32,11 @@ class HomeButtonHandler(
     private val infoBinding
         get() = binding
 
-    /** Ẩn tất cả các nút share và retry. */
+    /** Ẩn tất cả các nút share, retry, favorite. */
     fun hideButtons() {
         infoBinding.btnShareInfo.visibility = View.GONE
         infoBinding.btnRetryIdentification.visibility = View.GONE
+        infoBinding.btnFavorite.visibility = View.GONE
     }
 
     /** Hiển thị nút share với animation scale. */

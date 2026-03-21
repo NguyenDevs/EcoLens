@@ -132,9 +132,11 @@
     <string name="lists">HISTORY</string>
 
     <!-- Filter by Type -->
-    <string name="history_chipAnimals">🐾 Animals</string>
-    <string name="history_chipPlants">🌿 Plants</string>
+    <string name="history_chipAnimals">🐾 Animalia</string>
+    <string name="history_chipPlants">🌿 Plantae</string>
     <string name="history_chipFungi">🍄 Fungi</string>
+    <string name="history_chipProtozoa">🦠 Protozoa</string>
+    <string name="history_chipChromista">🌊 Chromista</string>
     <string name="history_chipAll">All</string>
 
     <!-- ==================== SORT & FILTER ==================== -->

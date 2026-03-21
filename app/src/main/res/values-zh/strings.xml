@@ -132,9 +132,11 @@
     <string name="lists">历史记录</string>
 
     <!-- 按类型筛选 -->
-    <string name="history_chipAnimals">🐾 动物</string>
-    <string name="history_chipPlants">🌿 植物</string>
-    <string name="history_chipFungi">🍄 真菌</string>
+    <string name="history_chipAnimals">🐾 动物界</string>
+    <string name="history_chipPlants">🌿 植物界</string>
+    <string name="history_chipFungi">🍄 真菌界</string>
+    <string name="history_chipProtozoa">🦠 原生动物</string>
+    <string name="history_chipChromista">🌊 色藻界</string>
     <string name="history_chipAll">全部</string>
 
     <!-- ==================== 排序和筛选 ==================== -->

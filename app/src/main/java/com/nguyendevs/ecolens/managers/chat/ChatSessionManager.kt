@@ -43,6 +43,7 @@ class ChatSessionManager(
     private var messageCollectionJob: Job? = null
     private val isGenerating = AtomicBoolean(false)
     private val streamingMessageId = AtomicLong(-1L)
+    private var lastStreamUpdateTime = 0L
 
     private val _chatMessages = MutableStateFlow<List<ChatMessage>>(emptyList())
     val chatMessages: StateFlow<List<ChatMessage>> = _chatMessages.asStateFlow()
@@ -139,6 +140,7 @@ class ChatSessionManager(
                         _chatMessages.value = emptyList()
                     }
                 }
+                Unit
             } catch (e: Exception) {
                 Log.e(TAG, "Delete failed: ${e.message}", e)
             }
@@ -201,6 +203,7 @@ class ChatSessionManager(
     /** Thực hiện gọi API lấy luồng tin nhắn trả về real-time. */
     private suspend fun executeGeminiStreamingFlow(sessionId: Long, reuseMessageId: Long? = null) {
         _isStreamingActive.value = true
+        lastStreamUpdateTime = 0L
 
         val tempMessage =
                 ChatMessage(
@@ -295,8 +298,12 @@ class ChatSessionManager(
 
             if (!chunk.isNullOrEmpty()) {
                 accumulatedText.append(chunk)
-                val formattedText = markdownProcessor.process(accumulatedText.toString())
-                chatDao.updateMessageContent(messageId, formattedText)
+                val now = System.currentTimeMillis()
+                if (now - lastStreamUpdateTime > 200) {
+                    val formattedText = markdownProcessor.process(accumulatedText.toString())
+                    chatDao.updateMessageContent(messageId, formattedText)
+                    lastStreamUpdateTime = now
+                }
                 delay(STREAM_UPDATE_DELAY)
             }
         } catch (e: Exception) {
