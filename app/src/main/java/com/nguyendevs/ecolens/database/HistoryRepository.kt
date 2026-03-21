@@ -85,9 +85,9 @@ class HistoryRepository(
     fun getHistoryConfidenceHigh(limit: Int, category: String = "", search: String = "") =
         historyDao.getHistoryConfidenceHigh(getUserId(), limit, category, search)
 
-    /** Lấy lịch sử yêu thích. */
-    fun getFavoriteHistory(limit: Int) =
-        historyDao.getFavoriteHistory(getUserId(), limit)
+    /** Lấy lịch sử yêu thích, hỗ trợ lọc và tìm kiếm. */
+    fun getFavoriteHistory(limit: Int, category: String = "", search: String = "") =
+        historyDao.getFavoriteHistory(getUserId(), limit, category, search)
 
     /** Lấy lịch sử theo Alpha B trong khoảng thời gian, hỗ trợ lọc. */
     fun getHistoryByDateRangeAlphabetical(

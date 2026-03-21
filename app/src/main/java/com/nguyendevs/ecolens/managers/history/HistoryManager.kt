@@ -53,7 +53,7 @@ class HistoryManager(
                     historyRepository.getHistoryByDateRangeConfidenceHigh(startDate, endDate, limit, category, search)
 
                 HistorySortOption.FAVORITE ->
-                    historyRepository.getFavoriteHistory(limit)
+                    historyRepository.getFavoriteHistory(limit, category, search)
             }
         } else {
             when (sortOption) {
@@ -70,7 +70,7 @@ class HistoryManager(
                     historyRepository.getHistoryConfidenceHigh(limit, category, search)
 
                 HistorySortOption.FAVORITE ->
-                    historyRepository.getFavoriteHistory(limit)
+                    historyRepository.getFavoriteHistory(limit, category, search)
             }
         }
 

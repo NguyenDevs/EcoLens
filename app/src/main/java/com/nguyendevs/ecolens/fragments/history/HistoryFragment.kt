@@ -449,7 +449,7 @@ class HistoryFragment : Fragment() {
 
     /** Hiển thị bottom sheet chọn thứ tự sắp xếp. */
     private fun showFilterBottomSheet() {
-        val sheet = FilterHistoryBottomSheet.newInstance(HistorySortOption.NEWEST_FIRST)
+        val sheet = FilterHistoryBottomSheet.newInstance(viewModel.historySortOption.value)
         sheet.onApplyListener = { sort ->
             updateSortUI(sort)
             viewModel.updateHistoryFilter(sort = sort, resetLimit = true)

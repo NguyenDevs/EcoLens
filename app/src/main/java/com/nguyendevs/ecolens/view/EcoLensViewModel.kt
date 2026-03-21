@@ -154,6 +154,8 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     }
 
     private val _historySortOption = MutableStateFlow(HistorySortOption.NEWEST_FIRST)
+    val historySortOption: StateFlow<HistorySortOption> = _historySortOption.asStateFlow()
+    
     private val _historySearchQuery = MutableStateFlow("")
     private val _historyCategory = MutableStateFlow("")
     val historyCategory: StateFlow<String> = _historyCategory.asStateFlow()

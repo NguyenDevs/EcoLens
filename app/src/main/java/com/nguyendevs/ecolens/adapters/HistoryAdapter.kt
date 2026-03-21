@@ -148,14 +148,14 @@ class HistoryAdapter(
     private fun setAnimation(view: View, position: Int) {
         if (position > lastPosition) {
             view.alpha = 0f
-            view.translationY = 80f
+            view.translationY = 100f
             
             val delay = if (position < 10) (10 - position) * 40L else 0L
 
             view.animate()
                 .alpha(1f)
                 .translationY(0f)
-                .setDuration(450)
+                .setDuration(550)
                 .setInterpolator(android.view.animation.DecelerateInterpolator())
                 .setStartDelay(delay)
                 .start()

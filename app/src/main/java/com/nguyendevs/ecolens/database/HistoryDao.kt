@@ -197,9 +197,22 @@ interface HistoryDao {
     @Query("UPDATE history_table SET isFavorite = :isFavorite WHERE id = :id")
     suspend fun updateFavoriteStatus(id: Int, isFavorite: Boolean)
 
-    /** Lấy danh sách lịch sử được yêu thích. */
-    @Query("SELECT * FROM history_table WHERE userId = :userId AND isFavorite = 1 ORDER BY timestamp DESC LIMIT :limit")
-    fun getFavoriteHistory(userId: String, limit: Int): Flow<List<HistoryEntry>>
+    /** Lấy danh sách lịch sử được yêu thích, hỗ trợ lọc và tìm kiếm. */
+    @Query(
+        """
+        SELECT * FROM history_table 
+        WHERE userId = :userId AND isFavorite = 1
+        AND (:category = '' OR kingdom LIKE '%' || :category || '%')
+        AND (:search = '' OR commonName LIKE '%' || :search || '%' OR scientificName LIKE '%' || :search || '%')
+        ORDER BY timestamp DESC LIMIT :limit
+        """
+    )
+    fun getFavoriteHistory(
+        userId: String,
+        limit: Int,
+        category: String = "",
+        search: String = ""
+    ): Flow<List<HistoryEntry>>
 
     /** Cập nhật thông tin chi tiết sinh vật của bản ghi. */
     @Query(
