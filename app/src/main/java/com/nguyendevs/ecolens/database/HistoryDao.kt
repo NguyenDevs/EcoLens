@@ -16,7 +16,7 @@ interface HistoryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insert(entry: HistoryEntry): Long
 
     /** Thêm nhiều bản ghi lịch sử cùng lúc. */
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(entries: List<HistoryEntry>)
 
     /** Lấy ID cao nhất trong bảng lịch sử. */
