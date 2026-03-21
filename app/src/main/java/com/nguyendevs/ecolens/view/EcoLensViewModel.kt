@@ -15,6 +15,7 @@ import com.nguyendevs.ecolens.models.chat.ChatMessage
 import com.nguyendevs.ecolens.models.chat.ChatSession
 import com.nguyendevs.ecolens.models.history.HistoryEntry
 import com.nguyendevs.ecolens.models.history.HistorySortOption
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -152,7 +153,77 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         chatManager.startNewChatSession()
     }
 
-    /** Truy xuất lịch sử theo tùy chọn sắp xếp và khoảng thời gian. */
+    private val _historySortOption = MutableStateFlow(HistorySortOption.NEWEST_FIRST)
+    private val _historySearchQuery = MutableStateFlow("")
+    private val _historyCategory = MutableStateFlow("")
+    val historyCategory: StateFlow<String> = _historyCategory.asStateFlow()
+    
+    private val _historyStartDate = MutableStateFlow<Long?>(null)
+    val historyStartDate: StateFlow<Long?> = _historyStartDate.asStateFlow()
+    
+    private val _historyEndDate = MutableStateFlow<Long?>(null)
+    val historyEndDate: StateFlow<Long?> = _historyEndDate.asStateFlow()
+    
+    private val _historyLimit = MutableStateFlow(20)
+
+    /** Luồng dữ liệu lịch sử phản ứng theo các điều kiện lọc, tìm kiếm và sắp xếp. */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val historyList: Flow<List<HistoryEntry>> = combine(
+        _historySortOption,
+        _historySearchQuery,
+        _historyCategory,
+        _historyStartDate,
+        _historyEndDate,
+        _historyLimit
+    ) { arrayOfParams ->
+        HistoryParams(
+            sort = arrayOfParams[0] as HistorySortOption,
+            search = arrayOfParams[1] as String,
+            category = arrayOfParams[2] as String,
+            start = arrayOfParams[3] as Long?,
+            end = arrayOfParams[4] as Long?,
+            limit = arrayOfParams[5] as Int
+        )
+    }.flatMapLatest { params ->
+        historyManager.getHistoryBySortOption(
+            params.sort,
+            params.start,
+            params.end,
+            params.limit,
+            params.category,
+            params.search
+        )
+    }.flowOn(kotlinx.coroutines.Dispatchers.IO)
+
+    private data class HistoryParams(
+        val sort: HistorySortOption,
+        val search: String,
+        val category: String,
+        val start: Long?,
+        val end: Long?,
+        val limit: Int
+    )
+
+    /** Cập nhật các tham số truy vấn lịch sử. */
+    fun updateHistoryFilter(
+        sort: HistorySortOption? = null,
+        search: String? = null,
+        category: String? = null,
+        start: Long? = null,
+        end: Long? = null,
+        limit: Int? = null,
+        resetLimit: Boolean = false
+    ) {
+        sort?.let { _historySortOption.value = it }
+        search?.let { _historySearchQuery.value = it }
+        category?.let { _historyCategory.value = it }
+        start?.let { _historyStartDate.value = it }
+        end?.let { _historyEndDate.value = it }
+        limit?.let { _historyLimit.value = it }
+        if (resetLimit) _historyLimit.value = 20
+    }
+
+    /** Truy xuất lịch sử theo tùy chọn sắp xếp và khoảng thời gian (Legacy support). */
     fun getHistoryBySortOption(
             sortOption: HistorySortOption,
             startDate: Long? = null,

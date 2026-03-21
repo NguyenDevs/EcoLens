@@ -145,18 +145,19 @@ class HistoryAdapter(
         }
     }
 
-    /** Chạy animation trượt lên khi item xuất hiện lần đầu. */
     private fun setAnimation(view: View, position: Int) {
         if (position > lastPosition) {
             view.alpha = 0f
-            view.translationY = 100f
+            view.translationY = 80f
             
+            val delay = if (position < 10) (10 - position) * 40L else 0L
+
             view.animate()
                 .alpha(1f)
                 .translationY(0f)
-                .setDuration(600)
+                .setDuration(450)
                 .setInterpolator(android.view.animation.DecelerateInterpolator())
-                .setStartDelay(position % 5 * 50L)
+                .setStartDelay(delay)
                 .start()
                 
             lastPosition = position

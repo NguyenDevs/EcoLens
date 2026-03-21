@@ -22,15 +22,39 @@ interface HistoryDao {
     /** Lấy ID cao nhất trong bảng lịch sử. */
     @Query("SELECT MAX(id) FROM history_table") suspend fun getMaxId(): Int?
 
-    /** Lấy danh sách lịch sử mới nhất theo giới hạn. */
+    /** Lấy danh sách lịch sử mới nhất theo giới hạn, hỗ trợ lọc và tìm kiếm. */
     @Query(
-            "SELECT * FROM history_table WHERE userId = :userId ORDER BY timestamp DESC LIMIT :limit"
+        """
+        SELECT * FROM history_table 
+        WHERE userId = :userId 
+        AND (:search = '' OR commonName LIKE '%' || :search || '%' OR scientificName LIKE '%' || :search || '%')
+        AND (:category = '' OR kingdom LIKE '%' || :category || '%')
+        ORDER BY timestamp DESC LIMIT :limit
+        """
     )
-    fun getHistoryNewestFirst(userId: String, limit: Int): Flow<List<HistoryEntry>>
+    fun getHistoryNewestFirst(
+        userId: String,
+        limit: Int,
+        category: String = "",
+        search: String = ""
+    ): Flow<List<HistoryEntry>>
 
-    /** Lấy danh sách lịch sử cũ nhất theo giới hạn. */
-    @Query("SELECT * FROM history_table WHERE userId = :userId ORDER BY timestamp ASC LIMIT :limit")
-    fun getHistoryOldestFirst(userId: String, limit: Int): Flow<List<HistoryEntry>>
+    /** Lấy danh sách lịch sử cũ nhất theo giới hạn, hỗ trợ lọc và tìm kiếm. */
+    @Query(
+        """
+        SELECT * FROM history_table 
+        WHERE userId = :userId 
+        AND (:search = '' OR commonName LIKE '%' || :search || '%' OR scientificName LIKE '%' || :search || '%')
+        AND (:category = '' OR kingdom LIKE '%' || :category || '%')
+        ORDER BY timestamp ASC LIMIT :limit
+        """
+    )
+    fun getHistoryOldestFirst(
+        userId: String,
+        limit: Int,
+        category: String = "",
+        search: String = ""
+    ): Flow<List<HistoryEntry>>
 
     /** Lấy toàn bộ danh sách lịch sử từ mới nhất. */
     @Query("SELECT * FROM history_table WHERE userId = :userId ORDER BY timestamp DESC")
@@ -40,13 +64,39 @@ interface HistoryDao {
     @Query("SELECT * FROM history_table WHERE userId = :userId ORDER BY timestamp ASC")
     fun getAllHistoryOldestFirst(userId: String): Flow<List<HistoryEntry>>
 
-    /** Lấy lịch sử sắp xếp theo tên (A-Z). */
-    @Query("SELECT * FROM history_table WHERE userId = :userId ORDER BY commonName ASC LIMIT :limit")
-    fun getHistoryAlphabetical(userId: String, limit: Int): Flow<List<HistoryEntry>>
+    /** Lấy lịch sử sắp xếp theo tên (A-Z), hỗ trợ lọc và tìm kiếm. */
+    @Query(
+        """
+        SELECT * FROM history_table 
+        WHERE userId = :userId 
+        AND (:search = '' OR commonName LIKE '%' || :search || '%' OR scientificName LIKE '%' || :search || '%')
+        AND (:category = '' OR kingdom LIKE '%' || :category || '%')
+        ORDER BY commonName ASC LIMIT :limit
+        """
+    )
+    fun getHistoryAlphabetical(
+        userId: String,
+        limit: Int,
+        category: String = "",
+        search: String = ""
+    ): Flow<List<HistoryEntry>>
 
-    /** Lấy lịch sử có độ tin cậy cao nhất. */
-    @Query("SELECT * FROM history_table WHERE userId = :userId ORDER BY confidence DESC LIMIT :limit")
-    fun getHistoryConfidenceHigh(userId: String, limit: Int): Flow<List<HistoryEntry>>
+    /** Lấy lịch sử có độ tin cậy cao nhất, hỗ trợ lọc và tìm kiếm. */
+    @Query(
+        """
+        SELECT * FROM history_table 
+        WHERE userId = :userId 
+        AND (:search = '' OR commonName LIKE '%' || :search || '%' OR scientificName LIKE '%' || :search || '%')
+        AND (:category = '' OR kingdom LIKE '%' || :category || '%')
+        ORDER BY confidence DESC LIMIT :limit
+        """
+    )
+    fun getHistoryConfidenceHigh(
+        userId: String,
+        limit: Int,
+        category: String = "",
+        search: String = ""
+    ): Flow<List<HistoryEntry>>
 
     /** Tìm lịch sử theo ID. */
     @Query("SELECT * FROM history_table WHERE id = :id LIMIT 1")
@@ -60,48 +110,84 @@ interface HistoryDao {
     @Query("SELECT * FROM history_table WHERE id > :id ORDER BY id ASC")
     suspend fun getEntriesWithIdGreaterThan(id: Int): List<HistoryEntry>
 
-    /** Lấy lịch sử mới nhất trong khoảng thời gian. */
+    /** Lấy lịch sử theo khoảng thời gian, hỗ trợ lọc và tìm kiếm (mới nhất trước). */
     @Query(
-            "SELECT * FROM history_table WHERE userId = :userId AND timestamp BETWEEN :startDate AND :endDate ORDER BY timestamp DESC LIMIT :limit"
+        """
+        SELECT * FROM history_table 
+        WHERE userId = :userId 
+        AND timestamp BETWEEN :startDate AND :endDate 
+        AND (:search = '' OR commonName LIKE '%' || :search || '%' OR scientificName LIKE '%' || :search || '%')
+        AND (:category = '' OR kingdom LIKE '%' || :category || '%')
+        ORDER BY timestamp DESC LIMIT :limit
+        """
     )
     fun getHistoryByDateRangeNewest(
-            userId: String,
-            startDate: Long,
-            endDate: Long,
-            limit: Int
+        userId: String,
+        startDate: Long,
+        endDate: Long,
+        limit: Int,
+        category: String = "",
+        search: String = ""
     ): Flow<List<HistoryEntry>>
 
-    /** Lấy lịch sử cũ nhất trong khoảng thời gian. */
+    /** Lấy lịch sử theo khoảng thời gian, hỗ trợ lọc và tìm kiếm (cũ nhất trước). */
     @Query(
-            "SELECT * FROM history_table WHERE userId = :userId AND timestamp BETWEEN :startDate AND :endDate ORDER BY timestamp ASC LIMIT :limit"
+        """
+        SELECT * FROM history_table 
+        WHERE userId = :userId 
+        AND timestamp BETWEEN :startDate AND :endDate 
+        AND (:search = '' OR commonName LIKE '%' || :search || '%' OR scientificName LIKE '%' || :search || '%')
+        AND (:category = '' OR kingdom LIKE '%' || :category || '%')
+        ORDER BY timestamp ASC LIMIT :limit
+        """
     )
     fun getHistoryByDateRangeOldest(
-            userId: String,
-            startDate: Long,
-            endDate: Long,
-            limit: Int
+        userId: String,
+        startDate: Long,
+        endDate: Long,
+        limit: Int,
+        category: String = "",
+        search: String = ""
     ): Flow<List<HistoryEntry>>
 
-    /** Lấy lịch sử theo Alpha B trong khoảng thời gian. */
+    /** Lấy lịch sử theo Alpha B trong khoảng thời gian, hỗ trợ lọc. */
     @Query(
-            "SELECT * FROM history_table WHERE userId = :userId AND timestamp BETWEEN :startDate AND :endDate ORDER BY commonName ASC LIMIT :limit"
+        """
+        SELECT * FROM history_table 
+        WHERE userId = :userId 
+        AND timestamp BETWEEN :startDate AND :endDate 
+        AND (:search = '' OR commonName LIKE '%' || :search || '%' OR scientificName LIKE '%' || :search || '%')
+        AND (:category = '' OR kingdom LIKE '%' || :category || '%')
+        ORDER BY commonName ASC LIMIT :limit
+        """
     )
     fun getHistoryByDateRangeAlphabetical(
-            userId: String,
-            startDate: Long,
-            endDate: Long,
-            limit: Int
+        userId: String,
+        startDate: Long,
+        endDate: Long,
+        limit: Int,
+        category: String = "",
+        search: String = ""
     ): Flow<List<HistoryEntry>>
 
-    /** Lấy lịch sử có độ tin cậy cao trong khoảng thời gian. */
+    /** Lấy lịch sử có độ tin cậy cao trong khoảng thời gian, hỗ trợ lọc. */
     @Query(
-            "SELECT * FROM history_table WHERE userId = :userId AND timestamp BETWEEN :startDate AND :endDate ORDER BY confidence DESC LIMIT :limit"
+        """
+        SELECT * FROM history_table 
+        WHERE userId = :userId 
+        AND timestamp BETWEEN :startDate AND :endDate 
+        AND (:search = '' OR commonName LIKE '%' || :search || '%' OR scientificName LIKE '%' || :search || '%')
+        AND (:category = '' OR kingdom LIKE '%' || :category || '%')
+        ORDER BY confidence DESC LIMIT :limit
+        """
     )
     fun getHistoryByDateRangeConfidenceHigh(
-            userId: String,
-            startDate: Long,
-            endDate: Long,
-            limit: Int
+        userId: String,
+        startDate: Long,
+        endDate: Long,
+        limit: Int,
+        category: String = "",
+        search: String = ""
     ): Flow<List<HistoryEntry>>
 
     /** Cập nhật một bản ghi lịch sử. */
@@ -112,8 +198,8 @@ interface HistoryDao {
     suspend fun updateFavoriteStatus(id: Int, isFavorite: Boolean)
 
     /** Lấy danh sách lịch sử được yêu thích. */
-    @Query("SELECT * FROM history_table WHERE userId = :userId AND isFavorite = 1 ORDER BY timestamp DESC")
-    fun getFavoriteHistory(userId: String): Flow<List<HistoryEntry>>
+    @Query("SELECT * FROM history_table WHERE userId = :userId AND isFavorite = 1 ORDER BY timestamp DESC LIMIT :limit")
+    fun getFavoriteHistory(userId: String, limit: Int): Flow<List<HistoryEntry>>
 
     /** Cập nhật thông tin chi tiết sinh vật của bản ghi. */
     @Query(

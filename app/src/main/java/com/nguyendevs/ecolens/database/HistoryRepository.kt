@@ -51,39 +51,75 @@ class HistoryRepository(
     /** Lấy toàn bộ lịch sử mới nhất. */
     fun getAllHistoryNewestFirst() = historyDao.getAllHistoryNewestFirst(getUserId())
 
-    /** Lấy lịch sử mới nhất theo giới hạn. */
-    fun getHistoryNewestFirst(limit: Int) = historyDao.getHistoryNewestFirst(getUserId(), limit)
+    /** Lấy lịch sử mới nhất theo giới hạn, hỗ trợ lọc và tìm kiếm. */
+    fun getHistoryNewestFirst(limit: Int, category: String = "", search: String = "") =
+        historyDao.getHistoryNewestFirst(getUserId(), limit, category, search)
 
-    /** Lấy lịch sử cũ nhất theo giới hạn. */
-    fun getHistoryOldestFirst(limit: Int) = historyDao.getHistoryOldestFirst(getUserId(), limit)
+    /** Lấy lịch sử cũ nhất theo giới hạn, hỗ trợ lọc và tìm kiếm. */
+    fun getHistoryOldestFirst(limit: Int, category: String = "", search: String = "") =
+        historyDao.getHistoryOldestFirst(getUserId(), limit, category, search)
 
-    /** Lấy lịch sử mới nhất trong khoảng thời gian. */
-    fun getHistoryByDateRangeNewest(startDate: Long, endDate: Long, limit: Int) =
-            historyDao.getHistoryByDateRangeNewest(getUserId(), startDate, endDate, limit)
+    /** Lấy lịch sử mới nhất trong khoảng thời gian, hỗ trợ lọc và tìm kiếm. */
+    fun getHistoryByDateRangeNewest(
+        startDate: Long,
+        endDate: Long,
+        limit: Int,
+        category: String = "",
+        search: String = ""
+    ) = historyDao.getHistoryByDateRangeNewest(getUserId(), startDate, endDate, limit, category, search)
 
-    /** Lấy lịch sử cũ nhất trong khoảng thời gian. */
-    fun getHistoryByDateRangeOldest(startDate: Long, endDate: Long, limit: Int) =
-            historyDao.getHistoryByDateRangeOldest(getUserId(), startDate, endDate, limit)
+    /** Lấy lịch sử cũ nhất trong khoảng thời gian, hỗ trợ lọc và tìm kiếm. */
+    fun getHistoryByDateRangeOldest(
+        startDate: Long,
+        endDate: Long,
+        limit: Int,
+        category: String = "",
+        search: String = ""
+    ) = historyDao.getHistoryByDateRangeOldest(getUserId(), startDate, endDate, limit, category, search)
 
-    /** Lấy lịch sử theo Alpha B. */
-    fun getHistoryAlphabetical(limit: Int) =
-            historyDao.getHistoryAlphabetical(getUserId(), limit)
+    /** Lấy lịch sử theo Alpha B, hỗ trợ lọc và tìm kiếm. */
+    fun getHistoryAlphabetical(limit: Int, category: String = "", search: String = "") =
+        historyDao.getHistoryAlphabetical(getUserId(), limit, category, search)
 
-    /** Lấy lịch sử có độ xác tín cao. */
-    fun getHistoryConfidenceHigh(limit: Int) =
-            historyDao.getHistoryConfidenceHigh(getUserId(), limit)
+    /** Lấy lịch sử có độ xác tín cao, hỗ trợ lọc và tìm kiếm. */
+    fun getHistoryConfidenceHigh(limit: Int, category: String = "", search: String = "") =
+        historyDao.getHistoryConfidenceHigh(getUserId(), limit, category, search)
 
     /** Lấy lịch sử yêu thích. */
     fun getFavoriteHistory(limit: Int) =
-            historyDao.getFavoriteHistory(getUserId())
+        historyDao.getFavoriteHistory(getUserId(), limit)
 
-    /** Lấy lịch sử theo Alpha B trong khoảng thời gian. */
-    fun getHistoryByDateRangeAlphabetical(startDate: Long, endDate: Long, limit: Int) =
-            historyDao.getHistoryByDateRangeAlphabetical(getUserId(), startDate, endDate, limit)
+    /** Lấy lịch sử theo Alpha B trong khoảng thời gian, hỗ trợ lọc. */
+    fun getHistoryByDateRangeAlphabetical(
+        startDate: Long,
+        endDate: Long,
+        limit: Int,
+        category: String = "",
+        search: String = ""
+    ) = historyDao.getHistoryByDateRangeAlphabetical(
+        getUserId(),
+        startDate,
+        endDate,
+        limit,
+        category,
+        search
+    )
 
-    /** Lấy lịch sử có độ xác tín cao trong khoảng thời gian. */
-    fun getHistoryByDateRangeConfidenceHigh(startDate: Long, endDate: Long, limit: Int) =
-            historyDao.getHistoryByDateRangeConfidenceHigh(getUserId(), startDate, endDate, limit)
+    /** Lấy lịch sử có độ xác tín cao trong khoảng thời gian, hỗ trợ lọc. */
+    fun getHistoryByDateRangeConfidenceHigh(
+        startDate: Long,
+        endDate: Long,
+        limit: Int,
+        category: String = "",
+        search: String = ""
+    ) = historyDao.getHistoryByDateRangeConfidenceHigh(
+        getUserId(),
+        startDate,
+        endDate,
+        limit,
+        category,
+        search
+    )
 
     /** Truy tìm lịch sử dựa theo ID. */
     suspend fun getHistoryById(id: Int): HistoryEntry? {

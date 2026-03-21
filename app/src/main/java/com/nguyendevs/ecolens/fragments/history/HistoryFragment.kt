@@ -39,11 +39,8 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.TimeZone
 import android.view.animation.AccelerateDecelerateInterpolator
-import android.transition.TransitionManager
-import android.transition.AutoTransition
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -59,17 +56,6 @@ class HistoryFragment : Fragment() {
     private lateinit var adapter: HistoryAdapter
     private lateinit var animationHandler: HistoryAnimationHandler
 
-    private var currentCategory: CategoryFilter = CategoryFilter.ALL
-    private var currentSortOption = HistorySortOption.NEWEST_FIRST
-    private var filterStartDate: Long? = null
-    private var filterEndDate: Long? = null
-    private var searchQuery: String = ""
-    private var currentViewMode = HistoryViewMode.LIST
-
-    private var currentLimit = 10
-    private val pageSize = 10
-    private var isLoadingMore = false
-    private var hasMoreData = true
     private var observeJob: Job? = null
 
     enum class CategoryFilter { ALL, ANIMALS, PLANTS, FUNGI, PROTOZOA, CHROMISTA }
@@ -91,12 +77,9 @@ class HistoryFragment : Fragment() {
         setupAdapter()
         setupSearch()
         setupClickListeners()
-        applyViewMode(currentViewMode)
-        currentLimit = pageSize
+        applyViewMode(HistoryViewMode.LIST)
         observeHistory()
         observeTotalCount()
-        updateSortUI()
-        updateCategoryChipsUI(currentCategory)
         observeLoadingState()
     }
 
@@ -173,7 +156,9 @@ class HistoryFragment : Fragment() {
                     is GridLayoutManager -> lm.findLastVisibleItemPosition()
                     else -> return
                 }
-                if (!isLoadingMore && hasMoreData && total <= lastVisible + 3) loadNextPage()
+                if (total <= lastVisible + 5) {
+                    viewModel.updateHistoryFilter(limit = total + 30)
+                }
             }
         })
     }
@@ -184,10 +169,9 @@ class HistoryFragment : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                searchQuery = s?.toString()?.trim() ?: ""
-                binding.ivSearchClear.visibility = if (searchQuery.isNotEmpty()) View.VISIBLE else View.GONE
-                currentLimit = pageSize
-                observeHistory()
+                val search = s?.toString()?.trim() ?: ""
+                binding.ivSearchClear.visibility = if (search.isNotEmpty()) View.VISIBLE else View.GONE
+                viewModel.updateHistoryFilter(search = search, resetLimit = true)
             }
         })
         binding.etSearch.setOnEditorActionListener { _, actionId, _ ->
@@ -214,7 +198,16 @@ class HistoryFragment : Fragment() {
     private fun setupClickListeners() {
         binding.chipAll.setOnClickListener {
             animationHandler.performConfirmFeedback(it)
-            val nextCategory = when (currentCategory) {
+            val currentCat = when (viewModel.historyCategory.value) {
+                "" -> CategoryFilter.ALL
+                "animal" -> CategoryFilter.ANIMALS
+                "plant" -> CategoryFilter.PLANTS
+                "fungi" -> CategoryFilter.FUNGI
+                "protozoa" -> CategoryFilter.PROTOZOA
+                "chromista" -> CategoryFilter.CHROMISTA
+                else -> CategoryFilter.ALL
+            }
+            val nextCategory = when (currentCat) {
                 CategoryFilter.ALL -> CategoryFilter.ANIMALS
                 CategoryFilter.ANIMALS -> CategoryFilter.PLANTS
                 CategoryFilter.PLANTS -> CategoryFilter.FUNGI
@@ -235,16 +228,10 @@ class HistoryFragment : Fragment() {
         binding.btnFilterByDate.setOnCloseIconClickListener { clearDateFilter() }
 
         binding.btnViewList.setOnClickListener {
-            if (currentViewMode != HistoryViewMode.LIST) {
-                currentViewMode = HistoryViewMode.LIST
-                applyViewMode(currentViewMode)
-            }
+            applyViewMode(HistoryViewMode.LIST)
         }
         binding.btnViewGrid.setOnClickListener {
-            if (currentViewMode != HistoryViewMode.GRID) {
-                currentViewMode = HistoryViewMode.GRID
-                applyViewMode(currentViewMode)
-            }
+            applyViewMode(HistoryViewMode.GRID)
         }
         binding.searchBarContainer.findViewById<View>(R.id.btnSearchIcon).setOnClickListener { view: View ->
             animationHandler.performConfirmFeedback(view)
@@ -353,16 +340,22 @@ class HistoryFragment : Fragment() {
         }
 
         if (previousMode != mode) {
-            observeHistory()
+            adapter.notifyDataSetChanged()
         }
     }
 
     /** Cập nhật bộ lọc category hiện tại. */
     private fun updateCategoryFilter(category: CategoryFilter) {
-        currentCategory = category
         updateCategoryChipsUI(category)
-        currentLimit = pageSize
-        observeHistory()
+        val catString = when (category) {
+            CategoryFilter.ALL -> ""
+            CategoryFilter.ANIMALS -> "animal"
+            CategoryFilter.PLANTS -> "plant"
+            CategoryFilter.FUNGI -> "fungi"
+            CategoryFilter.PROTOZOA -> "protozoa"
+            CategoryFilter.CHROMISTA -> "chromista"
+        }
+        viewModel.updateHistoryFilter(category = catString, resetLimit = true)
     }
 
     /** Cập nhật text của chip filter theo category đang chọn. */
@@ -387,109 +380,52 @@ class HistoryFragment : Fragment() {
         }
     }
 
-    /** Observe và lọc danh sách lịch sử theo category, search query và sort option. */
+    /** Observe dữ liệu lịch sử phản ứng từ ViewModel. */
     private fun observeHistory() {
         observeJob?.cancel()
         observeJob = viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.getHistoryBySortOption(currentSortOption, filterStartDate, filterEndDate, currentLimit)
-                .collectLatest { allList ->
-                    val filtered = withContext(Dispatchers.Default) {
-                        var list = when (currentCategory) {
-                            CategoryFilter.ALL -> allList
-                            CategoryFilter.ANIMALS -> allList.filter {
-                                val k = it.speciesInfo.kingdom.lowercase()
-                                k.contains("animal") || k.contains("động vật")
-                            }
-                            CategoryFilter.PLANTS -> allList.filter {
-                                val k = it.speciesInfo.kingdom.lowercase()
-                                k.contains("plant") || k.contains("thực vật")
-                            }
-                            CategoryFilter.FUNGI -> allList.filter {
-                                val k = it.speciesInfo.kingdom.lowercase()
-                                k.contains("fungi") || k.contains("nấm")
-                            }
-                            CategoryFilter.PROTOZOA -> allList.filter {
-                                val k = it.speciesInfo.kingdom.lowercase()
-                                k.contains("protozoa") || k.contains("nguyên sinh")
-                            }
-                            CategoryFilter.CHROMISTA -> allList.filter {
-                                val k = it.speciesInfo.kingdom.lowercase()
-                                k.contains("chromista") || k.contains("sắc tảo")
-                            }
-                        }
-
-                        if (searchQuery.isNotEmpty()) {
-                            list = list.filter {
-                                it.speciesInfo.commonName.contains(searchQuery, ignoreCase = true) ||
-                                        it.speciesInfo.scientificName.contains(searchQuery, ignoreCase = true)
-                            }
-                        }
-
-                        when (currentSortOption) {
-                            HistorySortOption.ALPHABETICAL -> list.sortedBy { it.speciesInfo.commonName }
-                            HistorySortOption.CONFIDENCE_HIGH -> list.sortedByDescending { it.speciesInfo.confidence }
-                            else -> list
-                        }
+            viewModel.historyList.collectLatest { filtered ->
+                if (filtered.isEmpty()) {
+                    if (viewModel.isHistoryLoading.value) return@collectLatest
+                    binding.shimmerViewContainer.stopShimmer()
+                    binding.shimmerViewContainer.visibility = View.GONE
+                    animationHandler.fadeOut(binding.rvHistory)
+                    animationHandler.fadeIn(binding.emptyStateContainer)
+                } else {
+                    binding.shimmerViewContainer.stopShimmer()
+                    binding.shimmerViewContainer.visibility = View.GONE
+                    if (binding.rvHistory.visibility != View.VISIBLE || binding.rvHistory.alpha < 1f) {
+                        animationHandler.fadeIn(binding.rvHistory)
                     }
+                    animationHandler.fadeOut(binding.emptyStateContainer)
 
-                    val isFiltering = searchQuery.isNotEmpty() || currentCategory != CategoryFilter.ALL || filterStartDate != null
+                    val uiModels = withContext(Dispatchers.Default) {
+                        val models = mutableListOf<HistoryUiModel>()
+                        var i = 0
+                        while (i < filtered.size) {
+                            val entry = filtered[i]
+                            val isFirst = i == 0 || !isSameDay(entry.timestamp, filtered[i - 1].timestamp)
+                            val isLast = i == filtered.size - 1 || !isSameDay(entry.timestamp, filtered[i + 1].timestamp)
 
-                    binding.tvResultCount.visibility = if (isFiltering) View.VISIBLE else View.INVISIBLE
-                    binding.tvResultCount.text = getString(R.string.history_results_count, filtered.size)
-
-                    if (filtered.size < pageSize && allList.size >= currentLimit) {
-                        currentLimit += pageSize
-                        loadNextPage()
-                        return@collectLatest
-                    }
-
-                    if (filtered.isEmpty()) {
-                        if (viewModel.isHistoryLoading.value) {
-                            return@collectLatest
-                        }
-                        binding.shimmerViewContainer.stopShimmer()
-                        binding.shimmerViewContainer.visibility = View.GONE
-                        animationHandler.fadeOut(binding.rvHistory)
-                        animationHandler.fadeIn(binding.emptyStateContainer)
-                        hasMoreData = false
-                    } else {
-                        binding.shimmerViewContainer.stopShimmer()
-                        binding.shimmerViewContainer.visibility = View.GONE
-                        if (binding.rvHistory.visibility != View.VISIBLE || binding.rvHistory.alpha < 1f) {
-                            animationHandler.fadeIn(binding.rvHistory)
-                        }
-                        animationHandler.fadeOut(binding.emptyStateContainer)
-                        hasMoreData = allList.size >= currentLimit
-
-                        val uiModels = withContext(Dispatchers.Default) {
-                            val models = mutableListOf<HistoryUiModel>()
-                            var i = 0
-                            while (i < filtered.size) {
-                                val entry = filtered[i]
-                                val isFirst = i == 0 || !isSameDay(entry.timestamp, filtered[i - 1].timestamp)
-                                val isLast = i == filtered.size - 1 || !isSameDay(entry.timestamp, filtered[i + 1].timestamp)
-
-                                models.add(HistoryUiModel(entry, isFirst, isLast))
-                                if (currentViewMode == HistoryViewMode.GRID && isLast) {
-                                    var dayStartIndex = i
-                                    while (dayStartIndex > 0 && isSameDay(filtered[dayStartIndex].timestamp, filtered[dayStartIndex - 1].timestamp)) {
-                                        dayStartIndex--
-                                    }
-                                    val itemsInDay = i - dayStartIndex + 1
-                                    if (itemsInDay % 2 != 0) {
-                                        models.add(HistoryUiModel(entry, isFirstOfDay = false, isLastOfDay = true, isPlaceholder = true))
-                                    }
+                            models.add(HistoryUiModel(entry, isFirst, isLast))
+                            if (adapter.viewMode == HistoryViewMode.GRID && isLast) {
+                                var dayStartIndex = i
+                                while (dayStartIndex > 0 && isSameDay(filtered[dayStartIndex].timestamp, filtered[dayStartIndex - 1].timestamp)) {
+                                    dayStartIndex--
                                 }
-                                i++
+                                val itemsInDay = i - dayStartIndex + 1
+                                if (itemsInDay % 2 != 0) {
+                                    models.add(HistoryUiModel(entry, isFirstOfDay = false, isLastOfDay = true, isPlaceholder = true))
+                                }
                             }
-                            models
+                            i++
                         }
-                        adapter.submitList(uiModels)
+                        models
                     }
-
-                    isLoadingMore = false
-                    adapter.setLoading(false)
+                    adapter.submitList(uiModels)
                 }
+                adapter.setLoading(false)
+            }
         }
     }
 
@@ -500,17 +436,9 @@ class HistoryFragment : Fragment() {
         return d1 == d2
     }
 
-    /** Tải trang tiếp theo của danh sách lịch sử. */
-    private fun loadNextPage() {
-        isLoadingMore = true
-        adapter.setLoading(true)
-        currentLimit += pageSize
-        observeHistory()
-    }
-
     /** Cập nhật nhãn sắp xếp hiện tại. */
-    private fun updateSortUI() {
-        binding.tvSortLabel.text = when (currentSortOption) {
+    private fun updateSortUI(sort: HistorySortOption) {
+        binding.tvSortLabel.text = when (sort) {
             HistorySortOption.NEWEST_FIRST -> getString(R.string.sort_newest_first)
             HistorySortOption.OLDEST_FIRST -> getString(R.string.sort_oldest_first)
             HistorySortOption.ALPHABETICAL -> getString(R.string.sort_az)
@@ -521,28 +449,24 @@ class HistoryFragment : Fragment() {
 
     /** Hiển thị bottom sheet chọn thứ tự sắp xếp. */
     private fun showFilterBottomSheet() {
-        val sheet = FilterHistoryBottomSheet.newInstance(currentSortOption)
+        val sheet = FilterHistoryBottomSheet.newInstance(HistorySortOption.NEWEST_FIRST)
         sheet.onApplyListener = { sort ->
-            currentSortOption = sort
-            updateSortUI()
-            currentLimit = pageSize
-            observeHistory()
+            updateSortUI(sort)
+            viewModel.updateHistoryFilter(sort = sort, resetLimit = true)
         }
         sheet.show(parentFragmentManager, "FILTER_SHEET")
     }
 
     /** Cập nhật UI chip filter ngày theo range đang chọn. */
     private fun updateDateFilterUI() {
-        if (filterStartDate != null || filterEndDate != null) {
-            val start = filterStartDate?.let { Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()) }
-            val end = filterEndDate?.let { Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()) }
+        val startMilli = viewModel.historyStartDate.value
+        val endMilli = viewModel.historyEndDate.value
 
-            binding.btnFilterByDate.text = when {
-                start != null && end != null -> "${dateFormatter.format(start)} - ${dateFormatter.format(end)}"
-                start != null -> "Từ ${dateFormatter.format(start)}"
-                end != null -> "Đến ${dateFormatter.format(end)}"
-                else -> getString(R.string.select_date)
-            }
+        if (startMilli != null || endMilli != null) {
+            val start = Instant.ofEpochMilli(startMilli ?: 0L).atZone(ZoneId.systemDefault())
+            val end = Instant.ofEpochMilli(endMilli ?: Long.MAX_VALUE).atZone(ZoneId.systemDefault())
+
+            binding.btnFilterByDate.text = "${dateFormatter.format(start)} - ${dateFormatter.format(end)}"
             binding.btnFilterByDate.isCloseIconVisible = true
             animationHandler.updateChipStyle(binding.btnFilterByDate, true)
         } else {
@@ -555,10 +479,6 @@ class HistoryFragment : Fragment() {
         val picker = MaterialDatePicker.Builder.dateRangePicker()
             .setTitleText(R.string.select_date)
             .setTheme(R.style.CustomMaterialDatePickerTheme)
-            .setSelection(Pair(
-                filterStartDate ?: MaterialDatePicker.todayInUtcMilliseconds(),
-                filterEndDate ?: MaterialDatePicker.todayInUtcMilliseconds()
-            ))
             .build()
         picker.show(parentFragmentManager, "DATE_RANGE_PICKER")
         picker.addOnPositiveButtonClickListener { applyDateFilter(it) }
@@ -567,27 +487,23 @@ class HistoryFragment : Fragment() {
     /** Áp dụng bộ lọc theo khoảng ngày được chọn. */
     private fun applyDateFilter(selection: Pair<Long, Long>) {
         val offset = TimeZone.getDefault().getOffset(selection.first)
-        filterStartDate = selection.first - offset
-        filterEndDate = (selection.second - offset) + 86400000L - 1L
+        val startAt = selection.first - offset
+        val endAt = (selection.second - offset) + 86400000L - 1L
 
-        val start = Instant.ofEpochMilli(filterStartDate!!).atZone(ZoneId.systemDefault())
-        val end = Instant.ofEpochMilli(filterEndDate!!).atZone(ZoneId.systemDefault())
-        binding.btnFilterByDate.text = "${dateFormatter.format(start)} - ${dateFormatter.format(end)}"
+        val s = Instant.ofEpochMilli(startAt).atZone(ZoneId.systemDefault())
+        val e = Instant.ofEpochMilli(endAt).atZone(ZoneId.systemDefault())
+        binding.btnFilterByDate.text = "${dateFormatter.format(s)} - ${dateFormatter.format(e)}"
         binding.btnFilterByDate.isCloseIconVisible = true
         animationHandler.updateChipStyle(binding.btnFilterByDate, true)
-        currentLimit = pageSize
-        observeHistory()
+        viewModel.updateHistoryFilter(start = startAt, end = endAt, resetLimit = true)
     }
 
     /** Xóa bộ lọc ngày và reset về mặc định. */
     private fun clearDateFilter() {
-        filterStartDate = null
-        filterEndDate = null
         binding.btnFilterByDate.text = getString(R.string.select_date)
         binding.btnFilterByDate.isCloseIconVisible = false
         animationHandler.updateChipStyle(binding.btnFilterByDate, false)
-        currentLimit = pageSize
-        observeHistory()
+        viewModel.updateHistoryFilter(start = 0L, end = Long.MAX_VALUE, resetLimit = true)
     }
 
     /** Điều hướng đến màn hình chi tiết lịch sử. */
