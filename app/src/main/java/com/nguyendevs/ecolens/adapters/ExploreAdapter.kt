@@ -29,13 +29,17 @@ class ExploreAdapter(private val onItemClick: (ExploreItem) -> Unit) :
         return ExploreViewHolder(binding, onItemClick)
     }
 
+    private var marginMd: Int = -1
+
     /** Bind item với margin phù hợp cho vị trí đầu tiên. */
     override fun onBindViewHolder(holder: ExploreViewHolder, position: Int) {
         val layoutParams = holder.itemView.layoutParams as ViewGroup.MarginLayoutParams
-        val context = holder.itemView.context
+        
+        if (marginMd == -1) {
+            marginMd = holder.itemView.context.resources.getDimensionPixelSize(R.dimen.spacing_md)
+        }
 
         if (position > 0) {
-            val marginMd = context.resources.getDimensionPixelSize(R.dimen.spacing_md)
             layoutParams.marginStart = marginMd
         } else {
             layoutParams.marginStart = 0
@@ -126,7 +130,7 @@ class ExploreAdapter(private val onItemClick: (ExploreItem) -> Unit) :
 
         /** Tải ảnh từ URL với shimmer trong khi chờ. */
         private fun loadImageWithShimmer(item: ExploreItem) {
-            binding.shimmerViewContainer?.apply {
+            binding.shimmerViewContainer.apply {
                 visibility = View.VISIBLE
                 startShimmer()
             }
@@ -144,7 +148,7 @@ class ExploreAdapter(private val onItemClick: (ExploreItem) -> Unit) :
                         target: Target<Drawable>,
                         isFirstResource: Boolean
                     ): Boolean {
-                        binding.shimmerViewContainer?.apply {
+                        binding.shimmerViewContainer.apply {
                             stopShimmer()
                             visibility = View.GONE
                         }
@@ -158,7 +162,7 @@ class ExploreAdapter(private val onItemClick: (ExploreItem) -> Unit) :
                         dataSource: DataSource,
                         isFirstResource: Boolean
                     ): Boolean {
-                        binding.shimmerViewContainer?.apply {
+                        binding.shimmerViewContainer.apply {
                             stopShimmer()
                             visibility = View.GONE
                         }

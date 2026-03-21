@@ -27,7 +27,7 @@ class SpeciesInfoHandler(
         onCopySuccess: (String) -> Unit,
         onRetryClick: () -> Unit
 ) {
-    private val handlerScope = CoroutineScope(Dispatchers.Main + Job())
+    private val handlerScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var isInitialLoad = true
     private var allSectionsRendered = false
     private var lastDisplayedCommonName: String? = null

@@ -89,21 +89,23 @@ object EcoLocationManager {
                         if (location != null) {
                             Log.d(TAG, "Got live location: ${location.latitude}, ${location.longitude}")
                             fusedClient.removeLocationUpdates(this)
-                            cont.resume(Coordinates(location.latitude, location.longitude))
+                            if (cont.isActive) cont.resume(Coordinates(location.latitude, location.longitude))
                         }
                     }
                 }
 
+                cont.invokeOnCancellation { fusedClient.removeLocationUpdates(callback) }
+                
                 try {
                     fusedClient.requestLocationUpdates(
                         locationRequest,
                         callback,
                         Looper.getMainLooper()
                     )
-                    cont.invokeOnCancellation { fusedClient.removeLocationUpdates(callback) }
                 } catch (e: Exception) {
                     Log.w(TAG, "Failed to request location updates: ${e.message}")
-                    cont.resume(defaultCoordinates)
+                    fusedClient.removeLocationUpdates(callback)
+                    if (cont.isActive) cont.resume(defaultCoordinates)
                 }
             }
         }

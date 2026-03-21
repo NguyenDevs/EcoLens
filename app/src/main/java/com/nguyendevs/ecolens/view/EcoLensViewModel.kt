@@ -46,11 +46,14 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     val allChatSessions: Flow<List<ChatSession>> = chatManager.allChatSessions
     val totalHistoryCount: Flow<Int> = historyManager.getTotalHistoryCount()
 
+    val currentChatSessionId: Long?
+        get() = chatManager.currentSessionId
+
     private var lastLanguageCode: String = "en"
     private var lastLat: Double = 16.0544
     private var lastLng: Double = 108.2022
 
-    private val translationCache = mutableMapOf<Int, Pair<String, SpeciesInfo>>()
+    private val translationCache = android.util.LruCache<Int, Pair<String, SpeciesInfo>>(10)
 
     private val _isHistoryLoading = MutableStateFlow(false)
     val isHistoryLoading: StateFlow<Boolean> = _isHistoryLoading.asStateFlow()
@@ -69,7 +72,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
     /** Lấy bản dịch ngôn ngữ đã lưu trong cache. */
     fun getCachedTranslation(historyId: Int, targetLang: String): SpeciesInfo? {
-        val cached = translationCache[historyId]
+        val cached = translationCache.get(historyId)
         return if (cached != null && cached.first == targetLang) {
             cached.second
         } else {
@@ -79,7 +82,7 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
 
     /** Lưu bản dịch mới vào cache. */
     fun saveTranslationToCache(historyId: Int, language: String, info: SpeciesInfo) {
-        translationCache[historyId] = language to info
+        translationCache.put(historyId, language to info)
     }
 
     /** Bắt đầu nhận diện loài từ ảnh. */
@@ -187,5 +190,11 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         _uiState.value = EcoLensUiState()
         currentImageUri = null
         lastLanguageCode = "en"
+        translationCache.evictAll()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        historyRepository.cleanup()
     }
 }

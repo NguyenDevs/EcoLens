@@ -118,7 +118,7 @@ object RetrofitClient {
                     .connectTimeout(60, TimeUnit.SECONDS)
                     .readTimeout(120, TimeUnit.SECONDS)
                     .writeTimeout(60, TimeUnit.SECONDS)
-                    .callTimeout(0, TimeUnit.SECONDS)
+                    .callTimeout(180, TimeUnit.SECONDS)
                     .build()
 
     /** Retrofit instance cho Worker API. */

@@ -153,8 +153,9 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
                 message = getString(R.string.dialog_delete_chat_message),
                 confirmText = getString(R.string.action_delete),
                 onConfirm = {
-                    currentSessionId?.let { sessionId ->
-                        viewModel.deleteChatSession(sessionId)
+                    val sessionId = viewModel.currentChatSessionId ?: currentSessionId
+                    sessionId?.let { id ->
+                        viewModel.deleteChatSession(id)
                         parentFragmentManager.popBackStack()
                     }
                 }

@@ -22,13 +22,18 @@ class LanguageManager(private val context: Context) {
 
     private val prefs =
             context.applicationContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-    private val database = FirebaseDatabase.getInstance(BuildConfig.FIREBASE_DATABASE_URL)
-    private val auth = FirebaseAuth.getInstance()
+    private val database by lazy { FirebaseDatabase.getInstance(BuildConfig.FIREBASE_DATABASE_URL) }
+    private val auth by lazy { FirebaseAuth.getInstance() }
+
+    private var cachedLanguage: String? = null
 
     /** Lấy mã ngôn ngữ hiện hành trong máy hoặc định dạng mặc định. */
     fun getLanguage(): String {
+        cachedLanguage?.let { return it }
+
         val savedLang = prefs.getString(KEY_LANG, null)
         if (savedLang != null) {
+            cachedLanguage = savedLang
             return savedLang
         }
 
@@ -45,11 +50,13 @@ class LanguageManager(private val context: Context) {
                 }
 
         prefs.edit().putString(KEY_LANG, defaultLang).apply()
+        cachedLanguage = defaultLang
         return defaultLang
     }
 
     /** Lưu cấu hình ngôn ngữ mới và đẩy lên hệ thống đám mây. */
     fun setLanguage(langCode: String) {
+        cachedLanguage = langCode
         prefs.edit().putString(KEY_LANG, langCode).apply()
         updateUserLanguage(langCode)
     }

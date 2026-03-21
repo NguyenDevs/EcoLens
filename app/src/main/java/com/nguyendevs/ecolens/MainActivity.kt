@@ -23,6 +23,7 @@ import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -78,8 +79,35 @@ class MainActivity : AppCompatActivity() {
     private lateinit var animationHandler: HistoryDetailAnimationHandler
     private val userRepository = UserRepository()
 
-    private val historyFragment = HistoryFragment()
-    private val chatHistoryFragment = ChatHistoryFragment()
+    private val historyFragment: HistoryFragment by lazy {
+        supportFragmentManager.findFragmentByTag("HISTORY") as? HistoryFragment ?: HistoryFragment()
+    }
+    private val chatHistoryFragment: ChatHistoryFragment by lazy {
+        supportFragmentManager.findFragmentByTag("CHAT_HISTORY") as? ChatHistoryFragment ?: ChatHistoryFragment()
+    }
+
+    private val homeViews by lazy { HomeViews(binding.homeContainer.root) }
+
+    private class HomeViews(root: View) {
+        val heroCard: View? = root.findViewById(R.id.heroCard)
+        val imgHeroFull: android.widget.ImageView? = root.findViewById(R.id.imgHeroFull)
+        val sectionQuickExplore: View? = root.findViewById(R.id.sectionQuickExplore)
+        val sectionRecent: View? = root.findViewById(R.id.sectionRecent)
+        val tvGreeting: TextView? = root.findViewById(R.id.tvGreeting)
+        val tvAppTitle: TextView? = root.findViewById(R.id.tvAppTitle)
+        val progressBarHero: View? = root.findViewById(R.id.progressBarHero)
+        val tvLoadingText: TextView? = root.findViewById(R.id.tvLoadingText)
+        val speciesInfoCard: View? = root.findViewById(R.id.speciesInfoCard)
+        val errorCard: View? = root.findViewById(R.id.errorCard)
+        val loadingCard: View? = root.findViewById(R.id.loadingCard)
+        val tvHeroBadge: View? = root.findViewById(R.id.tvHeroBadge)
+        val tvHeroTitle: View? = root.findViewById(R.id.tvHeroTitle)
+        val tvHeroSubtitle: View? = root.findViewById(R.id.tvHeroSubtitle)
+        val btnStartNow: View? = root.findViewById(R.id.btnStartNow)
+        val imgHeroDecor: View? = root.findViewById(R.id.imgHeroDecor)
+        val zoomControls: View? = root.findViewById(R.id.zoomControls)
+        val errorText: TextView? = root.findViewById(R.id.errorText)
+    }
     private var imageUri: Uri? = null
     private var isExpandedState = false
     private var stopLoadingJob: Job? = null
@@ -245,27 +273,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun preloadFragments() {
-        Looper.myQueue().addIdleHandler {
-            if (!isDestroyed && !isFinishing) {
-                lifecycleScope.launch {
-                    delay(PRELOAD_DELAY_MS)
-                    if (!isDestroyed) {
-                        val transaction = supportFragmentManager.beginTransaction()
-                        if (!historyFragment.isAdded) {
-                            transaction.add(R.id.historyContainer, historyFragment, "HISTORY")
-                        }
-                        if (!chatHistoryFragment.isAdded) {
-                            transaction.add(
-                                    R.id.myGardenContainer,
-                                    chatHistoryFragment,
-                                    "CHAT_HISTORY"
-                            )
-                        }
-                        transaction.commitAllowingStateLoss()
-                    }
+        lifecycleScope.launch {
+            delay(PRELOAD_DELAY_MS)
+            if (lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.STARTED)) {
+                val transaction = supportFragmentManager.beginTransaction()
+                if (!historyFragment.isAdded) {
+                    transaction.add(R.id.historyContainer, historyFragment, "HISTORY")
                 }
+                if (!chatHistoryFragment.isAdded) {
+                    transaction.add(
+                            R.id.myGardenContainer,
+                            chatHistoryFragment,
+                            "CHAT_HISTORY"
+                    )
+                }
+                transaction.commitAllowingStateLoss()
             }
-            false
         }
     }
 
@@ -469,41 +492,21 @@ class MainActivity : AppCompatActivity() {
             androidx.transition.TransitionManager.beginDelayedTransition(homeRoot)
         }
 
-        val heroCard = homeRoot.findViewById<View>(R.id.heroCard)
-        val imgHeroFull = homeRoot.findViewById<android.widget.ImageView>(R.id.imgHeroFull)
-        val sectionQuickExplore = homeRoot.findViewById<View>(R.id.sectionQuickExplore)
-        val sectionRecent = homeRoot.findViewById<View>(R.id.sectionRecent)
-        val tvGreeting = homeRoot.findViewById<TextView>(R.id.tvGreeting)
-        val tvAppTitle = homeRoot.findViewById<TextView>(R.id.tvAppTitle)
-
-        val progressBarHero = homeRoot.findViewById<View>(R.id.progressBarHero)
-        val tvLoadingText = homeRoot.findViewById<View>(R.id.tvLoadingText)
-        val speciesInfoCard = homeRoot.findViewById<View>(R.id.speciesInfoCard)
-        val errorCard = homeRoot.findViewById<View>(R.id.errorCard)
-        val loadingCard = homeRoot.findViewById<View>(R.id.loadingCard)
-
-        val tvHeroBadge = homeRoot.findViewById<View>(R.id.tvHeroBadge)
-        val tvHeroTitle = homeRoot.findViewById<View>(R.id.tvHeroTitle)
-        val tvHeroSubtitle = homeRoot.findViewById<View>(R.id.tvHeroSubtitle)
-        val btnStartNow = homeRoot.findViewById<View>(R.id.btnStartNow)
-        val imgHeroDecor = homeRoot.findViewById<View>(R.id.imgHeroDecor)
-        val zoomControls = homeRoot.findViewById<View>(R.id.zoomControls)
-
         if (showResults) {
-            sectionQuickExplore?.visibility = View.GONE
-            sectionRecent?.visibility = View.GONE
+            homeViews.sectionQuickExplore?.visibility = View.GONE
+            homeViews.sectionRecent?.visibility = View.GONE
 
-            heroCard?.visibility = View.VISIBLE
-            imgHeroFull?.visibility = View.VISIBLE
-            zoomControls?.visibility = View.VISIBLE
+            homeViews.heroCard?.visibility = View.VISIBLE
+            homeViews.imgHeroFull?.visibility = View.VISIBLE
+            homeViews.zoomControls?.visibility = View.VISIBLE
 
-            tvHeroBadge?.visibility = View.GONE
-            tvHeroTitle?.visibility = View.GONE
-            tvHeroSubtitle?.visibility = View.GONE
-            btnStartNow?.visibility = View.GONE
-            imgHeroDecor?.visibility = View.GONE
+            homeViews.tvHeroBadge?.visibility = View.GONE
+            homeViews.tvHeroTitle?.visibility = View.GONE
+            homeViews.tvHeroSubtitle?.visibility = View.GONE
+            homeViews.btnStartNow?.visibility = View.GONE
+            homeViews.imgHeroDecor?.visibility = View.GONE
 
-            loadingCard?.visibility = View.GONE
+            homeViews.loadingCard?.visibility = View.GONE
 
             this.imageUri?.let { uri ->
                 val path = uri.path
@@ -512,35 +515,37 @@ class MainActivity : AppCompatActivity() {
                             java.io.File(path).takeIf { it.exists() } ?: uri
                         } else uri
 
-                com.bumptech.glide.Glide.with(this)
-                        .load(loadModel)
-                        .transition(DrawableTransitionOptions.withCrossFade())
-                        .centerCrop()
-                        .into(imgHeroFull)
-
+                homeViews.imgHeroFull?.let {
+                    com.bumptech.glide.Glide.with(this)
+                            .load(loadModel)
+                            .transition(DrawableTransitionOptions.withCrossFade())
+                            .centerCrop()
+                            .into(it)
+                }
+                
                 imageZoomHandler.setImageUri(uri)
             }
         } else {
-            sectionQuickExplore?.visibility = View.VISIBLE
-            sectionRecent?.visibility = View.VISIBLE
-            tvGreeting?.visibility = View.VISIBLE
-            tvAppTitle?.visibility = View.VISIBLE
+            homeViews.sectionQuickExplore?.visibility = View.VISIBLE
+            homeViews.sectionRecent?.visibility = View.VISIBLE
+            homeViews.tvGreeting?.visibility = View.VISIBLE
+            homeViews.tvAppTitle?.visibility = View.VISIBLE
 
-            heroCard?.visibility = View.VISIBLE
-            imgHeroFull?.visibility = View.GONE
-            zoomControls?.visibility = View.GONE
+            homeViews.heroCard?.visibility = View.VISIBLE
+            homeViews.imgHeroFull?.visibility = View.GONE
+            homeViews.zoomControls?.visibility = View.GONE
 
-            tvHeroBadge?.visibility = View.VISIBLE
-            tvHeroTitle?.visibility = View.VISIBLE
-            tvHeroSubtitle?.visibility = View.VISIBLE
-            btnStartNow?.visibility = View.VISIBLE
-            imgHeroDecor?.visibility = View.VISIBLE
+            homeViews.tvHeroBadge?.visibility = View.VISIBLE
+            homeViews.tvHeroTitle?.visibility = View.VISIBLE
+            homeViews.tvHeroSubtitle?.visibility = View.VISIBLE
+            homeViews.btnStartNow?.visibility = View.VISIBLE
+            homeViews.imgHeroDecor?.visibility = View.VISIBLE
 
-            progressBarHero?.visibility = View.GONE
-            tvLoadingText?.visibility = View.GONE
-            speciesInfoCard?.visibility = View.GONE
-            errorCard?.visibility = View.GONE
-            loadingCard?.visibility = View.GONE
+            homeViews.progressBarHero?.visibility = View.GONE
+            homeViews.tvLoadingText?.visibility = View.GONE
+            homeViews.speciesInfoCard?.visibility = View.GONE
+            homeViews.errorCard?.visibility = View.GONE
+            homeViews.loadingCard?.visibility = View.GONE
 
             binding.fabCamera.isClickable = true
             binding.fabCamera.alpha = 1.0f
@@ -621,7 +626,11 @@ class MainActivity : AppCompatActivity() {
 
     /** Thiết lập observers cho UI state */
     private fun setupObservers() {
-        lifecycleScope.launch { viewModel.uiState.collect { state -> updateHomeUI(state) } }
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { state -> updateHomeUI(state) }
+            }
+        }
     }
 
     /** Cập nhật UI màn hình Home dựa trên state */
@@ -641,9 +650,9 @@ class MainActivity : AppCompatActivity() {
         binding.fabCamera.alpha = if (isLoading) 0.5f else 1.0f
 
         val homeRoot = binding.homeContainer.root
-        val progressBarHero = homeRoot.findViewById<View>(R.id.progressBarHero)
-        val tvLoadingText = homeRoot.findViewById<TextView>(R.id.tvLoadingText)
-        val loadingCard = homeRoot.findViewById<View>(R.id.loadingCard)
+        val progressBarHero = homeViews.progressBarHero
+        val tvLoadingText = homeViews.tvLoadingText
+        val loadingCard = homeViews.loadingCard
 
         loadingCard?.isVisible = false
 
@@ -693,8 +702,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (error != null) {
-            homeRoot.findViewById<TextView>(R.id.errorText).text = error
-            val errorCard = homeRoot.findViewById<View>(R.id.errorCard)
+            homeViews.errorText?.text = error
+            val errorCard = homeViews.errorCard
             if (errorCard != null) errorCard.isVisible = true
 
             progressBarHero?.isVisible = false
@@ -707,7 +716,7 @@ class MainActivity : AppCompatActivity() {
             binding.fabCamera.alpha = 1.0f
         } else if (loadingStage == LoadingStage.NONE && state.speciesInfo == null) {
             binding.homeContainer.speciesInfoCard.root.isVisible = false
-            homeRoot.findViewById<View>(R.id.errorCard).isVisible = false
+            homeViews.errorCard?.isVisible = false
             binding.fabSpeak.isVisible = false
             speciesInfoHandler.displaySpeciesInfo(
                     SpeciesInfo(scientificName = "", commonName = ""),
@@ -715,7 +724,7 @@ class MainActivity : AppCompatActivity() {
             )
         } else if (state.speciesInfo != null) {
             binding.homeContainer.speciesInfoCard.root.isVisible = true
-            val errorCard = homeRoot.findViewById<View>(R.id.errorCard)
+            val errorCard = homeViews.errorCard
             if (errorCard != null) errorCard.isVisible = false
 
             speciesInfoHandler.displaySpeciesInfo(
@@ -763,6 +772,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        speakerManager.onSpeechFinished = null
         speakerManager.shutdown()
         speciesInfoHandler.onDestroy()
         super.onDestroy()
