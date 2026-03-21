@@ -450,7 +450,7 @@ class ChatAdapter(private val actionListener: OnChatActionListener) :
             binding.layoutTypingIndicator.visibility = View.VISIBLE
             binding.tvMessage.visibility = View.GONE
 
-            if (typingAnimatorSet?.isRunning == true) return
+            if (typingAnimatorSet != null) return
 
             val distancePx = -6f * binding.root.context.resources.displayMetrics.density
 
