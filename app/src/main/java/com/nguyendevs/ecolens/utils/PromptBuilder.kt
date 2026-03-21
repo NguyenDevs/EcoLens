@@ -334,7 +334,7 @@ object PromptBuilder {
                     
                     STRICT RULES:
                     1. ONLY answer questions related to:
-                       - Animals, Plants, Insects, Fungi
+                       - Animals, Plants, Insects, Fungi, Protozoa, Chromista
                        - Nature, Environment, Ecology, Conservation
                        - Biological processes, Habitats, Taxonomy
                     

@@ -135,6 +135,8 @@
     <string name="history_chipAnimals">🐾 動物</string>
     <string name="history_chipPlants">🌿 植物</string>
     <string name="history_chipFungi">🍄 菌類</string>
+    <string name="history_chipProtozoa">🦠 原生生物</string>
+    <string name="history_chipChromista">🌊 クロミスタ</string>
     <string name="history_chipAll">すべて</string>
 
     <!-- ==================== 並べ替えとフィルター ==================== -->

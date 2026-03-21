@@ -366,6 +366,16 @@ class HistoryAdapter(
                 tv.setTextColor(0xFF7E22CE.toInt())
                 tv.text = tv.context.getString(R.string.history_chipFungi)
             }
+            k.contains("protozoa") || k.contains("nguyên sinh") -> {
+                tv.setBackgroundResource(R.drawable.bg_badge_protozoa)
+                tv.setTextColor(0xFF155E75.toInt()) // Cyan 800
+                tv.text = tv.context.getString(R.string.history_chipProtozoa)
+            }
+            k.contains("chromista") || k.contains("sắc tảo") -> {
+                tv.setBackgroundResource(R.drawable.bg_badge_chromista)
+                tv.setTextColor(0xFF9A3412.toInt()) // Orange 800
+                tv.text = tv.context.getString(R.string.history_chipChromista)
+            }
             else -> {
                 tv.setBackgroundResource(R.drawable.bg_badge_animal)
                 tv.setTextColor(0xFF92400E.toInt())

@@ -72,7 +72,7 @@ class HistoryFragment : Fragment() {
     private var hasMoreData = true
     private var observeJob: Job? = null
 
-    enum class CategoryFilter { ALL, ANIMALS, PLANTS, FUNGI }
+    enum class CategoryFilter { ALL, ANIMALS, PLANTS, FUNGI, PROTOZOA, CHROMISTA }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -218,7 +218,9 @@ class HistoryFragment : Fragment() {
                 CategoryFilter.ALL -> CategoryFilter.ANIMALS
                 CategoryFilter.ANIMALS -> CategoryFilter.PLANTS
                 CategoryFilter.PLANTS -> CategoryFilter.FUNGI
-                CategoryFilter.FUNGI -> CategoryFilter.ALL
+                CategoryFilter.FUNGI -> CategoryFilter.PROTOZOA
+                CategoryFilter.PROTOZOA -> CategoryFilter.CHROMISTA
+                CategoryFilter.CHROMISTA -> CategoryFilter.ALL
             }
             updateCategoryFilter(nextCategory)
         }
@@ -370,6 +372,8 @@ class HistoryFragment : Fragment() {
             CategoryFilter.ANIMALS -> R.string.history_chipAnimals
             CategoryFilter.PLANTS -> R.string.history_chipPlants
             CategoryFilter.FUNGI -> R.string.history_chipFungi
+            CategoryFilter.PROTOZOA -> R.string.history_chipProtozoa
+            CategoryFilter.CHROMISTA -> R.string.history_chipChromista
         }
 
         binding.chipAll.apply {
@@ -403,6 +407,14 @@ class HistoryFragment : Fragment() {
                             CategoryFilter.FUNGI -> allList.filter {
                                 val k = it.speciesInfo.kingdom.lowercase()
                                 k.contains("fungi") || k.contains("nấm")
+                            }
+                            CategoryFilter.PROTOZOA -> allList.filter {
+                                val k = it.speciesInfo.kingdom.lowercase()
+                                k.contains("protozoa") || k.contains("nguyên sinh")
+                            }
+                            CategoryFilter.CHROMISTA -> allList.filter {
+                                val k = it.speciesInfo.kingdom.lowercase()
+                                k.contains("chromista") || k.contains("sắc tảo")
                             }
                         }
 
