@@ -51,6 +51,8 @@ class HistoryAdapter(
     var isLoading = false
         private set
     private var lastPosition = -1
+    /** Khi true, bỏ qua animation để item xuất hiện ngay lập tức (scroll). */
+    var isScrolling: Boolean = false
     var viewMode: HistoryViewMode = HistoryViewMode.LIST
         set(value) {
             field = value
@@ -145,10 +147,17 @@ class HistoryAdapter(
     }
 
     private fun setAnimation(view: View, position: Int) {
+        if (isScrolling) {
+            // Khi đang scroll: hiển thị ngay, huỷ animation cũ nếu có
+            view.animate().cancel()
+            view.alpha = 1f
+            view.translationY = 0f
+            return
+        }
         if (position > lastPosition) {
             view.alpha = 0f
             view.translationY = 100f
-            
+
             val delay = if (position < 10) (10 - position) * 40L else 0L
 
             view.animate()
@@ -158,7 +167,7 @@ class HistoryAdapter(
                 .setInterpolator(android.view.animation.DecelerateInterpolator())
                 .setStartDelay(delay)
                 .start()
-                
+
             lastPosition = position
         }
     }
