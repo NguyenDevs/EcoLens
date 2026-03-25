@@ -1,5 +1,6 @@
 package com.nguyendevs.ecolens.adapters
 
+import android.text.Spanned
 import android.view.LayoutInflater
 import android.view.Gravity
 import android.view.View
@@ -54,6 +55,12 @@ class HistoryAdapter(
     var isLoading = false
         private set
     private var lastPosition = -1
+    private val spannedCache = HashMap<String, Spanned>()
+
+    /** Cache-based markdown rendering — parse một lần, tái sử dụng khi rebind. */
+    private fun renderMarkdown(text: String): Spanned {
+        return spannedCache.getOrPut(text) { markwon.toMarkdown(text) }
+    }
     var viewMode: HistoryViewMode = HistoryViewMode.LIST
         set(value) {
             field = value
@@ -164,6 +171,15 @@ class HistoryAdapter(
         }
     }
 
+    /** Reset lastPosition khi danh sách thay đổi để animation chạy lại đúng. */
+    override fun onCurrentListChanged(
+        previousList: MutableList<HistoryUiModel>,
+        currentList: MutableList<HistoryUiModel>
+    ) {
+        super.onCurrentListChanged(previousList, currentList)
+        lastPosition = -1
+    }
+
     /** DiffCallback so sánh history items. */
     object HistoryDiffCallback : DiffUtil.ItemCallback<HistoryUiModel>() {
         override fun areItemsTheSame(o: HistoryUiModel, n: HistoryUiModel) = o.entry.id == n.entry.id
@@ -193,11 +209,11 @@ class HistoryAdapter(
             val entry = uiModel.entry
             val dt = Instant.ofEpochMilli(entry.timestamp).atZone(ZoneId.systemDefault())
 
-            markwon.setMarkdown(b.tvHistoryCommonName, entry.speciesInfo.commonName.ifEmpty {
+            b.tvHistoryCommonName.text = renderMarkdown(entry.speciesInfo.commonName.ifEmpty {
                 itemView.context.getString(R.string.unknown_common_name)
             })
             b.tvHistoryCommonName.movementMethod = null
-            markwon.setMarkdown(b.tvHistoryScientificName, entry.speciesInfo.scientificName.ifEmpty {
+            b.tvHistoryScientificName.text = renderMarkdown(entry.speciesInfo.scientificName.ifEmpty {
                 itemView.context.getString(R.string.unknown_scientific_name)
             })
             b.tvHistoryScientificName.movementMethod = null
@@ -284,11 +300,11 @@ class HistoryAdapter(
             val entry = uiModel.entry
             val dt = Instant.ofEpochMilli(entry.timestamp).atZone(ZoneId.systemDefault())
 
-            markwon.setMarkdown(b.tvHistoryCommonName, entry.speciesInfo.commonName.ifEmpty {
+            b.tvHistoryCommonName.text = renderMarkdown(entry.speciesInfo.commonName.ifEmpty {
                 itemView.context.getString(R.string.unknown_common_name)
             })
             b.tvHistoryCommonName.movementMethod = null
-            markwon.setMarkdown(b.tvHistoryScientificName, entry.speciesInfo.scientificName.ifEmpty {
+            b.tvHistoryScientificName.text = renderMarkdown(entry.speciesInfo.scientificName.ifEmpty {
                 itemView.context.getString(R.string.unknown_scientific_name)
             })
             b.tvHistoryScientificName.movementMethod = null
@@ -406,7 +422,6 @@ class HistoryAdapter(
             .transition(DrawableTransitionOptions.withCrossFade(250))
             .centerCrop()
             .override(200, 200)
-            .thumbnail(0.1f)
             .placeholder(R.drawable.splash)
             .error(R.drawable.splash)
             .into(imageView)

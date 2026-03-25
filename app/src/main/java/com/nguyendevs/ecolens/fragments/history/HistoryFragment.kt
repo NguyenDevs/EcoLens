@@ -139,7 +139,7 @@ class HistoryFragment : Fragment() {
         binding.rvHistory.adapter = adapter
         binding.rvHistory.itemAnimator = null
         binding.rvHistory.setItemViewCacheSize(20)
-        binding.rvHistory.setHasFixedSize(true)
+        binding.rvHistory.setHasFixedSize(false)
 
         binding.rvHistory.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
