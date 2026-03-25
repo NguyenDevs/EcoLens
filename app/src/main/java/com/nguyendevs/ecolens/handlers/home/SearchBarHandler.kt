@@ -100,12 +100,12 @@ class SearchBarHandler(
     /** Thu gọn thanh tìm kiếm và xóa text. */
     fun collapseSearchBar() {
         if (isSearchBarExpanded) {
+            etSearchQuery.text?.clear()
             animateWidth(
                 from = expandedWidthPx,
                 to = collapsedWidthPx,
                 onEnd = {
                     textInputLayoutSearch.visibility = View.GONE
-                    etSearchQuery.text?.clear()
                     hideKeyboard()
                 }
             )
