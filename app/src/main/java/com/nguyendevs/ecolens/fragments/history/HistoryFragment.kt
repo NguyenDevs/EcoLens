@@ -31,8 +31,6 @@ import com.nguyendevs.ecolens.handlers.animations.HistoryAnimationHandler
 import com.nguyendevs.ecolens.models.history.HistoryEntry
 import com.nguyendevs.ecolens.models.history.HistorySortOption
 import com.nguyendevs.ecolens.view.EcoLensViewModel
-import io.noties.markwon.Markwon
-import io.noties.markwon.html.HtmlPlugin
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -129,10 +127,9 @@ class HistoryFragment : Fragment() {
         _binding = null
     }
 
-    /** Khởi tạo adapter lịch sử với Markwon renderer và scroll listener phân trang. */
+    /** Khởi tạo adapter lịch sử và scroll listener phân trang. */
     private fun setupAdapter() {
-        val markwon = Markwon.builder(requireContext()).usePlugin(HtmlPlugin.create()).build()
-        adapter = HistoryAdapter(markwon = markwon, clickListener = { entry ->
+        adapter = HistoryAdapter(clickListener = { entry ->
             animationHandler.performConfirmFeedback(binding.rvHistory)
             navigateToDetail(entry)
         })
@@ -415,11 +412,8 @@ class HistoryFragment : Fragment() {
         }
     }
 
-    /** Build UiModels trên background thread, pre-warm markdown cache, và submit. */
+    /** Build UiModels trên background thread và submit. */
     private suspend fun buildAndSubmitModels(filtered: List<HistoryEntry>) {
-        val defaultCommonName = getString(R.string.unknown_common_name)
-        val defaultScientificName = getString(R.string.unknown_scientific_name)
-
         val uiModels = withContext(Dispatchers.Default) {
             val models = mutableListOf<HistoryUiModel>()
             var i = 0
@@ -429,10 +423,6 @@ class HistoryFragment : Fragment() {
                 val isLast = i == filtered.size - 1 || !isSameDay(entry.timestamp, filtered[i + 1].timestamp)
 
                 models.add(HistoryUiModel(entry, isFirst, isLast))
-
-                // Pre-warm markdown cache trên background thread
-                adapter.preWarmMarkdown(entry.speciesInfo.commonName.ifEmpty { defaultCommonName })
-                adapter.preWarmMarkdown(entry.speciesInfo.scientificName.ifEmpty { defaultScientificName })
 
                 // Luôn thêm placeholder cho ngày có số lẻ items (cần cho grid alignment)
                 if (isLast) {

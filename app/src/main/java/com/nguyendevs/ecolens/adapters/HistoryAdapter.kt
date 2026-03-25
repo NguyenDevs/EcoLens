@@ -1,6 +1,4 @@
 package com.nguyendevs.ecolens.adapters
-
-import android.text.Spanned
 import android.view.LayoutInflater
 import android.view.Gravity
 import android.view.View
@@ -20,9 +18,7 @@ import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemSpeciesHistoryBinding
 import com.nguyendevs.ecolens.databinding.ItemSpeciesHistoryGridBinding
 import com.nguyendevs.ecolens.models.history.HistoryEntry
-import io.noties.markwon.Markwon
 import java.io.File
-import java.util.concurrent.ConcurrentHashMap
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -41,7 +37,6 @@ enum class HistoryViewMode { LIST, GRID }
 
 /** Adapter hiển thị lịch sử nhận diện dạng list hoặc grid, với phân nhóm theo ngày. */
 class HistoryAdapter(
-    private val markwon: Markwon,
     private val clickListener: (HistoryEntry) -> Unit
 ) : ListAdapter<HistoryUiModel, RecyclerView.ViewHolder>(HistoryDiffCallback) {
 
@@ -56,17 +51,6 @@ class HistoryAdapter(
     var isLoading = false
         private set
     private var lastPosition = -1
-    private val spannedCache = ConcurrentHashMap<String, Spanned>()
-
-    /** Cache-based markdown rendering — parse một lần, tái sử dụng khi rebind. */
-    internal fun renderMarkdown(text: String): Spanned {
-        return spannedCache.getOrPut(text) { markwon.toMarkdown(text) }
-    }
-
-    /** Pre-warm markdown cache trên background thread. */
-    fun preWarmMarkdown(text: String) {
-        renderMarkdown(text)
-    }
     var viewMode: HistoryViewMode = HistoryViewMode.LIST
         set(value) {
             field = value
@@ -221,14 +205,12 @@ class HistoryAdapter(
             val entry = uiModel.entry
             val dt = Instant.ofEpochMilli(entry.timestamp).atZone(ZoneId.systemDefault())
 
-            b.tvHistoryCommonName.text = renderMarkdown(entry.speciesInfo.commonName.ifEmpty {
+            b.tvHistoryCommonName.text = entry.speciesInfo.commonName.ifEmpty {
                 itemView.context.getString(R.string.unknown_common_name)
-            })
-            b.tvHistoryCommonName.movementMethod = null
-            b.tvHistoryScientificName.text = renderMarkdown(entry.speciesInfo.scientificName.ifEmpty {
+            }
+            b.tvHistoryScientificName.text = entry.speciesInfo.scientificName.ifEmpty {
                 itemView.context.getString(R.string.unknown_scientific_name)
-            })
-            b.tvHistoryScientificName.movementMethod = null
+            }
 
             b.tvHistoryTime.text = timeFormatter.format(dt)
             b.tvConfidence.text = String.format("%.2f%%", entry.speciesInfo.confidence)
@@ -312,13 +294,12 @@ class HistoryAdapter(
             val entry = uiModel.entry
             val dt = Instant.ofEpochMilli(entry.timestamp).atZone(ZoneId.systemDefault())
 
-            b.tvHistoryCommonName.text = renderMarkdown(entry.speciesInfo.commonName.ifEmpty {
+            b.tvHistoryCommonName.text = entry.speciesInfo.commonName.ifEmpty {
                 itemView.context.getString(R.string.unknown_common_name)
-            })
-            b.tvHistoryCommonName.movementMethod = null
-            b.tvHistoryScientificName.text = renderMarkdown(entry.speciesInfo.scientificName.ifEmpty {
+            }
+            b.tvHistoryScientificName.text = entry.speciesInfo.scientificName.ifEmpty {
                 itemView.context.getString(R.string.unknown_scientific_name)
-            })
+            }
             b.tvHistoryScientificName.movementMethod = null
 
             b.tvHistoryTime.text = timeFormatter.format(dt)
