@@ -180,10 +180,7 @@ class HistoryFragment : Fragment() {
             } else false
         }
         binding.ivSearchClear.setOnClickListener {
-            hideKeyboard()
-            binding.root.postDelayed({
-                toggleSearch(false)
-            }, 500)
+            toggleSearch(false)
         }
     }
 
@@ -287,7 +284,6 @@ class HistoryFragment : Fragment() {
         } else {
             binding.etSearch.animate().alpha(0f).setDuration(150).start()
             binding.ivSearchClear.animate().alpha(0f).setDuration(150).start()
-            binding.etSearch.text?.clear()
 
             widthAnimator.addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator) {
@@ -296,11 +292,12 @@ class HistoryFragment : Fragment() {
                     binding.titleRow.animate().alpha(1f).setDuration(250).start()
                 }
                 override fun onAnimationEnd(animation: Animator) {
+                    binding.etSearch.text?.clear()
                     binding.etSearch.visibility = View.GONE
                     binding.ivSearchClear.visibility = View.GONE
+                    hideKeyboard()
                 }
             })
-            hideKeyboard()
         }
         widthAnimator.start()
     }
