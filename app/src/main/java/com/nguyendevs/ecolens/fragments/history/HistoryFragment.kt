@@ -138,7 +138,16 @@ class HistoryFragment : Fragment() {
         binding.rvHistory.setItemViewCacheSize(20)
         binding.rvHistory.setHasFixedSize(false)
 
+        // Pre-inflate pool để tránh tạo ViewHolder lạnh khi scroll lần đầu
+        binding.rvHistory.recycledViewPool.setMaxRecycledViews(0, 10) // LIST
+        binding.rvHistory.recycledViewPool.setMaxRecycledViews(1, 10) // GRID
+
         binding.rvHistory.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                adapter.isScrolling = newState != RecyclerView.SCROLL_STATE_IDLE
+            }
+
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 val scrollY = recyclerView.computeVerticalScrollOffset()
