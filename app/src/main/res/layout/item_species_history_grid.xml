@@ -115,7 +115,7 @@
                                 app:layout_constraintBottom_toBottomOf="parent"
                                 app:layout_constraintDimensionRatio="W,1:1"
                                 tools:background="@color/emerald_100"
-                                android:src="@mipmap/ic_launcher"/>
+                                android:src="@drawable/splash"/>
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
