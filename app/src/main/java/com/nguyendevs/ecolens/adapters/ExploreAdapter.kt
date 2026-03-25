@@ -140,7 +140,7 @@ class ExploreAdapter(private val onItemClick: (ExploreItem) -> Unit) :
                 .centerCrop()
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .placeholder(R.drawable.bg_skeleton_transparent)
-                .error(R.drawable.bg_skeleton_rounded)
+                .error(R.drawable.splash)
                 .listener(object : RequestListener<Drawable> {
                     override fun onLoadFailed(
                         e: GlideException?,
