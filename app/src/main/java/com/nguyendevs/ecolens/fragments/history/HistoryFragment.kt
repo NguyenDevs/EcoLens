@@ -288,6 +288,7 @@ class HistoryFragment : Fragment() {
         } else {
             binding.etSearch.animate().alpha(0f).setDuration(150).start()
             binding.ivSearchClear.animate().alpha(0f).setDuration(150).start()
+            binding.etSearch.text?.clear()
 
             widthAnimator.addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator) {
@@ -298,9 +299,6 @@ class HistoryFragment : Fragment() {
                 override fun onAnimationEnd(animation: Animator) {
                     binding.etSearch.visibility = View.GONE
                     binding.ivSearchClear.visibility = View.GONE
-                    binding.root.postDelayed({
-                        binding.etSearch.text?.clear()
-                    }, 500)
                 }
             })
             hideKeyboard()
