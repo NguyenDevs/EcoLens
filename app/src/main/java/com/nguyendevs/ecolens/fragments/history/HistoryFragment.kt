@@ -31,8 +31,6 @@ import com.nguyendevs.ecolens.handlers.animations.HistoryAnimationHandler
 import com.nguyendevs.ecolens.models.history.HistoryEntry
 import com.nguyendevs.ecolens.models.history.HistorySortOption
 import com.nguyendevs.ecolens.view.EcoLensViewModel
-import io.noties.markwon.Markwon
-import io.noties.markwon.html.HtmlPlugin
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -129,19 +127,27 @@ class HistoryFragment : Fragment() {
         _binding = null
     }
 
-    /** Khởi tạo adapter lịch sử với Markwon renderer và scroll listener phân trang. */
+    /** Khởi tạo adapter lịch sử và scroll listener phân trang. */
     private fun setupAdapter() {
-        val markwon = Markwon.builder(requireContext()).usePlugin(HtmlPlugin.create()).build()
-        adapter = HistoryAdapter(markwon = markwon, clickListener = { entry ->
+        adapter = HistoryAdapter(clickListener = { entry ->
             animationHandler.performConfirmFeedback(binding.rvHistory)
             navigateToDetail(entry)
         })
         binding.rvHistory.adapter = adapter
         binding.rvHistory.itemAnimator = null
         binding.rvHistory.setItemViewCacheSize(20)
-        binding.rvHistory.setHasFixedSize(true)
+        binding.rvHistory.setHasFixedSize(false)
+
+        // Pre-inflate pool để tránh tạo ViewHolder lạnh khi scroll lần đầu
+        binding.rvHistory.recycledViewPool.setMaxRecycledViews(0, 10) // LIST
+        binding.rvHistory.recycledViewPool.setMaxRecycledViews(1, 10) // GRID
 
         binding.rvHistory.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                adapter.isScrolling = newState != RecyclerView.SCROLL_STATE_IDLE
+            }
+
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 val scrollY = recyclerView.computeVerticalScrollOffset()
@@ -334,7 +340,7 @@ class HistoryFragment : Fragment() {
         }
 
         if (previousMode != mode) {
-            adapter.notifyDataSetChanged()
+            rebuildAndSubmitModels()
         }
     }
 
@@ -375,10 +381,13 @@ class HistoryFragment : Fragment() {
     }
 
     /** Observe dữ liệu lịch sử phản ứng từ ViewModel. */
+    private var lastFilteredData: List<HistoryEntry> = emptyList()
+
     private fun observeHistory() {
         observeJob?.cancel()
         observeJob = viewLifecycleOwner.lifecycleScope.launch {
             viewModel.historyList.collectLatest { filtered ->
+                lastFilteredData = filtered
                 if (filtered.isEmpty()) {
                     if (viewModel.isHistoryLoading.value) return@collectLatest
                     binding.shimmerViewContainer.stopShimmer()
@@ -396,35 +405,50 @@ class HistoryFragment : Fragment() {
                         animationHandler.fadeIn(binding.rvHistory)
                     }
                     animationHandler.fadeOut(binding.emptyStateContainer)
-
-                    val uiModels = withContext(Dispatchers.Default) {
-                        val models = mutableListOf<HistoryUiModel>()
-                        var i = 0
-                        while (i < filtered.size) {
-                            val entry = filtered[i]
-                            val isFirst = i == 0 || !isSameDay(entry.timestamp, filtered[i - 1].timestamp)
-                            val isLast = i == filtered.size - 1 || !isSameDay(entry.timestamp, filtered[i + 1].timestamp)
-
-                            models.add(HistoryUiModel(entry, isFirst, isLast))
-                            if (adapter.viewMode == HistoryViewMode.GRID && isLast) {
-                                var dayStartIndex = i
-                                while (dayStartIndex > 0 && isSameDay(filtered[dayStartIndex].timestamp, filtered[dayStartIndex - 1].timestamp)) {
-                                    dayStartIndex--
-                                }
-                                val itemsInDay = i - dayStartIndex + 1
-                                if (itemsInDay % 2 != 0) {
-                                    models.add(HistoryUiModel(entry, isFirstOfDay = false, isLastOfDay = true, isPlaceholder = true))
-                                }
-                            }
-                            i++
-                        }
-                        models
-                    }
-                    adapter.submitList(uiModels)
+                    buildAndSubmitModels(filtered)
                 }
                 adapter.setLoading(false)
             }
         }
+    }
+
+    /** Re-build models khi view mode thay đổi. */
+    private fun rebuildAndSubmitModels() {
+        val data = lastFilteredData
+        if (data.isEmpty()) return
+        viewLifecycleOwner.lifecycleScope.launch {
+            buildAndSubmitModels(data)
+        }
+    }
+
+    /** Build UiModels trên background thread và submit. */
+    private suspend fun buildAndSubmitModels(filtered: List<HistoryEntry>) {
+        val uiModels = withContext(Dispatchers.Default) {
+            val models = mutableListOf<HistoryUiModel>()
+            var i = 0
+            while (i < filtered.size) {
+                val entry = filtered[i]
+                val isFirst = i == 0 || !isSameDay(entry.timestamp, filtered[i - 1].timestamp)
+                val isLast = i == filtered.size - 1 || !isSameDay(entry.timestamp, filtered[i + 1].timestamp)
+
+                models.add(HistoryUiModel(entry, isFirst, isLast))
+
+                // Luôn thêm placeholder cho ngày có số lẻ items (cần cho grid alignment)
+                if (isLast) {
+                    var dayStartIndex = i
+                    while (dayStartIndex > 0 && isSameDay(filtered[dayStartIndex].timestamp, filtered[dayStartIndex - 1].timestamp)) {
+                        dayStartIndex--
+                    }
+                    val itemsInDay = i - dayStartIndex + 1
+                    if (itemsInDay % 2 != 0) {
+                        models.add(HistoryUiModel(entry, isFirstOfDay = false, isLastOfDay = true, isPlaceholder = true))
+                    }
+                }
+                i++
+            }
+            models
+        }
+        adapter.submitList(uiModels)
     }
 
     /** Kiểm tra hai timestamp có cùng ngày không. */

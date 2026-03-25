@@ -1,5 +1,4 @@
 package com.nguyendevs.ecolens.adapters
-
 import android.view.LayoutInflater
 import android.view.Gravity
 import android.view.View
@@ -19,7 +18,6 @@ import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.databinding.ItemSpeciesHistoryBinding
 import com.nguyendevs.ecolens.databinding.ItemSpeciesHistoryGridBinding
 import com.nguyendevs.ecolens.models.history.HistoryEntry
-import io.noties.markwon.Markwon
 import java.io.File
 import java.time.Instant
 import java.time.ZoneId
@@ -39,7 +37,6 @@ enum class HistoryViewMode { LIST, GRID }
 
 /** Adapter hiển thị lịch sử nhận diện dạng list hoặc grid, với phân nhóm theo ngày. */
 class HistoryAdapter(
-    private val markwon: Markwon,
     private val clickListener: (HistoryEntry) -> Unit
 ) : ListAdapter<HistoryUiModel, RecyclerView.ViewHolder>(HistoryDiffCallback) {
 
@@ -54,6 +51,8 @@ class HistoryAdapter(
     var isLoading = false
         private set
     private var lastPosition = -1
+    /** Khi true, bỏ qua animation để item xuất hiện ngay lập tức (scroll). */
+    var isScrolling: Boolean = false
     var viewMode: HistoryViewMode = HistoryViewMode.LIST
         set(value) {
             field = value
@@ -72,7 +71,9 @@ class HistoryAdapter(
 
     override fun getItemId(position: Int): Long {
         if (isLoading && position == super.getItemCount()) return -1L
-        return getItem(position).entry.id.toLong()
+        val model = getItem(position)
+        val id = model.entry.id.toLong()
+        return if (model.isPlaceholder) -(id) - 2 else id
     }
 
     /** Đặt trạng thái loading và cập nhật RecyclerView. */
@@ -146,10 +147,17 @@ class HistoryAdapter(
     }
 
     private fun setAnimation(view: View, position: Int) {
+        if (isScrolling) {
+            // Khi đang scroll: hiển thị ngay, huỷ animation cũ nếu có
+            view.animate().cancel()
+            view.alpha = 1f
+            view.translationY = 0f
+            return
+        }
         if (position > lastPosition) {
             view.alpha = 0f
             view.translationY = 100f
-            
+
             val delay = if (position < 10) (10 - position) * 40L else 0L
 
             view.animate()
@@ -159,8 +167,21 @@ class HistoryAdapter(
                 .setInterpolator(android.view.animation.DecelerateInterpolator())
                 .setStartDelay(delay)
                 .start()
-                
+
             lastPosition = position
+        }
+    }
+
+    /** Reset lastPosition khi danh sách thay đổi đáng kể (filter/sort, không phải pagination). */
+    override fun onCurrentListChanged(
+        previousList: MutableList<HistoryUiModel>,
+        currentList: MutableList<HistoryUiModel>
+    ) {
+        super.onCurrentListChanged(previousList, currentList)
+        val prevFirst = previousList.firstOrNull()?.entry?.id
+        val currFirst = currentList.firstOrNull()?.entry?.id
+        if (previousList.isEmpty() || prevFirst != currFirst) {
+            lastPosition = -1
         }
     }
 
@@ -193,14 +214,12 @@ class HistoryAdapter(
             val entry = uiModel.entry
             val dt = Instant.ofEpochMilli(entry.timestamp).atZone(ZoneId.systemDefault())
 
-            markwon.setMarkdown(b.tvHistoryCommonName, entry.speciesInfo.commonName.ifEmpty {
+            b.tvHistoryCommonName.text = entry.speciesInfo.commonName.ifEmpty {
                 itemView.context.getString(R.string.unknown_common_name)
-            })
-            b.tvHistoryCommonName.movementMethod = null
-            markwon.setMarkdown(b.tvHistoryScientificName, entry.speciesInfo.scientificName.ifEmpty {
+            }
+            b.tvHistoryScientificName.text = entry.speciesInfo.scientificName.ifEmpty {
                 itemView.context.getString(R.string.unknown_scientific_name)
-            })
-            b.tvHistoryScientificName.movementMethod = null
+            }
 
             b.tvHistoryTime.text = timeFormatter.format(dt)
             b.tvConfidence.text = String.format("%.2f%%", entry.speciesInfo.confidence)
@@ -284,13 +303,12 @@ class HistoryAdapter(
             val entry = uiModel.entry
             val dt = Instant.ofEpochMilli(entry.timestamp).atZone(ZoneId.systemDefault())
 
-            markwon.setMarkdown(b.tvHistoryCommonName, entry.speciesInfo.commonName.ifEmpty {
+            b.tvHistoryCommonName.text = entry.speciesInfo.commonName.ifEmpty {
                 itemView.context.getString(R.string.unknown_common_name)
-            })
-            b.tvHistoryCommonName.movementMethod = null
-            markwon.setMarkdown(b.tvHistoryScientificName, entry.speciesInfo.scientificName.ifEmpty {
+            }
+            b.tvHistoryScientificName.text = entry.speciesInfo.scientificName.ifEmpty {
                 itemView.context.getString(R.string.unknown_scientific_name)
-            })
+            }
             b.tvHistoryScientificName.movementMethod = null
 
             b.tvHistoryTime.text = timeFormatter.format(dt)
@@ -406,7 +424,6 @@ class HistoryAdapter(
             .transition(DrawableTransitionOptions.withCrossFade(250))
             .centerCrop()
             .override(200, 200)
-            .thumbnail(0.1f)
             .placeholder(R.drawable.splash)
             .error(R.drawable.splash)
             .into(imageView)
