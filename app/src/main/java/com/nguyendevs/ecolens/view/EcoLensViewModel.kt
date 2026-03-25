@@ -98,6 +98,9 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
         lastLanguageCode = languageCode
         lastLat = lat
         lastLng = lng
+        
+        _uiState.value = EcoLensUiState(isLoading = true, loadingStage = LoadingStage.NONE)
+        
         viewModelScope.launch {
             speciesManager.identifySpecies(
                     imageUri = imageUri,
