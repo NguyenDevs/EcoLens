@@ -62,10 +62,13 @@ class EcoLensViewModel(application: Application) : AndroidViewModel(application)
     /** Khởi tạo ViewModel, tải lịch sử và session chat. */
     init {
         viewModelScope.launch {
-            _isHistoryLoading.value = true
-            historyRepository.fetchHistory()
-            _isHistoryLoading.value = false
-            historyManager.repairMissingImagesOnce()
+            try {
+                _isHistoryLoading.value = true
+                historyRepository.fetchHistory()
+            } finally {
+                _isHistoryLoading.value = false
+                historyManager.repairMissingImagesOnce()
+            }
         }
 
         viewModelScope.launch { chatRepository.fetchSessionsAndMessages() }
