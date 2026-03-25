@@ -52,7 +52,7 @@
                 android:name=".MainActivity"
                 android:configChanges="orientation|screenSize"
                 android:exported="false"
-                android:windowSoftInputMode="adjustPan"
+                android:windowSoftInputMode="adjustResize"
                 android:theme="@style/Theme.EcoLens" />
 
         <activity

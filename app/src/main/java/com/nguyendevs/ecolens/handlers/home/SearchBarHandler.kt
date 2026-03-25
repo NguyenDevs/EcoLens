@@ -23,7 +23,8 @@ class SearchBarHandler(
     private val searchBarContainer: MaterialCardView,
     private val textInputLayoutSearch: TextInputLayout,
     private val etSearchQuery: EditText,
-    private val btnSearchAction: ImageView
+    private val btnSearchAction: ImageView,
+    private val ivSearchClear: ImageView
 ) {
 
     private val collapsedWidthPx = (50 * context.resources.displayMetrics.density).toInt()
@@ -53,11 +54,8 @@ class SearchBarHandler(
             }
         }
 
-        textInputLayoutSearch.setEndIconOnClickListener {
-            hideKeyboard()
-            etSearchQuery.postDelayed({
-                collapseSearchBar()
-            }, 500)
+        ivSearchClear.setOnClickListener {
+            collapseSearchBar()
         }
 
         etSearchQuery.setOnEditorActionListener { _, actionId, _ ->
@@ -78,6 +76,11 @@ class SearchBarHandler(
                 to = expandedWidthPx,
                 onStart = {
                     textInputLayoutSearch.visibility = View.VISIBLE
+                    textInputLayoutSearch.alpha = 0f
+                    textInputLayoutSearch.animate().alpha(1f).setDuration(250).setStartDelay(50).start()
+                    ivSearchClear.visibility = View.VISIBLE
+                    ivSearchClear.alpha = 0f
+                    ivSearchClear.animate().alpha(0.6f).setDuration(250).setStartDelay(50).start()
                     etSearchQuery.setText(text)
                 },
                 onEnd = {
@@ -100,16 +103,19 @@ class SearchBarHandler(
     /** Thu gọn thanh tìm kiếm và xóa text. */
     fun collapseSearchBar() {
         if (isSearchBarExpanded) {
+            isSearchBarExpanded = false
+            textInputLayoutSearch.animate().alpha(0f).setDuration(200).start()
+            ivSearchClear.animate().alpha(0f).setDuration(200).start()
             animateWidth(
                 from = expandedWidthPx,
                 to = collapsedWidthPx,
                 onEnd = {
-                    textInputLayoutSearch.visibility = View.GONE
                     etSearchQuery.text?.clear()
+                    textInputLayoutSearch.visibility = View.GONE
+                    ivSearchClear.visibility = View.GONE
                     hideKeyboard()
                 }
             )
-            isSearchBarExpanded = false
         }
     }
 

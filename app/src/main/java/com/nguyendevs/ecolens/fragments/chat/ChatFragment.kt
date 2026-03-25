@@ -9,6 +9,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import com.nguyendevs.ecolens.R
 import com.nguyendevs.ecolens.adapters.ChatAdapter
 import com.nguyendevs.ecolens.databinding.FragmentChatBinding
@@ -63,10 +66,15 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         adapter = ChatAdapter(this)
         setupRecyclerView()
         setupListeners()
+        setupKeyboardInsets()
         observeViewModel()
         initializeSession()
 
-        binding.etChatInput.post { binding.etChatInput.requestFocus() }
+        binding.etChatInput.post {
+            if (!binding.etChatInput.isFocused) {
+                binding.etChatInput.requestFocus()
+            }
+        }
     }
 
     override fun onDestroyView() {
@@ -107,7 +115,37 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
 
         binding.btnBack.setOnClickListener { parentFragmentManager.popBackStack() }
 
-        binding.btnMenu.setOnClickListener { showMenuPopup(it) }
+        binding.btnMenu.setOnClickListener { showMenuPopup() }
+        binding.etChatInput.setOnClickListener {
+            if (!binding.etChatInput.isFocused) {
+                binding.etChatInput.requestFocus()
+            }
+        }
+    }
+
+    /** Xử lý WindowInsets để thêm margin 4dp khi bàn phím hiện. */
+    private fun setupKeyboardInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+            val immInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
+            val isKeyboardVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+
+            binding.rvChat.setPadding(
+                binding.rvChat.paddingLeft,
+                binding.rvChat.paddingTop,
+                binding.rvChat.paddingRight,
+                if (isKeyboardVisible) 0 else binding.rvChat.paddingBottom
+            )
+            try {
+                val inputContainer = binding.etChatInput.parent.parent.parent as View
+                inputContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    this.bottomMargin = bottomMargin
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            insets
+        }
     }
 
     /** Sao chép nội dung tin nhắn vào clipboard. */
@@ -139,7 +177,7 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
     }
 
     /** Hiển thị bottom sheet menu cho chat. */
-    private fun showMenuPopup(anchor: View) {
+    private fun showMenuPopup() {
         val bottomSheet = ChatMenuBottomSheet.newInstance()
         bottomSheet.onDeleteClicked = { showDeleteConfirmDialog() }
         bottomSheet.show(childFragmentManager, ChatMenuBottomSheet.TAG)
@@ -180,17 +218,12 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         val isNewMessageAdded = messages.size > adapter.itemCount
         val layoutManager = binding.rvChat.layoutManager as LinearLayoutManager
         val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
-        val isAtBottom = lastVisibleItemPosition == adapter.itemCount - 1
+        val isAtBottom = lastVisibleItemPosition >= adapter.itemCount - 2
 
-        adapter.submitList(messages)
-
-        if (messages.isNotEmpty()) {
-            if (isNewMessageAdded) {
-                binding.rvChat.scrollToPosition(messages.size - 1)
-            } else if (isAtBottom) {
-                val lastPos = messages.size - 1
-                if (layoutManager.findLastCompletelyVisibleItemPosition() < lastPos) {
-                    binding.rvChat.scrollToPosition(lastPos)
+        adapter.submitList(messages) {
+            if (messages.isNotEmpty()) {
+                if (isNewMessageAdded || isAtBottom || messages.lastOrNull()?.isStreaming == true) {
+                    binding.rvChat.scrollToPosition(messages.size - 1)
                 }
             }
         }

@@ -196,9 +196,11 @@ class HistoryAdapter(
             markwon.setMarkdown(b.tvHistoryCommonName, entry.speciesInfo.commonName.ifEmpty {
                 itemView.context.getString(R.string.unknown_common_name)
             })
+            b.tvHistoryCommonName.movementMethod = null
             markwon.setMarkdown(b.tvHistoryScientificName, entry.speciesInfo.scientificName.ifEmpty {
                 itemView.context.getString(R.string.unknown_scientific_name)
             })
+            b.tvHistoryScientificName.movementMethod = null
 
             b.tvHistoryTime.text = timeFormatter.format(dt)
             b.tvConfidence.text = String.format("%.2f%%", entry.speciesInfo.confidence)
@@ -285,9 +287,11 @@ class HistoryAdapter(
             markwon.setMarkdown(b.tvHistoryCommonName, entry.speciesInfo.commonName.ifEmpty {
                 itemView.context.getString(R.string.unknown_common_name)
             })
+            b.tvHistoryCommonName.movementMethod = null
             markwon.setMarkdown(b.tvHistoryScientificName, entry.speciesInfo.scientificName.ifEmpty {
                 itemView.context.getString(R.string.unknown_scientific_name)
             })
+            b.tvHistoryScientificName.movementMethod = null
 
             b.tvHistoryTime.text = timeFormatter.format(dt)
             b.tvConfidence.text = String.format("%.2f%%", entry.speciesInfo.confidence)
@@ -403,8 +407,8 @@ class HistoryAdapter(
             .centerCrop()
             .override(200, 200)
             .thumbnail(0.1f)
-            .placeholder(R.mipmap.ic_launcher)
-            .error(R.mipmap.ic_launcher)
+            .placeholder(R.drawable.splash)
+            .error(R.drawable.splash)
             .into(imageView)
     }
 }

@@ -385,7 +385,8 @@ class MainActivity : AppCompatActivity() {
                         binding.searchBarContainer,
                         binding.textInputLayoutSearch,
                         binding.etSearchQuery,
-                        binding.btnSearchAction
+                        binding.btnSearchAction,
+                        binding.ivSearchClearMain
                 ).apply {
                     val homeRoot = binding.homeContainer.root
                     setViewsToHide(listOf(
