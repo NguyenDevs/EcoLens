@@ -76,6 +76,8 @@ class SearchBarHandler(
                 to = expandedWidthPx,
                 onStart = {
                     textInputLayoutSearch.visibility = View.VISIBLE
+                    textInputLayoutSearch.alpha = 0f
+                    textInputLayoutSearch.animate().alpha(1f).setDuration(250).setStartDelay(50).start()
                     ivSearchClear.visibility = View.VISIBLE
                     ivSearchClear.alpha = 0f
                     ivSearchClear.animate().alpha(0.6f).setDuration(250).setStartDelay(50).start()
@@ -102,6 +104,7 @@ class SearchBarHandler(
     fun collapseSearchBar() {
         if (isSearchBarExpanded) {
             isSearchBarExpanded = false
+            textInputLayoutSearch.animate().alpha(0f).setDuration(200).start()
             ivSearchClear.animate().alpha(0f).setDuration(200).start()
             animateWidth(
                 from = expandedWidthPx,
