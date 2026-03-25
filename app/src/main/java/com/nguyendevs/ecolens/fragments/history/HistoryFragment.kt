@@ -334,7 +334,7 @@ class HistoryFragment : Fragment() {
         }
 
         if (previousMode != mode) {
-            adapter.notifyDataSetChanged()
+            rebuildAndSubmitModels()
         }
     }
 
@@ -375,10 +375,13 @@ class HistoryFragment : Fragment() {
     }
 
     /** Observe dữ liệu lịch sử phản ứng từ ViewModel. */
+    private var lastFilteredData: List<HistoryEntry> = emptyList()
+
     private fun observeHistory() {
         observeJob?.cancel()
         observeJob = viewLifecycleOwner.lifecycleScope.launch {
             viewModel.historyList.collectLatest { filtered ->
+                lastFilteredData = filtered
                 if (filtered.isEmpty()) {
                     if (viewModel.isHistoryLoading.value) return@collectLatest
                     binding.shimmerViewContainer.stopShimmer()
@@ -396,35 +399,57 @@ class HistoryFragment : Fragment() {
                         animationHandler.fadeIn(binding.rvHistory)
                     }
                     animationHandler.fadeOut(binding.emptyStateContainer)
-
-                    val uiModels = withContext(Dispatchers.Default) {
-                        val models = mutableListOf<HistoryUiModel>()
-                        var i = 0
-                        while (i < filtered.size) {
-                            val entry = filtered[i]
-                            val isFirst = i == 0 || !isSameDay(entry.timestamp, filtered[i - 1].timestamp)
-                            val isLast = i == filtered.size - 1 || !isSameDay(entry.timestamp, filtered[i + 1].timestamp)
-
-                            models.add(HistoryUiModel(entry, isFirst, isLast))
-                            if (adapter.viewMode == HistoryViewMode.GRID && isLast) {
-                                var dayStartIndex = i
-                                while (dayStartIndex > 0 && isSameDay(filtered[dayStartIndex].timestamp, filtered[dayStartIndex - 1].timestamp)) {
-                                    dayStartIndex--
-                                }
-                                val itemsInDay = i - dayStartIndex + 1
-                                if (itemsInDay % 2 != 0) {
-                                    models.add(HistoryUiModel(entry, isFirstOfDay = false, isLastOfDay = true, isPlaceholder = true))
-                                }
-                            }
-                            i++
-                        }
-                        models
-                    }
-                    adapter.submitList(uiModels)
+                    buildAndSubmitModels(filtered)
                 }
                 adapter.setLoading(false)
             }
         }
+    }
+
+    /** Re-build models khi view mode thay đổi. */
+    private fun rebuildAndSubmitModels() {
+        val data = lastFilteredData
+        if (data.isEmpty()) return
+        viewLifecycleOwner.lifecycleScope.launch {
+            buildAndSubmitModels(data)
+        }
+    }
+
+    /** Build UiModels trên background thread, pre-warm markdown cache, và submit. */
+    private suspend fun buildAndSubmitModels(filtered: List<HistoryEntry>) {
+        val defaultCommonName = getString(R.string.unknown_common_name)
+        val defaultScientificName = getString(R.string.unknown_scientific_name)
+
+        val uiModels = withContext(Dispatchers.Default) {
+            val models = mutableListOf<HistoryUiModel>()
+            var i = 0
+            while (i < filtered.size) {
+                val entry = filtered[i]
+                val isFirst = i == 0 || !isSameDay(entry.timestamp, filtered[i - 1].timestamp)
+                val isLast = i == filtered.size - 1 || !isSameDay(entry.timestamp, filtered[i + 1].timestamp)
+
+                models.add(HistoryUiModel(entry, isFirst, isLast))
+
+                // Pre-warm markdown cache trên background thread
+                adapter.preWarmMarkdown(entry.speciesInfo.commonName.ifEmpty { defaultCommonName })
+                adapter.preWarmMarkdown(entry.speciesInfo.scientificName.ifEmpty { defaultScientificName })
+
+                // Luôn thêm placeholder cho ngày có số lẻ items (cần cho grid alignment)
+                if (isLast) {
+                    var dayStartIndex = i
+                    while (dayStartIndex > 0 && isSameDay(filtered[dayStartIndex].timestamp, filtered[dayStartIndex - 1].timestamp)) {
+                        dayStartIndex--
+                    }
+                    val itemsInDay = i - dayStartIndex + 1
+                    if (itemsInDay % 2 != 0) {
+                        models.add(HistoryUiModel(entry, isFirstOfDay = false, isLastOfDay = true, isPlaceholder = true))
+                    }
+                }
+                i++
+            }
+            models
+        }
+        adapter.submitList(uiModels)
     }
 
     /** Kiểm tra hai timestamp có cùng ngày không. */

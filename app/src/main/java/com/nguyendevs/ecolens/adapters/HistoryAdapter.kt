@@ -22,6 +22,7 @@ import com.nguyendevs.ecolens.databinding.ItemSpeciesHistoryGridBinding
 import com.nguyendevs.ecolens.models.history.HistoryEntry
 import io.noties.markwon.Markwon
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -55,11 +56,16 @@ class HistoryAdapter(
     var isLoading = false
         private set
     private var lastPosition = -1
-    private val spannedCache = HashMap<String, Spanned>()
+    private val spannedCache = ConcurrentHashMap<String, Spanned>()
 
     /** Cache-based markdown rendering — parse một lần, tái sử dụng khi rebind. */
-    private fun renderMarkdown(text: String): Spanned {
+    internal fun renderMarkdown(text: String): Spanned {
         return spannedCache.getOrPut(text) { markwon.toMarkdown(text) }
+    }
+
+    /** Pre-warm markdown cache trên background thread. */
+    fun preWarmMarkdown(text: String) {
+        renderMarkdown(text)
     }
     var viewMode: HistoryViewMode = HistoryViewMode.LIST
         set(value) {
@@ -79,7 +85,9 @@ class HistoryAdapter(
 
     override fun getItemId(position: Int): Long {
         if (isLoading && position == super.getItemCount()) return -1L
-        return getItem(position).entry.id.toLong()
+        val model = getItem(position)
+        val id = model.entry.id.toLong()
+        return if (model.isPlaceholder) -(id) - 2 else id
     }
 
     /** Đặt trạng thái loading và cập nhật RecyclerView. */
@@ -171,13 +179,17 @@ class HistoryAdapter(
         }
     }
 
-    /** Reset lastPosition khi danh sách thay đổi để animation chạy lại đúng. */
+    /** Reset lastPosition khi danh sách thay đổi đáng kể (filter/sort, không phải pagination). */
     override fun onCurrentListChanged(
         previousList: MutableList<HistoryUiModel>,
         currentList: MutableList<HistoryUiModel>
     ) {
         super.onCurrentListChanged(previousList, currentList)
-        lastPosition = -1
+        val prevFirst = previousList.firstOrNull()?.entry?.id
+        val currFirst = currentList.firstOrNull()?.entry?.id
+        if (previousList.isEmpty() || prevFirst != currFirst) {
+            lastPosition = -1
+        }
     }
 
     /** DiffCallback so sánh history items. */
