@@ -1,6 +1,7 @@
 package com.nguyendevs.ecolens.handlers.setting
 
 import android.content.Context
+import android.net.Uri
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -15,7 +16,8 @@ class SettingsHandler(
     private val activity: AppCompatActivity,
     private val languageManager: LanguageManager,
     private val binding: ScreenSettingsBinding,
-    private val onUsernameChanged: (() -> Unit)? = null
+    private val onUsernameChanged: (() -> Unit)? = null,
+    private val onPickImage: () -> Unit = {}
 ) {
 
     private var isTransitioning = false
@@ -26,6 +28,7 @@ class SettingsHandler(
     private val socialLinksHandler: SocialLinksHandler
     private val userRepository = UserRepository()
     private val accountUpdateHandler: AccountUpdateHandler
+    private val avatarHandler: AvatarHandler
 
     init {
         themeHandler = ThemeHandler(
@@ -50,6 +53,8 @@ class SettingsHandler(
         )
 
         accountUpdateHandler = AccountUpdateHandler(activity, onUsernameChanged)
+
+        avatarHandler = AvatarHandler(activity, binding, onPickImage)
 
         setupClickListeners()
     }
@@ -120,6 +125,11 @@ class SettingsHandler(
     }
 
     // ==================== PUBLIC METHODS ====================
+
+    /** Xử lý kết quả chọn ảnh từ gallery cho avatar. */
+    fun handleAvatarResult(uri: Uri) {
+        avatarHandler.handlePickedImage(uri)
+    }
 
     /** Đăng ký callback Google re-auth cho AccountUpdateHandler. */
     fun setGoogleReAuthRequest(callback: () -> Unit) {

@@ -191,6 +191,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
+    /** Launcher cho Avatar Picker */
+    private val avatarPickerLauncher =
+            registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+                uri?.let { settingsHandler.handleAvatarResult(it) }
+            }
+
     override fun attachBaseContext(newBase: Context) {
         languageManager = LanguageManager(newBase)
         super.attachBaseContext(languageManager.updateBaseContext(newBase))
@@ -360,7 +366,8 @@ class MainActivity : AppCompatActivity() {
                         this,
                         languageManager,
                         binding.settingsContainer,
-                        onUsernameChanged = { homeScreenHandler.setupGreeting() }
+                        onUsernameChanged = { homeScreenHandler.setupGreeting() },
+                        onPickImage = { avatarPickerLauncher.launch("image/*") }
                 )
 
         settingsHandler.setGoogleReAuthRequest {

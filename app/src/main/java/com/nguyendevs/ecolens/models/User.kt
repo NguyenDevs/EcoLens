@@ -16,5 +16,6 @@ data class User(
     val language: String = "vi",
     val darkMode: Boolean = false,
     val iucnMode: Boolean = true,
-    val taxoMode: Boolean = false
+    val taxoMode: Boolean = false,
+    val avatar: String = ""
 )
