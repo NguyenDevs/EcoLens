@@ -191,6 +191,21 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
+    /** Launcher cho Avatar Crop (uCrop) */
+    private val avatarCropLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                settingsHandler.handleCropResult(result)
+            }
+
+    /** Launcher cho Avatar Picker → mở uCrop */
+    private val avatarPickerLauncher =
+            registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+                uri?.let {
+                    val cropIntent = settingsHandler.createCropIntent(it)
+                    avatarCropLauncher.launch(cropIntent)
+                }
+            }
+
     override fun attachBaseContext(newBase: Context) {
         languageManager = LanguageManager(newBase)
         super.attachBaseContext(languageManager.updateBaseContext(newBase))
@@ -360,7 +375,8 @@ class MainActivity : AppCompatActivity() {
                         this,
                         languageManager,
                         binding.settingsContainer,
-                        onUsernameChanged = { homeScreenHandler.setupGreeting() }
+                        onUsernameChanged = { homeScreenHandler.setupGreeting() },
+                        onPickImage = { avatarPickerLauncher.launch("image/*") }
                 )
 
         settingsHandler.setGoogleReAuthRequest {

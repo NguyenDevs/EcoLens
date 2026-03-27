@@ -174,4 +174,26 @@ class UserRepository {
             e.printStackTrace()
         }
     }
+
+    /** Cập nhật URL avatar trong Realtime Database. */
+    suspend fun updateAvatarUrl(url: String) {
+        val uid = auth.currentUser?.uid ?: return
+        try {
+            usersRef.child(uid).child("avatar").setValue(url).await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    /** Lấy URL avatar hiện tại từ Realtime Database. */
+    suspend fun getAvatarUrl(): String? {
+        val uid = auth.currentUser?.uid ?: return null
+        return try {
+            val snapshot = usersRef.child(uid).child("avatar").get().await()
+            snapshot.getValue(String::class.java)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
 }

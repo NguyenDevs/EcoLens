@@ -67,7 +67,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/padding_screen_horizontal"
-                    android:layout_marginTop="@dimen/spacing_lg"
+                    android:layout_marginTop="@dimen/spacing_md"
                     app:cardBackgroundColor="@color/hero_bg"
                     app:cardCornerRadius="@dimen/radius_2xl"
                     app:cardElevation="0dp"

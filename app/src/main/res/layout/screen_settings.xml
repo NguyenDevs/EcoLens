@@ -8,25 +8,55 @@
         android:background="@color/background">
 
     <!-- ==================== HEADER SECTION ==================== -->
-    <LinearLayout
+    <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingHorizontal="@dimen/padding_screen_horizontal"
-            android:paddingTop="@dimen/spacing_md"
             android:background="@color/background">
 
-        <!-- Title -->
-        <TextView
-                android:layout_width="wrap_content"
+        <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/spacing_lg"
-                android:text="@string/settings"
-                android:textColor="@color/primary"
-                android:textSize="30sp"
-                android:textStyle="bold"
-                android:letterSpacing="-0.02"/>
-    </LinearLayout>
+                android:orientation="vertical"
+                android:paddingHorizontal="@dimen/padding_screen_horizontal"
+                android:paddingTop="@dimen/spacing_md">
+
+            <!-- Title -->
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/spacing_lg"
+                    android:text="@string/settings"
+                    android:textColor="@color/primary"
+                    android:textSize="30sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="-0.02"/>
+
+        </LinearLayout>
+
+        <!-- Avatar -->
+        <com.google.android.material.card.MaterialCardView
+                android:id="@+id/avatarCard"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="end|center_vertical"
+                android:layout_marginEnd="12dp"
+                android:layout_marginBottom="6dp"
+                app:cardElevation="0dp"
+                app:cardCornerRadius="24dp"
+                app:strokeWidth="0.5dp"
+                app:strokeColor="@color/primary"
+                app:cardBackgroundColor="@color/surface">
+
+            <ImageView
+                    android:id="@+id/ivUserAvatar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@mipmap/ic_launcher_round"
+                    android:contentDescription="User Avatar"
+                    />
+        </com.google.android.material.card.MaterialCardView>
+    </FrameLayout>
     <View
             android:layout_width="match_parent"
             android:background="@color/border_normal"

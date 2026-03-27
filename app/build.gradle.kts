@@ -200,4 +200,7 @@ dependencies {
 
     //Ticker
     implementation("com.robinhood.ticker:ticker:2.0.4")
+
+    // Image Cropper (uCrop)
+    implementation("com.github.yalantis:ucrop:2.2.9-native")
 }
