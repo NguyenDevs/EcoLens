@@ -191,10 +191,19 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-    /** Launcher cho Avatar Picker */
+    /** Launcher cho Avatar Crop (uCrop) */
+    private val avatarCropLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                settingsHandler.handleCropResult(result)
+            }
+
+    /** Launcher cho Avatar Picker → mở uCrop */
     private val avatarPickerLauncher =
             registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-                uri?.let { settingsHandler.handleAvatarResult(it) }
+                uri?.let {
+                    val cropIntent = settingsHandler.createCropIntent(it)
+                    avatarCropLauncher.launch(cropIntent)
+                }
             }
 
     override fun attachBaseContext(newBase: Context) {

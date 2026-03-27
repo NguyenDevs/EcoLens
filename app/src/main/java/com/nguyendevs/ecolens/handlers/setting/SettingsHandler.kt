@@ -126,9 +126,14 @@ class SettingsHandler(
 
     // ==================== PUBLIC METHODS ====================
 
-    /** Xử lý kết quả chọn ảnh từ gallery cho avatar. */
-    fun handleAvatarResult(uri: Uri) {
-        avatarHandler.handlePickedImage(uri)
+    /** Tạo Intent uCrop từ URI ảnh đã chọn. */
+    fun createCropIntent(sourceUri: Uri): android.content.Intent {
+        return avatarHandler.createCropIntent(sourceUri)
+    }
+
+    /** Xử lý kết quả crop từ uCrop. */
+    fun handleCropResult(result: androidx.activity.result.ActivityResult) {
+        avatarHandler.handleCropResult(result)
     }
 
     /** Đăng ký callback Google re-auth cho AccountUpdateHandler. */
