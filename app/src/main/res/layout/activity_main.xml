@@ -44,7 +44,7 @@
             android:layout_marginTop="10dp"
             android:layout_marginEnd="12dp"
             android:layout_gravity="top|end"
-            app:cardCornerRadius="@dimen/radius_full"
+            app:cardCornerRadius="24dp"
             app:cardElevation="0dp"
             app:cardBackgroundColor="@color/surface"
             app:strokeWidth="@dimen/border_thin"
