@@ -55,7 +55,7 @@ class AvatarHandler(
     fun handlePickedImage(uri: Uri) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
-        val avatarRef = storageRef.child("users/avatars/$uid/avatar_picture.png")
+        val avatarRef = storageRef.child("users/$uid/avatars/avatar_picture.png")
 
         avatarRef.putFile(uri)
             .addOnSuccessListener {
