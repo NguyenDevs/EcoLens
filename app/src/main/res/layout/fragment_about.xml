@@ -79,7 +79,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_xs"
-                android:text="Version 1.0.1"
+                android:text="Version 1.0.2"
                 style="@style/TextAppearance.App.Body2"
                 android:background="@drawable/bg_flag_rounded"
                 android:backgroundTint="@color/border_normal"
