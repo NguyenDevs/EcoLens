@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/background">
+
+    <!-- MAIN CONTENT -->
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:animateLayoutChanges="true"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+        <!-- ==================== HEADER AREA ==================== -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@color/background"
+                android:elevation="0dp">
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="@dimen/padding_screen_horizontal"
+                    android:paddingTop="@dimen/spacing_md">
+
+                <!-- Title -->
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/spacing_lg"
+                        android:text="@string/quick_explore"
+                        android:textColor="@color/primary"
+                        android:textSize="30sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="-0.02"/>
+
+            </LinearLayout>
+
+            <!-- Divider -->
+            <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/border_normal"
+                    android:layout_marginStart="@dimen/padding_screen_horizontal"
+                    android:layout_marginEnd="@dimen/padding_screen_horizontal"/>
+
+        </LinearLayout>
+
+        <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+
+            <!-- EXPLORE LIST -->
+            <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvExploreAll"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingStart="@dimen/padding_screen_horizontal"
+                    android:paddingEnd="@dimen/padding_screen_horizontal"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
+                    android:clipToPadding="false"
+                    android:scrollbars="none"
+                    android:overScrollMode="ifContentScrolls"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
+            <!-- EMPTY STATE -->
+            <LinearLayout
+                    android:id="@+id/emptyStateContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    android:padding="@dimen/spacing_xl"
+                    android:visibility="gone">
+
+                <ImageView
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:src="@drawable/splash"
+                        android:alpha="0.3"
+                        app:tint="@color/text_secondary"
+                        android:contentDescription="@string/quick_explore"/>
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/history_empty"
+                        style="@style/TextAppearance.App.Headline3"
+                        android:textColor="@color/text_secondary"
+                        android:layout_marginTop="@dimen/spacing_md"/>
+
+            </LinearLayout>
+
+            <!-- LOADING STATE -->
+            <FrameLayout
+                    android:id="@+id/loadingContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone">
+
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:indeterminate="true"
+                        app:indicatorColor="@array/gemini_colors"/>
+
+            </FrameLayout>
+
+        </FrameLayout>
+
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

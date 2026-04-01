@@ -40,6 +40,15 @@ class ExploreRepository {
                 return@withContext items
             }
 
+    /** Lấy toàn bộ explore items, ưu tiên dùng cache nếu đã có. */
+    suspend fun getAllExploreItems(): List<ExploreItem> = withContext(Dispatchers.IO) {
+        if (allItemsCache.isNotEmpty()) {
+            return@withContext allItemsCache
+        }
+        fetchFromFirebase()
+        return@withContext allItemsCache
+    }
+
     /** Tải toàn bộ explore items từ Firebase và lưu vào cache. */
     private suspend fun fetchFromFirebase() {
         try {

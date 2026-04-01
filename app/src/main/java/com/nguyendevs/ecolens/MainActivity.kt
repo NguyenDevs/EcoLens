@@ -33,6 +33,7 @@ import com.nguyendevs.ecolens.activities.CameraActivity
 import com.nguyendevs.ecolens.database.UserRepository
 import com.nguyendevs.ecolens.databinding.ActivityMainBinding
 import com.nguyendevs.ecolens.fragments.chat.ChatHistoryFragment
+import com.nguyendevs.ecolens.fragments.explore.ExploreFragment
 import com.nguyendevs.ecolens.fragments.history.HistoryFragment
 import com.nguyendevs.ecolens.handlers.*
 import com.nguyendevs.ecolens.handlers.animations.HistoryDetailAnimationHandler
@@ -439,7 +440,8 @@ class MainActivity : AppCompatActivity() {
                         this,
                         binding,
                         { entry -> navigateToHistoryDetail(entry) },
-                        { imageUrl -> handleCapturedImage(imageUrl.toUri()) }
+                        { imageUrl -> handleCapturedImage(imageUrl.toUri()) },
+                        { navigateToExplore() }
                 )
 
         navigationHandler =
@@ -854,6 +856,26 @@ class MainActivity : AppCompatActivity() {
                 com.nguyendevs.ecolens.fragments.history.HistoryDetailFragment().apply {
                     arguments = Bundle().apply { putString("HISTORY_ENTRY_JSON", jsonEntry) }
                 }
+
+        supportFragmentManager
+                .beginTransaction()
+                .setCustomAnimations(
+                        R.anim.slide_in_bottom,
+                        R.anim.hold,
+                        R.anim.hold,
+                        R.anim.slide_out_bottom
+                )
+                .add(R.id.fragmentContainer, fragment)
+                .addToBackStack(null)
+                .commit()
+        binding.fragmentContainer.visibility = View.VISIBLE
+    }
+
+    /** Chuyển hướng tới màn hình Explore All. */
+    private fun navigateToExplore() {
+        val fragment = ExploreFragment().apply {
+            onItemClick = { imageUrl -> handleCapturedImage(imageUrl.toUri()) }
+        }
 
         supportFragmentManager
                 .beginTransaction()
