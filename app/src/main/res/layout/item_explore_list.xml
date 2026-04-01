@@ -20,7 +20,7 @@
             android:clickable="true"
             android:focusable="true"
             android:background="?attr/selectableItemBackground"
-            android:padding="@dimen/spacing_md">
+            android:padding="@dimen/spacing_sm">
 
         <!-- Thumbnail Image -->
         <FrameLayout
