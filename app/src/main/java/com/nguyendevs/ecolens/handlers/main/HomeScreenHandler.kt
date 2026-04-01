@@ -25,7 +25,8 @@ class HomeScreenHandler(
     private val activity: AppCompatActivity,
     private val binding: ActivityMainBinding,
     private val onNavigateToDetail: (HistoryEntry) -> Unit,
-    private val onExploreItemClick: (String) -> Unit
+    private val onExploreItemClick: (String) -> Unit,
+    private val onViewAllExplore: (() -> Unit)? = null
 ) {
 
     private lateinit var recentHistoryAdapter: RecentHistoryAdapter
@@ -209,5 +210,10 @@ class HomeScreenHandler(
             )
         }
         exploreAdapter.submitList(placeholders)
+
+        // Kết nối nút "Xem tất cả"
+        homeRoot.findViewById<android.widget.TextView>(R.id.btnViewAll)?.setOnClickListener {
+            onViewAllExplore?.invoke()
+        }
     }
 }
