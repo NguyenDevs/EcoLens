@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -40,7 +41,7 @@ class ExploreFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupRecyclerView()
-        setupBackButton()
+        setupBackPress()
         loadAllExploreItems()
     }
 
@@ -58,11 +59,16 @@ class ExploreFragment : Fragment() {
         }
     }
 
-    /** Thiết lập nút back để đóng fragment. */
-    private fun setupBackButton() {
-        binding.btnBack.setOnClickListener {
-            parentFragmentManager.popBackStack()
-        }
+    /** Xử lý nút back hệ thống để đóng fragment. */
+    private fun setupBackPress() {
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    parentFragmentManager.popBackStack()
+                }
+            }
+        )
     }
 
     /** Tải toàn bộ explore items từ Firebase và hiển thị. */
