@@ -477,11 +477,10 @@ class HistoryFragment : Fragment() {
     }
 
     private fun showSortDropdown(anchor: View) {
-        val widthPx = (240 * resources.displayMetrics.density).toInt()
         val popupView = LayoutInflater.from(requireContext())
             .inflate(R.layout.popup_sort_history, null)
 
-        val popup = PopupWindow(popupView, widthPx, ViewGroup.LayoutParams.WRAP_CONTENT, true).apply {
+        val popup = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true).apply {
             isOutsideTouchable = true
             setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         }
@@ -489,13 +488,13 @@ class HistoryFragment : Fragment() {
         updateDropdownUI(popupView, viewModel.historySortOption.value)
 
         val rowOptions = listOf(
-            R.id.sortRowNewest    to HistorySortOption.NEWEST_FIRST,
-            R.id.sortRowOldest    to HistorySortOption.OLDEST_FIRST,
-            R.id.sortRowAlpha     to HistorySortOption.ALPHABETICAL,
-            R.id.sortRowConfidence to HistorySortOption.CONFIDENCE_HIGH,
-            R.id.sortRowFavorite  to HistorySortOption.FAVORITE
+            R.id.itemNewest    to HistorySortOption.NEWEST_FIRST,
+            R.id.itemOldest    to HistorySortOption.OLDEST_FIRST,
+            R.id.itemAlpha     to HistorySortOption.ALPHABETICAL,
+            R.id.itemConfidence to HistorySortOption.CONFIDENCE_HIGH,
+            R.id.itemFavorite  to HistorySortOption.FAVORITE
         )
-        val rowViews = rowOptions.map { (id, _) -> popupView.findViewById<View>(id) }
+        val rowViews = rowOptions.map { (id, _) -> popupView.findViewById<ViewGroup>(id) }
 
         rowViews.forEach { row ->
             row.alpha = 0f
@@ -512,7 +511,12 @@ class HistoryFragment : Fragment() {
 
         val anchorLoc = IntArray(2)
         anchor.getLocationOnScreen(anchorLoc)
-        val xOffset = anchorLoc[0] + anchor.width - widthPx
+        popupView.measure(
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        )
+        val popupWidth = popupView.measuredWidth
+        val xOffset = anchorLoc[0] + anchor.width - popupWidth
         val yOffset = anchorLoc[1] + anchor.height + (6 * resources.displayMetrics.density).toInt()
 
         popup.showAtLocation(anchor, Gravity.NO_GRAVITY, xOffset, yOffset)
@@ -520,7 +524,7 @@ class HistoryFragment : Fragment() {
         popupView.alpha = 0f
         popupView.scaleX = 0.90f
         popupView.scaleY = 0.90f
-        popupView.pivotX = widthPx.toFloat()
+        popupView.pivotX = popupWidth.toFloat()
         popupView.pivotY = 0f
         popupView.animate()
             .alpha(1f).scaleX(1f).scaleY(1f)
@@ -548,27 +552,28 @@ class HistoryFragment : Fragment() {
     }
 
     private fun updateDropdownUI(root: View, selected: HistorySortOption) {
-        data class RowIds(val rowId: Int, val iconId: Int, val labelId: Int, val option: HistorySortOption)
+        data class RowIds(val rowId: Int, val labelId: Int, val option: HistorySortOption)
         val rows = listOf(
-            RowIds(R.id.sortRowNewest,    R.id.iconNewest,    R.id.labelNewest,    HistorySortOption.NEWEST_FIRST),
-            RowIds(R.id.sortRowOldest,    R.id.iconOldest,    R.id.labelOldest,    HistorySortOption.OLDEST_FIRST),
-            RowIds(R.id.sortRowAlpha,     R.id.iconAlpha,     R.id.labelAlpha,     HistorySortOption.ALPHABETICAL),
-            RowIds(R.id.sortRowConfidence, R.id.iconConfidence, R.id.labelConfidence, HistorySortOption.CONFIDENCE_HIGH),
-            RowIds(R.id.sortRowFavorite,  R.id.iconFavorite,  R.id.labelFavorite,  HistorySortOption.FAVORITE)
+            RowIds(R.id.itemNewest,    R.id.labelNewest,    HistorySortOption.NEWEST_FIRST),
+            RowIds(R.id.itemOldest,    R.id.labelOldest,    HistorySortOption.OLDEST_FIRST),
+            RowIds(R.id.itemAlpha,     R.id.labelAlpha,     HistorySortOption.ALPHABETICAL),
+            RowIds(R.id.itemConfidence, R.id.labelConfidence, HistorySortOption.CONFIDENCE_HIGH),
+            RowIds(R.id.itemFavorite,  R.id.labelFavorite,  HistorySortOption.FAVORITE)
         )
         val primaryColor = ContextCompat.getColor(requireContext(), R.color.primary)
         val textPrimaryColor = ContextCompat.getColor(requireContext(), R.color.text_primary)
-        val iconDefaultColor = ContextCompat.getColor(requireContext(), R.color.text_tertiary)
 
         for (r in rows) {
-            val iconView = root.findViewById<ImageView>(r.iconId)
+            val rowView = root.findViewById<ViewGroup>(r.rowId)
+            val iconView = rowView.getChildAt(0) as ImageView
             val labelView = root.findViewById<TextView>(r.labelId)
+            
             if (r.option == selected) {
                 iconView.setColorFilter(primaryColor)
                 labelView.setTextColor(primaryColor)
                 labelView.setTypeface(null, android.graphics.Typeface.BOLD)
             } else {
-                iconView.setColorFilter(iconDefaultColor)
+                iconView.clearColorFilter()
                 labelView.setTextColor(textPrimaryColor)
                 labelView.setTypeface(null, android.graphics.Typeface.NORMAL)
             }
