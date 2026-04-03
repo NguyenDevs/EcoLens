@@ -476,7 +476,7 @@ class HistoryFragment : Fragment() {
         }
     }
 
-    /** Hiển thị dropdown popup chọn thứ tự sắp xếp với crossfade animation. */
+    /** Hiển thị dropdown popup chọn thứ tự sắp xếp với waterfall animation. */
     private fun showSortDropdown(anchor: View) {
         val popupView = LayoutInflater.from(requireContext())
             .inflate(R.layout.popup_sort_history, null)
@@ -489,25 +489,31 @@ class HistoryFragment : Fragment() {
         ).apply {
             isOutsideTouchable = true
             setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-            elevation = 24f
-            // Crossfade animation
-            animationStyle = android.R.style.Animation_Dialog
         }
 
         // Áp dụng trạng thái hiện tại
         val currentSort = viewModel.historySortOption.value
         updateDropdownUI(popupView, currentSort)
 
-        // Thiết lập click listener cho từng option
-        val options = listOf(
-            R.id.sortRowNewest to HistorySortOption.NEWEST_FIRST,
-            R.id.sortRowOldest to HistorySortOption.OLDEST_FIRST,
-            R.id.sortRowAlpha to HistorySortOption.ALPHABETICAL,
-            R.id.sortRowConfidence to HistorySortOption.CONFIDENCE_HIGH,
-            R.id.sortRowFavorite to HistorySortOption.FAVORITE
+        // Mapping label id → sort option
+        val labelOptions = listOf(
+            R.id.labelNewest    to HistorySortOption.NEWEST_FIRST,
+            R.id.labelOldest    to HistorySortOption.OLDEST_FIRST,
+            R.id.labelAlpha     to HistorySortOption.ALPHABETICAL,
+            R.id.labelConfidence to HistorySortOption.CONFIDENCE_HIGH,
+            R.id.labelFavorite  to HistorySortOption.FAVORITE
         )
-        for ((rowId, sortOption) in options) {
-            popupView.findViewById<View>(rowId).setOnClickListener {
+        val labelViews = labelOptions.map { (id, _) -> popupView.findViewById<TextView>(id) }
+
+        // Ẩn tất cả label trước khi hiện (waterfall)
+        labelViews.forEach { tv ->
+            tv.alpha = 0f
+            tv.translationY = -10f
+        }
+
+        // Click listener cho từng label
+        for ((labelId, sortOption) in labelOptions) {
+            popupView.findViewById<TextView>(labelId).setOnClickListener {
                 updateSortUI(sortOption)
                 viewModel.updateHistoryFilter(sort = sortOption, resetLimit = true)
                 dismissWithFade(popup)
@@ -523,26 +529,36 @@ class HistoryFragment : Fragment() {
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
         )
         val popupWidth = popupView.measuredWidth
-
         val xOffset = anchorLoc[0] + anchor.width - popupWidth
-        val yOffset = anchorLoc[1] + anchor.height + (4 * resources.displayMetrics.density).toInt()
+        val yOffset = anchorLoc[1] + anchor.height + (6 * resources.displayMetrics.density).toInt()
 
-        // Hiện popup tại (0,0) rồi move đến vị trí
         popup.showAtLocation(anchor, Gravity.NO_GRAVITY, xOffset, yOffset)
 
-        // Crossfade in bằng alpha animation
+        // Container fade+scale in
         popupView.alpha = 0f
-        popupView.scaleX = 0.92f
-        popupView.scaleY = 0.92f
+        popupView.scaleX = 0.90f
+        popupView.scaleY = 0.90f
         popupView.pivotX = popupWidth.toFloat()
         popupView.pivotY = 0f
         popupView.animate()
             .alpha(1f)
             .scaleX(1f)
             .scaleY(1f)
-            .setDuration(180)
+            .setDuration(320)
             .setInterpolator(AccelerateDecelerateInterpolator())
             .start()
+
+        // Waterfall: từng label xuất hiện lần lượt (stagger 70ms)
+        labelViews.forEachIndexed { index, tv ->
+            val delay = 80L + index * 70L
+            tv.animate()
+                .alpha(1f)
+                .translationY(0f)
+                .setStartDelay(delay)
+                .setDuration(300)
+                .setInterpolator(AccelerateDecelerateInterpolator())
+                .start()
+        }
     }
 
     /** Dismiss popup với fade-out animation. */
@@ -550,54 +566,34 @@ class HistoryFragment : Fragment() {
         val contentView = popup.contentView
         contentView.animate()
             .alpha(0f)
-            .scaleX(0.92f)
-            .scaleY(0.92f)
-            .setDuration(140)
+            .scaleX(0.94f)
+            .scaleY(0.94f)
+            .setDuration(200)
             .setInterpolator(AccelerateDecelerateInterpolator())
             .withEndAction { popup.dismiss() }
             .start()
     }
 
-    /** Cập nhật trạng thái active/inactive cho từng row trong dropdown. */
+    /** Cập nhật trạng thái active/inactive cho từng label trong dropdown. */
     private fun updateDropdownUI(root: View, selected: HistorySortOption) {
-        val rows = listOf(
-            Triple(R.id.sortRowNewest, R.id.iconNewest, R.id.labelNewest) to HistorySortOption.NEWEST_FIRST,
-            Triple(R.id.sortRowOldest, R.id.iconOldest, R.id.labelOldest) to HistorySortOption.OLDEST_FIRST,
-            Triple(R.id.sortRowAlpha, R.id.iconAlpha, R.id.labelAlpha) to HistorySortOption.ALPHABETICAL,
-            Triple(R.id.sortRowConfidence, R.id.iconConfidence, R.id.labelConfidence) to HistorySortOption.CONFIDENCE_HIGH,
-            Triple(R.id.sortRowFavorite, R.id.iconFavorite, R.id.labelFavorite) to HistorySortOption.FAVORITE
+        val labelOptions = listOf(
+            R.id.labelNewest    to HistorySortOption.NEWEST_FIRST,
+            R.id.labelOldest    to HistorySortOption.OLDEST_FIRST,
+            R.id.labelAlpha     to HistorySortOption.ALPHABETICAL,
+            R.id.labelConfidence to HistorySortOption.CONFIDENCE_HIGH,
+            R.id.labelFavorite  to HistorySortOption.FAVORITE
         )
         val primaryColor = ContextCompat.getColor(requireContext(), R.color.primary)
         val textPrimaryColor = ContextCompat.getColor(requireContext(), R.color.text_primary)
-        val surfaceActiveColor = ContextCompat.getColor(requireContext(), R.color.emerald_50)
 
-        val selectableRes = run {
-            val attrs = intArrayOf(android.R.attr.selectableItemBackground)
-            val ta = requireContext().obtainStyledAttributes(attrs)
-            val res = ta.getResourceId(0, 0)
-            ta.recycle()
-            res
-        }
-
-        for ((ids, option) in rows) {
-            val (rowId, iconId, labelId) = ids
-            val rowView = root.findViewById<LinearLayout>(rowId)
-            val iconView = root.findViewById<ImageView>(iconId)
-            val labelView = root.findViewById<TextView>(labelId)
-            val isActive = option == selected
-
-            if (isActive) {
-                rowView.setBackgroundColor(surfaceActiveColor)
-                iconView.setImageResource(R.drawable.ic_radio_checked)
-                iconView.setColorFilter(primaryColor)
-                labelView.setTextColor(primaryColor)
-                labelView.setTypeface(null, android.graphics.Typeface.BOLD)
+        for ((labelId, option) in labelOptions) {
+            val tv = root.findViewById<TextView>(labelId)
+            if (option == selected) {
+                tv.setTypeface(null, android.graphics.Typeface.BOLD)
+                tv.setTextColor(primaryColor)
             } else {
-                rowView.setBackgroundResource(selectableRes)
-                iconView.setImageResource(R.drawable.ic_radio_unchecked)
-                iconView.clearColorFilter()
-                labelView.setTextColor(textPrimaryColor)
-                labelView.setTypeface(null, android.graphics.Typeface.NORMAL)
+                tv.setTypeface(null, android.graphics.Typeface.NORMAL)
+                tv.setTextColor(textPrimaryColor)
             }
         }
     }
