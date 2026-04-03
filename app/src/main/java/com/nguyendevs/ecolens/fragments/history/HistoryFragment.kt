@@ -476,124 +476,101 @@ class HistoryFragment : Fragment() {
         }
     }
 
-    /** Hiển thị dropdown popup chọn thứ tự sắp xếp với waterfall animation. */
     private fun showSortDropdown(anchor: View) {
+        val widthPx = (240 * resources.displayMetrics.density).toInt()
         val popupView = LayoutInflater.from(requireContext())
             .inflate(R.layout.popup_sort_history, null)
 
-        val popup = PopupWindow(
-            popupView,
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            true
-        ).apply {
+        val popup = PopupWindow(popupView, widthPx, ViewGroup.LayoutParams.WRAP_CONTENT, true).apply {
             isOutsideTouchable = true
             setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         }
 
-        // Áp dụng trạng thái hiện tại
-        val currentSort = viewModel.historySortOption.value
-        updateDropdownUI(popupView, currentSort)
+        updateDropdownUI(popupView, viewModel.historySortOption.value)
 
-        // Mapping label id → sort option
-        val labelOptions = listOf(
-            R.id.labelNewest    to HistorySortOption.NEWEST_FIRST,
-            R.id.labelOldest    to HistorySortOption.OLDEST_FIRST,
-            R.id.labelAlpha     to HistorySortOption.ALPHABETICAL,
-            R.id.labelConfidence to HistorySortOption.CONFIDENCE_HIGH,
-            R.id.labelFavorite  to HistorySortOption.FAVORITE
+        val rowOptions = listOf(
+            R.id.sortRowNewest    to HistorySortOption.NEWEST_FIRST,
+            R.id.sortRowOldest    to HistorySortOption.OLDEST_FIRST,
+            R.id.sortRowAlpha     to HistorySortOption.ALPHABETICAL,
+            R.id.sortRowConfidence to HistorySortOption.CONFIDENCE_HIGH,
+            R.id.sortRowFavorite  to HistorySortOption.FAVORITE
         )
-        val labelViews = labelOptions.map { (id, _) -> popupView.findViewById<TextView>(id) }
+        val rowViews = rowOptions.map { (id, _) -> popupView.findViewById<View>(id) }
 
-        // Ẩn tất cả label trước khi hiện (waterfall)
-        labelViews.forEach { tv ->
-            tv.alpha = 0f
-            tv.translationY = -10f
+        rowViews.forEach { row ->
+            row.alpha = 0f
+            row.translationY = -12f
         }
 
-        // Click listener cho từng label
-        for ((labelId, sortOption) in labelOptions) {
-            popupView.findViewById<TextView>(labelId).setOnClickListener {
+        for ((rowId, sortOption) in rowOptions) {
+            popupView.findViewById<View>(rowId).setOnClickListener {
                 updateSortUI(sortOption)
                 viewModel.updateHistoryFilter(sort = sortOption, resetLimit = true)
                 dismissWithFade(popup)
             }
         }
 
-        // Tính vị trí hiển thị: căn phải theo anchor, phía dưới anchor
         val anchorLoc = IntArray(2)
         anchor.getLocationOnScreen(anchorLoc)
-
-        popupView.measure(
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
-        )
-        val popupWidth = popupView.measuredWidth
-        val xOffset = anchorLoc[0] + anchor.width - popupWidth
+        val xOffset = anchorLoc[0] + anchor.width - widthPx
         val yOffset = anchorLoc[1] + anchor.height + (6 * resources.displayMetrics.density).toInt()
 
         popup.showAtLocation(anchor, Gravity.NO_GRAVITY, xOffset, yOffset)
 
-        // Container fade+scale in
         popupView.alpha = 0f
         popupView.scaleX = 0.90f
         popupView.scaleY = 0.90f
-        popupView.pivotX = popupWidth.toFloat()
+        popupView.pivotX = widthPx.toFloat()
         popupView.pivotY = 0f
         popupView.animate()
-            .alpha(1f)
-            .scaleX(1f)
-            .scaleY(1f)
+            .alpha(1f).scaleX(1f).scaleY(1f)
             .setDuration(320)
             .setInterpolator(AccelerateDecelerateInterpolator())
             .start()
 
-        // Waterfall: từng label xuất hiện lần lượt (stagger 70ms)
-        labelViews.forEachIndexed { index, tv ->
-            val delay = 80L + index * 70L
-            tv.animate()
-                .alpha(1f)
-                .translationY(0f)
-                .setStartDelay(delay)
+        rowViews.forEachIndexed { index, row ->
+            row.animate()
+                .alpha(1f).translationY(0f)
+                .setStartDelay(80L + index * 70L)
                 .setDuration(300)
                 .setInterpolator(AccelerateDecelerateInterpolator())
                 .start()
         }
     }
 
-    /** Dismiss popup với fade-out animation. */
     private fun dismissWithFade(popup: PopupWindow) {
-        val contentView = popup.contentView
-        contentView.animate()
-            .alpha(0f)
-            .scaleX(0.94f)
-            .scaleY(0.94f)
+        popup.contentView.animate()
+            .alpha(0f).scaleX(0.94f).scaleY(0.94f)
             .setDuration(200)
             .setInterpolator(AccelerateDecelerateInterpolator())
             .withEndAction { popup.dismiss() }
             .start()
     }
 
-    /** Cập nhật trạng thái active/inactive cho từng label trong dropdown. */
     private fun updateDropdownUI(root: View, selected: HistorySortOption) {
-        val labelOptions = listOf(
-            R.id.labelNewest    to HistorySortOption.NEWEST_FIRST,
-            R.id.labelOldest    to HistorySortOption.OLDEST_FIRST,
-            R.id.labelAlpha     to HistorySortOption.ALPHABETICAL,
-            R.id.labelConfidence to HistorySortOption.CONFIDENCE_HIGH,
-            R.id.labelFavorite  to HistorySortOption.FAVORITE
+        data class RowIds(val rowId: Int, val iconId: Int, val labelId: Int, val option: HistorySortOption)
+        val rows = listOf(
+            RowIds(R.id.sortRowNewest,    R.id.iconNewest,    R.id.labelNewest,    HistorySortOption.NEWEST_FIRST),
+            RowIds(R.id.sortRowOldest,    R.id.iconOldest,    R.id.labelOldest,    HistorySortOption.OLDEST_FIRST),
+            RowIds(R.id.sortRowAlpha,     R.id.iconAlpha,     R.id.labelAlpha,     HistorySortOption.ALPHABETICAL),
+            RowIds(R.id.sortRowConfidence, R.id.iconConfidence, R.id.labelConfidence, HistorySortOption.CONFIDENCE_HIGH),
+            RowIds(R.id.sortRowFavorite,  R.id.iconFavorite,  R.id.labelFavorite,  HistorySortOption.FAVORITE)
         )
         val primaryColor = ContextCompat.getColor(requireContext(), R.color.primary)
         val textPrimaryColor = ContextCompat.getColor(requireContext(), R.color.text_primary)
+        val iconDefaultColor = ContextCompat.getColor(requireContext(), R.color.text_tertiary)
 
-        for ((labelId, option) in labelOptions) {
-            val tv = root.findViewById<TextView>(labelId)
-            if (option == selected) {
-                tv.setTypeface(null, android.graphics.Typeface.BOLD)
-                tv.setTextColor(primaryColor)
+        for (r in rows) {
+            val iconView = root.findViewById<ImageView>(r.iconId)
+            val labelView = root.findViewById<TextView>(r.labelId)
+            if (r.option == selected) {
+                iconView.setColorFilter(primaryColor)
+                labelView.setTextColor(primaryColor)
+                labelView.setTypeface(null, android.graphics.Typeface.BOLD)
             } else {
-                tv.setTypeface(null, android.graphics.Typeface.NORMAL)
-                tv.setTextColor(textPrimaryColor)
+                iconView.setColorFilter(iconDefaultColor)
+                labelView.setTextColor(textPrimaryColor)
+                labelView.setTypeface(null, android.graphics.Typeface.NORMAL)
             }
         }
     }
