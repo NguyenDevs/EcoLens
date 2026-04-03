@@ -147,6 +147,11 @@
     <string name="sort_az">Tên A → Z</string>
     <string name="sort_confidence">Độ chính xác</string>
     <string name="sort_favorite">Ưa thích</string>
+    <string name="sort_newest_desc">Từ gần đây đến cũ nhất</string>
+    <string name="sort_oldest_desc">Từ cũ nhất đến gần đây</string>
+    <string name="sort_alpha_desc">Theo tên từ A đến Z</string>
+    <string name="sort_confidence_desc">Độ chính xác cao nhất trước</string>
+    <string name="sort_favorite_desc">Mục yêu thích xuất hiện đầu</string>
     <string name="sort">Sắp xếp</string>
     <string name="history_total_species_count">%d loài đã lưu</string>
     <string name="history_results_count">%d kết quả</string>
