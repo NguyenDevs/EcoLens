@@ -477,12 +477,17 @@ class HistoryFragment : Fragment() {
     }
 
     private fun showSortDropdown(anchor: View) {
+        val widthPx = (250 * resources.displayMetrics.density).toInt()
         val popupView = LayoutInflater.from(requireContext())
             .inflate(R.layout.popup_sort_history, null)
 
-        val popup = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true).apply {
+        val popup = PopupWindow(popupView, widthPx, ViewGroup.LayoutParams.WRAP_CONTENT, true).apply {
             isOutsideTouchable = true
             setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            exitTransition = android.transition.Fade(android.transition.Fade.OUT).apply {
+                duration = 250
+                interpolator = AccelerateDecelerateInterpolator()
+            }
         }
 
         updateDropdownUI(popupView, viewModel.historySortOption.value)
@@ -511,12 +516,7 @@ class HistoryFragment : Fragment() {
 
         val anchorLoc = IntArray(2)
         anchor.getLocationOnScreen(anchorLoc)
-        popupView.measure(
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
-        )
-        val popupWidth = popupView.measuredWidth
-        val xOffset = anchorLoc[0] + anchor.width - popupWidth
+        val xOffset = anchorLoc[0] + anchor.width - widthPx
         val yOffset = anchorLoc[1] + anchor.height + (6 * resources.displayMetrics.density).toInt()
 
         popup.showAtLocation(anchor, Gravity.NO_GRAVITY, xOffset, yOffset)
@@ -524,7 +524,7 @@ class HistoryFragment : Fragment() {
         popupView.alpha = 0f
         popupView.scaleX = 0.90f
         popupView.scaleY = 0.90f
-        popupView.pivotX = popupWidth.toFloat()
+        popupView.pivotX = widthPx.toFloat()
         popupView.pivotY = 0f
         popupView.animate()
             .alpha(1f).scaleX(1f).scaleY(1f)
@@ -543,12 +543,7 @@ class HistoryFragment : Fragment() {
     }
 
     private fun dismissWithFade(popup: PopupWindow) {
-        popup.contentView.animate()
-            .alpha(0f).scaleX(0.94f).scaleY(0.94f)
-            .setDuration(200)
-            .setInterpolator(AccelerateDecelerateInterpolator())
-            .withEndAction { popup.dismiss() }
-            .start()
+        popup.dismiss()
     }
 
     private fun updateDropdownUI(root: View, selected: HistorySortOption) {
