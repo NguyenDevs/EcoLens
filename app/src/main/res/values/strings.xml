@@ -367,5 +367,10 @@
     <!-- ==================== KHÔNG DỊCH ==================== -->
     <string name="text_secondary" translatable="false">text_secondary</string>
     <string name="background_color" translatable="false">background_color</string>
+    <string name="sort_newest_first_desc">Từ gần đây đến cũ</string>
+    <string name="sort_oldest_first_desc">Từ cũ đến gần đây</string>
+    <string name="sort_az_desc">Thứ tự bảng chữ cái</string>
+    <string name="sort_confidence_desc">Độ tin cậy giảm dần</string>
+    <string name="sort_favorite_desc">Đã yêu thích</string>
 
 </resources>
