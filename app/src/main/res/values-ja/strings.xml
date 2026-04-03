@@ -146,9 +146,9 @@
     <string name="sort_az">名前 A-Z</string>
     <string name="sort_confidence">信頼度</string>
     <string name="sort_favorite">お気に入り</string>
-    <string name="sort_newest_desc">最新から古い順に表示</string>
-    <string name="sort_oldest_desc">古いから最新順に表示</string>
-    <string name="sort_alpha_desc">名前のA〜Z順に表示</string>
+    <string name="sort_newest_first_desc">最新から古い順に表示</string>
+    <string name="sort_oldest_first_desc">古いから最新順に表示</string>
+    <string name="sort_az_desc">名前のA〜Z順に表示</string>
     <string name="sort_confidence_desc">信頼度の高い順に表示</string>
     <string name="sort_favorite_desc">お気に入りを先頭に表示</string>
     <string name="sort">並べ替え</string>
