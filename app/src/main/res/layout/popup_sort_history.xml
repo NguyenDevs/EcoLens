@@ -228,7 +228,7 @@
                     android:layout_height="32dp"
                     android:src="@drawable/ic_sort_favorite"
                     android:background="@drawable/bg_icon_rounded"
-                    android:padding="5dp"/>
+                    android:padding="3dp"/>
 
             <LinearLayout
                     android:layout_width="0dp"
