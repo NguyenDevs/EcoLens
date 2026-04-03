@@ -146,6 +146,11 @@
     <string name="sort_az">名称 A-Z</string>
     <string name="sort_confidence">置信度</string>
     <string name="sort_favorite">收藏</string>
+    <string name="sort_newest_desc">从最新到最旧</string>
+    <string name="sort_oldest_desc">从最旧到最新</string>
+    <string name="sort_alpha_desc">按名称从 A 到 Z</string>
+    <string name="sort_confidence_desc">置信度最高优先</string>
+    <string name="sort_favorite_desc">收藏夹优先显示</string>
     <string name="sort">排序</string>
     <string name="history_total_species_count">已保存 %d 个物种</string>
     <string name="history_results_count">%d 个结果</string>
