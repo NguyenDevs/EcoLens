@@ -146,6 +146,11 @@
     <string name="sort_az">Name A-Z</string>
     <string name="sort_confidence">Confidence</string>
     <string name="sort_favorite">Favorite</string>
+    <string name="sort_newest_desc">From most recent to oldest</string>
+    <string name="sort_oldest_desc">From oldest to most recent</string>
+    <string name="sort_alpha_desc">By name from A to Z</string>
+    <string name="sort_confidence_desc">Highest confidence first</string>
+    <string name="sort_favorite_desc">Favorites appear first</string>
     <string name="sort">Sort</string>
     <string name="history_total_species_count">%d species saved</string>
     <string name="history_results_count">%d results</string>
