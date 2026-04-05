@@ -343,6 +343,7 @@
     <string name="action_cancel">キャンセル</string>
     <string name="action_more_options">オプション</string>
     <string name="action_delete_chat">チャットを削除</string>
+    <string name="menu_delete_chat_desc">この会話をすべて削除します</string>
     <string name="dialog_delete_history_title">履歴を削除</string>
     <string name="menu_delete_desc">履歴からこの記録を削除します</string>
     <string name="dialog_delete_history_message">この履歴を削除してもよろしいですか？</string>
