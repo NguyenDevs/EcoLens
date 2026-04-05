@@ -509,7 +509,14 @@ class HistoryFragment : Fragment() {
         for ((rowId, sortOption) in rowOptions) {
             popupView.findViewById<View>(rowId).setOnClickListener {
                 updateSortUI(sortOption)
-                viewModel.updateHistoryFilter(sort = sortOption, resetLimit = true)
+                adapter.submitList(emptyList())
+
+                popup.setOnDismissListener {
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        kotlinx.coroutines.delay(100)
+                        viewModel.updateHistoryFilter(sort = sortOption, resetLimit = true)
+                    }
+                }
                 dismissWithFade(popup)
             }
         }
