@@ -343,6 +343,7 @@
     <string name="action_delete">Xóa</string>
     <string name="action_cancel">Hủy</string>
     <string name="action_delete_chat">Xoá đoạn chat</string>
+    <string name="menu_delete_chat_desc">Xóa toàn bộ cuộc trò chuyện này</string>
     <string name="action_more_options">Tuỳ chọn</string>
     <string name="dialog_delete_history_title">Xóa lịch sử</string>
     <string name="menu_delete_desc">Xóa bản ghi này khỏi lịch sử</string>
