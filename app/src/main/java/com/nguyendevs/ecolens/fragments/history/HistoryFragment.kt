@@ -508,6 +508,11 @@ class HistoryFragment : Fragment() {
 
         for ((rowId, sortOption) in rowOptions) {
             popupView.findViewById<View>(rowId).setOnClickListener {
+                if (sortOption == viewModel.historySortOption.value) {
+                    dismissWithFade(popup)
+                    return@setOnClickListener
+                }
+
                 updateSortUI(sortOption)
                 popup.setOnDismissListener {
                     viewLifecycleOwner.lifecycleScope.launch {
