@@ -517,7 +517,7 @@ class HistoryFragment : Fragment() {
                 popup.setOnDismissListener {
                     viewLifecycleOwner.lifecycleScope.launch {
                         adapter.submitList(emptyList())
-                        kotlinx.coroutines.delay(500)
+                        kotlinx.coroutines.delay(450)
                         viewModel.updateHistoryFilter(sort = sortOption, resetLimit = true)
                     }
                 }
