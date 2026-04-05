@@ -1,9 +1,13 @@
 package com.nguyendevs.ecolens.fragments.chat
 
 import android.content.*
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.*
 import android.text.Html
 import android.view.*
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.PopupWindow
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -115,7 +119,7 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
 
         binding.btnBack.setOnClickListener { parentFragmentManager.popBackStack() }
 
-        binding.btnMenu.setOnClickListener { showMenuPopup() }
+        binding.btnMenu.setOnClickListener { showMenuPopup(it) }
         binding.etChatInput.setOnClickListener {
             if (!binding.etChatInput.isFocused) {
                 binding.etChatInput.requestFocus()
@@ -176,11 +180,59 @@ class ChatFragment : Fragment(), ChatAdapter.OnChatActionListener {
         viewModel.renewAiResponse(message)
     }
 
-    /** Hiển thị bottom sheet menu cho chat. */
-    private fun showMenuPopup() {
-        val bottomSheet = ChatMenuBottomSheet.newInstance()
-        bottomSheet.onDeleteClicked = { showDeleteConfirmDialog() }
-        bottomSheet.show(childFragmentManager, ChatMenuBottomSheet.TAG)
+    /** Hiển thị popup menu cho chat. */
+    private fun showMenuPopup(anchor: View) {
+        val widthPx = (280 * resources.displayMetrics.density).toInt()
+        val popupView = LayoutInflater.from(requireContext())
+            .inflate(R.layout.popup_chat_menu, null)
+
+        val popup = PopupWindow(popupView, widthPx, ViewGroup.LayoutParams.WRAP_CONTENT, true).apply {
+            isOutsideTouchable = true
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            exitTransition = android.transition.Fade(android.transition.Fade.OUT).apply {
+                duration = 250
+                interpolator = AccelerateDecelerateInterpolator()
+            }
+        }
+
+        val btnDeleteChat = popupView.findViewById<ViewGroup>(R.id.itemDeleteChat)
+        btnDeleteChat?.setOnClickListener {
+            popup.dismiss()
+            showDeleteConfirmDialog()
+        }
+
+        // Animation preparation
+        btnDeleteChat?.let {
+            it.alpha = 0f
+            it.translationY = -12f
+        }
+
+        val anchorLoc = IntArray(2)
+        anchor.getLocationOnScreen(anchorLoc)
+        val xOffset = anchorLoc[0] + anchor.width - widthPx
+        val yOffset = anchorLoc[1] + anchor.height + (6 * resources.displayMetrics.density).toInt()
+
+        popup.showAtLocation(anchor, Gravity.NO_GRAVITY, xOffset, yOffset)
+
+        // Animation mở popup
+        popupView.alpha = 0f
+        popupView.scaleX = 0.90f
+        popupView.scaleY = 0.90f
+        popupView.pivotX = widthPx.toFloat()
+        popupView.pivotY = 0f
+        popupView.animate()
+            .alpha(1f).scaleX(1f).scaleY(1f)
+            .setDuration(320)
+            .setInterpolator(AccelerateDecelerateInterpolator())
+            .start()
+
+        // Animation cho item
+        btnDeleteChat?.animate()
+            ?.alpha(1f)?.translationY(0f)
+            ?.setStartDelay(80L)
+            ?.setDuration(300)
+            ?.setInterpolator(AccelerateDecelerateInterpolator())
+            ?.start()
     }
 
     /** Hiển thị dialog xác nhận xóa chat session. */
