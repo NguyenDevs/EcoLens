@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Typeface
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -14,7 +15,10 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.PopupWindow
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -184,30 +188,80 @@ class HistoryDetailFragment : Fragment() {
     private fun setupMoreOptionsButton() {
         binding.btnMoreOptions.setOnClickListener {
             animationHandler.performConfirmFeedback(it)
-            showHistoryMenu()
+            showHistoryMenu(it)
         }
     }
 
-    /** Hiển thị bottom sheet menu với tùy chọn xóa, tải ảnh, xuất file. */
-    private fun showHistoryMenu() {
-        val bottomSheet = HistoryMenuBottomSheet.newInstance()
-        bottomSheet.onDeleteClicked = { showDeleteConfirmDialog() }
-        bottomSheet.onDownloadClicked = {
-            historyEntry?.let { entry ->
-                if (entry.localImagePath.isNotEmpty() && File(entry.localImagePath).exists()) {
-                    showDownloadConfirmation(entry.localImagePath)
-                } else {
-                    Toast.makeText(
-                                    requireContext(),
-                                    getString(R.string.error_image_not_found),
-                                    Toast.LENGTH_SHORT
-                            )
-                            .show()
-                }
+    /** Hiển thị popup menu với tùy chọn xóa, tải ảnh, xuất file. */
+    private fun showHistoryMenu(anchor: View) {
+        val widthPx = (280 * resources.displayMetrics.density).toInt()
+        val popupView = LayoutInflater.from(requireContext())
+            .inflate(R.layout.popup_history_menu, null)
+
+        val popup = PopupWindow(popupView, widthPx, ViewGroup.LayoutParams.WRAP_CONTENT, true).apply {
+            isOutsideTouchable = true
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            exitTransition = android.transition.Fade(android.transition.Fade.OUT).apply {
+                duration = 250
+                interpolator = AccelerateDecelerateInterpolator()
             }
         }
-        bottomSheet.onExportClicked = { showExportOptions() }
-        bottomSheet.show(childFragmentManager, HistoryMenuBottomSheet.TAG)
+
+        val itemOptions = listOf(
+            popupView.findViewById<ViewGroup>(R.id.itemDelete) to { showDeleteConfirmDialog() },
+            popupView.findViewById<ViewGroup>(R.id.itemDownload) to {
+                historyEntry?.let { entry ->
+                    if (entry.localImagePath.isNotEmpty() && File(entry.localImagePath).exists()) {
+                        showDownloadConfirmation(entry.localImagePath)
+                    } else {
+                        Toast.makeText(requireContext(), getString(R.string.error_image_not_found), Toast.LENGTH_SHORT).show()
+                    }
+                }
+            },
+            popupView.findViewById<ViewGroup>(R.id.itemExport) to { showExportOptions() }
+        )
+
+        for (pair in itemOptions) {
+            val view = pair.first
+            val action = pair.second
+            view?.alpha = 0f
+            view?.translationY = -12f
+            view?.setOnClickListener {
+                popup.dismiss()
+                action()
+            }
+        }
+
+        val anchorLoc = IntArray(2)
+        anchor.getLocationOnScreen(anchorLoc)
+        val xOffset = anchorLoc[0] + anchor.width - widthPx
+        val yOffset = anchorLoc[1] + anchor.height + (6 * resources.displayMetrics.density).toInt()
+
+        popup.showAtLocation(anchor, Gravity.NO_GRAVITY, xOffset, yOffset)
+
+        // Animation mở popup
+        popupView.alpha = 0f
+        popupView.scaleX = 0.90f
+        popupView.scaleY = 0.90f
+        popupView.pivotX = widthPx.toFloat()
+        popupView.pivotY = 0f
+        popupView.animate()
+            .alpha(1f).scaleX(1f).scaleY(1f)
+            .setDuration(320)
+            .setInterpolator(AccelerateDecelerateInterpolator())
+            .start()
+
+        // Animation cho từng item
+        for (index in itemOptions.indices) {
+            val pair = itemOptions[index]
+            val view = pair.first
+            view?.animate()
+                ?.alpha(1f)?.translationY(0f)
+                ?.setStartDelay(80L + index * 70L)
+                ?.setDuration(300)
+                ?.setInterpolator(AccelerateDecelerateInterpolator())
+                ?.start()
+        }
     }
 
     /** Hiển thị dialog xác nhận lưu ảnh vào thư viện. */

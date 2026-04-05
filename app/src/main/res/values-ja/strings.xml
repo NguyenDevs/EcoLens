@@ -343,10 +343,14 @@
     <string name="action_cancel">キャンセル</string>
     <string name="action_more_options">オプション</string>
     <string name="action_delete_chat">チャットを削除</string>
+    <string name="menu_delete_chat_desc">この会話をすべて削除します</string>
     <string name="dialog_delete_history_title">履歴を削除</string>
+    <string name="menu_delete_desc">履歴からこの記録を削除します</string>
     <string name="dialog_delete_history_message">この履歴を削除してもよろしいですか？</string>
     <string name="dialog_save_picture_history_title">画像をダウンロード</string>
+    <string name="menu_download_desc">画像をギャラリーに保存します</string>
     <string name="dialog_export_history_title">履歴をエクスポート</string>
+    <string name="menu_export_desc">PDFまたはExcelファイルとしてエクスポートします</string>
     <string name="label_select_format">エクスポート形式を選択：</string>
     <string name="label_include_image">画像を含める</string>
     <string name="action_export">ファイルをエクスポート</string>

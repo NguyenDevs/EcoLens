@@ -343,11 +343,15 @@
     <string name="action_delete">Xóa</string>
     <string name="action_cancel">Hủy</string>
     <string name="action_delete_chat">Xoá đoạn chat</string>
+    <string name="menu_delete_chat_desc">Xóa toàn bộ cuộc trò chuyện này</string>
     <string name="action_more_options">Tuỳ chọn</string>
     <string name="dialog_delete_history_title">Xóa lịch sử</string>
+    <string name="menu_delete_desc">Xóa bản ghi này khỏi lịch sử</string>
     <string name="dialog_delete_history_message">Bạn có chắc muốn xóa lịch sử nhận diện này không?</string>
     <string name="dialog_save_picture_history_title">Tải hình ảnh</string>
+    <string name="menu_download_desc">Lưu hình ảnh vào thư viện thiết bị</string>
     <string name="dialog_export_history_title">Xuất lịch sử</string>
+    <string name="menu_export_desc">Xuất thông tin thành file PDF/Excel</string>
     <string name="label_select_format">Chọn định dạng xuất:</string>
     <string name="label_include_image">Bao gồm hình ảnh</string>
     <string name="action_export">Xuất file</string>
