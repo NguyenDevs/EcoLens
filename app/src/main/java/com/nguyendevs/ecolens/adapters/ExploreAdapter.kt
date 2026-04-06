@@ -74,8 +74,8 @@ class ExploreAdapter(private val onItemClick: (ExploreItem) -> Unit) :
 
             stopTextShimmers()
             showTextContent()
-            binding.imgExplore.visibility = View.VISIBLE
-            binding.root.alpha = 1f
+            binding.root.alpha = 0f
+            binding.root.animate().alpha(1f).setDuration(400).start()
 
             val currentLanguage = Locale.getDefault().language
             val displayName = when (currentLanguage) {
