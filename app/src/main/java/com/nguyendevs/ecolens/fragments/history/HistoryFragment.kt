@@ -337,7 +337,7 @@ class HistoryFragment : Fragment() {
         if (previousMode != mode) {
             viewLifecycleOwner.lifecycleScope.launch {
                 adapter.submitList(emptyList())
-                kotlinx.coroutines.delay(450)
+                kotlinx.coroutines.delay(350)
                 adapter.viewMode = mode
                 updateLayoutManager(mode)
                 rebuildAndSubmitModels()
