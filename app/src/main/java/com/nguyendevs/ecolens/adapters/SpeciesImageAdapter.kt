@@ -57,6 +57,9 @@ class SpeciesImageAdapter :
                 )
             }
             binding.root.layoutParams = params
+            
+            binding.root.alpha = 0f
+            binding.root.animate().alpha(1f).setDuration(400).start()
 
             binding.ivSpeciesImage.visibility = android.view.View.VISIBLE
             binding.shimmerSpeciesImage.visibility = android.view.View.VISIBLE
