@@ -72,8 +72,8 @@ class ExploreAdapter(private val onItemClick: (ExploreItem) -> Unit) :
                 return
             }
 
-            stopAllShimmers()
-            showRealContent()
+            stopTextShimmers()
+            showTextContent()
 
             binding.root.alpha = 0f
             binding.root.animate().alpha(1f).setDuration(400).start()
@@ -107,10 +107,9 @@ class ExploreAdapter(private val onItemClick: (ExploreItem) -> Unit) :
             }
         }
 
-        /** Tắt shimmer và ẩn tất cả. */
-        private fun stopAllShimmers() {
+        /** Tắt shimmer cho các views text. */
+        private fun stopTextShimmers() {
             listOfNotNull(
-                binding.shimmerViewContainer,
                 binding.shimmerName,
                 binding.shimmerDesc
             ).forEach {
@@ -119,12 +118,25 @@ class ExploreAdapter(private val onItemClick: (ExploreItem) -> Unit) :
             }
         }
 
-        /** Hiển thị nội dung thực sau placeholder. */
-        private fun showRealContent() {
-            binding.imgExplore.visibility = View.VISIBLE
+        /** Tắt shimmer cho ảnh. */
+        private fun stopImageShimmer() {
+            binding.shimmerViewContainer.apply {
+                stopShimmer()
+                visibility = View.GONE
+            }
+        }
+
+        /** Hiển thị các text thực sau placeholder. */
+        private fun showTextContent() {
             binding.tvExploreName.visibility = View.VISIBLE
             binding.tvExploreDesc.visibility = View.VISIBLE
             binding.root.alpha = 1f
+        }
+
+        /** Hiển thị nội dung thực sau placeholder. */
+        private fun showRealContent() {
+            binding.imgExplore.visibility = View.VISIBLE
+            showTextContent()
         }
 
         /** Tải ảnh từ URL với shimmer trong khi chờ. */
@@ -140,34 +152,30 @@ class ExploreAdapter(private val onItemClick: (ExploreItem) -> Unit) :
                 .transition(DrawableTransitionOptions.withCrossFade(400))
                 .placeholder(R.drawable.splash)
                 .error(R.drawable.splash)
-                .listener(object : RequestListener<Drawable> {
-                    override fun onLoadFailed(
-                        e: GlideException?,
-                        model: Any?,
-                        target: Target<Drawable>,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        binding.shimmerViewContainer.apply {
-                            stopShimmer()
-                            visibility = View.GONE
+                    .listener(object : RequestListener<Drawable> {
+                        override fun onLoadFailed(
+                            e: GlideException?,
+                            model: Any?,
+                            target: Target<Drawable>,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            binding.imgExplore.visibility = View.VISIBLE
+                            stopImageShimmer()
+                            return false
                         }
-                        return false
-                    }
 
-                    override fun onResourceReady(
-                        resource: Drawable,
-                        model: Any,
-                        target: Target<Drawable>,
-                        dataSource: DataSource,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        binding.shimmerViewContainer.apply {
-                            stopShimmer()
-                            visibility = View.GONE
+                        override fun onResourceReady(
+                            resource: Drawable,
+                            model: Any,
+                            target: Target<Drawable>,
+                            dataSource: DataSource,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            binding.imgExplore.visibility = View.VISIBLE
+                            stopImageShimmer()
+                            return false
                         }
-                        return false
-                    }
-                })
+                    })
                 .into(binding.imgExplore)
         }
     }
