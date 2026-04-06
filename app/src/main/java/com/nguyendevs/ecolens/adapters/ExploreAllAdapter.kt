@@ -39,6 +39,25 @@ class ExploreAllAdapter(private val onItemClick: (ExploreItem) -> Unit) :
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: ExploreItem) {
+            val isPlaceholder = item.id.startsWith("placeholder_")
+
+            if (isPlaceholder) {
+                startAllShimmers()
+                binding.imgExploreThumb.visibility = View.INVISIBLE
+                binding.tvExploreName.visibility = View.INVISIBLE
+                binding.tvExploreDesc.visibility = View.INVISIBLE
+
+                binding.root.alpha = 0.7f
+                binding.itemContainer.setOnClickListener(null)
+                return
+            }
+
+            stopAllShimmers()
+            showRealContent()
+
+            binding.root.alpha = 0f
+            binding.root.animate().alpha(1f).setDuration(400).start()
+
             val currentLanguage = Locale.getDefault().language
             val displayName = when (currentLanguage) {
                 "vi" -> item.name
@@ -54,6 +73,38 @@ class ExploreAllAdapter(private val onItemClick: (ExploreItem) -> Unit) :
             binding.itemContainer.setOnClickListener { onItemClick(item) }
 
             loadThumbnail(item)
+        }
+
+        /** Bật shimmer cho tất cả các views. */
+        private fun startAllShimmers() {
+            listOf(
+                binding.shimmerThumb,
+                binding.shimmerName,
+                binding.shimmerDesc
+            ).forEach {
+                it.visibility = View.VISIBLE
+                it.startShimmer()
+            }
+        }
+
+        /** Tắt shimmer và ẩn tất cả. */
+        private fun stopAllShimmers() {
+            listOf(
+                binding.shimmerThumb,
+                binding.shimmerName,
+                binding.shimmerDesc
+            ).forEach {
+                it.stopShimmer()
+                it.visibility = View.GONE
+            }
+        }
+
+        /** Hiển thị nội dung thực sau placeholder. */
+        private fun showRealContent() {
+            binding.imgExploreThumb.visibility = View.VISIBLE
+            binding.tvExploreName.visibility = View.VISIBLE
+            binding.tvExploreDesc.visibility = View.VISIBLE
+            binding.root.alpha = 1f
         }
 
         /** Tải ảnh thumbnail với shimmer khi đang load. */
