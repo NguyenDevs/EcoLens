@@ -67,7 +67,7 @@ class ExploreAllAdapter(private val onItemClick: (ExploreItem) -> Unit) :
                 .load(item.image)
                 .centerCrop()
                 .transition(DrawableTransitionOptions.withCrossFade())
-                .placeholder(R.drawable.bg_skeleton_transparent)
+                .placeholder(R.drawable.splash)
                 .error(R.drawable.splash)
                 .listener(object : RequestListener<Drawable> {
                     override fun onLoadFailed(
