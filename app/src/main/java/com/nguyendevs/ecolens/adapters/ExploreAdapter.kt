@@ -57,7 +57,6 @@ class ExploreAdapter(private val onItemClick: (ExploreItem) -> Unit) :
 
         /** Hiển thị thông tin item hoặc trạng thái placeholder shimmer. */
         fun bind(item: ExploreItem) {
-            val context = binding.root.context
             val isPlaceholder = item.id.startsWith("placeholder_")
 
             if (isPlaceholder) {
@@ -138,8 +137,8 @@ class ExploreAdapter(private val onItemClick: (ExploreItem) -> Unit) :
             Glide.with(binding.root.context)
                 .load(item.image)
                 .centerCrop()
-                .transition(DrawableTransitionOptions.withCrossFade())
-                .placeholder(R.drawable.bg_skeleton_transparent)
+                .transition(DrawableTransitionOptions.withCrossFade(400))
+                .placeholder(R.drawable.splash)
                 .error(R.drawable.splash)
                 .listener(object : RequestListener<Drawable> {
                     override fun onLoadFailed(
