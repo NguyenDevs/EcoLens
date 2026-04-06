@@ -153,9 +153,9 @@ class RecentHistoryAdapter(private val onItemClick: (HistoryEntry) -> Unit) :
                 Glide.with(context)
                     .load(loadModel)
                     .centerCrop()
-                    .transition(DrawableTransitionOptions.withCrossFade())
-                    .placeholder(R.drawable.bg_skeleton_transparent)
-                    .error(R.drawable.bg_skeleton_rounded)
+                    .transition(DrawableTransitionOptions.withCrossFade(400))
+                    .placeholder(R.drawable.splash)
+                    .error(R.drawable.splash)
                     .listener(object : RequestListener<android.graphics.drawable.Drawable> {
                         override fun onLoadFailed(
                             e: GlideException?,
