@@ -58,7 +58,7 @@ class SpeciesImageAdapter :
             }
             binding.root.layoutParams = params
 
-            binding.ivSpeciesImage.visibility = android.view.View.INVISIBLE
+            binding.ivSpeciesImage.visibility = android.view.View.VISIBLE
             binding.shimmerSpeciesImage.visibility = android.view.View.VISIBLE
             binding.shimmerSpeciesImage.startShimmer()
 
@@ -74,7 +74,6 @@ class SpeciesImageAdapter :
                         ): Boolean {
                             binding.shimmerSpeciesImage.stopShimmer()
                             binding.shimmerSpeciesImage.visibility = android.view.View.GONE
-                            binding.ivSpeciesImage.visibility = android.view.View.VISIBLE
                             return false
                         }
 
@@ -87,7 +86,6 @@ class SpeciesImageAdapter :
                         ): Boolean {
                             binding.shimmerSpeciesImage.stopShimmer()
                             binding.shimmerSpeciesImage.visibility = android.view.View.GONE
-                            binding.ivSpeciesImage.visibility = android.view.View.VISIBLE
                             
                             binding.ivSpeciesImage.setOnClickListener {
                                 val context = binding.root.context
