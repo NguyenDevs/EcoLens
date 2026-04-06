@@ -48,8 +48,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         app:shimmer_auto_start="false"
+                        app:shimmer_base_alpha="1.0"
                         app:shimmer_highlight_color="@color/background"
-                        app:shimmer_duration="1200">
+                        app:shimmer_duration="1500">
 
                     <com.google.android.material.imageview.ShapeableImageView
                             android:layout_width="match_parent"
