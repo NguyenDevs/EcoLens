@@ -321,33 +321,59 @@ class HistoryFragment : Fragment() {
         imm?.showSoftInput(binding.etSearch, InputMethodManager.SHOW_IMPLICIT)
     }
 
-    /** Áp dụng chế độ xem list hoặc grid và cập nhật LayoutManager. */
+    /** Áp dụng chế độ xem list hoặc grid và cập nhật LayoutManager kèm khoảng nghỉ. */
     private fun applyViewMode(mode: HistoryViewMode) {
         val previousMode = adapter.viewMode
-        adapter.viewMode = mode
-        if (mode == HistoryViewMode.GRID) {
-            binding.rvHistory.layoutManager = GridLayoutManager(requireContext(), 2).apply {
-                spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-                    override fun getSpanSize(position: Int): Int {
-                        return if (adapter.getItemViewType(position) == 2) 2
-                        else 1
-                    }
-                }
+        updateViewModeButtonsUI(mode)
+
+        // Nếu là lần đầu khởi tạo (LayoutManager chưa có), áp dụng ngay không delay
+        if (binding.rvHistory.layoutManager == null) {
+            adapter.viewMode = mode
+            updateLayoutManager(mode)
+            rebuildAndSubmitModels()
+            return
+        }
+
+        if (previousMode != mode) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                adapter.submitList(emptyList())
+                kotlinx.coroutines.delay(450)
+                adapter.viewMode = mode
+                updateLayoutManager(mode)
+                rebuildAndSubmitModels()
             }
+        }
+    }
+
+    /** Cập nhật UI cho các nút chuyển đổi chế độ xem. */
+    private fun updateViewModeButtonsUI(mode: HistoryViewMode) {
+        if (mode == HistoryViewMode.GRID) {
             binding.btnViewGrid.setBackgroundResource(R.drawable.bg_view_toggle_active)
             binding.btnViewGrid.setColorFilter(ContextCompat.getColor(requireContext(), R.color.white))
             binding.btnViewList.setBackgroundResource(R.drawable.bg_view_toggle)
             binding.btnViewList.setColorFilter(ContextCompat.getColor(requireContext(), R.color.text_tertiary))
         } else {
-            binding.rvHistory.layoutManager = LinearLayoutManager(requireContext())
             binding.btnViewList.setBackgroundResource(R.drawable.bg_view_toggle_active)
             binding.btnViewList.setColorFilter(ContextCompat.getColor(requireContext(), R.color.white))
             binding.btnViewGrid.setBackgroundResource(R.drawable.bg_view_toggle)
             binding.btnViewGrid.setColorFilter(ContextCompat.getColor(requireContext(), R.color.text_tertiary))
         }
+    }
 
-        if (previousMode != mode) {
-            rebuildAndSubmitModels()
+    /** Cập nhật LayoutManager cho RecyclerView dựa trên chế độ xem. */
+    private fun updateLayoutManager(mode: HistoryViewMode) {
+        if (mode == HistoryViewMode.GRID) {
+            binding.rvHistory.layoutManager = GridLayoutManager(requireContext(), 2).apply {
+                spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                    override fun getSpanSize(position: Int): Int {
+                        // ViewType 2 là LOADING, chiếm full width
+                        return if (adapter.getItemViewType(position) == 2) 2
+                        else 1
+                    }
+                }
+            }
+        } else {
+            binding.rvHistory.layoutManager = LinearLayoutManager(requireContext())
         }
     }
 
