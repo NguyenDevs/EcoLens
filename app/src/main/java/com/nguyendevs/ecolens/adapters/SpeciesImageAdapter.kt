@@ -75,6 +75,7 @@ class SpeciesImageAdapter :
                             target: Target<android.graphics.drawable.Drawable>,
                             isFirstResource: Boolean
                         ): Boolean {
+                            binding.ivSpeciesImage.visibility = android.view.View.VISIBLE
                             binding.shimmerSpeciesImage.stopShimmer()
                             binding.shimmerSpeciesImage.visibility = android.view.View.GONE
                             return false
@@ -87,6 +88,7 @@ class SpeciesImageAdapter :
                             dataSource: DataSource,
                             isFirstResource: Boolean
                         ): Boolean {
+                            binding.ivSpeciesImage.visibility = android.view.View.VISIBLE
                             binding.shimmerSpeciesImage.stopShimmer()
                             binding.shimmerSpeciesImage.visibility = android.view.View.GONE
                             
