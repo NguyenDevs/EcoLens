@@ -139,7 +139,6 @@
                         android:layout_marginEnd="12dp"
                         android:src="@drawable/ic_favorite"
                         android:contentDescription="@string/favorite"
-                        android:tint="@color/primary"
                         app:tint="@color/primary"
                         android:clickable="true"
                         android:focusable="true"/>
@@ -160,7 +159,6 @@
                             android:layout_marginTop="5dp"
                             android:src="@drawable/ic_share"
                             android:contentDescription="@string/share_info"
-                            android:tint="@color/primary"
                             app:tint="@color/primary"/>
 
                     <FrameLayout
@@ -176,7 +174,6 @@
                                 android:backgroundTint="@color/surface_tint"
                                 android:padding="10dp"
                                 android:src="@drawable/ic_translate"
-                                android:tint="@color/primary"
                                 app:tint="@color/primary"
                                 android:visibility="gone"
                                 tools:visibility="visible"/>
