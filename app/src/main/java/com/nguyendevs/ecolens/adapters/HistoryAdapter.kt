@@ -228,7 +228,7 @@ class HistoryAdapter(
             setupDateHeader(uiModel.isFirstOfDay, dt)
             setupCardAppearance(uiModel.isFirstOfDay, uiModel.isLastOfDay)
             setupConfidenceBadge(entry)
-            loadImage(entry, b.ivHistoryImage)
+            loadImage(entry, b.ivHistoryImage, b.shimmerHistoryImage)
 
             b.itemContainer.setOnClickListener { click(entry) }
         }
@@ -316,7 +316,7 @@ class HistoryAdapter(
 
             setupDateHeader(uiModel, dt)
             setupConfidenceBadge(entry)
-            loadImage(entry, b.ivHistoryImage)
+            loadImage(entry, b.ivHistoryImage, b.shimmerHistoryImage)
 
             b.itemContainer.setOnClickListener { click(entry) }
         }
@@ -408,7 +408,16 @@ class HistoryAdapter(
     }
 
     /** Tải ảnh lịch sử từ local hoặc remote vào ImageView. */
-    private fun loadImage(entry: HistoryEntry, imageView: com.google.android.material.imageview.ShapeableImageView) {
+    private fun loadImage(
+        entry: HistoryEntry,
+        imageView: com.google.android.material.imageview.ShapeableImageView,
+        shimmer: com.facebook.shimmer.ShimmerFrameLayout
+    ) {
+        shimmer.apply {
+            visibility = View.VISIBLE
+            startShimmer()
+        }
+
         val localPath = entry.localImagePath
         var model: Any? = null
         if (!localPath.isNullOrEmpty()) {
@@ -418,14 +427,43 @@ class HistoryAdapter(
         if (model == null && entry.imagePath.isNotEmpty()) {
             model = if (entry.imagePath.startsWith("http")) entry.imagePath else File(entry.imagePath)
         }
+
         Glide.with(imageView)
             .load(model)
-            .diskCacheStrategy(DiskCacheStrategy.ALL)
-            .transition(DrawableTransitionOptions.withCrossFade(400))
+            .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.ALL)
+            .transition(com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade(400))
             .centerCrop()
             .override(200, 200)
             .placeholder(R.drawable.splash)
             .error(R.drawable.splash)
+            .listener(object : com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable> {
+                override fun onLoadFailed(
+                    e: com.bumptech.glide.load.engine.GlideException?,
+                    model: Any?,
+                    target: com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable>,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    shimmer.apply {
+                        stopShimmer()
+                        visibility = View.GONE
+                    }
+                    return false
+                }
+
+                override fun onResourceReady(
+                    resource: android.graphics.drawable.Drawable,
+                    model: Any,
+                    target: com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable>,
+                    dataSource: com.bumptech.glide.load.DataSource,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    shimmer.apply {
+                        stopShimmer()
+                        visibility = View.GONE
+                    }
+                    return false
+                }
+            })
             .into(imageView)
     }
 }
