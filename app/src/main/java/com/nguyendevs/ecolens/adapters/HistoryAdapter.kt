@@ -316,7 +316,7 @@ class HistoryAdapter(
 
             setupDateHeader(uiModel, dt)
             setupConfidenceBadge(entry)
-            loadImage(entry, b.ivHistoryImage)
+            loadImage(entry, b.ivHistoryImage, b.shimmerHistoryImage)
 
             b.itemContainer.setOnClickListener { click(entry) }
         }
@@ -408,7 +408,16 @@ class HistoryAdapter(
     }
 
     /** Tải ảnh lịch sử từ local hoặc remote vào ImageView. */
-    private fun loadImage(entry: HistoryEntry, imageView: com.google.android.material.imageview.ShapeableImageView) {
+    private fun loadImage(
+        entry: HistoryEntry,
+        imageView: com.google.android.material.imageview.ShapeableImageView,
+        shimmer: com.facebook.shimmer.ShimmerFrameLayout? = null
+    ) {
+        shimmer?.apply {
+            visibility = android.view.View.VISIBLE
+            startShimmer()
+        }
+
         val localPath = entry.localImagePath
         var model: Any? = null
         if (!localPath.isNullOrEmpty()) {
@@ -426,6 +435,34 @@ class HistoryAdapter(
             .override(200, 200)
             .placeholder(R.drawable.splash)
             .error(R.drawable.splash)
+            .listener(object : com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable> {
+                override fun onLoadFailed(
+                    e: com.bumptech.glide.load.engine.GlideException?,
+                    model: Any?,
+                    target: com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable>,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    shimmer?.apply {
+                        stopShimmer()
+                        visibility = android.view.View.GONE
+                    }
+                    return false
+                }
+
+                override fun onResourceReady(
+                    resource: android.graphics.drawable.Drawable,
+                    model: Any,
+                    target: com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable>,
+                    dataSource: com.bumptech.glide.load.DataSource,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    shimmer?.apply {
+                        stopShimmer()
+                        visibility = android.view.View.GONE
+                    }
+                    return false
+                }
+            })
             .into(imageView)
     }
 }
