@@ -39,7 +39,7 @@
                         android:scaleType="centerCrop"
                         app:shapeAppearanceOverlay="@style/ShapeAppearance.App.MediumComponent"
                         android:visibility="visible"
-                        tools:src="@mipmap/ic_launcher" />
+                        tools:src="@drawable/splash" />
 
             </com.facebook.shimmer.ShimmerFrameLayout>
 
