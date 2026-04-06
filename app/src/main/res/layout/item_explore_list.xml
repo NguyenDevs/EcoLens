@@ -41,7 +41,7 @@
 
             <!-- Shimmer overlay -->
             <com.facebook.shimmer.ShimmerFrameLayout
-                    android:id="@+id/shimmerThumb"
+                    android:id="@+id/shimmer_thumb"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     app:shimmer_auto_start="false"
@@ -68,32 +68,66 @@
                 app:layout_constraintStart_toEndOf="@+id/thumbnailContainer"
                 app:layout_constraintTop_toTopOf="parent">
 
-            <!-- Name -->
-            <TextView
-                    android:id="@+id/tvExploreName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="16sp"
-                    android:textColor="@color/text_primary"
-                    android:textStyle="bold"
-                    android:fontFamily="sans-serif-medium"
-                    android:maxLines="1"
-                    android:ellipsize="end"
-                    tools:text="Sen đá"/>
+            <!-- Name with shimmer -->
+            <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
-            <!-- Description -->
-            <TextView
-                    android:id="@+id/tvExploreDesc"
-                    android:layout_width="wrap_content"
+                <TextView
+                        android:id="@+id/tvExploreName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"
+                        android:textColor="@color/text_primary"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        tools:text="Sen đá"/>
+
+                <com.facebook.shimmer.ShimmerFrameLayout
+                        android:id="@+id/shimmer_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:shimmer_auto_start="false"
+                        app:shimmer_duration="1500">
+                    <View
+                            android:layout_width="120dp"
+                            android:layout_height="18dp"
+                            android:background="@drawable/bg_skeleton_rounded" />
+                </com.facebook.shimmer.ShimmerFrameLayout>
+            </FrameLayout>
+
+            <!-- Description with shimmer -->
+            <FrameLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:textSize="13sp"
-                    android:textColor="@color/text_secondary"
-                    android:fontFamily="serif"
-                    android:textStyle="italic"
-                    android:maxLines="2"
-                    android:ellipsize="end"
-                    tools:text="Thực vật mọng nước, họ Crassulaceae"/>
+                    android:layout_marginTop="4dp">
+
+                <TextView
+                        android:id="@+id/tvExploreDesc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="13sp"
+                        android:textColor="@color/text_secondary"
+                        android:fontFamily="serif"
+                        android:textStyle="italic"
+                        android:maxLines="2"
+                        android:ellipsize="end"
+                        tools:text="Thực vật mọng nước, họ Crassulaceae"/>
+
+                <com.facebook.shimmer.ShimmerFrameLayout
+                        android:id="@+id/shimmer_desc"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:shimmer_auto_start="false"
+                        app:shimmer_duration="1500">
+                    <View
+                            android:layout_width="180dp"
+                            android:layout_height="14dp"
+                            android:background="@drawable/bg_skeleton_rounded" />
+                </com.facebook.shimmer.ShimmerFrameLayout>
+            </FrameLayout>
 
         </LinearLayout>
 
