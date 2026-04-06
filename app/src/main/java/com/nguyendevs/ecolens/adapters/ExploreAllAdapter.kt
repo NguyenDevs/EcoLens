@@ -117,7 +117,7 @@ class ExploreAllAdapter(private val onItemClick: (ExploreItem) -> Unit) :
             Glide.with(binding.root.context)
                 .load(item.image)
                 .centerCrop()
-                .transition(DrawableTransitionOptions.withCrossFade())
+                .transition(DrawableTransitionOptions.withCrossFade(400))
                 .placeholder(R.drawable.splash)
                 .error(R.drawable.splash)
                 .listener(object : RequestListener<Drawable> {
