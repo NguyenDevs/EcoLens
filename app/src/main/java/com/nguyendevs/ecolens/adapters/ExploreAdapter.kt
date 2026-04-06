@@ -64,7 +64,7 @@ class ExploreAdapter(private val onItemClick: (ExploreItem) -> Unit) :
 
                 binding.imgExplore.apply {
                     visibility = View.VISIBLE
-                    setImageResource(R.drawable.bg_skeleton_rounded)
+                    setImageResource(R.drawable.splash)
                 }
                 binding.tvExploreName.visibility = View.INVISIBLE
                 binding.tvExploreDesc.visibility = View.INVISIBLE
