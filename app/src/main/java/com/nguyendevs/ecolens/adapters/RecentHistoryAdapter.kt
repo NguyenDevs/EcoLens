@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.nguyendevs.ecolens.R
@@ -71,6 +72,9 @@ class RecentHistoryAdapter(private val onItemClick: (HistoryEntry) -> Unit) :
 
             stopTextShimmers()
             showRealContent()
+
+            binding.root.alpha = 0f
+            binding.root.animate().alpha(1f).setDuration(400).start()
 
             binding.tvCommonName.text = entry.speciesInfo.commonName.ifEmpty {
                 context.getString(R.string.unknown_common_name)
@@ -143,6 +147,7 @@ class RecentHistoryAdapter(private val onItemClick: (HistoryEntry) -> Unit) :
                 Glide.with(context)
                     .load(loadModel)
                     .centerCrop()
+                    .transition(DrawableTransitionOptions.withCrossFade())
                     .placeholder(R.drawable.bg_skeleton_transparent)
                     .error(R.drawable.bg_skeleton_rounded)
                     .listener(object : RequestListener<android.graphics.drawable.Drawable> {
