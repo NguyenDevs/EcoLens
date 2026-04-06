@@ -22,30 +22,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/card_explore_image_height">
 
-            <!-- Ảnh thật -->
-            <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/imgExplore"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    app:shapeAppearanceOverlay="@style/ShapeAppearance.App.MediumComponent"
-                    android:visibility="visible"
-                    tools:src="@mipmap/ic_launcher" />
-
-            <!-- Shimmer overlay cho image -->
+            <!-- Shimmer container bao quanh ảnh thực -->
             <com.facebook.shimmer.ShimmerFrameLayout
                     android:id="@+id/shimmer_view_container"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     app:shimmer_auto_start="false"
-                    app:shimmer_duration="1500">
+                    app:shimmer_duration="1500"
+                    app:shimmer_base_alpha="1.0"
+                    app:shimmer_highlight_alpha="0.8">
 
                 <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/imgExplore"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
                         app:shapeAppearanceOverlay="@style/ShapeAppearance.App.MediumComponent"
-                        android:src="@drawable/bg_skeleton_rounded" />
+                        android:visibility="visible"
+                        tools:src="@mipmap/ic_launcher" />
 
             </com.facebook.shimmer.ShimmerFrameLayout>
 
