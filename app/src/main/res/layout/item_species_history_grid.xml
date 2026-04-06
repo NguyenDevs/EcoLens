@@ -96,40 +96,61 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
 
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content">
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
 
-                        <com.google.android.material.imageview.ShapeableImageView
-                                android:id="@+id/ivHistoryImage"
-                                android:layout_width="0dp"
-                                android:layout_height="0dp"
-                                android:scaleType="centerCrop"
-                                android:clickable="false"
-                                android:duplicateParentState="true"
-                                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.GridImageTop"
-                                app:strokeWidth="1.2dp"
-                                android:padding="1.2dp"
-                                app:strokeColor="@color/primary_10"
-                                app:layout_constraintStart_toStartOf="parent"
-                                app:layout_constraintEnd_toEndOf="parent"
-                                app:layout_constraintTop_toTopOf="parent"
-                                app:layout_constraintBottom_toBottomOf="parent"
-                                app:layout_constraintDimensionRatio="W,1:1"
-                                tools:background="@color/emerald_100"
-                                android:src="@drawable/splash"/>
+                            <com.google.android.material.imageview.ShapeableImageView
+                                    android:id="@+id/ivHistoryImage"
+                                    android:layout_width="0dp"
+                                    android:layout_height="0dp"
+                                    android:scaleType="centerCrop"
+                                    android:clickable="false"
+                                    android:duplicateParentState="true"
+                                    app:shapeAppearanceOverlay="@style/ShapeAppearance.App.GridImageTop"
+                                    app:strokeWidth="1.2dp"
+                                    android:padding="1.2dp"
+                                    app:strokeColor="@color/primary_10"
+                                    app:layout_constraintStart_toStartOf="parent"
+                                    app:layout_constraintEnd_toEndOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    app:layout_constraintDimensionRatio="W,1:1"
+                                    tools:background="@color/emerald_100" />
 
-                    </androidx.constraintlayout.widget.ConstraintLayout>
+                            <!-- Shimmer overlay for history grid image -->
+                            <com.facebook.shimmer.ShimmerFrameLayout
+                                    android:id="@+id/shimmer_history_image"
+                                    android:layout_width="0dp"
+                                    android:layout_height="0dp"
+                                    app:shimmer_auto_start="false"
+                                    app:shimmer_base_alpha="1.0"
+                                    app:shimmer_duration="1500"
+                                    app:layout_constraintStart_toStartOf="@id/ivHistoryImage"
+                                    app:layout_constraintEnd_toEndOf="@id/ivHistoryImage"
+                                    app:layout_constraintTop_toTopOf="@id/ivHistoryImage"
+                                    app:layout_constraintBottom_toBottomOf="@id/ivHistoryImage">
 
-                    <com.google.android.material.card.MaterialCardView
-                            android:id="@+id/badgeSuccess"
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:layout_gravity="bottom|end"
-                            android:layout_margin="8dp"
-                            app:cardBackgroundColor="@color/primary"
-                            app:cardElevation="0dp"
-                            app:cardCornerRadius="@dimen/radius_full">
+                                <com.google.android.material.imageview.ShapeableImageView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="match_parent"
+                                        android:scaleType="centerCrop"
+                                        app:shapeAppearanceOverlay="@style/ShapeAppearance.App.GridImageTop"
+                                        android:src="@drawable/splash" />
+
+                            </com.facebook.shimmer.ShimmerFrameLayout>
+
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                        <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/badgeSuccess"
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:layout_gravity="bottom|end"
+                                android:layout_margin="8dp"
+                                app:cardBackgroundColor="@color/primary"
+                                app:cardElevation="0dp"
+                                app:cardCornerRadius="@dimen/radius_full">
 
                         <ImageView
                                 android:id="@+id/ivBadgeIcon"
