@@ -95,46 +95,21 @@
                     android:layout_marginStart="20dp"
                     android:layout_marginTop="0dp">
 
-                <FrameLayout
-                        android:id="@+id/historyImageContainer"
+                <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivHistoryImage"
                         android:layout_width="56dp"
                         android:layout_height="56dp"
+                        android:scaleType="centerCrop"
+                        android:clickable="false"
+                        android:duplicateParentState="true"
+                        app:shapeAppearanceOverlay="@style/ShapeAppearance.App.SmallComponent"
+                        app:strokeWidth="1.5dp"
+                        android:padding="1.5dp"
+                        app:strokeColor="@color/primary_10"
+                        android:src="@mipmap/ic_launcher"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent">
-
-                    <com.google.android.material.imageview.ShapeableImageView
-                            android:id="@+id/ivHistoryImage"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:scaleType="centerCrop"
-                            android:clickable="false"
-                            android:duplicateParentState="true"
-                            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.SmallComponent"
-                            app:strokeWidth="1.5dp"
-                            android:padding="1.5dp"
-                            app:strokeColor="@color/primary_10"
-                            android:src="@mipmap/ic_launcher" />
-
-                    <!-- Shimmer overlay for history image -->
-                    <com.facebook.shimmer.ShimmerFrameLayout
-                            android:id="@+id/shimmer_history_image"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            app:shimmer_auto_start="false"
-                            app:shimmer_base_alpha="1.0"
-                            app:shimmer_duration="1500">
-
-                        <com.google.android.material.imageview.ShapeableImageView
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:scaleType="centerCrop"
-                                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.SmallComponent"
-                                android:src="@drawable/splash" />
-
-                    </com.facebook.shimmer.ShimmerFrameLayout>
-
-                </FrameLayout>
+                        app:layout_constraintBottom_toBottomOf="parent" />
 
                 <LinearLayout
                         android:id="@+id/infoContainer"
@@ -247,7 +222,7 @@
                         tools:text="97%"
                         app:layout_constraintTop_toBottomOf="@+id/tvHistoryTime"
                         app:layout_constraintStart_toEndOf="@+id/infoContainer" android:layout_marginTop="30dp"
-                        />
+                />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
