@@ -62,7 +62,10 @@ class ExploreAdapter(private val onItemClick: (ExploreItem) -> Unit) :
             if (isPlaceholder) {
                 startAllShimmers()
 
-                binding.imgExplore.visibility = View.INVISIBLE
+                binding.imgExplore.apply {
+                    visibility = View.VISIBLE
+                    setImageResource(R.drawable.bg_skeleton_rounded)
+                }
                 binding.tvExploreName.visibility = View.INVISIBLE
                 binding.tvExploreDesc.visibility = View.INVISIBLE
 
@@ -117,11 +120,12 @@ class ExploreAdapter(private val onItemClick: (ExploreItem) -> Unit) :
             }
         }
 
-        /** Tắt shimmer cho ảnh. */
+        /** Tắt hiệu ứng shimmer cho ảnh sau khi nạp xong. */
         private fun stopImageShimmer() {
             binding.shimmerViewContainer.apply {
                 stopShimmer()
-                visibility = View.GONE
+                setShimmer(null)
+                visibility = View.VISIBLE
             }
         }
 
