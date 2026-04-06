@@ -71,8 +71,9 @@ class RecentHistoryAdapter(private val onItemClick: (HistoryEntry) -> Unit) :
             }
 
             stopTextShimmers()
-            showRealContent()
-
+            showTextContent()
+            binding.imgThumbnail.visibility = View.VISIBLE
+            
             binding.root.alpha = 0f
             binding.root.animate().alpha(1f).setDuration(400).start()
 
@@ -121,12 +122,17 @@ class RecentHistoryAdapter(private val onItemClick: (HistoryEntry) -> Unit) :
             }
         }
 
-        /** Hiển thị nội dung thực sau khi tắt placeholder. */
-        private fun showRealContent() {
-            binding.imgThumbnail.visibility = View.VISIBLE
+        /** Hiển thị các text thực sau placeholder. */
+        private fun showTextContent() {
             binding.tvCommonName.visibility = View.VISIBLE
             binding.tvScientificName.visibility = View.VISIBLE
             binding.timeContainer.visibility = View.VISIBLE
+        }
+
+        /** Hiển thị nội dung thực sau khi tắt placeholder. */
+        private fun showRealContent() {
+            binding.imgThumbnail.visibility = View.VISIBLE
+            showTextContent()
         }
 
         /** Tải ảnh thumbnail với shimmer, ưu tiên local path. */
@@ -157,6 +163,7 @@ class RecentHistoryAdapter(private val onItemClick: (HistoryEntry) -> Unit) :
                             target: Target<android.graphics.drawable.Drawable>,
                             isFirstResource: Boolean
                         ): Boolean {
+                            binding.imgThumbnail.visibility = View.VISIBLE
                             stopImageShimmer()
                             return false
                         }
@@ -168,6 +175,7 @@ class RecentHistoryAdapter(private val onItemClick: (HistoryEntry) -> Unit) :
                             p3: DataSource,
                             isFirstResource: Boolean
                         ): Boolean {
+                            binding.imgThumbnail.visibility = View.VISIBLE
                             stopImageShimmer()
                             return false
                         }
