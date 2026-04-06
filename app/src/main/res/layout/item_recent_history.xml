@@ -56,7 +56,7 @@
                             android:layout_height="match_parent"
                             android:scaleType="centerCrop"
                             app:shapeAppearanceOverlay="@style/ShapeAppearance.App.MediumComponent"
-                            android:src="@drawable/splash" />  <!-- hoặc @color/surface_variant + shape -->
+                            android:src="@drawable/bg_skeleton_rounded" />
 
                 </com.facebook.shimmer.ShimmerFrameLayout>
 
