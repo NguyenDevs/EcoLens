@@ -124,7 +124,6 @@
                                     android:layout_width="0dp"
                                     android:layout_height="0dp"
                                     app:shimmer_auto_start="false"
-                                    app:shimmer_base_alpha="1.0"
                                     app:shimmer_duration="1500"
                                     app:layout_constraintStart_toStartOf="@id/ivHistoryImage"
                                     app:layout_constraintEnd_toEndOf="@id/ivHistoryImage"
