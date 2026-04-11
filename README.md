@@ -38,24 +38,27 @@ The interface embodies **Material Design 3 (Material You)**, dynamically adaptin
 The EcoLens interface is designed for high-clarity scientific documentation while maintaining the fluid aesthetics of modern Material Design 3 experiences.
 
 ### 🏠 Home & Identification
-| Main Dashboard | Species Intelligence |
-| :---: | :---: |
-| ![Home](screenshots/home.jpg) | ![Identity](screenshots/identify.jpg) |
+<p align="center">
+  <a href="screenshots/home.jpg"><img src="screenshots/home.jpg" height="600" alt="Home"></a>
+  <a href="screenshots/identify.jpg"><img src="screenshots/identify.jpg" height="600" alt="Identity"></a>
+</p>
 
 ### 📜 Research History
-| Taxonomy History | Discovery Details |
-| :---: | :---: |
-| ![History](screenshots/history.jpg) | ![History Detail](screenshots/history_detail.jpg) |
+<p align="center">
+  <a href="screenshots/history.jpg"><img src="screenshots/history.jpg" height="600" alt="History"></a>
+  <a href="screenshots/history_detail.jpg"><img src="screenshots/history_detail.jpg" height="600" alt="History Detail"></a>
+</p>
 
 ### 💬 AI Nature Assistant
-| Conversation Vault | Streaming Expert Chat |
-| :---: | :---: |
-| ![Assistant](screenshots/assistant.jpg) | ![Chat](screenshots/chat.jpg) |
+<p align="center">
+  <a href="screenshots/assistant.jpg"><img src="screenshots/assistant.jpg" height="600" alt="Assistant"></a>
+  <a href="screenshots/chat.jpg"><img src="screenshots/chat.jpg" height="600" alt="Chat"></a>
+</p>
 
 ### ⚙️ System Settings
-| Configuration |
-| :---: |
-| ![Setting](screenshots/setting.jpg) |
+<p align="center">
+  <a href="screenshots/setting.jpg"><img src="screenshots/setting.jpg" height="600" alt="Setting"></a>
+</p>
 
 ---
 
