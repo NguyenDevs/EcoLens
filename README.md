@@ -1,113 +1,110 @@
-# EcoLens: AI-Powered Biodiversity Identification 🌿
+# EcoLens: Sophisticated AI-Powered Biodiversity Ecosystem 🌿
 
-EcoLens is a sophisticated Android application designed to bridge the gap between technology and nature. By leveraging state-of-the-art Artificial Intelligence, EcoLens empowers users to identify and learn about various species of plants and animals instantly through their camera lens.
+EcoLens is an industry-grade Android application that serves as a bridge between high-performance artificial intelligence and conservation science. Unlike basic identification tools, EcoLens provides a complete ecosystem for biodiversity research, documentation, and ecological education.
+
+Developed and refined using **IntelliJ IDEA**, the project adheres to strict clean architecture principles and leverages the full power of Google's Gemini AI.
 
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.9.0-purple.svg)](https://kotlinlang.org/)
 [![Material Design 3](https://img.shields.io/badge/Material--Design-3-blue.svg)](https://m3.material.io/)
 [![Gemini AI](https://img.shields.io/badge/AI-Gemini-orange.svg)](https://deepmind.google/technologies/gemini/)
-[![Firebase](https://img.shields.io/badge/Firebase-Auth-yellow.svg)](https://firebase.google.com/)
+[![Firebase](https://img.shields.io/badge/Firebase-33.1.0-yellow.svg)](https://firebase.google.com/)
+[![Built with IntelliJ IDEA](https://img.shields.io/badge/Built%20with-IntelliJ%20IDEA-blue.svg)](https://www.jetbrains.com/idea/)
 
 ---
 
-## ✨ Key Features
+## 🔥 Exhaustive Feature Set
 
-- **🚀 Real-time AI Identification**: Instantly identify species using the camera or gallery, powered by Google's Gemini AI.
-- **💬 AI-Powered Conservation Chat**: Engage in deep conversations with an AI expert about your discoveries, conservation efforts, or ecological facts.
-- **📖 Comprehensive Encyclopedia**: Access detailed information including:
-    - Scientific and common names.
-    - Full biological taxonomy.
-    - Habitat, distribution, and characteristics.
-    - **Conservation Status** integrated with IUCN Red List data.
-- **🎙️ Interactive Voice Assistant**: Built-in Text-to-Speech (TTS) capabilities to read species details aloud, providing an accessible learning experience.
-- **🔍 Smart Search & Explore**: Discover new species or search for specific ones with an intuitive, modern interface.
-- **📂 History & Personal Library**: Save your discoveries to a local database (Room) and sync them across devices using Firebase.
-- **🌎 Multilingual Support**: Fully localized in multiple languages (English, Vietnamese, etc.) with dynamic language switching.
-- **🌓 Adaptive Theme**: Stunning Material You implementation with full support for Light and Dark modes.
-- **📍 Location Awareness**: Capture and store discovery locations to build your own personal biodiversity map.
+### 🧠 Intelligence & Recognition
+*   **Visual Recognition Engine**: Leveraging Gemini AI with multimodal capabilities to identify species from both live camera feeds and high-resolution gallery images.
+*   **Contextual AI Chat**: A dedicated "Nature Expert" chat interface where users can ask complex questions about identified species, conservation status, or ecological impacts. Supports streaming AI responses for a "thinking" experience.
+*   **Scientific Encyclopedia**: Automatically retrieves scientific names, full biological taxonomy (Kingdom to Species), and detailed descriptions.
+
+### 📊 Data Management & Export
+*   **Multi-Format Export Engine**: Export your findings into professional documents. Supported formats include:
+    *   **DOCX**: Fully formatted Word documents with embedded images and rich text segments.
+    *   **XLSX**: Structured Excel spreadsheets for scientific data analysis.
+    *   **PDF**: Print-ready reports with professional styling.
+    *   **JSON**: Raw data export for integration with other research tools.
+*   **Advanced History Tracking**: A robust management system featuring:
+    *   **Full-Text Search**: Quickly locate past discoveries.
+    *   **Categorical Filtering**: Group by biological kingdom or class.
+    *   **Date Range Selection**: Precise history retrieval based on discovery time.
+    *   **Favorites System**: One-tap bookmarking for important research entries.
+
+### 🛡️ Security & Integrity
+*   **Biometric Authentication**: Secure your research and account data using Fingerprint or Facial recognition (BiometricPrompt integration).
+*   **Encrypted Storage**: Sensitive data and API configurations are protected using hardware-level security managers.
+*   **Firebase Integration**: Secure cloud synchronization of history and preferences across devices using Google Authentication.
+
+### 🎨 Premium UI/UX
+*   **Material You (MD3)**: Dynamic color themes that adapt to the user's wallpaper and environment.
+*   **Smooth Motion System**: Integrated **Lottie** animations, **Robinhood Ticker** for number transitions, and **Shimmer** effects for loading states.
+*   **Rich Text Support**: Full Markdown and HTML rendering within the app for professional documentation presentation.
+*   **Smart Media Toolkit**: Built-in **uCrop** for precise image framing and **CameraX** for high-performance camera control.
 
 ---
 
-## 🛠️ Technology Stack
+## 🛠️ Detailed Technical Specification
 
-| Layer | Technology |
-|---|---|
-| **Language** | Kotlin |
-| **UI Framework** | Jetpack (Material Design 3) |
-| **AI Backend** | Google Gemini AI |
-| **Networking** | Retrofit 2 & OkHttp |
-| **Local Database** | Room Persistence Library |
-| **Authentication** | Firebase Auth (Google Sign-In) |
-| **Image Handling** | Glide & uCrop |
-| **Architecture** | MVVM (Model-View-ViewModel) with Clean Architecture principles |
+### Development Environment & Tooling
+*   **IDE**: IntelliJ IDEA / Android Studio
+*   **Build System**: Gradle (Kotlin DSL)
+*   **Native Support**: C++ (CMake) integration for specialized security modules.
+*   **Minimum SDK**: API 31 (Android 12)
+*   **Target SDK**: API 34 (Android 14)
+
+### Core Technology Stack
+| Module | Technology | Rationale |
+|---|---|---|
+| **AI Backend** | Google Gemini SDK (0.9.0) | State-of-the-art vision & generative models. |
+| **Database** | Room Persistence Library (2.6.1) | Managed local relational data with KSP support. |
+| **Networking** | Retrofit 2 + OkHttp 4 | Industry-standard REST client with custom HMAC interceptors. |
+| **Architecture** | MVVM + Repository Pattern | Decoupled UI and business logic for maximum testability. |
+| **Export Engine** | Apache POI (5.2.3) | Professional-grade DOCX/XLSX generation. |
+| **Markdown** | Markwon (4.6.2) | Flexible HTML/Markdown rendering for content. |
+| **Reactive UI** | Kotlin Coroutines & Flow | High-performance asynchronous state management. |
+| **Images** | Glide 4 + uCrop | Optimized image loading and native cropping. |
+| **Animations** | Lottie + Robinhood Ticker | Fluid, meaningful micro-animations. |
+
+---
+
+## 🌍 Localization & Accessibility
+*   **Multilingual Core**: Dynamically switch between English, Vietnamese, and other supported languages without app restarts.
+*   **Voice Assistant**: Integrated Text-to-Speech (TTS) engine provides audio descriptions for an accessible and hands-free experience.
+*   **Adaptive Layouts**: Full support for varying screen sizes and orientations using ConstraintLayout and CoordinatorLayout.
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Android Studio Hedgehog (2023.1.1) or newer
-- JDK 17
-- Android SDK 34 (API Level 34)
+1.  **IntelliJ IDEA** or **Android Studio Hedgehog** (2023.1.1+)
+2.  **JDK 17**
+3.  **Gemini API Key** from [Google AI Studio](https://aistudio.google.com/)
 
-### Installation
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/NguyenDevs/EcoLens.git
-   ```
-2. **Setup Firebase:**
-   - Create a new project on the [Firebase Console](https://console.firebase.google.com/).
-   - Add your Android app and download `google-services.json`.
-   - Place `google-services.json` in the `app/` directory.
-3. **Configure API Keys:**
-   - Obtain a Gemini API key from [Google AI Studio](https://aistudio.google.com/).
-   - (Optional) Obtain iNaturalist/GBIF API keys if needed for extended data.
-4. **Build & Run:**
-   - Open the project in Android Studio.
-   - Sync Gradle files.
-   - Run the app on an emulator or physical device.
+### Installation Logic
+1.  Clone the repository:
+    ```bash
+    git clone https://github.com/NguyenDevs/EcoLens.git
+    ```
+2.  Place your `google-services.json` in the `/app` folder.
+3.  Configure your environment variables for `WORKER_URL` and `APP_SECRET` in `gradle.properties`.
+4.  Build the project and sync Gradle files via IntelliJ/Android Studio.
 
 ---
 
-## 🏗️ Architecture
+## 🤝 Contribution & License
 
-EcoLens follows the **MVVM (Model-View-ViewModel)** architectural pattern to ensure a highly maintainable and testable codebase:
+Contributions are welcome! If you find a bug or have a feature request, please open an issue.
 
-- **View**: Activity/Fragment-based UI using ViewBinding.
-- **ViewModel**: Manages UI state using Kotlin Flows and handles business logic coordination.
-- **Repository**: Acts as a single source of truth for data, coordinating between remote AI/APIs and the local Room database.
-- **Managers**: Specialized handlers for AI identification, location services, and playback.
+**License**: Distributed under the MIT License.
 
 ---
 
-## 📸 Screenshots
+## 📬 Contact & Support
 
-| Home | Identification | History |
-| :---: | :---: | :---: |
-| ![Home](https://raw.githubusercontent.com/NguyenDevs/EcoLens/main/screenshots/home.png) | ![Identify](https://raw.githubusercontent.com/NguyenDevs/EcoLens/main/screenshots/identify.png) | ![History](https://raw.githubusercontent.com/NguyenDevs/EcoLens/main/screenshots/history.png) |
+**Lead Developer**: NguyenDevs  
+**Email**: [tainguyen.devs@gmail.com](mailto:tainguyen.devs@gmail.com)  
+**Project ID**: `com.nguyendevs.ecolens`
 
-*(Note: Replace with actual screenshot links)*
-
----
-
-## 🤝 Contribution
-
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
-
-## 📄 License & Contact
-
-Distributed under the MIT License. See `LICENSE` for more information.
-
-**Project Lead**: NguyenDevs  
-**Email**: contact@nguyendevs.com  
-**Website**: [nguyendevs.com](https://nguyendevs.com)
-
----
-*Developed with ❤️ for Nature and Technology.*
+*Developed with precision using IntelliJ IDEA for the preservation of Nature.*
