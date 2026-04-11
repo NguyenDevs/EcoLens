@@ -35,6 +35,10 @@ The interface embodies **Material Design 3 (Material You)**, dynamically adaptin
 
 ## 📸 Interface Gallery
 
+<details>
+<summary><b>✨ Click to expand the Application Interface Gallery</b></summary>
+<br>
+
 The EcoLens interface is designed for high-clarity scientific documentation while maintaining the fluid aesthetics of modern Material Design 3 experiences.
 
 ### 🏠 Home & Identification
@@ -59,6 +63,8 @@ The EcoLens interface is designed for high-clarity scientific documentation whil
 <p align="center">
   <a href="screenshots/setting.jpg"><img src="screenshots/setting.jpg" height="600" alt="Setting"></a>
 </p>
+
+</details>
 
 ---
 
