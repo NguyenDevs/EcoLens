@@ -40,22 +40,22 @@ The EcoLens interface is designed for high-clarity scientific documentation whil
 ### 🏠 Home & Identification
 | Main Dashboard | Species Intelligence |
 | :---: | :---: |
-| ![Home](https://raw.githubusercontent.com/NguyenDevs/EcoLens/main/screenshots/home.jpg) | ![Identity](https://raw.githubusercontent.com/NguyenDevs/EcoLens/main/screenshots/identify.jpg) |
+| ![Home](screenshots/home.jpg) | ![Identity](screenshots/identify.jpg) |
 
 ### 📜 Research History
 | Taxonomy History | Discovery Details |
 | :---: | :---: |
-| ![History](https://raw.githubusercontent.com/NguyenDevs/EcoLens/main/screenshots/history.jpg) | ![History Detail](https://raw.githubusercontent.com/NguyenDevs/EcoLens/main/screenshots/history_detail.jpg) |
+| ![History](screenshots/history.jpg) | ![History Detail](screenshots/history_detail.jpg) |
 
 ### 💬 AI Nature Assistant
 | Conversation Vault | Streaming Expert Chat |
 | :---: | :---: |
-| ![Assistant](https://raw.githubusercontent.com/NguyenDevs/EcoLens/main/screenshots/assistant.jpg) | ![Chat](https://raw.githubusercontent.com/NguyenDevs/EcoLens/main/screenshots/chat.jpg) |
+| ![Assistant](screenshots/assistant.jpg) | ![Chat](screenshots/chat.jpg) |
 
 ### ⚙️ System Settings
 | Configuration |
 | :---: |
-| ![Setting](https://raw.githubusercontent.com/NguyenDevs/EcoLens/main/screenshots/setting.jpg) |
+| ![Setting](screenshots/setting.jpg) |
 
 ---
 
