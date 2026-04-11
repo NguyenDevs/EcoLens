@@ -1,0 +1,8 @@
+# This file is here to ensure the directory is tracked by Git even if empty.
+# Place your screenshots here following the names in README.md:
+# - home_main.png
+# - history_list.png
+# - history_details.png
+# - assistant_chat.png
+# - assistant_streaming.png
+# - settings_main.png
