@@ -258,7 +258,7 @@ class HistoryFragment : Fragment() {
 
     /** Animation mở rộng/thu hẹp thanh tìm kiếm. */
     private fun toggleSearch(expand: Boolean) {
-        val collapsedWidth = (48 * resources.displayMetrics.density).toInt()
+        val collapsedWidth = (50 * resources.displayMetrics.density).toInt()
         val expandedWidth = binding.stickyHeader.width - (12 * 2 * resources.displayMetrics.density).toInt()
 
         val widthAnimator = if (expand) {
