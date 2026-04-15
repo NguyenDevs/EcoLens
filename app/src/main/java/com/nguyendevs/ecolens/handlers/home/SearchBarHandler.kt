@@ -24,17 +24,26 @@ class SearchBarHandler(
     private val textInputLayoutSearch: TextInputLayout,
     private val etSearchQuery: EditText,
     private val btnSearchAction: ImageView,
-    private val ivSearchClear: ImageView
+    private val ivSearchClear: ImageView,
+    private val parentView: android.view.View? = null
 ) {
 
     private val collapsedWidthPx = (50 * context.resources.displayMetrics.density).toInt()
-    private val expandedWidthPx = (330 * context.resources.displayMetrics.density).toInt()
+    private var expandedWidthPx = (330 * context.resources.displayMetrics.density).toInt()
 
     private var isSearchBarExpanded = false
     private val viewsToHide = mutableListOf<View>()
 
     init {
         setupClickListeners()
+        val resolveParent = parentView ?: (searchBarContainer.parent as? android.view.View)
+        resolveParent?.post {
+            val parentWidth = resolveParent.width
+            if (parentWidth > 0) {
+                val marginPx = (12 * 2 * context.resources.displayMetrics.density).toInt()
+                expandedWidthPx = parentWidth - marginPx
+            }
+        }
     }
 
     /** Đăng ký danh sách view cần ẩn khi thanh tìm kiếm mở rộng. */
