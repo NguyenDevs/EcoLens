@@ -121,7 +121,8 @@
     <string name="loading_detail">Đang truy xuất thông tin loài</string>
     <string name="loading_conservation">Đang tra cứu tình trạng bảo tồn</string>
     <string name="loading_done">Tra cứu hoàn tất</string>
-    <string name="searching_info">Đang tra cứu IUCN...</string>
+    <string name="searching_iucn">Đang tra cứu IUCN...</string>
+    <string name="searching_vnredlist">Đang tra cứu Sách đỏ VN...</string>
 
 
     <!-- ==================== LỊCH SỬ ==================== -->

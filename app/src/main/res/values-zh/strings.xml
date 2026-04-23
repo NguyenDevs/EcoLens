@@ -120,7 +120,8 @@
     <string name="loading_detail">正在检索物种信息</string>
     <string name="loading_conservation">正在检查保护状态</string>
     <string name="loading_done">检查完成</string>
-    <string name="searching_info">正在搜索 IUCN...</string>
+    <string name="searching_iucn">正在搜索 IUCN...</string>
+    <string name="searching_vnredlist">正在查询越南红色名录...</string>
 
     <!-- ==================== 历史 ==================== -->
     <string name="history">历史</string>

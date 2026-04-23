@@ -120,7 +120,8 @@
     <string name="loading_detail">Retrieving species information</string>
     <string name="loading_conservation">Checking conservation status</string>
     <string name="loading_done">Checking complete</string>
-    <string name="searching_info">Searching IUCN...</string>
+    <string name="searching_iucn">Searching IUCN...</string>
+    <string name="searching_vnredlist">Searching VN Red List...</string>
 
     <!-- ==================== HISTORY ==================== -->
     <string name="history">History</string>

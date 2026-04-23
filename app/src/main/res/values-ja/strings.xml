@@ -120,7 +120,8 @@
     <string name="loading_detail">種情報を取得中</string>
     <string name="loading_conservation">保全状況を確認中</string>
     <string name="loading_done">確認完了</string>
-    <string name="searching_info">IUCN を検索しています...</string>
+    <string name="searching_iucn">IUCN を検索しています...</string>
+    <string name="searching_vnredlist">ベトナムレッドリストを検索中...</string>
 
     <!-- ==================== 履歴 ==================== -->
     <string name="history">履歴</string>
