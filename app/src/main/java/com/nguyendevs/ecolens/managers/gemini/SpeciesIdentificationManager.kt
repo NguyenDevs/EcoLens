@@ -13,6 +13,7 @@ import com.nguyendevs.ecolens.models.*
 import com.nguyendevs.ecolens.models.history.HistoryEntry
 import com.nguyendevs.ecolens.network.RetrofitClient
 import com.nguyendevs.ecolens.utils.ImageUtils
+import com.nguyendevs.ecolens.utils.MarkdownProcessor
 import java.io.File
 import java.io.FileNotFoundException
 import kotlinx.coroutines.*
@@ -146,7 +147,9 @@ class SpeciesIdentificationManager(
                         confidence = confidence,
                         commonName = "...",
                         iucn = isIucnEnabled,
-                        vnredlist = isVnRedListEnabled
+                        vnredlist = isVnRedListEnabled,
+                        conservationStatus = if (isIucnEnabled) getLocalizedString(R.string.searching_iucn) else "Vô hiệu",
+                        vnredlistStatus = if (isVnRedListEnabled) getLocalizedString(R.string.searching_vnredlist) else "Vô hiệu"
                 )
 
         onStateUpdate(
@@ -352,9 +355,13 @@ class SpeciesIdentificationManager(
                     val iucnCode =
                             iucnResult?.assessments?.firstOrNull()?.redListCategoryCode ?: "NE"
 
-                    val searchingText = getLocalizedString(R.string.searching_info)
+                    val searchingText = getLocalizedString(R.string.searching_iucn)
+                    val vnSearchingText = getLocalizedString(R.string.searching_vnredlist)
                     currentSpeciesInfo =
-                            currentSpeciesInfo?.copy(conservationStatus = searchingText)
+                            currentSpeciesInfo?.copy(
+                                conservationStatus = searchingText,
+                                vnredlistStatus = if (isVnRedListEnabled) vnSearchingText else "Vô hiệu"
+                            )
                     onStateUpdate(
                             EcoLensUiState(
                                     isLoading = true,
@@ -389,12 +396,19 @@ class SpeciesIdentificationManager(
                 if (isVnRedListEnabled) {
                     if (vnredlistResult != null) {
                         val buildStatus = buildString {
-                            if (!vnredlistResult.phanHangBaoTon.isNullOrEmpty()) append("• **Phân hạng:** ${vnredlistResult.phanHangBaoTon}\n")
-                            if (!vnredlistResult.tieuChuanDanhGia.isNullOrEmpty()) append("• **Tiêu chuẩn:** ${vnredlistResult.tieuChuanDanhGia}\n")
-                            if (!vnredlistResult.dienGiaiDanhGia.isNullOrEmpty()) append("• **Diễn giải:** ${vnredlistResult.dienGiaiDanhGia}\n")
-                            if (!vnredlistResult.namCongBo.isNullOrEmpty()) append("• **Năm công bố:** ${vnredlistResult.namCongBo}\n")
-                        }.trim()
-                        val statusText = if (buildStatus.isNotEmpty()) buildStatus else "Không có dữ liệu"
+                            if (!vnredlistResult.phanHangBaoTon.isNullOrEmpty()) append("• <b>Phân hạng:</b> ${vnredlistResult.phanHangBaoTon}<br>")
+                            if (!vnredlistResult.tieuChuanDanhGia.isNullOrEmpty()) append("• <b>Tiêu chuẩn:</b> ${vnredlistResult.tieuChuanDanhGia}<br>")
+                            if (!vnredlistResult.dienGiaiDanhGia.isNullOrEmpty()) append("• <b>Diễn giải:</b> ${vnredlistResult.dienGiaiDanhGia}<br>")
+                            if (!vnredlistResult.namCongBo.isNullOrEmpty()) append("• <b>Năm công bố:</b> ${vnredlistResult.namCongBo}<br>")
+                        }
+                        
+                        val processedStatus = MarkdownProcessor().process(
+                            text = buildStatus,
+                            isConservationStatus = true,
+                            isVietnamese = true // VN Red List luôn trả về tiếng Việt
+                        )
+                        
+                        val statusText = if (processedStatus.isNotEmpty()) processedStatus else "Không có dữ liệu"
                         currentSpeciesInfo = currentSpeciesInfo?.copy(vnredlistStatus = statusText)
                     } else {
                         currentSpeciesInfo = currentSpeciesInfo?.copy(vnredlistStatus = "Không có dữ liệu")
