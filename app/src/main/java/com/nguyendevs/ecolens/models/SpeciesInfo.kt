@@ -38,5 +38,6 @@ data class SpeciesInfo(
     val conservationStatus: String = "",
     val confidence: Double = 0.0,
     val iucn: Boolean = true,
-    val vnredlist: Boolean = true
+    val vnredlist: Boolean = true,
+    val vnredlistStatus: String = ""
 )

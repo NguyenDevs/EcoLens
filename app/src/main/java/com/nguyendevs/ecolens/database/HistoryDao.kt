@@ -233,6 +233,7 @@ interface HistoryDao {
             habitat = :habitat,
             conservationStatus = :conservationStatus,
             confidence = :confidence,
+            vnredlistStatus = :vnredlistStatus,
             timestamp = :timestamp,
             isFavorite = :isFavorite,
             language = :language
@@ -256,6 +257,7 @@ interface HistoryDao {
             habitat: String,
             conservationStatus: String,
             confidence: Double,
+            vnredlistStatus: String,
             timestamp: Long,
             isFavorite: Boolean,
             language: String

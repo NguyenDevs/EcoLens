@@ -228,7 +228,7 @@ class SpeciesInfoHandler(
                 checkIfAllSectionsRendered(info)
             }
             LoadingStage.CONSERVATION -> {
-                displayConservationStatus(info.conservationStatus, shouldScroll = false)
+                displayConservationStatus(info, shouldScroll = false)
                 checkIfAllSectionsRendered(info)
             }
             LoadingStage.COMPLETE -> {
@@ -263,7 +263,7 @@ class SpeciesInfoHandler(
                         shouldScroll = false,
                         isInitialLoad = false
                 )
-                displayConservationStatus(info.conservationStatus, shouldScroll = false)
+                displayConservationStatus(info, shouldScroll = false)
                 allSectionsRendered = true
 
                 if (!binding.expandableImages.isExpanded && imagesAdapter.itemCount > 0) {
@@ -324,7 +324,7 @@ class SpeciesInfoHandler(
         if (info.characteristics.isNotEmpty()) sectionsWithContent.add(R.id.sectionCharacteristics)
         if (info.distribution.isNotEmpty()) sectionsWithContent.add(R.id.sectionDistribution)
         if (info.habitat.isNotEmpty()) sectionsWithContent.add(R.id.sectionHabitat)
-        if (info.conservationStatus.isNotEmpty()) sectionsWithContent.add(R.id.sectionConservation)
+        if (info.conservationStatus.isNotEmpty() || info.vnredlistStatus.isNotEmpty()) sectionsWithContent.add(R.id.sectionConservation)
 
         val allRendered =
                 sectionsWithContent.all { sectionId ->
@@ -394,7 +394,7 @@ class SpeciesInfoHandler(
     }
 
     /** Hiển thị thẻ tình trạng bảo tồn nếu tính năng IUCN hoặc VN Red List được bật. */
-    private fun displayConservationStatus(status: String, shouldScroll: Boolean = true) {
+    private fun displayConservationStatus(info: SpeciesInfo, shouldScroll: Boolean = true) {
         val sharedPref = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         val isIucnEnabled = sharedPref.getBoolean("iucn_mode", true)
         val isVnRedListEnabled = sharedPref.getBoolean("vnredlist_mode", true)
@@ -417,17 +417,20 @@ class SpeciesInfoHandler(
             infoBinding.tvConservationDisabledMessage.visibility = View.GONE
             
             infoBinding.tvConservationStatus.visibility = View.VISIBLE
-            infoBinding.tvConservationStatus.text = if (isIucnEnabled) status else context.getString(R.string.iucn_disabled_message)
+            
+            val iucnText = if (isIucnEnabled) info.conservationStatus else context.getString(R.string.iucn_disabled_message)
+            textFormatter.setHtml(infoBinding.tvConservationStatus, iucnText)
             
             infoBinding.dividerConservation.visibility = View.VISIBLE
             
             infoBinding.tvVnRedListStatus.visibility = View.VISIBLE
-            infoBinding.tvVnRedListStatus.text = if (isVnRedListEnabled) status else context.getString(R.string.vnredlist_disabled_message)
+            val vnredlistText = if (isVnRedListEnabled) info.vnredlistStatus else context.getString(R.string.vnredlist_disabled_message)
+            textFormatter.setHtml(infoBinding.tvVnRedListStatus, vnredlistText)
 
             sectionDisplayHandler.displaySection(
                     R.id.sectionConservation,
                     R.id.tvConservationStatus,
-                    status,
+                    iucnText, // Section text is just a placeholder to mark as rendered
                     shouldScroll,
                     isInitialLoad
             )

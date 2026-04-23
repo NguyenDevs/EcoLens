@@ -712,7 +712,7 @@ class HistoryDetailFragment : Fragment() {
             )
         } else {
             val iucnContent = if (!info.iucn) getString(R.string.iucn_disabled_message) else info.conservationStatus
-            val vnRedListContent = if (!info.vnredlist) getString(R.string.vnredlist_disabled_message) else info.conservationStatus
+            val vnRedListContent = if (!info.vnredlist) getString(R.string.vnredlist_disabled_message) else info.vnredlistStatus
             
             val finalContent = buildString {
                 append(iucnContent)

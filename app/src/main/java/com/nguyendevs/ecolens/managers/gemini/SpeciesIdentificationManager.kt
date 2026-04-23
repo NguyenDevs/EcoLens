@@ -202,6 +202,34 @@ class SpeciesIdentificationManager(
                             null
                         }
 
+                val vnredlistDeferred =
+                        if (isVnRedListEnabled) {
+                            async(Dispatchers.IO) {
+                                try {
+                                    val slug = scientificName.trim().lowercase().replace(" ", "-")
+                                    val url = "http://vnredlist.vast.vn/$slug/"
+                                    val doc = org.jsoup.Jsoup.connect(url).get()
+                                    val result = mutableMapOf<String, String>()
+                                    doc.select("h3.cust_title").forEach { title ->
+                                        val key = title.text().trim()
+                                        val value = title.nextElementSibling()?.text()?.trim()
+                                        if (value != null) result[key] = value
+                                    }
+                                    VnRedListScrapeResult(
+                                        phanHangBaoTon = result["Phân hạng bảo tồn"] ?: result["Phân hạng"],
+                                        tieuChuanDanhGia = result["Tiêu chuẩn đánh giá"],
+                                        dienGiaiDanhGia = result["Diễn giải đánh giá theo các tiêu chuẩn"],
+                                        namCongBo = result["Năm công bố"]
+                                    )
+                                } catch (e: Exception) {
+                                    Log.e(TAG, "VN Red List Error: ${e.message}")
+                                    null
+                                }
+                            }
+                        } else {
+                            null
+                        }
+
                 val infoForDetails =
                         currentSpeciesInfo
                                 ?: SpeciesInfo(
@@ -262,6 +290,7 @@ class SpeciesIdentificationManager(
 
                 val gbifResult = gbifDeferred.await()
                 val iucnResult = iucnDeferred?.await()
+                val vnredlistResult = vnredlistDeferred?.await()
                 val fetchedImages = imagesDeferred.await()
 
                 if (fetchedImages.isNotEmpty()) {
@@ -355,6 +384,23 @@ class SpeciesIdentificationManager(
                     }
                 } else {
                     currentSpeciesInfo = currentSpeciesInfo?.copy(conservationStatus = "Vô hiệu")
+                }
+
+                if (isVnRedListEnabled) {
+                    if (vnredlistResult != null) {
+                        val buildStatus = buildString {
+                            if (!vnredlistResult.phanHangBaoTon.isNullOrEmpty()) append("• **Phân hạng:** ${vnredlistResult.phanHangBaoTon}\n")
+                            if (!vnredlistResult.tieuChuanDanhGia.isNullOrEmpty()) append("• **Tiêu chuẩn:** ${vnredlistResult.tieuChuanDanhGia}\n")
+                            if (!vnredlistResult.dienGiaiDanhGia.isNullOrEmpty()) append("• **Diễn giải:** ${vnredlistResult.dienGiaiDanhGia}\n")
+                            if (!vnredlistResult.namCongBo.isNullOrEmpty()) append("• **Năm công bố:** ${vnredlistResult.namCongBo}\n")
+                        }.trim()
+                        val statusText = if (buildStatus.isNotEmpty()) buildStatus else "Không có dữ liệu"
+                        currentSpeciesInfo = currentSpeciesInfo?.copy(vnredlistStatus = statusText)
+                    } else {
+                        currentSpeciesInfo = currentSpeciesInfo?.copy(vnredlistStatus = "Không có dữ liệu")
+                    }
+                } else {
+                    currentSpeciesInfo = currentSpeciesInfo?.copy(vnredlistStatus = "Vô hiệu")
                 }
 
                 saveToHistory(existingHistoryId, imageFile, languageCode)
@@ -550,4 +596,11 @@ class SpeciesIdentificationManager(
         val localizedContext = context.createConfigurationContext(config)
         return localizedContext.getString(resId, *args)
     }
+
+    data class VnRedListScrapeResult(
+        val phanHangBaoTon: String?,
+        val tieuChuanDanhGia: String?,
+        val dienGiaiDanhGia: String?,
+        val namCongBo: String?
+    )
 }

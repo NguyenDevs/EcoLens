@@ -171,6 +171,7 @@ class HistoryRepository(
                     habitat = entry.speciesInfo.habitat,
                     conservationStatus = entry.speciesInfo.conservationStatus,
                     confidence = entry.speciesInfo.confidence,
+                    vnredlistStatus = entry.speciesInfo.vnredlistStatus,
                     timestamp = entry.timestamp,
                     isFavorite = entry.isFavorite,
                     language = entry.language

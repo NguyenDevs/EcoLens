@@ -204,4 +204,7 @@ dependencies {
 
     // Image Cropper (uCrop)
     implementation("com.github.yalantis:ucrop:2.2.9-native")
+    
+    // HTML Parsing
+    implementation("org.jsoup:jsoup:1.17.2")
 }
