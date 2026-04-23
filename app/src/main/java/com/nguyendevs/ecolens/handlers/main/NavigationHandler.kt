@@ -84,6 +84,7 @@ class NavigationHandler(
         binding.settingsContainer.root.visibility = View.GONE
         binding.searchBarContainer.visibility = View.GONE
         binding.fabSpeak.visibility = View.GONE
+        binding.btnMap.visibility = View.GONE
 
         binding.bottomNavigation.visibility = View.VISIBLE
         binding.fabCamera.visibility = View.VISIBLE
@@ -97,11 +98,13 @@ class NavigationHandler(
                     val (loadingStage, _, hasInfo) = checker()
                     val isComplete = loadingStage == LoadingStage.COMPLETE
 
-                if (isComplete && hasInfo) {
-                    binding.fabSpeak.visibility = View.VISIBLE
-                } else {
-                    binding.fabSpeak.visibility = View.GONE
-                }
+                    if (isComplete && hasInfo) {
+                        binding.fabSpeak.visibility = View.VISIBLE
+                        binding.btnMap.visibility = View.VISIBLE
+                    } else {
+                        binding.fabSpeak.visibility = View.GONE
+                        binding.btnMap.visibility = View.GONE
+                    }
                 }
             }
             R.id.nav_history -> {
