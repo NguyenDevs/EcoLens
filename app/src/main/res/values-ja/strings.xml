@@ -220,7 +220,10 @@
     <string name="config">構成</string>
     <string name="taxonomy_language">ベトナム語分類</string>
     <string name="iucn_searching">IUCN検索</string>
+    <string name="vnredlist_searching">VN RedList 検索</string>
     <string name="iucn_disabled_message">IUCNが無効です。設定で有効にしてください</string>
+    <string name="vnredlist_disabled_message">ベトナムレッドリストは無効です。設定で再度有効にしてください</string>
+    <string name="conservation_disabled_message">保全情報の検索は無効です</string>
     <string name="error_feature_required_vietnamese">機能には言語設定が必要です：ベトナム語</string>
 
     <!-- 情報とサポート -->

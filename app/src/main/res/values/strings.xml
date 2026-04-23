@@ -123,6 +123,7 @@
     <string name="loading_done">Tra cứu hoàn tất</string>
     <string name="searching_info">Đang tra cứu IUCN...</string>
 
+
     <!-- ==================== LỊCH SỬ ==================== -->
     <string name="history">Lịch sử</string>
     <string name="history_title_label">Lịch sử</string>
@@ -220,7 +221,10 @@
     <string name="config">Thiết lập</string>
     <string name="taxonomy_language">Phân loại Tiếng Việt</string>
     <string name="iucn_searching">Tra cứu IUCN</string>
-    <string name="iucn_disabled_message">IUCN Đang tắt, bật lại ở Cài đặt</string>
+    <string name="vnredlist_searching">Tra cứu Sách đỏ VN</string>
+    <string name="iucn_disabled_message">IUCN đã tắt. Bật lại ở Cài đặt</string>
+    <string name="vnredlist_disabled_message">Sách đỏ VN đã tắt. Bật lại ở Cài đặt</string>
+    <string name="conservation_disabled_message">Tra cứu bảo tồn đã tắt</string>
     <string name="error_feature_required_vietnamese">Tính năng yêu cầu cài đặt ngôn ngữ: Tiếng Việt</string>
 
     <!-- Thông tin & Hỗ trợ -->
@@ -376,5 +380,6 @@
     <!-- ==================== KHÔNG DỊCH ==================== -->
     <string name="text_secondary" translatable="false">text_secondary</string>
     <string name="background_color" translatable="false">background_color</string>
+
 
 </resources>

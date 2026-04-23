@@ -349,6 +349,57 @@
                             app:trackTint="@color/switch_track_selector"
                             app:useMaterialThemeColors="false"/>
                 </LinearLayout>
+
+                    <View
+                            android:layout_width="match_parent"
+                            android:layout_marginStart="64dp"
+                            android:layout_marginEnd="@dimen/spacing_md"
+                            android:background="@color/border_light"
+                            android:layout_height="1dp"/>
+
+                    <LinearLayout
+                            android:id="@+id/btnVNRedList"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/spacing_md"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:background="?attr/selectableItemBackground">
+
+                        <FrameLayout
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:background="@drawable/bg_icon_pink">
+                            <ImageView
+                                    android:layout_width="@dimen/icon_md"
+                                    android:layout_height="@dimen/icon_md"
+                                    android:layout_gravity="center"
+                                    android:src="@drawable/ic_vnrl"
+                                    app:tint="@color/instagram_pink"/>
+                        </FrameLayout>
+
+                        <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/spacing_sm"
+                                android:layout_weight="1"
+                                android:text="@string/vnredlist_searching"
+                                android:textSize="@dimen/text_body_large"
+                                android:textColor="@color/text_primary"
+                                android:textStyle="bold"/>
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                                android:id="@+id/switchVNRedListMode"
+                                android:layout_width="44dp"
+                                android:layout_height="24dp"
+                                android:minHeight="0dp"
+                                android:minWidth="0dp"
+                                app:thumbTint="@color/white"
+                                app:trackTint="@color/switch_track_selector"
+                                app:useMaterialThemeColors="false"/>
+                    </LinearLayout>
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>

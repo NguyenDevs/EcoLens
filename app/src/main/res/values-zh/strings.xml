@@ -220,7 +220,10 @@
     <string name="config">配置</string>
     <string name="taxonomy_language">越南语分类</string>
     <string name="iucn_searching">IUCN搜索</string>
+    <string name="vnredlist_searching">VN RedList 搜索</string>
     <string name="iucn_disabled_message">IUCN已禁用，请在设置中启用</string>
+    <string name="vnredlist_disabled_message">越南红色名录已关闭。请在设置中重新开启</string>
+    <string name="conservation_disabled_message">保育查询已关闭</string>
     <string name="error_feature_required_vietnamese">功能需要语言设置：越南语</string>
 
     <!-- 关于和支持 -->
