@@ -288,29 +288,11 @@
     </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_speak"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="@dimen/spacing_md"
-            android:src="@drawable/ic_speak"
-            app:tint="@color/white"
-            style="@style/Widget.App.FloatingActionButton"
-            app:fabCustomSize="50dp"
-            app:elevation="13dp"
-            app:pressedTranslationZ="@dimen/elevation_xl"
-            app:useCompatPadding="true"
-            android:clickable="true"
-            android:focusable="true"
-            android:contentDescription="@string/speak"/>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/btnMap"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
-            android:layout_marginEnd="@dimen/spacing_md"
-            android:layout_marginBottom="85dp"
+            android:layout_margin="@dimen/spacing_md"
             android:src="@drawable/ic_map"
             app:tint="@color/white"
             style="@style/Widget.App.FloatingActionButton"
@@ -320,7 +302,25 @@
             app:useCompatPadding="true"
             android:clickable="true"
             android:focusable="true"
-            android:contentDescription="@string/gbif_map"
+            android:contentDescription="@string/gbif_map"/>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_speak"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="@dimen/spacing_md"
+            android:layout_marginBottom="85dp"
+            android:src="@drawable/ic_speak"
+            app:tint="@color/white"
+            style="@style/Widget.App.FloatingActionButton"
+            app:fabCustomSize="50dp"
+            app:elevation="13dp"
+            app:pressedTranslationZ="@dimen/elevation_xl"
+            app:useCompatPadding="true"
+            android:clickable="true"
+            android:focusable="true"
+            android:contentDescription="@string/speak"
             android:visibility="gone"
             tools:visibility="visible"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
