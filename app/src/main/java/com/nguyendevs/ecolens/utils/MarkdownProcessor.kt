@@ -138,6 +138,36 @@ class MarkdownProcessor {
         return result
     }
 
+    fun getConservationStatusExplanation(code: String, isVietnamese: Boolean = true): String {
+        return if (isVietnamese) {
+            when (code.uppercase(Locale.getDefault())) {
+                "EX" -> "Tuyệt chủng"
+                "EW" -> "Tuyệt chủng trong tự nhiên"
+                "CR" -> "Cực kỳ nguy cấp"
+                "EN" -> "Nguy cấp"
+                "VU" -> "Sắp nguy cấp"
+                "NT" -> "Sắp bị đe dọa"
+                "LC" -> "Ít quan tâm"
+                "DD" -> "Thiếu dữ liệu"
+                "NE" -> "Chưa đánh giá"
+                else -> ""
+            }
+        } else {
+            when (code.uppercase(Locale.getDefault())) {
+                "EX" -> "Extinct"
+                "EW" -> "Extinct in the Wild"
+                "CR" -> "Critically Endangered"
+                "EN" -> "Endangered"
+                "VU" -> "Vulnerable"
+                "NT" -> "Near Threatened"
+                "LC" -> "Least Concern"
+                "DD" -> "Data Deficient"
+                "NE" -> "Not Evaluated"
+                else -> ""
+            }
+        }
+    }
+
     /**
      * Xóa prefix phân loại (rank) khỏi text
      * Ví dụ: "Genus: Panthera" -> "Panthera"
