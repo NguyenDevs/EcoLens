@@ -377,5 +377,5 @@
 
     <!-- ==================== その他 ==================== -->
     <string name="feature_developing">機能開発中</string>
-
+    <string name="no_data">データなし</string>
 </resources>

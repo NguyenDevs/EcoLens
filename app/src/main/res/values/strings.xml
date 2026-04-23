@@ -379,7 +379,7 @@
 
     <!-- ==================== KHÁC ==================== -->
     <string name="feature_developing">Chức năng đang được phát triển</string>
-
+    <string name="no_data">Không có dữ liệu</string>
     <!-- ==================== KHÔNG DỊCH ==================== -->
     <string name="text_secondary" translatable="false">text_secondary</string>
     <string name="background_color" translatable="false">background_color</string>

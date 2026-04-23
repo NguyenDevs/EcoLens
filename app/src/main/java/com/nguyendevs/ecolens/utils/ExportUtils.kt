@@ -233,6 +233,23 @@ object ExportUtils {
         return false
     }
 
+    private fun getCombinedConservation(context: Context, info: com.nguyendevs.ecolens.models.SpeciesInfo): String {
+        val disabledMsg = context.getString(R.string.conservation_disabled_message)
+        val noDataMsg = context.getString(R.string.no_data)
+        
+        return buildString {
+            if (info.conservationStatus != disabledMsg && info.conservationStatus.isNotBlank() && info.conservationStatus != noDataMsg) {
+                append(info.conservationStatus)
+            }
+            if (info.vnredlistStatus.isNotBlank() && info.vnredlistStatus != disabledMsg && info.vnredlistStatus != noDataMsg) {
+                if (isNotEmpty()) {
+                    append("<br><br>")
+                }
+                append(info.vnredlistStatus)
+            }
+        }
+    }
+
     fun exportHistory(
         context: Context,
         entry: HistoryEntry,
@@ -329,8 +346,9 @@ object ExportUtils {
             addDocxContentSection(document, context.getString(R.string.section_characteristics), info.characteristics)
             addDocxContentSection(document, context.getString(R.string.section_distribution), info.distribution)
             addDocxContentSection(document, context.getString(R.string.section_habitat), info.habitat)
-            if (info.conservationStatus != "Vô hiệu") {
-                addDocxContentSection(document, context.getString(R.string.section_conservation), info.conservationStatus)
+            val combinedConservation = getCombinedConservation(context, info)
+            if (combinedConservation.isNotEmpty()) {
+                addDocxContentSection(document, context.getString(R.string.section_conservation), combinedConservation)
             }
 
             val out = getOutputStream(
@@ -545,9 +563,10 @@ object ExportUtils {
 
             addMergedSection(context.getString(R.string.section_habitat), info.habitat)
 
-            if (info.conservationStatus != "Vô hiệu") {
+            val combinedConservation = getCombinedConservation(context, info)
+            if (combinedConservation.isNotEmpty()) {
                 sheet.createRow(rowNum++)
-                addMergedSection(context.getString(R.string.section_conservation), info.conservationStatus)
+                addMergedSection(context.getString(R.string.section_conservation), combinedConservation)
             }
 
             sheet.setColumnWidth(0, 7500)
@@ -816,8 +835,9 @@ object ExportUtils {
             drawContentSection(context.getString(R.string.section_characteristics), info.characteristics)
             drawContentSection(context.getString(R.string.section_distribution), info.distribution)
             drawContentSection(context.getString(R.string.section_habitat), info.habitat)
-            if (info.conservationStatus != "Vô hiệu") {
-                drawContentSection(context.getString(R.string.section_conservation), info.conservationStatus)
+            val combinedConservation = getCombinedConservation(context, info)
+            if (combinedConservation.isNotEmpty()) {
+                drawContentSection(context.getString(R.string.section_conservation), combinedConservation)
             }
 
             pdfDocument.finishPage(page)
@@ -854,7 +874,7 @@ object ExportUtils {
                 "characteristics" to stripTags(info.characteristics),
                 "distribution" to stripTags(info.distribution),
                 "habitat" to stripTags(info.habitat),
-                "conservationStatus" to if (info.conservationStatus != "Vô hiệu") stripTags(info.conservationStatus) else null
+                "conservationStatus" to getCombinedConservation(context, info).let { if (it.isNotEmpty()) stripTags(it) else null }
             )
 
             val gson = com.google.gson.GsonBuilder()

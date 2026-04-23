@@ -148,8 +148,8 @@ class SpeciesIdentificationManager(
                         commonName = "...",
                         iucn = isIucnEnabled,
                         vnredlist = isVnRedListEnabled,
-                        conservationStatus = if (isIucnEnabled) getLocalizedString(R.string.searching_iucn) else "Vô hiệu",
-                        vnredlistStatus = if (isVnRedListEnabled) getLocalizedString(R.string.searching_vnredlist) else "Vô hiệu"
+                        conservationStatus = if (isIucnEnabled) getLocalizedString(R.string.searching_iucn) else getLocalizedString(R.string.conservation_disabled_message),
+                        vnredlistStatus = if (isVnRedListEnabled) getLocalizedString(R.string.searching_vnredlist) else getLocalizedString(R.string.conservation_disabled_message)
                 )
 
         onStateUpdate(
@@ -222,6 +222,7 @@ class SpeciesIdentificationManager(
                                         phanHangBaoTon = result["Phân hạng bảo tồn"] ?: result["Phân hạng"],
                                         tieuChuanDanhGia = result["Tiêu chuẩn đánh giá"],
                                         dienGiaiDanhGia = result["Diễn giải đánh giá theo các tiêu chuẩn"],
+                                        hienTrangQuanThe = result["Hiện trạng quần thể"],
                                         namCongBo = result["Năm công bố"]
                                     )
                                 } catch (e: Exception) {
@@ -360,7 +361,7 @@ class SpeciesIdentificationManager(
                     currentSpeciesInfo =
                             currentSpeciesInfo?.copy(
                                 conservationStatus = searchingText,
-                                vnredlistStatus = if (isVnRedListEnabled) vnSearchingText else "Vô hiệu"
+                                vnredlistStatus = if (isVnRedListEnabled) vnSearchingText else getLocalizedString(R.string.conservation_disabled_message)
                             )
                     onStateUpdate(
                             EcoLensUiState(
@@ -390,7 +391,7 @@ class SpeciesIdentificationManager(
                         onStateUpdate(state.copy(images = fetchedImages))
                     }
                 } else {
-                    currentSpeciesInfo = currentSpeciesInfo?.copy(conservationStatus = "Vô hiệu")
+                    currentSpeciesInfo = currentSpeciesInfo?.copy(conservationStatus = getLocalizedString(R.string.conservation_disabled_message))
                 }
 
                 if (isVnRedListEnabled) {
@@ -400,12 +401,20 @@ class SpeciesIdentificationManager(
                         val labelRank = when(languageCode) { LanguageManager.LANG_EN -> "Rank"; LanguageManager.LANG_CN -> "级别"; LanguageManager.LANG_JP -> "ランク"; else -> "Phân hạng" }
                         val labelCriteria = when(languageCode) { LanguageManager.LANG_EN -> "Criteria"; LanguageManager.LANG_CN -> "标准"; LanguageManager.LANG_JP -> "基準"; else -> "Tiêu chuẩn" }
                         val labelExplanation = when(languageCode) { LanguageManager.LANG_EN -> "Explanation"; LanguageManager.LANG_CN -> "说明"; LanguageManager.LANG_JP -> "説明"; else -> "Diễn giải" }
+                        val labelCurrentStatus = when(languageCode) {
+                            LanguageManager.LANG_EN -> "Current Status"; LanguageManager.LANG_CN -> "Current Status"; LanguageManager.LANG_JP -> "Current Status"; else -> "Hiện trạng" }
                         val labelYear = when(languageCode) { LanguageManager.LANG_EN -> "Year published"; LanguageManager.LANG_CN -> "发布年份"; LanguageManager.LANG_JP -> "発行年"; else -> "Năm công bố" }
+
 
                         val translatedExplanation = if (!isViet && !vnredlistResult.dienGiaiDanhGia.isNullOrEmpty()) {
                             streamingHelper.translateText(vnredlistResult.dienGiaiDanhGia, languageCode) ?: vnredlistResult.dienGiaiDanhGia
                         } else {
                             vnredlistResult.dienGiaiDanhGia
+                        }
+                        val translationCurrentStatus = if (!isViet && !vnredlistResult.hienTrangQuanThe.isNullOrEmpty()) {
+                            streamingHelper.translateText(vnredlistResult.hienTrangQuanThe, languageCode) ?: vnredlistResult.hienTrangQuanThe
+                        } else {
+                            vnredlistResult.hienTrangQuanThe
                         }
 
                         val buildStatus = buildString {
@@ -417,6 +426,7 @@ class SpeciesIdentificationManager(
                             }
                             if (!vnredlistResult.tieuChuanDanhGia.isNullOrEmpty()) append("• <b>$labelCriteria:</b> ${vnredlistResult.tieuChuanDanhGia}<br>")
                             if (!translatedExplanation.isNullOrEmpty()) append("• <b>$labelExplanation:</b> $translatedExplanation<br>")
+                            if (!translationCurrentStatus.isNullOrEmpty()) append("• <b>$labelCurrentStatus:</b> $translationCurrentStatus<br>")
                             if (!vnredlistResult.namCongBo.isNullOrEmpty()) append("• <b>$labelYear: <font color=#2761F5>${vnredlistResult.namCongBo}</b><br>")
                         }
                         
@@ -426,13 +436,13 @@ class SpeciesIdentificationManager(
                             isVietnamese = isViet
                         )
                         
-                        val statusText = if (processedStatus.isNotEmpty()) processedStatus else "Không có dữ liệu"
+                        val statusText = if (processedStatus.isNotEmpty()) processedStatus else getLocalizedString(R.string.no_data)
                         currentSpeciesInfo = currentSpeciesInfo?.copy(vnredlistStatus = statusText)
                     } else {
-                        currentSpeciesInfo = currentSpeciesInfo?.copy(vnredlistStatus = "Không có dữ liệu")
+                        currentSpeciesInfo = currentSpeciesInfo?.copy(vnredlistStatus = getLocalizedString(R.string.no_data))
                     }
                 } else {
-                    currentSpeciesInfo = currentSpeciesInfo?.copy(vnredlistStatus = "Vô hiệu")
+                    currentSpeciesInfo = currentSpeciesInfo?.copy(vnredlistStatus = getLocalizedString(R.string.conservation_disabled_message))
                 }
 
                 saveToHistory(existingHistoryId, imageFile, languageCode)
@@ -633,6 +643,7 @@ class SpeciesIdentificationManager(
         val phanHangBaoTon: String?,
         val tieuChuanDanhGia: String?,
         val dienGiaiDanhGia: String?,
-        val namCongBo: String?
+        val namCongBo: String?,
+        val hienTrangQuanThe: String?
     )
 }
