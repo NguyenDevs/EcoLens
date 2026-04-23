@@ -427,7 +427,7 @@ class MainActivity : AppCompatActivity() {
         loadingAnimationHandler =
                 LoadingAnimationHandler(homeRoot.findViewById(R.id.tvLoadingText), lifecycleScope)
 
-        speciesInfoHandler =
+                speciesInfoHandler =
                 SpeciesInfoHandler(
                         this,
                         binding.homeContainer.speciesInfoCard,
@@ -467,9 +467,11 @@ class MainActivity : AppCompatActivity() {
 
                         if (isComplete && hasInfo) {
                             binding.fabSpeak.isVisible = true
+                            binding.btnMap.isVisible = state.speciesInfo?.scientificName?.isNotEmpty() == true
                         }
                     } else {
                         binding.fabSpeak.isVisible = false
+                        binding.btnMap.isVisible = false
                     }
                 }
 
@@ -638,6 +640,14 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+
+        binding.btnMap.setOnClickListener {
+            viewModel.uiState.value.speciesInfo?.scientificName?.let { scientificName ->
+                if (scientificName.isNotEmpty()) {
+                    com.nguyendevs.ecolens.utils.CustomDialogUtils.showGbifMap(this, scientificName)
+                }
+            }
+        }
     }
 
     private fun updateFabUI(speaking: Boolean) {
@@ -732,6 +742,7 @@ class MainActivity : AppCompatActivity() {
 
             binding.homeContainer.speciesInfoCard.root.isVisible = false
             binding.fabSpeak.isVisible = false
+            binding.btnMap.isVisible = false
 
             binding.fabCamera.isClickable = true
             binding.fabCamera.alpha = 1.0f
@@ -739,6 +750,7 @@ class MainActivity : AppCompatActivity() {
             binding.homeContainer.speciesInfoCard.root.isVisible = false
             homeViews.errorCard?.isVisible = false
             binding.fabSpeak.isVisible = false
+            binding.btnMap.isVisible = false
             speciesInfoHandler.displaySpeciesInfo(
                     SpeciesInfo(scientificName = "", commonName = ""),
                     LoadingStage.NONE
@@ -773,11 +785,22 @@ class MainActivity : AppCompatActivity() {
                         binding.fabSpeak.isVisible = true
                         animationHandler.showFab(binding.fabSpeak)
                     }
+                    
+                    if (state.speciesInfo.scientificName.isNotEmpty()) {
+                        if (binding.btnMap.visibility != View.VISIBLE) {
+                            binding.btnMap.isVisible = true
+                            animationHandler.showFab(binding.btnMap)
+                        }
+                    } else {
+                        binding.btnMap.isVisible = false
+                    }
                 } else {
                     binding.fabSpeak.isVisible = false
+                    binding.btnMap.isVisible = false
                 }
             } else {
                 binding.fabSpeak.isVisible = false
+                binding.btnMap.isVisible = false
             }
         }
     }

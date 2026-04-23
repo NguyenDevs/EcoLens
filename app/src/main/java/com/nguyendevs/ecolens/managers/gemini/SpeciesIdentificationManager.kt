@@ -177,8 +177,9 @@ class SpeciesIdentificationManager(
                 val gbifDeferred =
                         async(Dispatchers.IO) {
                             try {
+                                val encodedName = java.net.URLEncoder.encode(scientificName, "UTF-8")
                                 val url =
-                                        "https://api.gbif.org/v1/species/match?name=$scientificName"
+                                        "https://api.gbif.org/v1/species/match?name=$encodedName"
                                 apiService.getGbifTaxonomy(url)
                             } catch (e: Exception) {
                                 Log.e(TAG, "GBIF Error: ${e.message}")

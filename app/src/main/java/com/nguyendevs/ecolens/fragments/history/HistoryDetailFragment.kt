@@ -110,6 +110,7 @@ class HistoryDetailFragment : Fragment() {
         setupFavoriteButton(entry)
         setupMoreOptionsButton()
         setupTranslateButton(entry)
+        setupMapButton(info)
 
         animationHandler.showFab(binding.fabSpeak)
         binding.fabSpeak.bringToFront()
@@ -506,6 +507,19 @@ class HistoryDetailFragment : Fragment() {
             }
         } else {
             binding.btnTranslate.visibility = View.GONE
+        }
+    }
+
+    /** Thiết lập nút xem bản đồ phân bố GBIF. */
+    private fun setupMapButton(info: SpeciesInfo) {
+        if (info.scientificName.isNotEmpty()) {
+            binding.btnMap.visibility = View.VISIBLE
+            binding.btnMap.setOnClickListener {
+                animationHandler.performConfirmFeedback(it)
+                com.nguyendevs.ecolens.utils.CustomDialogUtils.showGbifMap(requireContext(), info.scientificName)
+            }
+        } else {
+            binding.btnMap.visibility = View.GONE
         }
     }
 
