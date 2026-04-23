@@ -53,7 +53,12 @@ object CustomDialogUtils {
         dialog.show()
     }
 
-    private fun buildGbifMapHtml(taxonKey: Int, speciesName: String): String {
+    private fun buildGbifMapHtml(
+        taxonKey: Int,
+        speciesName: String,
+        initialMapIdx: Int,
+        initialGbifIdx: Int
+    ): String {
         return """
     <!DOCTYPE html>
     <html>
@@ -63,22 +68,23 @@ object CustomDialogUtils {
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
         <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            html, body, #map { width: 100%; height: 100%; background: #f8fafc; }
+            html, body, #map { width: 100%; height: 100%; background: #f1f5f9; transition: background 0.3s; }
             #map { transform: translate3d(0,0,0); }
             #title {
                 position: absolute; top: 16px; left: 50%;
                 transform: translateX(-50%); z-index: 1000;
-                background: rgba(15, 23, 42, 0.4); color: #f8fafc;
+                background: rgba(255, 255, 255, 0.85); color: #1e293b;
                 padding: 10px 20px; border-radius: 16px;
                 font-size: 14px; font-weight: 600; font-family: system-ui, -apple-system, sans-serif;
                 box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                backdrop-filter: blur(12px);
+                border: 1px solid rgba(0, 0, 0, 0.05);
+                backdrop-filter: blur(8px);
                 white-space: nowrap; max-width: 85vw;
                 overflow: hidden; text-overflow: ellipsis;
                 pointer-events: none;
+                transition: all 0.3s;
             }
-            .leaflet-container { background: #0f172a !important; }
+            .leaflet-container { background: transparent !important; }
         </style>
     </head>
     <body>
@@ -97,21 +103,71 @@ object CustomDialogUtils {
             
             L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            var baseLayers = [
+                'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+                'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+                'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+            ];
+            
+            var gbifStyles = [
+                'green.point', 'classic.point', 'purpleYellow.point', 'fire.point', 
+                'glacier.point', 'purpleHeat.point', 'blueHeat.point', 
+                'orangeHeat.point', 'greenHeat.point'
+            ];
+            
+            var currentMapIdx = $initialMapIdx;
+            var currentGbifIdx = $initialGbifIdx;
+            
+            var currentBaseLayer = L.tileLayer(baseLayers[currentMapIdx], { 
                 maxZoom: 20,
                 updateWhenIdle: true,
                 keepBuffer: 2
             }).addTo(map);
 
-            L.tileLayer(
+            var gbifLayer = L.tileLayer(
                 'https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@2x.png' +
-                '?srs=EPSG:3857&taxonKey=$taxonKey&style=purpleYellow.point',
+                '?srs=EPSG:3857&taxonKey=$taxonKey&style=' + gbifStyles[currentGbifIdx],
                 {
                     opacity: 0.9,
                     maxZoom: 14,
                     updateWhenIdle: true
                 }
             ).addTo(map);
+
+            function updateUI(idx) {
+                var isDark = idx === 2;
+                var title = document.getElementById('title');
+                title.style.background = isDark ? 'rgba(15, 23, 42, 0.85)' : 'rgba(255, 255, 255, 0.85)';
+                title.style.color = isDark ? '#f8fafc' : '#1e293b';
+                title.style.border = isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.05)';
+                document.body.style.background = isDark ? '#0f172a' : '#f1f5f9';
+            }
+            
+            updateUI(currentMapIdx);
+
+            window.changeMapStyle = function(index) {
+                map.removeLayer(currentBaseLayer);
+                currentBaseLayer = L.tileLayer(baseLayers[index], { 
+                    maxZoom: 20,
+                    updateWhenIdle: true,
+                    keepBuffer: 2
+                }).addTo(map);
+                currentBaseLayer.bringToBack();
+                updateUI(index);
+            };
+
+            window.changeGbifStyle = function(index) {
+                map.removeLayer(gbifLayer);
+                gbifLayer = L.tileLayer(
+                    'https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@2x.png' +
+                    '?srs=EPSG:3857&taxonKey=$taxonKey&style=' + gbifStyles[index],
+                    {
+                        opacity: 0.9,
+                        maxZoom: 14,
+                        updateWhenIdle: true
+                    }
+                ).addTo(map);
+            };
         </script>
     </body>
     </html>
@@ -171,10 +227,28 @@ object CustomDialogUtils {
         val webView = dialogView.findViewById<WebView>(R.id.webView)
         val loadingIndicator = dialogView.findViewById<View>(R.id.loadingIndicator)
         val webProgress = dialogView.findViewById<LinearProgressIndicator>(R.id.webProgress)
+        val btnGbifStyle = dialogView.findViewById<ImageView>(R.id.btnGbifStyle)
+        val btnStyle = dialogView.findViewById<ImageView>(R.id.btnStyle)
         val btnClose = dialogView.findViewById<ImageView>(R.id.btnClose)
         val tvTitle = dialogView.findViewById<TextView>(R.id.tvDialogTitle)
 
         val dialog = createDialog(context, dialogView, 0.95, 0.85)
+
+        val prefs = context.getSharedPreferences("map_prefs", Context.MODE_PRIVATE)
+        var currentStyleIndex = prefs.getInt("map_style_index", 0)
+        var currentGbifIndex = prefs.getInt("gbif_style_index", 0)
+
+        btnStyle.setOnClickListener {
+            currentStyleIndex = (currentStyleIndex + 1) % 3
+            prefs.edit().putInt("map_style_index", currentStyleIndex).apply()
+            webView.evaluateJavascript("changeMapStyle($currentStyleIndex)", null)
+        }
+
+        btnGbifStyle.setOnClickListener {
+            currentGbifIndex = (currentGbifIndex + 1) % 9
+            prefs.edit().putInt("gbif_style_index", currentGbifIndex).apply()
+            webView.evaluateJavascript("changeGbifStyle($currentGbifIndex)", null)
+        }
 
         configureWebView(webView)
 
@@ -219,7 +293,7 @@ object CustomDialogUtils {
 
                 val usageKey = response.usageKey
                 if (usageKey != null) {
-                    val html = buildGbifMapHtml(usageKey, cleanName)
+                    val html = buildGbifMapHtml(usageKey, cleanName, currentStyleIndex, currentGbifIndex)
                     webView.loadDataWithBaseURL(
                         null,
                         html,
