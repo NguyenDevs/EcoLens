@@ -103,6 +103,8 @@
     <!-- 音声読み上げ -->
     <string name="tts_scientific_name">学名</string>
     <string name="tts_taxonomy">科学的分類</string>
+    <string name="tts_iucn">IUCNによると</string>
+    <string name="tts_vnredlist">ベトナムレッドリストによると</string>
 
     <!-- 不明な値 -->
     <string name="unknown_common_name">[不明な一般名]</string>

@@ -308,4 +308,29 @@ class GeminiStreamingHelper(
     data class ConservationResponse(
         val conservationStatus: String? = null
     )
+
+    suspend fun translateText(
+        text: String,
+        languageCode: String
+    ): String? = withContext(Dispatchers.IO) {
+        val prompt = PromptBuilder.buildTextTranslationPrompt(text, languageCode)
+        val request = createGeminiRequest(prompt)
+
+        try {
+            val response = apiService.askGemini(request)
+            val responseText = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
+            if (!responseText.isNullOrEmpty()) {
+                val cleanedJson = cleanJsonString(responseText)
+                val result = gson.fromJson(cleanedJson, TextTranslationResponse::class.java)
+                return@withContext result.translatedText
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "TranslateText Error: ${e.message}")
+        }
+        return@withContext null
+    }
+
+    data class TextTranslationResponse(
+        val translatedText: String? = null
+    )
 }

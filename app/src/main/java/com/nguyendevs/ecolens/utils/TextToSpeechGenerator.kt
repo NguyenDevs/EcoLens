@@ -25,8 +25,15 @@ object TextToSpeechGenerator {
         appendSectionIfNotEmpty(sb, context, R.string.section_distribution, info.distribution)
         appendSectionIfNotEmpty(sb, context, R.string.section_habitat, info.habitat)
         
-        if (info.iucn) {
-            appendSectionIfNotEmpty(sb, context, R.string.section_conservation, info.conservationStatus)
+        if (info.iucn && info.vnredlist) {
+            appendSectionIfNotEmpty(sb, context, R.string.tts_iucn, info.conservationStatus)
+            appendSectionIfNotEmpty(sb, context, R.string.tts_vnredlist, info.vnredlistStatus)
+        } else if (info.iucn) {
+            appendSectionIfNotEmpty(sb, context, R.string.tts_iucn, info.conservationStatus)
+        } else if (info.vnredlist) {
+            appendSectionIfNotEmpty(sb, context, R.string.tts_vnredlist, info.vnredlistStatus)
+        } else {
+            sb.append("${context.getString(R.string.conservation_disabled_message)}. ")
         }
 
         return sb.toString()
@@ -54,11 +61,12 @@ object TextToSpeechGenerator {
 
     /** Khử trần các thẻ ngôn ngữ đánh dấu siêu văn bản ra khỏi chuỗi chuẩn. */
     private fun stripHtml(html: String): String {
-        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+        val stripped = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             android.text.Html.fromHtml(html, android.text.Html.FROM_HTML_MODE_COMPACT).toString()
         } else {
             @Suppress("DEPRECATION")
             android.text.Html.fromHtml(html).toString()
         }
+        return stripped.replace("•", "").replace("*", "").trim()
     }
 }

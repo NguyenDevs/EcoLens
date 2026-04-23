@@ -322,6 +322,26 @@ object PromptBuilder {
             """.trimIndent()
         }
     }
+
+    fun buildTextTranslationPrompt(text: String, languageCode: String): String {
+        val targetLang = when (languageCode) {
+            LanguageManager.LANG_EN -> "English"
+            LanguageManager.LANG_CN -> "Simplified Chinese"
+            LanguageManager.LANG_JP -> "Japanese"
+            else -> "English"
+        }
+        
+        return """
+            Translate the following text into $targetLang.
+            Input text:
+            $text
+            
+            Return JSON only:
+            {"translatedText": "translated text here"}
+            
+            RETURN ONLY JSON, NO MARKDOWN.
+        """.trimIndent()
+    }
     fun buildChatSystemInstruction(): GeminiContent {
         return GeminiContent(
                 role = "user",

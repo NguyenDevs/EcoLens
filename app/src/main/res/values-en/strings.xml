@@ -103,6 +103,8 @@
     <!-- Text-to-Speech -->
     <string name="tts_scientific_name">Scientific name</string>
     <string name="tts_taxonomy">Scientific classification</string>
+    <string name="tts_iucn">According to IUCN</string>
+    <string name="tts_vnredlist">According to Vietnam Red Book</string>
 
     <!-- Unknown Values -->
     <string name="unknown_common_name">[Unknown common name]</string>

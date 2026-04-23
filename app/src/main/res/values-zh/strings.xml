@@ -103,6 +103,8 @@
     <!-- 文本转语音 -->
     <string name="tts_scientific_name">学名</string>
     <string name="tts_taxonomy">科学分类</string>
+    <string name="tts_iucn">根据IUCN</string>
+    <string name="tts_vnredlist">根据越南红色名录</string>
 
     <!-- 未知值 -->
     <string name="unknown_common_name">[未知俗名]</string>
