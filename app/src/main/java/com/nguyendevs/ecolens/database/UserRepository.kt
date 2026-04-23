@@ -29,6 +29,7 @@ class UserRepository {
                             language = "vi",
                             darkMode = false,
                             iucnMode = true,
+                            vnredlistMode = true,
                             taxoMode = false
                     )
 
@@ -73,6 +74,7 @@ class UserRepository {
                                     language = "vi",
                                     darkMode = false,
                                     iucnMode = true,
+                                    vnredlistMode = true,
                                     taxoMode = false
                             )
                     usersRef.child(firebaseUser.uid).setValue(newUser).await()
@@ -160,6 +162,16 @@ class UserRepository {
         val uid = auth.currentUser?.uid ?: return
         try {
             usersRef.child(uid).child("iucnMode").setValue(isEnabled).await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    /** Cập nhật chế độ VN Red List. */
+    suspend fun updateVnRedListMode(isEnabled: Boolean) {
+        val uid = auth.currentUser?.uid ?: return
+        try {
+            usersRef.child(uid).child("vnredlistMode").setValue(isEnabled).await()
         } catch (e: Exception) {
             e.printStackTrace()
         }

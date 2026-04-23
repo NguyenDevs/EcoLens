@@ -137,6 +137,7 @@ class SpeciesIdentificationManager(
 
         val sharedPref = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         val isIucnEnabled = sharedPref.getBoolean("iucn_mode", true)
+        val isVnRedListEnabled = sharedPref.getBoolean("vnredlist_mode", true)
         val isTaxoModeEnabled = sharedPref.getBoolean("taxo_mode", false)
 
         currentSpeciesInfo =
@@ -144,7 +145,8 @@ class SpeciesIdentificationManager(
                         scientificName = scientificName,
                         confidence = confidence,
                         commonName = "...",
-                        iucn = isIucnEnabled
+                        iucn = isIucnEnabled,
+                        vnredlist = isVnRedListEnabled
                 )
 
         onStateUpdate(
@@ -205,7 +207,8 @@ class SpeciesIdentificationManager(
                                 ?: SpeciesInfo(
                                         scientificName = scientificName,
                                         confidence = confidence,
-                                        iucn = isIucnEnabled
+                                        iucn = isIucnEnabled,
+                                        vnredlist = isVnRedListEnabled
                                 )
 
                 val geminiDetailsDeferred =
@@ -229,7 +232,8 @@ class SpeciesIdentificationManager(
                                                     family = current.family,
                                                     genus = current.genus,
                                                     species = current.species,
-                                                    iucn = isIucnEnabled
+                                                    iucn = isIucnEnabled,
+                                                    vnredlist = isVnRedListEnabled
                                             )
                                         } else {
                                             incomingInfo
@@ -336,7 +340,8 @@ class SpeciesIdentificationManager(
                                     ?: SpeciesInfo(
                                             scientificName = scientificName,
                                             confidence = confidence,
-                                            iucn = true
+                                            iucn = true,
+                                            vnredlist = isVnRedListEnabled
                                     )
 
                     streamingHelper.streamConservation(

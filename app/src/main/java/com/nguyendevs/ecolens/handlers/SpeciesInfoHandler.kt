@@ -393,14 +393,37 @@ class SpeciesInfoHandler(
         }
     }
 
-    /** Hiển thị thẻ tình trạng bảo tồn nếu tính năng IUCN được bật. */
+    /** Hiển thị thẻ tình trạng bảo tồn nếu tính năng IUCN hoặc VN Red List được bật. */
     private fun displayConservationStatus(status: String, shouldScroll: Boolean = true) {
         val sharedPref = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         val isIucnEnabled = sharedPref.getBoolean("iucn_mode", true)
+        val isVnRedListEnabled = sharedPref.getBoolean("vnredlist_mode", true)
 
-        if (!isIucnEnabled || status == "Vô hiệu") {
-            sectionDisplayHandler.hideSection(R.id.sectionConservation)
+        if (!isIucnEnabled && !isVnRedListEnabled) {
+            infoBinding.tvConservationDisabledMessage.visibility = View.VISIBLE
+            infoBinding.tvConservationDisabledMessage.text = context.getString(R.string.conservation_disabled_message)
+            infoBinding.tvConservationStatus.visibility = View.GONE
+            infoBinding.dividerConservation.visibility = View.GONE
+            infoBinding.tvVnRedListStatus.visibility = View.GONE
+            
+            sectionDisplayHandler.displaySection(
+                    R.id.sectionConservation,
+                    R.id.tvConservationDisabledMessage,
+                    context.getString(R.string.conservation_disabled_message),
+                    shouldScroll,
+                    isInitialLoad
+            )
         } else {
+            infoBinding.tvConservationDisabledMessage.visibility = View.GONE
+            
+            infoBinding.tvConservationStatus.visibility = View.VISIBLE
+            infoBinding.tvConservationStatus.text = if (isIucnEnabled) status else context.getString(R.string.iucn_disabled_message)
+            
+            infoBinding.dividerConservation.visibility = View.VISIBLE
+            
+            infoBinding.tvVnRedListStatus.visibility = View.VISIBLE
+            infoBinding.tvVnRedListStatus.text = if (isVnRedListEnabled) status else context.getString(R.string.vnredlist_disabled_message)
+
             sectionDisplayHandler.displaySection(
                     R.id.sectionConservation,
                     R.id.tvConservationStatus,

@@ -784,7 +784,31 @@
                                         android:layout_marginBottom="@dimen/spacing_xs" />
 
                                 <TextView
+                                        android:id="@+id/tvConservationDisabledMessage"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:textColor="@color/text_secondary"
+                                        android:lineSpacingExtra="6dp"
+                                        android:visibility="gone"
+                                        style="@style/TextAppearance.App.Body1" />
+
+                                <TextView
                                         android:id="@+id/tvConservationStatus"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:textColor="@color/text_secondary"
+                                        android:lineSpacingExtra="6dp"
+                                        style="@style/TextAppearance.App.Body1" />
+
+                                <View
+                                        android:id="@+id/dividerConservation"
+                                        style="@style/Widget.App.Divider"
+                                        android:layout_marginTop="@dimen/spacing_sm"
+                                        android:layout_marginBottom="@dimen/spacing_sm" />
+
+                                <TextView
+                                        android:id="@+id/tvVnRedListStatus"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
                                         android:textColor="@color/text_secondary"

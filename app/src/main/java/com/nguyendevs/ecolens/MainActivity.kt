@@ -265,7 +265,9 @@ class MainActivity : AppCompatActivity() {
                     val appSettings = getSharedPreferences("app_settings", Context.MODE_PRIVATE)
                     appSettings
                             .edit()
+                            .putBoolean("dark_mode", user.darkMode)
                             .putBoolean("iucn_mode", user.iucnMode)
+                            .putBoolean("vnredlist_mode", user.vnredlistMode)
                             .putBoolean("taxo_mode", user.taxoMode)
                             .apply()
 

@@ -89,7 +89,6 @@ class SettingsHandler(
 
         val sharedPref = activity.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         binding.switchIUCNMode.isChecked = sharedPref.getBoolean("iucn_mode", true)
-
         binding.switchIUCNMode.setOnCheckedChangeListener { _, isChecked ->
             sharedPref.edit().putBoolean("iucn_mode", isChecked).apply()
             activity.lifecycleScope.launch {
@@ -97,8 +96,20 @@ class SettingsHandler(
             }
         }
 
+        binding.switchVNRedListMode.isChecked = sharedPref.getBoolean("vnredlist_mode", true)
+        binding.switchVNRedListMode.setOnCheckedChangeListener { _, isChecked ->
+            sharedPref.edit().putBoolean("vnredlist_mode", isChecked).apply()
+            activity.lifecycleScope.launch {
+                userRepository.updateVnRedListMode(isChecked)
+            }
+        }
+
         binding.btnIUCN.setOnClickListener {
             binding.switchIUCNMode.toggle()
+        }
+
+        binding.btnVNRedList.setOnClickListener {
+            binding.switchVNRedListMode.toggle()
         }
 
         val isVietnamese = languageManager.getLanguage() == LanguageManager.LANG_VI

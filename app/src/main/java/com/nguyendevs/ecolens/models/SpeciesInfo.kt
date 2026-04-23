@@ -19,6 +19,7 @@ package com.nguyendevs.ecolens.models
  * @property conservationStatus Tình trạng bảo tồn
  * @property confidence Độ tin cậy của kết quả nhận diện (0.0 - 1.0)
  * @property iucn Trạng thái hiển thị IUCN tại thời điểm nhận diện
+ * @property vnredlist Trạng thái hiển thị VN Red List tại thời điểm nhận diện
  */
 data class SpeciesInfo(
     val commonName: String = "",
@@ -36,5 +37,6 @@ data class SpeciesInfo(
     val habitat: String = "",
     val conservationStatus: String = "",
     val confidence: Double = 0.0,
-    val iucn: Boolean = true
+    val iucn: Boolean = true,
+    val vnredlist: Boolean = true
 )

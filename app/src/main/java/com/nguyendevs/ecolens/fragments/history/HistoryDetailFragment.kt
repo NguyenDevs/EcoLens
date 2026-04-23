@@ -702,17 +702,30 @@ class HistoryDetailFragment : Fragment() {
                 iconRes = R.drawable.ic_habitat_section
         )
 
-        val conservationContent =
-                if (info.conservationStatus == "Vô hiệu") getString(R.string.iucn_disabled_message)
-                else info.conservationStatus
-
-        addSection(
-                binding.containerSections,
-                getString(R.string.section_conservation),
-                conservationContent,
-                isCenter = info.conservationStatus == "Vô hiệu",
-                iconRes = R.drawable.ic_conservation_section
-        )
+        if (!info.iucn && !info.vnredlist) {
+            addSection(
+                    binding.containerSections,
+                    getString(R.string.section_conservation),
+                    getString(R.string.conservation_disabled_message),
+                    isCenter = true,
+                    iconRes = R.drawable.ic_conservation_section
+            )
+        } else {
+            val iucnContent = if (!info.iucn) getString(R.string.iucn_disabled_message) else info.conservationStatus
+            val vnRedListContent = if (!info.vnredlist) getString(R.string.vnredlist_disabled_message) else info.conservationStatus
+            
+            val finalContent = buildString {
+                append(iucnContent)
+                append("\n\n---\n\n")
+                append(vnRedListContent)
+            }
+            addSection(
+                    binding.containerSections,
+                    getString(R.string.section_conservation),
+                    finalContent,
+                    iconRes = R.drawable.ic_conservation_section
+            )
+        }
     }
 
     /** Thêm một section nội dung vào container với tiêu đề, divider và text. */
