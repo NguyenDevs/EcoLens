@@ -396,16 +396,21 @@ class SpeciesIdentificationManager(
                 if (isVnRedListEnabled) {
                     if (vnredlistResult != null) {
                         val buildStatus = buildString {
-                            if (!vnredlistResult.phanHangBaoTon.isNullOrEmpty()) append("• <b>Phân hạng:</b> ${vnredlistResult.phanHangBaoTon}<br>")
+                            if (!vnredlistResult.phanHangBaoTon.isNullOrEmpty()) {
+                                val code = vnredlistResult.phanHangBaoTon
+                                val explanation = MarkdownProcessor().getConservationStatusExplanation(code, true)
+                                val displayStatus = if (explanation.isNotEmpty()) "$code ($explanation)" else code
+                                append("• <b>Phân hạng:</b> $displayStatus<br>")
+                            }
                             if (!vnredlistResult.tieuChuanDanhGia.isNullOrEmpty()) append("• <b>Tiêu chuẩn:</b> ${vnredlistResult.tieuChuanDanhGia}<br>")
                             if (!vnredlistResult.dienGiaiDanhGia.isNullOrEmpty()) append("• <b>Diễn giải:</b> ${vnredlistResult.dienGiaiDanhGia}<br>")
-                            if (!vnredlistResult.namCongBo.isNullOrEmpty()) append("• <b>Năm công bố:</b> ${vnredlistResult.namCongBo}<br>")
+                            if (!vnredlistResult.namCongBo.isNullOrEmpty()) append("• <b>Năm công bố: <font color=#2761F5>${vnredlistResult.namCongBo}</b><br>")
                         }
                         
                         val processedStatus = MarkdownProcessor().process(
                             text = buildStatus,
                             isConservationStatus = true,
-                            isVietnamese = true // VN Red List luôn trả về tiếng Việt
+                            isVietnamese = true
                         )
                         
                         val statusText = if (processedStatus.isNotEmpty()) processedStatus else "Không có dữ liệu"
