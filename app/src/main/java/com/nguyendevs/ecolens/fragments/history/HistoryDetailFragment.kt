@@ -714,15 +714,11 @@ class HistoryDetailFragment : Fragment() {
             val iucnContent = if (!info.iucn) getString(R.string.iucn_disabled_message) else info.conservationStatus
             val vnRedListContent = if (!info.vnredlist) getString(R.string.vnredlist_disabled_message) else info.vnredlistStatus
             
-            val finalContent = buildString {
-                append(iucnContent)
-                append("\n\n---\n\n")
-                append(vnRedListContent)
-            }
-            addSection(
+            addSplitSection(
                     binding.containerSections,
                     getString(R.string.section_conservation),
-                    finalContent,
+                    iucnContent,
+                    vnRedListContent,
                     iconRes = R.drawable.ic_conservation_section
             )
         }
@@ -815,6 +811,121 @@ class HistoryDetailFragment : Fragment() {
         container.addView(headerLayout)
         container.addView(divider)
         container.addView(contentView)
+    }
+
+    /** Thêm một section với hai nội dung được ngăn cách bởi một divider. */
+    private fun addSplitSection(
+            container: LinearLayout,
+            title: String,
+            content1: String,
+            content2: String,
+            iconRes: Int = 0
+    ) {
+        if (content1.isBlank() && content2.isBlank()) return
+
+        val context = container.context
+        val titleColor = ContextCompat.getColor(context, R.color.text_primary)
+        val contentColor = ContextCompat.getColor(context, R.color.text_secondary)
+        val dividerColor = ContextCompat.getColor(context, R.color.border_light)
+        val topMargin = 24.dpToPx()
+        val bottomMarginTitle = 10.dpToPx()
+        val bottomMarginDivider = 12.dpToPx()
+        val dividerHeight = 1.dpToPx()
+        val spacingSm = resources.getDimensionPixelSize(R.dimen.spacing_sm)
+
+        val headerLayout =
+                LinearLayout(context).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    gravity = android.view.Gravity.CENTER_VERTICAL
+                    layoutParams =
+                            LinearLayout.LayoutParams(
+                                            ViewGroup.LayoutParams.MATCH_PARENT,
+                                            ViewGroup.LayoutParams.WRAP_CONTENT
+                                    )
+                                    .apply {
+                                        this.topMargin = topMargin
+                                        this.bottomMargin = bottomMarginTitle
+                                    }
+                }
+
+        if (iconRes != 0) {
+            val iconView =
+                    android.widget.ImageView(context).apply {
+                        setImageResource(iconRes)
+                        layoutParams =
+                                LinearLayout.LayoutParams(28.dpToPx(), 28.dpToPx()).apply {
+                                    marginEnd = 8.dpToPx()
+                                }
+                    }
+            headerLayout.addView(iconView)
+        }
+
+        val titleView =
+                TextView(context).apply {
+                    text = title
+                    textSize = 20f
+                    setTextColor(titleColor)
+                    setTypeface(null, Typeface.BOLD)
+                    layoutParams =
+                            LinearLayout.LayoutParams(
+                                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                                    ViewGroup.LayoutParams.WRAP_CONTENT
+                            )
+                }
+        headerLayout.addView(titleView)
+
+        val divider =
+                View(context).apply {
+                    layoutParams =
+                            LinearLayout.LayoutParams(
+                                            ViewGroup.LayoutParams.MATCH_PARENT,
+                                            dividerHeight
+                                    )
+                                    .apply { this.bottomMargin = bottomMarginDivider }
+                    setBackgroundColor(dividerColor)
+                }
+
+        container.addView(headerLayout)
+        container.addView(divider)
+
+        if (content1.isNotBlank()) {
+            val contentView1 =
+                    TextView(context).apply {
+                        textSize = 15f
+                        setTextColor(contentColor)
+                        setLineSpacing(0f, 1.4f)
+                        setHtml(content1)
+                    }
+            container.addView(contentView1)
+        }
+
+        if (content1.isNotBlank() && content2.isNotBlank()) {
+            val innerDivider =
+                    View(context).apply {
+                        layoutParams =
+                                LinearLayout.LayoutParams(
+                                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                                dividerHeight
+                                        )
+                                        .apply {
+                                            this.topMargin = spacingSm
+                                            this.bottomMargin = spacingSm
+                                        }
+                        setBackgroundColor(dividerColor)
+                    }
+            container.addView(innerDivider)
+        }
+
+        if (content2.isNotBlank()) {
+            val contentView2 =
+                    TextView(context).apply {
+                        textSize = 15f
+                        setTextColor(contentColor)
+                        setLineSpacing(0f, 1.4f)
+                        setHtml(content2)
+                    }
+            container.addView(contentView2)
+        }
     }
 
     /** Thiết lập FAB text-to-speech, toggle đọc/dừng khi click. */
