@@ -138,6 +138,27 @@
             android:layout_gravity="top|end"
             android:visibility="gone"/>
 
+    <!-- GBIF MAP BUTTON -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btnMap"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="140dp"
+            android:layout_marginEnd="12dp"
+            android:contentDescription="@string/gbif_map"
+            android:src="@drawable/ic_map"
+            app:tint="@color/white"
+            app:fabSize="normal"
+            app:maxImageSize="30dp"
+            app:fabCustomSize="50dp"
+            style="@style/Widget.App.FloatingActionButton"
+            app:backgroundTint="@color/primary"
+            app:elevation="13dp"
+            app:pressedTranslationZ="@dimen/elevation_xl"
+            app:layout_anchorGravity="top|end"
+            android:layout_gravity="top|end"
+            android:visibility="gone"/>
+
     <!-- BOTTOM NAVIGATION -->
     <com.google.android.material.card.MaterialCardView
             android:id="@+id/bottomNavContainer"
