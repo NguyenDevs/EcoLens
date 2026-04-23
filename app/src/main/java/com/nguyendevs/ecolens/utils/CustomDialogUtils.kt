@@ -63,17 +63,17 @@ object CustomDialogUtils {
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
         <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            html, body, #map { width: 100%; height: 100%; background: #0f172a; }
+            html, body, #map { width: 100%; height: 100%; background: #f8fafc; }
             #map { transform: translate3d(0,0,0); }
             #title {
                 position: absolute; top: 16px; left: 50%;
                 transform: translateX(-50%); z-index: 1000;
-                background: rgba(15, 23, 42, 0.85); color: #f8fafc;
+                background: rgba(15, 23, 42, 0.4); color: #f8fafc;
                 padding: 10px 20px; border-radius: 16px;
                 font-size: 14px; font-weight: 600; font-family: system-ui, -apple-system, sans-serif;
                 box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
                 border: 1px solid rgba(255, 255, 255, 0.1);
-                backdrop-filter: blur(8px);
+                backdrop-filter: blur(12px);
                 white-space: nowrap; max-width: 85vw;
                 overflow: hidden; text-overflow: ellipsis;
                 pointer-events: none;
