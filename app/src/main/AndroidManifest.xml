@@ -33,6 +33,7 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.EcoLens"
             android:usesCleartextTraffic="false"
+            android:networkSecurityConfig="@xml/network_security_config"
             tools:targetApi="31">
 
         <!-- Auth Activity (Launcher) -->
