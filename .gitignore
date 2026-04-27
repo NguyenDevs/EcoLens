@@ -72,5 +72,6 @@ gradle.properties
 # ========================
 node_modules/
 .wrangler/
+CloudFlare-Worker/
 dist/
 .kotlin/sessions/
