@@ -90,8 +90,8 @@ class GeminiStreamingHelper(
         try {
             val response = apiService.streamGroq(request)
             if (response.isSuccessful) {
-                processStreamResponse(response, DetailsResponse::class.java) { details ->
-                    updateDetailsUISync(details, isVietnamese, currentInfo, onStateUpdate)
+                processStreamResponse(response, DetailsResponse::class.java) { details, rawJson ->
+                    updateDetailsUISync(details, isVietnamese, currentInfo, rawJson, onStateUpdate)
                 }
             } else {
                 val errorMsg = response.errorBody()?.string()
@@ -130,8 +130,8 @@ class GeminiStreamingHelper(
         try {
             val response = apiService.streamGroq(request)
             if (response.isSuccessful) {
-                processStreamResponse(response, ConservationResponse::class.java) { conservation ->
-                    updateConservationUISync(conservation, isVietnamese, currentInfo, onStateUpdate)
+                processStreamResponse(response, ConservationResponse::class.java) { conservation, rawJson ->
+                    updateConservationUISync(conservation, isVietnamese, currentInfo, rawJson, onStateUpdate)
                 }
             }
         } catch (e: Exception) {
@@ -156,7 +156,7 @@ class GeminiStreamingHelper(
     private suspend fun <T> processStreamResponse(
         response: Response<ResponseBody>,
         type: Class<T>,
-        onUpdate: suspend (T) -> Unit
+        onUpdate: suspend (T, String) -> Unit
     ) {
         try {
             response.body()?.byteStream()?.bufferedReader()?.use { reader ->
@@ -182,7 +182,7 @@ class GeminiStreamingHelper(
         line: String,
         accumulatedJson: StringBuilder,
         type: Class<T>,
-        onUpdate: suspend (T) -> Unit
+        onUpdate: suspend (T, String) -> Unit
     ) {
         val jsonData = line.substring(PREFIX_DATA.length).trim()
         if (jsonData == STREAM_DONE) return
@@ -197,7 +197,7 @@ class GeminiStreamingHelper(
                 val rawJson = accumulatedJson.toString()
                 val details = tryParsePartialJson(rawJson, type)
                 if (details != null) {
-                    onUpdate(details)
+                    onUpdate(details, rawJson)
                 }
             }
         } catch (e: Exception) {
@@ -243,20 +243,15 @@ class GeminiStreamingHelper(
         details: DetailsResponse,
         isVietnamese: Boolean,
         currentInfo: SpeciesInfo,
+        rawJson: String,
         onStateUpdate: (EcoLensUiState) -> Unit
     ) = withContext(Dispatchers.Main) {
         var updated = currentInfo
 
-        suspend fun updateState(stage: LoadingStage) {
-            onStateUpdate(EcoLensUiState(isLoading = true, speciesInfo = updated, loadingStage = stage))
-            delay(DETAILS_DELAY)
-        }
-
-        details.description?.takeIf { it.isNotBlank() }?.let {
-            updated = updated.copy(
-                description = markdownProcessor.process(it, isVietnamese = isVietnamese)
-            )
-            updateState(LoadingStage.DESCRIPTION)
+        val isDescDone = rawJson.contains("\"characteristics\"") || rawJson.contains("\"distribution\"") || rawJson.contains("\"habitat\"") || rawJson.trim().endsWith("}")
+        if (isDescDone && details.description != null && updated.description.isNullOrEmpty()) {
+            updated = updated.copy(description = markdownProcessor.process(details.description, isVietnamese = isVietnamese))
+            onStateUpdate(EcoLensUiState(isLoading = true, speciesInfo = updated, loadingStage = LoadingStage.DESCRIPTION))
         }
 
         val characteristicsText = when (val chars = details.characteristics) {
@@ -264,25 +259,22 @@ class GeminiStreamingHelper(
             is List<*> -> chars.joinToString("\n")
             else -> ""
         }
-        if (characteristicsText.isNotBlank()) {
-            updated = updated.copy(
-                characteristics = markdownProcessor.process(characteristicsText, isVietnamese = isVietnamese)
-            )
-            updateState(LoadingStage.CHARACTERISTICS)
+        val isCharsDone = rawJson.contains("\"distribution\"") || rawJson.contains("\"habitat\"") || rawJson.trim().endsWith("}")
+        if (isCharsDone && characteristicsText.isNotBlank() && updated.characteristics.isNullOrEmpty()) {
+            updated = updated.copy(characteristics = markdownProcessor.process(characteristicsText, isVietnamese = isVietnamese))
+            onStateUpdate(EcoLensUiState(isLoading = true, speciesInfo = updated, loadingStage = LoadingStage.CHARACTERISTICS))
         }
 
-        details.distribution?.takeIf { it.isNotBlank() }?.let {
-            updated = updated.copy(
-                distribution = markdownProcessor.process(it, isVietnamese = isVietnamese)
-            )
-            updateState(LoadingStage.DISTRIBUTION)
+        val isDistDone = rawJson.contains("\"habitat\"") || rawJson.trim().endsWith("}")
+        if (isDistDone && details.distribution != null && updated.distribution.isNullOrEmpty()) {
+            updated = updated.copy(distribution = markdownProcessor.process(details.distribution, isVietnamese = isVietnamese))
+            onStateUpdate(EcoLensUiState(isLoading = true, speciesInfo = updated, loadingStage = LoadingStage.DISTRIBUTION))
         }
 
-        details.habitat?.takeIf { it.isNotBlank() }?.let {
-            updated = updated.copy(
-                habitat = markdownProcessor.process(it, isVietnamese = isVietnamese)
-            )
-            updateState(LoadingStage.HABITAT)
+        val isHabDone = rawJson.trim().endsWith("}")
+        if (isHabDone && details.habitat != null && updated.habitat.isNullOrEmpty()) {
+            updated = updated.copy(habitat = markdownProcessor.process(details.habitat, isVietnamese = isVietnamese))
+            onStateUpdate(EcoLensUiState(isLoading = true, speciesInfo = updated, loadingStage = LoadingStage.HABITAT))
         }
     }
 
@@ -291,12 +283,14 @@ class GeminiStreamingHelper(
         conservation: ConservationResponse,
         isVietnamese: Boolean,
         currentInfo: SpeciesInfo,
+        rawJson: String,
         onStateUpdate: (EcoLensUiState) -> Unit
     ) = withContext(Dispatchers.Main) {
-        conservation.conservationStatus?.takeIf { it.isNotBlank() }?.let {
+        val isDone = rawJson.trim().endsWith("}")
+        if (isDone && conservation.conservationStatus != null) {
             val updated = currentInfo.copy(
                 conservationStatus = markdownProcessor.process(
-                    it,
+                    conservation.conservationStatus,
                     isConservationStatus = true,
                     isVietnamese = isVietnamese
                 )
