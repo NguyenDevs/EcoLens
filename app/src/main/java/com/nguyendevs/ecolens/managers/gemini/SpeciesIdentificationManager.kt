@@ -20,6 +20,9 @@ import kotlinx.coroutines.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import android.graphics.BitmapFactory
+import java.io.FileOutputStream
+import com.nguyendevs.ecolens.utils.ImageHelper
 
 /** Quản lý quá trình nhận diện và xử lý luồng dữ liệu phân loại sinh vật qua API. */
 class SpeciesIdentificationManager(
@@ -32,10 +35,10 @@ class SpeciesIdentificationManager(
 
     companion object {
         private const val TAG = "SpeciesIdManager"
-        private const val MIME_TYPE_JPEG = "image/jpeg"
+        private const val MIME_TYPE_WEBP = "image/webp"
         private const val PART_NAME_IMAGE = "image"
         private const val MAX_IMAGE_SIZE = 1024
-        private const val DELAY_INIT = 100L
+        private const val DELAY_INIT = 0L
     }
 
     var currentImageUri: Uri? = null
@@ -58,7 +61,6 @@ class SpeciesIdentificationManager(
         currentHistoryEntryId = existingHistoryId
 
         onStateUpdate(EcoLensUiState(isLoading = true, loadingStage = LoadingStage.NONE))
-        delay(DELAY_INIT)
 
         try {
             val imageFile = prepareImageFile(imageUri)
@@ -69,7 +71,7 @@ class SpeciesIdentificationManager(
                         topResult,
                         languageCode,
                         existingHistoryId,
-                        imageFile,
+                        imageUri,
                         onStateUpdate
                 )
             } else {
@@ -88,23 +90,39 @@ class SpeciesIdentificationManager(
 
     /** Chuyển đổi và định cỡ lại bức ảnh từ URI xuống kích cỡ hợp lệ. */
     private suspend fun prepareImageFile(imageUri: Uri): File {
-        val imageFile =
-                withContext(Dispatchers.Default) {
-                    ImageUtils.uriToFile(context, imageUri, MAX_IMAGE_SIZE)
+        val cacheDir = context.cacheDir
+        val aiFile = File(cacheDir, "temp_ai_${System.currentTimeMillis()}.jpg")
+        
+        withContext(Dispatchers.IO) {
+            try {
+                val bitmap = com.bumptech.glide.Glide.with(context)
+                    .asBitmap()
+                    .load(imageUri)
+                    .submit()
+                    .get()
+                
+                if (bitmap != null) {
+                    val aiBytes = ImageHelper.prepareImageForAI(bitmap)
+                    
+                    FileOutputStream(aiFile).use { out ->
+                        out.write(aiBytes)
+                    }
+                } else {
+                    throw Exception("Failed to load bitmap")
                 }
-
-        if (!imageFile.exists()) {
-            throw FileNotFoundException(
-                    "Image file could not be created or found: ${imageFile.absolutePath}"
-            )
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in image preparation: ${e.message}")
+                val tempFile = ImageUtils.uriToFile(context, imageUri, MAX_IMAGE_SIZE)
+                tempFile.copyTo(aiFile, overwrite = true)
+            }
         }
 
-        return imageFile
+        return aiFile
     }
 
     /** Chuyển hóa tệp bức ảnh thành phần cấu thành dạng thức multipart. */
     private fun createImagePart(file: File): MultipartBody.Part {
-        val requestFile = file.asRequestBody(MIME_TYPE_JPEG.toMediaTypeOrNull())
+        val requestFile = file.asRequestBody(MIME_TYPE_WEBP.toMediaTypeOrNull())
         return MultipartBody.Part.createFormData(PART_NAME_IMAGE, file.name, requestFile)
     }
 
@@ -130,7 +148,7 @@ class SpeciesIdentificationManager(
             result: IdentificationResult,
             languageCode: String,
             existingHistoryId: Int?,
-            imageFile: File,
+            originalImageUri: Uri,
             onStateUpdate: (EcoLensUiState) -> Unit
     ) {
         val scientificName = result.taxon.name
@@ -247,10 +265,10 @@ class SpeciesIdentificationManager(
                 val geminiDetailsDeferred =
                         async(Dispatchers.IO) {
                             streamingHelper.streamDetails(
-                                    scientificName,
-                                    confidence,
-                                    languageCode,
-                                    infoForDetails
+                                    scientificName = scientificName,
+                                    confidence = confidence,
+                                    languageCode = languageCode,
+                                    currentInfo = infoForDetails
                             ) { state ->
                                 val incomingInfo = state.speciesInfo
                                 val current = currentSpeciesInfo
@@ -446,7 +464,7 @@ class SpeciesIdentificationManager(
                     currentSpeciesInfo = currentSpeciesInfo?.copy(vnredlistStatus = getLocalizedString(R.string.conservation_disabled_message))
                 }
 
-                saveToHistory(existingHistoryId, imageFile, languageCode)
+                saveToHistory(existingHistoryId, originalImageUri, languageCode)
 
                 onStateUpdate(
                         EcoLensUiState(
@@ -554,7 +572,7 @@ class SpeciesIdentificationManager(
     /** Ghi log lại cấu trúc loài sinh vật đã duyệt xong xuống cơ sở dữ liệu. */
     private suspend fun saveToHistory(
             existingHistoryId: Int?,
-            imageFile: File,
+            originalImageUri: Uri,
             languageCode: String
     ) {
         val currentInfo = currentSpeciesInfo ?: return
@@ -564,7 +582,7 @@ class SpeciesIdentificationManager(
                 if (existingHistoryId != null) {
                     updateExistingHistory(existingHistoryId, currentInfo, languageCode)
                 } else {
-                    createNewHistory(imageFile, currentInfo, languageCode)
+                    createNewHistory(originalImageUri, currentInfo, languageCode)
                 }
             }
         }
@@ -585,12 +603,12 @@ class SpeciesIdentificationManager(
     }
 
     /** Thiết lập thông số và phát sinh lịch sử rà soát loài mới. */
-    private suspend fun createNewHistory(imageFile: File, info: SpeciesInfo, languageCode: String) {
+    private suspend fun createNewHistory(originalImageUri: Uri, info: SpeciesInfo, languageCode: String) {
         val localImagePath =
-                if (currentImageUri != null && currentImageUri!!.scheme == "file") {
-                    currentImageUri!!.path
+                if (originalImageUri.scheme == "file") {
+                    originalImageUri.path
                 } else {
-                    ImageUtils.saveFileToInternalStorage(context, imageFile)
+                    ImageUtils.saveUriToInternalStorage(context, originalImageUri)
                 }
 
         if (localImagePath != null) {

@@ -11,7 +11,7 @@ class HomeAnimationHandler {
     private var confidenceRotationAnimator: ObjectAnimator? = null
 
     /** Trượt view từ dưới lên kết hợp fade-in. */
-    fun slideAndFadeIn(view: View, duration: Long = 500, delay: Long = 0) {
+    fun slideAndFadeIn(view: View, duration: Long = 200, delay: Long = 0) {
         if (view.visibility == View.VISIBLE && view.alpha == 1f) return
 
         view.alpha = 0f
@@ -57,7 +57,7 @@ class HomeAnimationHandler {
     }
 
     /** Phóng to view từ 80% kết hợp fade-in. */
-    fun scaleInAnimation(view: View, duration: Long = 400, delay: Long = 0) {
+    fun scaleInAnimation(view: View, duration: Long = 200, delay: Long = 0) {
         view.apply {
             visibility = View.VISIBLE
             alpha = 0f
@@ -75,7 +75,7 @@ class HomeAnimationHandler {
     }
 
     /** Animation bật ra với hiệu ứng overshoot từ 50%. */
-    fun popInAnimation(view: View, duration: Long = 500) {
+    fun popInAnimation(view: View, duration: Long = 200) {
         view.apply {
             visibility = View.VISIBLE
             alpha = 0f

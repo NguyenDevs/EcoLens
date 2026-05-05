@@ -2,7 +2,7 @@ package com.nguyendevs.ecolens.database
 
 import android.util.Log
 import com.google.firebase.database.FirebaseDatabase
-import com.nguyendevs.ecolens.network.NativeSecurityManager
+import com.nguyendevs.ecolens.network.SecurityProvider
 import com.nguyendevs.ecolens.models.ExploreItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
@@ -11,8 +11,7 @@ import kotlinx.coroutines.withContext
 /** Quản lý dữ liệu explore items từ Firebase, có cache trong bộ nhớ. */
 class ExploreRepository {
 
-    private val firebaseDatabase: FirebaseDatabase =
-            FirebaseDatabase.getInstance(NativeSecurityManager.getFirebaseUrl())
+    private val firebaseDatabase: FirebaseDatabase = FirebaseDatabase.getInstance(SecurityProvider.getFirebaseUrl())
     private val exploreRef = firebaseDatabase.getReference("explore/items")
 
     companion object {
@@ -21,24 +20,23 @@ class ExploreRepository {
     }
 
     /** Lấy ngẫu nhiên [count] items, ưu tiên dùng cache nếu đã có. */
-    suspend fun getRandomExploreItems(count: Int): List<ExploreItem> =
-            withContext(Dispatchers.IO) {
-                if (displayedItemsCache.isNotEmpty()) {
-                    return@withContext displayedItemsCache
-                }
+    suspend fun getRandomExploreItems(count: Int): List<ExploreItem> = withContext(Dispatchers.IO) {
+        if (displayedItemsCache.isNotEmpty()) {
+            return@withContext displayedItemsCache
+        }
 
-                if (allItemsCache.isEmpty()) {
-                    fetchFromFirebase()
-                }
+        if (allItemsCache.isEmpty()) {
+            fetchFromFirebase()
+        }
 
-                if (allItemsCache.isEmpty()) {
-                    return@withContext emptyList()
-                }
+        if (allItemsCache.isEmpty()) {
+            return@withContext emptyList()
+        }
 
-                val items = allItemsCache.shuffled().take(count)
-                displayedItemsCache = items
-                return@withContext items
-            }
+        val items = allItemsCache.shuffled().take(count)
+        displayedItemsCache = items
+        return@withContext items
+    }
 
     /** Lấy toàn bộ explore items, ưu tiên dùng cache nếu đã có. */
     suspend fun getAllExploreItems(): List<ExploreItem> = withContext(Dispatchers.IO) {

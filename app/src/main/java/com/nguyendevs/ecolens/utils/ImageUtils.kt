@@ -34,7 +34,7 @@ object ImageUtils {
 
             if (bitmap != null) {
                 FileOutputStream(file).use { out ->
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 75, out)
                 }
                 com.bumptech.glide.Glide.with(context).clear(futureTarget)
 
@@ -60,6 +60,38 @@ object ImageUtils {
             val destFile = File(context.filesDir, filename)
             FileOutputStream(destFile).use { out ->
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+            }
+            destFile.absolutePath
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    /** Sao chép tệp từ URI vào bộ nhớ nội bộ mà không làm giảm chất lượng (dùng cho lịch sử). */
+    fun saveUriToInternalStorage(context: Context, uri: Uri): String? {
+        return try {
+            val filename = "species_${System.currentTimeMillis()}.jpg"
+            val destFile = File(context.filesDir, filename)
+            
+            if (uri.scheme == "http" || uri.scheme == "https") {
+                // Tải ảnh từ web về
+                val bitmap = com.bumptech.glide.Glide.with(context)
+                    .asBitmap()
+                    .load(uri.toString())
+                    .submit()
+                    .get()
+                
+                FileOutputStream(destFile).use { out ->
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+                }
+            } else {
+                // Copy file nội bộ
+                context.contentResolver.openInputStream(uri)?.use { input ->
+                    FileOutputStream(destFile).use { output ->
+                        input.copyTo(output)
+                    }
+                }
             }
             destFile.absolutePath
         } catch (e: Exception) {

@@ -28,9 +28,8 @@ class HMACInterceptor : Interceptor {
         val requestId = UUID.randomUUID().toString()
         val path = url.encodedPath
 
-        // Format: METHOD:PATH:TIMESTAMP:REQUEST_ID
         val message = "${request.method}:$path:$timestamp:$requestId"
-        val signature = NativeSecurityManager.calculateHMAC(message)
+        val signature = SecurityProvider.calculateHMAC(message)
 
         val newRequest = request.newBuilder()
             .addHeader("X-App-Id", APP_ID)

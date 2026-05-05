@@ -115,11 +115,14 @@ class SpeciesInfoHandler(
 
         if (images.isNotEmpty()) {
             if (binding.sectionImages.visibility != View.VISIBLE) {
-                homeAnimationHandler.slideAndFadeIn(binding.sectionImages, duration = 400)
-                binding.expandableImages.collapse(false)
-                binding.ivImagesExpandIcon.rotation = -90f
+                homeAnimationHandler.slideAndFadeIn(binding.sectionImages, duration = 200)
+                imagesAdapter.submitList(images)
+                if (!binding.expandableImages.isExpanded) {
+                    toggleImagesExpand()
+                }
+            } else {
+                imagesAdapter.submitList(images)
             }
-            imagesAdapter.submitList(images)
         } else if (stage == LoadingStage.NONE) {
             binding.sectionImages.visibility = View.GONE
         }
@@ -265,13 +268,6 @@ class SpeciesInfoHandler(
                 )
                 displayConservationStatus(info, shouldScroll = false)
                 allSectionsRendered = true
-
-                if (!binding.expandableImages.isExpanded && imagesAdapter.itemCount > 0) {
-                    binding.headerImages.postDelayed(
-                            { toggleImagesExpand() },
-                            2500L
-                    )
-                }
 
                 homeButtonHandler.setupShareButton(info, currentImageUri)
                 homeButtonHandler.showShareButton()
@@ -430,7 +426,7 @@ class SpeciesInfoHandler(
             sectionDisplayHandler.displaySection(
                     R.id.sectionConservation,
                     R.id.tvConservationStatus,
-                    iucnText, // Section text is just a placeholder to mark as rendered
+                    iucnText,
                     shouldScroll,
                     isInitialLoad
             )

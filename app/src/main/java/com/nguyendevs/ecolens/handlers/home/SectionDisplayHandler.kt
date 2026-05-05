@@ -138,17 +138,6 @@ class SectionDisplayHandler(
             val trimmedText = text.trim()
             textView?.let { tv -> textFormatter.setHtml(tv, trimmedText) }
 
-            val delayIndex =
-                    when (sectionId) {
-                        R.id.sectionConservation -> 0
-                        R.id.sectionHabitat -> 1
-                        R.id.sectionDistribution -> 2
-                        R.id.sectionCharacteristics -> 3
-                        R.id.sectionDescription -> 4
-                        else -> 0
-                    }
-            val startDelay = delayIndex * 750L
-
             section?.let { sectionView ->
                 val wasAlreadyRendered = renderedSections.contains(sectionId)
 
@@ -164,7 +153,7 @@ class SectionDisplayHandler(
                             .animate()
                             .alpha(1f)
                             .translationY(0f)
-                            .setDuration(450)
+                            .setDuration(200)
                             .setInterpolator(DecelerateInterpolator())
                             .withEndAction {
                                 if (!wasAlreadyRendered && shouldScroll && !isInitialLoad) {
@@ -173,14 +162,9 @@ class SectionDisplayHandler(
                                 renderedSections.add(sectionId)
 
                                 if (expandableLayout != null && iconView != null) {
-                                    expandableLayout.postDelayed(
-                                            {
-                                                if (!expandableLayout.isExpanded) {
-                                                    toggleSection(expandableLayout, iconView)
-                                                }
-                                            },
-                                            startDelay
-                                    )
+                                    if (!expandableLayout.isExpanded) {
+                                        toggleSection(expandableLayout, iconView)
+                                    }
                                 }
                             }
                             .start()
@@ -188,14 +172,9 @@ class SectionDisplayHandler(
                     renderedSections.add(sectionId)
                     val isCurrentlyExpanded = expandableLayout?.isExpanded ?: false
                     if (!isCurrentlyExpanded && expandableLayout != null && iconView != null) {
-                        expandableLayout.postDelayed(
-                                {
-                                    if (!expandableLayout.isExpanded) {
-                                        toggleSection(expandableLayout, iconView)
-                                    }
-                                },
-                                startDelay
-                        )
+                        if (!expandableLayout.isExpanded) {
+                            toggleSection(expandableLayout, iconView)
+                        }
                     }
                 }
             }
@@ -210,7 +189,7 @@ class SectionDisplayHandler(
                             .animate()
                             .alpha(1f)
                             .translationY(0f)
-                            .setDuration(450)
+                            .setDuration(200)
                             .setInterpolator(DecelerateInterpolator())
                             .withEndAction { renderedSections.add(sectionId) }
                             .start()

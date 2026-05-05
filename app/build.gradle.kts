@@ -18,21 +18,13 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        ndk {
-            abiFilters += listOf(
-                //"armeabi-v7a",
-                "arm64-v8a",
-                "x86_64"
-            )
-        }
+        // Map variables from gradle.properties
+        buildConfigField("String", "WORKER_BASE_URL", "\"${project.findProperty("WORKER_BASE_URL")}\"")
+        buildConfigField("String", "APP_SECRET", "\"${project.findProperty("APP_SECRET")}\"")
+        buildConfigField("String", "FIREBASE_URL", "\"${project.findProperty("FIREBASE_URL")}\"")
     }
 
-    externalNativeBuild {
-        cmake {
-            path = file("src/main/cpp/CMakeLists.txt")
-            version = "3.22.1"
-        }
-    }
+
 
 
     buildTypes {
@@ -146,6 +138,8 @@ dependencies {
     implementation("com.google.firebase:firebase-database")
     implementation("com.google.firebase:firebase-storage")
     implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-appcheck-playintegrity")
+    implementation("com.google.firebase:firebase-appcheck-debug")
     
     // Google Sign In
     implementation("com.google.android.gms:play-services-auth:21.0.0")

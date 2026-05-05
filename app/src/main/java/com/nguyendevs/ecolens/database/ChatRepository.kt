@@ -3,7 +3,7 @@ package com.nguyendevs.ecolens.database
 import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
-import com.nguyendevs.ecolens.network.NativeSecurityManager
+import com.nguyendevs.ecolens.network.SecurityProvider
 import com.nguyendevs.ecolens.models.chat.ChatMessage
 import com.nguyendevs.ecolens.models.chat.ChatSession
 import kotlinx.coroutines.Dispatchers
@@ -14,17 +14,13 @@ import kotlinx.coroutines.withContext
 /** Quản lý dữ liệu chat, đồng bộ giữa Room Database và Firebase Realtime Database. */
 class ChatRepository(private val chatDao: ChatDao, private val context: Context) {
 
-    private val database = FirebaseDatabase.getInstance(NativeSecurityManager.getFirebaseUrl())
+    private val database = FirebaseDatabase.getInstance(SecurityProvider.getFirebaseUrl())
     private val auth = FirebaseAuth.getInstance()
 
     /** Trả về UID người dùng hiện tại. */
-    private fun getUserId(): String {
-        return auth.currentUser?.uid ?: "anonymous"
-    }
-
+    private fun getUserId(): String = auth.currentUser?.uid ?: "anonymous"
     /** Trả về reference đến node chat sessions của user trên Firebase. */
     private fun getSessionsRef() = database.getReference("chat_sessions").child(getUserId())
-
     /** Trả về reference đến node chat messages của user trên Firebase. */
     private fun getMessagesRef() = database.getReference("chat_messages").child(getUserId())
 
@@ -69,31 +65,27 @@ class ChatRepository(private val chatDao: ChatDao, private val context: Context)
     }
 
     /** Sắp xếp lại ID phiên chat sau khi xóa (hiện tại bị tắt). */
-    private suspend fun reorderSessionIds(deletedId: Long) {
-    }
-
+    private suspend fun reorderSessionIds(deletedId: Long) {}
     /** Di chuyển tin nhắn sang phiên mới khi reorder (hiện tại bị tắt). */
-    private suspend fun moveMessagesToNewSessionId(oldSessionId: Long, newSessionId: Long) {
-    }
+    private suspend fun moveMessagesToNewSessionId(oldSessionId: Long, newSessionId: Long) {}
 
     /** Thêm tin nhắn mới vào local và Firebase, trả về ID mới tạo. */
     suspend fun insertMessage(message: ChatMessage): Long {
         val messageWithUserId = message.copy(userId = getUserId())
-        val id =
-                if (message.id > 0) {
-                    chatDao.insertMessage(messageWithUserId)
-                    message.id
-                } else {
-                    chatDao.insertMessage(messageWithUserId)
-                }
+        val id = if (message.id > 0) {
+            chatDao.insertMessage(messageWithUserId)
+            message.id
+        } else {
+            chatDao.insertMessage(messageWithUserId)
+        }
 
         val messageWithId = messageWithUserId.copy(id = id)
         try {
             getMessagesRef()
-                    .child(message.sessionId.toString())
-                    .child(id.toString())
-                    .setValue(messageWithId)
-                    .await()
+                .child(message.sessionId.toString())
+                .child(id.toString())
+                .setValue(messageWithId)
+                .await()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -106,10 +98,10 @@ class ChatRepository(private val chatDao: ChatDao, private val context: Context)
         chatDao.updateMessage(messageWithUserId)
         try {
             getMessagesRef()
-                    .child(message.sessionId.toString())
-                    .child(message.id.toString())
-                    .setValue(messageWithUserId)
-                    .await()
+                .child(message.sessionId.toString())
+                .child(message.id.toString())
+                .setValue(messageWithUserId)
+                .await()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -120,11 +112,11 @@ class ChatRepository(private val chatDao: ChatDao, private val context: Context)
         chatDao.updateMessageContent(messageId, content)
         try {
             getMessagesRef()
-                    .child(sessionId.toString())
-                    .child(messageId.toString())
-                    .child("content")
-                    .setValue(content)
-                    .await()
+                .child(sessionId.toString())
+                .child(messageId.toString())
+                .child("content")
+                .setValue(content)
+                .await()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -135,71 +127,53 @@ class ChatRepository(private val chatDao: ChatDao, private val context: Context)
         chatDao.deleteMessageById(message.id)
         try {
             getMessagesRef()
-                    .child(message.sessionId.toString())
-                    .child(message.id.toString())
-                    .removeValue()
-                    .await()
+                .child(message.sessionId.toString())
+                .child(message.id.toString())
+                .removeValue()
+                .await()
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
     /** Sắp xếp lại ID tin nhắn sau khi xóa (hiện tại bị tắt). */
-    private suspend fun reorderMessageIds(sessionId: Long, deletedMessageId: Long) {
-    }
+    private suspend fun reorderMessageIds(sessionId: Long, deletedMessageId: Long) {}
 
     /** Tải toàn bộ sessions và messages từ Firebase về local. */
-    suspend fun fetchSessionsAndMessages() =
-            withContext(kotlinx.coroutines.Dispatchers.IO) {
-                if (auth.currentUser == null) return@withContext
+    suspend fun fetchSessionsAndMessages() = withContext(Dispatchers.IO) {
+        if (auth.currentUser == null) return@withContext
 
-                val sessionsJob = async {
-                    try {
-                        val sessionsSnapshot = getSessionsRef().get().await()
-                        if (sessionsSnapshot.exists()) {
-                            val sessions = mutableListOf<ChatSession>()
-                            for (sessionSnapshot in sessionsSnapshot.children) {
-                                val session = sessionSnapshot.getValue(ChatSession::class.java)
-                                if (session != null) {
-                                    sessions.add(session)
-                                }
-                            }
-                            if (sessions.isNotEmpty()) {
-                                for (session in sessions) {
-                                    chatDao.insertSession(session)
-                                }
-                            }
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
+        val sessionsJob = async {
+            try {
+                val sessionsSnapshot = getSessionsRef().get().await()
+                if (sessionsSnapshot.exists()) {
+                    val sessions = sessionsSnapshot.children.mapNotNull { it.getValue(ChatSession::class.java) }
+                    for (session in sessions) {
+                        chatDao.insertSession(session)
                     }
                 }
-
-                val messagesJob = async {
-                    try {
-                        val messagesSnapshot = getMessagesRef().get().await()
-                        if (messagesSnapshot.exists()) {
-                            val messages = mutableListOf<ChatMessage>()
-                            for (sessionMessagesSnapshot in messagesSnapshot.children) {
-                                for (messageSnapshot in sessionMessagesSnapshot.children) {
-                                    val message = messageSnapshot.getValue(ChatMessage::class.java)
-                                    if (message != null) {
-                                        messages.add(message)
-                                    }
-                                }
-                            }
-                            if (messages.isNotEmpty()) {
-                                for (message in messages) {
-                                    chatDao.insertMessage(message)
-                                }
-                            }
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }
-
-                sessionsJob.await()
-                messagesJob.await()
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
+        }
+
+        val messagesJob = async {
+            try {
+                val messagesSnapshot = getMessagesRef().get().await()
+                if (messagesSnapshot.exists()) {
+                    val messages = messagesSnapshot.children.flatMap { sessionSnapshot ->
+                        sessionSnapshot.children.mapNotNull { it.getValue(ChatMessage::class.java) }
+                    }
+                    for (message in messages) {
+                        chatDao.insertMessage(message)
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        sessionsJob.await()
+        messagesJob.await()
+    }
 }
