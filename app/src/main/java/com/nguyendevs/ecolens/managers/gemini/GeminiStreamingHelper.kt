@@ -24,7 +24,7 @@ class GeminiStreamingHelper(
         private const val TAG = "GeminiStreaming"
         private const val PREFIX_DATA = "data: "
         private const val STREAM_DONE = "[DONE]"
-        private const val DETAILS_DELAY = 200L
+        private const val DETAILS_DELAY = 0L
     }
 
     /** Lấy tên thường gọi chuẩn chỉnh từ Gemini. */
@@ -83,8 +83,9 @@ class GeminiStreamingHelper(
         confidence: Double,
         languageCode: String,
         currentInfo: SpeciesInfo,
+        retryCount: Int = 0, // Chuyển lên đây
         onStateUpdate: (EcoLensUiState) -> Unit
-    ) = withContext(Dispatchers.IO) {
+    ): Unit = withContext(Dispatchers.IO) {
         val isVietnamese = languageCode == "vi"
         val prompt = PromptBuilder.buildDetailsPrompt(scientificName, languageCode)
         val request = createGeminiRequest(prompt)
@@ -95,9 +96,27 @@ class GeminiStreamingHelper(
                 processStreamResponse(response, DetailsResponse::class.java) { details ->
                     updateDetailsUISync(details, isVietnamese, currentInfo, onStateUpdate)
                 }
+            } else {
+                val errorMsg = response.errorBody()?.string()
+                Log.e(TAG, "StreamDetails Failed (HTTP ${response.code()}): $errorMsg")
+                
+                // Nếu lỗi 500 và chưa thử lại quá 1 lần
+                if (response.code() >= 500 && retryCount < 1) {
+                    Log.d(TAG, "Retrying streamDetails... (Lần ${retryCount + 1})")
+                    delay(1000) // Đợi 1 giây trước khi thử lại
+                    streamDetails(scientificName, confidence, languageCode, currentInfo, retryCount + 1, onStateUpdate)
+                } else {
+                    withContext(Dispatchers.Main) {
+                        onStateUpdate(EcoLensUiState(isLoading = true, speciesInfo = currentInfo.copy(description = "Không thể tải thông tin từ AI (Lỗi ${response.code()})")))
+                    }
+                }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "StreamDetails Error: ${e.message}")
+            Log.e(TAG, "StreamDetails Exception: ${e.message}")
+            if (retryCount < 1) {
+                delay(1000)
+                streamDetails(scientificName, confidence, languageCode, currentInfo, retryCount + 1, onStateUpdate)
+            }
         }
         Unit
     }
@@ -179,39 +198,53 @@ class GeminiStreamingHelper(
             val chunk = streamResponse.candidates?.firstOrNull()
                 ?.content?.parts?.firstOrNull()?.text
 
-            if (!chunk.isNullOrEmpty()) {
+            if (chunk != null) {
                 accumulatedJson.append(chunk)
-                tryParseAndUpdate(accumulatedJson.toString(), type, onUpdate)
+                val rawJson = accumulatedJson.toString()
+                
+                // Thử parse JSON hiện tại
+                val details = tryParsePartialJson(rawJson, type)
+                if (details != null) {
+                    onUpdate(details)
+                }
             }
         } catch (e: Exception) {
             Log.e(TAG, "Parse error: ${e.message}")
         }
     }
 
-    /** Parse dòng cập nhật JSON hoàn tất. */
-    private suspend fun <T> tryParseAndUpdate(
-        json: String,
-        type: Class<T>,
-        onUpdate: suspend (T) -> Unit
-    ) {
-        val cleanedJson = cleanJsonString(json)
-        try {
-            val result = gson.fromJson(cleanedJson, type)
-            onUpdate(result)
-        } catch (e: Exception) {
+    /** Thử parse JSON chưa hoàn chỉnh bằng cách tự động đóng các dấu ngoặc. */
+    private fun <T> tryParsePartialJson(json: String, type: Class<T>): T? {
+        val cleaned = cleanJsonString(json)
+        if (cleaned.isEmpty()) return null
+
+        val candidates = mutableListOf<String>()
+        candidates.add(cleaned)
+        candidates.add("$cleaned\"}") // Trường hợp đang ở trong chuỗi
+        candidates.add("$cleaned}")    // Trường hợp đã xong chuỗi, thiếu ngoặc nhọn
+        candidates.add("$cleaned\"}]}") // Trường hợp mảng (nếu có)
+        
+        for (candidate in candidates) {
+            try {
+                return gson.fromJson(candidate, type)
+            } catch (e: Exception) {
+                // Tiếp tục thử cái tiếp theo
+            }
         }
+        return null
     }
 
     /** Thanh lọc JSON khỏi các thẻ đánh dấu Markdown phức tạp. */
     private fun cleanJsonString(json: String): String {
         val firstBrace = json.indexOf('{')
+        if (firstBrace == -1) return ""
+        
         val lastBrace = json.lastIndexOf('}')
-        return if (firstBrace != -1 && lastBrace > firstBrace) {
+        return if (lastBrace > firstBrace) {
             json.substring(firstBrace, lastBrace + 1)
         } else {
-            json.replace("```json", "", ignoreCase = true)
-                .replace("```", "")
-                .trim()
+            // Trường hợp chưa có ngoặc đóng, lấy hết từ ngoặc mở
+            json.substring(firstBrace)
         }
     }
 

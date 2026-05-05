@@ -3,6 +3,7 @@ package com.nguyendevs.ecolens.utils
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -22,16 +23,49 @@ object ImageHelper {
         return inSampleSize
     }
 
-    fun compressBitmap(imagePath: String, reqWidth: Int = 1920, reqHeight: Int = 1920): ByteArray? {
+    fun compressBitmap(imagePath: String, reqWidth: Int = 1024, reqHeight: Int = 1024): ByteArray? {
         val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeFile(imagePath, options)
         options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight)
         options.inJustDecodeBounds = false
         val bitmap = BitmapFactory.decodeFile(imagePath, options) ?: return null
+        
+        // Cố định kích thước tối đa là 1024px để đạt tốc độ upload nhanh nhất
+        val scaledBitmap = scaleBitmap(bitmap, reqWidth)
         val baos = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos)
-        bitmap.recycle()
+        scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 75, baos)
+        
+        if (scaledBitmap != bitmap) bitmap.recycle()
+        scaledBitmap.recycle()
+        
         return baos.toByteArray()
+    }
+
+    /** Chuẩn bị ảnh chuyên dụng cho AI để đạt tốc độ nhận diện nhanh nhất. */
+    fun prepareImageForAI(bitmap: Bitmap): ByteArray {
+        val scaledBitmap = scaleBitmap(bitmap, 1024)
+        val baos = ByteArrayOutputStream()
+        
+        // Sử dụng WebP (Lossy) để đạt dung lượng cực thấp nhưng AI vẫn đọc tốt
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            scaledBitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, 75, baos)
+        } else {
+            @Suppress("DEPRECATION")
+            scaledBitmap.compress(Bitmap.CompressFormat.WEBP, 75, baos)
+        }
+        
+        if (scaledBitmap != bitmap) scaledBitmap.recycle()
+        return baos.toByteArray()
+    }
+
+    private fun scaleBitmap(bitmap: Bitmap, maxDimension: Int): Bitmap {
+        val width = bitmap.width
+        val height = bitmap.height
+        val scale = maxDimension.toFloat() / Math.max(width, height)
+        if (scale >= 1f) return bitmap
+        
+        val matrix = Matrix().apply { postScale(scale, scale) }
+        return Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true)
     }
 
     fun saveBitmapToInternal(context: Context, bitmap: Bitmap, prefix: String, id: Int): String? {
