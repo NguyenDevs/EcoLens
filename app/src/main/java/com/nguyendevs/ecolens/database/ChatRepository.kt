@@ -3,7 +3,7 @@ package com.nguyendevs.ecolens.database
 import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
-import com.nguyendevs.ecolens.BuildConfig
+import com.nguyendevs.ecolens.network.NativeSecurityManager
 import com.nguyendevs.ecolens.models.chat.ChatMessage
 import com.nguyendevs.ecolens.models.chat.ChatSession
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +14,7 @@ import kotlinx.coroutines.withContext
 /** Quản lý dữ liệu chat, đồng bộ giữa Room Database và Firebase Realtime Database. */
 class ChatRepository(private val chatDao: ChatDao, private val context: Context) {
 
-    private val database = FirebaseDatabase.getInstance(BuildConfig.FIREBASE_DATABASE_URL)
+    private val database = FirebaseDatabase.getInstance(NativeSecurityManager.getFirebaseUrl())
     private val auth = FirebaseAuth.getInstance()
 
     /** Trả về UID người dùng hiện tại. */

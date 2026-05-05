@@ -10,7 +10,7 @@ import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
-import com.nguyendevs.ecolens.BuildConfig
+import com.nguyendevs.ecolens.network.NativeSecurityManager
 import com.nguyendevs.ecolens.models.history.HistoryEntry
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -33,7 +33,7 @@ class HistoryRepository(
         private val externalScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 ) {
 
-    private val database = FirebaseDatabase.getInstance(BuildConfig.FIREBASE_DATABASE_URL)
+    private val database = FirebaseDatabase.getInstance(NativeSecurityManager.getFirebaseUrl())
     private val storage = FirebaseStorage.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
@@ -149,34 +149,13 @@ class HistoryRepository(
 
     /** Cập nhật bản ghi trong Room cục bộ. */
     suspend fun updateLocal(entry: HistoryEntry) =
-            withContext(Dispatchers.IO) { historyDao.update(entry) }
+            withContext(Dispatchers.IO) {
+                historyDao.update(entry)
+            }
 
     /** Đồng bộ thông tin sinh vật mới cập nhật lên mọi kho lưu trữ. */
     suspend fun update(entry: HistoryEntry) {
-        withContext(Dispatchers.IO) {
-            historyDao.updateSpeciesDetails(
-                    id = entry.id,
-                    commonName = entry.speciesInfo.commonName,
-                    scientificName = entry.speciesInfo.scientificName,
-                    kingdom = entry.speciesInfo.kingdom,
-                    phylum = entry.speciesInfo.phylum,
-                    className = entry.speciesInfo.className,
-                    taxorder = entry.speciesInfo.taxorder,
-                    family = entry.speciesInfo.family,
-                    genus = entry.speciesInfo.genus,
-                    species = entry.speciesInfo.species,
-                    description = entry.speciesInfo.description,
-                    characteristics = entry.speciesInfo.characteristics,
-                    distribution = entry.speciesInfo.distribution,
-                    habitat = entry.speciesInfo.habitat,
-                    conservationStatus = entry.speciesInfo.conservationStatus,
-                    confidence = entry.speciesInfo.confidence,
-                    vnredlistStatus = entry.speciesInfo.vnredlistStatus,
-                    timestamp = entry.timestamp,
-                    isFavorite = entry.isFavorite,
-                    language = entry.language
-            )
-        }
+        updateLocal(entry)
         externalScope.launch { syncRemote(entry) }
     }
 
