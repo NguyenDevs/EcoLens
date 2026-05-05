@@ -5,7 +5,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.database.FirebaseDatabase
-import com.nguyendevs.ecolens.network.NativeSecurityManager
+import com.nguyendevs.ecolens.network.SecurityProvider
 import com.nguyendevs.ecolens.models.User
 import kotlinx.coroutines.tasks.await
 
@@ -13,7 +13,7 @@ import kotlinx.coroutines.tasks.await
 class UserRepository {
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val database = FirebaseDatabase.getInstance(NativeSecurityManager.getFirebaseUrl())
+    private val database = FirebaseDatabase.getInstance(SecurityProvider.getFirebaseUrl())
     private val usersRef = database.getReference("users")
 
     /** Đăng ký tài khoản mới với email, mật khẩu và username. */
@@ -22,16 +22,15 @@ class UserRepository {
             val authResult = auth.createUserWithEmailAndPassword(email, password).await()
             val firebaseUser = authResult.user ?: return false
 
-            val newUser =
-                    User(
-                            username = username,
-                            email = email,
-                            language = "vi",
-                            darkMode = false,
-                            iucnMode = true,
-                            vnredlistMode = true,
-                            taxoMode = false
-                    )
+            val newUser = User(
+                username = username,
+                email = email,
+                language = "vi",
+                darkMode = false,
+                iucnMode = true,
+                vnredlistMode = true,
+                taxoMode = false
+            )
 
             usersRef.child(firebaseUser.uid).setValue(newUser).await()
 
@@ -65,18 +64,17 @@ class UserRepository {
             if (firebaseUser != null) {
                 val snapshot = usersRef.child(firebaseUser.uid).get().await()
                 if (!snapshot.exists()) {
-                    val newUser =
-                            User(
-                                    username = firebaseUser.displayName
-                                                    ?: firebaseUser.email?.substringBefore("@")
-                                                            ?: "User",
-                                    email = firebaseUser.email ?: "",
-                                    language = "vi",
-                                    darkMode = false,
-                                    iucnMode = true,
-                                    vnredlistMode = true,
-                                    taxoMode = false
-                            )
+                    val newUser = User(
+                        username = firebaseUser.displayName
+                            ?: firebaseUser.email?.substringBefore("@")
+                            ?: "User",
+                        email = firebaseUser.email ?: "",
+                        language = "vi",
+                        darkMode = false,
+                        iucnMode = true,
+                        vnredlistMode = true,
+                        taxoMode = false
+                    )
                     usersRef.child(firebaseUser.uid).setValue(newUser).await()
                 }
             }

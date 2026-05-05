@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.res.Configuration
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
-import com.nguyendevs.ecolens.network.NativeSecurityManager
+import com.nguyendevs.ecolens.network.SecurityProvider
 import java.util.Locale
 
 /** Quản lý ngôn ngữ ứng dụng và tự động đồng bộ cấu hình người dùng. */
@@ -20,9 +20,8 @@ class LanguageManager(private val context: Context) {
         const val LANG_JP = "ja"
     }
 
-    private val prefs =
-            context.applicationContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-    private val database by lazy { FirebaseDatabase.getInstance(NativeSecurityManager.getFirebaseUrl()) }
+    private val prefs = context.applicationContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+    private val database by lazy { FirebaseDatabase.getInstance(SecurityProvider.getFirebaseUrl()) }
     private val auth by lazy { FirebaseAuth.getInstance() }
 
     private var cachedLanguage: String? = null
@@ -37,17 +36,15 @@ class LanguageManager(private val context: Context) {
             return savedLang
         }
 
-        val systemLocale =
-                androidx.core.os.ConfigurationCompat.getLocales(
-                        android.content.res.Resources.getSystem().configuration
-                )[0]
+        val systemLocale = androidx.core.os.ConfigurationCompat.getLocales(
+            android.content.res.Resources.getSystem().configuration
+        )[0]
         val deviceLang = systemLocale?.language ?: LANG_EN
 
-        val defaultLang =
-                when (deviceLang) {
-                    LANG_VI, LANG_EN, LANG_CN, LANG_JP -> deviceLang
-                    else -> LANG_EN
-                }
+        val defaultLang = when (deviceLang) {
+            LANG_VI, LANG_EN, LANG_CN, LANG_JP -> deviceLang
+            else -> LANG_EN
+        }
 
         prefs.edit().putString(KEY_LANG, defaultLang).apply()
         cachedLanguage = defaultLang

@@ -18,7 +18,7 @@ import retrofit2.converter.gson.GsonConverterFactory
  */
 object RetrofitClient {
 
-    private val WORKER_BASE_URL = NativeSecurityManager.getApiUrl()
+    private val WORKER_BASE_URL = SecurityProvider.getApiUrl()
     private var appContext: Context? = null
     private val mainHandler by lazy { Handler(Looper.getMainLooper()) }
 
