@@ -685,7 +685,7 @@ class MainActivity : AppCompatActivity() {
         val tvLoadingText = homeViews.tvLoadingText
         val loadingCard = homeViews.loadingCard
 
-        loadingCard?.isVisible = false
+        loadingCard?.isVisible = isLoading && state.speciesInfo == null
 
         if (isLoading || state.speciesInfo != null || error != null) {
             toggleHomeState(showResults = true)
@@ -695,7 +695,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (isLoading) {
-            progressBarHero?.isVisible = true
+            progressBarHero?.isVisible = state.speciesInfo == null
             tvLoadingText?.isVisible = true
             loadingAnimationHandler.setText(R.string.analyzing_text)
             stopLoadingJob?.cancel()
