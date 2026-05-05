@@ -138,8 +138,6 @@ class SectionDisplayHandler(
             val trimmedText = text.trim()
             textView?.let { tv -> textFormatter.setHtml(tv, trimmedText) }
 
-            val startDelay = 0L // Xóa bỏ delay
-
             section?.let { sectionView ->
                 val wasAlreadyRendered = renderedSections.contains(sectionId)
 
