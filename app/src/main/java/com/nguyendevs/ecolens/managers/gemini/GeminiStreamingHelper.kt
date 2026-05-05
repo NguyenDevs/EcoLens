@@ -83,7 +83,7 @@ class GeminiStreamingHelper(
         confidence: Double,
         languageCode: String,
         currentInfo: SpeciesInfo,
-        retryCount: Int = 0, // Chuyển lên đây
+        retryCount: Int = 0,
         onStateUpdate: (EcoLensUiState) -> Unit
     ): Unit = withContext(Dispatchers.IO) {
         val isVietnamese = languageCode == "vi"
@@ -99,11 +99,10 @@ class GeminiStreamingHelper(
             } else {
                 val errorMsg = response.errorBody()?.string()
                 Log.e(TAG, "StreamDetails Failed (HTTP ${response.code()}): $errorMsg")
-                
-                // Nếu lỗi 500 và chưa thử lại quá 1 lần
+
                 if (response.code() >= 500 && retryCount < 1) {
                     Log.d(TAG, "Retrying streamDetails... (Lần ${retryCount + 1})")
-                    delay(1000) // Đợi 1 giây trước khi thử lại
+                    delay(1000)
                     streamDetails(scientificName, confidence, languageCode, currentInfo, retryCount + 1, onStateUpdate)
                 } else {
                     withContext(Dispatchers.Main) {
@@ -201,8 +200,6 @@ class GeminiStreamingHelper(
             if (chunk != null) {
                 accumulatedJson.append(chunk)
                 val rawJson = accumulatedJson.toString()
-                
-                // Thử parse JSON hiện tại
                 val details = tryParsePartialJson(rawJson, type)
                 if (details != null) {
                     onUpdate(details)
@@ -220,15 +217,14 @@ class GeminiStreamingHelper(
 
         val candidates = mutableListOf<String>()
         candidates.add(cleaned)
-        candidates.add("$cleaned\"}") // Trường hợp đang ở trong chuỗi
-        candidates.add("$cleaned}")    // Trường hợp đã xong chuỗi, thiếu ngoặc nhọn
-        candidates.add("$cleaned\"}]}") // Trường hợp mảng (nếu có)
+        candidates.add("$cleaned\"}")
+        candidates.add("$cleaned}")
+        candidates.add("$cleaned\"}]}")
         
         for (candidate in candidates) {
             try {
                 return gson.fromJson(candidate, type)
             } catch (e: Exception) {
-                // Tiếp tục thử cái tiếp theo
             }
         }
         return null
@@ -243,7 +239,6 @@ class GeminiStreamingHelper(
         return if (lastBrace > firstBrace) {
             json.substring(firstBrace, lastBrace + 1)
         } else {
-            // Trường hợp chưa có ngoặc đóng, lấy hết từ ngoặc mở
             json.substring(firstBrace)
         }
     }
