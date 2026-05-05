@@ -29,8 +29,7 @@ object ImageHelper {
         options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight)
         options.inJustDecodeBounds = false
         val bitmap = BitmapFactory.decodeFile(imagePath, options) ?: return null
-        
-        // Cố định kích thước tối đa là 1024px để đạt tốc độ upload nhanh nhất
+
         val scaledBitmap = scaleBitmap(bitmap, reqWidth)
         val baos = ByteArrayOutputStream()
         scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 75, baos)
@@ -45,8 +44,7 @@ object ImageHelper {
     fun prepareImageForAI(bitmap: Bitmap): ByteArray {
         val scaledBitmap = scaleBitmap(bitmap, 1024)
         val baos = ByteArrayOutputStream()
-        
-        // Sử dụng WebP (Lossy) để đạt dung lượng cực thấp nhưng AI vẫn đọc tốt
+
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
             scaledBitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, 75, baos)
         } else {
