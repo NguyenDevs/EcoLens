@@ -35,7 +35,7 @@ class SpeciesIdentificationManager(
 
     companion object {
         private const val TAG = "SpeciesIdManager"
-        private const val MIME_TYPE_JPEG = "image/jpeg"
+        private const val MIME_TYPE_WEBP = "image/webp"
         private const val PART_NAME_IMAGE = "image"
         private const val MAX_IMAGE_SIZE = 1024
         private const val DELAY_INIT = 0L
@@ -71,7 +71,7 @@ class SpeciesIdentificationManager(
                         topResult,
                         languageCode,
                         existingHistoryId,
-                        imageUri, // Truyền URI gốc để lưu lịch sử
+                        imageUri,
                         onStateUpdate
                 )
             } else {
@@ -95,7 +95,6 @@ class SpeciesIdentificationManager(
         
         withContext(Dispatchers.IO) {
             try {
-                // Dùng Glide để tải Bitmap từ bất kỳ URI nào (Web, Content, File)
                 val bitmap = com.bumptech.glide.Glide.with(context)
                     .asBitmap()
                     .load(imageUri)
@@ -103,26 +102,16 @@ class SpeciesIdentificationManager(
                     .get()
                 
                 if (bitmap != null) {
-                    // Bước 1: Smart Crop
-                    val croppedBitmap = com.nguyendevs.ecolens.utils.MLKitHelper.detectAndCropObject(bitmap)
+                    val aiBytes = ImageHelper.prepareImageForAI(bitmap)
                     
-                    // Bước 2: Nén WebP cho AI
-                    val aiBytes = ImageHelper.prepareImageForAI(croppedBitmap)
-                    
-                    // Bước 3: Lưu file tạm
                     FileOutputStream(aiFile).use { out ->
                         out.write(aiBytes)
                     }
-                    
-                    // Giải phóng
-                    if (croppedBitmap != bitmap) croppedBitmap.recycle()
-                    // Không recycle bitmap gốc ở đây vì Glide quản lý, 
-                    // nhưng nếu submit().get() tạo bitmap mới thì nên recycle.
                 } else {
                     throw Exception("Failed to load bitmap")
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error in smart cropping: ${e.message}")
+                Log.e(TAG, "Error in image preparation: ${e.message}")
                 val tempFile = ImageUtils.uriToFile(context, imageUri, MAX_IMAGE_SIZE)
                 tempFile.copyTo(aiFile, overwrite = true)
             }
@@ -133,7 +122,7 @@ class SpeciesIdentificationManager(
 
     /** Chuyển hóa tệp bức ảnh thành phần cấu thành dạng thức multipart. */
     private fun createImagePart(file: File): MultipartBody.Part {
-        val requestFile = file.asRequestBody(MIME_TYPE_JPEG.toMediaTypeOrNull())
+        val requestFile = file.asRequestBody(MIME_TYPE_WEBP.toMediaTypeOrNull())
         return MultipartBody.Part.createFormData(PART_NAME_IMAGE, file.name, requestFile)
     }
 
@@ -619,7 +608,6 @@ class SpeciesIdentificationManager(
                 if (originalImageUri.scheme == "file") {
                     originalImageUri.path
                 } else {
-                    // Lưu ảnh gốc từ URI vào bộ nhớ máy để làm lịch sử
                     ImageUtils.saveUriToInternalStorage(context, originalImageUri)
                 }
 
