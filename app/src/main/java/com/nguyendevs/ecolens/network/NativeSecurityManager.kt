@@ -23,8 +23,4 @@ object NativeSecurityManager {
     external fun getAppSecret(): String
 
     external fun getFirebaseUrl(): String
-
-    external fun encryptData(data: String): String
-
-    external fun decryptData(data: String): String
 }
