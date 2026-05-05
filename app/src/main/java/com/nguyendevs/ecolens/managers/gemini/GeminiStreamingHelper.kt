@@ -27,7 +27,6 @@ class GeminiStreamingHelper(
         private const val DETAILS_DELAY = 0L
     }
 
-    /** Lấy tên thường gọi chuẩn chỉnh từ Gemini. */
     suspend fun getCommonName(
         scientificName: String,
         languageCode: String
@@ -49,7 +48,6 @@ class GeminiStreamingHelper(
         return@withContext null
     }
 
-    /** Dịch bộ thông tin phân loại sinh học chuẩn xác ngô ngữ. */
     suspend fun translateTaxonomy(
         kingdom: String,
         phylum: String,
@@ -65,7 +63,7 @@ class GeminiStreamingHelper(
         val request = createGeminiRequest(prompt)
 
         try {
-            val response = apiService.askGemini(request)
+            val response = apiService.askGroq(request)
             val text = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
             if (!text.isNullOrEmpty()) {
                 val cleanedJson = cleanJsonString(text)
@@ -77,7 +75,6 @@ class GeminiStreamingHelper(
         return@withContext null
     }
 
-    /** Nhận luồng chi tiết về đặc điểm phân bố của sinh vật. */
     suspend fun streamDetails(
         scientificName: String,
         confidence: Double,
@@ -91,7 +88,7 @@ class GeminiStreamingHelper(
         val request = createGeminiRequest(prompt)
 
         try {
-            val response = apiService.streamGemini(request)
+            val response = apiService.streamGroq(request)
             if (response.isSuccessful) {
                 processStreamResponse(response, DetailsResponse::class.java) { details ->
                     updateDetailsUISync(details, isVietnamese, currentInfo, onStateUpdate)
@@ -101,7 +98,6 @@ class GeminiStreamingHelper(
                 Log.e(TAG, "StreamDetails Failed (HTTP ${response.code()}): $errorMsg")
 
                 if (response.code() >= 500 && retryCount < 1) {
-                    Log.d(TAG, "Retrying streamDetails... (Lần ${retryCount + 1})")
                     delay(1000)
                     streamDetails(scientificName, confidence, languageCode, currentInfo, retryCount + 1, onStateUpdate)
                 } else {
@@ -120,7 +116,6 @@ class GeminiStreamingHelper(
         Unit
     }
 
-    /** Gọi API stream nội dung báo cáo tính trạng bảo tồn hệ sinh thái. */
     suspend fun streamConservation(
         scientificName: String,
         iucnCode: String,
@@ -133,7 +128,7 @@ class GeminiStreamingHelper(
         val request = createGeminiRequest(prompt)
 
         try {
-            val response = apiService.streamGemini(request)
+            val response = apiService.streamGroq(request)
             if (response.isSuccessful) {
                 processStreamResponse(response, ConservationResponse::class.java) { conservation ->
                     updateConservationUISync(conservation, isVietnamese, currentInfo, onStateUpdate)
@@ -345,7 +340,7 @@ class GeminiStreamingHelper(
         val request = createGeminiRequest(prompt)
 
         try {
-            val response = apiService.askGemini(request)
+            val response = apiService.askGroq(request)
             val responseText = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
             if (!responseText.isNullOrEmpty()) {
                 val cleanedJson = cleanJsonString(responseText)

@@ -76,4 +76,15 @@ interface INaturalistApi {
     suspend fun streamGemini(
         @Body request: GeminiRequest
     ): Response<ResponseBody>
+
+    @POST("groq")
+    suspend fun askGroq(
+        @Body request: GeminiRequest
+    ): GeminiResponse
+
+    @Streaming
+    @POST("groq/stream")
+    suspend fun streamGroq(
+        @Body request: GeminiRequest
+    ): Response<ResponseBody>
 }
