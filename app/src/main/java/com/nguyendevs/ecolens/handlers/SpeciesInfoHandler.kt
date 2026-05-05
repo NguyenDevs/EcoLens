@@ -117,7 +117,6 @@ class SpeciesInfoHandler(
             if (binding.sectionImages.visibility != View.VISIBLE) {
                 homeAnimationHandler.slideAndFadeIn(binding.sectionImages, duration = 200)
                 imagesAdapter.submitList(images)
-                // Mở rộng ngay lập tức
                 if (!binding.expandableImages.isExpanded) {
                     toggleImagesExpand()
                 }
@@ -269,8 +268,6 @@ class SpeciesInfoHandler(
                 )
                 displayConservationStatus(info, shouldScroll = false)
                 allSectionsRendered = true
-
-                // Bỏ qua vì đã xử lý ở trên khi nhận được images
 
                 homeButtonHandler.setupShareButton(info, currentImageUri)
                 homeButtonHandler.showShareButton()
@@ -429,7 +426,7 @@ class SpeciesInfoHandler(
             sectionDisplayHandler.displaySection(
                     R.id.sectionConservation,
                     R.id.tvConservationStatus,
-                    iucnText, // Section text is just a placeholder to mark as rendered
+                    iucnText,
                     shouldScroll,
                     isInitialLoad
             )
