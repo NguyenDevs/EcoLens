@@ -703,11 +703,12 @@ class MainActivity : AppCompatActivity() {
             when (loadingStage) {
                 LoadingStage.SCIENTIFIC_NAME, LoadingStage.COMMON_NAME ->
                         loadingAnimationHandler.setText(R.string.loading_taxon)
-                LoadingStage.TAXONOMY -> loadingAnimationHandler.setText(R.string.loading_detail)
+                LoadingStage.TAXONOMY,
                 LoadingStage.DESCRIPTION,
                 LoadingStage.CHARACTERISTICS,
                 LoadingStage.DISTRIBUTION,
-                LoadingStage.HABITAT,
+                LoadingStage.HABITAT ->
+                        loadingAnimationHandler.setText(R.string.loading_detail)
                 LoadingStage.CONSERVATION ->
                         loadingAnimationHandler.setText(R.string.loading_conservation)
                 else -> loadingAnimationHandler.setText(R.string.analyzing_text)
