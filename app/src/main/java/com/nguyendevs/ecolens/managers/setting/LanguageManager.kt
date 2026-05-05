@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.res.Configuration
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
-import com.nguyendevs.ecolens.BuildConfig
+import com.nguyendevs.ecolens.network.NativeSecurityManager
 import java.util.Locale
 
 /** Quản lý ngôn ngữ ứng dụng và tự động đồng bộ cấu hình người dùng. */
@@ -22,7 +22,7 @@ class LanguageManager(private val context: Context) {
 
     private val prefs =
             context.applicationContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-    private val database by lazy { FirebaseDatabase.getInstance(BuildConfig.FIREBASE_DATABASE_URL) }
+    private val database by lazy { FirebaseDatabase.getInstance(NativeSecurityManager.getFirebaseUrl()) }
     private val auth by lazy { FirebaseAuth.getInstance() }
 
     private var cachedLanguage: String? = null

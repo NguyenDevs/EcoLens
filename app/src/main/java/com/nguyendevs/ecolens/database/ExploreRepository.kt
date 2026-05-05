@@ -2,7 +2,7 @@ package com.nguyendevs.ecolens.database
 
 import android.util.Log
 import com.google.firebase.database.FirebaseDatabase
-import com.nguyendevs.ecolens.BuildConfig
+import com.nguyendevs.ecolens.network.NativeSecurityManager
 import com.nguyendevs.ecolens.models.ExploreItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
@@ -12,7 +12,7 @@ import kotlinx.coroutines.withContext
 class ExploreRepository {
 
     private val firebaseDatabase: FirebaseDatabase =
-            FirebaseDatabase.getInstance(BuildConfig.FIREBASE_DATABASE_URL)
+            FirebaseDatabase.getInstance(NativeSecurityManager.getFirebaseUrl())
     private val exploreRef = firebaseDatabase.getReference("explore/items")
 
     companion object {

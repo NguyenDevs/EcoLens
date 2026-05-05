@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import com.google.firebase.FirebaseApp
 import com.google.firebase.database.FirebaseDatabase
+import com.nguyendevs.ecolens.network.NativeSecurityManager
 import com.nguyendevs.ecolens.network.RetrofitClient
 
 /** Application class chính của EcoLens, khởi tạo cấu hình toàn cục khi app khởi động. */
@@ -42,7 +43,7 @@ class EcoLensApplication : Application() {
             synchronized(this) {
                 if (!firebaseInitialized) {
                     try {
-                        FirebaseDatabase.getInstance(BuildConfig.FIREBASE_DATABASE_URL)
+                        FirebaseDatabase.getInstance(NativeSecurityManager.getFirebaseUrl())
                                 .setPersistenceEnabled(true)
                         firebaseInitialized = true
                     } catch (e: Exception) {

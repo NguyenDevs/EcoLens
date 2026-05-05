@@ -5,7 +5,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.database.FirebaseDatabase
-import com.nguyendevs.ecolens.BuildConfig
+import com.nguyendevs.ecolens.network.NativeSecurityManager
 import com.nguyendevs.ecolens.models.User
 import kotlinx.coroutines.tasks.await
 
@@ -13,7 +13,7 @@ import kotlinx.coroutines.tasks.await
 class UserRepository {
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val database = FirebaseDatabase.getInstance(BuildConfig.FIREBASE_DATABASE_URL)
+    private val database = FirebaseDatabase.getInstance(NativeSecurityManager.getFirebaseUrl())
     private val usersRef = database.getReference("users")
 
     /** Đăng ký tài khoản mới với email, mật khẩu và username. */

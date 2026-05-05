@@ -17,4 +17,14 @@ object NativeSecurityManager {
      * @return Chữ ký HMAC dạng string
      */
     external fun calculateHMAC(message: String): String
+
+    external fun getApiUrl(): String
+
+    external fun getAppSecret(): String
+
+    external fun getFirebaseUrl(): String
+
+    external fun encryptData(data: String): String
+
+    external fun decryptData(data: String): String
 }
