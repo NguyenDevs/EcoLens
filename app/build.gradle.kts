@@ -173,11 +173,4 @@ dependencies {
     
     // HTML Parsing
     implementation("org.jsoup:jsoup:1.17.2")
-
-    // TensorFlow Lite (vẫn giữ nếu bạn muốn dùng sau này)
-    implementation("org.tensorflow:tensorflow-lite:2.14.0")
-    implementation("org.tensorflow:tensorflow-lite-support:0.4.4")
-
-    // ML Kit Object Detection (Dùng cho phương án cắt ảnh thông minh)
-    implementation("com.google.mlkit:object-detection:17.0.0")
 }
